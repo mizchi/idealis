@@ -14,7 +14,7 @@ projects = {
     "wasm-core": ("idealis-core", ["build", "--release", "--lib", "--target", "wasm32-unknown-unknown"]),
     "wasi-cli": ("idealis-cli", ["build", "--release", "--bin", "idealis", "--target", "wasm32-wasip1"]),
 }
-crate, args = projects[task]
+crate, args = projects[task.removeprefix("links-")]
 common = ["--locked", "--manifest-path", f"crates/{crate}/Cargo.toml"]
 subprocess.run(["cargo", "fetch", *common], check=True)
 wild = Path(os.environ["RUNNER_TEMP"]) / "wild"
@@ -48,6 +48,31 @@ process.exitCode = wasi.start(instance);"""
         print(comment)
         if mode == "wild":
             assert "wild" in comment.lower(), comment
+
+if task.startswith("links-"):
+    import shutil
+    wrapper = Path(__file__).with_name("relink.py").resolve()
+    with tempfile.TemporaryDirectory(dir=os.environ["RUNNER_TEMP"]) as tmp:
+        tmp = Path(tmp)
+        times = tmp / "times.jsonl"
+        env = dict(os.environ, CARGO_TARGET_DIR=str(tmp / "target"), CARGO_BUILD_JOBS="1",
+                   WILD_BINARY=str(wild), LINK_TIMINGS=str(times))
+        if task == "links-rtlc-tests":
+            env.update(FORMAT="native", BASE_LINKER=shutil.which("cc"))
+            (tmp / "cc").symlink_to(wrapper)
+            env["PATH"] = str(tmp) + os.pathsep + env["PATH"]
+        else:
+            sysroot = subprocess.check_output(["rustc", "--print", "sysroot"], text=True).strip()
+            env.update(FORMAT="wasm", BASE_LINKER=str(Path(sysroot) / "lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld"))
+            env["CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUSTFLAGS"] = f"-Clinker={wrapper} -Clinker-flavor=wasm-ld"
+        subprocess.run(["cargo", *args, "--offline", *common], check=True, env=env)
+        samples = [json.loads(line) for line in times.read_text().splitlines()]
+        assert samples
+        sums = [sum(col) for col in zip(*samples)]
+        print("RELINK", task, len(samples), sums)
+        with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as out:
+            print(task, len(samples), "link invocations; total seconds in ABBA order:", sums, file=out)
+    sys.exit()
 
 for mode in ["default", "wild", "wild", "default"]:
     with tempfile.TemporaryDirectory(dir=os.environ["RUNNER_TEMP"]) as tmp:
