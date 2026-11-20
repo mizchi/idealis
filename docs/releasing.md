@@ -58,7 +58,7 @@ PR と `main` への push では、4 つの検証ジョブを並列に実行す�
 | `model`   | portable core、TLC 差分検査、safety / temporal                                                        |
 | `go`      | Go adapter の race テスト、3 言語の実装照合、非同期履歴の評価と再生                                   |
 
-`model` と `go` はそれぞれ portable core をビルドする。TLC の結果キャッシュは `model` だけが復元・保存し、チェッカーのビルドが一致する検査結果を再利用する。Lean の `cache-proof` は 4 ジョブと並列に実行する。
+`model` と `go` は先行ジョブ `portable-build` が渡す同一の native / Wasm バイナリを使う。先行ジョブは crates・ビルド定義・Rust ツールチェーン・ランナーイメージが一致すれば保存済みのバイナリを使い、一致しなければビルドする。TLC の結果キャッシュは `model` だけが復元・保存し、チェッカーのビルドが一致する検査結果を再利用する。CI の Node は共通 setup でパッチまで固定する。`sdk`、`wasm`、Lean の `cache-proof` は先行ジョブと並列に開始する。
 
 同じコミットで TLC 結果の再利用による時間差を測るには、CI の手動実行で `reuse_tlc_results` をオン・オフして比較する。オフにすると空の結果ディレクトリから開始し、run 内で得た結果はその run 内で再利用する。
 

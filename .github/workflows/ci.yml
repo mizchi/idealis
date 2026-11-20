@@ -134,8 +134,51 @@ jobs:
             .artifacts/usable-evaluation
           if-no-files-found: warn
 
+  portable-build:
+    name: Build shared portable binaries
+    runs-on: ubuntu-latest
+    outputs:
+      artifact: ${{ steps.bundle.outputs.name }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Identify portable build inputs
+        id: inputs
+        run: |
+          fingerprint=$({
+            git ls-tree HEAD -- crates justfile .cargo rust-toolchain rust-toolchain.toml .github/workflows/ci.yml
+            rustc -vV
+            cargo -V
+            echo "$ImageOS $ImageVersion"
+          } | sha256sum | cut -d' ' -f1)
+          echo "key=$fingerprint" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: portable-cache
+        with:
+          key: portable-linux-${{ runner.arch }}-v1-${{ steps.inputs.outputs.key }}
+          path: ${{ runner.temp }}/portable.tar
+      - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4
+        if: steps.portable-cache.outputs.cache-hit != 'true'
+      - name: Build and archive native and Wasm binaries
+        if: steps.portable-cache.outputs.cache-hit != 'true'
+        run: |
+          rustup target add wasm32-unknown-unknown
+          just portable-build
+          tar -cf "$RUNNER_TEMP/portable.tar" \
+            crates/idealis-core/target/release/idealis-core \
+            crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm \
+            crates/roracle/target/release/roracle \
+            crates/roracle/target/wasm32-unknown-unknown/release/roracle.wasm
+      - id: bundle
+        run: echo "name=portable-binaries-$GITHUB_RUN_ATTEMPT" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ steps.bundle.outputs.name }}
+          path: ${{ runner.temp }}/portable.tar
+          if-no-files-found: error
+
   model:
     name: Model checking (3/4)
+    needs: portable-build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -143,7 +186,11 @@ jobs:
       - run: rustup target add wasm32-unknown-unknown
       - run: cargo fmt --manifest-path crates/idealis-core/Cargo.toml -- --check
       - run: cargo clippy --all-targets --locked --manifest-path crates/idealis-core/Cargo.toml -- -D warnings
-      - run: just portable-build
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ needs.portable-build.outputs.artifact }}
+          path: ${{ runner.temp }}
+      - run: tar -xf "$RUNNER_TEMP/portable.tar"
       - run: node dist/scripts/prepare-tlc-modules.js
       - run: node --test dist/tests/tlc-differential/compare-test.js dist/tests/tlc-differential/standard-modules-test.js
       - name: Identify TLC-compatible checkers
@@ -163,11 +210,11 @@ jobs:
           restore-keys: |
             tlc-results-v1-${{ steps.tlc-build.outputs.build }}-
       - run: node --test dist/tests/ci/tlc-result-cache.test.js
-      - run: just cache-test
-      - run: just expansion-test
-      - run: just expansion-eval .artifacts/cache-expansion-eval
-      - run: just expansion-replay .artifacts/cache-expansion-eval .artifacts/cache-expansion-replay
-      - run: just rtla-build
+      - run: just -f .github/prebuilt.just cache-test
+      - run: just -f .github/prebuilt.just expansion-test
+      - run: just -f .github/prebuilt.just expansion-eval .artifacts/cache-expansion-eval
+      - run: just -f .github/prebuilt.just expansion-replay .artifacts/cache-expansion-eval .artifacts/cache-expansion-replay
+      - run: just -f .github/prebuilt.just rtla-build
       - run: node --test dist/tests/rtla-compatibility/contract-test.js dist/tests/symbolic-operators/contract-test.js
       - run: cargo build --locked --manifest-path crates/rtla-compiler/Cargo.toml --example analysis_roles
       - run: node --test dist/tests/tlc-differential/analysis-parity-test.js dist/tests/tlc-differential/frame-decoder-test.js dist/tests/p0-checker/contract-test.js
@@ -180,7 +227,7 @@ jobs:
       - run: node dist/evals/experiments/collections-temporal/replay.js .artifacts/collections-temporal
       - run: node dist/evals/experiments/rust-safety/evaluate.js .artifacts/rust-safety
       - run: node dist/evals/experiments/rust-safety/replay.js .artifacts/rust-safety
-      - run: just portable-test
+      - run: just -f .github/prebuilt.just portable-test
       - run: just usable-test
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
@@ -198,12 +245,16 @@ jobs:
 
   go:
     name: Go and cross-language (4/4)
+    needs: portable-build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup
-      - run: rustup target add wasm32-unknown-unknown
-      - run: just portable-build
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ needs.portable-build.outputs.artifact }}
+          path: ${{ runner.temp }}
+      - run: tar -xf "$RUNNER_TEMP/portable.tar"
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: 1.25.x
