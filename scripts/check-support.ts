@@ -336,11 +336,7 @@ const scopes: readonly CrateScope[] = [
         path: "src/bin/idealis/tlc.rs",
         topic: "有限TLCの引数、終了値、予算切れと検査完了の区別",
         targetContains: "`idealis tlc` は",
-        context: [
-          "src/bin/idealis/modules.rs",
-          "src/bin/idealis/trace.rs",
-          "tests/tla_cli.rs",
-        ],
+        context: ["src/bin/idealis/modules.rs", "tests/tla_cli.rs"],
       },
       {
         path: "src/bin/idealis/tla.rs",
@@ -358,6 +354,12 @@ const scopes: readonly CrateScope[] = [
   {
     name: "idealis-connect",
     evidence: [
+      {
+        path: "src/tla.rs",
+        topic:
+          "任意のtla featureでの制約適用後の有限モデル射影と実装照合、invalidとmismatchの区別",
+        context: ["tests/tla.rs", "examples/tla_store.rs"],
+      },
       {
         path: "src/session.rs",
         topic: "PBT effect、失敗signature、縮小と再生、未確定と成功の区別",

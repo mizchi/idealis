@@ -1,6 +1,6 @@
 {
   "schema": "jev-lint-documents-1",
-  "snapshotDigest": "4df6c5ec60daf43a8c59e4189cc14f01384e31a4b007b0140d4a729bd945af12",
+  "snapshotDigest": "acddd14f5bc97e6cab82698450391a5cf869d78e09c61d54c836bccf8a5e0e37",
   "questionDigest": "209d6df378ccb747fcb0e821998fcd6105bc76638a88d22488d3b398d6a21595",
   "model": "jev-1.14.0",
   "snapshotChanged": false,
@@ -15,38 +15,89 @@
         "source": "source2",
         "path": "crates/idealis-connect/README.md",
         "startLine": 1,
-        "endLine": 43,
-        "quote": "# idealis-connect\n\n[対応範囲・非対応のチェックリスト](SUPPORT.md)を参照。\n\n有限状態機械からの操作列生成、削除による縮小、保存caseの再生、差分比較を行うRustライブラリ。serde/serde_jsonだけに依存し、同じ実装をnativeとホストimport不要のWasmで使う。SUTのI/Oやテストランナーはホストが担当する。alpha版で、registryには未公開。\n\n## セッションを駆動する\n\n`Session::property(Plan)`を作り、`effect()`を読む。Evaluateはcorrelation ID、phase、caseを持つ。ホストが新しいSUTを初期化してcase.actionsを実行し、`resume(id, verdict)`へ評価を返す。Doneが最終結果。Rustの呼び出し例は[examples/counter.rs](examples/counter.rs)を参照。\n\nVerdictはmatched、signature付きmismatch、invalid、reason付きunknown、message付きerror。mismatchを検出すると同じsignatureを保つ削除候補を検査し、最後に再現を確認する。unknownの候補がある場合、縮小をminimalと判定しない。異なるsignatureや非再現を成功へ変換しない。\n\n結果はpassed、failed、exhausted、inconclusive、error、not-failing。passedは指定した数の有効な正常caseを実行した意味で、モデルの完全探索ではない。invalidだけならexhausted、work不足ならinconclusive。縮小のminimalは、生成器が受理する列の中で単一削除しても同じ失敗を保持できない意味。予算で打ち切った縮小はboundedになる。scalar値の縮小は含めない。\n\n`Session::shrink(generator, case, max_checks, max_work)`は既知のcaseを縮小する。`Session::replay(case, expected_signature)`は保存したactionを使い、乱数から再生成しない。expected_signatureを指定した再生が失敗を再現しなければerrorになる。unknownや実行errorは別に保持する。\n\n## 生成器と保存形式\n\nGeneratorはid/version、初期状態、各状態のaction/target、minLength/maxLengthを持つ。最初に目標長、初期状態、遷移をxorshift32-v1で選ぶ。seedは1-2^32-1。終端へ到達するとそこで止め、minLengthに届かない生成はskipする。縮小候補は同じ有限状態機械と長さの条件を満たす必要がある。汎用Proptestやfast-checkのStrategyとseedの互換性は提供しない。\n\nCaseはformat=idealis.test-case、version=1、rng、generatorId/generatorVersion、seed/index、全actionsを持つ。モデルやDriverの版は評価側のmanifestへ固定する。JSONでは配列の順序を保持し、objectのfield順は比較に影響しない。数値はsafe integerに限り、任意精度整数・集合等はホストで既存のPortableValueへ正規化してから渡す。\n\n上限は1024状態、10,000遷移、128 actions、action当たり8 KiB、JSON再帰32段、case/request当たり1 MiB。1セッションは最大256正常case、4096 attempts、512縮小checks、16 MiBのtrial記録を扱う。超える入力はprotocol/resource error。workは生成の各段階と候補の受理検査を数え、JSON復号・plan検査・SUT実行の時間を含めない。SUT評価回数はattempts/checksで制限する。\n\n## 明示した並行操作列\n\n`Schedule { id, version, actors }`の各actorは`ScheduleActor { id, operations }`。`Schedule::generator()`はprogram counterの直積からGeneratorを作る。actionは`{ actor, step, operation }`となり、同actor内の操作順を維持する。stepは0始まり。[examples/schedule.rs](examples/schedule.rs)を参照。\n\n1-8 actor、合計128操作、最大1024状態を構築前に検査する。actor IDは一意にする。空の操作列も許す。最短長0、最長長は合計操作数で、prefixも生成・縮小の対象。任意の単一削除でactor内の順序やoperationが崩れる候補は受理しない。構築はSessionのwork予算外で、構造の上限により制限する。\n\nSUTはホストが指定actorを1操作ずつ進める。threadやawaitの自動計装、ブロッキングやweak memoryのモデル化は含まない。PBTのpassedを全スケジュールの完全探索と解釈しない。Loomは評価crateだけで利用し、このcrateやWasmの依存へ含めない。\n\n## 差分比較\n\n`compare(Observation::Allowed { values }, targets)`は、referenceが許可する値集合と各実装の観測を比較する。対象を多数決でオラクルへしない。空の対象はerror、空の許可値集合はinvalid。invalid/unknown/errorはmatchedへ変換せず、対象ごとのoutcomeも残す。全体statusはerror、mismatch、unknown、invalid、matchedの優先順で決めるため、全体statusだけで他対象の判定が完了したとは扱わない。\n\n## nativeとWasm\n\n[idealis-cli](../idealis-cli/README.md)はこのライブラリのEngineを起動し、version=1のJSONLを扱う。requestのkindはschedule、property、shrink、replay、resume、cancel、compare。scheduleは`{ kind: \"schedule\", schedule: ... }`へ`{ kind: \"generator\", generator: ... }`を返す。property/shrink/replayは同時に1セッションだけ実行し、cancelで解放する。schedule/compareは進行中のセッションとは独立。無効なrequestやfeedback IDは進行中の要求を消費しない。\n\nWasm ABI v1はtesting_abi_version、testing_input_resize、testing_dispatch、testing_output_ptr、testing_output_len。ホストは同じJSONを渡す。並列に実行する場合はworkerごとに別runtimeを使う。\n\n[Proptestの状態機械テスト](https://proptest-rs.github.io/proptest/proptest/state-machine.html)と既存TSの縮小器を参照した。外部solver、任意threadの自動計装、高階Strategy、scalar縮小はこのcrateへ組み込んでいない。",
-        "contentHash": "8f39d5931f74a49e211e1893485d2bd8460949310857f4e6d982b2291eca7942"
+        "endLine": 58,
+        "quote": "# idealis-connect\n\n[対応範囲・非対応のチェックリスト](SUPPORT.md)を参照。\n\n有限状態機械からの操作列生成、削除による縮小、保存caseの再生、差分比較を行うRustライブラリ。既定の構成はserde/serde_jsonだけに依存し、同じ実装をnativeとホストimport不要のWasmで使う。SUTのI/Oやテストランナーはホストが担当する。alpha版で、registryには未公開。\n\n## セッションを駆動する\n\n`Session::property(Plan)`を作り、`effect()`を読む。Evaluateはcorrelation ID、phase、caseを持つ。ホストが新しいSUTを初期化してcase.actionsを実行し、`resume(id, verdict)`へ評価を返す。Doneが最終結果。Rustの呼び出し例は[examples/counter.rs](examples/counter.rs)を参照。\n\nVerdictはmatched、signature付きmismatch、invalid、reason付きunknown、message付きerror。mismatchを検出すると同じsignatureを保つ削除候補を検査し、最後に再現を確認する。unknownの候補がある場合、縮小をminimalと判定しない。異なるsignatureや非再現を成功へ変換しない。\n\n結果はpassed、failed、exhausted、inconclusive、error、not-failing。passedは指定した数の有効な正常caseを実行した意味で、モデルの完全探索ではない。invalidだけならexhausted、work不足ならinconclusive。縮小のminimalは、生成器が受理する列の中で単一削除しても同じ失敗を保持できない意味。予算で打ち切った縮小はboundedになる。scalar値の縮小は含めない。\n\n`Session::shrink(generator, case, max_checks, max_work)`は既知のcaseを縮小する。`Session::replay(case, expected_signature)`は保存したactionを使い、乱数から再生成しない。expected_signatureを指定した再生が失敗を再現しなければerrorになる。unknownや実行errorは別に保持する。\n\n## 生成器と保存形式\n\nGeneratorはid/version、初期状態、各状態のaction/target、minLength/maxLengthを持つ。最初に目標長、初期状態、遷移をxorshift32-v1で選ぶ。seedは1-2^32-1。終端へ到達するとそこで止め、minLengthに届かない生成はskipする。縮小候補は同じ有限状態機械と長さの条件を満たす必要がある。汎用Proptestやfast-checkのStrategyとseedの互換性は提供しない。\n\nCaseはformat=idealis.test-case、version=1、rng、generatorId/generatorVersion、seed/index、全actionsを持つ。モデルやDriverの版は評価側のmanifestへ固定する。JSONでは配列の順序を保持し、objectのfield順は比較に影響しない。数値はsafe integerに限り、任意精度整数・集合等はホストで既存のPortableValueへ正規化してから渡す。\n\n上限は1024状態、10,000遷移、128 actions、action当たり8 KiB、JSON再帰32段、case/request当たり1 MiB。1セッションは最大256正常case、4096 attempts、512縮小checks、16 MiBのtrial記録を扱う。超える入力はprotocol/resource error。workは生成の各段階と候補の受理検査を数え、JSON復号・plan検査・SUT実行の時間を含めない。SUT評価回数はattempts/checksで制限する。\n\n## 明示した並行操作列\n\n`Schedule { id, version, actors }`の各actorは`ScheduleActor { id, operations }`。`Schedule::generator()`はprogram counterの直積からGeneratorを作る。actionは`{ actor, step, operation }`となり、同actor内の操作順を維持する。stepは0始まり。[examples/schedule.rs](examples/schedule.rs)を参照。\n\n1-8 actor、合計128操作、最大1024状態を構築前に検査する。actor IDは一意にする。空の操作列も許す。最短長0、最長長は合計操作数で、prefixも生成・縮小の対象。任意の単一削除でactor内の順序やoperationが崩れる候補は受理しない。構築はSessionのwork予算外で、構造の上限により制限する。\n\nSUTはホストが指定actorを1操作ずつ進める。threadやawaitの自動計装、ブロッキングやweak memoryのモデル化は含まない。PBTのpassedを全スケジュールの完全探索と解釈しない。Loomは評価crateだけで利用し、このcrateやWasmの依存へ含めない。\n\n## 差分比較\n\n`compare(Observation::Allowed { values }, targets)`は、referenceが許可する値集合と各実装の観測を比較する。対象を多数決でオラクルへしない。空の対象はerror、空の許可値集合はinvalid。invalid/unknown/errorはmatchedへ変換せず、対象ごとのoutcomeも残す。全体statusはerror、mismatch、unknown、invalid、matchedの優先順で決めるため、全体statusだけで他対象の判定が完了したとは扱わない。\n\n## nativeとWasm\n\n[idealis-cli](../idealis-cli/README.md)はこのライブラリのEngineを起動し、version=1のJSONLを扱う。requestのkindはschedule、property、shrink、replay、resume、cancel、compare。scheduleは`{ kind: \"schedule\", schedule: ... }`へ`{ kind: \"generator\", generator: ... }`を返す。property/shrink/replayは同時に1セッションだけ実行し、cancelで解放する。schedule/compareは進行中のセッションとは独立。無効なrequestやfeedback IDは進行中の要求を消費しない。\n\nWasm ABI v1はtesting_abi_version、testing_input_resize、testing_dispatch、testing_output_ptr、testing_output_len。ホストは同じJSONを渡す。並列に実行する場合はworkerごとに別runtimeを使う。\n\n[Proptestの状態機械テスト](https://proptest-rs.github.io/proptest/proptest/state-machine.html)と既存TSの縮小器を参照した。外部solver、任意threadの自動計装、高階Strategy、scalar縮小はこのcrateへ組み込んでいない。\n\n## Rust から TLA+ と実装を照合する\n\nCargo.toml に `idealis-connect = { git = \"https://github.com/mizchi/idealis\", branch = \"typed-oracle\", features = [\"tla\"] }` を追加する。テストを固定するときは branch を導入時の rev に置き換える。[実行可能な HashMap の例](examples/tla_store.rs) は仕様と設定のパスを引数に取り、実装を操作して読み取った観測を使う。\n\n```sh\ncargo run --release --manifest-path crates/idealis-connect/Cargo.toml --features tla \\\n  --example tla_store -- HashMapModel.tla HashMapModel.cfg\n```\n\n`tla::finite_model(source, config, spec, bounds)` は完全探索した具体状態から FiniteModel を作る。初期状態は探索の根から取得し、同じキーでも異なる初期観測を保存する。操作と観測は到達先の状態から読む。既定の変数名は `act` と `obs`。状態制約・操作制約で除外した辺、および時相検査が補った stuttering は含めない。予算切れ・empty・違反・対称性縮約ではエラーになる。\n\n`ConnectSpec` で変数名を指定できる。既定では注釈変数を除いた値で状態をまとめ、各グループの全メンバーで（操作、射影先、観測）の集合が一致するときだけ採用する。拒否された場合は `project_annotations: false` で完全な状態を保持できる。Generator の 1,024 状態・10,000 辺を超える場合は、モデルの有限領域を小さくする。\n\n手書きのテストアダプタに `tla::Driver` の reset / step を実装し、固定操作列には `tla::check_driver`、生成・縮小には `Generator::from_finite_model` と `tla::check` を使う。非決定的な観測後に操作を続けられない列は invalid として扱う。確認した mismatch は反例の操作列・失敗位置・許容観測・実測値を返す。",
+        "contentHash": "e19127e5146fc9559b9baec7f3510f30a3e0ef0315be2f09a54cd09551a4a4b0"
       },
       "target": {
         "source": "source3",
         "path": "crates/idealis-connect/SUPPORT.md",
         "startLine": 1,
         "endLine": 30,
-        "quote": "# idealis-connectの対応チェックリスト\n\nチェック済みは有限生成器からの生成・評価・縮小・再生・差分比較。SUTとテストランナーはホストが所有する。未チェックは未対応または対象外で、実装予定を約束しない。\n\n## 対応済み\n\n- [x] 有限状態機械のGeneratorとxorshift32-v1のseedによる操作列生成。長さ・終端・受理条件を扱う。\n- [x] Session::propertyでEvaluate/Doneのeffectを返し、correlation ID付きの評価を受け取る。\n- [x] matched、signature付きmismatch、invalid、unknown、errorを区別する。\n- [x] 同じ失敗signatureを保つ操作削除と再現確認。受理条件を満たす単一削除に対するminimalと予算切れのboundedを区別する。\n- [x] 保存Caseの全actionsを使う再生。seedからの再生成ではなく、期待signatureの非再現をerrorにする。\n- [x] 許容観測集合と各targetの差分比較。対象の多数決をオラクルにしない。\n- [x] Scheduleのactorごとの順序を保つ操作列と有限Generatorへの変換。\n- [x] version付きCase、JSONのsafe integer、protocol/resource上限とwork予算。\n- [x] serde/serde_jsonを使う独立Rustライブラリ、nativeのEngine::dispatchとホストimport不要のWasm ABI v1。\n\n## 非対応・対象外\n\n- [ ] scalar値の縮小、任意の高階Strategy、Proptest/fast-checkのStrategyやseedとの互換性。\n- [ ] thread/awaitの自動計装、ブロッキング、weak memoryのモデル化、SUTの自動実行。\n- [ ] 外部solverの内蔵、任意言語の静的検証、PBTのpassedからのモデル完全探索の証明。\n- [ ] 一つのruntime内の並列セッション。workerごとに別runtimeを使う。\n\n## 制約と根拠\n\n- [x] passedは指定数の有効caseが正常だった意味。invalidだけならexhausted、work不足ならinconclusiveとする。\n- [x] unknownの縮小候補がある場合にminimalとせず、異なるsignatureや非再現を成功へ変換しない。\n- [x] Scheduleは1〜8 actor、合計128操作、最大1024状態。構築費用はSessionのwork予算外で、構造上限で制限する。\n\n[README](README.md)、[Session](src/session.rs)、[縮小](src/shrink.rs)、[差分比較](src/compare.rs)、[Schedule](src/schedule.rs)、[評価](../../evals/iterations/0036-testing-core.md)を参照。",
-        "contentHash": "afb6b90ea41b0f60ee156057d8dec90760d282dc78b220d37ae72db0ea813abf"
+        "quote": "# idealis-connectの対応チェックリスト\n\nチェック済みは有限生成器からの生成・評価・縮小・再生・差分比較。SUTとテストランナーはホストが所有する。未チェックは未対応または対象外で、実装予定を約束しない。\n\n## 対応済み\n\n- [x] 有限状態機械のGeneratorとxorshift32-v1のseedによる操作列生成。長さ・終端・受理条件を扱う。任意の tla feature は具体グラフから安全に射影し、有限モデルの生成・実 Driver の照合・縮小に接続する。\n- [x] Session::propertyでEvaluate/Doneのeffectを返し、correlation ID付きの評価を受け取る。\n- [x] matched、signature付きmismatch、invalid、unknown、errorを区別する。\n- [x] 同じ失敗signatureを保つ操作削除と再現確認。受理条件を満たす単一削除に対するminimalと予算切れのboundedを区別する。\n- [x] 保存Caseの全actionsを使う再生。seedからの再生成ではなく、期待signatureの非再現をerrorにする。\n- [x] 許容観測集合と各targetの差分比較。対象の多数決をオラクルにしない。\n- [x] Scheduleのactorごとの順序を保つ操作列と有限Generatorへの変換。\n- [x] version付きCase、JSONのsafe integer、protocol/resource上限とwork予算。\n- [x] serde/serde_jsonを使う独立Rustライブラリ、nativeのEngine::dispatchとホストimport不要のWasm ABI v1。\n\n## 非対応・対象外\n\n- [ ] scalar値の縮小、任意の高階Strategy、Proptest/fast-checkのStrategyやseedとの互換性。\n- [ ] thread/awaitの自動計装、ブロッキング、weak memoryのモデル化、SUTの自動実行。\n- [ ] 外部solverの内蔵、任意言語の静的検証、PBTのpassedからのモデル完全探索の証明。\n- [ ] 一つのruntime内の並列セッション。workerごとに別runtimeを使う。\n\n## 制約と根拠\n\n- [x] passedは指定数の有効caseが正常だった意味。invalidだけならexhausted、work不足ならinconclusiveとする。\n- [x] unknownの縮小候補がある場合にminimalとせず、異なるsignatureや非再現を成功へ変換しない。\n- [x] Scheduleは1〜8 actor、合計128操作、最大1024状態。構築費用はSessionのwork予算外で、構造上限で制限する。\n\n[README](README.md)、[Session](src/session.rs)、[縮小](src/shrink.rs)、[差分比較](src/compare.rs)、[Schedule](src/schedule.rs)、[評価](../../evals/iterations/0036-testing-core.md)を参照。",
+        "contentHash": "b9ac9dabbe0ccaf50bbe5bef8132a1b3abe13e786a39f38f1bc29501d870071b"
       },
       "context": [],
-      "candidateId": "1faa33fc1d4e1ab3713c85c6e38f78d3129e1c7af0386659c0b04a5aaa17bcb1",
-      "contextHash": "2695104ff2fd85949a9c647a724f48d01484a3da40668f4f1feeca84e2d4cc17",
+      "candidateId": "f7495a7ab35b4af3f2454fffe70de1a44b22f5f3cec24ce9dee99397562ef468",
+      "contextHash": "0f95bbab88ba50eb5950ab4589fdf4c2a5b6d0344dfd9c43ee406288218356df",
       "judgment": {
         "choice": "supports",
-        "confidence": 0.96,
+        "confidence": 0.85,
         "probabilities": {
-          "supports": 0.97,
-          "contradicts": 0.03,
+          "supports": 0.89,
+          "contradicts": 0.1,
           "unrelated": 0,
-          "insufficient_context": 0
+          "insufficient_context": 0.01
         }
       }
     },
     {
       "id": "idealis-connect-implementation-0",
+      "topic": "任意のtla featureでの制約適用後の有限モデル射影と実装照合、invalidとmismatchの区別",
+      "mode": "semantic",
+      "reference": {
+        "source": "source14",
+        "path": "crates/idealis-connect/src/tla.rs",
+        "startLine": 1,
+        "endLine": 260,
+        "quote": "//! Optional adapter for a finite TLA+ model with action and observation variables.\nuse crate::{ActionEdge, Effect, Error, Generator, Phase, Plan, Session, TestResult, Verdict};\nuse idealis_core::{\n    ConformanceResult, CoreError, Edge, Effect as ModelEffect, FiniteModel, FiniteState, Initial,\n    PreparedFiniteModel, Response,\n};\npub use idealis_core::{SafetyBounds, Status, Value};\nuse std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};\n\npub struct ConnectSpec<'a> {\n    pub action: &'a str,\n    pub observation: &'a str,\n    /// Merge states differing only in the annotations if their projected edges agree.\n    pub project_annotations: bool,\n}\nimpl Default for ConnectSpec<'_> {\n    fn default() -> Self {\n        Self {\n            action: \"act\",\n            observation: \"obs\",\n            project_annotations: true,\n        }\n    }\n}\n\npub fn finite_model(\n    source: &str,\n    config: &str,\n    spec: ConnectSpec<'_>,\n    bounds: SafetyBounds,\n) -> Result<FiniteModel, CoreError> {\n    let program = idealis_core::compile_tla(source, config)?;\n    let slot = |name: &str| {\n        program\n            .variables\n            .iter()\n            .position(|v| v == name)\n            .ok_or_else(|| CoreError::protocol(&format!(\"Missing connect variable: {name}\")))\n    };\n    let action = slot(spec.action)?;\n    let observation = slot(spec.observation)?;\n    if action == observation {\n        return Err(CoreError::protocol(\n            \"Expected distinct action and observation variables\",\n        ));\n    }\n    let graph = program.reachable_graph(bounds)?;\n    let mut groups = HashMap::new();\n    let mut states = Vec::new();\n    let mut indices = Vec::with_capacity(graph.states.len());\n    for values in &graph.states {\n        let key: Vec<_> = values\n            .iter()\n            .enumerate()\n            .filter(|(i, _)| !spec.project_annotations || (*i != action && *i != observation))\n            .map(|(_, v)| v)\n            .collect();\n        let next = groups.len();\n        let group = *groups.entry(key).or_insert(next);\n        if group == states.len() {\n            states.push(FiniteState {\n                key: group.to_string(),\n                violations: vec![],\n                transitions: vec![],\n            });\n        }\n        indices.push(group);\n    }\n\n    let mut seen_initial = HashSet::new();\n    let mut initial = vec![];\n    for i in graph.initial {\n        let value = &graph.states[i][observation];\n        if seen_initial.insert((indices[i], value)) {\n            initial.push(Initial {\n                key: states[indices[i]].key.clone(),\n                observation: value.clone(),\n            });\n        }\n    }\n    let mut signatures: Vec<Option<HashSet<_>>> = vec![None; states.len()];\n    for (i, successors) in graph.successors.iter().enumerate() {\n        let group = indices[i];\n        let mut signature = HashSet::new();\n        for &target in successors {\n            let values = &graph.states[target];\n            if signature.insert((&values[action], indices[target], &values[observation]))\n                && signatures[group].is_none()\n            {\n                let key = states[indices[target]].key.clone();\n                states[group].transitions.push(Edge {\n                    action: values[action].clone(),\n                    target: key,\n                    observation: values[observation].clone(),\n                });\n            }\n        }\n        if let Some(previous) = &signatures[group] {\n            if previous != &signature {\n                return Err(CoreError::protocol(\n                    \"Unsafe connect projection: outgoing transitions differ; keep the annotations with project_annotations: false\",\n                ));\n            }\n        } else {\n            signatures[group] = Some(signature);\n        }\n    }\n    FiniteModel {\n        format: \"modelt.finite-model\".into(),\n        version: 1,\n        name: program.name,\n        initial,\n        states,\n    }\n    .normalize()\n}\n\n/// Implement on a test adapter. Each reset starts a fresh case.\npub trait Driver {\n    fn reset(&mut self) -> Result<Value, String>;\n    fn step(&mut self, action: &Value) -> Result<Value, String>;\n}\n\nfn model_error(error: impl std::fmt::Display) -> Error {\n    Error::protocol(error.to_string())\n}\n\npub fn check_driver(\n    model: &FiniteModel,\n    actions: Vec<Value>,\n    driver: &mut impl Driver,\n) -> Result<ConformanceResult, Error> {\n    drive(\n        &model.clone().prepare().map_err(model_error)?,\n        actions,\n        driver,\n    )\n}\nfn drive(\n    model: &PreparedFiniteModel,\n    actions: Vec<Value>,\n    driver: &mut impl Driver,\n) -> Result<ConformanceResult, Error> {\n    let mut session =\n        idealis_core::Session::new(model.name().into(), actions).map_err(model_error)?;\n    loop {\n        let effect = session.effect();\n        let (id, response) = match &effect {\n            ModelEffect::ModelInitial { id } | ModelEffect::ModelStep { id, .. } => (\n                *id,\n                model\n                    .response(&effect)\n                    .map_err(model_error)?\n                    .expect(\"model effect\"),\n            ),\n            ModelEffect::DriverReset { id } => (\n                *id,\n                Response::Observation {\n                    observation: driver.reset().map_err(model_error)?,\n                },\n            ),\n            ModelEffect::DriverStep { id, action } => (\n                *id,\n                Response::Observation {\n                    observation: driver.step(action).map_err(model_error)?,\n                },\n            ),\n            ModelEffect::Done { result } => return Ok(result.clone()),\n        };\n        session.resume(id, response).map_err(model_error)?;\n    }\n}\n\nimpl Generator {\n    pub fn from_finite_model(\n        model: &FiniteModel,\n        version: &str,\n        min_length: usize,\n        max_length: usize,\n    ) -> Result<Self, Error> {\n        let model = model.clone().normalize().map_err(model_error)?;\n        let initial = model\n            .initial\n            .into_iter()\n            .map(|i| i.key)\n            .collect::<BTreeSet<_>>()\n            .into_iter()\n            .collect();\n        let mut states = BTreeMap::new();\n        for state in model.states {\n            let mut edges = vec![];\n            let mut seen = HashSet::new();\n            for edge in state.transitions {\n                if seen.insert((edge.action.clone(), edge.target.clone())) {\n                    edges.push(ActionEdge {\n                        action: serde_json::to_value(edge.action).map_err(model_error)?,\n                        target: edge.target,\n                    });\n                }\n            }\n            states.insert(state.key, edges);\n        }\n        Self {\n            id: model.name,\n            version: version.into(),\n            initial,\n            states,\n            min_length,\n            max_length,\n        }\n        .normalize()\n    }\n}\n\npub struct Report {\n    pub result: TestResult,\n    pub counterexample: Option<ConformanceResult>,\n}\n\npub fn check(model: &FiniteModel, plan: Plan, driver: &mut impl Driver) -> Result<Report, Error> {\n    let model = model.clone().prepare().map_err(model_error)?;\n    let mut session = Session::property(plan)?;\n    let mut counterexample = None;\n    loop {\n        match session.effect() {\n            Effect::Evaluate { id, phase, case } => {\n                let actions = case\n                    .actions\n                    .into_iter()\n                    .map(serde_json::from_value)\n                    .collect::<Result<Vec<_>, _>>()\n                    .map_err(model_error)?;\n                let verdict = match drive(&model, actions, driver) {\n                    Ok(result) => match result.status {\n                        Status::Matched => Verdict::Matched {},\n                        Status::Invalid => Verdict::Invalid {},\n                        Status::Mismatch => {\n                            if phase == Phase::Confirmation {\n                                counterexample = Some(result);\n                            }\n                            Verdict::Mismatch {\n                                signature: \"observation\".into(),\n                            }\n                        }\n                    },\n                    Err(error) => Verdict::Error {\n                        message: error.to_string(),\n                    },\n                };\n                session.resume(id, verdict)?;\n            }\n            Effect::Done { result } => {\n                return Ok(Report {\n                    result,\n                    counterexample,\n                });\n            }\n        }\n    }\n}",
+        "contentHash": "d02c0ee0c1e02d66da65108e55a1eadd63445ec287e9866fd0a613e92f2fa59e"
+      },
+      "target": {
+        "source": "source3",
+        "path": "crates/idealis-connect/SUPPORT.md",
+        "startLine": 1,
+        "endLine": 30,
+        "quote": "# idealis-connectの対応チェックリスト\n\nチェック済みは有限生成器からの生成・評価・縮小・再生・差分比較。SUTとテストランナーはホストが所有する。未チェックは未対応または対象外で、実装予定を約束しない。\n\n## 対応済み\n\n- [x] 有限状態機械のGeneratorとxorshift32-v1のseedによる操作列生成。長さ・終端・受理条件を扱う。任意の tla feature は具体グラフから安全に射影し、有限モデルの生成・実 Driver の照合・縮小に接続する。\n- [x] Session::propertyでEvaluate/Doneのeffectを返し、correlation ID付きの評価を受け取る。\n- [x] matched、signature付きmismatch、invalid、unknown、errorを区別する。\n- [x] 同じ失敗signatureを保つ操作削除と再現確認。受理条件を満たす単一削除に対するminimalと予算切れのboundedを区別する。\n- [x] 保存Caseの全actionsを使う再生。seedからの再生成ではなく、期待signatureの非再現をerrorにする。\n- [x] 許容観測集合と各targetの差分比較。対象の多数決をオラクルにしない。\n- [x] Scheduleのactorごとの順序を保つ操作列と有限Generatorへの変換。\n- [x] version付きCase、JSONのsafe integer、protocol/resource上限とwork予算。\n- [x] serde/serde_jsonを使う独立Rustライブラリ、nativeのEngine::dispatchとホストimport不要のWasm ABI v1。\n\n## 非対応・対象外\n\n- [ ] scalar値の縮小、任意の高階Strategy、Proptest/fast-checkのStrategyやseedとの互換性。\n- [ ] thread/awaitの自動計装、ブロッキング、weak memoryのモデル化、SUTの自動実行。\n- [ ] 外部solverの内蔵、任意言語の静的検証、PBTのpassedからのモデル完全探索の証明。\n- [ ] 一つのruntime内の並列セッション。workerごとに別runtimeを使う。\n\n## 制約と根拠\n\n- [x] passedは指定数の有効caseが正常だった意味。invalidだけならexhausted、work不足ならinconclusiveとする。\n- [x] unknownの縮小候補がある場合にminimalとせず、異なるsignatureや非再現を成功へ変換しない。\n- [x] Scheduleは1〜8 actor、合計128操作、最大1024状態。構築費用はSessionのwork予算外で、構造上限で制限する。\n\n[README](README.md)、[Session](src/session.rs)、[縮小](src/shrink.rs)、[差分比較](src/compare.rs)、[Schedule](src/schedule.rs)、[評価](../../evals/iterations/0036-testing-core.md)を参照。",
+        "contentHash": "b9ac9dabbe0ccaf50bbe5bef8132a1b3abe13e786a39f38f1bc29501d870071b"
+      },
+      "context": [
+        {
+          "source": "source20",
+          "path": "crates/idealis-connect/tests/tla.rs",
+          "startLine": 1,
+          "endLine": 133,
+          "quote": "#![cfg(feature = \"tla\")]\nuse idealis_connect::tla::{ConnectSpec, Driver, Value, check_driver, finite_model};\nuse idealis_core::{SafetyBounds, Status};\n\nconst MODEL: &str = r#\"---- MODULE Store ----\nEXTENDS Naturals\nVARIABLE x, act, obs\nInit == x = 0 /\\ act = \"start\" /\\ obs \\in {0, 1}\nNext == \\E v \\in {0, 1, 2}: x' = v /\\ act' = <<\"put\", v>> /\\ obs' = v\nLimit == x < 2\nStepLimit == x' < 2\n====\"#;\nconst CFG: &str = \"INIT Init\\nNEXT Next\\n\";\nfn bounds() -> SafetyBounds {\n    SafetyBounds {\n        max_depth: 8,\n        max_states: 32,\n        max_work: 100000,\n        max_temporal_nodes: None,\n    }\n}\nstruct Store(bool);\nimpl Driver for Store {\n    fn reset(&mut self) -> Result<Value, String> {\n        Ok(Value::Int(\"1\".into()))\n    }\n    fn step(&mut self, action: &Value) -> Result<Value, String> {\n        let Value::List(args) = action else {\n            return Err(\"expected put\".into());\n        };\n        Ok(if self.0 {\n            Value::Int(\"9\".into())\n        } else {\n            args[1].clone()\n        })\n    }\n}\n#[test]\nfn constrained_graph_preserves_initial_observations_and_checks_live_stores() {\n    for constraint in [\"CONSTRAINT Limit\", \"ACTION_CONSTRAINT StepLimit\"] {\n        let model = finite_model(\n            MODEL,\n            &format!(\"{CFG}{constraint}\"),\n            ConnectSpec::default(),\n            bounds(),\n        )\n        .unwrap();\n        assert_eq!(model.states.len(), 2);\n        assert_eq!(model.initial.len(), 2);\n        assert_eq!(model.initial[0].key, model.initial[1].key);\n        let action = |v: &str| Value::List(vec![Value::String(\"put\".into()), Value::Int(v.into())]);\n        for (action, faulty, status) in [\n            (action(\"1\"), false, Status::Matched),\n            (action(\"1\"), true, Status::Mismatch),\n            (action(\"2\"), false, Status::Invalid),\n        ] {\n            assert_eq!(\n                check_driver(&model, vec![action], &mut Store(faulty))\n                    .unwrap()\n                    .status,\n                status\n            );\n        }\n        let generator = idealis_connect::Generator::from_finite_model(&model, \"1\", 1, 3).unwrap();\n        assert_eq!(generator.initial.len(), 1);\n        let plan = idealis_connect::Plan {\n            generator,\n            seed: 7,\n            cases: 4,\n            max_attempts: 16,\n            max_shrink_checks: 64,\n            max_work: 100000,\n        };\n        let report = idealis_connect::tla::check(&model, plan, &mut Store(true)).unwrap();\n        assert_eq!(report.result.status, idealis_connect::TestStatus::Failed);\n        assert_eq!(report.counterexample.unwrap().status, Status::Mismatch);\n    }\n}\n#[test]\nfn incomplete_or_unsound_projection_cannot_become_a_finite_model() {\n    assert!(\n        finite_model(\n            MODEL,\n            CFG,\n            ConnectSpec::default(),\n            SafetyBounds {\n                max_states: 1,\n                ..bounds()\n            }\n        )\n        .is_err()\n    );\n    let source = MODEL.replace(\"x' = v\", \"obs = 0 /\\\\ x' = v\");\n    let error = finite_model(\n        &source,\n        &format!(\"{CFG}CHECK_DEADLOCK FALSE\"),\n        ConnectSpec::default(),\n        bounds(),\n    )\n    .unwrap_err();\n    assert!(error.to_string().contains(\"projection\"), \"{error}\");\n}\n\n#[test]\nfn actions_unavailable_after_a_valid_nondeterministic_reset_are_invalid() {\n    let source = r#\"---- MODULE Fork ----\nVARIABLE x, act, obs\nInit == x \\in {0, 1} /\\ act = \"start\" /\\ obs = x\nNext == x = 0 /\\ UNCHANGED x /\\ act' = <<\"put\", 0>> /\\ obs' = 0\n====\"#;\n    let model = finite_model(\n        source,\n        &format!(\"{CFG}CHECK_DEADLOCK FALSE\"),\n        ConnectSpec::default(),\n        bounds(),\n    )\n    .unwrap();\n    let mut generator = idealis_connect::Generator::from_finite_model(&model, \"1\", 1, 1).unwrap();\n    generator\n        .initial\n        .retain(|key| !generator.states[key].is_empty());\n    let plan = idealis_connect::Plan {\n        generator,\n        seed: 1,\n        cases: 1,\n        max_attempts: 2,\n        max_shrink_checks: 3,\n        max_work: 10000,\n    };\n    let report = idealis_connect::tla::check(&model, plan, &mut Store(false)).unwrap();\n    assert_eq!(report.result.status, idealis_connect::TestStatus::Exhausted);\n    assert!(report.counterexample.is_none());\n}",
+          "contentHash": "9a08fd9a86ab51dec6c937e276882c3e53fe579833329c45ffdada979a162eb9"
+        },
+        {
+          "source": "source6",
+          "path": "crates/idealis-connect/examples/tla_store.rs",
+          "startLine": 1,
+          "endLine": 76,
+          "quote": "//! Driver for zust's HashMapModel.tla. The implementation receives operations only.\nuse idealis_connect::{\n    Generator, Plan, TestStatus,\n    tla::{self, ConnectSpec, Driver, SafetyBounds, Value},\n};\nuse std::{collections::HashMap, error::Error};\n\n#[derive(Default)]\nstruct Store(HashMap<Value, Value>);\nimpl Driver for Store {\n    fn reset(&mut self) -> Result<Value, String> {\n        self.0.clear();\n        Ok(Value::List(vec![Value::String(\"ok\".into())]))\n    }\n    fn step(&mut self, action: &Value) -> Result<Value, String> {\n        let Value::List(args) = action else {\n            return Err(\"expected tuple\".into());\n        };\n        let Some((Value::String(op), args)) = args.split_first() else {\n            return Err(\"missing operation\".into());\n        };\n        let (tag, value) = match (op.as_str(), args) {\n            (\"insert\", [key, value]) => (\"prev\", self.0.insert(key.clone(), value.clone())),\n            (\"remove\", [key]) => (\"prev\", self.0.remove(key)),\n            (\"get\", [key]) => (\"val\", self.0.get(key).cloned()),\n            (\"len\", []) => (\"len\", Some(Value::Int(self.0.len().to_string()))),\n            _ => return Err(format!(\"unknown operation: {action}\")),\n        };\n        Ok(Value::List(vec![\n            Value::String(tag.into()),\n            value.unwrap_or_else(|| Value::Int(\"0\".into())),\n        ]))\n    }\n}\nfn main() -> Result<(), Box<dyn Error>> {\n    let paths: Vec<_> = std::env::args().skip(1).collect();\n    let [tla, cfg] = paths.as_slice() else {\n        return Err(\"Usage: tla_store HashMapModel.tla HashMapModel.cfg\".into());\n    };\n    let bounds = SafetyBounds {\n        max_states: 100_000,\n        max_depth: 100,\n        max_work: 200_000_000,\n        max_temporal_nodes: None,\n    };\n    let model = tla::finite_model(\n        &std::fs::read_to_string(tla)?,\n        &std::fs::read_to_string(cfg)?,\n        ConnectSpec::default(),\n        bounds,\n    )?;\n    let plan = Plan {\n        generator: Generator::from_finite_model(&model, \"1\", 1, 16)?,\n        seed: 42,\n        cases: 64,\n        max_attempts: 256,\n        max_shrink_checks: 64,\n        max_work: 1_000_000,\n    };\n    let report = tla::check(&model, plan, &mut Store::default())?;\n    println!(\n        \"{} states, {} transitions, {} cases: {:?}\",\n        model.states.len(),\n        model\n            .states\n            .iter()\n            .map(|s| s.transitions.len())\n            .sum::<usize>(),\n        report.result.cases,\n        report.result.status\n    );\n    if report.result.status != TestStatus::Passed {\n        return Err(format!(\"{:?}\", report.counterexample).into());\n    }\n    Ok(())\n}",
+          "contentHash": "7314ca3648ee2deded1fc1b633f1dbce73800c9c4e439f42fba4cce4b5719e33"
+        }
+      ],
+      "candidateId": "69de3d260fb66506468922017fa6b809d8eb7e18f5dcaa5720d2f5628e446050",
+      "contextHash": "d6aa4d7f9bc71eed365f69e2598e6fdf67d703ab5a2009a6bae5e22d539e1c81",
+      "judgment": {
+        "choice": "supports",
+        "confidence": 0.76,
+        "probabilities": {
+          "supports": 0.82,
+          "contradicts": 0.16,
+          "unrelated": 0,
+          "insufficient_context": 0.02
+        }
+      }
+    },
+    {
+      "id": "idealis-connect-implementation-1",
       "topic": "PBT effect、失敗signature、縮小と再生、未確定と成功の区別",
       "mode": "semantic",
       "reference": {
-        "source": "source11",
+        "source": "source12",
         "path": "crates/idealis-connect/src/session.rs",
         "startLine": 1,
         "endLine": 382,
@@ -58,29 +109,29 @@
         "path": "crates/idealis-connect/SUPPORT.md",
         "startLine": 1,
         "endLine": 30,
-        "quote": "# idealis-connectの対応チェックリスト\n\nチェック済みは有限生成器からの生成・評価・縮小・再生・差分比較。SUTとテストランナーはホストが所有する。未チェックは未対応または対象外で、実装予定を約束しない。\n\n## 対応済み\n\n- [x] 有限状態機械のGeneratorとxorshift32-v1のseedによる操作列生成。長さ・終端・受理条件を扱う。\n- [x] Session::propertyでEvaluate/Doneのeffectを返し、correlation ID付きの評価を受け取る。\n- [x] matched、signature付きmismatch、invalid、unknown、errorを区別する。\n- [x] 同じ失敗signatureを保つ操作削除と再現確認。受理条件を満たす単一削除に対するminimalと予算切れのboundedを区別する。\n- [x] 保存Caseの全actionsを使う再生。seedからの再生成ではなく、期待signatureの非再現をerrorにする。\n- [x] 許容観測集合と各targetの差分比較。対象の多数決をオラクルにしない。\n- [x] Scheduleのactorごとの順序を保つ操作列と有限Generatorへの変換。\n- [x] version付きCase、JSONのsafe integer、protocol/resource上限とwork予算。\n- [x] serde/serde_jsonを使う独立Rustライブラリ、nativeのEngine::dispatchとホストimport不要のWasm ABI v1。\n\n## 非対応・対象外\n\n- [ ] scalar値の縮小、任意の高階Strategy、Proptest/fast-checkのStrategyやseedとの互換性。\n- [ ] thread/awaitの自動計装、ブロッキング、weak memoryのモデル化、SUTの自動実行。\n- [ ] 外部solverの内蔵、任意言語の静的検証、PBTのpassedからのモデル完全探索の証明。\n- [ ] 一つのruntime内の並列セッション。workerごとに別runtimeを使う。\n\n## 制約と根拠\n\n- [x] passedは指定数の有効caseが正常だった意味。invalidだけならexhausted、work不足ならinconclusiveとする。\n- [x] unknownの縮小候補がある場合にminimalとせず、異なるsignatureや非再現を成功へ変換しない。\n- [x] Scheduleは1〜8 actor、合計128操作、最大1024状態。構築費用はSessionのwork予算外で、構造上限で制限する。\n\n[README](README.md)、[Session](src/session.rs)、[縮小](src/shrink.rs)、[差分比較](src/compare.rs)、[Schedule](src/schedule.rs)、[評価](../../evals/iterations/0036-testing-core.md)を参照。",
-        "contentHash": "afb6b90ea41b0f60ee156057d8dec90760d282dc78b220d37ae72db0ea813abf"
+        "quote": "# idealis-connectの対応チェックリスト\n\nチェック済みは有限生成器からの生成・評価・縮小・再生・差分比較。SUTとテストランナーはホストが所有する。未チェックは未対応または対象外で、実装予定を約束しない。\n\n## 対応済み\n\n- [x] 有限状態機械のGeneratorとxorshift32-v1のseedによる操作列生成。長さ・終端・受理条件を扱う。任意の tla feature は具体グラフから安全に射影し、有限モデルの生成・実 Driver の照合・縮小に接続する。\n- [x] Session::propertyでEvaluate/Doneのeffectを返し、correlation ID付きの評価を受け取る。\n- [x] matched、signature付きmismatch、invalid、unknown、errorを区別する。\n- [x] 同じ失敗signatureを保つ操作削除と再現確認。受理条件を満たす単一削除に対するminimalと予算切れのboundedを区別する。\n- [x] 保存Caseの全actionsを使う再生。seedからの再生成ではなく、期待signatureの非再現をerrorにする。\n- [x] 許容観測集合と各targetの差分比較。対象の多数決をオラクルにしない。\n- [x] Scheduleのactorごとの順序を保つ操作列と有限Generatorへの変換。\n- [x] version付きCase、JSONのsafe integer、protocol/resource上限とwork予算。\n- [x] serde/serde_jsonを使う独立Rustライブラリ、nativeのEngine::dispatchとホストimport不要のWasm ABI v1。\n\n## 非対応・対象外\n\n- [ ] scalar値の縮小、任意の高階Strategy、Proptest/fast-checkのStrategyやseedとの互換性。\n- [ ] thread/awaitの自動計装、ブロッキング、weak memoryのモデル化、SUTの自動実行。\n- [ ] 外部solverの内蔵、任意言語の静的検証、PBTのpassedからのモデル完全探索の証明。\n- [ ] 一つのruntime内の並列セッション。workerごとに別runtimeを使う。\n\n## 制約と根拠\n\n- [x] passedは指定数の有効caseが正常だった意味。invalidだけならexhausted、work不足ならinconclusiveとする。\n- [x] unknownの縮小候補がある場合にminimalとせず、異なるsignatureや非再現を成功へ変換しない。\n- [x] Scheduleは1〜8 actor、合計128操作、最大1024状態。構築費用はSessionのwork予算外で、構造上限で制限する。\n\n[README](README.md)、[Session](src/session.rs)、[縮小](src/shrink.rs)、[差分比較](src/compare.rs)、[Schedule](src/schedule.rs)、[評価](../../evals/iterations/0036-testing-core.md)を参照。",
+        "contentHash": "b9ac9dabbe0ccaf50bbe5bef8132a1b3abe13e786a39f38f1bc29501d870071b"
       },
       "context": [],
-      "candidateId": "48d52bf1b1c28b428c015d3a2715cbf2325037dad8d3c8193ce53ca612220335",
-      "contextHash": "e8e0dcb701cfdfe8f1c5c11b15eb1b501114d8d445fd55802f5acb919c1d61ab",
+      "candidateId": "e3765d3b7d80d3af94c91a1a6e0ebfa5044843973c4a70578204ec42389756bb",
+      "contextHash": "cd63d36e504e45632d4bea27ab7447a250dbcb3b3460d4657c34257cc0e01af4",
       "judgment": {
         "choice": "supports",
-        "confidence": 0.79,
+        "confidence": 0.76,
         "probabilities": {
-          "supports": 0.84,
-          "contradicts": 0.12,
+          "supports": 0.82,
+          "contradicts": 0.14,
           "unrelated": 0,
           "insufficient_context": 0.04
         }
       }
     },
     {
-      "id": "idealis-connect-implementation-1",
+      "id": "idealis-connect-implementation-2",
       "topic": "操作列の削除による縮小でありscalarの縮小ではないこと",
       "mode": "semantic",
       "reference": {
-        "source": "source12",
+        "source": "source13",
         "path": "crates/idealis-connect/src/shrink.rs",
         "startLine": 1,
         "endLine": 99,
@@ -92,29 +143,29 @@
         "path": "crates/idealis-connect/SUPPORT.md",
         "startLine": 1,
         "endLine": 30,
-        "quote": "# idealis-connectの対応チェックリスト\n\nチェック済みは有限生成器からの生成・評価・縮小・再生・差分比較。SUTとテストランナーはホストが所有する。未チェックは未対応または対象外で、実装予定を約束しない。\n\n## 対応済み\n\n- [x] 有限状態機械のGeneratorとxorshift32-v1のseedによる操作列生成。長さ・終端・受理条件を扱う。\n- [x] Session::propertyでEvaluate/Doneのeffectを返し、correlation ID付きの評価を受け取る。\n- [x] matched、signature付きmismatch、invalid、unknown、errorを区別する。\n- [x] 同じ失敗signatureを保つ操作削除と再現確認。受理条件を満たす単一削除に対するminimalと予算切れのboundedを区別する。\n- [x] 保存Caseの全actionsを使う再生。seedからの再生成ではなく、期待signatureの非再現をerrorにする。\n- [x] 許容観測集合と各targetの差分比較。対象の多数決をオラクルにしない。\n- [x] Scheduleのactorごとの順序を保つ操作列と有限Generatorへの変換。\n- [x] version付きCase、JSONのsafe integer、protocol/resource上限とwork予算。\n- [x] serde/serde_jsonを使う独立Rustライブラリ、nativeのEngine::dispatchとホストimport不要のWasm ABI v1。\n\n## 非対応・対象外\n\n- [ ] scalar値の縮小、任意の高階Strategy、Proptest/fast-checkのStrategyやseedとの互換性。\n- [ ] thread/awaitの自動計装、ブロッキング、weak memoryのモデル化、SUTの自動実行。\n- [ ] 外部solverの内蔵、任意言語の静的検証、PBTのpassedからのモデル完全探索の証明。\n- [ ] 一つのruntime内の並列セッション。workerごとに別runtimeを使う。\n\n## 制約と根拠\n\n- [x] passedは指定数の有効caseが正常だった意味。invalidだけならexhausted、work不足ならinconclusiveとする。\n- [x] unknownの縮小候補がある場合にminimalとせず、異なるsignatureや非再現を成功へ変換しない。\n- [x] Scheduleは1〜8 actor、合計128操作、最大1024状態。構築費用はSessionのwork予算外で、構造上限で制限する。\n\n[README](README.md)、[Session](src/session.rs)、[縮小](src/shrink.rs)、[差分比較](src/compare.rs)、[Schedule](src/schedule.rs)、[評価](../../evals/iterations/0036-testing-core.md)を参照。",
-        "contentHash": "afb6b90ea41b0f60ee156057d8dec90760d282dc78b220d37ae72db0ea813abf"
+        "quote": "# idealis-connectの対応チェックリスト\n\nチェック済みは有限生成器からの生成・評価・縮小・再生・差分比較。SUTとテストランナーはホストが所有する。未チェックは未対応または対象外で、実装予定を約束しない。\n\n## 対応済み\n\n- [x] 有限状態機械のGeneratorとxorshift32-v1のseedによる操作列生成。長さ・終端・受理条件を扱う。任意の tla feature は具体グラフから安全に射影し、有限モデルの生成・実 Driver の照合・縮小に接続する。\n- [x] Session::propertyでEvaluate/Doneのeffectを返し、correlation ID付きの評価を受け取る。\n- [x] matched、signature付きmismatch、invalid、unknown、errorを区別する。\n- [x] 同じ失敗signatureを保つ操作削除と再現確認。受理条件を満たす単一削除に対するminimalと予算切れのboundedを区別する。\n- [x] 保存Caseの全actionsを使う再生。seedからの再生成ではなく、期待signatureの非再現をerrorにする。\n- [x] 許容観測集合と各targetの差分比較。対象の多数決をオラクルにしない。\n- [x] Scheduleのactorごとの順序を保つ操作列と有限Generatorへの変換。\n- [x] version付きCase、JSONのsafe integer、protocol/resource上限とwork予算。\n- [x] serde/serde_jsonを使う独立Rustライブラリ、nativeのEngine::dispatchとホストimport不要のWasm ABI v1。\n\n## 非対応・対象外\n\n- [ ] scalar値の縮小、任意の高階Strategy、Proptest/fast-checkのStrategyやseedとの互換性。\n- [ ] thread/awaitの自動計装、ブロッキング、weak memoryのモデル化、SUTの自動実行。\n- [ ] 外部solverの内蔵、任意言語の静的検証、PBTのpassedからのモデル完全探索の証明。\n- [ ] 一つのruntime内の並列セッション。workerごとに別runtimeを使う。\n\n## 制約と根拠\n\n- [x] passedは指定数の有効caseが正常だった意味。invalidだけならexhausted、work不足ならinconclusiveとする。\n- [x] unknownの縮小候補がある場合にminimalとせず、異なるsignatureや非再現を成功へ変換しない。\n- [x] Scheduleは1〜8 actor、合計128操作、最大1024状態。構築費用はSessionのwork予算外で、構造上限で制限する。\n\n[README](README.md)、[Session](src/session.rs)、[縮小](src/shrink.rs)、[差分比較](src/compare.rs)、[Schedule](src/schedule.rs)、[評価](../../evals/iterations/0036-testing-core.md)を参照。",
+        "contentHash": "b9ac9dabbe0ccaf50bbe5bef8132a1b3abe13e786a39f38f1bc29501d870071b"
       },
       "context": [],
-      "candidateId": "9c786d9cbb9f331e8ae553dcf4959222d65e94115b0fbab7f5134b303552cc13",
-      "contextHash": "1b725c56fb7721a95fc07c485fab8a74b08e0d472da41a7ca79234ec1750c7f5",
+      "candidateId": "b4297cae2fabc479d30d969b01a01314aca629c732a0ccd3a9fe83e21c40c32f",
+      "contextHash": "149a8a9de519c12f4616b2ddc983aeb633a2ed92efc7f3570d4b828a996836bc",
       "judgment": {
         "choice": "supports",
-        "confidence": 0.91,
+        "confidence": 0.93,
         "probabilities": {
-          "supports": 0.93,
-          "contradicts": 0.03,
+          "supports": 0.95,
+          "contradicts": 0.02,
           "unrelated": 0.01,
-          "insufficient_context": 0.03
+          "insufficient_context": 0.02
         }
       }
     },
     {
-      "id": "idealis-connect-implementation-2",
+      "id": "idealis-connect-implementation-3",
       "topic": "明示したactor操作順と構造上限、自動thread計装ではないこと",
       "mode": "semantic",
       "reference": {
-        "source": "source10",
+        "source": "source11",
         "path": "crates/idealis-connect/src/schedule.rs",
         "startLine": 1,
         "endLine": 94,
@@ -126,29 +177,29 @@
         "path": "crates/idealis-connect/SUPPORT.md",
         "startLine": 1,
         "endLine": 30,
-        "quote": "# idealis-connectの対応チェックリスト\n\nチェック済みは有限生成器からの生成・評価・縮小・再生・差分比較。SUTとテストランナーはホストが所有する。未チェックは未対応または対象外で、実装予定を約束しない。\n\n## 対応済み\n\n- [x] 有限状態機械のGeneratorとxorshift32-v1のseedによる操作列生成。長さ・終端・受理条件を扱う。\n- [x] Session::propertyでEvaluate/Doneのeffectを返し、correlation ID付きの評価を受け取る。\n- [x] matched、signature付きmismatch、invalid、unknown、errorを区別する。\n- [x] 同じ失敗signatureを保つ操作削除と再現確認。受理条件を満たす単一削除に対するminimalと予算切れのboundedを区別する。\n- [x] 保存Caseの全actionsを使う再生。seedからの再生成ではなく、期待signatureの非再現をerrorにする。\n- [x] 許容観測集合と各targetの差分比較。対象の多数決をオラクルにしない。\n- [x] Scheduleのactorごとの順序を保つ操作列と有限Generatorへの変換。\n- [x] version付きCase、JSONのsafe integer、protocol/resource上限とwork予算。\n- [x] serde/serde_jsonを使う独立Rustライブラリ、nativeのEngine::dispatchとホストimport不要のWasm ABI v1。\n\n## 非対応・対象外\n\n- [ ] scalar値の縮小、任意の高階Strategy、Proptest/fast-checkのStrategyやseedとの互換性。\n- [ ] thread/awaitの自動計装、ブロッキング、weak memoryのモデル化、SUTの自動実行。\n- [ ] 外部solverの内蔵、任意言語の静的検証、PBTのpassedからのモデル完全探索の証明。\n- [ ] 一つのruntime内の並列セッション。workerごとに別runtimeを使う。\n\n## 制約と根拠\n\n- [x] passedは指定数の有効caseが正常だった意味。invalidだけならexhausted、work不足ならinconclusiveとする。\n- [x] unknownの縮小候補がある場合にminimalとせず、異なるsignatureや非再現を成功へ変換しない。\n- [x] Scheduleは1〜8 actor、合計128操作、最大1024状態。構築費用はSessionのwork予算外で、構造上限で制限する。\n\n[README](README.md)、[Session](src/session.rs)、[縮小](src/shrink.rs)、[差分比較](src/compare.rs)、[Schedule](src/schedule.rs)、[評価](../../evals/iterations/0036-testing-core.md)を参照。",
-        "contentHash": "afb6b90ea41b0f60ee156057d8dec90760d282dc78b220d37ae72db0ea813abf"
+        "quote": "# idealis-connectの対応チェックリスト\n\nチェック済みは有限生成器からの生成・評価・縮小・再生・差分比較。SUTとテストランナーはホストが所有する。未チェックは未対応または対象外で、実装予定を約束しない。\n\n## 対応済み\n\n- [x] 有限状態機械のGeneratorとxorshift32-v1のseedによる操作列生成。長さ・終端・受理条件を扱う。任意の tla feature は具体グラフから安全に射影し、有限モデルの生成・実 Driver の照合・縮小に接続する。\n- [x] Session::propertyでEvaluate/Doneのeffectを返し、correlation ID付きの評価を受け取る。\n- [x] matched、signature付きmismatch、invalid、unknown、errorを区別する。\n- [x] 同じ失敗signatureを保つ操作削除と再現確認。受理条件を満たす単一削除に対するminimalと予算切れのboundedを区別する。\n- [x] 保存Caseの全actionsを使う再生。seedからの再生成ではなく、期待signatureの非再現をerrorにする。\n- [x] 許容観測集合と各targetの差分比較。対象の多数決をオラクルにしない。\n- [x] Scheduleのactorごとの順序を保つ操作列と有限Generatorへの変換。\n- [x] version付きCase、JSONのsafe integer、protocol/resource上限とwork予算。\n- [x] serde/serde_jsonを使う独立Rustライブラリ、nativeのEngine::dispatchとホストimport不要のWasm ABI v1。\n\n## 非対応・対象外\n\n- [ ] scalar値の縮小、任意の高階Strategy、Proptest/fast-checkのStrategyやseedとの互換性。\n- [ ] thread/awaitの自動計装、ブロッキング、weak memoryのモデル化、SUTの自動実行。\n- [ ] 外部solverの内蔵、任意言語の静的検証、PBTのpassedからのモデル完全探索の証明。\n- [ ] 一つのruntime内の並列セッション。workerごとに別runtimeを使う。\n\n## 制約と根拠\n\n- [x] passedは指定数の有効caseが正常だった意味。invalidだけならexhausted、work不足ならinconclusiveとする。\n- [x] unknownの縮小候補がある場合にminimalとせず、異なるsignatureや非再現を成功へ変換しない。\n- [x] Scheduleは1〜8 actor、合計128操作、最大1024状態。構築費用はSessionのwork予算外で、構造上限で制限する。\n\n[README](README.md)、[Session](src/session.rs)、[縮小](src/shrink.rs)、[差分比較](src/compare.rs)、[Schedule](src/schedule.rs)、[評価](../../evals/iterations/0036-testing-core.md)を参照。",
+        "contentHash": "b9ac9dabbe0ccaf50bbe5bef8132a1b3abe13e786a39f38f1bc29501d870071b"
       },
       "context": [],
-      "candidateId": "97c3d8a059bbaa9e8313a9bd9ad783702f4ece86c90bcfdc5c1b647c4436849e",
-      "contextHash": "dc75c61b336daf0b203e26288d291069262a0e3080f30f7f868df264c50de038",
+      "candidateId": "f8d05f0d30423a23d14ebd2dbe129a2fa1f40764b80e9cbb2bb79aad9f7ec1d2",
+      "contextHash": "be724ae61461334275c27f073ac0951ab935cbd5f0aff6ac80192f64fdeeef26",
       "judgment": {
         "choice": "supports",
-        "confidence": 0.99,
+        "confidence": 0.96,
         "probabilities": {
-          "supports": 0.99,
-          "contradicts": 0.01,
+          "supports": 0.97,
+          "contradicts": 0.02,
           "unrelated": 0,
-          "insufficient_context": 0
+          "insufficient_context": 0.01
         }
       }
     },
     {
-      "id": "idealis-connect-implementation-3",
+      "id": "idealis-connect-implementation-4",
       "topic": "許容観測集合との比較とerror/unknown/invalidの保持",
       "mode": "semantic",
       "reference": {
-        "source": "source6",
+        "source": "source7",
         "path": "crates/idealis-connect/src/compare.rs",
         "startLine": 1,
         "endLine": 145,
@@ -160,28 +211,28 @@
         "path": "crates/idealis-connect/SUPPORT.md",
         "startLine": 1,
         "endLine": 30,
-        "quote": "# idealis-connectの対応チェックリスト\n\nチェック済みは有限生成器からの生成・評価・縮小・再生・差分比較。SUTとテストランナーはホストが所有する。未チェックは未対応または対象外で、実装予定を約束しない。\n\n## 対応済み\n\n- [x] 有限状態機械のGeneratorとxorshift32-v1のseedによる操作列生成。長さ・終端・受理条件を扱う。\n- [x] Session::propertyでEvaluate/Doneのeffectを返し、correlation ID付きの評価を受け取る。\n- [x] matched、signature付きmismatch、invalid、unknown、errorを区別する。\n- [x] 同じ失敗signatureを保つ操作削除と再現確認。受理条件を満たす単一削除に対するminimalと予算切れのboundedを区別する。\n- [x] 保存Caseの全actionsを使う再生。seedからの再生成ではなく、期待signatureの非再現をerrorにする。\n- [x] 許容観測集合と各targetの差分比較。対象の多数決をオラクルにしない。\n- [x] Scheduleのactorごとの順序を保つ操作列と有限Generatorへの変換。\n- [x] version付きCase、JSONのsafe integer、protocol/resource上限とwork予算。\n- [x] serde/serde_jsonを使う独立Rustライブラリ、nativeのEngine::dispatchとホストimport不要のWasm ABI v1。\n\n## 非対応・対象外\n\n- [ ] scalar値の縮小、任意の高階Strategy、Proptest/fast-checkのStrategyやseedとの互換性。\n- [ ] thread/awaitの自動計装、ブロッキング、weak memoryのモデル化、SUTの自動実行。\n- [ ] 外部solverの内蔵、任意言語の静的検証、PBTのpassedからのモデル完全探索の証明。\n- [ ] 一つのruntime内の並列セッション。workerごとに別runtimeを使う。\n\n## 制約と根拠\n\n- [x] passedは指定数の有効caseが正常だった意味。invalidだけならexhausted、work不足ならinconclusiveとする。\n- [x] unknownの縮小候補がある場合にminimalとせず、異なるsignatureや非再現を成功へ変換しない。\n- [x] Scheduleは1〜8 actor、合計128操作、最大1024状態。構築費用はSessionのwork予算外で、構造上限で制限する。\n\n[README](README.md)、[Session](src/session.rs)、[縮小](src/shrink.rs)、[差分比較](src/compare.rs)、[Schedule](src/schedule.rs)、[評価](../../evals/iterations/0036-testing-core.md)を参照。",
-        "contentHash": "afb6b90ea41b0f60ee156057d8dec90760d282dc78b220d37ae72db0ea813abf"
+        "quote": "# idealis-connectの対応チェックリスト\n\nチェック済みは有限生成器からの生成・評価・縮小・再生・差分比較。SUTとテストランナーはホストが所有する。未チェックは未対応または対象外で、実装予定を約束しない。\n\n## 対応済み\n\n- [x] 有限状態機械のGeneratorとxorshift32-v1のseedによる操作列生成。長さ・終端・受理条件を扱う。任意の tla feature は具体グラフから安全に射影し、有限モデルの生成・実 Driver の照合・縮小に接続する。\n- [x] Session::propertyでEvaluate/Doneのeffectを返し、correlation ID付きの評価を受け取る。\n- [x] matched、signature付きmismatch、invalid、unknown、errorを区別する。\n- [x] 同じ失敗signatureを保つ操作削除と再現確認。受理条件を満たす単一削除に対するminimalと予算切れのboundedを区別する。\n- [x] 保存Caseの全actionsを使う再生。seedからの再生成ではなく、期待signatureの非再現をerrorにする。\n- [x] 許容観測集合と各targetの差分比較。対象の多数決をオラクルにしない。\n- [x] Scheduleのactorごとの順序を保つ操作列と有限Generatorへの変換。\n- [x] version付きCase、JSONのsafe integer、protocol/resource上限とwork予算。\n- [x] serde/serde_jsonを使う独立Rustライブラリ、nativeのEngine::dispatchとホストimport不要のWasm ABI v1。\n\n## 非対応・対象外\n\n- [ ] scalar値の縮小、任意の高階Strategy、Proptest/fast-checkのStrategyやseedとの互換性。\n- [ ] thread/awaitの自動計装、ブロッキング、weak memoryのモデル化、SUTの自動実行。\n- [ ] 外部solverの内蔵、任意言語の静的検証、PBTのpassedからのモデル完全探索の証明。\n- [ ] 一つのruntime内の並列セッション。workerごとに別runtimeを使う。\n\n## 制約と根拠\n\n- [x] passedは指定数の有効caseが正常だった意味。invalidだけならexhausted、work不足ならinconclusiveとする。\n- [x] unknownの縮小候補がある場合にminimalとせず、異なるsignatureや非再現を成功へ変換しない。\n- [x] Scheduleは1〜8 actor、合計128操作、最大1024状態。構築費用はSessionのwork予算外で、構造上限で制限する。\n\n[README](README.md)、[Session](src/session.rs)、[縮小](src/shrink.rs)、[差分比較](src/compare.rs)、[Schedule](src/schedule.rs)、[評価](../../evals/iterations/0036-testing-core.md)を参照。",
+        "contentHash": "b9ac9dabbe0ccaf50bbe5bef8132a1b3abe13e786a39f38f1bc29501d870071b"
       },
       "context": [],
-      "candidateId": "fb34fc8607e93a6918391d321b4c7e8cca6bb53eda7205ea5720f204651fa6e6",
-      "contextHash": "e923f026a596abf1e5229c169d05e89747b914c15cd6611e618395ed4eb9dca2",
+      "candidateId": "ba81c69631687c50ef13032613f76a0ba08e6b534fdd7bc2591c1fb6560ba69e",
+      "contextHash": "aaae0e590be0cdde0a68e652f4026dab5323b294edf3a53ca042343d7b34c33c",
       "judgment": {
         "choice": "supports",
-        "confidence": 0.89,
+        "confidence": 0.91,
         "probabilities": {
-          "supports": 0.92,
-          "contradicts": 0.03,
+          "supports": 0.93,
+          "contradicts": 0.04,
           "unrelated": 0,
-          "insufficient_context": 0.05
+          "insufficient_context": 0.03
         }
       }
     }
   ],
   "coverage": {
-    "expected": 5,
-    "selected": 5,
-    "answered": 5,
+    "expected": 6,
+    "selected": 6,
+    "answered": 6,
     "missing": 0,
     "contradictions": 0,
     "unassessed": 0,
@@ -190,9 +241,9 @@
     "unboundDocuments": 0
   },
   "usage": {
-    "requests": 5,
-    "inputTokens": 16455,
-    "usd": 0.0006911100000000001
+    "requests": 6,
+    "inputTokens": 23142,
+    "usd": 0.0009719640000000001
   },
   "errors": []
 }

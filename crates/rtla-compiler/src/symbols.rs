@@ -57,6 +57,31 @@ pub(crate) fn validate(module: &Module) -> Result<()> {
 
 fn validate_module(module: &Module) -> Result<()> {
     recursive(&module.recursive, &module.definitions)?;
+    // These names are declared by the Sequences module in tla2tools v1.7.4.
+    if module.extends.iter().any(|name| name == "Sequences") {
+        for (name, at) in module
+            .definitions
+            .iter()
+            .map(|d| (&d.name, d.location))
+            .chain(
+                module
+                    .variables
+                    .iter()
+                    .chain(&module.constants)
+                    .map(|d| (&d.name, d.location)),
+            )
+        {
+            if matches!(
+                name.as_str(),
+                "Seq" | "Len" | "Append" | "Head" | "Tail" | "SubSeq" | "SelectSeq"
+            ) {
+                return unsupported(format!(
+                    "Multiply-defined symbol '{name}' in module {}, line {}, column {}: conflicts with module Sequences",
+                    module.name, at.line, at.column
+                ));
+            }
+        }
+    }
     let conflict = |name: &str| {
         let builtin = matches!(
             name,

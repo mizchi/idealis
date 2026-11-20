@@ -33,7 +33,8 @@ pub fn run(args: impl Iterator<Item = String>) -> Result<u8> {
                 {
                     // SANY v1.7.4 reports semantic diagnostics on stdout and exits 0.
                     println!("Semantic errors:\nUnknown operator: `{name}'.");
-                } else if error.message.starts_with("level error at line ")
+                } else if error.message.starts_with("Multiply-defined symbol")
+                    || error.message.starts_with("level error at line ")
                     || error
                         .message
                         .starts_with("level error: recursive operator parameters")

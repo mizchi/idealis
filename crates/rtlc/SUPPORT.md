@@ -13,7 +13,7 @@
 - [x] v2のsequence callbackでもframe-local slotと共有callを検証する。SelectSeq / SortSeq / Assertの深い子の破棄も有界に扱う。source loweringの対応とは区別する。
 - [x] prepared定数はv2の共有定義・frameも走査する。深いaction frameの準備は明示stackで行い、上限超過をprotocolで拒否する。
 
-- [x] SafetyProgramからsuccessorを生成し、BFSで状態を重複排除する。hash衝突時にも状態全体を比較する。
+- [x] SafetyProgramからsuccessorを生成し、BFSで状態を重複排除する。hash衝突時にも状態全体を比較する。具体グラフの reachable_graph は制約を適用した完全探索だけを返す。初期・後続状態の未代入時は branch 名と未代入変数を診断する。Value の Display と SafetyViolation::format_trace で変数名付きの反例を表示できる。
 - [x] invariant・deadlock・初期state property・action property・定数ASSUMEの検査とsafety反例の復元。
 - [x] 対応するtemporal formula、stuttering、WF/SFとlasso反例。safetyと異なり最短lassoは保証しない。
 - [x] signed 32-bit整数、Bool、文字列、有限集合・有限関数。recordとsequenceも有限関数として等価性を判定する。

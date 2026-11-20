@@ -4,7 +4,7 @@
 
 ## 対応済み
 
-- [x] `analyze_modules` で実行用設定なしのモジュール束に既存 linker と任意の level 検査を適用する。単独解析で proof・nested module は拒否する。
+- [x] `analyze_modules` で実行用設定なしのモジュール束に既存 linker と任意の level 検査を適用する。単独解析で proof・nested module は拒否する。直接 EXTENDS Sequences の Len 等と同名のトップレベル宣言には、衝突元と定義位置を示す。
 
 - [x] 共有IRの統合でも既存v1のSYMMETRY設定を保持する。明示v2のSYMMETRYはlowering前に理由を示して拒否する。
 

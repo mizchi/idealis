@@ -234,9 +234,9 @@ testing-build: oracle-wire-build
 testing-core-test:
   cargo fmt --manifest-path crates/idealis-connect/Cargo.toml -- --check
   cargo fmt --manifest-path crates/idealis-cli/Cargo.toml -- --check
-  cargo clippy --all-targets --locked --manifest-path crates/idealis-connect/Cargo.toml -- -D warnings
+  cargo clippy --all-targets --all-features --locked --manifest-path crates/idealis-connect/Cargo.toml -- -D warnings
   cargo clippy --all-targets --locked --manifest-path crates/idealis-cli/Cargo.toml -- -D warnings
-  cargo test --all-targets --locked --manifest-path crates/idealis-connect/Cargo.toml
+  cargo test --all-targets --all-features --locked --manifest-path crates/idealis-connect/Cargo.toml
   cargo test --all-targets --locked --manifest-path crates/idealis-cli/Cargo.toml
 
 testing-example:

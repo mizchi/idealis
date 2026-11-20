@@ -68,12 +68,15 @@ impl Generator {
     pub(crate) fn normalize(mut self) -> Result<Self, Error> {
         text(&self.id)?;
         text(&self.version)?;
-        if self.min_length > self.max_length
-            || self.max_length > 128
-            || self.states.len() > 1024
-            || self.states.values().map(Vec::len).sum::<usize>() > 10_000
-        {
-            return Err(Error::resource("generator exceeds supported bounds"));
+        if self.min_length > self.max_length || self.max_length > 128 {
+            return Err(Error::resource(
+                "generator length must satisfy min <= max <= 128",
+            ));
+        }
+        if self.states.len() > 1024 || self.states.values().map(Vec::len).sum::<usize>() > 10_000 {
+            return Err(Error::resource(
+                "generator exceeds 1024 states or 10000 edges; reduce model domains or use a verified state projection",
+            ));
         }
         if self.initial.is_empty()
             || self.initial.iter().collect::<BTreeSet<_>>().len() != self.initial.len()

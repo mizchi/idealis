@@ -1,4 +1,5 @@
 mod bounded_drop;
+mod display;
 pub mod ir;
 mod safety;
 #[cfg(test)]
@@ -18,5 +19,5 @@ pub use ir::{
     SafetyActionCoverage, SafetyBounds, SafetyCoverage, SafetyCoverageReport, SafetyOptions,
     SafetyProgram, SafetyResult,
 };
-pub use safety::PreparedSafetyProgram;
+pub use safety::{PreparedSafetyProgram, SafetyGraph};
 pub use value::{CoreError, Value};

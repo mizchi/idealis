@@ -2,7 +2,7 @@
 
 [対応範囲・非対応のチェックリスト](SUPPORT.md)を参照。
 
-有限状態機械からの操作列生成、削除による縮小、保存caseの再生、差分比較を行うRustライブラリ。serde/serde_jsonだけに依存し、同じ実装をnativeとホストimport不要のWasmで使う。SUTのI/Oやテストランナーはホストが担当する。alpha版で、registryには未公開。
+有限状態機械からの操作列生成、削除による縮小、保存caseの再生、差分比較を行うRustライブラリ。既定の構成はserde/serde_jsonだけに依存し、同じ実装をnativeとホストimport不要のWasmで使う。SUTのI/Oやテストランナーはホストが担当する。alpha版で、registryには未公開。
 
 ## セッションを駆動する
 
@@ -41,3 +41,18 @@ SUTはホストが指定actorを1操作ずつ進める。threadやawaitの自動
 Wasm ABI v1はtesting_abi_version、testing_input_resize、testing_dispatch、testing_output_ptr、testing_output_len。ホストは同じJSONを渡す。並列に実行する場合はworkerごとに別runtimeを使う。
 
 [Proptestの状態機械テスト](https://proptest-rs.github.io/proptest/proptest/state-machine.html)と既存TSの縮小器を参照した。外部solver、任意threadの自動計装、高階Strategy、scalar縮小はこのcrateへ組み込んでいない。
+
+## Rust から TLA+ と実装を照合する
+
+Cargo.toml に `idealis-connect = { git = "https://github.com/mizchi/idealis", branch = "typed-oracle", features = ["tla"] }` を追加する。テストを固定するときは branch を導入時の rev に置き換える。[実行可能な HashMap の例](examples/tla_store.rs) は仕様と設定のパスを引数に取り、実装を操作して読み取った観測を使う。
+
+```sh
+cargo run --release --manifest-path crates/idealis-connect/Cargo.toml --features tla \
+  --example tla_store -- HashMapModel.tla HashMapModel.cfg
+```
+
+`tla::finite_model(source, config, spec, bounds)` は完全探索した具体状態から FiniteModel を作る。初期状態は探索の根から取得し、同じキーでも異なる初期観測を保存する。操作と観測は到達先の状態から読む。既定の変数名は `act` と `obs`。状態制約・操作制約で除外した辺、および時相検査が補った stuttering は含めない。予算切れ・empty・違反・対称性縮約ではエラーになる。
+
+`ConnectSpec` で変数名を指定できる。既定では注釈変数を除いた値で状態をまとめ、各グループの全メンバーで（操作、射影先、観測）の集合が一致するときだけ採用する。拒否された場合は `project_annotations: false` で完全な状態を保持できる。Generator の 1,024 状態・10,000 辺を超える場合は、モデルの有限領域を小さくする。
+
+手書きのテストアダプタに `tla::Driver` の reset / step を実装し、固定操作列には `tla::check_driver`、生成・縮小には `Generator::from_finite_model` と `tla::check` を使う。非決定的な観測後に操作を続けられない列は invalid として扱う。確認した mismatch は反例の操作列・失敗位置・許容観測・実測値を返す。

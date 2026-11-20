@@ -4,7 +4,7 @@
 
 ## 対応済み
 
-- [x] 有限状態機械のGeneratorとxorshift32-v1のseedによる操作列生成。長さ・終端・受理条件を扱う。
+- [x] 有限状態機械のGeneratorとxorshift32-v1のseedによる操作列生成。長さ・終端・受理条件を扱う。任意の tla feature は具体グラフから安全に射影し、有限モデルの生成・実 Driver の照合・縮小に接続する。
 - [x] Session::propertyでEvaluate/Doneのeffectを返し、correlation ID付きの評価を受け取る。
 - [x] matched、signature付きmismatch、invalid、unknown、errorを区別する。
 - [x] 同じ失敗signatureを保つ操作削除と再現確認。受理条件を満たす単一削除に対するminimalと予算切れのboundedを区別する。

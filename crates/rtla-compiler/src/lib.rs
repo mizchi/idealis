@@ -302,6 +302,27 @@ fn unchanged(value: Json) -> Result<Vec<Json>> {
     ])
 }
 
+/// Locate a uniquely named incomplete action in the original source modules.
+/// Raw IR can omit source information or reuse an action label.
+pub fn incomplete_state_location<'a>(
+    error: &rtlc::CoreError,
+    modules: impl IntoIterator<Item = &'a Module>,
+) -> Option<(&'a str, rtla::ast::Location)> {
+    let (action, _) = error
+        .message
+        .strip_prefix("Incomplete safety state in action ")?
+        .split_once("; unassigned: ")?;
+    let mut definitions = modules.into_iter().flat_map(|module| {
+        module
+            .definitions
+            .iter()
+            .filter(move |d| d.name == action)
+            .map(move |d| (module.name.as_str(), d.location))
+    });
+    let location = definitions.next()?;
+    definitions.next().is_none().then_some(location)
+}
+
 /// Compile the selected finite TLA+ fragment. Parsing and execution remain separate.
 pub fn compile(module: &Module, config: &Config) -> Result<rtlc::SafetyProgram> {
     compile_with_options(module, config, CompileOptions::default())

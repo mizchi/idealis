@@ -1,7 +1,6 @@
 mod modules;
 mod tla;
 mod tlc;
-mod trace;
 
 use std::process::ExitCode;
 

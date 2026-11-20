@@ -4,6 +4,8 @@ mod generator;
 mod schedule;
 mod session;
 mod shrink;
+#[cfg(feature = "tla")]
+pub mod tla;
 #[cfg(target_arch = "wasm32")]
 mod wasm;
 

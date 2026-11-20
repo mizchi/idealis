@@ -75,7 +75,11 @@ fn recursive_action_does_not_accept_an_incomplete_successor() {
     let program: SafetyProgram = serde_json::from_value(wire).unwrap();
     let error = program.check(bounds(1_000_000)).unwrap_err();
     assert_eq!(error.code, "protocol");
-    assert_eq!(error.message, "Incomplete safety state");
+    assert!(
+        error.message.contains("Incomplete safety state in action ")
+            && error.message.ends_with("unassigned: y"),
+        "{error}"
+    );
 }
 
 #[test]

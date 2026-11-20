@@ -37,3 +37,26 @@ fn nested_labels_and_function_and_lambda_parameters_have_their_own_label_scopes(
         }
     }
 }
+
+#[test]
+fn sequence_symbol_collision_points_to_top_level_declaration() {
+    let config = rtla::parse_config("INIT Init\nNEXT Next").unwrap();
+    let source = "---- MODULE M ----\nEXTENDS Sequences\nLen == 1\nVARIABLE x\nInit == x=0\nNext == x'=Len\n====";
+    for version in [IrVersion::V1, IrVersion::V2] {
+        let compile = |text: &str| {
+            compile_with_options(
+                &rtla::parse_module(text).unwrap(),
+                &config,
+                CompileOptions { irVersion: version },
+            )
+        };
+        let error = compile(source).unwrap_err();
+        assert!(
+            error.message.contains("Multiply-defined symbol 'Len'")
+                && error.message.contains("Sequences")
+                && error.message.contains("line 3, column 1"),
+            "{error}"
+        );
+        compile(&source.replace("EXTENDS Sequences", "EXTENDS Naturals")).unwrap();
+    }
+}

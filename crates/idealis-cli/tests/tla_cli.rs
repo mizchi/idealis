@@ -102,3 +102,42 @@ fn false_constant_checks_are_configuration_errors() {
         run(&["tlc", "-config", cfg, "Values"], 151, "is equal to FALSE");
     }
 }
+
+#[test]
+fn standard_name_collision_identifies_both_modules() {
+    let text = run(&["tla", "Shadow3"], 0, "Multiply-defined symbol 'Len'");
+    assert!(
+        text.contains("Sequences") && text.contains("line 3, column 1"),
+        "{text}"
+    );
+}
+
+#[test]
+fn incomplete_successor_identifies_action_missing_variable_and_source() {
+    let text = run(&["tlc", "Missing"], 255, "action A");
+    assert!(
+        text.contains("unassigned: y") && text.contains("Missing.tla:5:1"),
+        "{text}"
+    );
+}
+
+#[test]
+fn ci_can_expect_a_violation_and_read_the_whole_trace() {
+    let text = run(
+        &["tlc", "--expect-violation", "--fulltrace", "Diff"],
+        0,
+        "State 3:",
+    );
+    assert_eq!(text.matches("stable = \"constant\"").count(), 3);
+    assert!(text.contains("depth") && text.contains(" ms"));
+    run(
+        &["tlc", "--expect-violation", "Counter"],
+        1,
+        "Expected a violation",
+    );
+    run(
+        &["tlc", "--expect-violation", "-config", "Bound", "Counter"],
+        255,
+        "bounded",
+    );
+}

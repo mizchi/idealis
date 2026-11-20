@@ -10,15 +10,19 @@ pub fn run(mut args: impl Iterator<Item = String>) -> Result<u8> {
     let mut config = None;
     let mut workers = 1;
     let mut difftrace = false;
+    let mut fulltrace = false;
+    let mut expect_violation = false;
     let mut no_deadlock = false;
     while let Some(arg) = args.next() {
         match arg.as_str() {
             "-h" | "-help" => {
                 println!(
-                    "Usage: idealis tlc [-config file] [-workers N|auto] [-modelcheck] [-deadlock] [-difftrace] spec"
+                    "Usage: idealis tlc [-config file] [-workers N|auto] [-modelcheck] [-deadlock] [-difftrace|--fulltrace] [--expect-violation] spec"
                 );
                 return Ok(1);
             }
+            "--fulltrace" => fulltrace = true,
+            "--expect-violation" => expect_violation = true,
             "-modelcheck" => {}
             "-difftrace" => difftrace = true,
             "-deadlock" => no_deadlock = true,
@@ -81,6 +85,7 @@ pub fn run(mut args: impl Iterator<Item = String>) -> Result<u8> {
         .map_err(|e| (150, e.to_string()))?;
     let program = rtla_compiler::compile_modules(&bundle.root, &config, &bundle.dependencies)
         .map_err(|e| (150, e.to_string()))?;
+    let started = std::time::Instant::now();
     let check = program.check_with_options(
         SafetyBounds {
             max_depth: 1000,
@@ -103,7 +108,18 @@ pub fn run(mut args: impl Iterator<Item = String>) -> Result<u8> {
             println!("Error: Constant invariant or property is equal to FALSE");
             return Ok(151);
         }
-        Err(error) => return Err((255, error.to_string())),
+        Err(error) => {
+            if let Some((module, at)) = rtla_compiler::incomplete_state_location(
+                &error,
+                std::iter::once(&bundle.root).chain(&bundle.dependencies),
+            ) {
+                return Err((
+                    255,
+                    format!("{error} ({module}.tla:{}:{})", at.line, at.column),
+                ));
+            }
+            return Err((255, error.to_string()));
+        }
     };
     let code = match result.status.as_str() {
         "complete" => {
@@ -138,8 +154,11 @@ pub fn run(mut args: impl Iterator<Item = String>) -> Result<u8> {
             "deadlock" => println!("Error: Deadlock reached."),
             _ => println!("Error: {}: {}", result.status, violation.name),
         }
-        if difftrace {
-            super::trace::print_diff(&program.variables, &violation, &result.status);
+        if fulltrace || difftrace {
+            print!(
+                "{}",
+                violation.format_trace(&program.variables, &result.status, !fulltrace)
+            );
         } else {
             println!(
                 "{}",
@@ -147,6 +166,21 @@ pub fn run(mut args: impl Iterator<Item = String>) -> Result<u8> {
             );
         }
     }
-    println!("{} distinct states found.", result.states);
-    Ok(code)
+    println!(
+        "{} distinct states found. depth {}, {} ms",
+        result.states,
+        result.depth,
+        started.elapsed().as_millis()
+    );
+    if expect_violation && code == 0 {
+        return Err((
+            1,
+            "Expected a violation; model checking completed without one".into(),
+        ));
+    }
+    Ok(if expect_violation && (11..=13).contains(&code) {
+        0
+    } else {
+        code
+    })
 }

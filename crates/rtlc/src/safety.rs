@@ -77,16 +77,16 @@ impl StateStore {
     }
 }
 
-fn get_hash(values: &[Option<Scalar>]) -> Result<u64, CoreError> {
+fn get_hash(values: &[Option<Scalar>]) -> Option<u64> {
     values
         .iter()
         .try_fold(0xcbf2_9ce4_8422_2325_u64, |hash, value| {
-            let bits = match value.ok_or_else(|| CoreError::protocol("Incomplete safety state"))? {
+            let bits = match (*value)? {
                 Scalar::Int(value) => u64::from(value as u32) << 1,
                 Scalar::Bool(value) => (u64::from(value) << 1) | 1,
                 Scalar::Ref(value) => u64::from(value) ^ 0x9e37_79b9_7f4a_7c15,
             };
-            Ok(hash.wrapping_mul(0x0000_0100_0000_01b3) ^ bits)
+            Some(hash.wrapping_mul(0x0000_0100_0000_01b3) ^ bits)
         })
 }
 
@@ -103,6 +103,15 @@ struct Search<'a, R: Recording = NoCoverage> {
     options: SafetyOptions,
     partial_order: Option<PartialOrder>,
     validated: bool,
+}
+
+/// Concrete reachable states in program variable order. Successors are state indices
+/// after state/action constraints. Only actual Next edges are included.
+#[derive(Default, Debug)]
+pub struct SafetyGraph {
+    pub states: Vec<Vec<Value>>,
+    pub initial: Vec<usize>,
+    pub successors: Vec<Vec<usize>>,
 }
 
 pub struct PreparedSafetyProgram {
@@ -123,15 +132,19 @@ impl PreparedSafetyProgram {
     ) -> Result<SafetyResult, CoreError> {
         self.program.validate_options(options)?;
         self.program
-            .check_measured::<NoCoverage>(bounds, options, Some(self))
+            .check_measured::<NoCoverage>(bounds, options, Some(self), None)
     }
 
     pub fn check_with_coverage(
         &self,
         bounds: SafetyBounds,
     ) -> Result<SafetyCoverageReport, CoreError> {
-        self.program
-            .check_measured::<WithCoverage>(bounds, SafetyOptions::default(), Some(self))
+        self.program.check_measured::<WithCoverage>(
+            bounds,
+            SafetyOptions::default(),
+            Some(self),
+            None,
+        )
     }
 }
 
@@ -190,7 +203,7 @@ impl SafetyProgram {
         options: SafetyOptions,
     ) -> Result<SafetyResult, CoreError> {
         self.validate_options(options)?;
-        self.check_measured::<NoCoverage>(bounds, options, None)
+        self.check_measured::<NoCoverage>(bounds, options, None, None)
     }
 
     fn validate_options(&self, options: SafetyOptions) -> Result<(), CoreError> {
@@ -212,7 +225,7 @@ impl SafetyProgram {
         &self,
         bounds: SafetyBounds,
     ) -> Result<SafetyCoverageReport, CoreError> {
-        self.check_measured::<WithCoverage>(bounds, SafetyOptions::default(), None)
+        self.check_measured::<WithCoverage>(bounds, SafetyOptions::default(), None, None)
     }
     #[cfg(not(target_arch = "wasm32"))]
     pub fn check_parallel(
@@ -240,11 +253,40 @@ impl SafetyProgram {
             },
         )
     }
+    /// Export only after a complete, unreduced check of this program.
+    pub fn reachable_graph(&self, bounds: SafetyBounds) -> Result<SafetyGraph, CoreError> {
+        if self.symmetry.is_some() {
+            return Err(CoreError::protocol(
+                "Concrete graph export requires unreduced states",
+            ));
+        }
+        let mut graph = SafetyGraph::default();
+        let result = self.check_measured::<NoCoverage>(
+            bounds,
+            SafetyOptions::default(),
+            None,
+            Some(&mut graph),
+        )?;
+        if result.status != "complete" {
+            return Err(CoreError::protocol(&format!(
+                "Cannot export {} graph: {}",
+                result.status,
+                result
+                    .reason
+                    .as_deref()
+                    .or(result.violation.as_ref().map(|v| v.name.as_str()))
+                    .unwrap_or("no complete graph")
+            )));
+        }
+        Ok(graph)
+    }
+
     fn check_measured<R: Recording>(
         &self,
         bounds: SafetyBounds,
         options: SafetyOptions,
         preparation: Option<&PreparedSafetyProgram>,
+        graph_output: Option<&mut SafetyGraph>,
     ) -> Result<R::Output, CoreError> {
         if preparation.is_none() {
             self.validate_header()?;
@@ -267,7 +309,7 @@ impl SafetyProgram {
             program: self,
             bounds,
             nodes: vec![],
-            graph: (!self.properties.is_empty()).then(Vec::new),
+            graph: (graph_output.is_some() || !self.properties.is_empty()).then(Vec::new),
             roots: vec![],
             store: StateStore::new(self.variables.len()),
             coverage: R::new(self),
@@ -304,6 +346,26 @@ impl SafetyProgram {
                 }
                 .into(),
             );
+        }
+        if search.result.status == "complete"
+            && let Some(output) = graph_output
+        {
+            output.states = (0..search.nodes.len())
+                .map(|i| search.portable(i, &arena))
+                .collect::<Result<_, _>>()?;
+            output.initial = search.roots;
+            output.successors = search
+                .graph
+                .expect("requested graph")
+                .into_iter()
+                .map(|edges| {
+                    edges
+                        .into_iter()
+                        .filter(|e| e.action.is_some())
+                        .map(|e| e.target)
+                        .collect()
+                })
+                .collect();
         }
         search.result.work = arena.work;
         Ok(search.coverage.finish(search.result))
@@ -508,6 +570,7 @@ impl<'program, R: Recording> Search<'program, R> {
             }
         }
         if self.result.status == "complete"
+            && !program.properties.is_empty()
             && let Some(graph) = &mut self.graph
         {
             for (index, edges) in graph.iter_mut().enumerate() {
@@ -656,7 +719,26 @@ impl<'program, R: Recording> Search<'program, R> {
         action: usize,
         arena: &mut Arena,
     ) -> Result<(), CoreError> {
-        let hash = get_hash(values)?;
+        let hash = get_hash(values).ok_or_else(|| {
+            let branch = if parent.is_some() {
+                &self.program.next[action]
+            } else {
+                &self.program.initial[action]
+            };
+            let missing: Vec<_> = self
+                .program
+                .variables
+                .iter()
+                .zip(values)
+                .filter(|(_, value)| value.is_none())
+                .map(|(name, _)| name.as_str())
+                .collect();
+            CoreError::protocol(&format!(
+                "Incomplete safety state in action {}; unassigned: {}",
+                branch.name,
+                missing.join(", ")
+            ))
+        })?;
         self.result.generated += 1;
         if !self.program.constraints.is_empty()
             || (parent.is_some() && !self.program.action_constraints.is_empty())
