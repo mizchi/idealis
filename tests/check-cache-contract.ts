@@ -6,6 +6,7 @@ import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createInterface } from "node:readline";
+import { Worker } from "node:worker_threads";
 import { cases } from "../evals/experiments/rust-safety/cases.js";
 import { createRtlcBackend } from "../packages/idealis/src/backend.js";
 import { createHttpCheckCacheStore } from "../packages/idealis/src/check-cache-http.js";
@@ -156,6 +157,29 @@ export const registerCheckCacheContract = (
     assert.equal(uncacheable.kind, "executed");
     assert.equal(Reflect.get(uncacheable, "cleanupError"), cleanupError);
   });
+  test("SQLite cache initialization waits for another connection's write lock", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "idealis-cache-lock-"));
+    const path = join(directory, "cache.db");
+    const worker = new Worker(
+      "./dist/tests/verified-cache/sqlite-lock-worker.js",
+      { workerData: path },
+    );
+    try {
+      const [ready] = await once(worker, "message");
+      assert.equal(ready, "locked");
+      worker.postMessage("release");
+      const store = createSqliteCheckCacheStore(path);
+      try {
+        assert.equal(await store.read("missing"), null);
+      } finally {
+        store.close();
+      }
+    } finally {
+      await worker.terminate();
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
   test("a killed SQLite producer cannot publish after another process takes its lease", async () => {
     const directory = await mkdtemp(join(tmpdir(), "idealis-cache-crash-"));
     const path = join(directory, "cache.db");
@@ -168,8 +192,9 @@ export const registerCheckCacheContract = (
     );
     const lines = createInterface({ input: child.stdout });
     const exited = once(child, "exit");
-    const store = createSqliteCheckCacheStore(path);
+    let store: ReturnType<typeof createSqliteCheckCacheStore> | undefined;
     try {
+      store = createSqliteCheckCacheStore(path);
       const [line] = await Promise.race([
         once(lines, "line"),
         exited.then(() => {
@@ -201,7 +226,7 @@ export const registerCheckCacheContract = (
     } finally {
       child.kill("SIGKILL");
       lines.close();
-      store.close();
+      store?.close();
       await rm(directory, { recursive: true, force: true });
     }
   });

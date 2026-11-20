@@ -70,6 +70,13 @@ test("symbolic native/Wasm syntax and standalone fixtures retain both SANY contr
       "crates/rtla/target/wasm32-unknown-unknown/release/rtla.wasm",
     ),
   );
+  // Run 0069 predates the lexer recognizing (+) and (\X) as single tokens.
+  const aliasExpectations: Record<string, unknown> = JSON.parse(
+    await readFile(
+      "fixtures/symbolic-operators/parenthesized-aliases.json",
+      "utf8",
+    ),
+  );
   for (const [index, record] of saved.records.entries()) {
     const input = cases[index];
     assert.ok(input && input.id === record.id);
@@ -79,17 +86,24 @@ test("symbolic native/Wasm syntax and standalone fixtures retain both SANY contr
         input: `${JSON.stringify(request)}\n`,
       }).toString(),
     );
-    assert.deepEqual(native, record.native, record.id);
+    assert.deepEqual(
+      native,
+      aliasExpectations[record.id] ?? record.native,
+      record.id,
+    );
+    assert.ok(isRecord(native));
+    const syntax =
+      native.kind === "module"
+        ? "accepted"
+        : isRecord(native.error) && native.error.kind;
+    assert.equal(syntax, input.accepted ? "accepted" : "syntax", record.id);
     assert.deepEqual(wasm.request(request), native, record.id);
     assert.deepEqual(
       record.references.map((reference) => reference.version),
       ["1.7.4", "1.8.0"],
     );
     assert.ok(
-      record.references.every(
-        (reference) =>
-          reference.kind === (input.accepted ? "accepted" : "syntax"),
-      ),
+      record.references.every((reference) => reference.kind === syntax),
       record.id,
     );
   }

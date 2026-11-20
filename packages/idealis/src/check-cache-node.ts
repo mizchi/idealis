@@ -10,13 +10,45 @@ import {
 import type { CheckCacheStore } from "./contracts.js";
 import { isRecord, valueKey } from "./trace.js";
 
+const busyTimeoutMs = 5_000;
+const sqliteBusy = 5;
+
+const enableWal = (database: DatabaseSync) => {
+  const deadline = performance.now() + busyTimeoutMs;
+  const sleeper = new Int32Array(new SharedArrayBuffer(4));
+  for (;;) {
+    try {
+      database.exec("PRAGMA journal_mode=WAL");
+      return;
+    } catch (error) {
+      // Concurrent journal mode upgrades can return SQLITE_BUSY immediately.
+      const remaining = deadline - performance.now();
+      if (
+        !isRecord(error) ||
+        typeof error.errcode !== "number" ||
+        (error.errcode & 0xff) !== sqliteBusy ||
+        remaining <= 0
+      )
+        throw error;
+      Atomics.wait(sleeper, 0, 0, Math.min(10, remaining));
+    }
+  }
+};
+
 export const createSqliteCheckCacheStore = (
   path: string,
 ): CheckCacheStore & { readonly close: () => void } => {
   const database = new DatabaseSync(path);
-  database.exec(
-    "PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; CREATE TABLE IF NOT EXISTS idealis_check_cache (key TEXT PRIMARY KEY, revision INTEGER NOT NULL CHECK(revision > 0), body TEXT NOT NULL) STRICT;",
-  );
+  try {
+    enableWal(database);
+    database.exec(`PRAGMA busy_timeout=${busyTimeoutMs}`);
+    database.exec(
+      "PRAGMA synchronous=FULL; CREATE TABLE IF NOT EXISTS idealis_check_cache (key TEXT PRIMARY KEY, revision INTEGER NOT NULL CHECK(revision > 0), body TEXT NOT NULL) STRICT;",
+    );
+  } catch (error) {
+    database.close();
+    throw error;
+  }
   const get = database.prepare(
     "SELECT revision, body FROM idealis_check_cache WHERE key = ?",
   );
