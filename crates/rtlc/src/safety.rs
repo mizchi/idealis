@@ -1126,4 +1126,55 @@ mod tests {
         assert!(store.push(0, &[Some(Scalar::Int(0)), None]).is_err());
         assert_eq!(store.find(0, &third), Some(2));
     }
+
+    #[test]
+    fn incomplete_successor_names_action_and_variable_with_and_without_cache() {
+        let program: crate::ir::SafetyProgram = serde_json::from_value(serde_json::json!({
+            "format": "modelt.safety-program",
+            "version": 1,
+            "name": "Missing",
+            "variables": ["x", "y"],
+            "initial": [{
+                "name": "Init",
+                "steps": [
+                    {"kind": "assign", "slot": 0, "value": {"op": "literal", "value": {"type": "int", "value": "0"}}},
+                    {"kind": "assign", "slot": 1, "value": {"op": "literal", "value": {"type": "int", "value": "0"}}}
+                ]
+            }],
+            "next": [{
+                "name": "A",
+                "steps": [
+                    {"kind": "assign", "slot": 0, "value": {"op": "read", "slot": 0, "next": false}}
+                ]
+            }],
+            "invariants": [],
+            "assumptions": [],
+            "checkDeadlock": false
+        }))
+        .unwrap();
+        let bounds = crate::ir::SafetyBounds {
+            max_depth: 64,
+            max_states: 10000,
+            max_work: 1000000,
+            max_temporal_nodes: None,
+        };
+        let expected = "Incomplete safety state in action A; unassigned: y";
+        let ordinary = program.check(bounds).unwrap_err();
+        assert_eq!(ordinary.code, "protocol");
+        assert_eq!(ordinary.message, expected);
+
+        let cached = program
+            .check_incremental(
+                bounds,
+                &mut super::SafetyExpansionCache::default(),
+                super::ExpansionOptions {
+                    enabled: true,
+                    build_digest: &"a".repeat(64),
+                    max_entries: 10000,
+                },
+            )
+            .unwrap_err();
+        assert_eq!(cached.code, ordinary.code);
+        assert_eq!(cached.message, expected);
+    }
 }
