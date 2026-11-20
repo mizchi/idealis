@@ -1,0 +1,421 @@
+diff --git i/crates/rtlc/src/safety_expressions.rs w/crates/rtlc/src/safety_expressions.rs
+index 5bdd8b670..b9538e792 100644
+--- i/crates/rtlc/src/safety_expressions.rs
++++ w/crates/rtlc/src/safety_expressions.rs
+@@ -5,6 +5,7 @@ use crate::ir::{
+ use crate::safety_values::Arena;
+ #[cfg(not(target_arch = "wasm32"))]
+ use crate::safety_values::ValueRemap;
++use std::collections::HashMap;
+ use std::collections::hash_map::DefaultHasher;
+ use std::hash::{Hash, Hasher};
+ use std::sync::Arc;
+@@ -2073,6 +2074,20 @@ pub(crate) fn visit_branch(
+             domain,
+             tuple_size,
+         } => {
++            if let Some(run) = arena.bind_run(branch, position) {
++                let mut locals = ctx.locals.to_vec();
++                return visit_bind_run(
++                    branch,
++                    position,
++                    run,
++                    ctx,
++                    &mut locals,
++                    next,
++                    arena,
++                    visitor,
++                    &mut Continuations::default(),
++                );
++            }
+             let values = domain.values(context, arena)?;
+             let mut locals = ctx.locals.to_vec();
+             if *slot != locals.len() {
+@@ -2102,6 +2117,247 @@ pub(crate) fn visit_branch(
+     }
+ }
+ 
++pub(crate) struct BindRun {
++    end: usize,
++    read: Vec<usize>,
++}
++
++const RECORDED_SUCCESSORS_PER_RUN: usize = 4096;
++const RECORDED_SUCCESSORS_PER_CONTINUATION: usize = 64;
++const RECORDED_CONTINUATIONS_PER_RUN: usize = 4096;
++const UNREPLAYED_CONTINUATIONS_BEFORE_GIVING_UP: usize = 256;
++
++type Successors = Vec<Vec<Option<Scalar>>>;
++
++#[derive(Default)]
++struct Continuations {
++    entries: HashMap<Vec<Scalar>, Option<Successors>>,
++    recorded: usize,
++    replayed: usize,
++}
++
++fn bound_reads(expression: &Expression, reads: &mut Vec<usize>) -> bool {
++    match expression {
++        Expression::Bound { slot } => {
++            reads.push(*slot);
++            true
++        }
++        Expression::Enabled { .. } => false,
++        _ => expression
++            .children()
++            .into_iter()
++            .all(|child| bound_reads(child, reads)),
++    }
++}
++
++fn domain_reads(domain: &Domain, reads: &mut Vec<usize>) -> bool {
++    domain
++        .children()
++        .into_iter()
++        .all(|child| bound_reads(child, reads))
++}
++
++fn step_reads(steps: &[Step], reads: &mut Vec<usize>) -> bool {
++    steps.iter().all(|step| match step {
++        Step::Guard { expression } => bound_reads(expression, reads),
++        Step::Assign { value, .. } => bound_reads(value, reads),
++        Step::Choose { domain, .. } | Step::Bind { domain, .. } => domain_reads(domain, reads),
++        Step::Call {
++            arguments,
++            captures,
++            ..
++        } => arguments
++            .iter()
++            .chain(captures)
++            .all(|expression| bound_reads(expression, reads)),
++        Step::Frame {
++            arguments,
++            captures,
++            branches,
++            ..
++        } => {
++            arguments
++                .iter()
++                .chain(captures)
++                .all(|expression| bound_reads(expression, reads))
++                && branches.iter().all(|inner| step_reads(&inner.steps, reads))
++        }
++    })
++}
++
++fn plan_bind_run(branch: &Branch, position: usize) -> Option<BindRun> {
++    let Some(Step::Bind { slot: first, .. }) = branch.steps.get(position) else {
++        return None;
++    };
++    let end = position
++        + branch.steps[position..]
++            .iter()
++            .take_while(|step| matches!(step, Step::Bind { .. }))
++            .count();
++    if end == branch.steps.len() {
++        return None;
++    }
++    let mut reads = vec![];
++    if !step_reads(&branch.steps[end..], &mut reads) {
++        return None;
++    }
++    let slots = *first..first.checked_add(end - position)?;
++    let read: Vec<usize> = slots.clone().filter(|slot| reads.contains(slot)).collect();
++    (read.len() < slots.len()).then_some(BindRun { end, read })
++}
++
++pub(crate) fn plan_bind_runs<'a>(
++    branches: &'a [Branch],
++    register: &mut impl FnMut(&'a Branch, usize, BindRun),
++) {
++    let mut pending = vec![branches];
++    while let Some(branches) = pending.pop() {
++        for branch in branches {
++            for (position, step) in branch.steps.iter().enumerate() {
++                if let Step::Frame { branches, .. } = step {
++                    pending.push(branches);
++                }
++                if let Some(run) = plan_bind_run(branch, position) {
++                    register(branch, position, run);
++                }
++            }
++        }
++    }
++}
++
++#[allow(clippy::too_many_arguments)]
++fn visit_bind_run(
++    branch: &Branch,
++    position: usize,
++    run: &BindRun,
++    ctx: EvalContext<'_>,
++    locals: &mut Vec<Scalar>,
++    next: &mut [Option<Scalar>],
++    arena: &mut Arena,
++    visitor: &mut BranchVisitor<'_>,
++    continuations: &mut Continuations,
++) -> Result<bool, CoreError> {
++    if position == run.end {
++        return visit_continuation(
++            branch,
++            run,
++            ctx,
++            locals,
++            next,
++            arena,
++            visitor,
++            continuations,
++        );
++    }
++    let mut ctx = ctx;
++    if locals.len() > ctx.locals.len() {
++        ctx.descend(arena)?;
++        arena.tick()?;
++    }
++    let Some(Step::Bind {
++        slot,
++        domain,
++        tuple_size,
++    }) = branch.steps.get(position)
++    else {
++        return Err(CoreError::protocol("Invalid bound variable run"));
++    };
++    let values = domain.values(
++        EvalContext {
++            next,
++            locals,
++            ..ctx
++        },
++        arena,
++    )?;
++    if *slot != locals.len() {
++        return Err(CoreError::protocol("Unbound action variable"));
++    }
++    for value in values {
++        arena.check_tuple(value, *tuple_size)?;
++        locals.push(value);
++        let found = visit_bind_run(
++            branch,
++            position + 1,
++            run,
++            ctx,
++            locals,
++            next,
++            arena,
++            visitor,
++            continuations,
++        )?;
++        locals.pop();
++        if found {
++            return Ok(true);
++        }
++    }
++    Ok(false)
++}
++
++#[allow(clippy::too_many_arguments)]
++fn visit_continuation(
++    branch: &Branch,
++    run: &BindRun,
++    ctx: EvalContext<'_>,
++    locals: &[Scalar],
++    next: &mut [Option<Scalar>],
++    arena: &mut Arena,
++    visitor: &mut BranchVisitor<'_>,
++    continuations: &mut Continuations,
++) -> Result<bool, CoreError> {
++    let key: Vec<Scalar> = run.read.iter().map(|slot| locals[*slot]).collect();
++    if let Some(Some(successors)) = continuations.entries.get(&key) {
++        continuations.replayed += 1;
++        arena.tick()?;
++        for successor in successors.clone() {
++            let mut successor = successor;
++            arena.tick()?;
++            if visitor(&mut successor, arena)? {
++                return Ok(true);
++            }
++        }
++        return Ok(false);
++    }
++    let known = continuations.entries.contains_key(&key);
++    let unproductive = continuations.replayed == 0
++        && continuations.entries.len() >= UNREPLAYED_CONTINUATIONS_BEFORE_GIVING_UP;
++    if !known && (unproductive || continuations.entries.len() >= RECORDED_CONTINUATIONS_PER_RUN) {
++        return visit_branch(
++            branch,
++            run.end,
++            EvalContext { locals, ..ctx },
++            next,
++            arena,
++            visitor,
++        );
++    }
++    let mut recording =
++        (!known && continuations.recorded < RECORDED_SUCCESSORS_PER_RUN).then(Vec::new);
++    let found = visit_branch(
++        branch,
++        run.end,
++        EvalContext { locals, ..ctx },
++        next,
++        arena,
++        &mut |values, arena| {
++            if let Some(successors) = &mut recording {
++                if successors.len() < RECORDED_SUCCESSORS_PER_CONTINUATION {
++                    successors.push(values.to_vec());
++                } else {
++                    recording = None;
++                }
++            }
++            visitor(values, arena)
++        },
++    )?;
++    if !known && !found {
++        continuations.recorded += recording.as_ref().map_or(0, Vec::len);
++        continuations.entries.insert(key, recording);
++    }
++    Ok(found)
++}
++
+ #[cfg(test)]
+ mod tests {
+     use super::EvalContext;
+diff --git i/crates/rtlc/src/safety_prepared.rs w/crates/rtlc/src/safety_prepared.rs
+index 9d62a66a5..2ff44e87b 100644
+--- i/crates/rtlc/src/safety_prepared.rs
++++ w/crates/rtlc/src/safety_prepared.rs
+@@ -1,5 +1,6 @@
+-use crate::ir::{Expression, SafetyProgram, TemporalFormula};
++use crate::ir::{Branch, Expression, SafetyProgram, TemporalFormula};
+ use crate::safety_expressions::register_branch_memberships;
++use crate::safety_expressions::{BindRun, plan_bind_runs};
+ use std::collections::HashMap;
+ use std::hash::{BuildHasherDefault, Hasher};
+ 
+@@ -30,6 +31,7 @@ impl Hasher for AddressHasher {
+ 
+ pub(crate) struct PreparedProgram {
+     slots: HashMap<usize, usize, BuildHasherDefault<AddressHasher>>,
++    bind_runs: HashMap<usize, Vec<Option<BindRun>>, BuildHasherDefault<AddressHasher>>,
+ }
+ 
+ impl PreparedProgram {
+@@ -51,6 +53,12 @@ impl PreparedProgram {
+         }
+         register_branch_memberships(&program.initial, &mut |expression| roots.push(expression));
+         register_branch_memberships(&program.next, &mut |expression| roots.push(expression));
++        let mut branches: Vec<&[Branch]> = vec![&program.initial, &program.next];
++        for definition in program.definitions.iter().flatten() {
++            if let crate::ir::DefinitionBody::Action(action) = &definition.body {
++                branches.push(action);
++            }
++        }
+         roots.extend(
+             program
+                 .invariants
+@@ -100,12 +108,18 @@ impl PreparedProgram {
+                 }
+             }
+         }
+-        Self::from_roots(roots)
++        Self::from_parts(roots, branches)
+     }
+ 
+-    pub fn from_roots(mut roots: Vec<&Expression>) -> Self {
++    #[cfg(test)]
++    pub fn from_roots(roots: Vec<&Expression>) -> Self {
++        Self::from_parts(roots, vec![])
++    }
++
++    fn from_parts(mut roots: Vec<&Expression>, mut branches: Vec<&[Branch]>) -> Self {
+         let mut prepared = Self {
+             slots: HashMap::default(),
++            bind_runs: HashMap::default(),
+         };
+         while let Some(expression) = roots.pop() {
+             if let Expression::Data { .. } = expression {
+@@ -124,12 +138,33 @@ impl PreparedProgram {
+             {
+                 register_branch_memberships(branches, &mut |expression| roots.push(expression));
+                 roots.extend(subscript.iter().map(Box::as_ref));
++                prepared.register_bind_runs(branches);
+             }
+             roots.extend(expression.children());
+         }
++        while let Some(group) = branches.pop() {
++            prepared.register_bind_runs(group);
++        }
+         prepared
+     }
+ 
++    fn register_bind_runs(&mut self, branches: &[Branch]) {
++        plan_bind_runs(branches, &mut |branch, position, run| {
++            let runs = self
++                .bind_runs
++                .entry(std::ptr::from_ref(branch) as usize)
++                .or_insert_with(|| (0..branch.steps.len()).map(|_| None).collect());
++            runs[position] = Some(run);
++        });
++    }
++
++    pub fn bind_run(&self, branch: &Branch, position: usize) -> Option<&BindRun> {
++        self.bind_runs
++            .get(&(std::ptr::from_ref(branch) as usize))?
++            .get(position)?
++            .as_ref()
++    }
++
+     pub fn slot(&self, expression: &Expression) -> Option<usize> {
+         self.slots
+             .get(&(std::ptr::from_ref(expression) as usize))
+@@ -140,3 +175,32 @@ impl PreparedProgram {
+         self.slots.len()
+     }
+ }
++
++#[cfg(test)]
++mod tests {
++    use super::PreparedProgram;
++    use crate::ir::{SafetyProgram, Step};
++
++    #[test]
++    fn bind_plans_are_found_only_for_the_program_own_branches() {
++        let fixtures: serde_json::Value =
++            serde_json::from_str(include_str!("../tests/dead-bindings-fixtures.json")).unwrap();
++        let case = fixtures["cases"]
++            .as_array()
++            .unwrap()
++            .iter()
++            .find(|case| case["spec"] == "dead" && case["variant"] == "complete")
++            .unwrap();
++        let program: SafetyProgram = serde_json::from_value(case["program"].clone()).unwrap();
++        let prepared = PreparedProgram::new(&program);
++        let branch = &program.next[0];
++        let position = branch
++            .steps
++            .iter()
++            .position(|step| matches!(step, Step::Bind { .. }))
++            .unwrap();
++        assert!(prepared.bind_run(branch, position).is_some());
++        let copy = branch.clone();
++        assert!(prepared.bind_run(&copy, position).is_none());
++    }
++}
+diff --git i/crates/rtlc/src/safety_values.rs w/crates/rtlc/src/safety_values.rs
+index ca46fbb5a..3e065c80c 100644
+--- i/crates/rtlc/src/safety_values.rs
++++ w/crates/rtlc/src/safety_values.rs
+@@ -148,6 +148,14 @@ impl<'scope> Arena<'scope> {
+     pub fn tick(&mut self) -> Result<(), CoreError> {
+         self.consume(1)
+     }
++    pub(crate) fn bind_run(
++        &self,
++        branch: &crate::ir::Branch,
++        position: usize,
++    ) -> Option<&'scope crate::safety_expressions::BindRun> {
++        self.prepared
++            .and_then(|prepared| prepared.bind_run(branch, position))
++    }
+     pub fn consume(&mut self, count: usize) -> Result<(), CoreError> {
+         #[cfg(not(target_arch = "wasm32"))]
+         if let Some((budget, worker)) = self.budget {

@@ -41,6 +41,7 @@
 
 - [x] immutableなprogramのData式をslotへ登録し、Arenaごとに初回成功後のScalarをcacheする。未評価分岐の値を先に評価せず、失敗・状態依存式をcacheしない。未登録の式は従来の評価へ戻り、workerのlocal Refはmergeでremapする。
 - [x] Data式のslot索引では内部address専用hashと完全なkey比較を使う。ユーザー値・集合・関数・探索状態のhashと等価性、lazy評価・work課金は変更しない。
+- [x] 連続するbindの後続が読まない束縛を持つ場合、読む束縛の値の組ごとに後続を一度だけ評価し、同じ組では記録したsuccessor列を同じ順序でvisitorへ渡し直す。状態・生成数・反例・探索順を維持する。再生では継続の入口とsuccessorごとに1 workを課金し、workは変更前を超えない。計画はPreparedProgramがprogramの持つbranchにだけ作り、複製したbranchとENABLEDを含む後続は従来の評価へ戻す。記録は1回の展開の中だけで使い、継続とsuccessorの件数に上限を持ち、再生のない並びでは記録をやめる。
 
 - [x] 任意のcheck_incrementalで、同じbuild・Next・全definition・変数順とportable状態について、完了したsuccessor列だけを再利用する。Init・property・constraints・deadlock・temporal/fairnessは毎回検査し、visitedや過去の合否を引き継がない。保持状態数の上限、snapshotのSHA-256検査と同じnamespaceのmerge・競合拒否を扱う。この経路は逐次探索で、分散BFSやcheckpoint再開ではない。
 - [x] 状態keyとsuccessor列のportable変換は1展開64 KiBの保守的な予算で制限する。共有値のサイズを複製前に計算し、超過時や保存容量不足時は通常のstreaming探索を続け、不完全な展開を保存しない。

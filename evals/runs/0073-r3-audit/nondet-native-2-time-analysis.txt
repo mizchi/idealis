@@ -1,0 +1,16 @@
+status complete samples 32 controls 8
+ w before med s after med s  ratio states generated RSS b MiB RSS a MiB exceptWorkEq  work before  work after  samples B/A
+ 1        1.923       0.920  0.478   4785    896821       5.7       5.8         True [51227111] [21342230]  B:1.923,1.951,1.909 A:0.919,0.920,0.929 RSSB:5.7,5.8,5.7 RSSA:5.8,5.7,5.8
+    result keys: ['depth', 'generated', 'reason', 'states', 'status', 'violation', 'work'] status complete depth 10 reason None violation None
+ 2        1.039       0.525  0.505   4785    896821       7.1       7.1         True [51227198] [21342317]  B:1.039,1.067,1.039 A:0.521,0.525,0.531 RSSB:6.9,7.1,7.2 RSSA:6.9,7.1,7.2
+    result keys: ['depth', 'generated', 'reason', 'states', 'status', 'violation', 'work'] status complete depth 10 reason None violation None
+ 4        0.596       0.298  0.500   4785    896821       8.4       8.4         True [51227273] [21342392]  B:0.610,0.596,0.591 A:0.298,0.336,0.298 RSSB:8.3,8.6,8.4 RSSA:8.4,8.4,8.3
+    result keys: ['depth', 'generated', 'reason', 'states', 'status', 'violation', 'work'] status complete depth 10 reason None violation None
+ 8        0.402       0.208  0.518   4785    896821      11.8      11.4         True [51227398] [21342517]  B:0.396,0.402,0.403 A:0.206,0.208,0.208 RSSB:11.7,11.8,12.0 RSSA:11.4,11.3,11.5
+    result keys: ['depth', 'generated', 'reason', 'states', 'status', 'violation', 'work'] status complete depth 10 reason None violation None
+controls (broken):
+  w1: status invariant-violation/invariant-violation states 1764/1764 generated 256167/256167 depth 6/6 reason None/None work 14607394/6158596 differing keys ['work'] except-work-equal True violation-equal True rss(MiB) 5.1/5.0
+  w2: status invariant-violation/invariant-violation states 1764/1764 generated 256167/256167 depth 6/6 reason None/None work 14885182/6282232 differing keys ['work'] except-work-equal True violation-equal True rss(MiB) 6.2/6.4
+  w4: status invariant-violation/invariant-violation states 1764/1764 generated 256167/256167 depth 6/6 reason None/None work 15227553/6424873 differing keys ['work'] except-work-equal True violation-equal True rss(MiB) 7.5/7.6
+  w8: status invariant-violation/invariant-violation states 1764/1764 generated 256167/256167 depth 6/6 reason None/None work 15898398/6708810 differing keys ['work'] except-work-equal True violation-equal True rss(MiB) 11.1/10.8
+work after <= work before for every sample/control: True

@@ -1,0 +1,6795 @@
+{
+  "source": "TLA+ specifications below compiled by idealis-core at d42509d4 with compile-tla; step-frame is the step-call v2 program with its Step::Call replaced by a Step::Frame carrying the called definition's body; end-run is the compiled program with its trailing guard removed so that its run of bindings ends the branch, and its baseline holds check-safety (maxDepth 100, maxStates 10000) results of idealis-core at d42509d4 before this change",
+  "specifications": {
+    "dead": "---- MODULE DeadBindings ----\nEXTENDS Naturals\nVARIABLES x, n\nInit == x = 0 /\\ n = 0\nNext == n < 3 /\\ \\E a \\in BOOLEAN: \\E t \\in 1..9: \\E e \\in (IF a THEN {0, 1} ELSE {t % 3, 2}): x' = e /\\ n' = n + 1\nSmall == x + n < 4\n====\n",
+    "live": "---- MODULE DeadBindings ----\nEXTENDS Naturals\nVARIABLES x, n\nInit == x = 0 /\\ n = 0\nNext == n < 3 /\\ \\E a \\in BOOLEAN: \\E t \\in 1..9: \\E e \\in (IF a THEN {0, 1} ELSE {t % 3, 2}): x' = e /\\ n' = n + 1 /\\ a = a /\\ t = t\nSmall == x + n < 4\n====\n",
+    "enabled": "---- MODULE EnabledBinding ----\nEXTENDS Naturals\nVARIABLES x, n\nInit == x = 0 /\\ n = 0\nNext == n < 2 /\\ \\E a \\in BOOLEAN: \\E e \\in {0, 1}: x' = e /\\ n' = n + 1 /\\ ENABLED (a /\\ x' = x)\n====\n",
+    "call": "---- MODULE CallBinding ----\nEXTENDS Naturals\nVARIABLES x, n\nKeep(a) == a\nInit == x = 0 /\\ n = 0\nNext == n < 2 /\\ \\E a \\in BOOLEAN: \\E e \\in {0, 1}: x' = e /\\ n' = n + 1 /\\ Keep(a)\n====\n",
+    "frame-enabled": "---- MODULE FrameEnabled ----\nEXTENDS Naturals\nVARIABLE x\nF(p) == p\nInit == x = 1\nNext == x' = x\nSafe == ~(F(ENABLED <<\\E a \\in 1..2 : x' = x>>_x) \\/ F(ENABLED <<\\E a \\in 1..2 : x' = a>>_x))\n====\n",
+    "type-cache": "---- MODULE TypeCache ----\nEXTENDS Naturals, Sequences\nVARIABLE x\nInit == x = 0\nNext == (\\E a \\in 1..2 : <<1>> \\in Seq({1}) /\\ x' = 0) \\/ FALSE\n====\n",
+    "division": "---- MODULE Division ----\nEXTENDS Naturals\nVARIABLE x\nInit == x = 0\nNext == \\E a \\in 1..2 : 1 \\div 0 = 1 /\\ x' = 0\n====\n",
+    "wide": "---- MODULE Wide ----\nEXTENDS Naturals\nVARIABLE x\nInit == x = 0\nNext == \\E a \\in 1..1 : x' \\in 0..99999\nStay == x = 0\n====\n",
+    "step-call": "---- MODULE StepCall ----\nEXTENDS Naturals\nVARIABLES x, y\nInit == x = 0 /\\ y = 0\nNext == \\E a \\in 1..2 : \\E b \\in 1..3 : LET Act(p) == \\E w \\in 0..1 : \\E u \\in 0..2 : x' = (p + w + b) % 4 /\\ y' = u % 4 IN Act(a)\n====\n",
+    "choose-read": "---- MODULE ChooseRead ----\nEXTENDS Naturals\nVARIABLE x\nInit == x = 0\nNext == \\E a \\in 1..2 : \\E b \\in 1..3 : x' \\in {b, b + 1}\n====\n",
+    "bind-read": "---- MODULE BindRead ----\nEXTENDS Naturals\nVARIABLES x, y\nInit == x = 0 /\\ y = 0\nNext == \\E a \\in 1..2 : \\E b \\in 1..3 : x' = 0 /\\ \\E c \\in {b} : y' = c\n====\n",
+    "many": "---- MODULE Many ----\nEXTENDS Naturals\nVARIABLE x\nInit == x = 0\nNext == \\E a \\in 1..2 : x' \\in 0..99\n====\n",
+    "huge": "---- MODULE Huge ----\nEXTENDS Naturals\nVARIABLE x\nInit == x = 0\nNext == \\E a \\in 1..2000000 : x' = 1\n====\n",
+    "deep-action": "---- MODULE DeepAction ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE x\nRECURSIVE Go(_)\nGo(n) == IF n = 0 THEN x' = 1 ELSE \\E a \\in 1..1 : \\E b \\in 1..1 : Go(n - 1)\nInit == x = 0\nNext == Go(N)\n====\n",
+    "step-call-args": "---- MODULE StepCallArgs ----\nEXTENDS Naturals\nVARIABLES x, y\nInit == x = 0 /\\ y = 0\nNext == \\E a \\in 1..2 : \\E b \\in 1..3 : LET Act(p) == \\E w \\in 0..0 : x' = p /\\ y' = b + w IN Act(a)\n====\n",
+    "end-run": "---- MODULE EndRun ----\nEXTENDS Naturals\nVARIABLES x\nInit == x = 0\nNext == x < 2 /\\ x' = x + 1 /\\ \\E a \\in 1..100: TRUE\n====\n"
+  },
+  "cases": [
+    {
+      "spec": "dead",
+      "variant": "complete",
+      "irVersion": 1,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "DeadBindings",
+        "variables": ["x", "n"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "lt",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": false
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "9"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 2,
+                "domain": {
+                  "kind": "value",
+                  "value": {
+                    "op": "if",
+                    "condition": {
+                      "op": "bound",
+                      "slot": 0
+                    },
+                    "consequent": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "0"
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "1"
+                          }
+                        }
+                      ]
+                    },
+                    "alternative": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "mod",
+                          "left": {
+                            "op": "bound",
+                            "slot": 1
+                          },
+                          "right": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "3"
+                            }
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "2"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 2
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false
+      }
+    },
+    {
+      "spec": "dead",
+      "variant": "complete",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "DeadBindings",
+        "variables": ["x", "n"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "lt",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": false
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "9"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 2,
+                "domain": {
+                  "kind": "value",
+                  "value": {
+                    "op": "if",
+                    "condition": {
+                      "op": "bound",
+                      "slot": 0
+                    },
+                    "consequent": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "0"
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "1"
+                          }
+                        }
+                      ]
+                    },
+                    "alternative": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "mod",
+                          "left": {
+                            "op": "bound",
+                            "slot": 1
+                          },
+                          "right": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "3"
+                            }
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "2"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 2
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": []
+      }
+    },
+    {
+      "spec": "dead",
+      "variant": "deadlock",
+      "irVersion": 1,
+      "config": "INIT Init\nNEXT Next\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "DeadBindings",
+        "variables": ["x", "n"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "lt",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": false
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "9"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 2,
+                "domain": {
+                  "kind": "value",
+                  "value": {
+                    "op": "if",
+                    "condition": {
+                      "op": "bound",
+                      "slot": 0
+                    },
+                    "consequent": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "0"
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "1"
+                          }
+                        }
+                      ]
+                    },
+                    "alternative": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "mod",
+                          "left": {
+                            "op": "bound",
+                            "slot": 1
+                          },
+                          "right": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "3"
+                            }
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "2"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 2
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": true
+      }
+    },
+    {
+      "spec": "dead",
+      "variant": "deadlock",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "DeadBindings",
+        "variables": ["x", "n"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "lt",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": false
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "9"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 2,
+                "domain": {
+                  "kind": "value",
+                  "value": {
+                    "op": "if",
+                    "condition": {
+                      "op": "bound",
+                      "slot": 0
+                    },
+                    "consequent": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "0"
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "1"
+                          }
+                        }
+                      ]
+                    },
+                    "alternative": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "mod",
+                          "left": {
+                            "op": "bound",
+                            "slot": 1
+                          },
+                          "right": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "3"
+                            }
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "2"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 2
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": true,
+        "definitions": []
+      }
+    },
+    {
+      "spec": "dead",
+      "variant": "violation",
+      "irVersion": 1,
+      "config": "INIT Init\nNEXT Next\nINVARIANT Small\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "DeadBindings",
+        "variables": ["x", "n"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "lt",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": false
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "9"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 2,
+                "domain": {
+                  "kind": "value",
+                  "value": {
+                    "op": "if",
+                    "condition": {
+                      "op": "bound",
+                      "slot": 0
+                    },
+                    "consequent": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "0"
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "1"
+                          }
+                        }
+                      ]
+                    },
+                    "alternative": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "mod",
+                          "left": {
+                            "op": "bound",
+                            "slot": 1
+                          },
+                          "right": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "3"
+                            }
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "2"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 2
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [
+          {
+            "name": "Small",
+            "expression": {
+              "op": "lt",
+              "left": {
+                "op": "add",
+                "left": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "right": {
+                  "op": "read",
+                  "slot": 1,
+                  "next": false
+                }
+              },
+              "right": {
+                "op": "literal",
+                "value": {
+                  "type": "int",
+                  "value": "4"
+                }
+              }
+            }
+          }
+        ],
+        "assumptions": [],
+        "checkDeadlock": false
+      }
+    },
+    {
+      "spec": "dead",
+      "variant": "violation",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nINVARIANT Small\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "DeadBindings",
+        "variables": ["x", "n"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "lt",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": false
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "9"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 2,
+                "domain": {
+                  "kind": "value",
+                  "value": {
+                    "op": "if",
+                    "condition": {
+                      "op": "bound",
+                      "slot": 0
+                    },
+                    "consequent": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "0"
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "1"
+                          }
+                        }
+                      ]
+                    },
+                    "alternative": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "mod",
+                          "left": {
+                            "op": "bound",
+                            "slot": 1
+                          },
+                          "right": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "3"
+                            }
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "2"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 2
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [
+          {
+            "name": "Small",
+            "expression": {
+              "op": "call",
+              "definition": 0,
+              "arguments": [],
+              "captures": []
+            }
+          }
+        ],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": [
+          {
+            "id": 0,
+            "parameterCount": 0,
+            "captureCount": 0,
+            "bodyKind": "expression",
+            "localScope": 0,
+            "body": {
+              "op": "lt",
+              "left": {
+                "op": "add",
+                "left": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "right": {
+                  "op": "read",
+                  "slot": 1,
+                  "next": false
+                }
+              },
+              "right": {
+                "op": "literal",
+                "value": {
+                  "type": "int",
+                  "value": "4"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "spec": "enabled",
+      "variant": "complete",
+      "irVersion": 1,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "EnabledBinding",
+        "variables": ["x", "n"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "lt",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": false
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "0"
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "1"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "enabled",
+                  "branches": [
+                    {
+                      "name": "ENABLED",
+                      "steps": [
+                        {
+                          "kind": "guard",
+                          "expression": {
+                            "op": "bound",
+                            "slot": 0
+                          }
+                        },
+                        {
+                          "kind": "assign",
+                          "slot": 0,
+                          "value": {
+                            "op": "read",
+                            "slot": 0,
+                            "next": false
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "subscript": null
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false
+      }
+    },
+    {
+      "spec": "enabled",
+      "variant": "complete",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "EnabledBinding",
+        "variables": ["x", "n"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "lt",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": false
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "0"
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "1"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "enabled",
+                  "branches": [
+                    {
+                      "name": "ENABLED",
+                      "steps": [
+                        {
+                          "kind": "guard",
+                          "expression": {
+                            "op": "bound",
+                            "slot": 0
+                          }
+                        },
+                        {
+                          "kind": "assign",
+                          "slot": 0,
+                          "value": {
+                            "op": "read",
+                            "slot": 0,
+                            "next": false
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "subscript": null
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": []
+      }
+    },
+    {
+      "spec": "call",
+      "variant": "complete",
+      "irVersion": 1,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "CallBinding",
+        "variables": ["x", "n"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Keep",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "lt",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": false
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "0"
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "1"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "bound",
+                  "slot": 0
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false
+      }
+    },
+    {
+      "spec": "call",
+      "variant": "complete",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "CallBinding",
+        "variables": ["x", "n"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Keep",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "lt",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": false
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "0"
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "1"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "call",
+                  "definition": 0,
+                  "arguments": [
+                    {
+                      "op": "bound",
+                      "slot": 0
+                    }
+                  ],
+                  "captures": []
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": [
+          {
+            "id": 0,
+            "parameterCount": 1,
+            "captureCount": 0,
+            "bodyKind": "expression",
+            "localScope": 0,
+            "body": {
+              "op": "parameter",
+              "slot": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "spec": "frame-enabled",
+      "variant": "violation",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "FrameEnabled",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "1"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [
+          {
+            "name": "Safe",
+            "expression": {
+              "op": "call",
+              "definition": 1,
+              "arguments": [],
+              "captures": []
+            }
+          }
+        ],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": [
+          {
+            "id": 0,
+            "parameterCount": 1,
+            "captureCount": 0,
+            "bodyKind": "expression",
+            "localScope": 0,
+            "body": {
+              "op": "parameter",
+              "slot": 0
+            }
+          },
+          {
+            "id": 1,
+            "parameterCount": 0,
+            "captureCount": 0,
+            "bodyKind": "expression",
+            "localScope": 1,
+            "body": {
+              "op": "not",
+              "argument": {
+                "op": "or",
+                "left": {
+                  "op": "call",
+                  "definition": 0,
+                  "arguments": [
+                    {
+                      "op": "enabled",
+                      "branches": [
+                        {
+                          "name": "ENABLED",
+                          "steps": [
+                            {
+                              "kind": "bind",
+                              "slot": 0,
+                              "domain": {
+                                "kind": "range",
+                                "lower": {
+                                  "op": "literal",
+                                  "value": {
+                                    "type": "int",
+                                    "value": "1"
+                                  }
+                                },
+                                "upper": {
+                                  "op": "literal",
+                                  "value": {
+                                    "type": "int",
+                                    "value": "2"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "assign",
+                              "slot": 0,
+                              "value": {
+                                "op": "read",
+                                "slot": 0,
+                                "next": false
+                              }
+                            },
+                            {
+                              "kind": "guard",
+                              "expression": {
+                                "op": "ne",
+                                "left": {
+                                  "op": "read",
+                                  "slot": 0,
+                                  "next": false
+                                },
+                                "right": {
+                                  "op": "prime",
+                                  "argument": {
+                                    "op": "read",
+                                    "slot": 0,
+                                    "next": false
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      "subscript": null
+                    }
+                  ],
+                  "captures": []
+                },
+                "right": {
+                  "op": "call",
+                  "definition": 0,
+                  "arguments": [
+                    {
+                      "op": "enabled",
+                      "branches": [
+                        {
+                          "name": "ENABLED",
+                          "steps": [
+                            {
+                              "kind": "bind",
+                              "slot": 0,
+                              "domain": {
+                                "kind": "range",
+                                "lower": {
+                                  "op": "literal",
+                                  "value": {
+                                    "type": "int",
+                                    "value": "1"
+                                  }
+                                },
+                                "upper": {
+                                  "op": "literal",
+                                  "value": {
+                                    "type": "int",
+                                    "value": "2"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "assign",
+                              "slot": 0,
+                              "value": {
+                                "op": "bound",
+                                "slot": 0
+                              }
+                            },
+                            {
+                              "kind": "guard",
+                              "expression": {
+                                "op": "ne",
+                                "left": {
+                                  "op": "read",
+                                  "slot": 0,
+                                  "next": false
+                                },
+                                "right": {
+                                  "op": "prime",
+                                  "argument": {
+                                    "op": "read",
+                                    "slot": 0,
+                                    "next": false
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      "subscript": null
+                    }
+                  ],
+                  "captures": []
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "spec": "type-cache",
+      "variant": "complete",
+      "irVersion": 1,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "TypeCache",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "sequence-in",
+                  "left": {
+                    "op": "tuple",
+                    "values": [
+                      {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      }
+                    ]
+                  },
+                  "right": {
+                    "op": "set",
+                    "values": [
+                      {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "literal",
+                  "value": {
+                    "type": "bool",
+                    "value": false
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false
+      }
+    },
+    {
+      "spec": "type-cache",
+      "variant": "complete",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "TypeCache",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "sequence-in",
+                  "left": {
+                    "op": "tuple",
+                    "values": [
+                      {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      }
+                    ]
+                  },
+                  "right": {
+                    "op": "set",
+                    "values": [
+                      {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "literal",
+                  "value": {
+                    "type": "bool",
+                    "value": false
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": []
+      }
+    },
+    {
+      "spec": "division",
+      "variant": "error",
+      "irVersion": 1,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "Division",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "eq",
+                  "left": {
+                    "op": "div",
+                    "left": {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "1"
+                      }
+                    },
+                    "right": {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "0"
+                      }
+                    }
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false
+      }
+    },
+    {
+      "spec": "division",
+      "variant": "error",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "Division",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "eq",
+                  "left": {
+                    "op": "div",
+                    "left": {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "1"
+                      }
+                    },
+                    "right": {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "0"
+                      }
+                    }
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": []
+      }
+    },
+    {
+      "spec": "wide",
+      "variant": "complete",
+      "irVersion": 1,
+      "config": "INIT Init\nNEXT Next\nCONSTRAINT Stay\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "Wide",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "choose",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "99999"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "constraints": [
+          {
+            "name": "Stay",
+            "expression": {
+              "op": "eq",
+              "left": {
+                "op": "read",
+                "slot": 0,
+                "next": false
+              },
+              "right": {
+                "op": "literal",
+                "value": {
+                  "type": "int",
+                  "value": "0"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "spec": "live",
+      "variant": "complete",
+      "irVersion": 1,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "DeadBindings",
+        "variables": ["x", "n"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "lt",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": false
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "9"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 2,
+                "domain": {
+                  "kind": "value",
+                  "value": {
+                    "op": "if",
+                    "condition": {
+                      "op": "bound",
+                      "slot": 0
+                    },
+                    "consequent": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "0"
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "1"
+                          }
+                        }
+                      ]
+                    },
+                    "alternative": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "mod",
+                          "left": {
+                            "op": "bound",
+                            "slot": 1
+                          },
+                          "right": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "3"
+                            }
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "2"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 2
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "eq",
+                  "left": {
+                    "op": "bound",
+                    "slot": 0
+                  },
+                  "right": {
+                    "op": "bound",
+                    "slot": 0
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "eq",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "bound",
+                    "slot": 1
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false
+      }
+    },
+    {
+      "spec": "live",
+      "variant": "complete",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "DeadBindings",
+        "variables": ["x", "n"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "lt",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": false
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "9"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 2,
+                "domain": {
+                  "kind": "value",
+                  "value": {
+                    "op": "if",
+                    "condition": {
+                      "op": "bound",
+                      "slot": 0
+                    },
+                    "consequent": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "0"
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "1"
+                          }
+                        }
+                      ]
+                    },
+                    "alternative": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "mod",
+                          "left": {
+                            "op": "bound",
+                            "slot": 1
+                          },
+                          "right": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "3"
+                            }
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "2"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 2
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "eq",
+                  "left": {
+                    "op": "bound",
+                    "slot": 0
+                  },
+                  "right": {
+                    "op": "bound",
+                    "slot": 0
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "eq",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "bound",
+                    "slot": 1
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": []
+      }
+    },
+    {
+      "spec": "live",
+      "variant": "deadlock",
+      "irVersion": 1,
+      "config": "INIT Init\nNEXT Next\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "DeadBindings",
+        "variables": ["x", "n"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "lt",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": false
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "9"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 2,
+                "domain": {
+                  "kind": "value",
+                  "value": {
+                    "op": "if",
+                    "condition": {
+                      "op": "bound",
+                      "slot": 0
+                    },
+                    "consequent": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "0"
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "1"
+                          }
+                        }
+                      ]
+                    },
+                    "alternative": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "mod",
+                          "left": {
+                            "op": "bound",
+                            "slot": 1
+                          },
+                          "right": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "3"
+                            }
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "2"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 2
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "eq",
+                  "left": {
+                    "op": "bound",
+                    "slot": 0
+                  },
+                  "right": {
+                    "op": "bound",
+                    "slot": 0
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "eq",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "bound",
+                    "slot": 1
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": true
+      }
+    },
+    {
+      "spec": "live",
+      "variant": "deadlock",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "DeadBindings",
+        "variables": ["x", "n"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "lt",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": false
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "9"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 2,
+                "domain": {
+                  "kind": "value",
+                  "value": {
+                    "op": "if",
+                    "condition": {
+                      "op": "bound",
+                      "slot": 0
+                    },
+                    "consequent": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "0"
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "1"
+                          }
+                        }
+                      ]
+                    },
+                    "alternative": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "mod",
+                          "left": {
+                            "op": "bound",
+                            "slot": 1
+                          },
+                          "right": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "3"
+                            }
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "2"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 2
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "eq",
+                  "left": {
+                    "op": "bound",
+                    "slot": 0
+                  },
+                  "right": {
+                    "op": "bound",
+                    "slot": 0
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "eq",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "bound",
+                    "slot": 1
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": true,
+        "definitions": []
+      }
+    },
+    {
+      "spec": "live",
+      "variant": "violation",
+      "irVersion": 1,
+      "config": "INIT Init\nNEXT Next\nINVARIANT Small\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "DeadBindings",
+        "variables": ["x", "n"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "lt",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": false
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "9"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 2,
+                "domain": {
+                  "kind": "value",
+                  "value": {
+                    "op": "if",
+                    "condition": {
+                      "op": "bound",
+                      "slot": 0
+                    },
+                    "consequent": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "0"
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "1"
+                          }
+                        }
+                      ]
+                    },
+                    "alternative": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "mod",
+                          "left": {
+                            "op": "bound",
+                            "slot": 1
+                          },
+                          "right": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "3"
+                            }
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "2"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 2
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "eq",
+                  "left": {
+                    "op": "bound",
+                    "slot": 0
+                  },
+                  "right": {
+                    "op": "bound",
+                    "slot": 0
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "eq",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "bound",
+                    "slot": 1
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [
+          {
+            "name": "Small",
+            "expression": {
+              "op": "lt",
+              "left": {
+                "op": "add",
+                "left": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "right": {
+                  "op": "read",
+                  "slot": 1,
+                  "next": false
+                }
+              },
+              "right": {
+                "op": "literal",
+                "value": {
+                  "type": "int",
+                  "value": "4"
+                }
+              }
+            }
+          }
+        ],
+        "assumptions": [],
+        "checkDeadlock": false
+      }
+    },
+    {
+      "spec": "live",
+      "variant": "violation",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nINVARIANT Small\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "DeadBindings",
+        "variables": ["x", "n"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "lt",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": false
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "bool",
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "9"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 2,
+                "domain": {
+                  "kind": "value",
+                  "value": {
+                    "op": "if",
+                    "condition": {
+                      "op": "bound",
+                      "slot": 0
+                    },
+                    "consequent": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "0"
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "1"
+                          }
+                        }
+                      ]
+                    },
+                    "alternative": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "mod",
+                          "left": {
+                            "op": "bound",
+                            "slot": 1
+                          },
+                          "right": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "3"
+                            }
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "2"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 2
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "read",
+                    "slot": 1,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "eq",
+                  "left": {
+                    "op": "bound",
+                    "slot": 0
+                  },
+                  "right": {
+                    "op": "bound",
+                    "slot": 0
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "eq",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "bound",
+                    "slot": 1
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [
+          {
+            "name": "Small",
+            "expression": {
+              "op": "call",
+              "definition": 0,
+              "arguments": [],
+              "captures": []
+            }
+          }
+        ],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": [
+          {
+            "id": 0,
+            "parameterCount": 0,
+            "captureCount": 0,
+            "bodyKind": "expression",
+            "localScope": 0,
+            "body": {
+              "op": "lt",
+              "left": {
+                "op": "add",
+                "left": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "right": {
+                  "op": "read",
+                  "slot": 1,
+                  "next": false
+                }
+              },
+              "right": {
+                "op": "literal",
+                "value": {
+                  "type": "int",
+                  "value": "4"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "spec": "step-call",
+      "variant": "complete",
+      "irVersion": 1,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "StepCall",
+        "variables": ["x", "y"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Act",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 2,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 3,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "mod",
+                  "left": {
+                    "op": "add",
+                    "left": {
+                      "op": "add",
+                      "left": {
+                        "op": "bound",
+                        "slot": 0
+                      },
+                      "right": {
+                        "op": "bound",
+                        "slot": 2
+                      }
+                    },
+                    "right": {
+                      "op": "bound",
+                      "slot": 1
+                    }
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "4"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "mod",
+                  "left": {
+                    "op": "bound",
+                    "slot": 3
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "4"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false
+      }
+    },
+    {
+      "spec": "step-call",
+      "variant": "complete",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "StepCall",
+        "variables": ["x", "y"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Act",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "call",
+                "definition": 0,
+                "arguments": [
+                  {
+                    "op": "bound",
+                    "slot": 0
+                  }
+                ],
+                "captures": [
+                  {
+                    "op": "bound",
+                    "slot": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": [
+          {
+            "id": 0,
+            "parameterCount": 1,
+            "captureCount": 1,
+            "bodyKind": "action",
+            "localScope": 2,
+            "body": [
+              {
+                "name": "<action>",
+                "steps": [
+                  {
+                    "kind": "bind",
+                    "slot": 0,
+                    "domain": {
+                      "kind": "range",
+                      "lower": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      },
+                      "upper": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "bind",
+                    "slot": 1,
+                    "domain": {
+                      "kind": "range",
+                      "lower": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      },
+                      "upper": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "2"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "assign",
+                    "slot": 0,
+                    "value": {
+                      "op": "mod",
+                      "left": {
+                        "op": "add",
+                        "left": {
+                          "op": "add",
+                          "left": {
+                            "op": "parameter",
+                            "slot": 0
+                          },
+                          "right": {
+                            "op": "bound",
+                            "slot": 0
+                          }
+                        },
+                        "right": {
+                          "op": "capture",
+                          "slot": 0
+                        }
+                      },
+                      "right": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "4"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "assign",
+                    "slot": 1,
+                    "value": {
+                      "op": "mod",
+                      "left": {
+                        "op": "bound",
+                        "slot": 1
+                      },
+                      "right": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "4"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "spec": "choose-read",
+      "variant": "complete",
+      "irVersion": 1,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "ChooseRead",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "choose",
+                "slot": 0,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "bound",
+                      "slot": 1
+                    },
+                    {
+                      "op": "add",
+                      "left": {
+                        "op": "bound",
+                        "slot": 1
+                      },
+                      "right": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false
+      }
+    },
+    {
+      "spec": "choose-read",
+      "variant": "complete",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "ChooseRead",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "choose",
+                "slot": 0,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "bound",
+                      "slot": 1
+                    },
+                    {
+                      "op": "add",
+                      "left": {
+                        "op": "bound",
+                        "slot": 1
+                      },
+                      "right": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": []
+      }
+    },
+    {
+      "spec": "bind-read",
+      "variant": "complete",
+      "irVersion": 1,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "BindRead",
+        "variables": ["x", "y"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 2,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "bound",
+                      "slot": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "bound",
+                  "slot": 2
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false
+      }
+    },
+    {
+      "spec": "bind-read",
+      "variant": "complete",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "BindRead",
+        "variables": ["x", "y"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 2,
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "bound",
+                      "slot": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "bound",
+                  "slot": 2
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": []
+      }
+    },
+    {
+      "spec": "many",
+      "variant": "complete",
+      "irVersion": 1,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "Many",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "choose",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "99"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false
+      }
+    },
+    {
+      "spec": "many",
+      "variant": "complete",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "Many",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "choose",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "99"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": []
+      }
+    },
+    {
+      "spec": "huge",
+      "variant": "complete",
+      "irVersion": 1,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "Huge",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2000000"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "1"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false
+      }
+    },
+    {
+      "spec": "huge",
+      "variant": "complete",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "Huge",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2000000"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "1"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": []
+      }
+    },
+    {
+      "spec": "deep-action-20",
+      "variant": "complete",
+      "irVersion": 2,
+      "config": "CONSTANT N = 20\nINIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "DeepAction",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Go",
+            "steps": [
+              {
+                "kind": "call",
+                "definition": 0,
+                "arguments": [
+                  {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "20"
+                    }
+                  }
+                ],
+                "captures": []
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": [
+          {
+            "recursive": true,
+            "id": 0,
+            "parameterCount": 1,
+            "captureCount": 0,
+            "bodyKind": "action",
+            "localScope": 2,
+            "body": [
+              {
+                "name": "<action>",
+                "steps": [
+                  {
+                    "kind": "guard",
+                    "expression": {
+                      "op": "eq",
+                      "left": {
+                        "op": "parameter",
+                        "slot": 0
+                      },
+                      "right": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "assign",
+                    "slot": 0,
+                    "value": {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "1"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "$linked2",
+                "steps": [
+                  {
+                    "kind": "guard",
+                    "expression": {
+                      "op": "not",
+                      "argument": {
+                        "op": "eq",
+                        "left": {
+                          "op": "parameter",
+                          "slot": 0
+                        },
+                        "right": {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "0"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "bind",
+                    "slot": 0,
+                    "domain": {
+                      "kind": "range",
+                      "lower": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      },
+                      "upper": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "bind",
+                    "slot": 1,
+                    "domain": {
+                      "kind": "range",
+                      "lower": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      },
+                      "upper": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "call",
+                    "definition": 0,
+                    "arguments": [
+                      {
+                        "op": "sub",
+                        "left": {
+                          "op": "parameter",
+                          "slot": 0
+                        },
+                        "right": {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "1"
+                          }
+                        }
+                      }
+                    ],
+                    "captures": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "spec": "deep-action-21",
+      "variant": "bounded",
+      "irVersion": 2,
+      "config": "CONSTANT N = 21\nINIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "DeepAction",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Go",
+            "steps": [
+              {
+                "kind": "call",
+                "definition": 0,
+                "arguments": [
+                  {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "21"
+                    }
+                  }
+                ],
+                "captures": []
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": [
+          {
+            "recursive": true,
+            "id": 0,
+            "parameterCount": 1,
+            "captureCount": 0,
+            "bodyKind": "action",
+            "localScope": 2,
+            "body": [
+              {
+                "name": "<action>",
+                "steps": [
+                  {
+                    "kind": "guard",
+                    "expression": {
+                      "op": "eq",
+                      "left": {
+                        "op": "parameter",
+                        "slot": 0
+                      },
+                      "right": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "assign",
+                    "slot": 0,
+                    "value": {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "1"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "$linked2",
+                "steps": [
+                  {
+                    "kind": "guard",
+                    "expression": {
+                      "op": "not",
+                      "argument": {
+                        "op": "eq",
+                        "left": {
+                          "op": "parameter",
+                          "slot": 0
+                        },
+                        "right": {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "0"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "bind",
+                    "slot": 0,
+                    "domain": {
+                      "kind": "range",
+                      "lower": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      },
+                      "upper": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "bind",
+                    "slot": 1,
+                    "domain": {
+                      "kind": "range",
+                      "lower": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      },
+                      "upper": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "call",
+                    "definition": 0,
+                    "arguments": [
+                      {
+                        "op": "sub",
+                        "left": {
+                          "op": "parameter",
+                          "slot": 0
+                        },
+                        "right": {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "1"
+                          }
+                        }
+                      }
+                    ],
+                    "captures": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "spec": "step-frame",
+      "variant": "complete",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "StepCall",
+        "variables": ["x", "y"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Act",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "frame",
+                "arguments": [
+                  {
+                    "op": "bound",
+                    "slot": 0
+                  }
+                ],
+                "captures": [
+                  {
+                    "op": "bound",
+                    "slot": 1
+                  }
+                ],
+                "parameterCount": 1,
+                "captureCount": 1,
+                "localScope": 2,
+                "branches": [
+                  {
+                    "name": "<action>",
+                    "steps": [
+                      {
+                        "kind": "bind",
+                        "slot": 0,
+                        "domain": {
+                          "kind": "range",
+                          "lower": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "0"
+                            }
+                          },
+                          "upper": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "1"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "bind",
+                        "slot": 1,
+                        "domain": {
+                          "kind": "range",
+                          "lower": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "0"
+                            }
+                          },
+                          "upper": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "2"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "assign",
+                        "slot": 0,
+                        "value": {
+                          "op": "mod",
+                          "left": {
+                            "op": "add",
+                            "left": {
+                              "op": "add",
+                              "left": {
+                                "op": "parameter",
+                                "slot": 0
+                              },
+                              "right": {
+                                "op": "bound",
+                                "slot": 0
+                              }
+                            },
+                            "right": {
+                              "op": "capture",
+                              "slot": 0
+                            }
+                          },
+                          "right": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "4"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "assign",
+                        "slot": 1,
+                        "value": {
+                          "op": "mod",
+                          "left": {
+                            "op": "bound",
+                            "slot": 1
+                          },
+                          "right": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "4"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": [
+          {
+            "id": 0,
+            "parameterCount": 1,
+            "captureCount": 1,
+            "bodyKind": "action",
+            "localScope": 2,
+            "body": [
+              {
+                "name": "<action>",
+                "steps": [
+                  {
+                    "kind": "bind",
+                    "slot": 0,
+                    "domain": {
+                      "kind": "range",
+                      "lower": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      },
+                      "upper": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "bind",
+                    "slot": 1,
+                    "domain": {
+                      "kind": "range",
+                      "lower": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      },
+                      "upper": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "2"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "assign",
+                    "slot": 0,
+                    "value": {
+                      "op": "mod",
+                      "left": {
+                        "op": "add",
+                        "left": {
+                          "op": "add",
+                          "left": {
+                            "op": "parameter",
+                            "slot": 0
+                          },
+                          "right": {
+                            "op": "bound",
+                            "slot": 0
+                          }
+                        },
+                        "right": {
+                          "op": "capture",
+                          "slot": 0
+                        }
+                      },
+                      "right": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "4"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "assign",
+                    "slot": 1,
+                    "value": {
+                      "op": "mod",
+                      "left": {
+                        "op": "bound",
+                        "slot": 1
+                      },
+                      "right": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "4"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "spec": "step-call-args",
+      "variant": "complete",
+      "irVersion": 1,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "StepCallArgs",
+        "variables": ["x", "y"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Act",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 2,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 0
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "bound",
+                    "slot": 2
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false
+      }
+    },
+    {
+      "spec": "step-call-args",
+      "variant": "complete",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "StepCallArgs",
+        "variables": ["x", "y"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Act",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "call",
+                "definition": 0,
+                "arguments": [
+                  {
+                    "op": "bound",
+                    "slot": 0
+                  }
+                ],
+                "captures": [
+                  {
+                    "op": "bound",
+                    "slot": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": [
+          {
+            "id": 0,
+            "parameterCount": 1,
+            "captureCount": 1,
+            "bodyKind": "action",
+            "localScope": 1,
+            "body": [
+              {
+                "name": "<action>",
+                "steps": [
+                  {
+                    "kind": "bind",
+                    "slot": 0,
+                    "domain": {
+                      "kind": "range",
+                      "lower": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      },
+                      "upper": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "assign",
+                    "slot": 0,
+                    "value": {
+                      "op": "parameter",
+                      "slot": 0
+                    }
+                  },
+                  {
+                    "kind": "assign",
+                    "slot": 1,
+                    "value": {
+                      "op": "add",
+                      "left": {
+                        "op": "capture",
+                        "slot": 0
+                      },
+                      "right": {
+                        "op": "bound",
+                        "slot": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "spec": "step-frame-args",
+      "variant": "complete",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "StepCallArgs",
+        "variables": ["x", "y"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 1,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Act",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "frame",
+                "arguments": [
+                  {
+                    "op": "bound",
+                    "slot": 0
+                  }
+                ],
+                "captures": [
+                  {
+                    "op": "bound",
+                    "slot": 1
+                  }
+                ],
+                "parameterCount": 1,
+                "captureCount": 1,
+                "localScope": 1,
+                "branches": [
+                  {
+                    "name": "<action>",
+                    "steps": [
+                      {
+                        "kind": "bind",
+                        "slot": 0,
+                        "domain": {
+                          "kind": "range",
+                          "lower": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "0"
+                            }
+                          },
+                          "upper": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "0"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "assign",
+                        "slot": 0,
+                        "value": {
+                          "op": "parameter",
+                          "slot": 0
+                        }
+                      },
+                      {
+                        "kind": "assign",
+                        "slot": 1,
+                        "value": {
+                          "op": "add",
+                          "left": {
+                            "op": "capture",
+                            "slot": 0
+                          },
+                          "right": {
+                            "op": "bound",
+                            "slot": 0
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": [
+          {
+            "id": 0,
+            "parameterCount": 1,
+            "captureCount": 1,
+            "bodyKind": "action",
+            "localScope": 1,
+            "body": [
+              {
+                "name": "<action>",
+                "steps": [
+                  {
+                    "kind": "bind",
+                    "slot": 0,
+                    "domain": {
+                      "kind": "range",
+                      "lower": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      },
+                      "upper": {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "assign",
+                    "slot": 0,
+                    "value": {
+                      "op": "parameter",
+                      "slot": 0
+                    }
+                  },
+                  {
+                    "kind": "assign",
+                    "slot": 1,
+                    "value": {
+                      "op": "add",
+                      "left": {
+                        "op": "capture",
+                        "slot": 0
+                      },
+                      "right": {
+                        "op": "bound",
+                        "slot": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "spec": "end-run",
+      "variant": "complete",
+      "irVersion": 1,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "EndRun",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "lt",
+                  "left": {
+                    "op": "read",
+                    "slot": 0,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "read",
+                    "slot": 0,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "100"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false
+      },
+      "baseline": [
+        {
+          "maxWork": 100000000,
+          "status": "complete",
+          "reason": null,
+          "states": 3,
+          "generated": 201,
+          "work": 209
+        },
+        {
+          "maxWork": 150,
+          "status": "bounded",
+          "reason": "work",
+          "states": 3,
+          "generated": 143,
+          "work": 150
+        },
+        {
+          "maxWork": 100,
+          "status": "bounded",
+          "reason": "work",
+          "states": 2,
+          "generated": 96,
+          "work": 100
+        }
+      ]
+    },
+    {
+      "spec": "end-run",
+      "variant": "complete",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "EndRun",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "lt",
+                  "left": {
+                    "op": "read",
+                    "slot": 0,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "add",
+                  "left": {
+                    "op": "read",
+                    "slot": 0,
+                    "next": false
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "100"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": []
+      },
+      "baseline": [
+        {
+          "maxWork": 100000000,
+          "status": "complete",
+          "reason": null,
+          "states": 3,
+          "generated": 201,
+          "work": 209
+        },
+        {
+          "maxWork": 150,
+          "status": "bounded",
+          "reason": "work",
+          "states": 3,
+          "generated": 143,
+          "work": 150
+        },
+        {
+          "maxWork": 100,
+          "status": "bounded",
+          "reason": "work",
+          "states": 2,
+          "generated": 96,
+          "work": 100
+        }
+      ]
+    }
+  ]
+}

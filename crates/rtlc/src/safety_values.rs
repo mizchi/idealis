@@ -148,6 +148,14 @@ impl<'scope> Arena<'scope> {
     pub fn tick(&mut self) -> Result<(), CoreError> {
         self.consume(1)
     }
+    pub(crate) fn bind_run(
+        &self,
+        branch: &crate::ir::Branch,
+        position: usize,
+    ) -> Option<&'scope crate::safety_expressions::BindRun> {
+        self.prepared
+            .and_then(|prepared| prepared.bind_run(branch, position))
+    }
     pub fn consume(&mut self, count: usize) -> Result<(), CoreError> {
         #[cfg(not(target_arch = "wasm32"))]
         if let Some((budget, worker)) = self.budget {

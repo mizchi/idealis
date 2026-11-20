@@ -1,0 +1,297 @@
+diff --git i/crates/rtlc/src/safety_expressions.rs w/crates/rtlc/src/safety_expressions.rs
+index 5bdd8b670..ee62b16a0 100644
+--- i/crates/rtlc/src/safety_expressions.rs
++++ w/crates/rtlc/src/safety_expressions.rs
+@@ -5,6 +5,7 @@ use crate::ir::{
+ use crate::safety_values::Arena;
+ #[cfg(not(target_arch = "wasm32"))]
+ use crate::safety_values::ValueRemap;
++use std::collections::HashMap;
+ use std::collections::hash_map::DefaultHasher;
+ use std::hash::{Hash, Hasher};
+ use std::sync::Arc;
+@@ -2073,6 +2074,20 @@ pub(crate) fn visit_branch(
+             domain,
+             tuple_size,
+         } => {
++            if let Some(run) = bind_run(branch, position, arena) {
++                let mut locals = ctx.locals.to_vec();
++                return visit_bind_run(
++                    branch,
++                    position,
++                    &run,
++                    ctx,
++                    &mut locals,
++                    next,
++                    arena,
++                    visitor,
++                    &mut HashMap::new(),
++                );
++            }
+             let values = domain.values(context, arena)?;
+             let mut locals = ctx.locals.to_vec();
+             if *slot != locals.len() {
+@@ -2102,6 +2117,219 @@ pub(crate) fn visit_branch(
+     }
+ }
+ 
++pub(crate) struct BindRun {
++    end: usize,
++    read: Vec<usize>,
++}
++
++struct Continuation {
++    successors: Vec<Vec<Option<Scalar>>>,
++    work: usize,
++    visitor_work: usize,
++}
++
++type Continuations = HashMap<Vec<Scalar>, Continuation>;
++
++fn bound_reads(expression: &Expression, reads: &mut Vec<usize>) -> bool {
++    match expression {
++        Expression::Bound { slot } => {
++            reads.push(*slot);
++            true
++        }
++        Expression::Enabled { .. } => false,
++        _ => expression
++            .children()
++            .into_iter()
++            .all(|child| bound_reads(child, reads)),
++    }
++}
++
++fn domain_reads(domain: &Domain, reads: &mut Vec<usize>) -> bool {
++    domain
++        .children()
++        .into_iter()
++        .all(|child| bound_reads(child, reads))
++}
++
++fn step_reads(steps: &[Step], reads: &mut Vec<usize>) -> bool {
++    steps.iter().all(|step| match step {
++        Step::Guard { expression } => bound_reads(expression, reads),
++        Step::Assign { value, .. } => bound_reads(value, reads),
++        Step::Choose { domain, .. } | Step::Bind { domain, .. } => domain_reads(domain, reads),
++        Step::Call {
++            arguments,
++            captures,
++            ..
++        } => arguments
++            .iter()
++            .chain(captures)
++            .all(|expression| bound_reads(expression, reads)),
++        Step::Frame {
++            arguments,
++            captures,
++            branches,
++            ..
++        } => {
++            arguments
++                .iter()
++                .chain(captures)
++                .all(|expression| bound_reads(expression, reads))
++                && branches.iter().all(|inner| step_reads(&inner.steps, reads))
++        }
++    })
++}
++
++fn bind_run(branch: &Branch, position: usize, arena: &mut Arena) -> Option<Arc<BindRun>> {
++    let key = (std::ptr::from_ref(branch) as usize, position);
++    if let Some(run) = arena.bind_runs.get(&key) {
++        return run.clone();
++    }
++    let run = plan_bind_run(branch, position).map(Arc::new);
++    arena.bind_runs.insert(key, run.clone());
++    run
++}
++
++fn plan_bind_run(branch: &Branch, position: usize) -> Option<BindRun> {
++    let Some(Step::Bind { slot: first, .. }) = branch.steps.get(position) else {
++        return None;
++    };
++    let end = position
++        + branch.steps[position..]
++            .iter()
++            .take_while(|step| matches!(step, Step::Bind { .. }))
++            .count();
++    if end == branch.steps.len() {
++        return None;
++    }
++    let mut reads = vec![];
++    if !step_reads(&branch.steps[end..], &mut reads) {
++        return None;
++    }
++    let slots = *first..*first + (end - position);
++    let read: Vec<usize> = slots.clone().filter(|slot| reads.contains(slot)).collect();
++    (read.len() < slots.len()).then_some(BindRun { end, read })
++}
++
++#[allow(clippy::too_many_arguments)]
++fn visit_bind_run(
++    branch: &Branch,
++    position: usize,
++    run: &BindRun,
++    ctx: EvalContext<'_>,
++    locals: &mut Vec<Scalar>,
++    next: &mut [Option<Scalar>],
++    arena: &mut Arena,
++    visitor: &mut BranchVisitor<'_>,
++    continuations: &mut Continuations,
++) -> Result<bool, CoreError> {
++    if position == run.end {
++        return visit_continuation(
++            branch,
++            run,
++            ctx,
++            locals,
++            next,
++            arena,
++            visitor,
++            continuations,
++        );
++    }
++    let mut ctx = ctx;
++    if locals.len() > ctx.locals.len() {
++        ctx.descend(arena)?;
++        arena.tick()?;
++    }
++    let Some(Step::Bind {
++        slot,
++        domain,
++        tuple_size,
++    }) = branch.steps.get(position)
++    else {
++        return Err(CoreError::protocol("Invalid bound variable run"));
++    };
++    let values = domain.values(
++        EvalContext {
++            next,
++            locals,
++            ..ctx
++        },
++        arena,
++    )?;
++    if *slot != locals.len() {
++        return Err(CoreError::protocol("Unbound action variable"));
++    }
++    for value in values {
++        arena.check_tuple(value, *tuple_size)?;
++        locals.push(value);
++        let found = visit_bind_run(
++            branch,
++            position + 1,
++            run,
++            ctx,
++            locals,
++            next,
++            arena,
++            visitor,
++            continuations,
++        )?;
++        locals.pop();
++        if found {
++            return Ok(true);
++        }
++    }
++    Ok(false)
++}
++
++#[allow(clippy::too_many_arguments)]
++fn visit_continuation(
++    branch: &Branch,
++    run: &BindRun,
++    ctx: EvalContext<'_>,
++    locals: &[Scalar],
++    next: &mut [Option<Scalar>],
++    arena: &mut Arena,
++    visitor: &mut BranchVisitor<'_>,
++    continuations: &mut Continuations,
++) -> Result<bool, CoreError> {
++    let key: Vec<Scalar> = run.read.iter().map(|slot| locals[*slot]).collect();
++    if let Some(continuation) = continuations.get(&key)
++        && arena.can_consume(continuation.work + continuation.visitor_work)
++    {
++        arena.consume(continuation.work)?;
++        for successor in continuation.successors.clone() {
++            let mut successor = successor;
++            if visitor(&mut successor, arena)? {
++                return Ok(true);
++            }
++        }
++        return Ok(false);
++    }
++    let start = arena.work - arena.created;
++    let mut successors = vec![];
++    let mut visitor_work = 0;
++    let found = visit_branch(
++        branch,
++        run.end,
++        EvalContext { locals, ..ctx },
++        next,
++        arena,
++        &mut |values, arena| {
++            successors.push(values.to_vec());
++            let before = arena.work - arena.created;
++            let found = visitor(values, arena);
++            visitor_work += (arena.work - arena.created - before) as usize;
++            found
++        },
++    )?;
++    let work = (arena.work - arena.created - start) as usize - visitor_work;
++    continuations.entry(key).or_insert(Continuation {
++        successors,
++        work,
++        visitor_work,
++    });
++    Ok(found)
++}
++
+ #[cfg(test)]
+ mod tests {
+     use super::EvalContext;
+diff --git i/crates/rtlc/src/safety_values.rs w/crates/rtlc/src/safety_values.rs
+index ca46fbb5a..d4e7e62b4 100644
+--- i/crates/rtlc/src/safety_values.rs
++++ w/crates/rtlc/src/safety_values.rs
+@@ -87,6 +87,8 @@ pub(crate) struct Arena<'a> {
+     types: HashMap<Expression, Option<Arc<MembershipSet>>>,
+     registered: RegisteredMembership,
+     membership: MembershipCache,
++    pub(crate) bind_runs: HashMap<(usize, usize), Option<Arc<crate::safety_expressions::BindRun>>>,
++    pub(crate) created: u32,
+     pub work: u32,
+     maximum: u32,
+ }
+@@ -113,6 +115,8 @@ impl<'scope> Arena<'scope> {
+             types: HashMap::new(),
+             registered: HashMap::new(),
+             membership: HashMap::new(),
++            bind_runs: HashMap::new(),
++            created: 0,
+             work: 0,
+             maximum,
+         }
+@@ -148,6 +152,13 @@ impl<'scope> Arena<'scope> {
+     pub fn tick(&mut self) -> Result<(), CoreError> {
+         self.consume(1)
+     }
++    pub(crate) fn can_consume(&self, count: usize) -> bool {
++        #[cfg(not(target_arch = "wasm32"))]
++        if self.budget.is_some() {
++            return true;
++        }
++        count <= (self.maximum - self.work) as usize
++    }
+     pub fn consume(&mut self, count: usize) -> Result<(), CoreError> {
+         #[cfg(not(target_arch = "wasm32"))]
+         if let Some((budget, worker)) = self.budget {
+@@ -453,6 +464,7 @@ impl<'scope> Arena<'scope> {
+         }
+         if charge {
+             self.tick()?;
++            self.created += 1;
+         }
+         let index = u32::try_from(self.offset + self.cells.len())
+             .map_err(|_| CoreError::protocol("Value store exhausted"))?;

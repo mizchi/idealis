@@ -1,5 +1,6 @@
-use crate::ir::{Expression, SafetyProgram, TemporalFormula};
+use crate::ir::{Branch, Expression, SafetyProgram, TemporalFormula};
 use crate::safety_expressions::register_branch_memberships;
+use crate::safety_expressions::{BindRun, plan_bind_runs};
 use std::collections::HashMap;
 use std::hash::{BuildHasherDefault, Hasher};
 
@@ -30,6 +31,7 @@ impl Hasher for AddressHasher {
 
 pub(crate) struct PreparedProgram {
     slots: HashMap<usize, usize, BuildHasherDefault<AddressHasher>>,
+    bind_runs: HashMap<usize, Vec<Option<BindRun>>, BuildHasherDefault<AddressHasher>>,
 }
 
 impl PreparedProgram {
@@ -51,6 +53,12 @@ impl PreparedProgram {
         }
         register_branch_memberships(&program.initial, &mut |expression| roots.push(expression));
         register_branch_memberships(&program.next, &mut |expression| roots.push(expression));
+        let mut branches: Vec<&[Branch]> = vec![&program.initial, &program.next];
+        for definition in program.definitions.iter().flatten() {
+            if let crate::ir::DefinitionBody::Action(action) = &definition.body {
+                branches.push(action);
+            }
+        }
         roots.extend(
             program
                 .invariants
@@ -100,12 +108,18 @@ impl PreparedProgram {
                 }
             }
         }
-        Self::from_roots(roots)
+        Self::from_parts(roots, branches)
     }
 
-    pub fn from_roots(mut roots: Vec<&Expression>) -> Self {
+    #[cfg(test)]
+    pub fn from_roots(roots: Vec<&Expression>) -> Self {
+        Self::from_parts(roots, vec![])
+    }
+
+    fn from_parts(mut roots: Vec<&Expression>, mut branches: Vec<&[Branch]>) -> Self {
         let mut prepared = Self {
             slots: HashMap::default(),
+            bind_runs: HashMap::default(),
         };
         while let Some(expression) = roots.pop() {
             if let Expression::Data { .. } = expression {
@@ -124,10 +138,31 @@ impl PreparedProgram {
             {
                 register_branch_memberships(branches, &mut |expression| roots.push(expression));
                 roots.extend(subscript.iter().map(Box::as_ref));
+                prepared.register_bind_runs(branches);
             }
             roots.extend(expression.children());
         }
+        while let Some(group) = branches.pop() {
+            prepared.register_bind_runs(group);
+        }
         prepared
+    }
+
+    fn register_bind_runs(&mut self, branches: &[Branch]) {
+        plan_bind_runs(branches, &mut |branch, position, run| {
+            let runs = self
+                .bind_runs
+                .entry(std::ptr::from_ref(branch) as usize)
+                .or_insert_with(|| (0..branch.steps.len()).map(|_| None).collect());
+            runs[position] = Some(run);
+        });
+    }
+
+    pub fn bind_run(&self, branch: &Branch, position: usize) -> Option<&BindRun> {
+        self.bind_runs
+            .get(&(std::ptr::from_ref(branch) as usize))?
+            .get(position)?
+            .as_ref()
     }
 
     pub fn slot(&self, expression: &Expression) -> Option<usize> {
@@ -138,5 +173,34 @@ impl PreparedProgram {
 
     pub fn len(&self) -> usize {
         self.slots.len()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::PreparedProgram;
+    use crate::ir::{SafetyProgram, Step};
+
+    #[test]
+    fn bind_plans_are_found_only_for_the_program_own_branches() {
+        let fixtures: serde_json::Value =
+            serde_json::from_str(include_str!("../tests/dead-bindings-fixtures.json")).unwrap();
+        let case = fixtures["cases"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|case| case["spec"] == "dead" && case["variant"] == "complete")
+            .unwrap();
+        let program: SafetyProgram = serde_json::from_value(case["program"].clone()).unwrap();
+        let prepared = PreparedProgram::new(&program);
+        let branch = &program.next[0];
+        let position = branch
+            .steps
+            .iter()
+            .position(|step| matches!(step, Step::Bind { .. }))
+            .unwrap();
+        assert!(prepared.bind_run(branch, position).is_some());
+        let copy = branch.clone();
+        assert!(prepared.bind_run(&copy, position).is_none());
     }
 }

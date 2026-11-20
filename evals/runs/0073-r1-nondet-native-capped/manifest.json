@@ -1,0 +1,49 @@
+{
+  "driver": "nondet-native-rss.mjs",
+  "mode": "capped",
+  "driverSha256": "52013f8b0926ab9f873b1463c6c45eaf56e20ec12802418414fad4e258bc183d",
+  "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+  "bounds": {
+    "maxDepth": 10000000,
+    "maxStates": 10000000,
+    "maxWork": 4000000000
+  },
+  "irVersion": 2,
+  "workers": [
+    1,
+    2,
+    4,
+    8
+  ],
+  "warmup": 1,
+  "samples": 3,
+  "order": "iteration 0 is the warmup; even iterations run before then after, odd iterations run after then before",
+  "request": "one fresh process per sample under capped.py (RSS cap and wall cap, peak_rss_kb polled every 0.2 s, elapsed_s quantised by that poll); stdin holds one check-safety-parallel request with the precompiled irVersion 2 program",
+  "cappedPath": "<rss-cap>/capped.py",
+  "cappedSha256": "7cb610970c9b0e6443a742d50425c6f5700892e7681048617d32e2e4bbfd5a81",
+  "sourceSha256": {
+    "safety": "03bee5032cdc8b703ed9495d40d5f2971187674d4bdb7a08f8873ce5ae46bafa",
+    "broken": "a73f0d6d749867f8734c4f4b2d2a5f6130dd1f75f3fa8b06ec0a3f60af9b78e1"
+  },
+  "programSha256": {
+    "before-safety": "834fb9e5bec62089ac4dd6bd4a2ef8bc9b2e578673bf54233cb7b200fe641de8",
+    "before-broken": "84cd0bdc26d1da3249dc7b3b4bbc03dc25484557001587618809fbf6e80b682c",
+    "after-safety": "834fb9e5bec62089ac4dd6bd4a2ef8bc9b2e578673bf54233cb7b200fe641de8",
+    "after-broken": "84cd0bdc26d1da3249dc7b3b4bbc03dc25484557001587618809fbf6e80b682c"
+  },
+  "binaries": {
+    "before": "d96e4d108e7df16845cb2e4b5be9d342f27bb3f96613da375ed405027ee6e270",
+    "after": "64468511bb08a1e1f9b114c825637e77144b4bd2b383e7548b9440c126d63eb2"
+  },
+  "roots": {
+    "before": "<scratch>/eval-0073/snapshots/before",
+    "after": "<scratch>/eval-0073/snapshots/after"
+  },
+  "cpu": "Apple M5 Pro",
+  "cpus": 15,
+  "hostLoadAtStart": [
+    2.2490234375,
+    2.07958984375,
+    2.3193359375
+  ]
+}
