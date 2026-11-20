@@ -60,6 +60,8 @@ PR と `main` への push では、4 つの検証ジョブを並列に実行す�
 
 `model` と `go` はそれぞれ portable core をビルドする。TLC の結果キャッシュは `model` だけが復元・保存し、チェッカーのビルドが一致する検査結果を再利用する。Lean の `cache-proof` は 4 ジョブと並列に実行する。
 
+同じコミットで TLC 結果の再利用による時間差を測るには、CI の手動実行で `reuse_tlc_results` をオン・オフして比較する。オフにすると空の結果ディレクトリから開始し、run 内で得た結果はその run 内で再利用する。
+
 4800件の portable 評価、runtime 性能評価、4 runner の cloud sharding はそれぞれ workflow_dispatch で残す。重い評価を明示的に実行でき、sharding の manifest / 欠落・衝突検出も保持する。PR で runner を prepare → shard → merge と3段階待つ構造を外した。GitHub の割当待ちそのものを短縮する保証ではない。
 
 `rtlc`の分離後は`rtlc-<version>.crate`と`idealis-core-<version>.crate`を同梱する。packageは一時workspaceで両者を同時検証し、Cargoの一時registryで依存を解決する。展開したarchiveのconsumerは未公開のrtlcを`[patch.crates-io]`でローカルへ結び、rtlc単独の依存graphにidealis-coreが入らないことも確認する。通常のrepoは独立manifestのままとし、native/Wasm targetの位置を変更しない。この処理はCargo registryへのpublishではない。

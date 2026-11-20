@@ -4,6 +4,11 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      reuse_tlc_results:
+        description: Restore and save TLC results across runs
+        type: boolean
+        default: true
 permissions:
   contents: read
 concurrency:
@@ -141,6 +146,7 @@ jobs:
           echo "inputs=$inputs" >> "$GITHUB_OUTPUT"
           echo "IDEALIS_TLC_RESULTS=.artifacts/tlc-results" >> "$GITHUB_ENV"
       - name: Restore model check results for this checker build
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.reuse_tlc_results }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .artifacts/tlc-results/${{ steps.tlc-build.outputs.build }}
