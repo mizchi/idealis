@@ -1,5 +1,5 @@
 {
-  "source": "TLA+ specifications below compiled by idealis-core at d42509d4 with compile-tla; step-frame is the step-call v2 program with its Step::Call replaced by a Step::Frame carrying the called definition's body; end-run is the compiled program with its trailing guard removed so that its run of bindings ends the branch, and its baseline holds check-safety (maxDepth 100, maxStates 10000) results of idealis-core at d42509d4 before this change",
+  "source": "TLA+ specifications below compiled by idealis-core at d42509d4 with compile-tla; step-frame is the step-call v2 program with its Step::Call replaced by a Step::Frame carrying the called definition's body; end-run is the compiled program with its trailing guard removed so that its run of bindings ends the branch, and its baseline holds check-safety (maxDepth 100, maxStates 10000) results of idealis-core at d42509d4 before this change; wide-frontier and wide-frontier-read (complete and violation variants) are compiled by the same compile-tla from fixtures/dead-bindings/WideFrontier*.tla, and the complete variants' 64 distinct and 16385 generated states and the violation variants' first counterexample 0, 1, 64 come from TLC run with one worker from the Apalache 0.62.4 jar",
   "specifications": {
     "dead": "---- MODULE DeadBindings ----\nEXTENDS Naturals\nVARIABLES x, n\nInit == x = 0 /\\ n = 0\nNext == n < 3 /\\ \\E a \\in BOOLEAN: \\E t \\in 1..9: \\E e \\in (IF a THEN {0, 1} ELSE {t % 3, 2}): x' = e /\\ n' = n + 1\nSmall == x + n < 4\n====\n",
     "live": "---- MODULE DeadBindings ----\nEXTENDS Naturals\nVARIABLES x, n\nInit == x = 0 /\\ n = 0\nNext == n < 3 /\\ \\E a \\in BOOLEAN: \\E t \\in 1..9: \\E e \\in (IF a THEN {0, 1} ELSE {t % 3, 2}): x' = e /\\ n' = n + 1 /\\ a = a /\\ t = t\nSmall == x + n < 4\n====\n",
@@ -16,7 +16,11 @@
     "huge": "---- MODULE Huge ----\nEXTENDS Naturals\nVARIABLE x\nInit == x = 0\nNext == \\E a \\in 1..2000000 : x' = 1\n====\n",
     "deep-action": "---- MODULE DeepAction ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE x\nRECURSIVE Go(_)\nGo(n) == IF n = 0 THEN x' = 1 ELSE \\E a \\in 1..1 : \\E b \\in 1..1 : Go(n - 1)\nInit == x = 0\nNext == Go(N)\n====\n",
     "step-call-args": "---- MODULE StepCallArgs ----\nEXTENDS Naturals\nVARIABLES x, y\nInit == x = 0 /\\ y = 0\nNext == \\E a \\in 1..2 : \\E b \\in 1..3 : LET Act(p) == \\E w \\in 0..0 : x' = p /\\ y' = b + w IN Act(a)\n====\n",
-    "end-run": "---- MODULE EndRun ----\nEXTENDS Naturals\nVARIABLES x\nInit == x = 0\nNext == x < 2 /\\ x' = x + 1 /\\ \\E a \\in 1..100: TRUE\n====\n"
+    "end-run": "---- MODULE EndRun ----\nEXTENDS Naturals\nVARIABLES x\nInit == x = 0\nNext == x < 2 /\\ x' = x + 1 /\\ \\E a \\in 1..100: TRUE\n====\n",
+    "wide-frontier": "---- MODULE WideFrontier ----\nEXTENDS Integers\n\nVARIABLE x\n\nInit == x = 0\n\nNext == \\E a \\in 1..4 : \\E b \\in 0..63 : b >= 0 /\\ b <= 63 /\\ b # 64 /\\ b # 65 /\\ b # 66 /\\ b # 67 /\\ b # 68 /\\ b # 69 /\\ x' = b\n\nSafe == x \\in 0..63\n\n====\n",
+    "wide-frontier-read": "---- MODULE WideFrontierRead ----\nEXTENDS Integers\n\nVARIABLE x\n\nInit == x = 0\n\nNext == \\E a \\in 1..4 : \\E b \\in 0..63 : a > 0 /\\ b >= 0 /\\ b <= 63 /\\ b # 64 /\\ b # 65 /\\ b # 66 /\\ b # 67 /\\ b # 68 /\\ b # 69 /\\ x' = b\n\nSafe == x \\in 0..63\n\n====\n",
+    "wide-frontier-violation": "---- MODULE WideFrontierViolation ----\nEXTENDS Integers\n\nVARIABLE x\n\nInit == x = 0\n\nNext == \\E a \\in 1..4 : \\E b \\in 0..63 : b >= 0 /\\ b <= 63 /\\ b # 64 /\\ b # 65 /\\ b # 66 /\\ b # 67 /\\ b # 68 /\\ b # 69 /\\ x' = IF x = 0 THEN b ELSE b + 64\n\nSafe == x \\in 0..63\n\n====\n",
+    "wide-frontier-read-violation": "---- MODULE WideFrontierViolationRead ----\nEXTENDS Integers\n\nVARIABLE x\n\nInit == x = 0\n\nNext == \\E a \\in 1..4 : \\E b \\in 0..63 : a > 0 /\\ b >= 0 /\\ b <= 63 /\\ b # 64 /\\ b # 65 /\\ b # 66 /\\ b # 67 /\\ b # 68 /\\ b # 69 /\\ x' = IF x = 0 THEN b ELSE b + 64\n\nSafe == x \\in 0..63\n\n====\n"
   },
   "cases": [
     {
@@ -6790,6 +6794,1184 @@
           "work": 100
         }
       ]
+    },
+    {
+      "spec": "wide-frontier",
+      "variant": "complete",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "WideFrontier",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "4"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "63"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ge",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "le",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "63"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "64"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "65"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "66"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "67"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "68"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "69"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 1
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [
+          {
+            "name": "Safe",
+            "expression": {
+              "op": "call",
+              "definition": 0,
+              "arguments": [],
+              "captures": []
+            }
+          }
+        ],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": [
+          {
+            "id": 0,
+            "parameterCount": 0,
+            "captureCount": 0,
+            "bodyKind": "expression",
+            "localScope": 0,
+            "body": {
+              "op": "in",
+              "value": {
+                "op": "read",
+                "slot": 0,
+                "next": false
+              },
+              "domain": {
+                "kind": "range",
+                "lower": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                },
+                "upper": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "63"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "spec": "wide-frontier-read",
+      "variant": "complete",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "WideFrontierRead",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "4"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "63"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "gt",
+                  "left": {
+                    "op": "bound",
+                    "slot": 0
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ge",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "le",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "63"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "64"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "65"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "66"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "67"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "68"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "69"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "bound",
+                  "slot": 1
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [
+          {
+            "name": "Safe",
+            "expression": {
+              "op": "call",
+              "definition": 0,
+              "arguments": [],
+              "captures": []
+            }
+          }
+        ],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": [
+          {
+            "id": 0,
+            "parameterCount": 0,
+            "captureCount": 0,
+            "bodyKind": "expression",
+            "localScope": 0,
+            "body": {
+              "op": "in",
+              "value": {
+                "op": "read",
+                "slot": 0,
+                "next": false
+              },
+              "domain": {
+                "kind": "range",
+                "lower": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                },
+                "upper": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "63"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "spec": "wide-frontier",
+      "variant": "violation",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "WideFrontierViolation",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "4"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "63"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ge",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "le",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "63"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "64"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "65"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "66"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "67"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "68"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "69"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "if",
+                  "condition": {
+                    "op": "eq",
+                    "left": {
+                      "op": "read",
+                      "slot": 0,
+                      "next": false
+                    },
+                    "right": {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "0"
+                      }
+                    }
+                  },
+                  "consequent": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "alternative": {
+                    "op": "add",
+                    "left": {
+                      "op": "bound",
+                      "slot": 1
+                    },
+                    "right": {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "64"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [
+          {
+            "name": "Safe",
+            "expression": {
+              "op": "call",
+              "definition": 0,
+              "arguments": [],
+              "captures": []
+            }
+          }
+        ],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": [
+          {
+            "id": 0,
+            "parameterCount": 0,
+            "captureCount": 0,
+            "bodyKind": "expression",
+            "localScope": 0,
+            "body": {
+              "op": "in",
+              "value": {
+                "op": "read",
+                "slot": 0,
+                "next": false
+              },
+              "domain": {
+                "kind": "range",
+                "lower": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                },
+                "upper": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "63"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "spec": "wide-frontier-read",
+      "variant": "violation",
+      "irVersion": 2,
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE\n",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "WideFrontierViolationRead",
+        "variables": ["x"],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "bind",
+                "slot": 0,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "4"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "bind",
+                "slot": 1,
+                "domain": {
+                  "kind": "range",
+                  "lower": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  },
+                  "upper": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "63"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "gt",
+                  "left": {
+                    "op": "bound",
+                    "slot": 0
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ge",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "le",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "63"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "64"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "65"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "66"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "67"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "68"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "guard",
+                "expression": {
+                  "op": "ne",
+                  "left": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "69"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "if",
+                  "condition": {
+                    "op": "eq",
+                    "left": {
+                      "op": "read",
+                      "slot": 0,
+                      "next": false
+                    },
+                    "right": {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "0"
+                      }
+                    }
+                  },
+                  "consequent": {
+                    "op": "bound",
+                    "slot": 1
+                  },
+                  "alternative": {
+                    "op": "add",
+                    "left": {
+                      "op": "bound",
+                      "slot": 1
+                    },
+                    "right": {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "64"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [
+          {
+            "name": "Safe",
+            "expression": {
+              "op": "call",
+              "definition": 0,
+              "arguments": [],
+              "captures": []
+            }
+          }
+        ],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": [
+          {
+            "id": 0,
+            "parameterCount": 0,
+            "captureCount": 0,
+            "bodyKind": "expression",
+            "localScope": 0,
+            "body": {
+              "op": "in",
+              "value": {
+                "op": "read",
+                "slot": 0,
+                "next": false
+              },
+              "domain": {
+                "kind": "range",
+                "lower": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                },
+                "upper": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "63"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
     }
   ]
 }

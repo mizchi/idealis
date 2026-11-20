@@ -2136,53 +2136,75 @@ struct Continuations {
     replayed: usize,
 }
 
-fn bound_reads(expression: &Expression, reads: &mut Vec<usize>) -> bool {
-    match expression {
-        Expression::Bound { slot } => {
-            reads.push(*slot);
-            true
-        }
-        Expression::Enabled { .. } => false,
-        _ => expression
-            .children()
-            .into_iter()
-            .all(|child| bound_reads(child, reads)),
-    }
-}
-
-fn domain_reads(domain: &Domain, reads: &mut Vec<usize>) -> bool {
-    domain
-        .children()
-        .into_iter()
-        .all(|child| bound_reads(child, reads))
+enum ReadWork<'a> {
+    Expression(&'a Expression),
+    Expressions(std::slice::Iter<'a, Expression>),
+    Children(std::vec::IntoIter<&'a Expression>),
+    Steps(std::slice::Iter<'a, Step>),
+    Branches(std::slice::Iter<'a, Branch>),
 }
 
 fn step_reads(steps: &[Step], reads: &mut Vec<usize>) -> bool {
-    steps.iter().all(|step| match step {
-        Step::Guard { expression } => bound_reads(expression, reads),
-        Step::Assign { value, .. } => bound_reads(value, reads),
-        Step::Choose { domain, .. } | Step::Bind { domain, .. } => domain_reads(domain, reads),
-        Step::Call {
-            arguments,
-            captures,
-            ..
-        } => arguments
-            .iter()
-            .chain(captures)
-            .all(|expression| bound_reads(expression, reads)),
-        Step::Frame {
-            arguments,
-            captures,
-            branches,
-            ..
-        } => {
-            arguments
-                .iter()
-                .chain(captures)
-                .all(|expression| bound_reads(expression, reads))
-                && branches.iter().all(|inner| step_reads(&inner.steps, reads))
+    let mut work = vec![ReadWork::Steps(steps.iter())];
+    while let Some(item) = work.pop() {
+        match item {
+            ReadWork::Expression(expression) => match expression {
+                Expression::Bound { slot } => reads.push(*slot),
+                Expression::Enabled { .. } => return false,
+                _ => work.push(ReadWork::Children(expression.children().into_iter())),
+            },
+            ReadWork::Expressions(mut remaining) => {
+                if let Some(expression) = remaining.next() {
+                    work.push(ReadWork::Expressions(remaining));
+                    work.push(ReadWork::Expression(expression));
+                }
+            }
+            ReadWork::Children(mut remaining) => {
+                if let Some(expression) = remaining.next() {
+                    work.push(ReadWork::Children(remaining));
+                    work.push(ReadWork::Expression(expression));
+                }
+            }
+            ReadWork::Steps(mut remaining) => {
+                let Some(step) = remaining.next() else {
+                    continue;
+                };
+                work.push(ReadWork::Steps(remaining));
+                match step {
+                    Step::Guard { expression } => work.push(ReadWork::Expression(expression)),
+                    Step::Assign { value, .. } => work.push(ReadWork::Expression(value)),
+                    Step::Choose { domain, .. } | Step::Bind { domain, .. } => {
+                        work.push(ReadWork::Children(domain.children().into_iter()));
+                    }
+                    Step::Call {
+                        arguments,
+                        captures,
+                        ..
+                    } => {
+                        work.push(ReadWork::Expressions(captures.iter()));
+                        work.push(ReadWork::Expressions(arguments.iter()));
+                    }
+                    Step::Frame {
+                        arguments,
+                        captures,
+                        branches,
+                        ..
+                    } => {
+                        work.push(ReadWork::Branches(branches.iter()));
+                        work.push(ReadWork::Expressions(captures.iter()));
+                        work.push(ReadWork::Expressions(arguments.iter()));
+                    }
+                }
+            }
+            ReadWork::Branches(mut remaining) => {
+                if let Some(branch) = remaining.next() {
+                    work.push(ReadWork::Branches(remaining));
+                    work.push(ReadWork::Steps(branch.steps.iter()));
+                }
+            }
         }
-    })
+    }
+    true
 }
 
 fn plan_bind_run(branch: &Branch, position: usize) -> Option<BindRun> {
@@ -2334,6 +2356,8 @@ fn visit_continuation(
     }
     let mut recording =
         (!known && continuations.recorded < RECORDED_SUCCESSORS_PER_RUN).then(Vec::new);
+    let capacity = RECORDED_SUCCESSORS_PER_CONTINUATION
+        .min(RECORDED_SUCCESSORS_PER_RUN.saturating_sub(continuations.recorded));
     let found = visit_branch(
         branch,
         run.end,
@@ -2342,7 +2366,7 @@ fn visit_continuation(
         arena,
         &mut |values, arena| {
             if let Some(successors) = &mut recording {
-                if successors.len() < RECORDED_SUCCESSORS_PER_CONTINUATION {
+                if successors.len() < capacity {
                     successors.push(values.to_vec());
                 } else {
                     recording = None;
@@ -2364,6 +2388,72 @@ mod tests {
     use crate::Value;
     use crate::ir::{Expression, Scalar};
     use crate::safety_values::Arena;
+
+    #[test]
+    fn a_continuation_crossing_the_run_wide_budget_is_not_recorded_and_not_replayed() {
+        use super::{BindRun, Continuations, RECORDED_SUCCESSORS_PER_RUN, visit_continuation};
+        use crate::ir::{Branch, Domain, Step};
+        let literal = |value| Expression::Literal {
+            value: Scalar::Int(value),
+        };
+        let branch = Branch {
+            name: "Two".into(),
+            steps: vec![
+                Step::Bind {
+                    slot: 0,
+                    domain: Domain::Set {
+                        values: vec![literal(0)],
+                    },
+                    tuple_size: None,
+                },
+                Step::Choose {
+                    slot: 0,
+                    domain: Domain::Set {
+                        values: vec![literal(1), literal(2)],
+                    },
+                },
+            ],
+        };
+        let run = BindRun {
+            end: 1,
+            read: vec![],
+        };
+        let current = [Scalar::Int(0)];
+        let locals = [Scalar::Int(0)];
+        let mut continuations = Continuations {
+            recorded: RECORDED_SUCCESSORS_PER_RUN - 1,
+            ..Continuations::default()
+        };
+        let visits = |continuations: &mut Continuations| {
+            let mut arena = Arena::new(1000);
+            let mut seen = vec![];
+            let found = visit_continuation(
+                &branch,
+                &run,
+                EvalContext {
+                    locals: &locals,
+                    ..EvalContext::new(&current, &[])
+                },
+                &locals,
+                &mut [None],
+                &mut arena,
+                &mut |values, _| {
+                    seen.push(values.to_vec());
+                    Ok(false)
+                },
+                continuations,
+            )
+            .unwrap();
+            assert!(!found);
+            seen
+        };
+        let expected = vec![vec![Some(Scalar::Int(1))], vec![Some(Scalar::Int(2))]];
+        assert_eq!(visits(&mut continuations), expected);
+        assert_eq!(continuations.recorded, RECORDED_SUCCESSORS_PER_RUN - 1);
+        assert!(matches!(continuations.entries.get(&vec![]), Some(None)));
+        assert_eq!(visits(&mut continuations), expected);
+        assert_eq!(continuations.replayed, 0);
+    }
 
     #[test]
     fn v1_enabled_subscript_keeps_the_existing_long_branch_limit() {

@@ -38,7 +38,7 @@ r1 と r2 の完全応答 corpus は、どちらも 264 比較で差分 0 だっ
 `crates/rtlc/tests/dead_bindings.rs` を実装の前に置き、work の比較で Red を確認した。レビューの後に足したテストは、それぞれが対象にする故障版で失敗することを確かめた。
 
 - 束縛を guard で読ませた双子と、complete / deadlock / violation の各版で、status・reason・状態・生成数・深さ・violation が一致し、work は双子の 3 分の 2 未満になる。complete は仕様から数えた 10 状態・232 生成。
-- 公開 Quint モデルとその読ませた双子を 1 / 2 / 4 / 8 worker で検査し、どちらも TLC と同じ 4,785 状態・896,821 生成になり、work は双子の 3 分の 2 未満になる。frontier は並列化の条件に届く。
+- 並列化の条件に届く幅の小さな TLA+ の双子（`fixtures/dead-bindings/WideFrontier*`）を 1 / 2 / 4 / 8 worker で検査し、どちらも TLC と同じ 64 状態・16,385 生成になり、work は双子の 2 分の 1 未満になる。違反版の双子では、最初の反例がどの worker 数でも TLC と同じ `x = 0, 1, 64` になる。PR のレビューの段で、公開 Quint モデル（4,785 状態・896,821 生成）を使う debug の大きなテストから置き換えた（下の「PR のレビューと修正」）。
 - `ENABLED` の中だけで読む束縛と、演算子の引数で読む束縛では、仕様どおり 5 状態・7 生成を返す。`ENABLED` を対象外にする判定を外した故障版では、このテストが 1 状態・1 生成で失敗した。
 - レビューの再現例（`Frame` の `ENABLED`、型の cache と 0 除算、10 万候補の `Choose`）を検査する。
 - 後続が束縛を読む経路ごとに、読み落とすと到達状態が変わる仕様で検査する。対象は Step の `Call` の arguments と captures、それを `Frame` に書き換えた版、`Choose` の domain、後続の `Bind` の domain。故障版 M2〜M6 はどれもこのテストで失敗した。
@@ -46,9 +46,30 @@ r1 と r2 の完全応答 corpus は、どちらも 264 比較で差分 0 だっ
 - 読まれない 200 万候補の束縛を `maxWork` 100,000 で検査し、変更前と同じ `bounded(work)`・49,999 生成・100,000 work で止まることを検査する。再生で課金しない故障版は失敗した。
 - 再帰する action の中の bind の並びで、評価の深さの上限が変更前と同じ位置（再帰 20 回で complete、21 回で `bounded(evaluation)`）にあることを検査する。並びの中の深さの検査を外した故障版は失敗した。
 - 並びが branch の末尾で終わる program（コンパイル結果から末尾の guard を外したもの）で、work と予算での打ち切り位置が変更前と一致することを検査する。この場合だけは再生が従来の評価より高くつくので計画を作らない。この除外を外した故障版は、work が 209 から 407 に増えて失敗した。
-- 件数の上限そのもの（4,096 と 64）はメモリだけに効き、結果に現れないので、テストでは固定しない。
+- 件数の上限（1 並びあたり successor 4,096 個、1 継続あたり 64 個）は、継続を再生するか評価し直すかを変える。予算で打ち切らない実行では、状態・生成数・探索順に現れない。work とその予算での打ち切り位置は上限で変わりうる。並び全体の残り枠を超える継続の記録を捨てることは、crate 内の境界テスト（残り 1 枠に 2 件）で固定する（下の「PR のレビューと修正」）。
 - 既存テスト `wide_batches_keep_budget_cuts_and_action_constraint_errors` は、打ち切り値を同じ program の総 work から決めるように変えた。
 - rtlc の全 301 テスト（release / debug）、cargo fmt、clippy（`-D warnings`）、`just check`、`just wasm-test`（23）、`just portable-test`（cargo 570、node 3 / 22 / 8）、`just evaluate`、`just replay-evaluation`、`just support-plan` が通った。`just safety-test`（1,324）は、他の build と重なった実行で時間制限つきの 1 件（50,000 項の連言を 5 秒以内に拒否する compile 側の test）が 5,027 ms で落ち、負荷のない単独の再実行で全件通った。Jev の checklist を `just support-sync` で同期し、9 scope すべてで矛盾・未評価 0、`just support-check` が通った。`just check` は pnpm 経由で `pnpm-lock.yaml` を書き換えるため、`support-check` はその lockfile を戻してから実行した。
+
+## PR のレビューと修正
+
+PR のレビューで、次の 3 件を直した。
+
+1. 後続が読む束縛を集める走査（`step_reads`）が、IR の深さの検証より前に再帰していた。深さの上限で拒否する IR でも、先に call stack を使い切りうる。走査を明示的な stack に変えた。
+   - 訪れる順序と、最初の `ENABLED` で打ち切る位置は、変更前の再帰と同じにした。
+   - 回帰テストでは、100,000 段の `Not` を持つ IR を 512 KiB の thread で検査し、従来の `Safety expression nesting exceeds 48` が返ることを確かめる。再帰のままの版は stack overflow で落ちた。
+   - 独立レビューでは、最初の明示的な stack に問題があったことも分かった。後続の step をすべて集めてから `ENABLED` を判定していた。式の子を記述順に積んで末尾から取り出すため、逆順に訪れていた。`Frame` は、引数と capture の後、式を訪れる前に分岐をすべて積んでいた。そのため、変更前なら打ち切っていた入力で、検証前の走査が増えていた。
+   - 訪れる順序を戻した後も、引数・capture・子のリストを、最初の要素を見る前に全件 stack に積む費用が残っていた。リストは iterator のまま積み、1 件ずつ取り出すようにした。
+   - これらは、打ち切りが同じ位置で起きることを検査するテストで固定した。各 `Bind` の後に `Guard(ENABLED)` を置いた 20,000 組の並びと、512 組の `Bind`・`Guard(TRUE)` の後に先頭が `ENABLED` の式・`Frame`・長い集合を置いた並びを、debug で上限時間を設けて検査する。
+2. 記録の上限を、継続ごとの 64 件だけで判定していた。並び全体で 4,095 件を記録した後に、次の継続が 64 件を足せた。successor を足すたびに並び全体の残り枠も見るようにし、超える継続は記録ごと捨てて、visitor には最後まで渡すようにした。残り 1 枠に 2 件が来る境界をテストで固定した。直す前の版では 4,097 件になって失敗した。
+3. 1 / 2 / 4 / 8 worker を比べる debug のテストが、公開 Quint モデルを使っていて CI で約 159 秒かかっていた。
+   - 並列化の条件（frontier 16 状態以上）に届く 64 状態の TLA+ の双子に置き換えた。継続は束縛 `b` だけを読む 8 個の常に真の連言と代入で、読ませた双子は `a > 0` を加える。
+   - 件数（64 状態・16,385 生成）と違反版の最初の反例（`x = 0, 1, 64`）は、Apalache 0.62.4 同梱の TLC を 1 worker で流して得た。
+   - 再利用を外した版では work の比較が、並列の候補の順を逆にした版では反例の比較が失敗した。
+   - 置き換える前の公開 Quint モデル（4,785 状態・896,821 生成）での 1 / 2 / 4 / 8 worker の比較は、release の評価（下の表、[0073-r3-nondet-native-rss](../runs/0073-r3-nondet-native-rss/)）に残る。
+
+再生では最低限の work だけを課金するため、同じ `maxWork` でも探索が変更前より先へ進みうる。このことを #76 にも記した。
+
+修正の後、rtlc の全 309 テスト（release / debug）、cargo fmt、clippy（`-D warnings`）、`just portable-test`、`just wasm-test`、`just check`、`just safety-test`（1,324）、`just evaluate`、`just replay-evaluation` が通った。Jev の checklist を `just support-sync` で同期し直し、9 scope すべてで矛盾・未評価 0、`just support-check` が通った。
 
 ## 合成 Quint モデルでの比較
 

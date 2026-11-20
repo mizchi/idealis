@@ -80,35 +80,65 @@ fn unread_bindings_evaluate_each_distinct_continuation_once() {
 }
 
 #[test]
-fn wide_parallel_frontiers_keep_the_tlc_counts_with_less_work() {
+fn frontiers_wide_enough_for_every_worker_keep_the_tlc_counts_with_less_work() {
     let bounds = SafetyBounds {
-        max_states: 1_000_000,
+        max_states: 1_000,
         max_work: u32::MAX,
         ..bounds()
     };
     for workers in [1, 2, 4, 8] {
-        let unread = program("nondet-tags", "complete", 2)
+        let unread = program("wide-frontier", "complete", 2)
             .check_parallel(bounds, workers)
             .unwrap();
-        let read = program("nondet-tags-read", "complete", 2)
+        let read = program("wide-frontier-read", "complete", 2)
             .check_parallel(bounds, workers)
             .unwrap();
-        assert_eq!(
-            (unread.status.as_str(), unread.states, unread.generated),
-            ("complete", 4785, 896_821),
-            "workers {workers}"
-        );
-        assert_eq!(
-            (read.status.as_str(), read.states, read.generated),
-            ("complete", 4785, 896_821),
-            "workers {workers}"
-        );
+        for result in [&unread, &read] {
+            assert_eq!(
+                (result.status.as_str(), result.states, result.generated),
+                ("complete", 64, 16_385),
+                "workers {workers}"
+            );
+        }
         assert!(
-            unread.work * 3 < read.work * 2,
+            unread.work * 2 < read.work,
             "workers {workers}: unread {} read {}",
             unread.work,
             read.work
         );
+    }
+}
+
+#[test]
+fn the_first_counterexample_of_a_wide_parallel_frontier_follows_the_tlc_trace() {
+    let bounds = SafetyBounds {
+        max_states: 1_000,
+        max_work: u32::MAX,
+        ..bounds()
+    };
+    for spec in ["wide-frontier", "wide-frontier-read"] {
+        for workers in [1, 2, 4, 8] {
+            let result = program(spec, "violation", 2)
+                .check_parallel(bounds, workers)
+                .unwrap();
+            assert_eq!(result.status, "invariant-violation", "{spec} {workers}");
+            let violation = result.violation.unwrap();
+            assert_eq!(violation.name, "Safe", "{spec} {workers}");
+            let trace: Vec<_> = violation
+                .trace
+                .iter()
+                .map(|step| serde_json::to_value(&step.values).unwrap())
+                .collect();
+            assert_eq!(
+                trace,
+                [
+                    serde_json::json!([{"type": "int", "value": "0"}]),
+                    serde_json::json!([{"type": "int", "value": "1"}]),
+                    serde_json::json!([{"type": "int", "value": "64"}]),
+                ],
+                "{spec} {workers}"
+            );
+        }
     }
 }
 
