@@ -1,6 +1,7 @@
 #![cfg(feature = "tla")]
-use idealis_connect::tla::{ConnectSpec, Driver, Value, check_driver, finite_model};
-use idealis_core::{SafetyBounds, Status};
+use idealis_connect::tla::{
+    ConnectSpec, Driver, FiniteModel, SafetyBounds, Status, Value, check_driver, finite_model,
+};
 
 const MODEL: &str = r#"---- MODULE Store ----
 EXTENDS Naturals
@@ -38,7 +39,7 @@ impl Driver for Store {
 #[test]
 fn constrained_graph_preserves_initial_observations_and_checks_live_stores() {
     for constraint in ["CONSTRAINT Limit", "ACTION_CONSTRAINT StepLimit"] {
-        let model = finite_model(
+        let model: FiniteModel = finite_model(
             MODEL,
             &format!("{CFG}{constraint}"),
             ConnectSpec::default(),
@@ -74,6 +75,13 @@ fn constrained_graph_preserves_initial_observations_and_checks_live_stores() {
         let report = idealis_connect::tla::check(&model, plan, &mut Store(true)).unwrap();
         assert_eq!(report.result.status, idealis_connect::TestStatus::Failed);
         assert_eq!(report.counterexample.unwrap().status, Status::Mismatch);
+        let actions: Vec<Value> = report.counterexample_actions.unwrap();
+        assert_eq!(actions.len(), 1);
+        assert!(matches!(&actions[0], Value::List(args) if args[0] == Value::String("put".into())));
+        assert_eq!(
+            serde_json::to_value(actions).unwrap(),
+            serde_json::to_value(report.result.counterexample.unwrap().actions).unwrap()
+        );
     }
 }
 #[test]
@@ -130,4 +138,31 @@ Next == x = 0 /\ UNCHANGED x /\ act' = <<"put", 0>> /\ obs' = 0
     let report = idealis_connect::tla::check(&model, plan, &mut Store(false)).unwrap();
     assert_eq!(report.result.status, idealis_connect::TestStatus::Exhausted);
     assert!(report.counterexample.is_none());
+    assert!(report.counterexample_actions.is_none());
+}
+
+#[test]
+fn reset_mismatch_keeps_the_whole_saved_case_even_when_no_steps_ran() {
+    let source = MODEL.replace("obs \\in {0, 1}", "obs = 0");
+    let model = finite_model(&source, CFG, ConnectSpec::default(), bounds()).unwrap();
+    for length in [0, 2] {
+        let plan = idealis_connect::Plan {
+            generator: idealis_connect::Generator::from_finite_model(&model, "1", length, length)
+                .unwrap(),
+            seed: 7,
+            cases: 1,
+            max_attempts: 2,
+            max_shrink_checks: 16,
+            max_work: 10000,
+        };
+        let report = idealis_connect::tla::check(&model, plan, &mut Store(false)).unwrap();
+        assert_eq!(report.result.status, idealis_connect::TestStatus::Failed);
+        assert_eq!(report.counterexample.unwrap().checked_steps, 0);
+        let actions = report.counterexample_actions.unwrap();
+        assert_eq!(actions.len(), length);
+        assert_eq!(
+            serde_json::to_value(actions).unwrap(),
+            serde_json::to_value(report.result.counterexample.unwrap().actions).unwrap()
+        );
+    }
 }

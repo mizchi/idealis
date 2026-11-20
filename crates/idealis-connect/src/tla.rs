@@ -1,10 +1,11 @@
 //! Optional adapter for a finite TLA+ model with action and observation variables.
 use crate::{ActionEdge, Effect, Error, Generator, Phase, Plan, Session, TestResult, Verdict};
 use idealis_core::{
-    ConformanceResult, CoreError, Edge, Effect as ModelEffect, FiniteModel, FiniteState, Initial,
+    ConformanceResult, CoreError, Edge, Effect as ModelEffect, FiniteState, Initial,
     PreparedFiniteModel, Response,
 };
-pub use idealis_core::{SafetyBounds, Status, Value};
+pub use idealis_core::{FiniteModel, SafetyBounds, Status, Value};
+use serde::Deserialize;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 
 pub struct ConnectSpec<'a> {
@@ -215,6 +216,9 @@ impl Generator {
 pub struct Report {
     pub result: TestResult,
     pub counterexample: Option<ConformanceResult>,
+    /// The full saved case in TLA+ values, including any actions after the first mismatch.
+    /// An empty action list represents a reset-only case.
+    pub counterexample_actions: Option<Vec<Value>>,
 }
 
 pub fn check(model: &FiniteModel, plan: Plan, driver: &mut impl Driver) -> Result<Report, Error> {
@@ -250,9 +254,16 @@ pub fn check(model: &FiniteModel, plan: Plan, driver: &mut impl Driver) -> Resul
                 session.resume(id, verdict)?;
             }
             Effect::Done { result } => {
+                let counterexample_actions = result
+                    .counterexample
+                    .as_ref()
+                    .map(|case| case.actions.iter().map(Value::deserialize).collect())
+                    .transpose()
+                    .map_err(model_error)?;
                 return Ok(Report {
                     result,
                     counterexample,
+                    counterexample_actions,
                 });
             }
         }
