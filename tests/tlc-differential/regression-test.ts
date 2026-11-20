@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
-import { check } from "tla-ts";
 import { bounds } from "../../evals/experiments/collections-temporal/cases.js";
 import { traceInput } from "../../evals/experiments/collections-temporal/tlc.js";
 import {
@@ -9,19 +8,22 @@ import {
   foldOrderControls,
   foldRejections,
 } from "../../evals/experiments/tlc-differential/corpus.js";
-import { startNative } from "../../evals/experiments/usable/native.js";
 import { digest } from "../../evals/experiments/usable/provenance.js";
 import type {
   PortableValue,
   SafetyResult,
 } from "../../packages/idealis/src/contracts.js";
 import { PortableCoreError } from "../../packages/idealis/src/portable-value.js";
-import { createPortableWasm } from "../../packages/idealis/src/portable-wasm.js";
 import { decodeSafetyProgram } from "../../packages/idealis/src/safety-program.js";
 import { checkSafety } from "../../packages/idealis/src/safety.js";
 import { compileTlaSafety } from "../../packages/idealis/src/tla-safety.js";
 import { compileTlaSource } from "../../packages/idealis/src/tla-source.js";
 import { isRecord } from "../../packages/idealis/src/trace.js";
+import {
+  startCiNative,
+  createCiWasm,
+  checkCiReference,
+} from "../ci/tlc-checkers.js";
 import "./operator-sharing-test.js";
 import "./operator-sharing-framed-test.js";
 import "./operator-sharing-limits-test.js";
@@ -56,11 +58,7 @@ const golden = (
     }),
   )
 ).flat();
-const core = await createPortableWasm(
-  await readFile(
-    "crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm",
-  ),
-);
+const core = await createCiWasm();
 for (const input of [...boundaries(), ...foldOrderControls()])
   test(`TLC regression: ${input.name}`, async () => {
     if (input.expectedRejection) {
@@ -82,7 +80,7 @@ for (const input of [...boundaries(), ...foldOrderControls()])
     }
     const reference =
       fixture ??
-      (await check({
+      (await checkCiReference({
         source: input.source,
         config: input.config,
         livenessCheck: "final",
@@ -103,7 +101,7 @@ for (const input of [...boundaries(), ...foldOrderControls()])
       fixture?.unsupported ? "error" : reference.status,
       `${input.name}: ${JSON.stringify(result ?? error)}`,
     );
-    const native = startNative();
+    const native = startCiNative();
     try {
       const response = await native.request({
         version: 1,
@@ -140,7 +138,7 @@ for (const input of [...boundaries(), ...foldOrderControls()])
     }
     if (result?.violation?.trace.length && !fixture) {
       const forced = traceInput(input, compileTlaSafety(input), result);
-      const witness = await check({
+      const witness = await checkCiReference({
         ...forced,
         version: "1.7.4",
         livenessCheck: "final",
@@ -194,7 +192,7 @@ for (const input of foldRejections())
       )
     ) {
       assert.equal(fixture.status, "invariant-violation");
-      const native = startNative();
+      const native = startCiNative();
       try {
         for (const irVersion of [1, 2] as const) {
           const program = compileTlaSource(core, { ...input, irVersion });
@@ -217,7 +215,7 @@ for (const input of foldRejections())
       return;
     }
     assert.throws(() => compileTlaSource(core, input), PortableCoreError);
-    const native = startNative();
+    const native = startCiNative();
     try {
       const response = await native.request({
         version: 1,

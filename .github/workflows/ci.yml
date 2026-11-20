@@ -89,6 +89,22 @@ jobs:
       - run: cargo fmt --manifest-path crates/idealis-core/Cargo.toml -- --check
       - run: cargo clippy --all-targets --locked --manifest-path crates/idealis-core/Cargo.toml -- -D warnings
       - run: just portable-build
+      - name: Identify TLC-compatible checkers
+        id: tlc-build
+        run: |
+          build=$(node --input-type=module -e "import { tlcBuild } from './dist/tests/ci/tlc-build.js'; console.log(tlcBuild())")
+          echo "build=$build" >> "$GITHUB_OUTPUT"
+          inputs=$(git rev-parse HEAD:tests HEAD:fixtures HEAD:evals HEAD:crates | sha256sum | cut -d' ' -f1)
+          echo "inputs=$inputs" >> "$GITHUB_OUTPUT"
+          echo "IDEALIS_TLC_RESULTS=.artifacts/tlc-results" >> "$GITHUB_ENV"
+      - name: Restore model check results for this checker build
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .artifacts/tlc-results/${{ steps.tlc-build.outputs.build }}
+          key: tlc-results-v1-${{ steps.tlc-build.outputs.build }}-${{ steps.tlc-build.outputs.inputs }}
+          restore-keys: |
+            tlc-results-v1-${{ steps.tlc-build.outputs.build }}-
+      - run: node --test dist/tests/ci/tlc-result-cache.test.js
       - run: just cache-test
       - run: just expansion-test
       - run: just expansion-eval .artifacts/cache-expansion-eval

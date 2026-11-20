@@ -1,25 +1,24 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
-import { check, TlaError } from "tla-ts";
+import { TlaError } from "tla-ts";
 import { bounds, cases } from "../../evals/experiments/rust-safety/cases.js";
-import { startNative } from "../../evals/experiments/usable/native.js";
 import { assertOracle } from "../../evals/experiments/workspace-oracle/node.js";
-import { createPortableWasm } from "../../packages/idealis/src/portable-wasm.js";
 import {
   checkSafety,
   decodeSafetyResult,
 } from "../../packages/idealis/src/safety.js";
 import { compileTlaSafety } from "../../packages/idealis/src/tla-safety.js";
 import { isRecord } from "../../packages/idealis/src/trace.js";
+import {
+  startCiNative,
+  createCiWasm,
+  checkCiReference,
+} from "../ci/tlc-checkers.js";
 
 test("Rust generates TLA states and checks safety in native and Wasm without a materialized graph", async () => {
-  const core = await createPortableWasm(
-    await readFile(
-      "crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm",
-    ),
-  );
-  const native = startNative();
+  const core = await createCiWasm();
+  const native = startCiNative();
   try {
     for (const entry of cases) {
       const program = compileTlaSafety(entry);
@@ -47,11 +46,13 @@ test("Rust generates TLA states and checks safety in native and Wasm without a m
         assert.equal(result.status, entry.expected, entry.name);
       }
       if (entry.bounds || entry.name === "empty") continue;
-      const reference = await check(entry).catch((error: unknown) => {
-        if (entry.expected !== "error") throw error;
-        assert.ok(error instanceof TlaError);
-        return undefined;
-      });
+      const reference = await checkCiReference(entry).catch(
+        (error: unknown) => {
+          if (entry.expected !== "error") throw error;
+          assert.ok(error instanceof TlaError);
+          return undefined;
+        },
+      );
       if (!reference) continue;
       assert.equal(
         reference.status,
@@ -93,18 +94,14 @@ test("Rust generates TLA states and checks safety in native and Wasm without a m
 
 test("the unmodified upstream DieHard model finds the same shortest solution", async () => {
   const source = await readFile("fixtures/die-hard/DieHard.tla", "utf8");
-  const core = await createPortableWasm(
-    await readFile(
-      "crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm",
-    ),
-  );
+  const core = await createCiWasm();
   for (const invariants of ["TypeOK", "TypeOK NotSolved"]) {
     const options = {
       source,
       config: `INIT Init\nNEXT Next\nINVARIANT ${invariants}`,
     };
     const actual = checkSafety(core, compileTlaSafety(options), bounds);
-    const reference = await check(options);
+    const reference = await checkCiReference(options);
     assert.equal(
       actual.status,
       reference.status === "success" ? "complete" : reference.status,
