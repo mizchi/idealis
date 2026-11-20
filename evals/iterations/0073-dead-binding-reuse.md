@@ -31,7 +31,7 @@
 
 r1 と r2 の完全応答 corpus は、どちらも 264 比較で差分 0 だった。この corpus は新しい経路を通らず、r3 と同じ入力・同じ比較なので、raw（各 42 MB）はこの iteration に含めず、集計（[r1](../runs/0073-r1-corpus-summary/result.json)、[r2](../runs/0073-r2-corpus-summary/result.json)）と台帳の行だけを残す。r3 は raw ごと残す。
 
-記録した run では、実行したホストの絶対パスとユーザー名を、記録する時点で `<scratch>`、`<after>`、`<clone>`、`<tools>`、`<mise>`、`<home>`、`<user>` に置き換えた。結果の値、計数、sha256 は変えていない。
+記録した run では、実行したホストの絶対パスとユーザー名を、記録する時点で `<scratch>`、`<after>`、`<clone>`、`<tools>`、`<mise>`、`<home>`、`<user>` に置き換えた。TLC の出力と corpus の環境記録に残っていたホストの一時ディレクトリは、PR のレビューの段で `<tmp>` に置き換えた。結果の値、計数、sha256 は変えていない。
 
 ## 意味と work の検査
 
