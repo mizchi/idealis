@@ -21,7 +21,7 @@ wild = Path(os.environ["RUNNER_TEMP"]) / "wild"
 command = '{"version":1,"request":{"kind":"shrink-candidates","length":0}}'
 expected = {"kind": "candidates", "ranges": []}
 
-def verify(target, mode):
+def verify(target, mode, test_binary):
     if task == "native-core":
         binary = target / "release/idealis-core"
         result = subprocess.check_output([binary], input=command+"\n", text=True)
@@ -43,7 +43,7 @@ process.exitCode = wasi.start(instance);"""
         result = subprocess.run(["node", "--input-type=module", "-e", code, binary], text=True, capture_output=True)
         assert result.returncode == 1 and "Usage: idealis tlc" in result.stdout, result
     if task in ("rtlc-tests", "native-core"):
-        binary = (target / "release/idealis-core") if task == "native-core" else next(p for p in (target / "debug/deps").glob("rtlc-*") if os.access(p,os.X_OK))
+        binary = (target / "release/idealis-core") if task == "native-core" else test_binary
         comment = subprocess.check_output(["readelf", "-p", ".comment", binary], text=True)
         print(comment)
         if mode == "wild":
@@ -61,9 +61,17 @@ for mode in ["default", "wild", "wild", "default"]:
                 env["CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER"] = "clang"
                 env["CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS"] = f"-Clink-arg=--ld-path={wild}"
         start = time.monotonic()
-        subprocess.run(["cargo", *args, "--offline", *common], check=True, env=env)
+        invocation = ["cargo", *args, "--offline", *common]
+        test_binary = None
+        if task == "rtlc-tests":
+            output = subprocess.check_output([*invocation, "--message-format=json"], env=env, text=True)
+        else:
+            subprocess.run(invocation, check=True, env=env)
         elapsed = time.monotonic() - start
-        verify(target, mode)
+        if task == "rtlc-tests":
+            messages = (json.loads(line) for line in output.splitlines() if line.startswith('{"reason":'))
+            test_binary = next(m["executable"] for m in messages if m["reason"] == "compiler-artifact" and m["target"]["name"] == "rtlc" and m["executable"])
+        verify(target, mode, test_binary)
         row = f"{task} {mode} {elapsed:.3f}s"
         print("MEASURE", row, flush=True)
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as out:
