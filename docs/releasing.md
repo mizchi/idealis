@@ -51,12 +51,12 @@ registry へ公開済みの version は使い回さない。途中まで公開�
 
 PR と `main` への push では、4 つの検証ジョブを並列に実行する。各ジョブの結果は `verification-evidence-<ジョブ ID>` に保存する。
 
-| ジョブ ID | 検査                                                                             |
-| --------- | -------------------------------------------------------------------------------- |
-| `sdk`     | SDK、Connect bindings、各 crate の lint・単体テスト、mutation                    |
-| `wasm`    | native / Wasm の release ビルド、ホスト・ソルバーの統合テスト、配布物の consumer |
-| `model`   | portable core、TLC 差分検査、safety / temporal、usable の評価と再生              |
-| `go`      | Go adapter の race テスト、3 言語の実装照合、非同期履歴の評価と再生              |
+| ジョブ ID | 検査                                                                                                  |
+| --------- | ----------------------------------------------------------------------------------------------------- |
+| `sdk`     | SDK、Connect bindings、各 crate の lint・単体テスト、mutation                                         |
+| `wasm`    | native / Wasm の release ビルド、ホスト・ソルバーの統合テスト、配布物の consumer、usable の評価と再生 |
+| `model`   | portable core、TLC 差分検査、safety / temporal                                                        |
+| `go`      | Go adapter の race テスト、3 言語の実装照合、非同期履歴の評価と再生                                   |
 
 `model` と `go` はそれぞれ portable core をビルドする。TLC の結果キャッシュは `model` だけが復元・保存し、チェッカーのビルドが一致する検査結果を再利用する。Lean の `cache-proof` は 4 ジョブと並列に実行する。
 
