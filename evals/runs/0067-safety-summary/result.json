@@ -1,0 +1,888 @@
+{
+  "status": "complete",
+  "plan": "0067-record-schema",
+  "input": "evals/runs/0067-safety-kernel",
+  "manifest": {
+    "metadata": [
+      {
+        "binarySha256": "e73db747e8d5603d8ae217f9d2e848ddeb1fb73df7e671e74356731154b444f2",
+        "benchSha256": "2c98a88b5767c9ce73fc0e17c3622baf1c1925624e4b8ff1842a5f1513c79c7b"
+      },
+      {
+        "binarySha256": "86275a8179d8ef0188bd035e3f16fd45ad8ab7c373d833fee7480dcd1d217d81",
+        "benchSha256": "2c98a88b5767c9ce73fc0e17c3622baf1c1925624e4b8ff1842a5f1513c79c7b"
+      }
+    ],
+    "filter": "",
+    "inputPath": ".artifacts/criterion-safety/inputs.json",
+    "inputSha256": "d9a95e8abff4900e74ca918a9fbd9ae6d1b9fcb39d00a9759ef114044a85b835",
+    "cpu": "Apple M5",
+    "sampleSize": 20,
+    "warmupMs": 500,
+    "measurementMs": 1000,
+    "order": [
+      "before",
+      "after",
+      "after",
+      "before"
+    ]
+  },
+  "manifestSha256": "c688873227488d96640c1ae3d1ee3e10099f6567f31bf40fe65d58365be7fe19",
+  "method": "Arithmetic mean of two Criterion mean estimates per side in ABBA order. Intervals are per repetition, not pooled.",
+  "records": [
+    {
+      "name": "membership/function-cube",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-safety-kernel/0/criterion/membership/function-cube/new/estimates.json",
+          "sha256": "6bd95e9ff8c05a5c9bdc6d62e7c146ae55f1baecc93c9f327a41690af27241a9",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1724569.716398393,
+              "upper_bound": 1742035.2852939558
+            },
+            "point_estimate": 1733023.2918845043,
+            "standard_error": 4451.859216748803
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/1/criterion/membership/function-cube/new/estimates.json",
+          "sha256": "2abf35c0e47aced2d04ca8e8ee3591d584c5a9496cbb1c904fda1618240e7248",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1771252.481830487,
+              "upper_bound": 1821261.1526974472
+            },
+            "point_estimate": 1793815.9317957263,
+            "standard_error": 12860.481264902113
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/2/criterion/membership/function-cube/new/estimates.json",
+          "sha256": "f4b16039178144c05698651ed7abd8eedd5ec7a0bb99fc6cb35cfbb641db499b",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1743216.1569613526,
+              "upper_bound": 1787270.1665634566
+            },
+            "point_estimate": 1762723.0695129526,
+            "standard_error": 11348.973567457146
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/3/criterion/membership/function-cube/new/estimates.json",
+          "sha256": "9f71949d73bfab192423a51f4dc1f7300f1e84ad17763e2ab7f2df3bea26b4ff",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1738981.7325776666,
+              "upper_bound": 1762498.5907556708
+            },
+            "point_estimate": 1750202.7699062875,
+            "standard_error": 5985.597228704114
+          }
+        }
+      ],
+      "beforeNs": 1741613.030895396,
+      "afterNs": 1778269.5006543393,
+      "ratio": 1.0210474250643942,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "membership/parallel-channels",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-safety-kernel/0/criterion/membership/parallel-channels/new/estimates.json",
+          "sha256": "af399638422dcfadd0cd90e6a55ff7dd98068d15e16be36232df69a498a7cddd",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 965822.2542933495,
+              "upper_bound": 974535.1275953712
+            },
+            "point_estimate": 969936.6300564979,
+            "standard_error": 2228.4757138695863
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/1/criterion/membership/parallel-channels/new/estimates.json",
+          "sha256": "03368f02e1ff62f9a95489f89329d881121b6458fab288dc3b9d855c9a962114",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 975069.48925,
+              "upper_bound": 1014087.15325
+            },
+            "point_estimate": 991203.6799999999,
+            "standard_error": 10228.32035978949
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/2/criterion/membership/parallel-channels/new/estimates.json",
+          "sha256": "bc541041c95a8aef6415a6305bcee7863b39d6acf941825842c9e1f624d08aef",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 982134.1154363614,
+              "upper_bound": 988466.0466324928
+            },
+            "point_estimate": 985282.885855634,
+            "standard_error": 1616.9987276648899
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/3/criterion/membership/parallel-channels/new/estimates.json",
+          "sha256": "c253dded92960de95c3484fea00cc3f0a04e4edb1beee3691d4da0de1f226787",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 993711.3301338939,
+              "upper_bound": 1009651.9980626086
+            },
+            "point_estimate": 1000861.8450062079,
+            "standard_error": 4117.272052198974
+          }
+        }
+      ],
+      "beforeNs": 985399.2375313529,
+      "afterNs": 988243.282927817,
+      "ratio": 1.0028861859113967,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "search/counter-product/1",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-safety-kernel/0/criterion/search/counter-product/1/new/estimates.json",
+          "sha256": "79fac0b4275aa96ba8d1aaa76a9c5b65041e76aa482be60b6bf0dd022c55cadf",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 9507258.980416665,
+              "upper_bound": 9664644.299791668
+            },
+            "point_estimate": 9585311.116666669,
+            "standard_error": 40305.26593821909
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/1/criterion/search/counter-product/1/new/estimates.json",
+          "sha256": "c62bbcd87b87cbea7bb889a702dbca4548a1d88be4d70f81a18fb3ab2e03d17b",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 9760329.115833335,
+              "upper_bound": 9880576.137291668
+            },
+            "point_estimate": 9805490.275,
+            "standard_error": 33784.33679240879
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/2/criterion/search/counter-product/1/new/estimates.json",
+          "sha256": "396885e77b33a28116d66112354b0c70212d94678531e9494e59a019642bb026",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 10134126.197250001,
+              "upper_bound": 10749916.898999998
+            },
+            "point_estimate": 10408267.499999998,
+            "standard_error": 158529.82698806704
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/3/criterion/search/counter-product/1/new/estimates.json",
+          "sha256": "a3389658fab82005b268832432ef8facc33ae6dfdabbd29e1c9a7465a3a919f8",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 9743572.907083334,
+              "upper_bound": 9766527.800416665
+            },
+            "point_estimate": 9754939.591666665,
+            "standard_error": 5865.920491911928
+          }
+        }
+      ],
+      "beforeNs": 9670125.354166668,
+      "afterNs": 10106878.8875,
+      "ratio": 1.0451652400912408,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "search/counter-product/8",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-safety-kernel/0/criterion/search/counter-product/8/new/estimates.json",
+          "sha256": "48cff541e067cc64fd2454e10e35b8a666aab910caa45dbcb886e2572a23bb09",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 9769455.368333332,
+              "upper_bound": 9925123.986249998
+            },
+            "point_estimate": 9839418.383333333,
+            "standard_error": 39563.85484571047
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/1/criterion/search/counter-product/8/new/estimates.json",
+          "sha256": "9272fd9021e98f2cd9de10e04898c04dc5ea04bd36621b717aa1f4c7ca81b63b",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 9502827.592708336,
+              "upper_bound": 9643031.45083333
+            },
+            "point_estimate": 9574319.791666668,
+            "standard_error": 35840.32616736535
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/2/criterion/search/counter-product/8/new/estimates.json",
+          "sha256": "1bea57781cd970ba0bf0095eabb17f116848e2d5ff64b17ee0d9252b35d682d8",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 9878306.237499999,
+              "upper_bound": 10109952.353249997
+            },
+            "point_estimate": 9990151.649999999,
+            "standard_error": 59462.79973084619
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/3/criterion/search/counter-product/8/new/estimates.json",
+          "sha256": "6e5a91804e8402bb420f0dd2602a1872c2aabac7122f4c0c5429df0fd1821706",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 9752039.924166666,
+              "upper_bound": 9774101.758541668
+            },
+            "point_estimate": 9763051.05,
+            "standard_error": 5627.922020655083
+          }
+        }
+      ],
+      "beforeNs": 9801234.716666667,
+      "afterNs": 9782235.720833333,
+      "ratio": 0.9980615711813302,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "search/function-cube/1",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-safety-kernel/0/criterion/search/function-cube/1/new/estimates.json",
+          "sha256": "2e129801926e9e7a23f0d0dd4e54586782d4a0bacb5ca406f6303a83d3c6b67e",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 6228293.120426399,
+              "upper_bound": 6319245.772432658
+            },
+            "point_estimate": 6265744.081767124,
+            "standard_error": 23891.823459576084
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/1/criterion/search/function-cube/1/new/estimates.json",
+          "sha256": "8b95495ff94c162d2d47c60265fa16d7f6e9a147e25079cfb900a4111f2dc542",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 6607880.461611298,
+              "upper_bound": 6622594.53174347
+            },
+            "point_estimate": 6615179.905068958,
+            "standard_error": 3749.8920460570566
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/2/criterion/search/function-cube/1/new/estimates.json",
+          "sha256": "78d40927e1ca6b8e36ce1a9ad18c1d7c045e821ae24a0caf565b1048bd3036d1",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 6061942.562658713,
+              "upper_bound": 6237401.314963667
+            },
+            "point_estimate": 6145308.041472535,
+            "standard_error": 44980.443088314074
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/3/criterion/search/function-cube/1/new/estimates.json",
+          "sha256": "396e0fd682fc3195ada260a4e2d7a1e50ea8a80ff22f55e7758434c11d7e394b",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 6318066.71637552,
+              "upper_bound": 6369959.8972187955
+            },
+            "point_estimate": 6340247.757716655,
+            "standard_error": 13486.087952180433
+          }
+        }
+      ],
+      "beforeNs": 6302995.919741889,
+      "afterNs": 6380243.973270746,
+      "ratio": 1.0122557676559658,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "search/function-cube/8",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-safety-kernel/0/criterion/search/function-cube/8/new/estimates.json",
+          "sha256": "3c40d06899ca75a420fe8238b52ab210e2d05b7651355ebc59d844e31b26c689",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 6013811.729139297,
+              "upper_bound": 6070470.669691183
+            },
+            "point_estimate": 6041296.268681766,
+            "standard_error": 14485.86005904852
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/1/criterion/search/function-cube/8/new/estimates.json",
+          "sha256": "46c797b34dabfdb9062d32746b5f31283eb1564f29dac83d50d92b400e71e662",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 5919430.050210738,
+              "upper_bound": 5979101.844203642
+            },
+            "point_estimate": 5947069.397351299,
+            "standard_error": 15328.285862882884
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/2/criterion/search/function-cube/8/new/estimates.json",
+          "sha256": "66c60934bd3d7e8faa6aff9d48da657969571a6f0be2ab1def8179b65bc28386",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 5791324.112142663,
+              "upper_bound": 5820815.429383064
+            },
+            "point_estimate": 5806142.441700109,
+            "standard_error": 7532.092999989073
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/3/criterion/search/function-cube/8/new/estimates.json",
+          "sha256": "cdaa41d3d02688c43e3006e3bf2990f350e6019c3208a8a90eafead8b3f0d55a",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 5847198.020841057,
+              "upper_bound": 5970338.340902114
+            },
+            "point_estimate": 5906733.24859829,
+            "standard_error": 31475.97655827775
+          }
+        }
+      ],
+      "beforeNs": 5974014.758640029,
+      "afterNs": 5876605.919525704,
+      "ratio": 0.9836945767545276,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "search/linear-ring/1",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-safety-kernel/0/criterion/search/linear-ring/1/new/estimates.json",
+          "sha256": "054c688d22c49fc7d827d7ace3e1f83f4ba080d03b23220091e66f29d9da9310",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1119372.4156566923,
+              "upper_bound": 1121110.2746967468
+            },
+            "point_estimate": 1120217.880313612,
+            "standard_error": 444.6985648975585
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/1/criterion/search/linear-ring/1/new/estimates.json",
+          "sha256": "ed5a4ec0345a350952a0d1720fe131bb65d2b95b33821a5785cb98b025167dd9",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1119728.4552656268,
+              "upper_bound": 1127148.8886544837
+            },
+            "point_estimate": 1123275.504044177,
+            "standard_error": 1900.6073004641491
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/2/criterion/search/linear-ring/1/new/estimates.json",
+          "sha256": "11f358c4c284e8f0e59934fb3d7f88375fbc4e986a0712d04312655a25185f33",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1117046.0248383682,
+              "upper_bound": 1137107.516292557
+            },
+            "point_estimate": 1125406.8676125885,
+            "standard_error": 5222.113258032396
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/3/criterion/search/linear-ring/1/new/estimates.json",
+          "sha256": "2c3cfc82c6571cf306db097f7c889be0164165ac552b1c6d8e3f2647c67fdc1f",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1111219.5016715273,
+              "upper_bound": 1115785.6232282845
+            },
+            "point_estimate": 1113585.4472550887,
+            "standard_error": 1164.1723424900536
+          }
+        }
+      ],
+      "beforeNs": 1116901.6637843503,
+      "afterNs": 1124341.1858283826,
+      "ratio": 1.006660856801686,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "search/linear-ring/8",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-safety-kernel/0/criterion/search/linear-ring/8/new/estimates.json",
+          "sha256": "bb23d440a8605fb60cbac78e0a4777f4e7d669aef843f1a3ff6811445b648955",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1118240.2814870176,
+              "upper_bound": 1135449.4028617654
+            },
+            "point_estimate": 1125695.1540238322,
+            "standard_error": 4445.560397498651
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/1/criterion/search/linear-ring/8/new/estimates.json",
+          "sha256": "85c536595ef94c58c8cbdc60c7ecb479ea5a96dbeb992341d67a2954219ff333",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1116295.6563134796,
+              "upper_bound": 1119088.757982996
+            },
+            "point_estimate": 1117713.2163669108,
+            "standard_error": 716.4880331708594
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/2/criterion/search/linear-ring/8/new/estimates.json",
+          "sha256": "ddac674222c790e55c8f40bdc95b097c94112601817b3c0abdf6d1bf06ecea4a",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1118192.8766253532,
+              "upper_bound": 1132299.9134624612
+            },
+            "point_estimate": 1124672.3448918732,
+            "standard_error": 3623.1029869502377
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/3/criterion/search/linear-ring/8/new/estimates.json",
+          "sha256": "3e1c7653c7c2ce7b920ff1a316e056e6a94912524e6de8ee7e01a5a8686c79fd",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1113303.9446320545,
+              "upper_bound": 1133087.7230712695
+            },
+            "point_estimate": 1121574.3241091361,
+            "standard_error": 5167.550364224664
+          }
+        }
+      ],
+      "beforeNs": 1123634.7390664842,
+      "afterNs": 1121192.780629392,
+      "ratio": 0.9978267328766277,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "search/parallel-channels/1",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-safety-kernel/0/criterion/search/parallel-channels/1/new/estimates.json",
+          "sha256": "2549e32e5b31ad0c05386303b9d669b65571fb36d29b69c598ad3f1020f81110",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 11936958.30875,
+              "upper_bound": 12095651.132749999
+            },
+            "point_estimate": 11995782.5,
+            "standard_error": 45485.618045501666
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/1/criterion/search/parallel-channels/1/new/estimates.json",
+          "sha256": "bc6761686d4477431a2a2c137941fffaee350f32439e991f6c003770ce12c4b2",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 11996085.348999998,
+              "upper_bound": 12135035.0635
+            },
+            "point_estimate": 12049909.169999998,
+            "standard_error": 37089.715102244765
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/2/criterion/search/parallel-channels/1/new/estimates.json",
+          "sha256": "0a34a5025c1f211cc62dc90a36a97fb393ceb7364c9b2472d3616777db37ea58",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 11987162.322500002,
+              "upper_bound": 12176630.5255
+            },
+            "point_estimate": 12072870.84,
+            "standard_error": 48855.71978188647
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/3/criterion/search/parallel-channels/1/new/estimates.json",
+          "sha256": "b54b52592e12475225815ca0361cd33da1cce5fc1a308d5e88c07c9890ada4df",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 11400767.010749998,
+              "upper_bound": 11463425.08325
+            },
+            "point_estimate": 11427838.719999999,
+            "standard_error": 16178.416674893942
+          }
+        }
+      ],
+      "beforeNs": 11711810.61,
+      "afterNs": 12061390.004999999,
+      "ratio": 1.0298484501364387,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "search/parallel-channels/8",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-safety-kernel/0/criterion/search/parallel-channels/8/new/estimates.json",
+          "sha256": "399d97b7491f17365cfba7425fbacba3b9837bc48f95dd310301ec1f48eb83bb",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 6838991.456373915,
+              "upper_bound": 6894317.882761624
+            },
+            "point_estimate": 6866142.982507703,
+            "standard_error": 14106.017685485798
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/1/criterion/search/parallel-channels/8/new/estimates.json",
+          "sha256": "d141bd2045f5c372f9dbe51a4a1cc02893ba68b2794cef8b41890a3954cc5a73",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 6518381.423294049,
+              "upper_bound": 6555941.161820485
+            },
+            "point_estimate": 6536680.965822229,
+            "standard_error": 9568.200864365393
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/2/criterion/search/parallel-channels/8/new/estimates.json",
+          "sha256": "05e32007b3bc2d5ee6cfc82c60ebf657866abe2c63ef423fe08001cd93ba365d",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 6382885.468120433,
+              "upper_bound": 6452652.991780732
+            },
+            "point_estimate": 6414518.64379793,
+            "standard_error": 18009.184307125466
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/3/criterion/search/parallel-channels/8/new/estimates.json",
+          "sha256": "954fd16de20bf3975c15a599cc8ba610973cad2beff017dd545d6b9fdd4e31b6",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 6483137.000482183,
+              "upper_bound": 6647209.547073028
+            },
+            "point_estimate": 6552036.334414062,
+            "standard_error": 42491.87477424318
+          }
+        }
+      ],
+      "beforeNs": 6709089.6584608825,
+      "afterNs": 6475599.80481008,
+      "ratio": 0.965197982805857,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "values/except-function",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-safety-kernel/0/criterion/values/except-function/new/estimates.json",
+          "sha256": "a1764b74a6a65d2bbd559ce3a9be174940817355eef4a5f1b30ca0d4aa9eda67",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 474033.60543885827,
+              "upper_bound": 475007.66200088244
+            },
+            "point_estimate": 474525.0786977862,
+            "standard_error": 248.13825947154933
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/1/criterion/values/except-function/new/estimates.json",
+          "sha256": "e8148a00b2a54fa4620eb42bdbdffc5227967a38acf99a414e1a22b1d9525083",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 471024.25310559355,
+              "upper_bound": 479643.00240914343
+            },
+            "point_estimate": 475014.81914641644,
+            "standard_error": 2212.686686358529
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/2/criterion/values/except-function/new/estimates.json",
+          "sha256": "c562182d15133adaf002e3d535fafe9749f61732f484c41f57a977ab3b9c3f8a",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 472092.7962716288,
+              "upper_bound": 473476.87762075174
+            },
+            "point_estimate": 472795.8772780245,
+            "standard_error": 353.33154254599015
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/3/criterion/values/except-function/new/estimates.json",
+          "sha256": "2d8335a974d5e0953292972ff05000784ec51988e0563a250b82897ba241f090",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 470399.08611131256,
+              "upper_bound": 471400.9301091432
+            },
+            "point_estimate": 470898.6819779382,
+            "standard_error": 255.86451259385728
+          }
+        }
+      ],
+      "beforeNs": 472711.8803378622,
+      "afterNs": 473905.3482122205,
+      "ratio": 1.0025247257875247,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "values/except-record",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-safety-kernel/0/criterion/values/except-record/new/estimates.json",
+          "sha256": "3417441e70bcbe6a030ff09e3d3c9ed290b9efeb1668a5f939f8f9717a515176",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 4213901.753939877,
+              "upper_bound": 4292937.68589012
+            },
+            "point_estimate": 4247816.958558115,
+            "standard_error": 20590.589776728655
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/1/criterion/values/except-record/new/estimates.json",
+          "sha256": "c67bbf4a85fde5234ba0a9d5f5ac0b3c103fe66ab9a3504c3c6c027d9b6db33c",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 4336940.170777649,
+              "upper_bound": 4380948.332108325
+            },
+            "point_estimate": 4356942.170102484,
+            "standard_error": 11275.236319375519
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/2/criterion/values/except-record/new/estimates.json",
+          "sha256": "ee3a3be435c67144b5a7a2164e42a8691127f3ad1194e3da6c5f01321eedf05d",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 4252772.335194068,
+              "upper_bound": 4305240.738977915
+            },
+            "point_estimate": 4276605.755918326,
+            "standard_error": 13464.840309327552
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/3/criterion/values/except-record/new/estimates.json",
+          "sha256": "ac9b3b7fb97e2f99dc371d93fabd8b11e415e78d1813358770140da429d51755",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 4200617.090517526,
+              "upper_bound": 4235446.351545568
+            },
+            "point_estimate": 4216257.789929474,
+            "standard_error": 8980.286004190926
+          }
+        }
+      ],
+      "beforeNs": 4232037.374243794,
+      "afterNs": 4316773.963010404,
+      "ratio": 1.020022646605703,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "values/intern-existing-functions",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-safety-kernel/0/criterion/values/intern-existing-functions/new/estimates.json",
+          "sha256": "a92c60ff5b366dcbc73e4320e6c5049318477f03e7948a911970e7815ec2797d",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 367124.9423278596,
+              "upper_bound": 374158.7516042186
+            },
+            "point_estimate": 370142.8600848267,
+            "standard_error": 1825.6490516073013
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/1/criterion/values/intern-existing-functions/new/estimates.json",
+          "sha256": "946da9d818ff3dfa0f0a15cbe2eafed982bcc7b5126919d880cd73ae5fa75b28",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 346870.8017348467,
+              "upper_bound": 352337.7326864987
+            },
+            "point_estimate": 349450.21935388737,
+            "standard_error": 1397.7934413220205
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/2/criterion/values/intern-existing-functions/new/estimates.json",
+          "sha256": "832930d41899fe240161a8b0893f950795e876838a4dbb2615cfc82d80e6a650",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 347380.6799210641,
+              "upper_bound": 354589.77155527903
+            },
+            "point_estimate": 350544.6914371598,
+            "standard_error": 1860.2112513072668
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/3/criterion/values/intern-existing-functions/new/estimates.json",
+          "sha256": "e40270bf4826effe8b86b2c780e5f474d9d124ff574c0ebe8a15a19c144bf545",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 361087.8787659494,
+              "upper_bound": 367725.5305176775
+            },
+            "point_estimate": 364023.22734906495,
+            "standard_error": 1714.3086528797962
+          }
+        }
+      ],
+      "beforeNs": 367083.0437169458,
+      "afterNs": 349997.4553955236,
+      "ratio": 0.9534557953197186,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "values/intern-new-functions",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-safety-kernel/0/criterion/values/intern-new-functions/new/estimates.json",
+          "sha256": "1dcbbe298a385c57940dd8c249ae992ce9e5b154a1d14eaeee65b451b1d98360",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 463509.8661800846,
+              "upper_bound": 468801.92444789706
+            },
+            "point_estimate": 466056.5780728917,
+            "standard_error": 1350.1285957229354
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/1/criterion/values/intern-new-functions/new/estimates.json",
+          "sha256": "1b683f8ce53d4d248e04bcc524d15e2f2e124d952f419762aca38e1f3439203d",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 456081.0601173484,
+              "upper_bound": 460590.5402410682
+            },
+            "point_estimate": 458154.6708415279,
+            "standard_error": 1150.9771190585748
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/2/criterion/values/intern-new-functions/new/estimates.json",
+          "sha256": "79e8edfc4f631e7deda4d6dae2f56b0d11caa8e46e2c36690e9256252a019265",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 454934.9264419557,
+              "upper_bound": 456912.2420406428
+            },
+            "point_estimate": 455920.1475430036,
+            "standard_error": 507.1547984937928
+          }
+        },
+        {
+          "path": "evals/runs/0067-safety-kernel/3/criterion/values/intern-new-functions/new/estimates.json",
+          "sha256": "579b5d0b6c1560ee8ade9d499b439449d5a03ff14bc6bd37a9e3766dae0eaa31",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 420428.5407581716,
+              "upper_bound": 429620.1619117871
+            },
+            "point_estimate": 425161.80838187283,
+            "standard_error": 2347.8032745121313
+          }
+        }
+      ],
+      "beforeNs": 445609.19322738226,
+      "afterNs": 457037.40919226577,
+      "ratio": 1.0256462751185926,
+      "regressionOver10Percent": false
+    }
+  ]
+}

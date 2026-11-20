@@ -1,0 +1,34 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 101 and seed 6237102906015611373 with 1 worker on 10 cores with 7282MB heap and 64MB offheap memory [pid: 56251] (Mac OS X 26.6.2 aarch64, Eclipse Adoptium 21.0.13 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file /Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0059-tlc-replay/fold-equality-entry-error/model/Differential.tla
+Parsing file /private/var/folders/_h/_rf455xj4h3_3g6z86pg244c0000gn/T/idealis-tlc-4YovNL/Integers.tla
+Parsing file /private/var/folders/_h/_rf455xj4h3_3g6z86pg244c0000gn/T/idealis-tlc-4YovNL/Sequences.tla
+Parsing file /private/var/folders/_h/_rf455xj4h3_3g6z86pg244c0000gn/T/idealis-tlc-4YovNL/FiniteSets.tla
+Parsing file /Users/mz/ghq/github.com/mizchi/idealis/.artifacts/tlc/standard-modules/Apalache.tla
+Parsing file /private/var/folders/_h/_rf455xj4h3_3g6z86pg244c0000gn/T/idealis-tlc-4YovNL/Naturals.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module Apalache
+Semantic processing of module Differential
+Starting... (2026-11-18 12:46:57)
+Computing initial states...
+Error: Attempted to compare equality of boolean TRUE with non-boolean:
+0
+Error: The error occurred when TLC was evaluating the nested
+expressions at the following positions:
+0. Line 7, column 9 to line 7, column 40 in Differential
+1. Line 7, column 14 to line 7, column 39 in Differential
+2. Line 140, column 5 to line 144, column 45 in Apalache
+3. Line 142, column 10 to line 144, column 45 in Apalache
+4. Line 143, column 10 to line 144, column 45 in Apalache
+5. Line 144, column 10 to line 144, column 45 in Apalache
+6. Line 140, column 5 to line 144, column 45 in Apalache
+7. Line 141, column 10 to line 141, column 12 in Apalache
+8. Line 144, column 27 to line 144, column 39 in Apalache
+9. Line 6, column 13 to line 6, column 17 in Differential
+
+
+0 states generated, 0 distinct states found, 0 states left on queue.
+Finished in 00s at (2026-11-18 12:46:57)

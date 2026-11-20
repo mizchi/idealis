@@ -1,0 +1,119 @@
+{
+  "status": "complete",
+  "commands": [
+    {
+      "command": "just check",
+      "status": "passed",
+      "log": "final-check.log",
+      "sha256": "c886432b7e30ae87b619e66aba4e27f7ef26af383d578e7b9348e034bf5159d1"
+    },
+    {
+      "command": "just browser",
+      "status": "passed",
+      "log": "browser.log",
+      "sha256": "cc94c490df33286711c0c2399539323995ec0228349547aff84028003fd78ecc"
+    },
+    {
+      "command": "just oracle-test",
+      "status": "passed",
+      "log": "oracle-test.log",
+      "sha256": "27692715b205280dacd5f4196ef88ca9ba16ac5c0f5a8f29fb79728de244e271"
+    },
+    {
+      "command": "just runtime-build",
+      "status": "passed",
+      "log": "runtime-build.log",
+      "sha256": "42102c18c2aa40fa9012b786991a9f1df566767d9c9fdd5ef0486bfcd2f612aa"
+    },
+    {
+      "command": "just runtime-test",
+      "status": "passed",
+      "log": "runtime-test.log",
+      "sha256": "5b5bcdc21cb3c779274c2bcda8aadd03e6f2828f7c4cb43b20c8c7bb57014fed"
+    },
+    {
+      "command": "just evaluate",
+      "status": "passed",
+      "log": "evaluate.log",
+      "sha256": "27a403d49c1e8ae3304e755a1904987cb85ca5c8f0812836816a43b451e8cd4b"
+    },
+    {
+      "command": "just replay-evaluation",
+      "status": "passed",
+      "log": "replay-evaluation.log",
+      "sha256": "726981d4697b24e2a613fba5f4379f0e2dfa82348043181862831a63053d077d"
+    },
+    {
+      "command": "just mutation",
+      "status": "passed",
+      "log": "mutation.log",
+      "sha256": "3d356830da1e8a048c5f3cb34d74c40daa878f892a146dfb1d58794320dcfa3a"
+    },
+    {
+      "command": "just cross-test",
+      "status": "passed",
+      "log": "cross.log",
+      "sha256": "04f74e5e3dc7aee74132c30315714db0a45cd1410b19c3017a4c13bc58710700"
+    },
+    {
+      "command": "just async-test",
+      "status": "passed",
+      "log": "async.log",
+      "sha256": "e02ae0e64dee84dfe671b57499fe5ac4ed56a0923e6457298b3a0575aee394a8"
+    },
+    {
+      "command": "just package",
+      "status": "passed",
+      "log": "package.log",
+      "sha256": "80a3ab3f100bfe1f9002af700cfcd8dc44177ae7eb175c5c07c1e5fe359caf52"
+    },
+    {
+      "command": "just support-test",
+      "status": "passed",
+      "log": "support-test.log",
+      "sha256": "f0405aad284ed7f0d911fe15e6305caa17de2232f410e74e5a0079abfd4f2337"
+    },
+    {
+      "command": "just support-sync (live, profile loaded)",
+      "status": "passed",
+      "log": "support-sync.log",
+      "sha256": "0eda9d3295bfd093eefb4463b03ca02cbb426bc45843373f9b397b90bf2c0bf6"
+    },
+    {
+      "command": "just support-check",
+      "status": "passed",
+      "log": "final-support-check.log",
+      "sha256": "88b0a030432c632715cd1de9b4225ce5d807a0301c109e24ec127c563bb13be3"
+    },
+    {
+      "command": "node --test dist/evals/*/contract-test.js",
+      "status": "passed",
+      "log": "eval-contracts.log",
+      "sha256": "4321cae8e01d744dbbebb65d4232c389e2a2b998f7c22af6564cc7f6771f5737"
+    },
+    {
+      "command": "cargo test --locked --manifest-path crates/oracle/Cargo.toml",
+      "status": "passed",
+      "log": "final-wire-test.log",
+      "sha256": "f298fdbb39bbec9810e5cc9fb7f3401b9ececdcffaca14f6197a90a608db9b27"
+    },
+    {
+      "command": "cargo clippy --all-targets --locked --manifest-path crates/oracle/Cargo.toml -- -D warnings",
+      "status": "passed",
+      "log": "final-clippy.log",
+      "sha256": "e28f7d158c673359dcb5aa26b6db88e25ec05784de221cdde4a41273872d874e"
+    },
+    {
+      "command": "cargo test --locked --manifest-path crates/oracle/Cargo.toml --bench wire",
+      "status": "passed",
+      "log": "final-bench-test.log",
+      "sha256": "ddbb80443e5a7e84702b9fd4d10dd9737cdf5f861f25ab123641a836d2aab2b1"
+    }
+  ],
+  "notes": [
+    "Local checks only; no remote CI run or publication.",
+    "Mutation reused 109 cached evaluations: 104 killed, 5 survived, 133 compile errors; score 95.4%.",
+    "Bytes Red fails on missing dispatch_json export; Green and optimized tests pass.",
+    "19 Rust oracle tests, 8 Criterion smoke cases, 144 eval contract tests."
+  ]
+}

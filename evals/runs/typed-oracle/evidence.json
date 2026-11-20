@@ -1,0 +1,311 @@
+{
+  "schema": 1,
+  "baseRevision": "254f96aaf0528ec4649e0aee20abe60b77021afc",
+  "plan": "evals/plans/typed-oracle.md",
+  "report": "evals/iterations/typed-oracle.md",
+  "archive": {
+    "path": "evidence.tar.gz",
+    "sha256": "c29ec21fe59b9fde7c12f2fc1fb2b13561bb8ead4d3ea8d607fe428bf6cf7d91",
+    "bytes": 5518568
+  },
+  "primaryRun": "measurement-03",
+  "failedPrechecks": [
+    "ts-build-06.log",
+    "ts-build-07.log"
+  ],
+  "priorRuns": [
+    "measurement-01",
+    "measurement-02"
+  ],
+  "diagnostics": "diagnose-01",
+  "replay": "replay-03",
+  "summary": {
+    "rows": [
+      {
+        "fixture": "single",
+        "modes": {
+          "json-wasm": 3.4088339999999997,
+          "native-json": 3.1490015000000002,
+          "native-object": 9.706942999999999,
+          "wit-record": 13.134465,
+          "wit-buffer": 11.9188835,
+          "native-buffer": 7.063824
+        }
+      },
+      {
+        "fixture": "single-copied",
+        "modes": {
+          "json-wasm": 3.323413,
+          "native-json": 3.144769,
+          "native-object": 9.6992785,
+          "wit-record": 12.7769545,
+          "wit-buffer": 11.731188999999999,
+          "native-buffer": 7.0809305
+        }
+      },
+      {
+        "fixture": "batch-32",
+        "modes": {
+          "json-wasm": 78.967505,
+          "native-json": 76.88333499999999,
+          "native-object": 278.675765,
+          "wit-record": 244.788115,
+          "wit-buffer": 234.72458,
+          "native-buffer": 212.93102
+        }
+      },
+      {
+        "fixture": "batch-32-copied",
+        "modes": {
+          "json-wasm": 78.52172,
+          "native-json": 76.53457500000002,
+          "native-object": 278.56920999999994,
+          "wit-record": 243.953175,
+          "wit-buffer": 234.45501000000002,
+          "native-buffer": 213.12064500000002
+        }
+      },
+      {
+        "fixture": "nested-256",
+        "modes": {
+          "json-wasm": 206.08266999999998,
+          "native-json": 200.48582000000002,
+          "native-object": 822.642525,
+          "wit-record": 1126.3245699999998,
+          "wit-buffer": 1123.8910449999998,
+          "native-buffer": 1045.863515
+        }
+      },
+      {
+        "fixture": "nested-256-copied",
+        "modes": {
+          "json-wasm": 206.12294500000002,
+          "native-json": 201.06852,
+          "native-object": 823.4941699999999,
+          "wit-record": 1128.174365,
+          "wit-buffer": 1131.861435,
+          "native-buffer": 1053.9804
+        }
+      },
+      {
+        "fixture": "unicode",
+        "modes": {
+          "json-wasm": 5.271724,
+          "native-json": 5.0327839999999995,
+          "native-object": 14.075143,
+          "wit-record": 18.2444075,
+          "wit-buffer": 17.3087525,
+          "native-buffer": 12.2409
+        }
+      },
+      {
+        "fixture": "unicode-copied",
+        "modes": {
+          "json-wasm": 5.293433499999999,
+          "native-json": 5.0970465,
+          "native-object": 13.9816075,
+          "wit-record": 18.121019,
+          "wit-buffer": 17.0664355,
+          "native-buffer": 12.145683499999999
+        }
+      },
+      {
+        "fixture": "mismatch",
+        "modes": {
+          "json-wasm": 3.5043634999999997,
+          "native-json": 3.3638649999999997,
+          "native-object": 10.525148499999998,
+          "wit-record": 13.4997765,
+          "wit-buffer": 12.521906999999999,
+          "native-buffer": 7.886297000000001
+        }
+      },
+      {
+        "fixture": "mismatch-copied",
+        "modes": {
+          "json-wasm": 3.6011845000000005,
+          "native-json": 3.4058110000000004,
+          "native-object": 10.656223999999998,
+          "wit-record": 13.818190999999999,
+          "wit-buffer": 12.9593685,
+          "native-buffer": 7.9789615
+        }
+      },
+      {
+        "fixture": "unknown",
+        "modes": {
+          "json-wasm": 3.4072635,
+          "native-json": 3.2727484999999996,
+          "native-object": 10.00541,
+          "wit-record": 13.5564345,
+          "wit-buffer": 12.134295999999999,
+          "native-buffer": 7.2157835
+        }
+      },
+      {
+        "fixture": "unknown-copied",
+        "modes": {
+          "json-wasm": 3.372443,
+          "native-json": 3.2306935,
+          "native-object": 9.884205,
+          "wit-record": 12.935756999999999,
+          "wit-buffer": 11.761351999999999,
+          "native-buffer": 7.183179
+        }
+      }
+    ],
+    "candidates": [
+      {
+        "mode": "wit-record",
+        "versus": [
+          {
+            "baseline": "json-wasm",
+            "geometricMean": 0.2581708959460203,
+            "worst": 0.182704864952325,
+            "eligible": false
+          },
+          {
+            "baseline": "native-json",
+            "geometricMean": 0.24756494681895286,
+            "worst": 0.17800004132023867,
+            "eligible": false
+          }
+        ]
+      },
+      {
+        "mode": "wit-buffer",
+        "versus": [
+          {
+            "baseline": "json-wasm",
+            "geometricMean": 0.27415969394118583,
+            "worst": 0.18210969879011737,
+            "eligible": false
+          },
+          {
+            "baseline": "native-json",
+            "geometricMean": 0.26289690711164115,
+            "worst": 0.17764411241734726,
+            "eligible": false
+          }
+        ]
+      },
+      {
+        "mode": "native-buffer",
+        "versus": [
+          {
+            "baseline": "json-wasm",
+            "geometricMean": 0.3829668350530371,
+            "worst": 0.19556620312863507,
+            "eligible": false
+          },
+          {
+            "baseline": "native-json",
+            "geometricMean": 0.36723412918375986,
+            "worst": 0.19077064431179178,
+            "eligible": false
+          }
+        ]
+      }
+    ],
+    "cold": [
+      {
+        "mode": "json-wasm",
+        "initAndFirstUs": 4717.728999999999,
+        "processMs": 27.75975
+      },
+      {
+        "mode": "native-json",
+        "initAndFirstUs": 3169.0205,
+        "processMs": 26.399208
+      },
+      {
+        "mode": "native-object",
+        "initAndFirstUs": 3347.9375,
+        "processMs": 26.5619995
+      },
+      {
+        "mode": "wit-record",
+        "initAndFirstUs": 7850.3125,
+        "processMs": 31.105625
+      },
+      {
+        "mode": "wit-buffer",
+        "initAndFirstUs": 7474.8330000000005,
+        "processMs": 30.8690415
+      },
+      {
+        "mode": "native-buffer",
+        "initAndFirstUs": 3635.084,
+        "processMs": 26.317979
+      }
+    ]
+  },
+  "decision": {
+    "typedTransport": "not adopted",
+    "default": "wasm",
+    "nextPriority": "SMT parse/conversion and solver performance"
+  },
+  "checks": {
+    "basicNode": 79,
+    "basicVitest": 79,
+    "wasmNode": 23,
+    "wasmVitest": 23,
+    "typedNode": 7,
+    "typedVitest": 7,
+    "chromiumReports": 140,
+    "rust": "fmt/clippy/all-targets tests passed",
+    "runtime": "build/test passed",
+    "mutation": {
+      "killed": 104,
+      "scored": 109,
+      "reused": 109,
+      "compileError": 133
+    },
+    "checklists": {
+      "answered": 68,
+      "live": "skipped without API key",
+      "offlineAndStaged": "passed"
+    }
+  },
+  "negativeControls": [
+    {
+      "path": "corrupt-report.log",
+      "expectedExit": 1
+    },
+    {
+      "path": "corrupt-runtime.log",
+      "expectedExit": 1
+    },
+    {
+      "path": "contract-03.log",
+      "expected": "depth witness rejected after fix",
+      "witness": "depth-witness.json"
+    }
+  ],
+  "logs": [
+    "typed-final.log",
+    "contract-final.log",
+    "vitest-final.log",
+    "browser-final.log",
+    "check.log",
+    "wasm.log",
+    "runtime-build.log",
+    "runtime-test.log",
+    "mutation.log",
+    "evaluate.log",
+    "evaluate-replay.log",
+    "support-plan.log",
+    "support-sync.log",
+    "support-check.log",
+    "support-staged-final.log",
+    "lint-final-02.log"
+  ],
+  "limitations": [
+    "Private prototype, public crates unchanged",
+    "Output is still full JSON",
+    "Number leaf parsing remains",
+    "Host is darwin arm64 / Node v24.22.2",
+    "Packing is included in full request; excluded only from diagnostic calls",
+    "Shared OracleGroup logic is not independently proven by transport differential tests"
+  ]
+}

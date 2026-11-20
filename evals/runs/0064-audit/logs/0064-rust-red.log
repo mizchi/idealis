@@ -1,0 +1,21 @@
+   Compiling rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+error[E0599]: no method named `prepare` found for struct `SafetyProgram` in the current scope
+  --> tests/prepared_safety.rs:22:40
+   |
+22 |         let prepared = program.clone().prepare().unwrap();
+   |                                        ^^^^^^^ method not found in `SafetyProgram`
+
+error[E0599]: no method named `prepare` found for struct `SafetyProgram` in the current scope
+  --> tests/prepared_safety.rs:53:36
+   |
+53 |     let prepared = program.clone().prepare().unwrap();
+   |                                    ^^^^^^^ method not found in `SafetyProgram`
+
+error[E0599]: no method named `prepare` found for struct `SafetyProgram` in the current scope
+  --> tests/prepared_safety.rs:66:31
+   |
+66 |     let error = match program.prepare() {
+   |                               ^^^^^^^ method not found in `SafetyProgram`
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `rtlc` (test "prepared_safety") due to 3 previous errors

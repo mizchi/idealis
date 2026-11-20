@@ -15,7 +15,7 @@ import {
   encodeTrace,
   equalValues,
   type Model,
-} from "../src/index.js";
+} from "../packages/idealis/src/index.js";
 
 export const registerAdvancedContract = (
   test: (name: string, run: () => void | Promise<void>) => unknown,

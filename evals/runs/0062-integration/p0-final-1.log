@@ -1,0 +1,70 @@
+✔ Quint v2 preserves v1 behavior: Counter/safety (363.690708ms)
+✔ Quint v2 preserves v1 behavior: Counter/broken (3.320084ms)
+✔ Quint v2 preserves v1 behavior: SetFold/safety (6.067708ms)
+✔ Quint v2 preserves v1 behavior: SetFold/broken (2.414917ms)
+✔ Quint v2 preserves v1 behavior: SequenceFold/safety (2.434667ms)
+✔ Quint v2 preserves v1 behavior: SequenceFold/broken (3.679625ms)
+✔ Quint v2 preserves v1 behavior: Choice/safety (4.839417ms)
+✔ Quint v2 preserves v1 behavior: Choice/broken (1.416583ms)
+✔ Quint v2 preserves v1 behavior: Match/safety (6.739916ms)
+✔ Quint v2 preserves v1 behavior: Match/broken (5.958916ms)
+✔ Quint v2 preserves v1 behavior: NestedFold/safety (3.23925ms)
+✔ Quint v2 preserves v1 behavior: NestedFold/broken (1.945333ms)
+✔ v2 explicitly rejects SYMMETRY and preserves the v1 configuration (6.260958ms)
+✔ unmodified TCommit matches TLC with IR v1 (447.451ms)
+✔ unmodified TCommit matches TLC with IR v2 (448.396334ms)
+✔ v2 lexical frames make POR fall back to the complete graph (1.557333ms)
+✖ v2 IR retains callback and Assert support separately from source lowering (0.372417ms)
+✔ sync without a Jev key warns and skips before reading or writing the repository (138.636125ms)
+✔ pre-commit skips without either key and continues when either alias is set (98.309375ms)
+✔ a real index is authoritative over unstaged checklist edits (307.434291ms)
+✔ missing checklists, new crates and dangling staged evidence are rejected (262.641042ms)
+✔ staged symlink sources are not followed (147.027917ms)
+✔ installing a hook is repeatable and preserves another tool's hook (127.183708ms)
+✔ a checklist made only of examples in a code fence is not a support declaration (143.657042ms)
+✖ the real offline gate rejects stale, missing and corrupted staged Jev evidence (2831.539458ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 23
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4124.125417
+
+✖ failing tests:
+
+test at dist/evals/p0-checker/contract-test.js:97:1
+✖ v2 IR retains callback and Assert support separately from source lowering (0.372417ms)
+  Error [PortableCoreError]: Unsupported TLA input: unary minus requires Integers
+      at Object.request (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/portable-wasm.js:127:23)
+      at compileTlaSource (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-source.js:3:25)
+      at TestContext.<anonymous> (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/p0-checker/contract-test.js:110:22)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    code: 'protocol'
+  }
+
+test at dist/scripts/check-support-test.js:159:1
+✖ the real offline gate rejects stale, missing and corrupted staged Jev evidence (2831.539458ms)
+  AssertionError [ERR_ASSERTION]: crates/rtla-compiler/SUPPORT.md: link absent from selected tree: ../../evals/tlc-differential/operator-sharing-test.ts
+  Checklist review is incomplete. Run just support-sync (or support-sync-staged), inspect the findings, then stage SUPPORT.md and .jev-lint/checklists.
+  
+  
+  3 !== 0
+  
+      at TestContext.<anonymous> (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/scripts/check-support-test.js:195:16)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 3,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,179 +1,24 @@
 {
-  "name": "@mizchi/idealis",
-  "version": "0.1.0-alpha.0",
-  "description": "Portable finite models, conformance checking and reproducible fault tests for TypeScript and Rust",
+  "name": "idealis-workspace",
+  "private": true,
   "type": "module",
-  "license": "MIT",
-  "packageManager": "pnpm@10.12.1",
+  "packageManager": "pnpm@12.21.0",
   "engines": {
-    "node": ">=24"
-  },
-  "exports": {
-    "./backend": {
-      "types": "./dist/src/backend.d.ts",
-      "default": "./dist/src/backend.js"
-    },
-    "./scheduling": {
-      "types": "./dist/src/scheduling.d.ts",
-      "default": "./dist/src/scheduling.js"
-    },
-    "./portable": {
-      "types": "./dist/src/portable.d.ts",
-      "default": "./dist/src/portable.js"
-    },
-    "./budget": {
-      "types": "./dist/src/budget.d.ts",
-      "default": "./dist/src/budget.js"
-    },
-    "./sharding": {
-      "types": "./dist/src/sharding.d.ts",
-      "default": "./dist/src/sharding.js"
-    },
-    ".": {
-      "types": "./dist/src/index.d.ts",
-      "default": "./dist/src/index.js"
-    },
-    "./property": {
-      "types": "./dist/src/property.d.ts",
-      "default": "./dist/src/property.js"
-    },
-    "./tla": {
-      "types": "./dist/src/tla.d.ts",
-      "default": "./dist/src/tla.js"
-    },
-    "./smt": {
-      "types": "./dist/src/smt.d.ts",
-      "default": "./dist/src/smt.js"
-    },
-    "./finite": {
-      "types": "./dist/src/finite.d.ts",
-      "default": "./dist/src/finite.js"
-    },
-    "./host": {
-      "types": "./dist/src/host.d.ts",
-      "default": "./dist/src/host.js"
-    },
-    "./history": {
-      "types": "./dist/src/history.d.ts",
-      "default": "./dist/src/history.js"
-    },
-    "./shrink": {
-      "types": "./dist/src/shrink.d.ts",
-      "default": "./dist/src/shrink.js"
-    },
-    "./core.wasm": "./assets/idealis-core.wasm",
-    "./rtla.wasm": "./assets/rtla.wasm",
-    "./alloy": {
-      "types": "./dist/src/alloy.d.ts",
-      "default": "./dist/src/alloy.js"
-    },
-    "./ralloy.wasm": "./assets/ralloy.wasm",
-    "./testing": {
-      "types": "./dist/src/testing.d.ts",
-      "default": "./dist/src/testing.js"
-    },
-    "./testing.wasm": "./assets/idealis-testing.wasm",
-    "./check-cache": {
-      "types": "./dist/src/check-cache.d.ts",
-      "default": "./dist/src/check-cache.js"
-    },
-    "./check-cache/http": {
-      "types": "./dist/src/check-cache-http.d.ts",
-      "default": "./dist/src/check-cache-http.js"
-    },
-    "./check-cache/node": {
-      "types": "./dist/src/check-cache-node.d.ts",
-      "default": "./dist/src/check-cache-node.js"
-    }
-  },
-  "scripts": {
-    "rtla:build": "cargo build --release --locked --manifest-path crates/rtla/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/rtla/Cargo.toml",
-    "rtla:test": "cargo fmt --manifest-path crates/rtla/Cargo.toml -- --check && cargo clippy --all-targets --locked --manifest-path crates/rtla/Cargo.toml -- -D warnings && cargo test --all-targets --locked --manifest-path crates/rtla/Cargo.toml && pnpm build && pnpm rtla:build && node --test dist/evals/rtla-parser/contract-test.js",
-    "portable:build": "cargo build --release --locked --manifest-path crates/idealis-core/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/idealis-core/Cargo.toml",
-    "rtlc:test": "cargo fmt --manifest-path crates/rtlc/Cargo.toml -- --check && cargo clippy --all-targets --locked --manifest-path crates/rtlc/Cargo.toml -- -D warnings && cargo test --all-targets --locked --manifest-path crates/rtlc/Cargo.toml",
-    "portable:test": "pnpm build && pnpm rtlc:test && pnpm rtla:test && cargo fmt --manifest-path crates/rtla-compiler/Cargo.toml -- --check && cargo clippy --all-targets --locked --manifest-path crates/rtla-compiler/Cargo.toml -- -D warnings && cargo test --all-targets --locked --manifest-path crates/rtla-compiler/Cargo.toml && cargo test --all-targets --locked --manifest-path crates/idealis-core/Cargo.toml && node --test dist/evals/portable/contract-test.js",
-    "portable:browser": "playwright test --config portable-playwright.config.ts",
-    "portable:eval": "pnpm build && node dist/evals/portable/evaluate.js",
-    "portable:replay": "pnpm build && node dist/evals/portable/replay.js",
-    "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc --noEmit",
-    "check": "biome check .",
-    "test": "pnpm test:vitest && pnpm test:node",
-    "test:vitest": "vitest run",
-    "test:node": "pnpm build && node --test dist/tests/node.test.js",
-    "test:browser": "playwright test",
-    "test:mutation": "mutator --runner vitest --config vitest.mutation.config.ts --reporter text --reporter json",
-    "example": "pnpm build && node dist/examples/demo.js",
-    "evaluate": "pnpm build && node dist/evals/harness/evaluate.js",
-    "evaluate:replay": "pnpm build && node dist/evals/harness/replay.js",
-    "eval:loop": "pnpm build && node dist/evals/loop.js",
-    "eval:replay": "pnpm build && node dist/evals/replay.js",
-    "runtime:build": "cargo build --release --manifest-path evals/rust-probe/Cargo.toml && cargo build --release --lib --target wasm32-unknown-unknown --manifest-path evals/rust-probe/Cargo.toml",
-    "runtime:test": "pnpm build && cargo test --manifest-path evals/rust-probe/Cargo.toml && node --test dist/evals/runtime/rust-test.js dist/evals/runtime/system-test.js",
-    "runtime:browser": "playwright test --config runtime-playwright.config.ts",
-    "runtime:eval": "pnpm build && node dist/evals/runtime/evaluate.js",
-    "eval:shard": "pnpm build && node dist/evals/runtime/shard-cli.js",
-    "usable:test": "pnpm build && node --test dist/evals/usable/contract-test.js",
-    "usable:eval": "pnpm build && node dist/evals/usable/evaluate.js",
-    "usable:replay": "pnpm build && node dist/evals/usable/replay.js",
-    "package:prepare": "pnpm testing:build && pnpm ralloy:build && pnpm rsmt:build && pnpm portable:build && pnpm rtla:build && pnpm build && node dist/scripts/package.js",
-    "package:test": "node dist/scripts/package-test.js",
-    "rsmt:build": "cargo build --release --locked --manifest-path crates/idealis-smt/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/idealis-smt/Cargo.toml",
-    "rsmt:test": "cargo fmt --manifest-path crates/idealis-smt/Cargo.toml -- --check && cargo clippy --all-targets --locked --manifest-path crates/idealis-smt/Cargo.toml -- -D warnings && cargo test --all-targets --locked --manifest-path crates/idealis-smt/Cargo.toml",
-    "ralloy:build": "cargo build --release --locked --manifest-path crates/ralloy/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/ralloy/Cargo.toml",
-    "testing:build": "cargo build --release --locked --manifest-path crates/idealis-testing/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/idealis-testing/Cargo.toml"
+    "node": ">=24",
+    "pnpm": ">=12"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.0",
+    "@mizchi/idealis": "workspace:*",
     "@mizchi/mutator": "0.2.0",
+    "@napi-rs/cli": "3.10.12",
     "@playwright/test": "^1.65.0",
     "@types/node": "^24.0.0",
-    "esbuild": "^0.27.0",
     "fast-check": "4.10.2",
     "fflate": "0.8.3",
     "jev-lint": "0.8.0",
     "tla-ts": "0.0.10",
     "typescript": "7.0.2",
-    "vitest": "5.1.0",
+    "vite-plus": "1.7.0",
     "z3-solver": "5.4.1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mizchi/idealis.git"
-  },
-  "files": [
-    "dist/src",
-    "dist/cli",
-    "assets",
-    "README.md",
-    "LICENSE",
-    "docs"
-  ],
-  "publishConfig": {
-    "access": "public",
-    "tag": "next"
-  },
-  "bin": {
-    "idealis": "dist/cli/idealis.js"
-  },
-  "peerDependencies": {
-    "fast-check": "4.10.2",
-    "fflate": "0.8.3",
-    "tla-ts": "0.0.10",
-    "z3-solver": "5.4.1"
-  },
-  "peerDependenciesMeta": {
-    "fast-check": {
-      "optional": true
-    },
-    "fflate": {
-      "optional": true
-    },
-    "tla-ts": {
-      "optional": true
-    },
-    "z3-solver": {
-      "optional": true
-    }
   }
 }

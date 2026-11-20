@@ -6,24 +6,30 @@ import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createInterface } from "node:readline";
-import { cases } from "../evals/rust-safety/cases.js";
-import { createRtlcBackend } from "../src/backend.js";
+import { cases } from "../evals/experiments/rust-safety/cases.js";
+import { createRtlcBackend } from "../packages/idealis/src/backend.js";
+import { createHttpCheckCacheStore } from "../packages/idealis/src/check-cache-http.js";
+import {
+  createCheckCacheHttpHandler,
+  createSqliteCheckCacheStore,
+} from "../packages/idealis/src/check-cache-node.js";
 import {
   CheckCacheError,
   createCheckCache,
   createMemoryCheckCacheStore,
   planCachedChecks,
   runCachedCheck,
-} from "../src/check-cache.js";
-import { createHttpCheckCacheStore } from "../src/check-cache-http.js";
+} from "../packages/idealis/src/check-cache.js";
+import type {
+  CheckCacheJob,
+  CheckCacheReservation,
+} from "../packages/idealis/src/contracts.js";
+import { createPortableWasm } from "../packages/idealis/src/portable-wasm.js";
 import {
-  createCheckCacheHttpHandler,
-  createSqliteCheckCacheStore,
-} from "../src/check-cache-node.js";
-import type { CheckCacheJob, CheckCacheReservation } from "../src/contracts.js";
-import { createPortableWasm } from "../src/portable-wasm.js";
-import { createManifest, mergeReports } from "../src/sharding.js";
-import { compileTlaSafety } from "../src/tla-safety.js";
+  createManifest,
+  mergeReports,
+} from "../packages/idealis/src/sharding.js";
+import { compileTlaSafety } from "../packages/idealis/src/tla-safety.js";
 
 const bytes = await readFile(
   "crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm",
@@ -157,7 +163,7 @@ export const registerCheckCacheContract = (
     await writeFile(input, JSON.stringify(job));
     const child = spawn(
       process.execPath,
-      ["dist/evals/verified-cache/crash-worker.js", path, input],
+      ["dist/evals/experiments/verified-cache/crash-worker.js", path, input],
       { stdio: ["pipe", "pipe", "inherit"] },
     );
     const lines = createInterface({ input: child.stdout });

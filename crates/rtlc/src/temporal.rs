@@ -1,7 +1,7 @@
 use crate::CoreError;
 use crate::ir::{
-    Expression, SafetyBounds, SafetyProgram, SafetyTraceStep, SafetyViolation, Scalar,
-    TemporalFormula,
+    DefinitionBody, Expression, SafetyBounds, SafetyProgram, SafetyTraceStep, SafetyViolation,
+    Scalar, TemporalFormula,
 };
 use crate::safety_expressions::{
     CallFrame, EvalContext, validate_constant_bindings, visit_bindings,
@@ -24,7 +24,7 @@ impl TemporalFormula {
             return Err(CoreError::protocol("Temporal formula nesting exceeds 40"));
         }
         match self {
-            Self::Frame { .. } => {
+            Self::Frame { .. } | Self::Call { .. } => {
                 return Err(CoreError::protocol(
                     "Operator references require safety IR v2",
                 ));
@@ -68,6 +68,7 @@ enum Formula<'a> {
 }
 struct Pool<'a> {
     formulas: Vec<Formula<'a>>,
+    definitions: &'a [crate::ir::Definition],
     until: Vec<usize>,
     frame_sequence: usize,
     entries: Vec<Vec<usize>>,
@@ -76,6 +77,33 @@ struct Pool<'a> {
 }
 impl<'a> Pool<'a> {
     fn add(&mut self, formula: Formula<'a>) -> usize {
+        match &formula {
+            Formula::And(left, right) => {
+                if matches!(self.formulas[*left], Formula::False)
+                    || matches!(self.formulas[*right], Formula::True)
+                {
+                    return *left;
+                }
+                if matches!(self.formulas[*right], Formula::False)
+                    || matches!(self.formulas[*left], Formula::True)
+                {
+                    return *right;
+                }
+            }
+            Formula::Or(left, right) => {
+                if matches!(self.formulas[*left], Formula::True)
+                    || matches!(self.formulas[*right], Formula::False)
+                {
+                    return *left;
+                }
+                if matches!(self.formulas[*right], Formula::True)
+                    || matches!(self.formulas[*left], Formula::False)
+                {
+                    return *right;
+                }
+            }
+            _ => {}
+        }
         let index = self.formulas.len();
         if matches!(formula, Formula::Until(..)) {
             self.until.push(index);
@@ -101,12 +129,43 @@ impl<'a> Pool<'a> {
         &mut self,
         formula: &'a TemporalFormula,
         negative: bool,
-        context: EvalContext<'_>,
+        mut context: EvalContext<'_>,
         entries: &[usize],
         arena: &mut Arena,
     ) -> Result<usize, CoreError> {
+        context.descend(arena)?;
         arena.tick()?;
         Ok(match formula {
+            TemporalFormula::Call {
+                arguments,
+                captures,
+                definition,
+            } => {
+                let definitions = self.definitions;
+                let DefinitionBody::Temporal(formula) = &definitions
+                    .get(*definition)
+                    .ok_or_else(|| CoreError::protocol("Unknown safety definition ID"))?
+                    .body
+                else {
+                    return Err(CoreError::protocol("Invalid safety call body kind"));
+                };
+                let frame = CallFrame::new(arguments, captures, context);
+                let mut entries = entries.to_vec();
+                entries.push(self.frame_sequence);
+                self.frame_sequence += 1;
+                self.lower(
+                    formula,
+                    negative,
+                    EvalContext {
+                        locals: &[],
+                        frame: Some(&frame),
+                        old: None,
+                        ..context
+                    },
+                    &entries,
+                    arena,
+                )?
+            }
             TemporalFormula::Frame {
                 arguments,
                 captures,
@@ -196,9 +255,41 @@ impl<'a> Pool<'a> {
     }
 }
 #[derive(Clone)]
+enum Seen {
+    Dense([u64; 4]),
+    Sparse(HashSet<usize>),
+}
+impl Seen {
+    fn new(formulas: usize) -> Self {
+        if formulas <= 256 {
+            Self::Dense([0; 4])
+        } else {
+            Self::Sparse(HashSet::new())
+        }
+    }
+    fn insert(&mut self, id: usize) -> bool {
+        match self {
+            Self::Dense(words) => {
+                let word = &mut words[id / 64];
+                let mask = 1 << (id % 64);
+                let fresh = *word & mask == 0;
+                *word |= mask;
+                fresh
+            }
+            Self::Sparse(set) => set.insert(id),
+        }
+    }
+    fn contains(&self, id: usize) -> bool {
+        match self {
+            Self::Dense(words) => words[id / 64] & (1 << (id % 64)) != 0,
+            Self::Sparse(set) => set.contains(&id),
+        }
+    }
+}
+#[derive(Clone)]
 struct Expansion {
     todo: Vec<usize>,
-    seen: HashSet<usize>,
+    seen: Seen,
     entered: HashSet<usize>,
     next: Vec<usize>,
     pending: Vec<usize>,
@@ -215,7 +306,7 @@ fn expand(
 ) -> Result<Vec<Alternative>, CoreError> {
     let mut stack = vec![Expansion {
         todo: required.to_vec(),
-        seen: HashSet::new(),
+        seen: Seen::new(pool.formulas.len()),
         entered: HashSet::new(),
         next: vec![],
         pending: vec![],
@@ -283,7 +374,7 @@ fn expand(
         state.next.sort_unstable();
         state.next.dedup();
         state.pending.retain(|id| match pool.formulas[*id] {
-            Formula::Until(_, right) => !state.seen.contains(&right),
+            Formula::Until(_, right) => !state.seen.contains(right),
             _ => false,
         });
         state.pending.sort_unstable();
@@ -498,6 +589,7 @@ pub(crate) fn check(
 ) -> Result<Option<SafetyViolation>, CoreError> {
     for property in &program.properties {
         let mut pool = Pool {
+            definitions: program.definitions.as_deref().unwrap_or_default(),
             formulas: vec![],
             until: vec![],
             frame_sequence: 0,

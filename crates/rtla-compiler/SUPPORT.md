@@ -4,14 +4,20 @@
 
 ## 対応済み
 
-- [x] `CompileOptions.irVersion`でv1を既定・明示選択し、明示v2ではexpression定義を共有するSafetyProgramを返す。省略・明示v1のserialize結果を保持し、v1拒否から自動再試行しない。
+- [x] `analyze_modules` で実行用設定なしのモジュール束に既存 linker と任意の level 検査を適用する。単独解析で proof・nested module は拒否する。直接 EXTENDS Sequences の Len 等と同名のトップレベル宣言には、衝突元と定義位置を示す。
+
+- [x] 共有IRの統合でも既存v1のSYMMETRY設定を保持する。明示v2のSYMMETRYはlowering前に理由を示して拒否する。
+
+- [x] `CompileOptions.irVersion`でv1を既定・明示選択し、明示v2ではexpression定義を共有するSafetyProgramを返す。通常のv1 loweringと省略時の選択を保持し、v1拒否から自動再試行しない。別のEXCEPTへ渡す自由な`@`はv2を要求する。
 - [x] v2の定義IDを字句宣言順とphase / membership用途 / target signature順、captureをlexical bindingの宣言順で決める。frame-localなbinder slotとcall / parameter / capture参照を生成する。
 - [x] 定義graphの循環・level依存解析を明示stackで処理し、LETスコープで宣言ASTを参照共有する。5000定義のcompile-only対照を持ち、実行成功とは区別する。
 - [x] 生成的UNCHANGEDとSPECIFICATION subscriptの変数・tuple別名をparameter / capture経由も含め解決する。ENABLED内にも同じ対象解決を使う。v2では要求されるformal/capture targetをsource依存metadataで解析し、signature別に式定義を共有する。foldの専用frame付き呼出しも共有を維持する。
 - [x] v2の引数・captureをcaller lexical frame付きの遅延引数としてrtlcへ渡す。値のmemoizationは行わず、call entryと要求時の課金・予算判定はrtlcが担当する。
 
-- [x] 名前解決、定数・非再帰operatorとLETの展開、lexical scopeの保持。
-- [x] 明示したModule集合のcompile_modulesで非再帰EXTENDSと引数なしnamed/unnamed INSTANCE、WITH、LOCALを解決する（IR v1。v2は拒否する）。diamond import、定義元のscope、独立したinstanceを保持する。
+- [x] 名前解決、定数・operatorとLETの展開、lexical scopeの保持。
+- [x] 既存語彙のcustom記号operatorを通常の定義として解決する。prefix `-.`、infix、postfix `^+`/`^*`/`^#`とnonfix呼出しをIR v1/v2で扱う。
+- [x] builtin・対応する標準moduleからimportした記号とのbinding衝突を拒否する。未使用定義とLET/formal宣言も検査し、SANY全体の意味解析とは区別する。
+- [x] 明示したModule集合のcompile_modulesで非再帰EXTENDSと引数なしnamed/unnamed INSTANCE、WITH、LOCALを解決する（IR v1/v2）。diamond import、定義元のscope、独立したinstanceを保持する。
 - [x] v2で連結と設定上書きを要さない入力は、追加moduleを添えてもbundleの検証が通れば、`compile_modules_with_options`が`compile_with_options`と同じrootの変換を行い、変換に成功した場合は同じIRを返す。連結の検証による拒否はv1と同じmessageになる。
 - [x] 反例のaction名には公開名・instanceの修飾名・LETの元のoperator名を使い、内部の束縛識別子を出さない。
 - [x] signed 32-bit整数、Bool、文字列、有限集合・関数・record・sequenceの対応式とactionの変換。
@@ -19,7 +25,7 @@
 - [x] IFとCASE。最初の真のarmを選び、OTHERがなく未一致なら評価時エラーにする。未評価の分岐ではエラーにしない。
 - [x] INIT/NEXTまたは対応形のSPECIFICATION、定数、INVARIANT/PROPERTY、CHECK_DEADLOCK、定数ASSUME。
 - [x] 対応するstate/action/temporal propertyとWF/SFをIRへ変換する。
-- [x] 定義元moduleのEXTENDS ApalacheでApaFoldSet / ApaFoldSeqLeft。可視の非再帰2引数operatorに限定し、一般の高階引数とは区別する。
+- [x] 定義元moduleのEXTENDS ApalacheでApaFoldSet / ApaFoldSeqLeft。可視の2引数operatorを使う。再帰callbackは明示v2に限る。
 - [x] 同じimport下の`:=`をApalache定義の等号として扱う。
 - [x] EXTENDS VariantsでApalache 0.63.0のVariant / VariantTag / VariantGetUnsafe。tag取得はsingletonの文字列domainに限定する。
 - [x] EXTENDS TLCのimport自体を受理する。任意のTLC operatorを受理する意味ではない。
@@ -32,25 +38,36 @@
 - [x] 有限domainに限定したCHOOSEとtuple pattern。無制限CHOOSEは拒否する。
 - [x] CONSTRAINT / ACTION_CONSTRAINTを名前付きpredicateへ変換する。
 - [x] PROPERTY内の時間論理forall/exists。domainは定数の有限集合に限定し、通常のstate量化と区別する。
-- [ ] SYMMETRY、VIEWの設定とlowering。
+- [x] flat moduleのゼロ引数定義Symm == Permutations(Nodes)とTLC import、CONSTANTへ直接与えた2〜64個の異なるuntyped model value集合をoptionalなsymmetry.modelValuesへlowerする。宣言のequivarianceを自動証明せず、実行時の状態形状と組合せはrtlcが制限する。
+- [ ] 一般のSYMMETRY設定、複数群・任意の置換・typed model value・module bundle/INSTANCEとの併用。VIEWの設定とlowering。
 - [ ] ALIASによる反例表示、POSTCONDITION、POSSIBLE、PERIODIC、RL_REWARD。
 - [x] CONSTANTのoperator置換（<-）と同arityのoperator宣言への置換。module別の定義への値・operator・引数付きテーブル設定。
 - [ ] operator宣言そのものへの引数付きテーブル設定。比較元TLCがoperator値をstateへ格納してエラーにする入力を未対応として拒否する。
-- [ ] SequencesのSelectSeq。
-- [ ] TLCのAssert、SortSeq、RandomElement、TLCGet、TLCSet。
-- [ ] SPECIFICATIONの量化されたfairness。直接のWF/SF連言は対応済み。
+- [x] IR v1/v2でEXTENDS SequencesのSelectSeqとEXTENDS TLCのSortSeqをlowerする。callbackは可視のoperator名またはLAMBDAを静的に特殊化し、SelectSeqは1引数、SortSeqは2引数。定義元scope、LET捕捉とprimeを保持する。
+- [x] IR v1/v2でEXTENDS TLCのAssertをlowerする。conditionとmessageの両方を評価し、TRUE以外はmessage付きの評価エラーにする。
+- [x] SPECIFICATION内の定数有限domain上のforall/exists fairness。tuple・入れ子・空domainと定数引数のwrapperを扱う。state依存domainと量化したInit/Nextの一般的な分解は対象外。
+- [ ] TLCのRandomElement、TLCGet、TLCSet。
 - [ ] 最小整数リテラル-2147483648のTLC診断互換。Rust frontendの既存の例外受理と比較元TLCには差がある。計算式-2147483647 - 1は対応する。
 
-## 非対応・対象外
+## frontendの追加対応と残る制約
 
-- [ ] v2の代入action template共有、self / mutual recursion。代入actionはinlineを維持する。
+- [x] IR v2のSelectSeq / SortSeq / Assertのsource lowering。
+- [x] 明示v2のRECURSIVEによる自己・相互再帰、有限domainの暗黙再帰関数。scalar値・guard・temporal atom・callbackで実行する。
+- [x] 明示v2でRECURSIVEの自己・相互再帰するInit/Nextの代入actionを共有action定義とStep callへ変換する。LET捕捉、INSTANCE、高階特殊化、ENABLEDと継続を扱う。引数・capture・caller binderのためframeが必要な非再帰actionも共有する。零引数でframe不要の呼出しはinlineを維持する。recursive自身のformalをprime/UNCHANGED対象にする入力はSANYに従って拒否する。
+- [x] 明示v2でframeを必要とする非再帰actionとtemporal helperをbody kind別の共有定義へ変換する。PROPERTYのatom/always分類とcall入口・actual要求のworkを保つ。非再帰actionの仮想展開にも4096経路/256 stepsを適用する。
+- [x] source levelの制約を未使用定義も含め検査する。prime・UNCHANGED・ENABLED、temporal/action operands、formal/capture/LET・再帰の制約を固定点で伝播し、引数の受理上限と結果への依存を区別する。全SANYの名前・型・proof検査ではない。
+- [x] 明示v2で再帰関数をalias・operator actual経由で渡し、DOMAINと選択keyを遅延評価する。宣言時state・binder・oldのsnapshotはrtlcが保持する。等値・状態保存など完全な値を要する位置では有限domainを実体化する。
+- [ ] 一般のlazy関数値。EXCEPTのtarget、fold、membershipなど通常のScalar評価を使う観測位置の完全なTLC遅延評価互換。
+- [x] v2でもmodule連結、設定operator置換・定数表・定義上書きをlowerする。
 - [ ] v2は、tuple別名の連鎖`V0 == x`、`Vn == <<V(n-1), V(n-1)>>`に対する`UNCHANGED Vn`を、n=7（展開後のleafが128個）以上で検査時に`Safety evaluation nesting exceeds 128`で拒否する。v1はn=8（leafが256個）まで受理する。測定した現在の限界で、原因は調べていない。
-- [ ] v2のモジュール連結（ユーザーmoduleのEXTENDS・INSTANCE）と設定の上書き（operator置換・定数表・定義の上書き）。要する入力は、v1と共通の連結と検査が通った場合、v1が受理するときも、loweringの前に`safety IR v2 does not support module linking or configuration operator substitution`で拒否する。v1と既定は従来どおり受理する。
 
-- [ ] 引数付きINSTANCE、LET内のINSTANCE、nested module、WITHの一般のoperator引数・変数名以外への変数置換、一般の高階・再帰operator、LAMBDA。
+- [x] 引数付きINSTANCE、LET内INSTANCE、nested moduleの宣言時scope、名前・LAMBDAによるWITH operator置換。
+- [x] 高階operatorをarityと字句scopeに従って静的に特殊化する。LAMBDAと一般selectorを解決する。
+- [x] labelのbound parameter、重複、EXCEPT境界、RECURSIVE宣言の位置・arityを未使用定義も含め検査する。
+- [ ] operatorをstateへ格納する一般の値、任意の式への変数置換、全SANYの意味・level検査。
 - [ ] 無限集合の列挙、stateに依存するdomainでの時間論理量化、temporal variable quantification（\AA / \EE）。
 - [ ] 無制限CHOOSE、他のApalache/Variants operator。
-- [ ] 全モジュールのSANY検査、未使用定義やproofの正しさの判断。
+- [ ] 全モジュールのSANY検査、未使用定義の一般的な名前・型検査とproofの正しさの判断。
 - [ ] 一般のTLA+からSMTへの変換、Quint言語の直接解釈、Quint Connect APIやITFのimport。
 
 ## 制約と根拠
@@ -63,13 +80,23 @@
 - [x] Moduleを直接渡す場合もASTの書き換え深さは64段まで。未使用の定義でも過度に深いASTを拒否する。
 - [x] 不正な設定の拒否phase・診断や、存在しないmoduleへの値設定をTLCが無視する場合は同一診断を保証しない。未対応拒否とTLCの評価エラー・無視を比較記録で分ける。
 
-[実装](src/lib.rs)、[回帰](tests/compiler.rs)、[operator共有の回帰](tests/operator_sharing.rs)、[追加対応の回帰](tests/finite_support.rs)、[比較入力](tests/finite-support.json)、[Quint生成物の12設定](../../docs/quint-generated.md)、[既存frontendとの比較](../../evals/iterations/0029-rtla-compiler.md)を参照。
+[実装](src/lib.rs)、[回帰](tests/compiler.rs)、[追加対応の回帰](tests/finite_support.rs)、[比較入力](tests/finite-support.json)、[標準演算と公平性の回帰](tests/operators.rs)、[その比較入力](tests/operators-support.json)、[Quint生成物の12設定](../../docs/quint-generated.md)、[既存frontendとの比較](../../evals/iterations/0029-rtla-compiler.md)を参照。
+[operator共有の回帰](tests/operator_sharing.rs)も参照。
+[記号operatorの回帰](tests/symbolic.rs)、[binding検査](src/symbols.rs)と[構文・TLC比較](../../evals/iterations/0069-symbolic-operators.md)も参照。高階operatorは静的に特殊化し、operatorをstateへ格納する一般の値とは区別する。
 
-[operator-sharing cohort](../../evals/tlc-differential/operator-sharing-test.ts)は保存TLCログ、TS/Rust構造、native / Wasm完全応答、線形成長と小予算のbounded / workを検査する。固定した有限fragmentと入力での根拠であり、全TLA+互換や指数的な評価仕事の除去、一般的な速度改善は主張しない。
+[operator-sharing cohort](../../tests/tlc-differential/operator-sharing-test.ts)は保存TLCログ、TS/Rust構造、native / Wasm完全応答、線形成長と小予算のbounded / workを検査する。固定した有限fragmentと入力での根拠であり、全TLA+互換や指数的な評価仕事の除去、一般的な速度改善は主張しない。
 
-生成的UNCHANGEDはcallerの字句環境で変数/tuple targetを解決する。通常式の引数・captureを外殻へ代入せず、membership用途を伝播する。action/temporal引数はcall siteごとの非共有anonymous frameでcallerのlexical bindingを保持する。LET本体の自由な`@`は型付きprotocol拒否とする。
+生成的UNCHANGEDはcallerの字句環境で変数/tuple targetを解決する。通常式の引数・captureを外殻へ代入せず、membership用途を伝播する。action/temporal引数は共有callまたはanonymous frameでcallerのlexical bindingを保持する。LET内の自由な`@`はTLC対照に従って扱う。引数の`@`を呼出し先のEXCEPTへ渡す場合はv2を要求する。
 
-- [x] 明示v2の非共有anonymous expression/action/temporal frameを扱い、callerのbinder・old・引数を遅延参照する。入口と引数要求へ各1 workを課金し、v1・既存上限を維持する。LET本体の自由な`@`は型付きprotocol拒否とする。
+- [x] 明示v2の非共有anonymous expression/action/temporal frameを扱い、callerのbinder・old・引数を遅延参照する。入口と引数要求へ各1 workを課金し、v1・既存上限を維持する。LET内の自由な`@`はTLC対照に従って扱う。引数の`@`を呼出し先のEXCEPTへ渡す場合はv2を要求する。
+
+再帰経路の動的評価は128段まで。超過はbounded/evaluation、work枯渇はbounded/workで、成功と区別する。暗黙再帰関数の直接key適用とDOMAINは別にlowerする。関数値全体の構築は有限・eagerであり、任意のaliasを通じた完全なlazy関数値は未対応。
+
+別のEXCEPTへ入る引数なしLETの自由な`@`は、宣言側の環境をv2の遅延引数で保持する。引数あり定義の適用側oldとは区別し、この組合せのv1は拒否する。
+
+[追加対応と独立比較](../../evals/iterations/0070-tla-coverage.md)を参照。構文受理・有限実行・証明の検証を区別する。
+
+[意味検査・遅延関数・共有templateの範囲](../../docs/frontend-semantics.md)、[level回帰](tests/levels.rs)、[lazy回帰](tests/lazy_functions.rs)と[共有回帰](tests/templates.rs)を参照。
 
 - [x] v2のtuple target解決と共有IRの変数読取り展開は、それぞれ524,288ノードを上限とする。空tupleを繰り返す場合も数え、超過を`target expansion exceeds 524288 nodes`で拒否する。既存のnesting 40・leaf 256と別のcompile時上限で、実行時のworkやメモリの厳密な上限ではない。
 

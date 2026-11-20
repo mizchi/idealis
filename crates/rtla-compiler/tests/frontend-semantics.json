@@ -1,0 +1,650 @@
+[
+  {
+    "name": "double-prime",
+    "family": "level",
+    "expected": "input-error",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nBad == (x')'\nInit == x=0\nNext == x'=x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "unchanged-action",
+    "family": "level",
+    "expected": "input-error",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nBad == UNCHANGED (x')\nInit == x=0\nNext == x'=x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "enabled-temporal",
+    "family": "level",
+    "expected": "input-error",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nBad == ENABLED ([](x=0))\nInit == x=0\nNext == x'=x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "tuple-temporal",
+    "family": "level",
+    "expected": "input-error",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nBad == <<[](x=0)>>\nInit == x=0\nNext == x'=x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "set-temporal",
+    "family": "level",
+    "expected": "input-error",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nBad == {[](x=0)}\nInit == x=0\nNext == x'=x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "equality-temporal",
+    "family": "level",
+    "expected": "input-error",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nBad == ([](x=0)) = TRUE\nInit == x=0\nNext == x'=x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "subscript-action",
+    "family": "level",
+    "expected": "input-error",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nBad == [x'=x]_(x')\nInit == x=0\nNext == x'=x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "fairness-subscript",
+    "family": "level",
+    "expected": "input-error",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nBad == WF_(x')(x'=x)\nInit == x=0\nNext == x'=x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "formal-transitive",
+    "family": "level",
+    "expected": "input-error",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nP(a) == a'\nQ(b) == P(b)\nBad == Q(x')\nInit == x=0\nNext == x'=x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "let-formal",
+    "family": "level",
+    "expected": "input-error",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nBad == LET P(a) == a' IN P(x')\nInit == x=0\nNext == x'=x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "recursive-temporal-actual",
+    "family": "level",
+    "expected": "input-error",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nRECURSIVE P(_)\nP(a) == IF TRUE THEN a ELSE P(a)\nBad == P([]TRUE)\nInit == x=0\nNext == x'=x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "recursive-prime-formal",
+    "family": "level",
+    "expected": "input-error",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nRECURSIVE P(_)\nP(a) == a'\nInit == x=0\nNext == x'=x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "ignored-actual",
+    "family": "level",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nP(a) == TRUE\nGood == P([]TRUE)'\nInit == x=0\nNext == x'=x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "formal-state",
+    "family": "level",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nP(a) == a'\nGood == P(x)\nInit == x=0\nNext == x'=x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "enabled-weight",
+    "family": "level",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nP(a) == ENABLED a\nGood == P(x'=x)'\nInit == x=0\nNext == x'=x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "let-state",
+    "family": "level",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nGood == LET P(a) == a' IN P(x)\nInit == x=0\nNext == x'=x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "recursive-action-actual",
+    "family": "level",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nRECURSIVE P(_)\nP(a) == IF TRUE THEN a ELSE P(a)\nGood == P(x')\nInit == x=0\nNext == x'=x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-alias",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..7] == IF i=0 THEN 7 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=(Alias[0])\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-actual",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..7] == IF i=0 THEN 7 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=(Id(Alias)[0])\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-selected",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..7] == IF i=0 THEN 7 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=((IF TRUE THEN Alias ELSE 1 \\div 0)[0])\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-record",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..7] == IF i=0 THEN 7 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=(Id([fn |-> Alias, mark |-> TRUE]).fn[0])\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-tuple",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..7] == IF i=0 THEN 7 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=(Id(<<Alias, TRUE>>)[1][0])\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-domain",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..7] == IF i=0 THEN 7 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=(DOMAIN Id(Alias))\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-demand-error",
+    "family": "lazy",
+    "expected": "evaluation-error",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..7] == IF i=0 THEN 7 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=(Id(Alias)[1])\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-equality-error",
+    "family": "lazy",
+    "expected": "evaluation-error",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..7] == IF i=0 THEN 7 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=(Alias=Alias)\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-state-error",
+    "family": "lazy",
+    "expected": "evaluation-error",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..7] == IF i=0 THEN 7 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=(Id(Alias))\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-outside",
+    "family": "lazy",
+    "expected": "evaluation-error",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..7] == IF i=0 THEN 7 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=(Id(Alias)[8])\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-unused-loop",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in {0,1}] == IF i=0 THEN 7 ELSE F[1]\nAlias == F\nId(f) == f\nInit == x=(Id(Alias)[0])\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-demand-loop",
+    "family": "lazy",
+    "expected": "bounded",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in {0,1}] == IF i=0 THEN 7 ELSE F[1]\nAlias == F\nId(f) == f\nInit == x=(Id(Alias)[1])\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-capture",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nGet(delta) == LET F[i \\in {0,1}] == IF i=0 THEN delta ELSE F[1] IN F\nInit == x=(Get(7)[0])\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-old",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..7] == IF i=0 THEN 7 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=(([<<7>> EXCEPT ![1] = Id([i \\in {0,1} |-> IF i=0 THEN @ ELSE 1 \\div 0])[0]])[1])\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-pattern",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[<<i,j>> \\in {<<0,0>>,<<1,1>>}] == IF i=0 THEN 7 ELSE F[<<1,1>>]\nAlias == F\nId(f) == f\nInit == x=(Id(Alias)[<<0,0>>])\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-product",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in {0,1}, j \\in {0,1}] == IF i+j=0 THEN 7 ELSE F[1,1]\nAlias == F\nId(f) == f\nInit == x=(Id(Alias)[0,0])\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-materialize",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..3] == IF i=0 THEN 0 ELSE F[i-1]+1\nAlias == F\nId(f) == f\nInit == x=(Id(Alias))\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-prime",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in {0,1}] == IF i=0 THEN x ELSE F[1]\nId(f) == f\nInit == x=0\nNext == x'=(x+1)%3 /\\ Id(F)[0]=x /\\ Id(F')[0]=x'\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-alias-value",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..7] == IF i=0 THEN 7 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=(Alias[0])\nNext == UNCHANGED x\nValueSafe == x=7\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\nINVARIANT ValueSafe"
+  },
+  {
+    "name": "lazy-actual-value",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..7] == IF i=0 THEN 7 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=(Id(Alias)[0])\nNext == UNCHANGED x\nValueSafe == x=7\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\nINVARIANT ValueSafe"
+  },
+  {
+    "name": "lazy-selected-value",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..7] == IF i=0 THEN 7 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=((IF TRUE THEN Alias ELSE 1 \\div 0)[0])\nNext == UNCHANGED x\nValueSafe == x=7\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\nINVARIANT ValueSafe"
+  },
+  {
+    "name": "lazy-record-value",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..7] == IF i=0 THEN 7 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=(Id([fn |-> Alias, mark |-> TRUE]).fn[0])\nNext == UNCHANGED x\nValueSafe == x=7\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\nINVARIANT ValueSafe"
+  },
+  {
+    "name": "lazy-tuple-value",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..7] == IF i=0 THEN 7 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=(Id(<<Alias, TRUE>>)[1][0])\nNext == UNCHANGED x\nValueSafe == x=7\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\nINVARIANT ValueSafe"
+  },
+  {
+    "name": "lazy-domain-value",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..7] == IF i=0 THEN 7 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=(DOMAIN Id(Alias))\nNext == UNCHANGED x\nValueSafe == x=(0..7)\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\nINVARIANT ValueSafe"
+  },
+  {
+    "name": "lazy-unused-loop-value",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in {0,1}] == IF i=0 THEN 7 ELSE F[1]\nAlias == F\nId(f) == f\nInit == x=(Id(Alias)[0])\nNext == UNCHANGED x\nValueSafe == x=7\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\nINVARIANT ValueSafe"
+  },
+  {
+    "name": "lazy-capture-value",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nGet(delta) == LET F[i \\in {0,1}] == IF i=0 THEN delta ELSE F[1] IN F\nInit == x=(Get(7)[0])\nNext == UNCHANGED x\nValueSafe == x=7\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\nINVARIANT ValueSafe"
+  },
+  {
+    "name": "lazy-old-value",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..7] == IF i=0 THEN 7 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=(([<<7>> EXCEPT ![1] = Id([i \\in {0,1} |-> IF i=0 THEN @ ELSE 1 \\div 0])[0]])[1])\nNext == UNCHANGED x\nValueSafe == x=7\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\nINVARIANT ValueSafe"
+  },
+  {
+    "name": "lazy-pattern-value",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[<<i,j>> \\in {<<0,0>>,<<1,1>>}] == IF i=0 THEN 7 ELSE F[<<1,1>>]\nAlias == F\nId(f) == f\nInit == x=(Id(Alias)[<<0,0>>])\nNext == UNCHANGED x\nValueSafe == x=7\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\nINVARIANT ValueSafe"
+  },
+  {
+    "name": "lazy-product-value",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in {0,1}, j \\in {0,1}] == IF i+j=0 THEN 7 ELSE F[1,1]\nAlias == F\nId(f) == f\nInit == x=(Id(Alias)[0,0])\nNext == UNCHANGED x\nValueSafe == x=7\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\nINVARIANT ValueSafe"
+  },
+  {
+    "name": "lazy-materialize-value",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..3] == IF i=0 THEN 0 ELSE F[i-1]+1\nAlias == F\nId(f) == f\nInit == x=(Id(Alias))\nNext == UNCHANGED x\nValueSafe == DOMAIN x=(0..3) /\\ x[0]=0 /\\ x[1]=1 /\\ x[2]=2 /\\ x[3]=3\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\nINVARIANT ValueSafe"
+  },
+  {
+    "name": "lazy-prime-value",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in {0,1}] == IF i=0 THEN x ELSE F[1]\nId(f) == f\nInit == x=0\nNext == x'=(x+1)%3 /\\ Id(F)[0]=x /\\ Id(F')[0]=x'\nValueSafe == x \\in 0..2\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\nINVARIANT ValueSafe"
+  },
+  {
+    "name": "action-repeat-4",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nA3(v) == A2(v) \\/ A2(v)\nA4(v) == A3(v) \\/ A3(v)\nInit == x=0\nNext == A4((x+1)%4)\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "action-repeat-6",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nA3(v) == A2(v) \\/ A2(v)\nA4(v) == A3(v) \\/ A3(v)\nA5(v) == A4(v) \\/ A4(v)\nA6(v) == A5(v) \\/ A5(v)\nInit == x=0\nNext == A6((x+1)%4)\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "action-capture",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nInit == x=0\nNext == \\E delta \\in {1,2}: LET Step(v) == x'=(x+delta+v)%4 IN Step(0) \\/ Step(0) \\/ Step(0) \\/ Step(0)\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "temporal-repeat-3",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nT0(limit) == [](x<limit)\nT1(limit) == T0(limit) /\\ T0(limit)\nT2(limit) == T1(limit) /\\ T1(limit)\nT3(limit) == T2(limit) /\\ T2(limit)\nInit == x=0\nNext == x'=(x+1)%4\nLive == T3(4)\n====",
+    "config": "INIT Init\nNEXT Next\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "temporal-repeat-5",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nT0(limit) == [](x<limit)\nT1(limit) == T0(limit) /\\ T0(limit)\nT2(limit) == T1(limit) /\\ T1(limit)\nT3(limit) == T2(limit) /\\ T2(limit)\nT4(limit) == T3(limit) /\\ T3(limit)\nT5(limit) == T4(limit) /\\ T4(limit)\nInit == x=0\nNext == x'=(x+1)%4\nLive == T5(4)\n====",
+    "config": "INIT Init\nNEXT Next\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "scalar-control",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nInit == x=0\nNext == x'=(x+1)%4\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-control",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..15] == IF i=0 THEN 1 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=0\nNext == x'=(x+Id(Alias)[0])%4\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "temporal-normal",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nT(target) == []<>(x=target)\nBoth(target) == T(target) /\\ T(target)\nInit == x=0\nNext == x'=(x+1)%3\nSpec == Init /\\ [][Next]_x /\\ WF_x(Next)\nLive == Both(0)\n====",
+    "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "temporal-fault",
+    "family": "template",
+    "expected": "temporal-violation",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nT(target) == []<>(x=target)\nBoth(target) == T(target) /\\ T(target)\nInit == x=0\nNext == x'=(x+1)%3\nSpec == Init /\\ [][Next]_x /\\ WF_x(Next)\nLive == Both(4)\n====",
+    "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-1172-0-normal",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nA3(v) == A2(v) \\/ A2(v)\nT(limit) == []<>(x<limit)\nLive == T(3) /\\ T(3)\nInit == x=0\nNext == A3((x+1)%3)\nSafe == x<3\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-1172-0-fault",
+    "family": "template",
+    "expected": "invariant-violation",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nA3(v) == A2(v) \\/ A2(v)\nT(limit) == []<>(x<limit)\nLive == T(3) /\\ T(3)\nInit == x=0\nNext == A3((x+1)%3)\nSafe == x<2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-1172-1-normal",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nT(limit) == []<>(x<limit)\nLive == T(2) /\\ T(2)\nInit == x=0\nNext == A2((x+1)%2)\nSafe == x<2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-1172-1-fault",
+    "family": "template",
+    "expected": "invariant-violation",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nT(limit) == []<>(x<limit)\nLive == T(2) /\\ T(2)\nInit == x=0\nNext == A2((x+1)%2)\nSafe == x<1\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-1172-2-normal",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nT(limit) == []<>(x<limit)\nLive == T(4) /\\ T(4)\nInit == x=0\nNext == A1((x+1)%4)\nSafe == x<4\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-1172-2-fault",
+    "family": "template",
+    "expected": "invariant-violation",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nT(limit) == []<>(x<limit)\nLive == T(4) /\\ T(4)\nInit == x=0\nNext == A1((x+1)%4)\nSafe == x<3\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-1172-3-normal",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nA3(v) == A2(v) \\/ A2(v)\nA4(v) == A3(v) \\/ A3(v)\nT(limit) == []<>(x<limit)\nLive == T(3) /\\ T(3)\nInit == x=0\nNext == A4((x+1)%3)\nSafe == x<3\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-1172-3-fault",
+    "family": "template",
+    "expected": "invariant-violation",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nA3(v) == A2(v) \\/ A2(v)\nA4(v) == A3(v) \\/ A3(v)\nT(limit) == []<>(x<limit)\nLive == T(3) /\\ T(3)\nInit == x=0\nNext == A4((x+1)%3)\nSafe == x<2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-1172-4-normal",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nT(limit) == []<>(x<limit)\nLive == T(6) /\\ T(6)\nInit == x=0\nNext == A2((x+1)%6)\nSafe == x<6\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-1172-4-fault",
+    "family": "template",
+    "expected": "invariant-violation",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nT(limit) == []<>(x<limit)\nLive == T(6) /\\ T(6)\nInit == x=0\nNext == A2((x+1)%6)\nSafe == x<5\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-1172-5-normal",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nT(limit) == []<>(x<limit)\nLive == T(4) /\\ T(4)\nInit == x=0\nNext == A1((x+1)%4)\nSafe == x<4\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-1172-5-fault",
+    "family": "template",
+    "expected": "invariant-violation",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nT(limit) == []<>(x<limit)\nLive == T(4) /\\ T(4)\nInit == x=0\nNext == A1((x+1)%4)\nSafe == x<3\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-2172-0-normal",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nT(limit) == []<>(x<limit)\nLive == T(3) /\\ T(3)\nInit == x=0\nNext == A1((x+1)%3)\nSafe == x<3\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-2172-0-fault",
+    "family": "template",
+    "expected": "invariant-violation",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nT(limit) == []<>(x<limit)\nLive == T(3) /\\ T(3)\nInit == x=0\nNext == A1((x+1)%3)\nSafe == x<2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-2172-1-normal",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nA3(v) == A2(v) \\/ A2(v)\nA4(v) == A3(v) \\/ A3(v)\nT(limit) == []<>(x<limit)\nLive == T(2) /\\ T(2)\nInit == x=0\nNext == A4((x+1)%2)\nSafe == x<2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-2172-1-fault",
+    "family": "template",
+    "expected": "invariant-violation",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nA3(v) == A2(v) \\/ A2(v)\nA4(v) == A3(v) \\/ A3(v)\nT(limit) == []<>(x<limit)\nLive == T(2) /\\ T(2)\nInit == x=0\nNext == A4((x+1)%2)\nSafe == x<1\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-2172-2-normal",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nA3(v) == A2(v) \\/ A2(v)\nT(limit) == []<>(x<limit)\nLive == T(5) /\\ T(5)\nInit == x=0\nNext == A3((x+1)%5)\nSafe == x<5\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-2172-2-fault",
+    "family": "template",
+    "expected": "invariant-violation",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nA3(v) == A2(v) \\/ A2(v)\nT(limit) == []<>(x<limit)\nLive == T(5) /\\ T(5)\nInit == x=0\nNext == A3((x+1)%5)\nSafe == x<4\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-2172-3-normal",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nT(limit) == []<>(x<limit)\nLive == T(3) /\\ T(3)\nInit == x=0\nNext == A2((x+1)%3)\nSafe == x<3\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-2172-3-fault",
+    "family": "template",
+    "expected": "invariant-violation",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nT(limit) == []<>(x<limit)\nLive == T(3) /\\ T(3)\nInit == x=0\nNext == A2((x+1)%3)\nSafe == x<2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-2172-4-normal",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nT(limit) == []<>(x<limit)\nLive == T(6) /\\ T(6)\nInit == x=0\nNext == A1((x+1)%6)\nSafe == x<6\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-2172-4-fault",
+    "family": "template",
+    "expected": "invariant-violation",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nT(limit) == []<>(x<limit)\nLive == T(6) /\\ T(6)\nInit == x=0\nNext == A1((x+1)%6)\nSafe == x<5\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-2172-5-normal",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nA3(v) == A2(v) \\/ A2(v)\nA4(v) == A3(v) \\/ A3(v)\nT(limit) == []<>(x<limit)\nLive == T(4) /\\ T(4)\nInit == x=0\nNext == A4((x+1)%4)\nSafe == x<4\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "generated-2172-5-fault",
+    "family": "template",
+    "expected": "invariant-violation",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nA3(v) == A2(v) \\/ A2(v)\nA4(v) == A3(v) \\/ A3(v)\nT(limit) == []<>(x<limit)\nLive == T(4) /\\ T(4)\nInit == x=0\nNext == A4((x+1)%4)\nSafe == x<3\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  }
+]

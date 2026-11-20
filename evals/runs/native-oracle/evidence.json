@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "plan": "evals/plans/native-oracle.md",
+  "report": "evals/iterations/native-oracle.md",
+  "baseRevision": "fdaa5c898db2dc152e272dc729d9397d4e8f1826",
+  "archive": {
+    "path": "evidence.tar.gz",
+    "sha256": "9d21a0020243635b7c04193c11bdcd8d5582ab49e41b9780ac1c1ec7f78aa38f",
+    "bytes": 3080495
+  },
+  "primaryRun": "measurement-02",
+  "priorRun": "measurement-01",
+  "replay": "replay-02/replay.json",
+  "negativeControls": [
+    {
+      "path": "corrupted-report-02.log",
+      "expectedExit": 1,
+      "reason": "modified complete report, with recomputed fixture digest"
+    },
+    {
+      "path": "corrupted-source-02.log",
+      "expectedExit": 1,
+      "reason": "modified saved source"
+    }
+  ],
+  "scope": "roracle transport only; snapshot/SUT excluded; darwin arm64 host; native object input plus JSON output",
+  "decision": {
+    "generatedTypes": "adopt",
+    "nativeBindings": "explicit experimental selection",
+    "default": "wasm"
+  },
+  "summary": {
+    "rows": [
+      {
+        "fixture": "single",
+        "wasmUs": 3.7720025,
+        "nativeJsonUs": 3.4402245000000002,
+        "nativeObjectUs": 11.062768,
+        "jsonSpeedup": 1.0964407991397074,
+        "objectSpeedup": 0.3409637172179693
+      },
+      {
+        "fixture": "batch-32",
+        "wasmUs": 82.605225,
+        "nativeJsonUs": 81.40066,
+        "nativeObjectUs": 294.34268,
+        "jsonSpeedup": 1.014797975839508,
+        "objectSpeedup": 0.2806430416411239
+      },
+      {
+        "fixture": "nested-256",
+        "wasmUs": 216.55585,
+        "nativeJsonUs": 210.80269,
+        "nativeObjectUs": 864.56017,
+        "jsonSpeedup": 1.02729168209381,
+        "objectSpeedup": 0.25048094686110745
+      },
+      {
+        "fixture": "unicode",
+        "wasmUs": 5.77391,
+        "nativeJsonUs": 5.615244,
+        "nativeObjectUs": 15.913318499999999,
+        "jsonSpeedup": 1.0282562966097288,
+        "objectSpeedup": 0.36283506799665954
+      },
+      {
+        "fixture": "mismatch",
+        "wasmUs": 3.85251,
+        "nativeJsonUs": 3.665415,
+        "nativeObjectUs": 11.722739,
+        "jsonSpeedup": 1.0510433334288205,
+        "objectSpeedup": 0.32863565417604196
+      },
+      {
+        "fixture": "unknown",
+        "wasmUs": 3.7287685,
+        "nativeJsonUs": 3.5065905,
+        "nativeObjectUs": 10.7781675,
+        "jsonSpeedup": 1.0633601214627142,
+        "objectSpeedup": 0.3459557016533655
+      }
+    ],
+    "candidates": [
+      {
+        "mode": "native-json",
+        "geometricMean": 1.0465102507854565,
+        "worstRatio": 1.014797975839508,
+        "eligible": false
+      },
+      {
+        "mode": "native-object",
+        "geometricMean": 0.31563144342938054,
+        "worstRatio": 0.25048094686110745,
+        "eligible": false
+      }
+    ],
+    "cold": [
+      {
+        "mode": "wasm",
+        "initAndFirstUs": 2656.3959999999997,
+        "processMs": 30.110771
+      },
+      {
+        "mode": "native-json",
+        "initAndFirstUs": 907.604,
+        "processMs": 28.419417
+      },
+      {
+        "mode": "native-object",
+        "initAndFirstUs": 1076.2915,
+        "processMs": 27.719354000000003
+      }
+    ]
+  },
+  "checks": {
+    "basicNode": 79,
+    "basicVitest": 79,
+    "wasmNode": 23,
+    "wasmVitest": 23,
+    "nativeNode": 10,
+    "nativeVitest": 10,
+    "workspaceNativePerMode": 8,
+    "supportComparisons": 68,
+    "supportTests": 8,
+    "mutationKilled": 104,
+    "mutationScored": 109,
+    "mutationCompileErrors": 133,
+    "packages": "npm and 8 Rust crates, independent consumers"
+  },
+  "logs": [
+    "check-final-02.log",
+    "wasm.log",
+    "contract-07.log",
+    "rust-check.log",
+    "native-rust-check.log",
+    "oracle.log",
+    "runtime-build.log",
+    "runtime-test.log",
+    "package.log",
+    "evaluate.log",
+    "evaluate-replay.log",
+    "mutation.log",
+    "support-sync.log",
+    "support-check-final.log",
+    "support-staged-final-02.log",
+    "support-test-final.log"
+  ],
+  "supportRetry": {
+    "failed": "support-sync-02.log",
+    "diagnostic": "jev-http-status.json",
+    "records": "failed-support-402",
+    "resolution": "Removed optional evals index edit. Restored successful records for identical reviewed input. Current tree and staged gates passed offline."
+  }
+}

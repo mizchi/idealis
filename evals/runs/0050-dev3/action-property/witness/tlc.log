@@ -1,0 +1,27 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 56 and seed 4186601829325590724 with 1 worker on 10 cores with 7282MB heap and 64MB offheap memory [pid: 18275] (Mac OS X 26.6.2 aarch64, Eclipse Adoptium 21.0.13 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file /Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0050-dev3/action-property/witness/Differential.tla
+Parsing file /private/var/folders/_h/_rf455xj4h3_3g6z86pg244c0000gn/T/idealis-tlc-amjt6o/Naturals.tla
+Semantic processing of module Naturals
+Semantic processing of module Differential
+Starting... (2026-11-17 17:14:17)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-11-17 17:14:17.
+Error: Action property Progress is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ __position = 0
+/\ x = 0
+
+State 2: <__TraceNext line 13, col 16 to line 13, col 195 of module Differential>
+/\ __position = 1
+/\ x = 1
+
+State 3: <__TraceNext line 13, col 16 to line 13, col 195 of module Differential>
+/\ __position = 2
+/\ x = 2
+
+3 states generated, 3 distinct states found, 0 states left on queue.
+The depth of the complete state graph search is 3.
+The average outdegree of the complete state graph is 1 (minimum is 1, the maximum 1 and the 95th percentile is 1).
+Finished in 00s at (2026-11-17 17:14:17)

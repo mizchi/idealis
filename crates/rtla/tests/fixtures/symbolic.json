@@ -1,0 +1,167 @@
+[
+  {
+    "id": "infix-definition",
+    "source": "---- MODULE Symbolic ----\nEXTENDS Naturals\na %% b == a + b\nMain == 2 %% 3\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "prefix-definition",
+    "source": "---- MODULE Symbolic ----\n-. value == IF value = 0 THEN 1 ELSE 0\nMain == -0\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "postfix-definition",
+    "source": "---- MODULE Symbolic ----\nvalue ^+ == value\nMain == 1^+\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "local-let",
+    "source": "---- MODULE Symbolic ----\nLOCAL a %% b == a\nMain == LET value ^+ == value IN (1 %% 2)^+\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "symbolic-constants",
+    "source": "---- MODULE Symbolic ----\nCONSTANT _ %% _, -. _, _ ^+\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "symbolic-formals",
+    "source": "---- MODULE Symbolic ----\nF(_ %% _, -. _, _ ^+) == TRUE\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "operator-arguments",
+    "source": "---- MODULE Symbolic ----\nMain == F(%%, -., ^+, +, -, ~, [], DOMAIN)\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "qualified-infix",
+    "source": "---- MODULE Symbolic ----\nMain == M!N!%%(1, 2)\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "qualified-postfix",
+    "source": "---- MODULE Symbolic ----\nMain == M!^+(1)\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "qualified-prefix",
+    "source": "---- MODULE Symbolic ----\nMain == M!~(TRUE)\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "nonfix-infix",
+    "source": "---- MODULE Symbolic ----\nMain == %%(1, 2)\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "nonfix-prefix-minus",
+    "source": "---- MODULE Symbolic ----\nMain == -.(1)\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "nonfix-plus",
+    "source": "---- MODULE Symbolic ----\nMain == +(1, 2)\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "nonfix-arity-is-semantic",
+    "source": "---- MODULE Symbolic ----\nMain == %%(1)\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "bad-prefix-arity",
+    "source": "---- MODULE Symbolic ----\nMain == ~(TRUE, FALSE)\n====\n",
+    "accepted": false
+  },
+  {
+    "id": "bare-operator-body",
+    "source": "---- MODULE Symbolic ----\nMain == %%\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "bare-operator-set",
+    "source": "---- MODULE Symbolic ----\nMain == {%%}\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "bare-operator-index",
+    "source": "---- MODULE Symbolic ----\nMain == function[%%]\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "bad-minus-head",
+    "source": "---- MODULE Symbolic ----\n- value == value\n====\n",
+    "accepted": false
+  },
+  {
+    "id": "missing-infix-formal",
+    "source": "---- MODULE Symbolic ----\nleft %% == left\n====\n",
+    "accepted": false
+  },
+  {
+    "id": "extra-postfix-formal",
+    "source": "---- MODULE Symbolic ----\nleft ^+ right == left\n====\n",
+    "accepted": false
+  },
+  {
+    "id": "missing-infix-placeholder",
+    "source": "---- MODULE Symbolic ----\nCONSTANT _ %%\n====\n",
+    "accepted": false
+  },
+  {
+    "id": "bad-minus-placeholder",
+    "source": "---- MODULE Symbolic ----\nCONSTANT - _\n====\n",
+    "accepted": false
+  },
+  {
+    "id": "variable-symbol",
+    "source": "---- MODULE Symbolic ----\nVARIABLE _ %% _\n====\n",
+    "accepted": false
+  },
+  {
+    "id": "variable-operator",
+    "source": "---- MODULE Symbolic ----\nVARIABLE F(_)\n====\n",
+    "accepted": false
+  },
+  {
+    "id": "product-definition",
+    "source": "---- MODULE Symbolic ----\nleft \\X right == left\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "product-reference",
+    "source": "---- MODULE Symbolic ----\nMain == F(\\X)\n====\n",
+    "accepted": false
+  },
+  {
+    "id": "qualified-product",
+    "source": "---- MODULE Symbolic ----\nMain == M!\\X(1, 2)\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "string-head",
+    "source": "---- MODULE Symbolic ----\nleft \"%%\" right == left\n====\n",
+    "accepted": false
+  },
+  {
+    "id": "builtin-prefix-head",
+    "source": "---- MODULE Symbolic ----\nDOMAIN value == value\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "builtin-infix-head",
+    "source": "---- MODULE Symbolic ----\nleft /\\ right == left\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "parenthesized-reference",
+    "source": "---- MODULE Symbolic ----\nMain == F((+))\n====\n",
+    "accepted": true
+  },
+  {
+    "id": "normal-function",
+    "source": "---- MODULE Symbolic ----\nF(value) == value\nf[key \\in {1}] == F(key)\nMain == f[1]\n====\n",
+    "accepted": true
+  }
+]

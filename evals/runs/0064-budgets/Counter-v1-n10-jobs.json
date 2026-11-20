@@ -1,0 +1,196 @@
+{
+  "jobs": [
+    {
+      "bounds": {
+        "maxDepth": 0,
+        "maxStates": 10000000,
+        "maxWork": 1
+      }
+    },
+    {
+      "bounds": {
+        "maxDepth": 1,
+        "maxStates": 10000000,
+        "maxWork": 2
+      }
+    },
+    {
+      "bounds": {
+        "maxDepth": 2,
+        "maxStates": 10000000,
+        "maxWork": 4
+      }
+    },
+    {
+      "bounds": {
+        "maxDepth": 4,
+        "maxStates": 10000000,
+        "maxWork": 8
+      }
+    },
+    {
+      "bounds": {
+        "maxDepth": 16,
+        "maxStates": 10000000,
+        "maxWork": 16
+      }
+    },
+    {
+      "bounds": {
+        "maxDepth": 0,
+        "maxStates": 10000000,
+        "maxWork": 32
+      }
+    },
+    {
+      "bounds": {
+        "maxDepth": 1,
+        "maxStates": 10000000,
+        "maxWork": 64
+      }
+    },
+    {
+      "bounds": {
+        "maxDepth": 2,
+        "maxStates": 10000000,
+        "maxWork": 128
+      }
+    },
+    {
+      "bounds": {
+        "maxDepth": 4,
+        "maxStates": 10000000,
+        "maxWork": 256
+      }
+    },
+    {
+      "bounds": {
+        "maxDepth": 16,
+        "maxStates": 10000000,
+        "maxWork": 512
+      }
+    }
+  ],
+  "expected": [
+    {
+      "kind": "safety",
+      "result": {
+        "status": "bounded",
+        "reason": "work",
+        "states": 0,
+        "generated": 0,
+        "depth": 0,
+        "work": 1,
+        "violation": null
+      }
+    },
+    {
+      "kind": "safety",
+      "result": {
+        "status": "bounded",
+        "reason": "work",
+        "states": 1,
+        "generated": 1,
+        "depth": 0,
+        "work": 2,
+        "violation": null
+      }
+    },
+    {
+      "kind": "safety",
+      "result": {
+        "status": "bounded",
+        "reason": "work",
+        "states": 2,
+        "generated": 2,
+        "depth": 1,
+        "work": 4,
+        "violation": null
+      }
+    },
+    {
+      "kind": "safety",
+      "result": {
+        "status": "bounded",
+        "reason": "work",
+        "states": 4,
+        "generated": 4,
+        "depth": 3,
+        "work": 8,
+        "violation": null
+      }
+    },
+    {
+      "kind": "safety",
+      "result": {
+        "status": "complete",
+        "reason": null,
+        "states": 4,
+        "generated": 5,
+        "depth": 3,
+        "work": 10,
+        "violation": null
+      }
+    },
+    {
+      "kind": "safety",
+      "result": {
+        "status": "bounded",
+        "reason": "depth",
+        "states": 1,
+        "generated": 2,
+        "depth": 0,
+        "work": 4,
+        "violation": null
+      }
+    },
+    {
+      "kind": "safety",
+      "result": {
+        "status": "bounded",
+        "reason": "depth",
+        "states": 2,
+        "generated": 3,
+        "depth": 1,
+        "work": 6,
+        "violation": null
+      }
+    },
+    {
+      "kind": "safety",
+      "result": {
+        "status": "bounded",
+        "reason": "depth",
+        "states": 3,
+        "generated": 4,
+        "depth": 2,
+        "work": 8,
+        "violation": null
+      }
+    },
+    {
+      "kind": "safety",
+      "result": {
+        "status": "complete",
+        "reason": null,
+        "states": 4,
+        "generated": 5,
+        "depth": 3,
+        "work": 10,
+        "violation": null
+      }
+    },
+    {
+      "kind": "safety",
+      "result": {
+        "status": "complete",
+        "reason": null,
+        "states": 4,
+        "generated": 5,
+        "depth": 3,
+        "work": 10,
+        "violation": null
+      }
+    }
+  ]
+}

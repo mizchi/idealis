@@ -1,0 +1,92 @@
+    Checking rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+    Checking rtla-compiler v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtla-compiler)
+error: pattern requires `..` due to inaccessible fields
+    --> /Users/mz/ghq/github.com/mizchi/idealis/crates/rtla-compiler/src/analysis.rs:803:13
+     |
+ 803 |           let ir::SafetyProgram {
+     |  _____________^
+ 804 | |             format: _,
+ 805 | |             version: _,
+ 806 | |             name: _,
+...    |
+ 819 | |             definitions,
+ 820 | |         } = value;
+     | |_________^
+...
+1409 |       program_edges_body!(value, Node, edge, iter)
+     |       -------------------------------------------- in this macro invocation
+     |
+     = note: this error originates in the macro `program_edges_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: ignore the inaccessible and unused fields
+     |
+ 819 |             definitions, ..
+     |                          ++
+
+error[E0063]: missing field `symmetry` in initializer of `SafetyProgram`
+    --> /Users/mz/ghq/github.com/mizchi/idealis/crates/rtla-compiler/src/analysis.rs:1540:19
+     |
+1540 |     let program = ir::SafetyProgram {
+     |                   ^^^^^^^^^^^^^^^^^ missing `symmetry`
+
+error: pattern requires `..` due to inaccessible fields
+    --> /Users/mz/ghq/github.com/mizchi/idealis/crates/rtla-compiler/src/analysis.rs:803:13
+     |
+ 803 |           let ir::SafetyProgram {
+     |  _____________^
+ 804 | |             format: _,
+ 805 | |             version: _,
+ 806 | |             name: _,
+...    |
+ 819 | |             definitions,
+ 820 | |         } = value;
+     | |_________^
+...
+2203 |           NodeMut::Program(value) => program_edges_body!(value, NodeMut, edge_mut, iter_mut),
+     |                                      ------------------------------------------------------- in this macro invocation
+     |
+     = note: this error originates in the macro `program_edges_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: ignore the inaccessible and unused fields
+     |
+ 819 |             definitions, ..
+     |                          ++
+
+error[E0063]: missing field `symmetry` in initializer of `SafetyProgram`
+   --> /Users/mz/ghq/github.com/mizchi/idealis/crates/rtla-compiler/src/typed_lower.rs:673:27
+    |
+673 |         let mut program = ir::SafetyProgram {
+    |                           ^^^^^^^^^^^^^^^^^ missing `symmetry`
+
+error[E0004]: non-exhaustive patterns: `&rtlc::ir::Expression::SelectSeq { .. }`, `&rtlc::ir::Expression::SortSeq { .. }` and `&rtlc::ir::Expression::Assert { .. }` not covered
+    --> /Users/mz/ghq/github.com/mizchi/idealis/crates/rtla-compiler/src/analysis.rs:374:15
+     |
+ 374 |         match value {
+     |               ^^^^^ patterns `&rtlc::ir::Expression::SelectSeq { .. }`, `&rtlc::ir::Expression::SortSeq { .. }` and `&rtlc::ir::Expression::Assert { .. }` not covered
+...
+1397 |     expression_edges_body!(value, Node, edge, iter)
+     |     ----------------------------------------------- in this macro invocation
+     |
+note: `rtlc::ir::Expression` defined here
+    --> /Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc/src/ir.rs:31:1
+     |
+  31 | pub enum Expression {
+     | ^^^^^^^^^^^^^^^^^^^
+...
+ 126 |     SelectSeq {
+     |     --------- not covered
+...
+ 131 |     SortSeq {
+     |     ------- not covered
+...
+ 136 |     Assert {
+     |     ------ not covered
+     = note: the matched value is of type `&rtlc::ir::Expression`
+     = note: this error originates in the macro `expression_edges_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern, a match arm with multiple or-patterns as shown, or multiple match arms
+     |
+ 631 ~             },
+ 632 +             &rtlc::ir::Expression::SelectSeq { .. } | &rtlc::ir::Expression::SortSeq { .. } | &rtlc::ir::Expression::Assert { .. } => todo!()
+     |
+
+Some errors have detailed explanations: E0004, E0063.
+For more information about an error, try `rustc --explain E0004`.
+error: could not compile `rtla-compiler` (lib) due to 5 previous errors

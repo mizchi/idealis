@@ -1,0 +1,1050 @@
+{
+  "input": "TCommit-8",
+  "route": "before-wasm-v2",
+  "iteration": 1,
+  "warmup": false,
+  "status": "complete",
+  "compileMs": 0.8467080000000351,
+  "checkMs": 197.9560420000007,
+  "sourceMs": 197.96091700000034,
+  "irBytes": 8367,
+  "definitions": 4,
+  "result": {
+    "status": "complete",
+    "reason": null,
+    "states": 6816,
+    "generated": 53513,
+    "depth": 16,
+    "work": 2857051,
+    "violation": null
+  },
+  "program": {
+    "format": "modelt.safety-program",
+    "version": 2,
+    "name": "TCommit",
+    "variables": [
+      "rmState"
+    ],
+    "initial": [
+      {
+        "name": "TCInit",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "function",
+              "bounds": [
+                {
+                  "slot": 0,
+                  "domain": {
+                    "kind": "value",
+                    "value": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r0"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r1"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r2"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r3"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r4"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r5"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r6"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r7"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "body": {
+                "op": "data",
+                "value": {
+                  "type": "string",
+                  "value": "working"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "next": [
+      {
+        "name": "Prepare",
+        "steps": [
+          {
+            "kind": "bind",
+            "slot": 0,
+            "domain": {
+              "kind": "value",
+              "value": {
+                "op": "set",
+                "values": [
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r0"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r1"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r2"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r3"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r4"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r5"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r6"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r7"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "kind": "frame",
+            "arguments": [
+              {
+                "op": "bound",
+                "slot": 0
+              }
+            ],
+            "captures": [],
+            "parameterCount": 1,
+            "captureCount": 0,
+            "localScope": 0,
+            "branches": [
+              {
+                "name": "Prepare",
+                "steps": [
+                  {
+                    "kind": "guard",
+                    "expression": {
+                      "op": "eq",
+                      "left": {
+                        "op": "at",
+                        "target": {
+                          "op": "read",
+                          "slot": 0,
+                          "next": false
+                        },
+                        "key": {
+                          "op": "parameter",
+                          "slot": 0
+                        }
+                      },
+                      "right": {
+                        "op": "data",
+                        "value": {
+                          "type": "string",
+                          "value": "working"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "assign",
+                    "slot": 0,
+                    "value": {
+                      "op": "update",
+                      "target": {
+                        "op": "read",
+                        "slot": 0,
+                        "next": false
+                      },
+                      "updates": [
+                        {
+                          "path": [
+                            {
+                              "op": "parameter",
+                              "slot": 0
+                            }
+                          ],
+                          "value": {
+                            "op": "data",
+                            "value": {
+                              "type": "string",
+                              "value": "prepared"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Decide",
+        "steps": [
+          {
+            "kind": "bind",
+            "slot": 0,
+            "domain": {
+              "kind": "value",
+              "value": {
+                "op": "set",
+                "values": [
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r0"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r1"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r2"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r3"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r4"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r5"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r6"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r7"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "kind": "frame",
+            "arguments": [
+              {
+                "op": "bound",
+                "slot": 0
+              }
+            ],
+            "captures": [],
+            "parameterCount": 1,
+            "captureCount": 0,
+            "localScope": 0,
+            "branches": [
+              {
+                "name": "Decide",
+                "steps": [
+                  {
+                    "kind": "guard",
+                    "expression": {
+                      "op": "eq",
+                      "left": {
+                        "op": "at",
+                        "target": {
+                          "op": "read",
+                          "slot": 0,
+                          "next": false
+                        },
+                        "key": {
+                          "op": "parameter",
+                          "slot": 0
+                        }
+                      },
+                      "right": {
+                        "op": "data",
+                        "value": {
+                          "type": "string",
+                          "value": "prepared"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "kind": "guard",
+                    "expression": {
+                      "op": "call",
+                      "definition": 1,
+                      "arguments": [],
+                      "captures": []
+                    }
+                  },
+                  {
+                    "kind": "assign",
+                    "slot": 0,
+                    "value": {
+                      "op": "update",
+                      "target": {
+                        "op": "read",
+                        "slot": 0,
+                        "next": false
+                      },
+                      "updates": [
+                        {
+                          "path": [
+                            {
+                              "op": "parameter",
+                              "slot": 0
+                            }
+                          ],
+                          "value": {
+                            "op": "data",
+                            "value": {
+                              "type": "string",
+                              "value": "committed"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "Decide",
+                "steps": [
+                  {
+                    "kind": "guard",
+                    "expression": {
+                      "op": "in",
+                      "value": {
+                        "op": "at",
+                        "target": {
+                          "op": "read",
+                          "slot": 0,
+                          "next": false
+                        },
+                        "key": {
+                          "op": "parameter",
+                          "slot": 0
+                        }
+                      },
+                      "domain": {
+                        "kind": "set",
+                        "values": [
+                          {
+                            "op": "data",
+                            "value": {
+                              "type": "string",
+                              "value": "working"
+                            }
+                          },
+                          {
+                            "op": "data",
+                            "value": {
+                              "type": "string",
+                              "value": "prepared"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "kind": "guard",
+                    "expression": {
+                      "op": "call",
+                      "definition": 2,
+                      "arguments": [],
+                      "captures": []
+                    }
+                  },
+                  {
+                    "kind": "assign",
+                    "slot": 0,
+                    "value": {
+                      "op": "update",
+                      "target": {
+                        "op": "read",
+                        "slot": 0,
+                        "next": false
+                      },
+                      "updates": [
+                        {
+                          "path": [
+                            {
+                              "op": "parameter",
+                              "slot": 0
+                            }
+                          ],
+                          "value": {
+                            "op": "data",
+                            "value": {
+                              "type": "string",
+                              "value": "aborted"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "invariants": [
+      {
+        "name": "TCTypeOK",
+        "expression": {
+          "op": "call",
+          "definition": 0,
+          "arguments": [],
+          "captures": []
+        }
+      },
+      {
+        "name": "TCConsistent",
+        "expression": {
+          "op": "call",
+          "definition": 3,
+          "arguments": [],
+          "captures": []
+        }
+      }
+    ],
+    "assumptions": [],
+    "checkDeadlock": false,
+    "definitions": [
+      {
+        "id": 0,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "function-in",
+          "left": {
+            "op": "read",
+            "slot": 0,
+            "next": false
+          },
+          "right": {
+            "op": "function-set",
+            "left": {
+              "op": "set",
+              "values": [
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "model-value",
+                    "value": "r0"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "model-value",
+                    "value": "r1"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "model-value",
+                    "value": "r2"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "model-value",
+                    "value": "r3"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "model-value",
+                    "value": "r4"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "model-value",
+                    "value": "r5"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "model-value",
+                    "value": "r6"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "model-value",
+                    "value": "r7"
+                  }
+                }
+              ]
+            },
+            "right": {
+              "op": "set",
+              "values": [
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "working"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "prepared"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "committed"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "aborted"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 1,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 1,
+        "body": {
+          "op": "forall",
+          "bounds": [
+            {
+              "slot": 0,
+              "domain": {
+                "kind": "value",
+                "value": {
+                  "op": "set",
+                  "values": [
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r0"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r1"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r2"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r3"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r4"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r5"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r6"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r7"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "body": {
+            "op": "in",
+            "value": {
+              "op": "at",
+              "target": {
+                "op": "read",
+                "slot": 0,
+                "next": false
+              },
+              "key": {
+                "op": "bound",
+                "slot": 0
+              }
+            },
+            "domain": {
+              "kind": "set",
+              "values": [
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "prepared"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "committed"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 1,
+        "body": {
+          "op": "forall",
+          "bounds": [
+            {
+              "slot": 0,
+              "domain": {
+                "kind": "value",
+                "value": {
+                  "op": "set",
+                  "values": [
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r0"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r1"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r2"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r3"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r4"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r5"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r6"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r7"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "body": {
+            "op": "ne",
+            "left": {
+              "op": "at",
+              "target": {
+                "op": "read",
+                "slot": 0,
+                "next": false
+              },
+              "key": {
+                "op": "bound",
+                "slot": 0
+              }
+            },
+            "right": {
+              "op": "data",
+              "value": {
+                "type": "string",
+                "value": "committed"
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 2,
+        "body": {
+          "op": "forall",
+          "bounds": [
+            {
+              "slot": 0,
+              "domain": {
+                "kind": "value",
+                "value": {
+                  "op": "set",
+                  "values": [
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r0"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r1"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r2"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r3"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r4"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r5"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r6"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r7"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "slot": 1,
+              "domain": {
+                "kind": "value",
+                "value": {
+                  "op": "set",
+                  "values": [
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r0"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r1"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r2"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r3"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r4"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r5"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r6"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r7"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "body": {
+            "op": "not",
+            "argument": {
+              "op": "and",
+              "left": {
+                "op": "eq",
+                "left": {
+                  "op": "at",
+                  "target": {
+                    "op": "read",
+                    "slot": 0,
+                    "next": false
+                  },
+                  "key": {
+                    "op": "bound",
+                    "slot": 0
+                  }
+                },
+                "right": {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "aborted"
+                  }
+                }
+              },
+              "right": {
+                "op": "eq",
+                "left": {
+                  "op": "at",
+                  "target": {
+                    "op": "read",
+                    "slot": 0,
+                    "next": false
+                  },
+                  "key": {
+                    "op": "bound",
+                    "slot": 1
+                  }
+                },
+                "right": {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "committed"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

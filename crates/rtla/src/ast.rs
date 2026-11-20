@@ -21,6 +21,9 @@ pub enum ExpressionKind {
     Number {
         value: u64,
     },
+    Integer {
+        text: String,
+    },
     Decimal {
         text: String,
     },
@@ -33,6 +36,22 @@ pub enum ExpressionKind {
     Apply {
         operator: String,
         args: Vec<Expression>,
+    },
+    Lambda {
+        params: Vec<Declaration>,
+        body: Box<Expression>,
+    },
+    Selection {
+        expression: Box<Expression>,
+        selectors: Vec<Selector>,
+    },
+    AssumeProve {
+        assumptions: Vec<ProofAssumption>,
+        prove: Box<Expression>,
+        #[serde(rename = "isBoxedAssume")]
+        is_boxed_assume: bool,
+        #[serde(rename = "isBoxedProve")]
+        is_boxed_prove: bool,
     },
     And {
         operands: Vec<Expression>,
@@ -79,6 +98,12 @@ pub enum ExpressionKind {
     },
     Let {
         definitions: Vec<Definition>,
+        body: Box<Expression>,
+    },
+    LetModule {
+        definitions: Vec<Definition>,
+        instances: Vec<Instance>,
+        recursive: Vec<Declaration>,
         body: Box<Expression>,
     },
     Forall {
@@ -173,6 +198,18 @@ pub enum ExpressionKind {
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(tag = "kind")]
+pub enum Selector {
+    Name { name: String, args: Vec<Expression> },
+    Index { index: u64 },
+    Left,
+    Right,
+    Arguments { args: Vec<Expression> },
+    Body,
+    Bound,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Bound {
     pub pattern: Pattern,
     pub set: Expression,
@@ -243,6 +280,8 @@ pub struct Theorem {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
     pub statement: Expression,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub proof: Option<Proof>,
     pub location: Location,
 }
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -254,6 +293,12 @@ pub struct Module {
     pub definitions: Vec<Definition>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub instances: Vec<Instance>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub recursive: Vec<Declaration>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub modules: Vec<Module>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub directives: Vec<ProofDirective>,
     pub assumptions: Vec<Assumption>,
     pub theorems: Vec<Theorem>,
     pub location: Location,
@@ -263,6 +308,8 @@ pub struct Module {
 pub struct Instance {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub params: Vec<Declaration>,
     pub module: String,
     pub substitutions: Vec<InstanceSubstitution>,
     #[serde(rename = "isLocal")]
@@ -274,6 +321,129 @@ pub struct Instance {
 pub struct InstanceSubstitution {
     pub name: String,
     pub expression: Expression,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(tag = "kind")]
+pub enum ProofAssumption {
+    Expression {
+        expression: Expression,
+    },
+    New {
+        declaration: Declaration,
+        level: DeclarationLevel,
+        #[serde(rename = "isNew")]
+        is_new: bool,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        set: Option<Box<Expression>>,
+    },
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum DeclarationLevel {
+    Constant,
+    Variable,
+    State,
+    Action,
+    Temporal,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(tag = "kind")]
+pub enum ProofReference {
+    Module { name: String },
+    Expression { expression: Expression },
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct UseBody {
+    pub only: bool,
+    pub facts: Vec<ProofReference>,
+    pub definitions: Vec<ProofReference>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ProofDirective {
+    #[serde(rename = "isHide")]
+    pub is_hide: bool,
+    pub usage: UseBody,
+    pub location: Location,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(tag = "kind")]
+pub enum Proof {
+    By {
+        #[serde(flatten)]
+        usage: UseBody,
+        location: Location,
+    },
+    Obvious {
+        location: Location,
+    },
+    Omitted {
+        location: Location,
+    },
+    Steps {
+        steps: Vec<ProofStep>,
+        location: Location,
+    },
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ProofStep {
+    pub number: String,
+    pub level: usize,
+    pub body: ProofStepKind,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub proof: Option<Box<Proof>>,
+    pub location: Location,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(tag = "kind")]
+pub enum ProofStepKind {
+    Define {
+        definitions: Vec<Definition>,
+        instances: Vec<Instance>,
+    },
+    Use {
+        usage: UseBody,
+    },
+    Hide {
+        usage: UseBody,
+    },
+    Instance {
+        instance: Instance,
+    },
+    Have {
+        expression: Expression,
+    },
+    Take {
+        bindings: ProofBindings,
+    },
+    Witness {
+        expressions: Vec<Expression>,
+    },
+    Pick {
+        bindings: ProofBindings,
+        expression: Expression,
+    },
+    Case {
+        expression: Expression,
+    },
+    Assert {
+        statement: Expression,
+        suffices: bool,
+    },
+    Qed,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(tag = "kind")]
+pub enum ProofBindings {
+    Bounded { bounds: Vec<Bound> },
+    Unbounded { names: Vec<String> },
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

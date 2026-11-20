@@ -1,6 +1,32 @@
 # 評価しながら改善する
 
+実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
+
+[0072: source level・遅延関数・template共有](iterations/0072-frontend-semantics.md)は、SANY/TLCの拒否・正常/故障対照とnative/Wasm/Chromiumを照合する。共有化前後の完全応答・workとCriterionのcompile/fresh/preparedを分け、入力条件の修正と失敗も保存する。
+
+[0070: TLA+ frontendの追加対応](iterations/0070-tla-coverage.md)は二版のSANY構文木、native/Wasm/TLCの実行と反例、再帰の予算切れを比較する。高階・module・proofの構文保持と有限実行の範囲を区別する。
+
+[0064: 準備済みSafetyProgramとbatch](iterations/0064-prepared-safety.md)は同じIRへ予算を変えて問い合わせる費用を比較する。小さいqueryで採用し、探索主体のモデルでの効果の小ささ、cold/RSSと既存kernelの後退確認を残す。
+
 モデル検査・テスト手法の採用判断を記録する場所。仮説、条件、実行、判断、次の仮説を1つの iteration として残す。比較器の `improved` は故障ごとの検出数の増加を表し、費用や外的妥当性を含む採用決定ではない。
+
+[0062: 共有IRと最新版の比較](iterations/0062-p0-checker.md)はdraft実装を0061へ統合し、4モデル9経路、Quint生成物と原本TCommit、IRの線形成長、profileとv1の費用増を比較する。静的visitorは撤去し、共有IRは明示選択で採用する。
+
+[0063: Data定数のslot検索](iterations/0063-evaluator-tuning.md)は内部addressのhashだけを変更し、TCommitのnative検査要求・起動を短縮した。14本に残る数%の後退と、membershipの後退で撤去したinline、v1/v2の完全応答比較を記録する。
+
+[0061: symmetry拡張と探索削減](iterations/0061-symmetry-next.md)は、record・集合、代表展開、並列化、命令ID、限定PORを順に試した。命令IDは後退して撤去し、採用した条件・具体反例の再生・計数の違いを記録する。
+
+[0053: TLCの24不一致解消](iterations/0053-tlc-standard-modules.md)は標準moduleを固定して参照pathを渡し、int32最小値のtrace表記も修正した。155件の検査・32件の確認・155件の保存再生で不一致0を確認した。
+
+[0052: workspaceのoracle統合](iterations/0052-workspace-oracle.md)は23ファイル・99比較をRust/Wasmへ通し、3言語と保存反例を再検査した。source/binary snapshotからのbefore/after比較と再生、JSON bridgeの追加費用、当時のTLCの24不一致も記録する（0053で解消）。
+
+[0051: roracle](iterations/0051-oracle-library.md)は、固定入力・実装登録を差分検査・保存oracle再生・比較ベンチで共有する独立crateを追加した。TLC/tla-ts/idealisのcold比較とprepared Rustを分け、人工故障・測定中drift・clock分解能による最初の失敗も記録した。
+
+[0050: アクション単位のcoverage](iterations/0050-action-coverage.md)は、Rust/TS/native/Wasmへopt-inのbranch計数とwork内訳を追加した。162入力と840回のon/off照合、TLCの14仕様、3反例の再生、旧APIとの完全応答比較を記録した。式・source location・並列のcoverageは未対応。
+
+[0049: 時間論理のmicro tuning](iterations/0049-temporal-tuning.md)は、profileに基づき小さい式集合をbit集合へ置き換えた。交互測定で時間論理のcheckは1.35-1.42倍となり、156ケース・各10要求でbefore/afterの完全応答を照合した。対照8件に残る後退も記録している。
+
+[0048: 量化fairnessと標準演算](iterations/0048-fairness-operators.md)は、SPECIFICATIONの定数有限domain上のfairnessとSelectSeq / SortSeq / Assertを追加した。52ケースのnative/Wasm/TLC比較、4反例の再生、Chromiumと27本のCriterionで対応と費用を検査した。
 
 [Rustの状態展開cache](iterations/cached-expansions.md)は、現在のInit/propertyを再検査し、同一Nextの完全なsuccessor列を再利用する。Leanの追加9定理、実Wasmの16条件、native/Wasm/Chromiumと36区間のCriterionで、効く場合と固定費が上回る場合を分ける。
 
@@ -48,8 +74,8 @@ just replay-loop
 plan と run ID を明示する場合:
 
 ```sh
-pnpm eval:loop evals/plans/0001-longer-walk.json my-run
-pnpm eval:replay evals/runs/my-run-confirmation
+just eval-loop evals/plans/0001-longer-walk.json my-run
+just replay-loop evals/runs/my-run-confirmation
 ```
 
 | 場所                       | 記録するもの                                                       |
@@ -63,7 +89,7 @@ pnpm eval:replay evals/runs/my-run-confirmation
 | `runs/<id>/result.json`    | 集計、正常対照、評価、各証拠の digest。完了の目印                  |
 | `runs/ledger.jsonl`        | run の追記台帳。例外は `error`、正常対照の失敗は `controls-failed` |
 | `iterations/`              | 結果の解釈、採用・保留の理由、後退、次の仮説                       |
-| `harness/`                 | 実験用のモデル・実装・探索器。public API と分離                    |
+| `experiments/harness/`     | 実験用のモデル・実装・探索器。public API と分離                    |
 
 ## ループの進め方
 
@@ -80,9 +106,9 @@ pnpm eval:replay evals/runs/my-run-confirmation
 
 実行済みの比較は [0001: 履歴長16](iterations/0001-longer-walk.md)、[0002: 8/16の混在](iterations/0002-mixed-depth.md)。次の仮説は [backlog](backlog.md) に残す。CI で同じ plan を反復するのは再現・回帰確認であり、新しい独立した確認実験として集計しない。
 
-初回の幅広い pilot は `pnpm evaluate` / `pnpm evaluate:replay` で再実行できる。履歴は [0000](iterations/0000-pilot.md)。古い記録には後付けの厳密な provenance を主張せず、`legacy-import` として区別した。
+初回の幅広い pilot は `just evaluate` / `just replay-evaluation` で再実行できる。履歴は [0000](iterations/0000-pilot.md)。古い記録には後付けの厳密な provenance を主張せず、`legacy-import` として区別した。
 
-実行時間と Rust 化は [0003](iterations/0003-runtime.md)。[runtime/](runtime/README.md) に budget planner の前提、Rust/Wasm の比較、クラウド分割 CLI を記録している。
+実行時間と Rust 化は [0003](iterations/0003-runtime.md)。[runtime/](experiments/runtime/README.md) に budget planner の前提、Rust/Wasm の比較、クラウド分割 CLI を記録している。
 
 [0007 の計画](plans/0007-shared-oracle.md) は、同じ仕様 oracle で TS / Rust / Go の実装を直接操作する。`just cross-test`、`cross-eval` / `cross-replay` と [利用手順](../docs/shared-oracle.md) を参照。
 
@@ -123,3 +149,19 @@ pnpm eval:replay evals/runs/my-run-confirmation
 [backend契約](iterations/0028-backend-contract.md)は、explicit complete、有界の反例なし、帰納性と個別obligationを分ける。`backend-test` / `backend-eval`で実rtlc native/Wasm、0027の保存したApalache応答、非空性と帰納性の集約条件を確認する。新しい速度比較や汎用Apalache adapterの評価ではない。
 
 [Rust frontend](iterations/0029-rtla-compiler.md)は、rtlaのASTからrtlcのIRを生成する。`compiler-test` / `compiler-eval`で既存TS frontendとのIR・結果の一致、`compiler-tlc`で固定20件の直接比較を行う。意味の一致を確認する回帰で、性能や未知故障発見の実験とは区別する。
+
+[0054の結果](iterations/0054-oracle-bench-tuning.md)は、workspace比較のpipe bufferingとoracle JSON境界の借用・直接serializationを、旧版を固定して評価する。通信・照合kernel・モデル検査の費用を区別する。
+
+[0055の結果](iterations/0055-oracle-hotspots.md)は、Node CPU profileから観測JSONの二重構築とsnapshotの中間配列を減らす。区間別測定、同じ親runnerでの往復、Criterionを分けて比較する。
+
+[0056: 関数値と並列domain共有](iterations/0056-compact-functions.md)は、domain共有・64要素のBool/整数bit表現とworker参照を実装し、旧native/Wasm・TLC・tla-tsへ同じ完全探索を比較する。初期候補の並列後退、最終候補の改善と残るWasmの遅さを分けて記録した。
+
+[0057: 重複する関数更新のコピー削減](iterations/0057-probe-updates.md)は、borrowed viewで更新後の既存値を検索する。Aの関数並列の後退、Bのチャネル並列の改善、Wasmに残る差を、同じ条件のbefore/after・TLC・tla-tsで記録した。
+
+[0058: packed関数のhash](iterations/0058-packed-hash.md)は、公式C++のgolden vectorへ照合したfmix64で内部索引を軽くする。functionのnative/Wasmの改善、対照の後退、負荷変動でチャネルの速度判断を見送った条件を記録した。
+
+[0059: prepared定数・型別命令・並列照合](iterations/0059-prepared-execution.md)は3案を順に試し、Data定数cacheを採用する。型別命令と並列照合の後退、最終9経路と14本の段階別比較、旧版への完全応答照合を残す。チャネルのWasmは改善後もtla-tsより遅い。
+
+[0060: 限定したSYMMETRY](iterations/0060-restricted-symmetry.md)は、scalar node関数の行で状態を同一視する。宣言の前提、nativeの起動込み・prepared比較、TLCと具体traceの照合、通常ringで残る変動、失敗した測定driverも保存した。
+
+- [0071: 再帰action生成と親frame共有](iterations/0071-recursive-actions.md): TLC・native/Wasm・ブラウザの照合とCriterionの測定。

@@ -46,53 +46,47 @@ fn complete(source: &str) {
 fn analysis_parity_role_table_matches_independent_expectation() {
     let text = std::fs::read_to_string(concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/../../evals/fixtures/tlc-operator-sharing/analysis-roles.json"
+        "/../../fixtures/tlc-operator-sharing/analysis-roles.json"
     ))
     .unwrap();
-    let expected: serde_json::Value = serde_json::from_str(&text).unwrap();
-    assert_eq!(analysis_roles(), expected);
+    let mut expected: Vec<serde_json::Value> = serde_json::from_str(&text).unwrap();
+    let additions: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+        "../../../fixtures/tlc-operator-sharing/analysis-rust-roles.json"
+    ))
+    .unwrap();
+    expected.extend(additions);
+    expected.sort_by_key(|row| {
+        ["space", "constructor", "operatorClass", "position"]
+            .map(|key| row[key].as_str().unwrap().to_string())
+    });
+    assert_eq!(analysis_roles(), serde_json::json!(expected));
 }
 
 #[test]
-fn analysis_parity_choose_domain_free_old_is_rejected_when_unused() {
+fn analysis_parity_choose_domain_free_old_is_captured_when_unused() {
     let input = source(
         "",
         "[<<{9}>> EXCEPT ![1] = LET Pick == CHOOSE n \\in @: TRUE IN TRUE][1]",
     );
-    assert_eq!(
-        compile(&input).map(|_| ()),
-        Err(rtla_compiler::CompileError {
-            message: "LET definitions with free EXCEPT @".into()
-        })
-    );
+    complete(&input);
 }
 
 #[test]
-fn analysis_parity_choose_domain_free_old_is_rejected_when_used() {
+fn analysis_parity_choose_domain_free_old_is_captured_when_used() {
     let input = source(
         "",
         "[<<{9}>> EXCEPT ![1] = LET Pick == CHOOSE n \\in @: TRUE IN Pick = 9][1]",
     );
-    assert_eq!(
-        compile(&input).map(|_| ()),
-        Err(rtla_compiler::CompileError {
-            message: "LET definitions with free EXCEPT @".into()
-        })
-    );
+    complete(&input);
 }
 
 #[test]
-fn analysis_parity_choose_predicate_free_old_remains_rejected() {
+fn analysis_parity_choose_predicate_free_old_is_captured() {
     let input = source(
         "",
         "[<<9>> EXCEPT ![1] = LET Pick == CHOOSE n \\in {9}: @ = n IN TRUE][1]",
     );
-    assert_eq!(
-        compile(&input).map(|_| ()),
-        Err(rtla_compiler::CompileError {
-            message: "LET definitions with free EXCEPT @".into()
-        })
-    );
+    complete(&input);
 }
 
 #[test]
@@ -177,18 +171,13 @@ fn analysis_parity_choose_lazy_and_unused_actual_are_not_evaluated() {
 }
 
 #[test]
-fn analysis_parity_function_domain_free_old_remains_rejected() {
+fn analysis_parity_function_domain_free_old_is_captured() {
     for definition in ["f[i \\in @] == i", "f == [i \\in @ |-> i]"] {
         let input = source(
             "",
             &format!("[<<{{9}}>> EXCEPT ![1] = LET {definition} IN TRUE][1]"),
         );
-        assert_eq!(
-            compile(&input).map(|_| ()),
-            Err(rtla_compiler::CompileError {
-                message: "LET definitions with free EXCEPT @".into()
-            })
-        );
+        complete(&input);
     }
 }
 
@@ -242,7 +231,7 @@ fn contains_node(value: &serde_json::Value, expected: &serde_json::Value) -> boo
 
 fn call_actual_case(id: &str) {
     let fixture: serde_json::Value = serde_json::from_str(include_str!(
-        "../../../evals/fixtures/tlc-operator-sharing/analysis-call-actual-cases.json"
+        "../../../fixtures/tlc-operator-sharing/analysis-call-actual-cases.json"
     ))
     .unwrap();
     let entry = fixture["cases"]

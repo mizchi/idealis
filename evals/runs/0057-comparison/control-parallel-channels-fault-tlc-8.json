@@ -1,0 +1,46 @@
+{
+  "route": "tlc-8",
+  "command": "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java",
+  "args": [
+    "-Xmx8g",
+    "-XX:+UseParallelGC",
+    "-XX:ActiveProcessorCount=8",
+    "-Djava.io.tmpdir=/Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0057-comparison/control-parallel-channels-fault-tlc-8/tmp",
+    "-jar",
+    "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/tlc/tla2tools.jar",
+    "-workers",
+    "8",
+    "-seed",
+    "16",
+    "-lncheck",
+    "final",
+    "-tool",
+    "-cleanup",
+    "-config",
+    "ParallelChannels.cfg",
+    "ParallelChannels.tla"
+  ],
+  "exit": 12,
+  "wallMs": 644.6855419999993,
+  "stdout": "@!@!@STARTMSG 2262:0 @!@!@\nTLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)\n@!@!@ENDMSG 2262 @!@!@\n@!@!@STARTMSG 2187:0 @!@!@\nRunning breadth-first search Model-Checking with fp 47 and seed 16 with 8 workers on 8 cores with 7282MB heap and 64MB offheap memory [pid: 57057] (Mac OS X 26.6.2 aarch64, Eclipse Adoptium 21.0.13 x86_64, MSBDiskFPSet, DiskStateQueue).\n@!@!@ENDMSG 2187 @!@!@\n@!@!@STARTMSG 2220:0 @!@!@\nStarting SANY...\n@!@!@ENDMSG 2220 @!@!@\nParsing file /Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0057-comparison/control-parallel-channels-fault-tlc-8/ParallelChannels.tla\nParsing file /Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0057-comparison/control-parallel-channels-fault-tlc-8/tmp/Naturals.tla\nSemantic processing of module Naturals\nSemantic processing of module ParallelChannels\n@!@!@STARTMSG 2219:0 @!@!@\nSANY finished.\n@!@!@ENDMSG 2219 @!@!@\n@!@!@STARTMSG 2185:0 @!@!@\nStarting... (2026-11-18 05:33:39)\n@!@!@ENDMSG 2185 @!@!@\n@!@!@STARTMSG 2189:0 @!@!@\nComputing initial states...\n@!@!@ENDMSG 2189 @!@!@\n@!@!@STARTMSG 2190:0 @!@!@\nFinished computing initial states: 1 distinct state generated at 2026-11-18 05:33:39.\n@!@!@ENDMSG 2190 @!@!@\n@!@!@STARTMSG 2110:1 @!@!@\nInvariant Safe is violated.\n@!@!@ENDMSG 2110 @!@!@\n@!@!@STARTMSG 2121:1 @!@!@\nThe behavior up to this point is:\n@!@!@ENDMSG 2121 @!@!@\n@!@!@STARTMSG 2217:4 @!@!@\n1: <Initial predicate>\nchan = <<[val |-> 0, rdy |-> 0, ack |-> 0], [val |-> 0, rdy |-> 0, ack |-> 0]>>\n\n@!@!@ENDMSG 2217 @!@!@\n@!@!@STARTMSG 2217:4 @!@!@\n2: <Send line 6, col 23 to line 7, col 81 of module ParallelChannels>\nchan = <<[val |-> 1, rdy |-> 1, ack |-> 0], [val |-> 0, rdy |-> 0, ack |-> 0]>>\n\n@!@!@ENDMSG 2217 @!@!@\n@!@!@STARTMSG 2200:0 @!@!@\nProgress(7) at 2026-11-18 05:33:39: 27 states generated (10,384 s/min), 23 distinct states found (8,846 ds/min), 4 states left on queue.\n@!@!@ENDMSG 2200 @!@!@\n@!@!@STARTMSG 2199:0 @!@!@\n27 states generated, 23 distinct states found, 4 states left on queue.\n@!@!@ENDMSG 2199 @!@!@\n@!@!@STARTMSG 2194:0 @!@!@\nThe depth of the complete state graph search is 7.\n@!@!@ENDMSG 2194 @!@!@\n@!@!@STARTMSG 2268:0 @!@!@\nThe average outdegree of the complete state graph is 1 (minimum is 1, the maximum 2 and the 95th percentile is 2).\n@!@!@ENDMSG 2268 @!@!@\n@!@!@STARTMSG 2186:0 @!@!@\nFinished in 158ms at (2026-11-18 05:33:39)\n@!@!@ENDMSG 2186 @!@!@\n",
+  "stderr": "",
+  "output": null,
+  "decodeError": null,
+  "memory": [
+    {
+      "milliseconds": 226.85037499999999,
+      "bytes": 133562368
+    },
+    {
+      "milliseconds": 441.5135829999999,
+      "bytes": 133562368
+    },
+    {
+      "milliseconds": 654.6552499999998,
+      "bytes": 133562368
+    }
+  ],
+  "sampledMaxRssBytes": 133562368,
+  "phases": null,
+  "phaseError": null
+}

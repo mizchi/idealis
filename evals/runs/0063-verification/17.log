@@ -1,0 +1,51 @@
+
+> @mizchi/idealis@0.1.0-alpha.0 oracle:build /Users/mz/ghq/github.com/mizchi/idealis
+> cargo build --release --locked --manifest-path crates/oracle/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/oracle/Cargo.toml
+
+
+> @mizchi/idealis@0.1.0-alpha.0 portable:build /Users/mz/ghq/github.com/mizchi/idealis
+> pnpm oracle:build && cargo build --release --locked --manifest-path crates/idealis-core/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/idealis-core/Cargo.toml
+
+
+> @mizchi/idealis@0.1.0-alpha.0 oracle:build /Users/mz/ghq/github.com/mizchi/idealis
+> cargo build --release --locked --manifest-path crates/oracle/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/oracle/Cargo.toml
+
+
+> @mizchi/idealis@0.1.0-alpha.0 build /Users/mz/ghq/github.com/mizchi/idealis
+> tsc -p tsconfig.build.json
+
+✔ the same oracle drives live TS, Rust and Go implementations (2915.554292ms)
+✔ a changed expected observation is rejected before live execution (578.298666ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3535.945166
+pnpm oracle:build
+    Finished `release` profile [optimized] target(s) in 0.03s
+    Finished `release` profile [optimized] target(s) in 0.01s
+pnpm portable:build
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.07s
+    Finished `release` profile [optimized] target(s) in 0.03s
+pnpm build
+cargo build --release --locked --manifest-path evals/shared-oracle-rust/Cargo.toml
+   Compiling rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+   Compiling rtla-compiler v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtla-compiler)
+   Compiling idealis-core v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/idealis-core)
+   Compiling idealis-shared-oracle v0.0.0 (/Users/mz/ghq/github.com/mizchi/idealis/evals/shared-oracle-rust)
+    Finished `release` profile [optimized] target(s) in 14.72s
+mkdir -p .artifacts/go
+cd adapters/go && CGO_ENABLED=0 go build -o ../../.artifacts/go/counter-replay ./cmd/counter-replay
+cargo fmt --manifest-path evals/shared-oracle-rust/Cargo.toml -- --check
+cargo clippy --all-targets --locked --manifest-path evals/shared-oracle-rust/Cargo.toml -- -D warnings
+    Checking rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+    Checking rtla-compiler v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtla-compiler)
+    Checking idealis-core v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/idealis-core)
+    Checking idealis-shared-oracle v0.0.0 (/Users/mz/ghq/github.com/mizchi/idealis/evals/shared-oracle-rust)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.72s
+node --test dist/evals/cross-language/contract-test.js

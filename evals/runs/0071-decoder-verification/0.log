@@ -1,0 +1,492 @@
+
+> @mizchi/idealis@0.1.0-alpha.0 check /Users/mz/ghq/github.com/mizchi/idealis
+> biome check .
+
+
+> @mizchi/idealis@0.1.0-alpha.0 typecheck /Users/mz/ghq/github.com/mizchi/idealis
+> tsc --noEmit
+
+
+> @mizchi/idealis@0.1.0-alpha.0 test /Users/mz/ghq/github.com/mizchi/idealis
+> pnpm test:vitest && pnpm test:node
+
+
+> @mizchi/idealis@0.1.0-alpha.0 test:vitest /Users/mz/ghq/github.com/mizchi/idealis
+> vitest run
+
+
+ RUN  v5.1.0 /Users/mz/ghq/github.com/mizchi/idealis
+
+
+ Test Files  14 passed (14)
+      Tests  79 passed (79)
+   Start at  13:37:26
+   Duration  2.37s (tests 50%, import 36%, transform 12%, worker 1%)
+
+
+> @mizchi/idealis@0.1.0-alpha.0 test:node /Users/mz/ghq/github.com/mizchi/idealis
+> pnpm build && node --test dist/tests/node.test.js
+
+
+> @mizchi/idealis@0.1.0-alpha.0 build /Users/mz/ghq/github.com/mizchi/idealis
+> tsc -p tsconfig.build.json
+
+✔ a durable implementation conforms through retries, crashes and restarts (1.1585ms)
+✔ a volatile write loses an acknowledged value after a crash (0.452ms)
+✔ a missing deduplication check applies a retried request twice (0.092583ms)
+✔ oracle generation gives replayable witnesses and distinguishes a depth bound (5.346375ms)
+✔ trace artifacts survive a JSON round trip (0.228166ms)
+✔ driver errors propagate instead of counting as a detected mismatch (0.227166ms)
+✔ compiled symmetry metadata is optional and validates the finite model-value group (4.234625ms)
+✔ compiled IR preserves a snapshot and rejects unsupported wire shapes (0.492208ms)
+✔ behavior witnesses keep state arity, initial actions, loop edges and bound semantics (0.447834ms)
+✔ backend snapshots isolate metadata and reject forged induction evidence (0.418ms)
+✔ backend wire contracts preserve guarantees and reject unsupported versions and claims (0.205666ms)
+✔ induction requires matching obligations, implication and a nonempty initial domain (0.23275ms)
+✔ unknown, errors and obligation counterexamples never become an inductive proof (0.116791ms)
+✔ dropped messages are removed before a later delivery (0.087166ms)
+✔ reset clears request deduplication and durable state between cases (0.110709ms)
+✔ restarting a running process preserves volatile state (0.052959ms)
+✔ the trace boundary accepts supported actions and rejects malformed JSON domains (0.065709ms)
+✔ successful reports and replay expose the complete observation record (0.0895ms)
+✔ differential execution disposes the reference and names its observation record (0.0765ms)
+✔ delayed, reordered and dropped network messages remain replayable (0.0555ms)
+✔ a differential oracle detects an implementation regression (0.040166ms)
+✔ finite graph closure, state limits and empty initial states are distinct (0.07ms)
+✔ model invariants return a shortest in-bound counterexample (0.042541ms)
+✔ conformance keeps one consistent nondeterministic history (0.08675ms)
+✔ invalid inputs and initial observations cannot pass vacuously (0.059959ms)
+✔ driver cleanup runs when stepping fails (0.088917ms)
+✔ trace replay checks the initial observation before any action (0.036667ms)
+✔ trace decoding validates the caller's action and observation domains (0.125875ms)
+✔ composed models expose interleavings and cross-component invariant failures (0.160792ms)
+✔ shared actions advance both components and preserve component invariants (0.1055ms)
+✔ property tests generate valid action sequences for a conforming implementation (4.19225ms)
+✔ shrunk fault traces replay from seed and path (1.918333ms)
+✔ discarding every generated input is exhaustion, never a passing test (0.136417ms)
+✔ property testing propagates infrastructure errors (0.09875ms)
+✔ request renaming is a metamorphic relation independent of the model (1.345375ms)
+✔ a real TLA+ counterexample becomes an executable implementation oracle (9.43875ms)
+✔ a successful TLA check does not fabricate a witness (1.189209ms)
+✔ Z3 Wasm solves SMT-LIB integer constraints and supplies a concrete test input (242.372333ms)
+✔ mixed-depth search alternates short and long cases under one operation budget (0.71325ms)
+✔ complete model coverage can miss a third-retry implementation fault (6.55675ms)
+✔ both experimental searches obey the same operation budget and replay on the normal implementation (0.87375ms)
+✔ a virtual clock reproduces the expiry boundary and the corrected version passes (0.2055ms)
+✔ state-dependent inputs remain executable when the choice list shrinks (0.261209ms)
+✔ history checking accepts overlapping valid operations, rejects lost updates, and respects real-time precedence (0.236416ms)
+✔ actual asynchronous lost updates depend on the controlled schedule and replay exactly (1.054709ms)
+✔ the experimental history checker agrees with an independent counter characterization (0.455083ms)
+✔ plans reject overlapping seed splits and unsupported scope (2.689959ms)
+✔ completed runs retain evidence and cannot overwrite an existing run ID (1765.601916ms)
+✔ method comparison keeps improvements, regressions and broken controls distinct (0.24925ms)
+✔ time and memory budgets choose a feasible worker count and depth (0.157292ms)
+✔ insufficient and uncalibrated budgets never become successful exploration (0.043417ms)
+✔ packed and dynamic finite models generate the same results and action traces (4.365125ms)
+✔ schedule depth bounds distinguish partial exploration from all interleavings (0.18525ms)
+✔ sharding preserves task identities and exactly covers the manifest (1.86025ms)
+✔ cloud aggregation distinguishes missing tasks, retries, errors and incompatible results (0.680292ms)
+✔ portable values follow the shared canonical fixtures (0.469125ms)
+✔ portable codecs preserve integer precision and structural collections (0.357833ms)
+✔ portable values reject lossy or unsupported host values (0.052292ms)
+✔ portable traces have a distinct strict versioned format (0.108291ms)
+✔ finite artifacts retain closure, edge observations and invariants (9.283875ms)
+✔ finite edges preserve differing observations for the same target state (0.116875ms)
+✔ finite artifacts preserve violations and do not duplicate enabled actions (0.110834ms)
+✔ shrinking preserves failure identity, validity and explicit budgets (0.285916ms)
+✔ simulation hosts replay choices, queues, clocks and durable state (0.604792ms)
+✔ late responses resolve uncertainty at their actual event position (0.382083ms)
+✔ history formats reject unmatched ids, duplicate outcomes and unsupported metadata (0.089917ms)
+✔ trace buffers return isolated full snapshots and the exact failure prefix (0.150875ms)
+✔ unknown and cancel may take effect, confirmed failures cannot (0.141584ms)
+✔ concurrent responses may reorder, real-time order and budgets are preserved (0.214542ms)
+✔ causal shrinking can remove dependent pairs and preflight invalid histories (0.156667ms)
+✔ coverage validates counts, exact fields and conservation of totals (0.374584ms)
+✔ safety compilation produces a portable program without enumerating reachable states (0.349416ms)
+✔ safety compilation rejects unsupported configuration instead of ignoring it (1.243291ms)
+✔ safety compilation rejects missing arithmetic imports and constant NEXT (0.155792ms)
+✔ safety compilation rejects unbound, recursive and conflicting symbols (0.377083ms)
+✔ safety result validates lasso boundaries and preserves compound snapshots (0.112375ms)
+✔ schedule chooses measured parallelism within time and memory budgets (0.266542ms)
+✔ cost order batches small jobs while FIFO preserves input order (0.103583ms)
+✔ scheduling rejects ambiguous identities and invalid resource estimates (0.126708ms)
+ℹ tests 79
+ℹ suites 0
+ℹ pass 79
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2216.421708
+pnpm check
+evals/alloy-subset/run.ts:159:5 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    157 │   await appendFile(
+    158 │     "evals/runs/ledger.jsonl",
+  > 159 │     JSON.stringify({
+        │     ^^^^^^^^^^^^^^^^
+  > 160 │       runId: basename(directory),
+  > 161 │       kind: "ralloy-differential",
+  > 162 │       status: "complete",
+  > 163 │       sourceVersion: stamp.sourceVersion,
+  > 164 │     }) + "\n",
+        │     ^^^^^^^^^
+    165 │   );
+    166 │ } catch (error) {
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
+  i Unsafe fix: Use a template literal.
+  
+    157 157 │     await appendFile(
+    158 158 │       "evals/runs/ledger.jsonl",
+    159     │ - ····JSON.stringify({
+        159 │ + ····`${JSON.stringify({
+    160 160 │         runId: basename(directory),
+    161 161 │         kind: "ralloy-differential",
+    162 162 │         status: "complete",
+    163 163 │         sourceVersion: stamp.sourceVersion,
+    164     │ - ····})·+·"\n",
+        164 │ + ····})}\n`,
+    165 165 │     );
+    166 166 │   } catch (error) {
+  
+
+evals/alloy-subset/run.ts:178:5 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    176 │   await appendFile(
+    177 │     "evals/runs/ledger.jsonl",
+  > 178 │     JSON.stringify({
+        │     ^^^^^^^^^^^^^^^^
+  > 179 │       runId: basename(directory),
+  > 180 │       kind: "ralloy-differential",
+  > 181 │       status: "error",
+  > 182 │       sourceVersion: stamp.sourceVersion,
+  > 183 │     }) + "\n",
+        │     ^^^^^^^^^
+    184 │   );
+    185 │   throw error;
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
+  i Unsafe fix: Use a template literal.
+  
+    176 176 │     await appendFile(
+    177 177 │       "evals/runs/ledger.jsonl",
+    178     │ - ····JSON.stringify({
+        178 │ + ····`${JSON.stringify({
+    179 179 │         runId: basename(directory),
+    180 180 │         kind: "ralloy-differential",
+    181 181 │         status: "error",
+    182 182 │         sourceVersion: stamp.sourceVersion,
+    183     │ - ····})·+·"\n",
+        183 │ + ····})}\n`,
+    184 184 │     );
+    185 185 │     throw error;
+  
+
+evals/tla-coverage/fixtures.ts:39:5 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+    37 │   [
+    38 │     "named",
+  > 39 │     String.raw`Apply(F(_), value) == F(value)
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 40 │ Inc(value) == (value+1)%3`,
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │     "x'=Apply(Inc,x)",
+    42 │   ],
+  
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+evals/tla-coverage/fixtures.ts:50:5 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+    48 │   [
+    49 │     "forward",
+  > 50 │     String.raw`Apply(F(_), value) == F(value)
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 51 │ Forward(G(_), value) == Apply(G,value)`,
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │     "x'=Forward(LAMBDA value: (value+1)%3,x)",
+    53 │   ],
+  
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+evals/tla-coverage/fixtures.ts:61:5 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+    59 │   [
+    60 │     "action",
+  > 61 │     String.raw`Run(A(_), value) == A(value)
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 62 │ Assign(value) == x'=value`,
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │     "Run(Assign,(x+1)%3)",
+    64 │   ],
+  
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+evals/tla-coverage/fixtures.ts:110:5 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+    108 │   [
+    109 │     "factorial",
+  > 110 │     String.raw`RECURSIVE Fact(_)
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 111 │ Fact(value) == IF value=0 THEN 1 ELSE value*Fact(value-1)`,
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    112 │     "Fact(5)",
+    113 │     "120",
+  
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+evals/tla-coverage/fixtures.ts:117:5 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+    115 │   [
+    116 │     "mutual",
+  > 117 │     String.raw`RECURSIVE Even(_), Odd(_)
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 118 │ Even(value) == IF value=0 THEN TRUE ELSE Odd(value-1)
+  > 119 │ Odd(value) == IF value=0 THEN FALSE ELSE Even(value-1)`,
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    120 │     "IF Even(6) THEN 6 ELSE 7",
+    121 │     "6",
+  
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+evals/tla-coverage/fixtures.ts:125:5 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+    123 │   [
+    124 │     "state",
+  > 125 │     String.raw`RECURSIVE Sum(_)
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 126 │ Sum(value) == IF value=0 THEN 0 ELSE value+Sum(value-1)`,
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    127 │     "IF x=3 THEN Sum(x) ELSE x",
+    128 │     "6",
+  
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+evals/tla-coverage/fixtures.ts:186:5 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+    184 │   [
+    185 │     "except-argument",
+  > 186 │     String.raw`Apply(F(_), value) == F(value)
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 187 │ Update(value) == [<<1>> EXCEPT ![1]=@+value]`,
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    188 │     "[<<2>> EXCEPT ![1]=Apply(Update,@)[1]]",
+    189 │     "<<3>>",
+  
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+evals/tla-coverage/fixtures.ts:233:11 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+    231 │   name: "instance-parameter",
+    232 │   family: "module",
+  > 233 │   source: String.raw`---- MODULE Completion ----
+        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 234 │ EXTENDS Naturals
+         ...
+  > 239 │ Safe == C(2)!Safe
+  > 240 │ ====`,
+        │ ^^^^^
+    241 │   config,
+    242 │   modules: { Counter: counter },
+  
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+evals/tla-coverage/fixtures.ts:262:5 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+    260 │   [
+    261 │     "nested",
+  > 262 │     String.raw`CONSTANT N
+        │     ^^^^^^^^^^^^^^^^^^^^^
+  > 263 │ ---- MODULE Inner ----
+  > 264 │ Init == x=0
+  > 265 │ Next == x'=IF x<N THEN x+1 ELSE 0
+  > 266 │ ====
+  > 267 │ I == INSTANCE Inner`,
+        │ ^^^^^^^^^^^^^^^^^^^^
+    268 │     "0",
+    269 │     String.raw`x \in 0..N`,
+  
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+evals/tla-coverage/fixtures.ts:274:5 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+    272 │   [
+    273 │     "nested-shadow",
+  > 274 │     String.raw`CONSTANT N
+        │     ^^^^^^^^^^^^^^^^^^^^^
+  > 275 │ ---- MODULE Inner ----
+  > 276 │ CONSTANT N
+  > 277 │ Value == N
+  > 278 │ ====
+  > 279 │ I == INSTANCE Inner WITH N <- 1`,
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    280 │     "I!Value",
+    281 │     "x=1",
+  
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+evals/tla-coverage/fixtures.ts:286:5 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+    284 │   [
+    285 │     "nested-operator-capture",
+  > 286 │     String.raw`Base == 2
+        │     ^^^^^^^^^^^^^^^^^^^^
+  > 287 │ ---- MODULE Inner ----
+  > 288 │ Value == Base
+  > 289 │ ====
+  > 290 │ I == INSTANCE Inner`,
+        │ ^^^^^^^^^^^^^^^^^^^^
+    291 │     "I!Value",
+    292 │     "x=2",
+  
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+evals/tla-coverage/fixtures.ts:297:5 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+    295 │   [
+    296 │     "nested-extends",
+  > 297 │     String.raw`CONSTANT N
+        │     ^^^^^^^^^^^^^^^^^^^^^
+  > 298 │ ---- MODULE First ----
+         ...
+  > 304 │ ====
+  > 305 │ I == INSTANCE Second`,
+        │ ^^^^^^^^^^^^^^^^^^^^^
+    306 │     "I!Result",
+    307 │     "x=2",
+  
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+evals/tla-coverage/fixtures.ts:324:19 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+    322 │     constants + config,
+    323 │   );
+  > 324 │ const parameter = String.raw`---- MODULE Parameter ----
+        │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 325 │ EXTENDS Naturals
+  > 326 │ CONSTANT N
+  > 327 │ Add(value) == value+N
+  > 328 │ ====`;
+        │ ^^^^^
+    329 │ add(
+    330 │   "namespace-operator",
+  
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+evals/tla-coverage/fixtures.ts:356:11 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+    354 │   name: "nested-capture-override",
+    355 │   family: "module-rejection",
+  > 356 │   source: String.raw`---- MODULE Completion ----
+        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 357 │ CONSTANT N
+         ...
+  > 365 │ Safe == TRUE
+  > 366 │ ====`,
+        │ ^^^^^
+    367 │   config: `CONSTANT N=2\n${config}`,
+    368 │   versions: [1, 2],
+  
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+evals/tla-coverage/fixtures.ts:475:3 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+    473 │   "assumption-lambda",
+    474 │   "higher",
+  > 475 │   String.raw`ASSUME SelectSeq(<<1,2>>,LAMBDA value: value>1) = <<2>>`,
+        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    476 │   "0",
+    477 │   "UNCHANGED x",
+  
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+evals/tla-coverage/fixtures.ts:504:3 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+    502 │   "fold-recursive",
+    503 │   "recursion",
+  > 504 │   String.raw`RECURSIVE Add(_,_)
+        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 505 │ Add(left,right) == IF right=0 THEN left ELSE Add(left+1,right-1)`,
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    506 │   "ApaFoldSeqLeft(Add,0,<<1,2,3>>)",
+    507 │   "UNCHANGED x",
+  
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+evals/smt-subset/benchmark.ts:22:22 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+    20 │   wasmPath,
+    21 │ } from "./clients.js";
+  > 22 │ import { benchmarks, type Input } from "./corpus.js";
+       │                      ^^^^^^^^^^
+    23 │ import { digest, fingerprint } from "./provenance.js";
+    24 │ import { createWasm } from "./wasm.js";
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    22 │ import·{·benchmarks,·type·Input·}·from·"./corpus.js";
+       │                      -----------                     
+
+Checked 738 files in 124ms. No fixes applied.
+Found 1 warning.
+Found 18 infos.
+pnpm typecheck
+pnpm test

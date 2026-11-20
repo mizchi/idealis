@@ -1,0 +1,50 @@
+    Checking rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+    Checking rtla-compiler v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtla-compiler)
+    Checking idealis-core v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/idealis-core)
+error[E0425]: cannot find type `CompileOptions` in this scope
+  --> src/lib.rs:28:14
+   |
+28 |     options: CompileOptions,
+   |              ^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `CompileOptions` in this scope
+  --> src/lib.rs:37:14
+   |
+37 |     options: CompileOptions,
+   |              ^^^^^^^^^^^^^^ not found in this scope
+
+error[E0422]: cannot find struct, variant or union type `CompileOptions` in this scope
+   --> src/lib.rs:521:21
+    |
+521 |                     CompileOptions {
+    |                     ^^^^^^^^^^^^^^ not found in this scope
+
+error[E0422]: cannot find struct, variant or union type `CompileOptions` in this scope
+   --> src/lib.rs:538:21
+    |
+538 |                     CompileOptions {
+    |                     ^^^^^^^^^^^^^^ not found in this scope
+
+error[E0433]: cannot find type `CompileOptions` in this scope
+  --> src/lib.rs:22:46
+   |
+22 |     compile_tla_with_options(source, config, CompileOptions::default())
+   |                                              ^^^^^^^^^^^^^^ use of undeclared type `CompileOptions`
+
+error[E0433]: cannot find type `IrVersion` in this scope
+   --> src/lib.rs:522:36
+    |
+522 |                         irVersion: IrVersion::try_from(irVersion)
+    |                                    ^^^^^^^^^ use of undeclared type `IrVersion`
+
+error[E0433]: cannot find type `IrVersion` in this scope
+   --> src/lib.rs:539:36
+    |
+539 |                         irVersion: IrVersion::try_from(irVersion)
+    |                                    ^^^^^^^^^ use of undeclared type `IrVersion`
+
+Some errors have detailed explanations: E0422, E0425, E0433.
+For more information about an error, try `rustc --explain E0422`.
+error: could not compile `idealis-core` (lib test) due to 7 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `idealis-core` (lib) due to 7 previous errors

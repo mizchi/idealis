@@ -1,0 +1,144 @@
+{
+  "name": "linear-ring",
+  "states": 100000,
+  "generated": 100001,
+  "initialStates": 1,
+  "layerWidth": 1,
+  "faultPredicate": "x<N-1",
+  "source": "---- MODULE LinearRing ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE x\nInit == x=0\nNext == x'=IF x<N-1 THEN x+1 ELSE 0\nSafe == x \\in 0..(N-1)\n====",
+  "config": "CONSTANT N=100000\nINIT Init\nNEXT Next\nINVARIANT Safe",
+  "program": {
+    "format": "modelt.safety-program",
+    "version": 1,
+    "name": "LinearRing",
+    "variables": [
+      "x"
+    ],
+    "initial": [
+      {
+        "name": "Init",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "literal",
+              "value": {
+                "type": "int",
+                "value": "0"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "next": [
+      {
+        "name": "Next",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "if",
+              "condition": {
+                "op": "lt",
+                "left": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "right": {
+                  "op": "sub",
+                  "left": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "100000"
+                    }
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  }
+                }
+              },
+              "consequent": {
+                "op": "add",
+                "left": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "right": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "1"
+                  }
+                }
+              },
+              "alternative": {
+                "op": "literal",
+                "value": {
+                  "type": "int",
+                  "value": "0"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "invariants": [
+      {
+        "name": "Safe",
+        "expression": {
+          "op": "in",
+          "value": {
+            "op": "read",
+            "slot": 0,
+            "next": false
+          },
+          "domain": {
+            "kind": "range",
+            "lower": {
+              "op": "literal",
+              "value": {
+                "type": "int",
+                "value": "0"
+              }
+            },
+            "upper": {
+              "op": "sub",
+              "left": {
+                "op": "literal",
+                "value": {
+                  "type": "int",
+                  "value": "100000"
+                }
+              },
+              "right": {
+                "op": "literal",
+                "value": {
+                  "type": "int",
+                  "value": "1"
+                }
+              }
+            }
+          }
+        }
+      }
+    ],
+    "assumptions": [],
+    "checkDeadlock": true
+  },
+  "bounds": {
+    "maxDepth": 10000000,
+    "maxStates": 10000000,
+    "maxWork": 4000000000
+  }
+}

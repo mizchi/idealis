@@ -1,0 +1,123 @@
+{
+  "plan": "0056",
+  "inputs": [
+    {
+      "name": "packed-int-0",
+      "source": "---- MODULE Differential ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> 0]\nNext == f' = [f EXCEPT ![1] = 1-@]\nSafe == f \\in [1..N -> 0..1]\n====",
+      "config": "CONSTANT N=0\nINIT Init\nNEXT Next\nINVARIANT Safe",
+      "family": "graph"
+    },
+    {
+      "name": "packed-int-1",
+      "source": "---- MODULE Differential ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> 0]\nNext == f' = [f EXCEPT ![1] = 1-@]\nSafe == f \\in [1..N -> 0..1]\n====",
+      "config": "CONSTANT N=1\nINIT Init\nNEXT Next\nINVARIANT Safe",
+      "family": "graph"
+    },
+    {
+      "name": "packed-int-16",
+      "source": "---- MODULE Differential ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> 0]\nNext == f' = [f EXCEPT ![1] = 1-@]\nSafe == f \\in [1..N -> 0..1]\n====",
+      "config": "CONSTANT N=16\nINIT Init\nNEXT Next\nINVARIANT Safe",
+      "family": "graph"
+    },
+    {
+      "name": "packed-int-32",
+      "source": "---- MODULE Differential ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> 0]\nNext == f' = [f EXCEPT ![1] = 1-@]\nSafe == f \\in [1..N -> 0..1]\n====",
+      "config": "CONSTANT N=32\nINIT Init\nNEXT Next\nINVARIANT Safe",
+      "family": "graph"
+    },
+    {
+      "name": "packed-int-64",
+      "source": "---- MODULE Differential ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> 0]\nNext == f' = [f EXCEPT ![1] = 1-@]\nSafe == f \\in [1..N -> 0..1]\n====",
+      "config": "CONSTANT N=64\nINIT Init\nNEXT Next\nINVARIANT Safe",
+      "family": "graph"
+    },
+    {
+      "name": "packed-int-65",
+      "source": "---- MODULE Differential ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> 0]\nNext == f' = [f EXCEPT ![1] = 1-@]\nSafe == f \\in [1..N -> 0..1]\n====",
+      "config": "CONSTANT N=65\nINIT Init\nNEXT Next\nINVARIANT Safe",
+      "family": "graph"
+    },
+    {
+      "name": "packed-bool-0",
+      "source": "---- MODULE Differential ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> FALSE]\nNext == f' = [f EXCEPT ![1] = ~@]\nSafe == f \\in [1..N -> BOOLEAN]\n====",
+      "config": "CONSTANT N=0\nINIT Init\nNEXT Next\nINVARIANT Safe",
+      "family": "graph"
+    },
+    {
+      "name": "packed-bool-1",
+      "source": "---- MODULE Differential ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> FALSE]\nNext == f' = [f EXCEPT ![1] = ~@]\nSafe == f \\in [1..N -> BOOLEAN]\n====",
+      "config": "CONSTANT N=1\nINIT Init\nNEXT Next\nINVARIANT Safe",
+      "family": "graph"
+    },
+    {
+      "name": "packed-bool-16",
+      "source": "---- MODULE Differential ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> FALSE]\nNext == f' = [f EXCEPT ![1] = ~@]\nSafe == f \\in [1..N -> BOOLEAN]\n====",
+      "config": "CONSTANT N=16\nINIT Init\nNEXT Next\nINVARIANT Safe",
+      "family": "graph"
+    },
+    {
+      "name": "packed-bool-32",
+      "source": "---- MODULE Differential ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> FALSE]\nNext == f' = [f EXCEPT ![1] = ~@]\nSafe == f \\in [1..N -> BOOLEAN]\n====",
+      "config": "CONSTANT N=32\nINIT Init\nNEXT Next\nINVARIANT Safe",
+      "family": "graph"
+    },
+    {
+      "name": "packed-bool-64",
+      "source": "---- MODULE Differential ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> FALSE]\nNext == f' = [f EXCEPT ![1] = ~@]\nSafe == f \\in [1..N -> BOOLEAN]\n====",
+      "config": "CONSTANT N=64\nINIT Init\nNEXT Next\nINVARIANT Safe",
+      "family": "graph"
+    },
+    {
+      "name": "packed-bool-65",
+      "source": "---- MODULE Differential ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> FALSE]\nNext == f' = [f EXCEPT ![1] = ~@]\nSafe == f \\in [1..N -> BOOLEAN]\n====",
+      "config": "CONSTANT N=65\nINIT Init\nNEXT Next\nINVARIANT Safe",
+      "family": "graph"
+    },
+    {
+      "name": "packed-range-False-{0}",
+      "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE f\nInit == f = [i \\in 1..2 |-> 0]\nNext == f' = [f EXCEPT ![1] = 1-@]\nSafe == f \\in [1..2 -> {0}]\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+      "family": "graph"
+    },
+    {
+      "name": "packed-range-False-BOOLEAN",
+      "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE f\nInit == f = [i \\in 1..2 |-> 0]\nNext == f' = [f EXCEPT ![1] = 1-@]\nSafe == f \\in [1..2 -> BOOLEAN]\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+      "family": "graph"
+    },
+    {
+      "name": "packed-range-True-{0}",
+      "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE f\nInit == f = [i \\in 1..2 |-> FALSE]\nNext == f' = [f EXCEPT ![1] = ~@]\nSafe == f \\in [1..2 -> {0}]\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+      "family": "graph"
+    },
+    {
+      "name": "packed-range-True-0..1",
+      "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE f\nInit == f = [i \\in 1..2 |-> FALSE]\nNext == f' = [f EXCEPT ![1] = ~@]\nSafe == f \\in [1..2 -> 0..1]\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+      "family": "graph"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": ".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java",
+      "sha256": "0f642542ea1f0be6957557c0db96653ec128113bb5a4aaa7c2534d1d72ddb51f"
+    },
+    {
+      "path": ".artifacts/tlc/tla2tools.jar",
+      "sha256": "936a262061c914694dfd669a543be24573c45d5aa0ff20a8b96b23d01e050e88"
+    },
+    {
+      "path": "crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm",
+      "sha256": "0c0356700dc7bfbddeded159a8329c501f4d5d9316a0b3e56a980c8c765aa249"
+    },
+    {
+      "path": "crates/idealis-core/target/release/idealis-core",
+      "sha256": "5b3ee837def20fded912c6e8244cd956a2f66a75041c35c4a3925ca36cdabab8"
+    },
+    {
+      "path": "evals/compact-functions/boundaries.json",
+      "sha256": "13c6b23665b8c371021098f27d4537a796eff77f440a6e468aa76d400a80ee76"
+    }
+  ]
+}

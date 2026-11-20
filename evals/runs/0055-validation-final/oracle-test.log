@@ -1,0 +1,239 @@
+cargo build --release --locked --manifest-path crates/oracle/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/oracle/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --locked --manifest-path evals/oracle-comparison/rust/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.02s
+cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path evals/oracle-comparison/rust/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.03s
+pnpm oracle:build
+
+> @mizchi/idealis@0.1.0-alpha.0 oracle:build /Users/mz/ghq/github.com/mizchi/idealis
+> cargo build --release --locked --manifest-path crates/oracle/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/oracle/Cargo.toml
+
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --locked --manifest-path evals/workspace-oracle/rust/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.02s
+pnpm portable:build
+
+> @mizchi/idealis@0.1.0-alpha.0 portable:build /Users/mz/ghq/github.com/mizchi/idealis
+> pnpm oracle:build && cargo build --release --locked --manifest-path crates/idealis-core/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/idealis-core/Cargo.toml
+
+
+> @mizchi/idealis@0.1.0-alpha.0 oracle:build /Users/mz/ghq/github.com/mizchi/idealis
+> cargo build --release --locked --manifest-path crates/oracle/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/oracle/Cargo.toml
+
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --locked --manifest-path crates/idealis-testing/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.02s
+cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/idealis-testing/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --locked --manifest-path crates/ralloy/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.02s
+cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/ralloy/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+pnpm rsmt:build
+
+> @mizchi/idealis@0.1.0-alpha.0 rsmt:build /Users/mz/ghq/github.com/mizchi/idealis
+> pnpm oracle:build && cargo build --release --locked --manifest-path crates/idealis-smt/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/idealis-smt/Cargo.toml
+
+
+> @mizchi/idealis@0.1.0-alpha.0 oracle:build /Users/mz/ghq/github.com/mizchi/idealis
+> cargo build --release --locked --manifest-path crates/oracle/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/oracle/Cargo.toml
+
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.03s
+    Finished `release` profile [optimized] target(s) in 0.02s
+pnpm rtla:build
+
+> @mizchi/idealis@0.1.0-alpha.0 rtla:build /Users/mz/ghq/github.com/mizchi/idealis
+> pnpm oracle:build && cargo build --release --locked --manifest-path crates/rtla/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/rtla/Cargo.toml
+
+
+> @mizchi/idealis@0.1.0-alpha.0 oracle:build /Users/mz/ghq/github.com/mizchi/idealis
+> cargo build --release --locked --manifest-path crates/oracle/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/oracle/Cargo.toml
+
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.02s
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo fmt --manifest-path evals/workspace-oracle/rust/Cargo.toml -- --check
+cargo clippy --all-targets --locked --manifest-path evals/workspace-oracle/rust/Cargo.toml -- -D warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s
+cargo test --locked --manifest-path evals/workspace-oracle/rust/Cargo.toml
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running unittests src/main.rs (evals/workspace-oracle/rust/target/debug/deps/workspace_oracle-9ed959e66721d524)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/process.rs (evals/workspace-oracle/rust/target/debug/deps/process-076be48ef6139df8)
+
+running 5 tests
+test invalid_manifest_is_rejected_before_spawning_an_implementation ... ok
+test missing_program_is_an_execution_error ... ok
+test independent_cold_and_reused_processes_have_matching_complete_outputs ... ok
+test real_process_failures_malformed_json_and_drift_never_produce_speedups ... ok
+test large_payloads_are_flushed_and_preserved_before_reading_a_reply ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.80s
+
+pnpm build
+
+> @mizchi/idealis@0.1.0-alpha.0 build /Users/mz/ghq/github.com/mizchi/idealis
+> tsc -p tsconfig.build.json
+
+node --test dist/evals/workspace-oracle/contract-test.js dist/evals/workspace-oracle/catalog-test.js
+✔ all workspace tuning cases have accepted deterministic full replies (1595.108916ms)
+✔ tampered binaries, sources and changed requests are rejected before measurement (341.528917ms)
+✔ oracle equality retains the previous strict equality on portable snapshots (9.143333ms)
+✔ nonportable values and cycles fail explicitly instead of losing data (0.116625ms)
+✔ batch wire preserves unknown and execution failure without matching them (1.775084ms)
+✔ declared workspace migration sites all use the shared oracle (2.600875ms)
+✔ mutating an input is observed on the next call and does not alter a previous report (0.142792ms)
+✔ snapshot traversal preserves special keys, shared values and exact depth (0.258125ms)
+✔ snapshot rejects hidden fields, extended arrays and accessors without invoking them (0.121209ms)
+✔ snapshot output defines own data properties without invoking inherited setters (0.825042ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1972.192625
+cargo fmt --manifest-path crates/oracle/Cargo.toml -- --check
+cargo clippy --all-targets --locked --manifest-path crates/oracle/Cargo.toml -- -D warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.10s
+cargo test --locked --manifest-path crates/oracle/Cargo.toml
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.07s
+     Running unittests src/lib.rs (crates/oracle/target/debug/deps/idealis_oracle-f1f8222ab459fbb5)
+
+running 1 test
+test wire::tests::reused_output_replaces_success_and_error_without_trailing_bytes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (crates/oracle/target/debug/deps/idealis_oracle-b51977c8c78d0874)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/bytes.rs (crates/oracle/target/debug/deps/bytes-6af81c244f0bc96b)
+
+running 2 tests
+test malformed_or_empty_batches_are_errors ... ok
+test byte_output_preserves_complete_reports_for_values_and_failure_observations ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/json.rs (crates/oracle/target/debug/deps/json-5abeb252fc1badc1)
+
+running 6 tests
+test duplicate_observation_fields_are_rejected ... ok
+test observation_tag_may_follow_its_payload ... ok
+test json_batches_use_the_same_group_and_preserve_inputs_and_failures ... ok
+test malformed_or_vacuous_batches_cannot_match ... ok
+test observations_require_exact_variant_fields_in_any_key_order ... ok
+test wire_observation_acceptance_matches_the_public_serde_contract ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/oracle.rs (crates/oracle/target/debug/deps/oracle-b2822aa6c9ea1837)
+
+running 14 tests
+test invalid_benchmark_options_and_evaluation_count_overflow_never_execute_callbacks ... ok
+test rejects_empty_duplicate_and_incomplete_suites ... ok
+test nonuniform_samples_use_per_invocation_statistics_and_baseline_over_target_ratio ... ok
+test rejects_bad_budget_before_calling_any_implementation ... ok
+test mismatching_preflight_never_reads_clock ... ok
+test measures_targets_only_with_balanced_order_and_explicit_baseline ... ok
+test clock_regression_or_nonadvancing_interval_is_unknown ... ok
+test drift_during_timing_invalidates_all_ratios ... ok
+test checks_and_replays_recorded_inputs_without_calling_reference ... ok
+test compares_values_and_allowed_sets_without_vacuous_success ... ok
+test replay_can_load_cases_and_preserves_a_failure_instead_of_recomputing_the_oracle ... ok
+test rejects_zero_and_backwards_clocks_without_fast_results ... ok
+test replay_validates_cases_ids_aggregate_and_version_before_running_targets ... ok
+test warmup_errors_remove_all_ratios_and_preserve_raw_observation ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests idealis_oracle
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+cargo test --locked --manifest-path crates/oracle/Cargo.toml --bench wire
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running benches/wire.rs (crates/oracle/target/debug/deps/wire-4f346941ac64cd98)
+Testing wire-value/single
+Success
+
+Testing wire-bytes/single
+Success
+
+Testing wire-value/batch-32
+Success
+
+Testing wire-bytes/batch-32
+Success
+
+Testing wire-value/nested-256
+Success
+
+Testing wire-bytes/nested-256
+Success
+
+Testing wire-value/unknown
+Success
+
+Testing wire-bytes/unknown
+Success
+
+cargo fmt --manifest-path evals/oracle-comparison/rust/Cargo.toml -- --check
+cargo clippy --all-targets --locked --manifest-path evals/oracle-comparison/rust/Cargo.toml -- -D warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s
+cargo test --locked --manifest-path evals/oracle-comparison/rust/Cargo.toml
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.05s
+     Running unittests src/lib.rs (evals/oracle-comparison/rust/target/debug/deps/oracle_comparison-94eb32a9b9bafedb)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (evals/oracle-comparison/rust/target/debug/deps/oracle_comparison-42bb5463f2b7648a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests oracle_comparison
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+cargo run --example comparison --locked --manifest-path crates/oracle/Cargo.toml
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running `crates/oracle/target/debug/examples/comparison`
+standalone idealis-oracle consumer checked
+pnpm exec playwright test --config oracle-playwright.config.ts
+
+Running 2 tests using 1 worker
+
+(node:23700) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+  ✓  1 evals/oracle-comparison/browser.spec.ts:5:1 › typed differential checks, recorded replay and host clock run in native and browser Wasm (443ms)
+  ✓  2 evals/workspace-oracle/browser.spec.ts:5:1 › workspace snapshots use the actual oracle JSON ABI in Chromium (56ms)
+
+  2 passed (1.4s)

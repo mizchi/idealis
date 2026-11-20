@@ -1,0 +1,22 @@
+IDEALIS_CHECKER_PLAN=0063-evaluator-tuning IDEALIS_CHECKER_SNAPSHOT='.artifacts/0063-final' node dist/evals/p0-checker/verify.js 'evals/runs/0063-verification'
+1/21 just check: 0
+2/21 just analysis-test: 0
+3/21 just compiler-test: 0
+4/21 just safety-test: 0
+5/21 just quint-test: 0
+6/21 just portable-test: 0
+7/21 just browser: 0
+8/21 cargo fmt --manifest-path crates/idealis-core/Cargo.toml -- --check: 0
+9/21 cargo clippy --all-targets --locked --manifest-path crates/idealis-core/Cargo.toml -- -D warnings: 0
+10/21 just runtime-build: 0
+11/21 just runtime-test: 0
+12/21 just mutation: 0
+13/21 just evaluate: 0
+14/21 just replay-evaluation: 0
+15/21 just usable-test: 0
+16/21 pnpm usable:eval evals/runs/0063-verification/usable: 0
+17/21 just usable-replay evals/runs/0063-verification/usable: 0
+18/21 just cross-test: 0
+19/21 just package: 0
+20/21 node --test dist/scripts/check-support-test.js: 0
+21/21 just support-check: 0

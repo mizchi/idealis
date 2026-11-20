@@ -64,6 +64,49 @@ fn v2_definition_acceptance_is_paired_with_self_cycle_refusal() {
 }
 
 #[test]
+fn explicitly_recursive_definitions_terminate_or_report_a_bound() {
+    let mut input = program();
+    input["definitions"][0]["recursive"] = json!(true);
+    let parameter = json!({"op":"parameter","slot":0});
+    let integer = |value: &str| json!({"op":"literal","value":{"type":"int","value":value}});
+    input["invariants"][0]["expression"] = call(0, vec![integer("5")], vec![]);
+    input["definitions"][0]["body"] = json!({"op":"if","condition":{"op":"le","left":parameter,"right":integer("0")},"consequent":literal(true),"alternative":call(0,vec![json!({"op":"sub","left":parameter,"right":integer("1")})],vec![])});
+    accepted(input.clone());
+    input["definitions"][0]["body"] = call(0, vec![parameter], vec![]);
+    let result = check(input.clone()).unwrap();
+    assert_eq!(result.status, "bounded");
+    assert_eq!(result.reason.as_deref(), Some("evaluation"));
+    let program: SafetyProgram = serde_json::from_value(input).unwrap();
+    let result = program
+        .check(SafetyBounds {
+            max_depth: 64,
+            max_states: 1000,
+            max_work: 7,
+            max_temporal_nodes: None,
+        })
+        .unwrap();
+    assert_eq!(result.status, "bounded");
+    assert_eq!(result.reason.as_deref(), Some("work"));
+    assert_eq!(result.work, 7);
+}
+
+#[test]
+fn every_member_of_a_recursive_component_must_be_marked_and_phase_checked() {
+    let mut input = program();
+    input["definitions"][0]["recursive"] = json!(true);
+    input["definitions"]
+        .as_array_mut()
+        .unwrap()
+        .push(definition(1, call(0, vec![literal(true)], vec![])));
+    input["definitions"][0]["body"] = json!({"op":"if","condition":literal(true),"consequent":literal(true),"alternative":call(1,vec![literal(true)],vec![])});
+    refused(input.clone());
+    input["definitions"][1]["recursive"] = json!(true);
+    accepted(input.clone());
+    input["definitions"][1]["body"] = json!({"op":"and","left":call(0,vec![literal(true)],vec![]),"right":{"op":"eq","left":{"op":"read","slot":0,"next":true},"right":{"op":"read","slot":0,"next":false}}});
+    refused(input);
+}
+
+#[test]
 fn v2_mutual_cycle_is_refused_even_in_an_unreached_branch() {
     let mut valid = program();
     valid["definitions"]
@@ -805,7 +848,8 @@ fn public_program_deep_action_frames_are_checked_before_recursive_analysis() {
     input.definitions.as_mut().unwrap()[0].body = Expression::Enabled {
         branches,
         subscript: None,
-    };
+    }
+    .into();
     let error = crate::safety_definitions::validate_program(&input)
         .err()
         .unwrap();
@@ -1015,7 +1059,7 @@ analysis_parity_wire_direct!(
         } else {
             unreachable!();
         }
-        input.definitions.as_mut().unwrap()[0].body = node;
+        input.definitions.as_mut().unwrap()[0].body = node.into();
     },
     false
 );
@@ -1029,7 +1073,7 @@ analysis_parity_wire_direct!(
         } else {
             unreachable!();
         }
-        input.definitions.as_mut().unwrap()[0].body = node;
+        input.definitions.as_mut().unwrap()[0].body = node.into();
     },
     false
 );
@@ -1043,7 +1087,7 @@ analysis_parity_wire_direct!(
         } else {
             unreachable!();
         }
-        input.definitions.as_mut().unwrap()[0].body = node;
+        input.definitions.as_mut().unwrap()[0].body = node.into();
     },
     false
 );
@@ -1058,7 +1102,7 @@ analysis_parity_wire_direct!(
         } else {
             unreachable!();
         }
-        input.definitions.as_mut().unwrap()[0].body = node;
+        input.definitions.as_mut().unwrap()[0].body = node.into();
     },
     false
 );
@@ -1073,7 +1117,7 @@ analysis_parity_wire_direct!(
         } else {
             unreachable!();
         }
-        input.definitions.as_mut().unwrap()[0].body = node;
+        input.definitions.as_mut().unwrap()[0].body = node.into();
     },
     false
 );
@@ -1088,7 +1132,7 @@ analysis_parity_wire_direct!(
         } else {
             unreachable!();
         }
-        input.definitions.as_mut().unwrap()[0].body = node;
+        input.definitions.as_mut().unwrap()[0].body = node.into();
     },
     false
 );
@@ -1103,7 +1147,7 @@ analysis_parity_wire_direct!(
         } else {
             unreachable!();
         }
-        input.definitions.as_mut().unwrap()[0].body = node;
+        input.definitions.as_mut().unwrap()[0].body = node.into();
     },
     false
 );
@@ -1118,7 +1162,7 @@ analysis_parity_wire_direct!(
         } else {
             unreachable!();
         }
-        input.definitions.as_mut().unwrap()[0].body = node;
+        input.definitions.as_mut().unwrap()[0].body = node.into();
     },
     false
 );
@@ -1132,7 +1176,7 @@ analysis_parity_wire_direct!(
         } else {
             unreachable!();
         }
-        input.definitions.as_mut().unwrap()[0].body = node;
+        input.definitions.as_mut().unwrap()[0].body = node.into();
     },
     false
 );
@@ -1256,7 +1300,8 @@ analysis_parity_wire_direct!(
             body: Box::new(crate::ir::Expression::Literal {
                 value: crate::ir::Scalar::Bool(true),
             }),
-        };
+        }
+        .into();
     },
     false
 );
@@ -1275,7 +1320,8 @@ analysis_parity_wire_direct!(
             body: Box::new(crate::ir::Expression::Literal {
                 value: crate::ir::Scalar::Bool(true),
             }),
-        };
+        }
+        .into();
     },
     false
 );

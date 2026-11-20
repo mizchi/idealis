@@ -1,0 +1,60 @@
+{
+  "route": "tlc-8",
+  "command": "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java",
+  "args": [
+    "-Xmx8g",
+    "-XX:+UseParallelGC",
+    "-XX:ActiveProcessorCount=8",
+    "-Djava.io.tmpdir=/Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0060-symmetry-benchmark-final/3-tlc-plain-8/tmp",
+    "-jar",
+    "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/tlc/tla2tools.jar",
+    "-workers",
+    "8",
+    "-seed",
+    "16",
+    "-lncheck",
+    "final",
+    "-tool",
+    "-cleanup",
+    "-config",
+    "Differential.cfg",
+    "Differential.tla"
+  ],
+  "exit": 0,
+  "wallMs": 1195.4574999999968,
+  "stdout": "@!@!@STARTMSG 2262:0 @!@!@\nTLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)\n@!@!@ENDMSG 2262 @!@!@\n@!@!@STARTMSG 2187:0 @!@!@\nRunning breadth-first search Model-Checking with fp 67 and seed 16 with 8 workers on 8 cores with 7282MB heap and 64MB offheap memory [pid: 73077] (Mac OS X 26.6.2 aarch64, Eclipse Adoptium 21.0.13 x86_64, MSBDiskFPSet, DiskStateQueue).\n@!@!@ENDMSG 2187 @!@!@\n@!@!@STARTMSG 2220:0 @!@!@\nStarting SANY...\n@!@!@ENDMSG 2220 @!@!@\nParsing file /Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0060-symmetry-benchmark-final/3-tlc-plain-8/Differential.tla\nParsing file /Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0060-symmetry-benchmark-final/3-tlc-plain-8/tmp/Naturals.tla\nParsing file /Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0060-symmetry-benchmark-final/3-tlc-plain-8/tmp/TLC.tla\nParsing file /Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0060-symmetry-benchmark-final/3-tlc-plain-8/tmp/Sequences.tla\nParsing file /Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0060-symmetry-benchmark-final/3-tlc-plain-8/tmp/FiniteSets.tla\nSemantic processing of module Naturals\nSemantic processing of module Sequences\nSemantic processing of module FiniteSets\nSemantic processing of module TLC\nSemantic processing of module Differential\n@!@!@STARTMSG 2219:0 @!@!@\nSANY finished.\n@!@!@ENDMSG 2219 @!@!@\n@!@!@STARTMSG 2185:0 @!@!@\nStarting... (2026-11-18 14:28:28)\n@!@!@ENDMSG 2185 @!@!@\n@!@!@STARTMSG 2189:0 @!@!@\nComputing initial states...\n@!@!@ENDMSG 2189 @!@!@\n@!@!@STARTMSG 2190:0 @!@!@\nFinished computing initial states: 1 distinct state generated at 2026-11-18 14:28:28.\n@!@!@ENDMSG 2190 @!@!@\n@!@!@STARTMSG 2193:0 @!@!@\nModel checking completed. No error has been found.\n  Estimates of the probability that TLC did not check all reachable states\n  because two distinct states had the same fingerprint:\n  calculated (optimistic):  val = 2.5E-8\n  based on the actual fingerprints:  val = 5.8E-12\n@!@!@ENDMSG 2193 @!@!@\n@!@!@STARTMSG 2200:0 @!@!@\nProgress(36) at 2026-11-18 14:28:29: 1,959,553 states generated (153,690,431 s/min), 279,936 distinct states found (21,955,764 ds/min), 0 states left on queue.\n@!@!@ENDMSG 2200 @!@!@\n@!@!@STARTMSG 2199:0 @!@!@\n1959553 states generated, 279936 distinct states found, 0 states left on queue.\n@!@!@ENDMSG 2199 @!@!@\n@!@!@STARTMSG 2194:0 @!@!@\nThe depth of the complete state graph search is 36.\n@!@!@ENDMSG 2194 @!@!@\n@!@!@STARTMSG 2268:0 @!@!@\nThe average outdegree of the complete state graph is 1 (minimum is 0, the maximum 7 and the 95th percentile is 2).\n@!@!@ENDMSG 2268 @!@!@\n@!@!@STARTMSG 2186:0 @!@!@\nFinished in 769ms at (2026-11-18 14:28:29)\n@!@!@ENDMSG 2186 @!@!@\n",
+  "stderr": "",
+  "output": null,
+  "decodeError": null,
+  "memory": [
+    {
+      "milliseconds": 224.59245799999917,
+      "bytes": 96927744
+    },
+    {
+      "milliseconds": 433.6585829999967,
+      "bytes": 288915456
+    },
+    {
+      "milliseconds": 625.5977919999932,
+      "bytes": 459063296
+    },
+    {
+      "milliseconds": 826.4064579999977,
+      "bytes": 500350976
+    },
+    {
+      "milliseconds": 1028.5324579999942,
+      "bytes": 500350976
+    }
+  ],
+  "sampledMaxRssBytes": 500350976,
+  "phases": {
+    "initStartMs": 222.42566699999588,
+    "initDoneMs": 224.60749999999825,
+    "successMs": 796.2227079999939,
+    "initAndSearchMs": 573.797040999998,
+    "searchAndFinalMs": 571.6152079999956
+  },
+  "phaseError": null
+}

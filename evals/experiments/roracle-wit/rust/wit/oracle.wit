@@ -1,0 +1,31 @@
+package idealis:oracle@0.1.0;
+
+interface protocol {
+  variant observation {
+    value(u32),
+    allowed(list<u32>),
+    unknown(string),
+    invalid(string),
+    error(string),
+  }
+  record input {
+    id: string,
+    input: u32,
+    reference: observation,
+    actual: list<observation>,
+  }
+  record batch {
+    version: u32,
+    group: string,
+    reference: string,
+    implementations: list<string>,
+    cases: list<input>,
+    payload: list<u8>,
+  }
+  check: func(request: batch) -> string;
+  check-buffer: func(data: list<u8>) -> string;
+}
+
+world oracle {
+  export protocol;
+}

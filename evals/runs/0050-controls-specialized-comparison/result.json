@@ -1,0 +1,265 @@
+{
+  "status": "complete",
+  "before": "evals/runs/0050-controls-before",
+  "after": "evals/runs/0050-controls-specialized",
+  "inputsEqual": true,
+  "sourceResults": [
+    {
+      "path": "evals/runs/0050-controls-before/result.json",
+      "sha256": "6d6ab668fb1886ff3cc8485f4a833e7ebd62b9abfc2e28a6c848b0eeca35ceb8"
+    },
+    {
+      "path": "evals/runs/0050-controls-specialized/result.json",
+      "sha256": "a453726a0dbfeab37d3284eab67efba57f4dc7bdb6cf8b2e8b0a8555291f7b71"
+    }
+  ],
+  "comparisons": [
+    {
+      "benchmark": "membership/function-cube",
+      "before": {
+        "benchmark": "membership/function-cube",
+        "mean": 2090612.8763453916,
+        "lower": 2078509.365701095,
+        "upper": 2103586.9016293217
+      },
+      "after": {
+        "benchmark": "membership/function-cube",
+        "mean": 2124666.452936541,
+        "lower": 2115090.9412874063,
+        "upper": 2137734.252523748
+      },
+      "speedup": 0.9839722717210115,
+      "regression": false
+    },
+    {
+      "benchmark": "membership/parallel-channels",
+      "before": {
+        "benchmark": "membership/parallel-channels",
+        "mean": 889623.5895182065,
+        "lower": 885973.2601626215,
+        "upper": 893727.8906374155
+      },
+      "after": {
+        "benchmark": "membership/parallel-channels",
+        "mean": 889303.0260645018,
+        "lower": 886296.2631383926,
+        "upper": 893259.7387241168
+      },
+      "speedup": 1.000360465942777,
+      "regression": false
+    },
+    {
+      "benchmark": "search/counter-product/1",
+      "before": {
+        "benchmark": "search/counter-product/1",
+        "mean": 9508002.458333332,
+        "lower": 9462493.082708333,
+        "upper": 9556015.668958334
+      },
+      "after": {
+        "benchmark": "search/counter-product/1",
+        "mean": 9437085.653433943,
+        "lower": 9421093.22615882,
+        "upper": 9455175.779638503
+      },
+      "speedup": 1.0075146933601884,
+      "regression": false
+    },
+    {
+      "benchmark": "search/counter-product/8",
+      "before": {
+        "benchmark": "search/counter-product/8",
+        "mean": 9532081.583333334,
+        "lower": 9486113.061458332,
+        "upper": 9582889.234374998
+      },
+      "after": {
+        "benchmark": "search/counter-product/8",
+        "mean": 9704366.394993465,
+        "lower": 9506646.215883426,
+        "upper": 9979893.072320344
+      },
+      "speedup": 0.982246670761626,
+      "regression": false
+    },
+    {
+      "benchmark": "search/function-cube/1",
+      "before": {
+        "benchmark": "search/function-cube/1",
+        "mean": 10111164.241666665,
+        "lower": 9845909.49,
+        "upper": 10396832.915208334
+      },
+      "after": {
+        "benchmark": "search/function-cube/1",
+        "mean": 9920090.966666665,
+        "lower": 9698097.14875,
+        "upper": 10181175.532291668
+      },
+      "speedup": 1.0192612422246976,
+      "regression": false
+    },
+    {
+      "benchmark": "search/function-cube/8",
+      "before": {
+        "benchmark": "search/function-cube/8",
+        "mean": 7697184.685259591,
+        "lower": 7630622.704515245,
+        "upper": 7771021.232137427
+      },
+      "after": {
+        "benchmark": "search/function-cube/8",
+        "mean": 8109115.399949524,
+        "lower": 7942117.569320556,
+        "upper": 8316064.502568802
+      },
+      "speedup": 0.9492015226848916,
+      "regression": true
+    },
+    {
+      "benchmark": "search/linear-ring/1",
+      "before": {
+        "benchmark": "search/linear-ring/1",
+        "mean": 1097982.0414847806,
+        "lower": 1096617.0310964317,
+        "upper": 1099373.041376771
+      },
+      "after": {
+        "benchmark": "search/linear-ring/1",
+        "mean": 1260783.802454114,
+        "lower": 1102053.134814525,
+        "upper": 1450260.488379848
+      },
+      "speedup": 0.8708725789049321,
+      "regression": true
+    },
+    {
+      "benchmark": "search/linear-ring/8",
+      "before": {
+        "benchmark": "search/linear-ring/8",
+        "mean": 1237528.411064339,
+        "lower": 1098374.4861296641,
+        "upper": 1431480.0421153267
+      },
+      "after": {
+        "benchmark": "search/linear-ring/8",
+        "mean": 1097719.9404733153,
+        "lower": 1093543.3097033296,
+        "upper": 1102289.9810311433
+      },
+      "speedup": 1.1273626044642509,
+      "regression": false
+    },
+    {
+      "benchmark": "search/parallel-channels/1",
+      "before": {
+        "benchmark": "search/parallel-channels/1",
+        "mean": 13047117.725,
+        "lower": 13011151.0875,
+        "upper": 13089290.499375
+      },
+      "after": {
+        "benchmark": "search/parallel-channels/1",
+        "mean": 12848765.1375,
+        "lower": 12801769.1971875,
+        "upper": 12904122.698437499
+      },
+      "speedup": 1.0154374825422792,
+      "regression": false
+    },
+    {
+      "benchmark": "search/parallel-channels/8",
+      "before": {
+        "benchmark": "search/parallel-channels/8",
+        "mean": 7006920.453568086,
+        "lower": 6968511.872848621,
+        "upper": 7049071.129046608
+      },
+      "after": {
+        "benchmark": "search/parallel-channels/8",
+        "mean": 8136575.003214543,
+        "lower": 7809855.181895184,
+        "upper": 8473056.88468287
+      },
+      "speedup": 0.8611633827255128,
+      "regression": true
+    },
+    {
+      "benchmark": "values/except-function",
+      "before": {
+        "benchmark": "values/except-function",
+        "mean": 470753.9005922692,
+        "lower": 466132.8486598785,
+        "upper": 476214.07369349885
+      },
+      "after": {
+        "benchmark": "values/except-function",
+        "mean": 562889.2724161075,
+        "lower": 514998.09783756087,
+        "upper": 617872.1166151694
+      },
+      "speedup": 0.8363170585426816,
+      "regression": true
+    },
+    {
+      "benchmark": "values/except-record",
+      "before": {
+        "benchmark": "values/except-record",
+        "mean": 3930192.7886904874,
+        "lower": 3898155.8582222,
+        "upper": 3966779.937131754
+      },
+      "after": {
+        "benchmark": "values/except-record",
+        "mean": 3903336.1452754783,
+        "lower": 3857297.162079042,
+        "upper": 3987496.1271085585
+      },
+      "speedup": 1.0068804331513994,
+      "regression": false
+    },
+    {
+      "benchmark": "values/intern-existing-functions",
+      "before": {
+        "benchmark": "values/intern-existing-functions",
+        "mean": 449254.3554360131,
+        "lower": 446371.5046885168,
+        "upper": 451996.3319548995
+      },
+      "after": {
+        "benchmark": "values/intern-existing-functions",
+        "mean": 472465.12230584474,
+        "lower": 457624.58551802236,
+        "upper": 489227.55941284384
+      },
+      "speedup": 0.9508730575570266,
+      "regression": true
+    },
+    {
+      "benchmark": "values/intern-new-functions",
+      "before": {
+        "benchmark": "values/intern-new-functions",
+        "mean": 499373.99237896886,
+        "lower": 490997.740325544,
+        "upper": 514125.2603513993
+      },
+      "after": {
+        "benchmark": "values/intern-new-functions",
+        "mean": 549764.6275153063,
+        "lower": 538991.6471696869,
+        "upper": 562322.3196056265
+      },
+      "speedup": 0.9083414381094671,
+      "regression": true
+    }
+  ],
+  "regressions": [
+    "search/function-cube/8",
+    "search/linear-ring/1",
+    "search/parallel-channels/8",
+    "values/except-function",
+    "values/intern-existing-functions",
+    "values/intern-new-functions"
+  ],
+  "interpretation": "Ratios of Criterion mean estimates. A regression flag is a >3% slowdown, not a statistical significance test or an adoption decision."
+}

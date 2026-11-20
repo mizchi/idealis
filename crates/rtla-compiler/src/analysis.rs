@@ -20,6 +20,7 @@ pub(crate) enum Node<'a> {
     Branch(&'a ir::Branch),
     Step(&'a ir::Step),
     Definition(&'a ir::Definition),
+    Body(&'a ir::DefinitionBody),
     Temporal(&'a ir::TemporalFormula),
     Program(&'a ir::SafetyProgram),
     Call(&'a usize),
@@ -188,6 +189,10 @@ fn descriptor(
         }
     } else {
         match space {
+            "source-elaboration" => {
+                result.role = "elaboration-input";
+                result.scope = "lexical";
+            }
             "parser-only" => {
                 result.role = if constructor == "Fairness" {
                     "annotation"
@@ -209,6 +214,10 @@ fn descriptor(
                 }
             }
             "ir-expression" => match constructor {
+                "select-seq" | "sort-seq" if p == "body" => {
+                    result.role = "binder-body";
+                    result.scope = "binder";
+                }
                 "parameter" | "capture" | "bound" => result.scope = "frame",
                 "record-set" | "sequence-set" => {
                     result.role = "membership-result";
@@ -302,6 +311,16 @@ fn descriptor(
                 result.role = "definition-body";
                 result.scope = "frame";
             }
+            "ir-step" | "ir-temporal" if constructor == "call" => {
+                if p.starts_with("arguments") {
+                    result.role = "call-actual";
+                } else if p.starts_with("captures") {
+                    result.role = "call-capture";
+                } else {
+                    result.role = "call-edge";
+                    result.scope = "definition";
+                }
+            }
             "ir-step" if constructor == "frame" => {
                 if p.starts_with("arguments") {
                     result.role = "frame-actual";
@@ -379,6 +398,26 @@ macro_rules! expression_edges_body {
             I::UnmatchedCase { location: _ } => {}
             I::Data { value: _ } | I::Literal { value: _ } => {}
             I::Read { slot: _, next: _ } => {}
+            I::SelectSeq {
+                slot: _,
+                sequence,
+                body,
+            } => {
+                add("select-seq", "sequence", $node::Expression(sequence));
+                add("select-seq", "body", $node::Expression(body));
+            }
+            I::SortSeq {
+                slot: _,
+                sequence,
+                body,
+            } => {
+                add("sort-seq", "sequence", $node::Expression(sequence));
+                add("sort-seq", "body", $node::Expression(body));
+            }
+            I::Assert { condition, message } => {
+                add("assert", "condition", $node::Expression(condition));
+                add("assert", "message", $node::Expression(message));
+            }
             I::Domain { argument } => add("domain", "argument", $node::Expression(argument)),
             I::VariantTag { argument } => {
                 add("variant-tag", "argument", $node::Expression(argument))
@@ -638,6 +677,38 @@ macro_rules! step_edges_body {
     ($value:ident, $node:ident, $edge:ident, $iter:ident) => {{
         let value = $value;
         match value {
+            ir::Step::Call {
+                definition,
+                arguments,
+                captures,
+            } => arguments
+                .$iter()
+                .map(|value| {
+                    $edge(
+                        $node::Expression(value),
+                        "ir-step",
+                        "call",
+                        "",
+                        "arguments[*]",
+                    )
+                })
+                .chain(captures.$iter().map(|value| {
+                    $edge(
+                        $node::Expression(value),
+                        "ir-step",
+                        "call",
+                        "",
+                        "captures[*]",
+                    )
+                }))
+                .chain([$edge(
+                    $node::Call(definition),
+                    "ir-step",
+                    "call",
+                    "",
+                    "definition",
+                )])
+                .collect(),
             ir::Step::Bind {
                 slot: _,
                 domain,
@@ -700,6 +771,38 @@ macro_rules! temporal_edges_body {
         let value = $value;
         use ir::TemporalFormula as T;
         match value {
+            T::Call {
+                definition,
+                arguments,
+                captures,
+            } => arguments
+                .$iter()
+                .map(|value| {
+                    $edge(
+                        $node::Expression(value),
+                        "ir-temporal",
+                        "call",
+                        "",
+                        "arguments[*]",
+                    )
+                })
+                .chain(captures.$iter().map(|value| {
+                    $edge(
+                        $node::Expression(value),
+                        "ir-temporal",
+                        "call",
+                        "",
+                        "captures[*]",
+                    )
+                }))
+                .chain([$edge(
+                    $node::Call(definition),
+                    "ir-temporal",
+                    "call",
+                    "",
+                    "definition",
+                )])
+                .collect(),
             T::Frame {
                 arguments,
                 captures,
@@ -810,6 +913,7 @@ macro_rules! program_edges_body {
             invariants,
             assumptions,
             check_deadlock: _,
+            symmetry: _,
             initial_properties,
             action_properties,
             properties,
@@ -928,6 +1032,7 @@ macro_rules! ir_wrapper_edges {
     }};
     (Definition, $value:ident, $node:ident, $edge:ident, $iter:ident) => {{
         let ir::Definition {
+            recursive: _,
             id: _,
             parameter_count: _,
             capture_count: _,
@@ -935,13 +1040,34 @@ macro_rules! ir_wrapper_edges {
             local_scope: _,
             body,
         } = $value;
-        vec![$edge(
-            $node::Expression(body),
-            "ir-definition",
-            "definition",
-            "",
-            "body",
-        )]
+        match body {
+            ir::DefinitionBody::Temporal(body) => vec![$edge(
+                $node::Temporal(body),
+                "ir-definition",
+                "definition",
+                "",
+                "body",
+            )],
+            ir::DefinitionBody::Expression(body) => vec![$edge(
+                $node::Expression(body),
+                "ir-definition",
+                "definition",
+                "",
+                "body",
+            )],
+            ir::DefinitionBody::Action(branches) => branches
+                .$iter()
+                .map(|branch| {
+                    $edge(
+                        $node::Branch(branch),
+                        "ir-definition",
+                        "definition",
+                        "",
+                        "body[*]",
+                    )
+                })
+                .collect(),
+        }
     }};
     (Call, $value:ident, $node:ident, $edge:ident, $iter:ident) => {{
         let _ = $value;
@@ -1069,6 +1195,26 @@ pub(crate) fn analysis_children(node: Node<'_>) -> Vec<Edge<'_>> {
         Node::Binding(value) => ir_wrapper_edges!(Binding, value, Node, edge, iter),
         Node::Branch(value) => ir_wrapper_edges!(Branch, value, Node, edge, iter),
         Node::Step(value) => step_edges(value),
+        Node::Body(body) => match body {
+            ir::DefinitionBody::Temporal(body) => vec![edge(
+                Node::Temporal(body),
+                "ir-body",
+                "temporal",
+                "",
+                "body",
+            )],
+            ir::DefinitionBody::Expression(body) => vec![edge(
+                Node::Expression(body),
+                "ir-body",
+                "expression",
+                "",
+                "body",
+            )],
+            ir::DefinitionBody::Action(branches) => branches
+                .iter()
+                .map(|branch| edge(Node::Branch(branch), "ir-body", "action", "", "body[*]"))
+                .collect(),
+        },
         Node::Definition(value) => ir_wrapper_edges!(Definition, value, Node, edge, iter),
         Node::Temporal(value) => temporal_edges(value),
         Node::Program(value) => program_edges(value),
@@ -1084,6 +1230,7 @@ fn source_edges(value: &ast::Expression, call: bool) -> Vec<Edge<'_>> {
     };
     match node {
         S::Number { value: _ }
+        | S::Integer { text: _ }
         | S::Decimal { text: _ }
         | S::String { value: _ }
         | S::Identifier { name: _ }
@@ -1100,6 +1247,100 @@ fn source_edges(value: &ast::Expression, call: bool) -> Vec<Edge<'_>> {
             };
             for (i, v) in args.iter().enumerate() {
                 add("Apply", &class, format!("args[{i}]"), Node::Source(v));
+            }
+        }
+        S::Lambda { params: _, body } => out.push(edge(
+            Node::Source(body),
+            "source-elaboration",
+            "Lambda",
+            "",
+            "body",
+        )),
+        S::AssumeProve {
+            assumptions, prove, ..
+        } => {
+            for (index, assumption) in assumptions.iter().enumerate() {
+                let expression = match assumption {
+                    ast::ProofAssumption::Expression { expression } => Some(expression),
+                    ast::ProofAssumption::New { set, .. } => set.as_deref(),
+                };
+                if let Some(expression) = expression {
+                    out.push(edge(
+                        Node::Source(expression),
+                        "parser-only",
+                        "AssumeProve",
+                        "",
+                        format!("assumptions[{index}]"),
+                    ));
+                }
+            }
+            out.push(edge(
+                Node::Source(prove),
+                "parser-only",
+                "AssumeProve",
+                "",
+                "prove",
+            ));
+        }
+        S::LetModule {
+            definitions,
+            instances,
+            recursive: _,
+            body,
+        } => {
+            for (index, definition) in definitions.iter().enumerate() {
+                out.push(edge(
+                    Node::SourceDefinition(definition),
+                    "source-elaboration",
+                    "LetModule",
+                    "",
+                    format!("definitions[{index}]"),
+                ));
+            }
+            for (index, instance) in instances.iter().enumerate() {
+                for (argument, entry) in instance.substitutions.iter().enumerate() {
+                    out.push(edge(
+                        Node::Source(&entry.expression),
+                        "source-elaboration",
+                        "LetModule",
+                        "",
+                        format!("instances[{index}].substitutions[{argument}]"),
+                    ));
+                }
+            }
+            out.push(edge(
+                Node::Source(body),
+                "source-elaboration",
+                "LetModule",
+                "",
+                "body",
+            ));
+        }
+        S::Selection {
+            expression,
+            selectors,
+        } => {
+            out.push(edge(
+                Node::Source(expression),
+                "source-elaboration",
+                "Selection",
+                "",
+                "expression",
+            ));
+            for (index, selector) in selectors.iter().enumerate() {
+                if let ast::Selector::Name { args, .. } | ast::Selector::Arguments { args } =
+                    selector
+                {
+                    for (argument, value) in args.iter().enumerate() {
+                        out.push(edge(
+                            Node::Source(value),
+                            "source-elaboration",
+                            "Selection",
+                            "",
+                            format!("selectors[{index}].args[{argument}]"),
+                        ));
+                    }
+                }
             }
         }
         S::And {
@@ -1519,14 +1760,25 @@ fn descriptors() -> Vec<Descriptor> {
     };
     collect(Node::Branch(&branch));
     let definition = ir::Definition {
+        recursive: false,
         id: 0,
         parameter_count: 0,
         capture_count: 0,
         body_kind: ir::BodyKind::Expression,
         local_scope: 0,
-        body: I::Old,
+        body: I::Old.into(),
     };
     collect(Node::Definition(&definition));
+    let action_definition = ir::Definition {
+        recursive: false,
+        id: 0,
+        parameter_count: 0,
+        capture_count: 0,
+        body_kind: ir::BodyKind::Action,
+        local_scope: 0,
+        body: ir::DefinitionBody::Action(vec![branch.clone()]),
+    };
+    collect(Node::Definition(&action_definition));
     let temporal = temporal_samples(&binding);
     for value in &temporal {
         collect(Node::Temporal(value));
@@ -1547,6 +1799,7 @@ fn descriptors() -> Vec<Descriptor> {
         invariants: predicate(),
         assumptions: predicate(),
         check_deadlock: false,
+        symmetry: None,
         initial_properties: predicate(),
         action_properties: predicate(),
         constraints: predicate(),
@@ -1616,6 +1869,7 @@ fn descriptors() -> Vec<Descriptor> {
         ("source", "Identifier"),
         ("source", "ExceptAt"),
         ("parser-only", "Decimal"),
+        ("parser-only", "Integer"),
         ("parser-only", "OperatorReference"),
         ("source-wrapper", "ExceptPath.Field"),
         ("ir-expression", "data"),
@@ -1731,6 +1985,45 @@ fn source_samples() -> Vec<ast::Expression> {
     };
     let mut nodes = vec![
         S::Number { value: 0 },
+        S::Integer {
+            text: "9007199254740992".into(),
+        },
+        S::LetModule {
+            definitions: vec![definition(), definition()],
+            instances: vec![ast::Instance {
+                name: None,
+                params: vec![],
+                module: String::new(),
+                substitutions: vec![ast::InstanceSubstitution {
+                    name: String::new(),
+                    expression: leaf.clone(),
+                }],
+                is_local: false,
+                location: leaf.location,
+            }],
+            recursive: vec![],
+            body: one(),
+        },
+        S::AssumeProve {
+            assumptions: vec![
+                ast::ProofAssumption::Expression {
+                    expression: leaf.clone(),
+                },
+                ast::ProofAssumption::New {
+                    declaration: ast::Declaration {
+                        name: String::new(),
+                        arity: 0,
+                        location: leaf.location,
+                    },
+                    level: ast::DeclarationLevel::Constant,
+                    is_new: true,
+                    set: Some(one()),
+                },
+            ],
+            prove: one(),
+            is_boxed_assume: false,
+            is_boxed_prove: false,
+        },
         S::String {
             value: String::new(),
         },
@@ -1845,6 +2138,20 @@ fn source_samples() -> Vec<ast::Expression> {
             params: vec![],
             body: one(),
         },
+        S::Lambda {
+            params: vec![],
+            body: one(),
+        },
+        S::Selection {
+            expression: one(),
+            selectors: vec![
+                ast::Selector::Name {
+                    name: String::new(),
+                    args: many(),
+                },
+                ast::Selector::Arguments { args: many() },
+            ],
+        },
     ];
     nodes.extend(
         apply_spellings()
@@ -1881,6 +2188,20 @@ fn expression_samples() -> Vec<I> {
         I::Len { argument: one() },
         I::Head { argument: one() },
         I::Tail { argument: one() },
+        I::SelectSeq {
+            slot: 0,
+            sequence: one(),
+            body: one(),
+        },
+        I::SortSeq {
+            slot: 0,
+            sequence: one(),
+            body: one(),
+        },
+        I::Assert {
+            condition: one(),
+            message: one(),
+        },
         I::Powerset { argument: one() },
         I::Union { argument: one() },
         I::Not { argument: one() },
@@ -2071,6 +2392,11 @@ fn expression_samples() -> Vec<I> {
 
 fn step_samples(binding: &ir::Binding) -> Vec<ir::Step> {
     vec![
+        ir::Step::Call {
+            definition: 0,
+            arguments: vec![I::Old],
+            captures: vec![I::Old],
+        },
         ir::Step::Bind {
             slot: 0,
             domain: binding.domain.clone(),
@@ -2103,6 +2429,11 @@ fn temporal_samples(binding: &ir::Binding) -> Vec<ir::TemporalFormula> {
     use ir::TemporalFormula as T;
     let one = || Box::new(T::Atom { expression: I::Old });
     vec![
+        T::Call {
+            definition: 0,
+            arguments: vec![I::Old],
+            captures: vec![I::Old],
+        },
         T::Atom { expression: I::Old },
         T::Forall {
             bounds: vec![binding.clone()],
@@ -2145,6 +2476,7 @@ pub(crate) enum NodeMut<'a> {
     Branch(&'a mut ir::Branch),
     Step(&'a mut ir::Step),
     Definition(&'a mut ir::Definition),
+    Body(&'a mut ir::DefinitionBody),
     Temporal(&'a mut ir::TemporalFormula),
     Program(&'a mut ir::SafetyProgram),
     Call(&'a mut usize),
@@ -2159,6 +2491,7 @@ impl NodeMut<'_> {
             Self::Branch(value) => Node::Branch(value),
             Self::Step(value) => Node::Step(value),
             Self::Definition(value) => Node::Definition(value),
+            Self::Body(value) => Node::Body(value),
             Self::Temporal(value) => Node::Temporal(value),
             Self::Program(value) => Node::Program(value),
             Self::Call(value) => Node::Call(value),
@@ -2172,6 +2505,7 @@ impl NodeMut<'_> {
             Self::Branch(value) => NodeMut::Branch(value),
             Self::Step(value) => NodeMut::Step(value),
             Self::Definition(value) => NodeMut::Definition(value),
+            Self::Body(value) => NodeMut::Body(value),
             Self::Temporal(value) => NodeMut::Temporal(value),
             Self::Program(value) => NodeMut::Program(value),
             Self::Call(value) => NodeMut::Call(value),
@@ -2204,6 +2538,26 @@ pub(crate) fn analysis_children_mut(node: NodeMut<'_>) -> Vec<EdgeMut<'_>> {
         NodeMut::Domain(value) => ir_wrapper_edges!(Domain, value, NodeMut, edge_mut, iter_mut),
         NodeMut::Binding(value) => ir_wrapper_edges!(Binding, value, NodeMut, edge_mut, iter_mut),
         NodeMut::Branch(value) => ir_wrapper_edges!(Branch, value, NodeMut, edge_mut, iter_mut),
+        NodeMut::Body(body) => match body {
+            ir::DefinitionBody::Temporal(body) => vec![edge_mut(
+                NodeMut::Temporal(body),
+                "ir-body",
+                "temporal",
+                "",
+                "body",
+            )],
+            ir::DefinitionBody::Expression(body) => vec![edge_mut(
+                NodeMut::Expression(body),
+                "ir-body",
+                "expression",
+                "",
+                "body",
+            )],
+            ir::DefinitionBody::Action(branches) => branches
+                .iter_mut()
+                .map(|branch| edge_mut(NodeMut::Branch(branch), "ir-body", "action", "", "body[*]"))
+                .collect(),
+        },
         NodeMut::Definition(value) => {
             ir_wrapper_edges!(Definition, value, NodeMut, edge_mut, iter_mut)
         }

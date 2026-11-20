@@ -1,0 +1,177 @@
+{
+  "name": "operators-instance",
+  "compiled": {
+    "kind": "compiled",
+    "program": {
+      "format": "modelt.safety-program",
+      "version": 1,
+      "name": "Differential",
+      "variables": [
+        "x"
+      ],
+      "initial": [
+        {
+          "name": "A!Init",
+          "steps": [
+            {
+              "kind": "assign",
+              "slot": 0,
+              "value": {
+                "op": "sort-seq",
+                "slot": 0,
+                "sequence": {
+                  "op": "select-seq",
+                  "slot": 0,
+                  "sequence": {
+                    "op": "tuple",
+                    "values": [
+                      {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "3"
+                        }
+                      },
+                      {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      },
+                      {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "2"
+                        }
+                      },
+                      {
+                        "op": "literal",
+                        "value": {
+                          "type": "int",
+                          "value": "2"
+                        }
+                      }
+                    ]
+                  },
+                  "body": {
+                    "op": "gt",
+                    "left": {
+                      "op": "bound",
+                      "slot": 0
+                    },
+                    "right": {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "1"
+                      }
+                    }
+                  }
+                },
+                "body": {
+                  "op": "lt",
+                  "left": {
+                    "op": "bound",
+                    "slot": 0
+                  },
+                  "right": {
+                    "op": "bound",
+                    "slot": 1
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "next": [
+        {
+          "name": "A!Next",
+          "steps": [
+            {
+              "kind": "assign",
+              "slot": 0,
+              "value": {
+                "op": "read",
+                "slot": 0,
+                "next": false
+              }
+            }
+          ]
+        }
+      ],
+      "invariants": [
+        {
+          "name": "Safe",
+          "expression": {
+            "op": "assert",
+            "condition": {
+              "op": "eq",
+              "left": {
+                "op": "read",
+                "slot": 0,
+                "next": false
+              },
+              "right": {
+                "op": "tuple",
+                "values": [
+                  {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  },
+                  {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  },
+                  {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  }
+                ]
+              }
+            },
+            "message": {
+              "op": "data",
+              "value": {
+                "type": "string",
+                "value": "instance"
+              }
+            }
+          }
+        }
+      ],
+      "assumptions": [],
+      "checkDeadlock": false
+    }
+  },
+  "checked": {
+    "kind": "safety",
+    "result": {
+      "status": "complete",
+      "reason": null,
+      "states": 1,
+      "generated": 2,
+      "depth": 0,
+      "work": 31,
+      "violation": null
+    }
+  },
+  "reference": {
+    "status": "complete",
+    "states": 1,
+    "generated": 2,
+    "exit": 0
+  },
+  "witness": null
+}

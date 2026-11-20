@@ -1,0 +1,8 @@
+{
+  "name": "fair-intermittent-SF",
+  "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLES turn, done\nvars == <<turn,done>>\nInit == turn = 0 /\\ done = {}\nTick == turn' = 1-turn /\\ UNCHANGED done\nStep(p) == turn = 1 /\\ p \\notin done /\\ turn' = 0 /\\ done' = done \\cup {p}\nNext == Tick \\/ (\\E p \\in {1,2}: Step(p))\nFairTick == WF_vars(Tick)\nSpec == Init /\\ [][Next]_vars /\\ FairTick /\\ (\\A p \\in {1,2}: SF_vars(Step(p)))\nLive == <> (done = {1,2})\n====",
+  "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+  "modules": {},
+  "expected": "complete",
+  "tlc": "complete"
+}

@@ -1,10 +1,10 @@
 import { readFile } from "node:fs/promises";
 import { createServer, type Server } from "node:http";
 import { expect, test } from "@playwright/test";
-import { build } from "esbuild";
-import { names } from "../evals/quint-generated/cases.js";
-import { createMemoryCheckCacheStore } from "../src/check-cache.js";
-import { createCheckCacheHttpHandler } from "../src/check-cache-node.js";
+import { names } from "../evals/experiments/quint-generated/cases.js";
+import { createCheckCacheHttpHandler } from "../packages/idealis/src/check-cache-node.js";
+import { createMemoryCheckCacheStore } from "../packages/idealis/src/check-cache.js";
+import { bundleModule } from "../scripts/bundle-module.js";
 
 let server: Server;
 let origin: string;
@@ -12,23 +12,17 @@ const models = await Promise.all(
   names.map(async (name) => ({
     name,
     source: await readFile(
-      `evals/fixtures/quint-generated/generated/${name}.tla`,
+      `fixtures/quint-generated/generated/${name}.tla`,
       "utf8",
     ),
   })),
 );
 test.beforeAll(async () => {
-  const bundle = await build({
-    entryPoints: ["tests/check-cache-browser-entry.ts"],
-    bundle: true,
-    platform: "browser",
-    format: "iife",
+  const bundle = await bundleModule("tests/check-cache-browser-entry.ts", {
     globalName: "cacheSuite",
-    write: false,
-    metafile: true,
   });
   expect(
-    Object.keys(bundle.metafile?.inputs ?? {}).some(
+    bundle.inputs.some(
       (path) => path.includes("check-cache-node") || path.startsWith("node:"),
     ),
   ).toBe(false);
@@ -42,7 +36,7 @@ test.beforeAll(async () => {
       void handler(request, response);
     } else if (request.url === "/bundle.js") {
       response.setHeader("Content-Type", "text/javascript");
-      response.end(bundle.outputFiles[0]?.contents);
+      response.end(bundle.code);
     } else if (request.url === "/core.wasm") {
       response.setHeader("Content-Type", "application/wasm");
       response.end(wasm);

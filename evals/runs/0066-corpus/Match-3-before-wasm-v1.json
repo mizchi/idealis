@@ -1,0 +1,353 @@
+{
+  "input": "Match",
+  "route": "before-wasm-v1",
+  "iteration": 3,
+  "warmup": false,
+  "status": "complete",
+  "compileMs": 0.3547920000000886,
+  "checkMs": 0.08787499999993997,
+  "sourceMs": 0.26520800000002964,
+  "irBytes": 2696,
+  "definitions": null,
+  "result": {
+    "status": "complete",
+    "reason": null,
+    "states": 3,
+    "generated": 4,
+    "depth": 2,
+    "work": 25,
+    "violation": null
+  },
+  "program": {
+    "format": "modelt.safety-program",
+    "version": 1,
+    "name": "Match",
+    "variables": [
+      "phase"
+    ],
+    "initial": [
+      {
+        "name": "init",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "function",
+              "bounds": [
+                {
+                  "slot": 0,
+                  "domain": {
+                    "kind": "set",
+                    "values": [
+                      {
+                        "op": "data",
+                        "value": {
+                          "type": "string",
+                          "value": "Idle"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "body": {
+                "op": "record",
+                "fields": [
+                  [
+                    "tag",
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "string",
+                        "value": "UNIT"
+                      }
+                    }
+                  ]
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "next": [
+      {
+        "name": "step",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "if",
+              "condition": {
+                "op": "eq",
+                "left": {
+                  "op": "variant-tag",
+                  "argument": {
+                    "op": "read",
+                    "slot": 0,
+                    "next": false
+                  }
+                },
+                "right": {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "Idle"
+                  }
+                }
+              },
+              "consequent": {
+                "op": "function",
+                "bounds": [
+                  {
+                    "slot": 0,
+                    "domain": {
+                      "kind": "set",
+                      "values": [
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "string",
+                            "value": "Busy"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "body": {
+                  "op": "record",
+                  "fields": [
+                    [
+                      "tag",
+                      {
+                        "op": "data",
+                        "value": {
+                          "type": "string",
+                          "value": "UNIT"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              },
+              "alternative": {
+                "op": "if",
+                "condition": {
+                  "op": "eq",
+                  "left": {
+                    "op": "variant-tag",
+                    "argument": {
+                      "op": "read",
+                      "slot": 0,
+                      "next": false
+                    }
+                  },
+                  "right": {
+                    "op": "data",
+                    "value": {
+                      "type": "string",
+                      "value": "Busy"
+                    }
+                  }
+                },
+                "consequent": {
+                  "op": "function",
+                  "bounds": [
+                    {
+                      "slot": 0,
+                      "domain": {
+                        "kind": "set",
+                        "values": [
+                          {
+                            "op": "data",
+                            "value": {
+                              "type": "string",
+                              "value": "Done"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "body": {
+                    "op": "record",
+                    "fields": [
+                      [
+                        "tag",
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "string",
+                            "value": "UNIT"
+                          }
+                        }
+                      ]
+                    ]
+                  }
+                },
+                "alternative": {
+                  "op": "if",
+                  "condition": {
+                    "op": "eq",
+                    "left": {
+                      "op": "variant-tag",
+                      "argument": {
+                        "op": "read",
+                        "slot": 0,
+                        "next": false
+                      }
+                    },
+                    "right": {
+                      "op": "data",
+                      "value": {
+                        "type": "string",
+                        "value": "Done"
+                      }
+                    }
+                  },
+                  "consequent": {
+                    "op": "function",
+                    "bounds": [
+                      {
+                        "slot": 0,
+                        "domain": {
+                          "kind": "set",
+                          "values": [
+                            {
+                              "op": "data",
+                              "value": {
+                                "type": "string",
+                                "value": "Idle"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "body": {
+                      "op": "record",
+                      "fields": [
+                        [
+                          "tag",
+                          {
+                            "op": "data",
+                            "value": {
+                              "type": "string",
+                              "value": "UNIT"
+                            }
+                          }
+                        ]
+                      ]
+                    }
+                  },
+                  "alternative": {
+                    "op": "unmatched-case",
+                    "location": "line 36, column 9"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "invariants": [
+      {
+        "name": "safety",
+        "expression": {
+          "op": "if",
+          "condition": {
+            "op": "eq",
+            "left": {
+              "op": "variant-tag",
+              "argument": {
+                "op": "read",
+                "slot": 0,
+                "next": false
+              }
+            },
+            "right": {
+              "op": "data",
+              "value": {
+                "type": "string",
+                "value": "Idle"
+              }
+            }
+          },
+          "consequent": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "alternative": {
+            "op": "if",
+            "condition": {
+              "op": "eq",
+              "left": {
+                "op": "variant-tag",
+                "argument": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                }
+              },
+              "right": {
+                "op": "data",
+                "value": {
+                  "type": "string",
+                  "value": "Busy"
+                }
+              }
+            },
+            "consequent": {
+              "op": "literal",
+              "value": {
+                "type": "bool",
+                "value": true
+              }
+            },
+            "alternative": {
+              "op": "if",
+              "condition": {
+                "op": "eq",
+                "left": {
+                  "op": "variant-tag",
+                  "argument": {
+                    "op": "read",
+                    "slot": 0,
+                    "next": false
+                  }
+                },
+                "right": {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "Done"
+                  }
+                }
+              },
+              "consequent": {
+                "op": "literal",
+                "value": {
+                  "type": "bool",
+                  "value": true
+                }
+              },
+              "alternative": {
+                "op": "unmatched-case",
+                "location": "line 62, column 3"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "assumptions": [],
+    "checkDeadlock": true
+  }
+}

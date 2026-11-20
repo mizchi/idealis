@@ -1,0 +1,2915 @@
+[
+  {
+    "report": {
+      "input": {
+        "name": "por-2-safe",
+        "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLES visible,flag0,flag1\nInit == visible = 0 /\\ flag0 = FALSE /\\ flag1 = FALSE\nNext == (/\\ ~flag0 /\\ flag0' = TRUE /\\ UNCHANGED <<visible,flag1>>) \\/ (/\\ ~flag1 /\\ flag1' = TRUE /\\ UNCHANGED <<visible,flag0>>) \\/ (visible' = (IF visible < 3 THEN visible + 1 ELSE 0) /\\ UNCHANGED <<flag0,flag1>>)\nSafe == visible <= 3\n====",
+        "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+        "family": "graph"
+      },
+      "comparison": {
+        "states": false,
+        "generated": false,
+        "shortestTrace": false
+      },
+      "classification": "compared",
+      "ours": {
+        "result": {
+          "status": "complete",
+          "reason": null,
+          "states": 6,
+          "generated": 7,
+          "depth": 5,
+          "work": 38,
+          "violation": null
+        }
+      },
+      "native": {
+        "result": {
+          "status": "complete",
+          "reason": null,
+          "states": 6,
+          "generated": 7,
+          "depth": 5,
+          "work": 38,
+          "violation": null
+        }
+      },
+      "reference": {
+        "status": "complete",
+        "states": 16,
+        "generated": 33,
+        "exit": 0
+      },
+      "differences": []
+    },
+    "original": {
+      "status": "complete",
+      "reason": null,
+      "states": 16,
+      "generated": 33,
+      "depth": 5,
+      "work": 164,
+      "violation": null
+    },
+    "workers8": {
+      "kind": "safety",
+      "result": {
+        "status": "complete",
+        "reason": null,
+        "states": 6,
+        "generated": 7,
+        "depth": 5,
+        "work": 38,
+        "violation": null
+      }
+    }
+  },
+  {
+    "report": {
+      "input": {
+        "name": "por-2-fault",
+        "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLES visible,flag0,flag1\nInit == visible = 0 /\\ flag0 = FALSE /\\ flag1 = FALSE\nNext == (/\\ ~flag0 /\\ flag0' = TRUE /\\ UNCHANGED <<visible,flag1>>) \\/ (/\\ ~flag1 /\\ flag1' = TRUE /\\ UNCHANGED <<visible,flag0>>) \\/ (visible' = (IF visible < 3 THEN visible + 1 ELSE 0) /\\ UNCHANGED <<flag0,flag1>>)\nSafe == visible < 3\n====",
+        "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+        "family": "graph"
+      },
+      "comparison": {
+        "states": false,
+        "generated": false,
+        "shortestTrace": false
+      },
+      "classification": "compared",
+      "ours": {
+        "result": {
+          "status": "invariant-violation",
+          "reason": null,
+          "states": 6,
+          "generated": 6,
+          "depth": 5,
+          "work": 32,
+          "violation": {
+            "name": "Safe",
+            "trace": [
+              {
+                "action": null,
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "1"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "2"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "3"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "native": {
+        "result": {
+          "status": "invariant-violation",
+          "reason": null,
+          "states": 6,
+          "generated": 6,
+          "depth": 5,
+          "work": 32,
+          "violation": {
+            "name": "Safe",
+            "trace": [
+              {
+                "action": null,
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "1"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "2"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "3"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "reference": {
+        "status": "invariant-violation",
+        "states": 12,
+        "generated": 19,
+        "exit": 12
+      },
+      "witness": {
+        "input": {
+          "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLES visible,flag0,flag1\nInit == visible = 0 /\\ flag0 = FALSE /\\ flag1 = FALSE\nNext == (/\\ ~flag0 /\\ flag0' = TRUE /\\ UNCHANGED <<visible,flag1>>) \\/ (/\\ ~flag1 /\\ flag1' = TRUE /\\ UNCHANGED <<visible,flag0>>) \\/ (visible' = (IF visible < 3 THEN visible + 1 ELSE 0) /\\ UNCHANGED <<flag0,flag1>>)\nSafe == visible < 3\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (visible = 0 /\\ flag0 = FALSE /\\ flag1 = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (visible' = 0 /\\ flag0' = TRUE /\\ flag1' = FALSE)) \\/ (__position = 1 /\\ __position' = 2 /\\ (visible' = 0 /\\ flag0' = TRUE /\\ flag1' = TRUE)) \\/ (__position = 2 /\\ __position' = 3 /\\ (visible' = 1 /\\ flag0' = TRUE /\\ flag1' = TRUE)) \\/ (__position = 3 /\\ __position' = 4 /\\ (visible' = 2 /\\ flag0' = TRUE /\\ flag1' = TRUE)) \\/ (__position = 4 /\\ __position' = 5 /\\ (visible' = 3 /\\ flag0' = TRUE /\\ flag1' = TRUE)) \\/ (__position = 5 /\\ __position' = 5 /\\ (visible' = 3 /\\ flag0' = TRUE /\\ flag1' = TRUE))) /\\ (Next \\/ UNCHANGED <<visible,flag0,flag1>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<visible,flag0,flag1,__position>> /\\ WF_<<visible,flag0,flag1,__position>>(__TraceNext)\n__Expected == <>(~(Safe))\n====",
+          "expected": "complete",
+          "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+        },
+        "status": "complete",
+        "states": 6
+      },
+      "differences": []
+    },
+    "original": {
+      "status": "invariant-violation",
+      "reason": null,
+      "states": 12,
+      "generated": 19,
+      "depth": 3,
+      "work": 92,
+      "violation": {
+        "name": "Safe",
+        "trace": [
+          {
+            "action": null,
+            "values": [
+              {
+                "type": "int",
+                "value": "0"
+              },
+              {
+                "type": "bool",
+                "value": false
+              },
+              {
+                "type": "bool",
+                "value": false
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "1"
+              },
+              {
+                "type": "bool",
+                "value": false
+              },
+              {
+                "type": "bool",
+                "value": false
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "2"
+              },
+              {
+                "type": "bool",
+                "value": false
+              },
+              {
+                "type": "bool",
+                "value": false
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "3"
+              },
+              {
+                "type": "bool",
+                "value": false
+              },
+              {
+                "type": "bool",
+                "value": false
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "workers8": {
+      "kind": "safety",
+      "result": {
+        "status": "invariant-violation",
+        "reason": null,
+        "states": 6,
+        "generated": 6,
+        "depth": 5,
+        "work": 32,
+        "violation": {
+          "name": "Safe",
+          "trace": [
+            {
+              "action": null,
+              "values": [
+                {
+                  "type": "int",
+                  "value": "0"
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "0"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "0"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "1"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "2"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "3"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "report": {
+      "input": {
+        "name": "por-2-deadlock",
+        "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLES visible,flag0,flag1\nInit == visible = 0 /\\ flag0 = FALSE /\\ flag1 = FALSE\nNext == (/\\ ~flag0 /\\ flag0' = TRUE /\\ UNCHANGED <<visible,flag1>>) \\/ (/\\ ~flag1 /\\ flag1' = TRUE /\\ UNCHANGED <<visible,flag0>>) \\/ (visible < 3 /\\ visible' = (IF visible < 3 THEN visible + 1 ELSE 0) /\\ UNCHANGED <<flag0,flag1>>)\nSafe == visible <= 3\n====",
+        "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+        "family": "graph"
+      },
+      "comparison": {
+        "states": false,
+        "generated": false,
+        "shortestTrace": false
+      },
+      "classification": "compared",
+      "ours": {
+        "result": {
+          "status": "deadlock",
+          "reason": null,
+          "states": 6,
+          "generated": 6,
+          "depth": 5,
+          "work": 38,
+          "violation": {
+            "name": "deadlock",
+            "trace": [
+              {
+                "action": null,
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "1"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "2"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "3"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "native": {
+        "result": {
+          "status": "deadlock",
+          "reason": null,
+          "states": 6,
+          "generated": 6,
+          "depth": 5,
+          "work": 38,
+          "violation": {
+            "name": "deadlock",
+            "trace": [
+              {
+                "action": null,
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "1"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "2"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "3"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "reference": {
+        "status": "deadlock",
+        "states": 16,
+        "generated": 29,
+        "exit": 11
+      },
+      "witness": {
+        "input": {
+          "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLES visible,flag0,flag1\nInit == visible = 0 /\\ flag0 = FALSE /\\ flag1 = FALSE\nNext == (/\\ ~flag0 /\\ flag0' = TRUE /\\ UNCHANGED <<visible,flag1>>) \\/ (/\\ ~flag1 /\\ flag1' = TRUE /\\ UNCHANGED <<visible,flag0>>) \\/ (visible < 3 /\\ visible' = (IF visible < 3 THEN visible + 1 ELSE 0) /\\ UNCHANGED <<flag0,flag1>>)\nSafe == visible <= 3\n__HasNext == ENABLED Next\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (visible = 0 /\\ flag0 = FALSE /\\ flag1 = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (visible' = 0 /\\ flag0' = TRUE /\\ flag1' = FALSE)) \\/ (__position = 1 /\\ __position' = 2 /\\ (visible' = 0 /\\ flag0' = TRUE /\\ flag1' = TRUE)) \\/ (__position = 2 /\\ __position' = 3 /\\ (visible' = 1 /\\ flag0' = TRUE /\\ flag1' = TRUE)) \\/ (__position = 3 /\\ __position' = 4 /\\ (visible' = 2 /\\ flag0' = TRUE /\\ flag1' = TRUE)) \\/ (__position = 4 /\\ __position' = 5 /\\ (visible' = 3 /\\ flag0' = TRUE /\\ flag1' = TRUE)) \\/ (__position = 5 /\\ __position' = 5 /\\ (visible' = 3 /\\ flag0' = TRUE /\\ flag1' = TRUE))) /\\ (Next \\/ UNCHANGED <<visible,flag0,flag1>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<visible,flag0,flag1,__position>> /\\ WF_<<visible,flag0,flag1,__position>>(__TraceNext)\n__Expected == <>(~(__HasNext))\n====",
+          "expected": "complete",
+          "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+        },
+        "status": "complete",
+        "states": 6
+      },
+      "differences": []
+    },
+    "original": {
+      "status": "deadlock",
+      "reason": null,
+      "states": 16,
+      "generated": 29,
+      "depth": 5,
+      "work": 164,
+      "violation": {
+        "name": "deadlock",
+        "trace": [
+          {
+            "action": null,
+            "values": [
+              {
+                "type": "int",
+                "value": "0"
+              },
+              {
+                "type": "bool",
+                "value": false
+              },
+              {
+                "type": "bool",
+                "value": false
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "0"
+              },
+              {
+                "type": "bool",
+                "value": true
+              },
+              {
+                "type": "bool",
+                "value": false
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "0"
+              },
+              {
+                "type": "bool",
+                "value": true
+              },
+              {
+                "type": "bool",
+                "value": true
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "1"
+              },
+              {
+                "type": "bool",
+                "value": true
+              },
+              {
+                "type": "bool",
+                "value": true
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "2"
+              },
+              {
+                "type": "bool",
+                "value": true
+              },
+              {
+                "type": "bool",
+                "value": true
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "3"
+              },
+              {
+                "type": "bool",
+                "value": true
+              },
+              {
+                "type": "bool",
+                "value": true
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "workers8": {
+      "kind": "safety",
+      "result": {
+        "status": "deadlock",
+        "reason": null,
+        "states": 6,
+        "generated": 6,
+        "depth": 5,
+        "work": 38,
+        "violation": {
+          "name": "deadlock",
+          "trace": [
+            {
+              "action": null,
+              "values": [
+                {
+                  "type": "int",
+                  "value": "0"
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "0"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "0"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "1"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "2"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "3"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "report": {
+      "input": {
+        "name": "por-3-safe",
+        "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLES visible,flag0,flag1,flag2\nInit == visible = 0 /\\ flag0 = FALSE /\\ flag1 = FALSE /\\ flag2 = FALSE\nNext == (/\\ ~flag0 /\\ flag0' = TRUE /\\ UNCHANGED <<visible,flag1,flag2>>) \\/ (/\\ ~flag1 /\\ flag1' = TRUE /\\ UNCHANGED <<visible,flag0,flag2>>) \\/ (/\\ ~flag2 /\\ flag2' = TRUE /\\ UNCHANGED <<visible,flag0,flag1>>) \\/ (visible' = (IF visible < 3 THEN visible + 1 ELSE 0) /\\ UNCHANGED <<flag0,flag1,flag2>>)\nSafe == visible <= 3\n====",
+        "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+        "family": "graph"
+      },
+      "comparison": {
+        "states": false,
+        "generated": false,
+        "shortestTrace": false
+      },
+      "classification": "compared",
+      "ours": {
+        "result": {
+          "status": "complete",
+          "reason": null,
+          "states": 7,
+          "generated": 8,
+          "depth": 6,
+          "work": 55,
+          "violation": null
+        }
+      },
+      "native": {
+        "result": {
+          "status": "complete",
+          "reason": null,
+          "states": 7,
+          "generated": 8,
+          "depth": 6,
+          "work": 55,
+          "violation": null
+        }
+      },
+      "reference": {
+        "status": "complete",
+        "states": 32,
+        "generated": 81,
+        "exit": 0
+      },
+      "differences": []
+    },
+    "original": {
+      "status": "complete",
+      "reason": null,
+      "states": 32,
+      "generated": 81,
+      "depth": 6,
+      "work": 501,
+      "violation": null
+    },
+    "workers8": {
+      "kind": "safety",
+      "result": {
+        "status": "complete",
+        "reason": null,
+        "states": 7,
+        "generated": 8,
+        "depth": 6,
+        "work": 55,
+        "violation": null
+      }
+    }
+  },
+  {
+    "report": {
+      "input": {
+        "name": "por-3-fault",
+        "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLES visible,flag0,flag1,flag2\nInit == visible = 0 /\\ flag0 = FALSE /\\ flag1 = FALSE /\\ flag2 = FALSE\nNext == (/\\ ~flag0 /\\ flag0' = TRUE /\\ UNCHANGED <<visible,flag1,flag2>>) \\/ (/\\ ~flag1 /\\ flag1' = TRUE /\\ UNCHANGED <<visible,flag0,flag2>>) \\/ (/\\ ~flag2 /\\ flag2' = TRUE /\\ UNCHANGED <<visible,flag0,flag1>>) \\/ (visible' = (IF visible < 3 THEN visible + 1 ELSE 0) /\\ UNCHANGED <<flag0,flag1,flag2>>)\nSafe == visible < 3\n====",
+        "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+        "family": "graph"
+      },
+      "comparison": {
+        "states": false,
+        "generated": false,
+        "shortestTrace": false
+      },
+      "classification": "compared",
+      "ours": {
+        "result": {
+          "status": "invariant-violation",
+          "reason": null,
+          "states": 7,
+          "generated": 7,
+          "depth": 6,
+          "work": 47,
+          "violation": {
+            "name": "Safe",
+            "trace": [
+              {
+                "action": null,
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "1"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "2"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "3"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "native": {
+        "result": {
+          "status": "invariant-violation",
+          "reason": null,
+          "states": 7,
+          "generated": 7,
+          "depth": 6,
+          "work": 47,
+          "violation": {
+            "name": "Safe",
+            "trace": [
+              {
+                "action": null,
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "1"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "2"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "3"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "reference": {
+        "status": "invariant-violation",
+        "states": 20,
+        "generated": 37,
+        "exit": 12
+      },
+      "witness": {
+        "input": {
+          "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLES visible,flag0,flag1,flag2\nInit == visible = 0 /\\ flag0 = FALSE /\\ flag1 = FALSE /\\ flag2 = FALSE\nNext == (/\\ ~flag0 /\\ flag0' = TRUE /\\ UNCHANGED <<visible,flag1,flag2>>) \\/ (/\\ ~flag1 /\\ flag1' = TRUE /\\ UNCHANGED <<visible,flag0,flag2>>) \\/ (/\\ ~flag2 /\\ flag2' = TRUE /\\ UNCHANGED <<visible,flag0,flag1>>) \\/ (visible' = (IF visible < 3 THEN visible + 1 ELSE 0) /\\ UNCHANGED <<flag0,flag1,flag2>>)\nSafe == visible < 3\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (visible = 0 /\\ flag0 = FALSE /\\ flag1 = FALSE /\\ flag2 = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (visible' = 0 /\\ flag0' = TRUE /\\ flag1' = FALSE /\\ flag2' = FALSE)) \\/ (__position = 1 /\\ __position' = 2 /\\ (visible' = 0 /\\ flag0' = TRUE /\\ flag1' = TRUE /\\ flag2' = FALSE)) \\/ (__position = 2 /\\ __position' = 3 /\\ (visible' = 0 /\\ flag0' = TRUE /\\ flag1' = TRUE /\\ flag2' = TRUE)) \\/ (__position = 3 /\\ __position' = 4 /\\ (visible' = 1 /\\ flag0' = TRUE /\\ flag1' = TRUE /\\ flag2' = TRUE)) \\/ (__position = 4 /\\ __position' = 5 /\\ (visible' = 2 /\\ flag0' = TRUE /\\ flag1' = TRUE /\\ flag2' = TRUE)) \\/ (__position = 5 /\\ __position' = 6 /\\ (visible' = 3 /\\ flag0' = TRUE /\\ flag1' = TRUE /\\ flag2' = TRUE)) \\/ (__position = 6 /\\ __position' = 6 /\\ (visible' = 3 /\\ flag0' = TRUE /\\ flag1' = TRUE /\\ flag2' = TRUE))) /\\ (Next \\/ UNCHANGED <<visible,flag0,flag1,flag2>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<visible,flag0,flag1,flag2,__position>> /\\ WF_<<visible,flag0,flag1,flag2,__position>>(__TraceNext)\n__Expected == <>(~(Safe))\n====",
+          "expected": "complete",
+          "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+        },
+        "status": "complete",
+        "states": 7
+      },
+      "differences": []
+    },
+    "original": {
+      "status": "invariant-violation",
+      "reason": null,
+      "states": 20,
+      "generated": 37,
+      "depth": 3,
+      "work": 221,
+      "violation": {
+        "name": "Safe",
+        "trace": [
+          {
+            "action": null,
+            "values": [
+              {
+                "type": "int",
+                "value": "0"
+              },
+              {
+                "type": "bool",
+                "value": false
+              },
+              {
+                "type": "bool",
+                "value": false
+              },
+              {
+                "type": "bool",
+                "value": false
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "1"
+              },
+              {
+                "type": "bool",
+                "value": false
+              },
+              {
+                "type": "bool",
+                "value": false
+              },
+              {
+                "type": "bool",
+                "value": false
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "2"
+              },
+              {
+                "type": "bool",
+                "value": false
+              },
+              {
+                "type": "bool",
+                "value": false
+              },
+              {
+                "type": "bool",
+                "value": false
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "3"
+              },
+              {
+                "type": "bool",
+                "value": false
+              },
+              {
+                "type": "bool",
+                "value": false
+              },
+              {
+                "type": "bool",
+                "value": false
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "workers8": {
+      "kind": "safety",
+      "result": {
+        "status": "invariant-violation",
+        "reason": null,
+        "states": 7,
+        "generated": 7,
+        "depth": 6,
+        "work": 47,
+        "violation": {
+          "name": "Safe",
+          "trace": [
+            {
+              "action": null,
+              "values": [
+                {
+                  "type": "int",
+                  "value": "0"
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "0"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "0"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "0"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "1"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "2"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "3"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "report": {
+      "input": {
+        "name": "por-3-deadlock",
+        "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLES visible,flag0,flag1,flag2\nInit == visible = 0 /\\ flag0 = FALSE /\\ flag1 = FALSE /\\ flag2 = FALSE\nNext == (/\\ ~flag0 /\\ flag0' = TRUE /\\ UNCHANGED <<visible,flag1,flag2>>) \\/ (/\\ ~flag1 /\\ flag1' = TRUE /\\ UNCHANGED <<visible,flag0,flag2>>) \\/ (/\\ ~flag2 /\\ flag2' = TRUE /\\ UNCHANGED <<visible,flag0,flag1>>) \\/ (visible < 3 /\\ visible' = (IF visible < 3 THEN visible + 1 ELSE 0) /\\ UNCHANGED <<flag0,flag1,flag2>>)\nSafe == visible <= 3\n====",
+        "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+        "family": "graph"
+      },
+      "comparison": {
+        "states": false,
+        "generated": false,
+        "shortestTrace": false
+      },
+      "classification": "compared",
+      "ours": {
+        "result": {
+          "status": "deadlock",
+          "reason": null,
+          "states": 7,
+          "generated": 7,
+          "depth": 6,
+          "work": 54,
+          "violation": {
+            "name": "deadlock",
+            "trace": [
+              {
+                "action": null,
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "1"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "2"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "3"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "native": {
+        "result": {
+          "status": "deadlock",
+          "reason": null,
+          "states": 7,
+          "generated": 7,
+          "depth": 6,
+          "work": 54,
+          "violation": {
+            "name": "deadlock",
+            "trace": [
+              {
+                "action": null,
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "1"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "2"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "3"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "reference": {
+        "status": "deadlock",
+        "states": 32,
+        "generated": 73,
+        "exit": 11
+      },
+      "witness": {
+        "input": {
+          "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLES visible,flag0,flag1,flag2\nInit == visible = 0 /\\ flag0 = FALSE /\\ flag1 = FALSE /\\ flag2 = FALSE\nNext == (/\\ ~flag0 /\\ flag0' = TRUE /\\ UNCHANGED <<visible,flag1,flag2>>) \\/ (/\\ ~flag1 /\\ flag1' = TRUE /\\ UNCHANGED <<visible,flag0,flag2>>) \\/ (/\\ ~flag2 /\\ flag2' = TRUE /\\ UNCHANGED <<visible,flag0,flag1>>) \\/ (visible < 3 /\\ visible' = (IF visible < 3 THEN visible + 1 ELSE 0) /\\ UNCHANGED <<flag0,flag1,flag2>>)\nSafe == visible <= 3\n__HasNext == ENABLED Next\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (visible = 0 /\\ flag0 = FALSE /\\ flag1 = FALSE /\\ flag2 = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (visible' = 0 /\\ flag0' = TRUE /\\ flag1' = FALSE /\\ flag2' = FALSE)) \\/ (__position = 1 /\\ __position' = 2 /\\ (visible' = 0 /\\ flag0' = TRUE /\\ flag1' = TRUE /\\ flag2' = FALSE)) \\/ (__position = 2 /\\ __position' = 3 /\\ (visible' = 0 /\\ flag0' = TRUE /\\ flag1' = TRUE /\\ flag2' = TRUE)) \\/ (__position = 3 /\\ __position' = 4 /\\ (visible' = 1 /\\ flag0' = TRUE /\\ flag1' = TRUE /\\ flag2' = TRUE)) \\/ (__position = 4 /\\ __position' = 5 /\\ (visible' = 2 /\\ flag0' = TRUE /\\ flag1' = TRUE /\\ flag2' = TRUE)) \\/ (__position = 5 /\\ __position' = 6 /\\ (visible' = 3 /\\ flag0' = TRUE /\\ flag1' = TRUE /\\ flag2' = TRUE)) \\/ (__position = 6 /\\ __position' = 6 /\\ (visible' = 3 /\\ flag0' = TRUE /\\ flag1' = TRUE /\\ flag2' = TRUE))) /\\ (Next \\/ UNCHANGED <<visible,flag0,flag1,flag2>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<visible,flag0,flag1,flag2,__position>> /\\ WF_<<visible,flag0,flag1,flag2,__position>>(__TraceNext)\n__Expected == <>(~(__HasNext))\n====",
+          "expected": "complete",
+          "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+        },
+        "status": "complete",
+        "states": 7
+      },
+      "differences": []
+    },
+    "original": {
+      "status": "deadlock",
+      "reason": null,
+      "states": 32,
+      "generated": 73,
+      "depth": 6,
+      "work": 493,
+      "violation": {
+        "name": "deadlock",
+        "trace": [
+          {
+            "action": null,
+            "values": [
+              {
+                "type": "int",
+                "value": "0"
+              },
+              {
+                "type": "bool",
+                "value": false
+              },
+              {
+                "type": "bool",
+                "value": false
+              },
+              {
+                "type": "bool",
+                "value": false
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "0"
+              },
+              {
+                "type": "bool",
+                "value": true
+              },
+              {
+                "type": "bool",
+                "value": false
+              },
+              {
+                "type": "bool",
+                "value": false
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "0"
+              },
+              {
+                "type": "bool",
+                "value": true
+              },
+              {
+                "type": "bool",
+                "value": true
+              },
+              {
+                "type": "bool",
+                "value": false
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "0"
+              },
+              {
+                "type": "bool",
+                "value": true
+              },
+              {
+                "type": "bool",
+                "value": true
+              },
+              {
+                "type": "bool",
+                "value": true
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "1"
+              },
+              {
+                "type": "bool",
+                "value": true
+              },
+              {
+                "type": "bool",
+                "value": true
+              },
+              {
+                "type": "bool",
+                "value": true
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "2"
+              },
+              {
+                "type": "bool",
+                "value": true
+              },
+              {
+                "type": "bool",
+                "value": true
+              },
+              {
+                "type": "bool",
+                "value": true
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "3"
+              },
+              {
+                "type": "bool",
+                "value": true
+              },
+              {
+                "type": "bool",
+                "value": true
+              },
+              {
+                "type": "bool",
+                "value": true
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "workers8": {
+      "kind": "safety",
+      "result": {
+        "status": "deadlock",
+        "reason": null,
+        "states": 7,
+        "generated": 7,
+        "depth": 6,
+        "work": 54,
+        "violation": {
+          "name": "deadlock",
+          "trace": [
+            {
+              "action": null,
+              "values": [
+                {
+                  "type": "int",
+                  "value": "0"
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "0"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "0"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "0"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "1"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "2"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "3"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "report": {
+      "input": {
+        "name": "por-fallback-visible",
+        "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLES visible,flag0\nInit == visible = 0 /\\ flag0 = FALSE\nNext == (/\\ ~flag0 /\\ flag0' = TRUE /\\ UNCHANGED <<visible>>) \\/ (visible' = (IF visible < 3 THEN visible + 1 ELSE 0) /\\ UNCHANGED <<flag0>>)\nSafe == ~flag0\n====",
+        "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+        "family": "graph"
+      },
+      "comparison": {
+        "states": false,
+        "generated": false,
+        "shortestTrace": false
+      },
+      "classification": "compared",
+      "ours": {
+        "result": {
+          "status": "invariant-violation",
+          "reason": null,
+          "states": 2,
+          "generated": 2,
+          "depth": 1,
+          "work": 7,
+          "violation": {
+            "name": "Safe",
+            "trace": [
+              {
+                "action": null,
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "native": {
+        "result": {
+          "status": "invariant-violation",
+          "reason": null,
+          "states": 2,
+          "generated": 2,
+          "depth": 1,
+          "work": 7,
+          "violation": {
+            "name": "Safe",
+            "trace": [
+              {
+                "action": null,
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "reference": {
+        "status": "invariant-violation",
+        "states": 2,
+        "generated": 2,
+        "exit": 12
+      },
+      "witness": {
+        "input": {
+          "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLES visible,flag0\nInit == visible = 0 /\\ flag0 = FALSE\nNext == (/\\ ~flag0 /\\ flag0' = TRUE /\\ UNCHANGED <<visible>>) \\/ (visible' = (IF visible < 3 THEN visible + 1 ELSE 0) /\\ UNCHANGED <<flag0>>)\nSafe == ~flag0\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (visible = 0 /\\ flag0 = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (visible' = 0 /\\ flag0' = TRUE)) \\/ (__position = 1 /\\ __position' = 1 /\\ (visible' = 0 /\\ flag0' = TRUE))) /\\ (Next \\/ UNCHANGED <<visible,flag0>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<visible,flag0,__position>> /\\ WF_<<visible,flag0,__position>>(__TraceNext)\n__Expected == <>(~(Safe))\n====",
+          "expected": "complete",
+          "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+        },
+        "status": "complete",
+        "states": 2
+      },
+      "differences": []
+    },
+    "original": {
+      "status": "invariant-violation",
+      "reason": null,
+      "states": 2,
+      "generated": 2,
+      "depth": 1,
+      "work": 7,
+      "violation": {
+        "name": "Safe",
+        "trace": [
+          {
+            "action": null,
+            "values": [
+              {
+                "type": "int",
+                "value": "0"
+              },
+              {
+                "type": "bool",
+                "value": false
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "0"
+              },
+              {
+                "type": "bool",
+                "value": true
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "workers8": {
+      "kind": "safety",
+      "result": {
+        "status": "invariant-violation",
+        "reason": null,
+        "states": 2,
+        "generated": 2,
+        "depth": 1,
+        "work": 7,
+        "violation": {
+          "name": "Safe",
+          "trace": [
+            {
+              "action": null,
+              "values": [
+                {
+                  "type": "int",
+                  "value": "0"
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "0"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "report": {
+      "input": {
+        "name": "por-fallback-cycle",
+        "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLES visible,flag0\nInit == visible = 0 /\\ flag0 = FALSE\nNext == (/\\ ~flag0 /\\ flag0' = ~flag0 /\\ UNCHANGED <<visible>>) \\/ (visible' = (IF visible < 3 THEN visible + 1 ELSE 0) /\\ UNCHANGED <<flag0>>)\nSafe == visible <= 3\n====",
+        "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+        "family": "graph"
+      },
+      "comparison": {
+        "states": false,
+        "generated": false,
+        "shortestTrace": false
+      },
+      "classification": "compared",
+      "ours": {
+        "result": {
+          "status": "complete",
+          "reason": null,
+          "states": 8,
+          "generated": 13,
+          "depth": 4,
+          "work": 47,
+          "violation": null
+        }
+      },
+      "native": {
+        "result": {
+          "status": "complete",
+          "reason": null,
+          "states": 8,
+          "generated": 13,
+          "depth": 4,
+          "work": 47,
+          "violation": null
+        }
+      },
+      "reference": {
+        "status": "complete",
+        "states": 8,
+        "generated": 13,
+        "exit": 0
+      },
+      "differences": []
+    },
+    "original": {
+      "status": "complete",
+      "reason": null,
+      "states": 8,
+      "generated": 13,
+      "depth": 4,
+      "work": 47,
+      "violation": null
+    },
+    "workers8": {
+      "kind": "safety",
+      "result": {
+        "status": "complete",
+        "reason": null,
+        "states": 8,
+        "generated": 13,
+        "depth": 4,
+        "work": 47,
+        "violation": null
+      }
+    }
+  },
+  {
+    "report": {
+      "input": {
+        "name": "por-fallback-dependent",
+        "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLES visible,flag0\nInit == visible = 0 /\\ flag0 = FALSE\nNext == (/\\ ~flag0 /\\ flag0' = TRUE /\\ UNCHANGED <<visible>>) \\/ (~flag0 /\\ visible' = (IF visible < 3 THEN visible + 1 ELSE 0) /\\ UNCHANGED <<flag0>>)\nSafe == visible <= 3\n====",
+        "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+        "family": "graph"
+      },
+      "comparison": {
+        "states": false,
+        "generated": false,
+        "shortestTrace": false
+      },
+      "classification": "compared",
+      "ours": {
+        "result": {
+          "status": "deadlock",
+          "reason": null,
+          "states": 3,
+          "generated": 3,
+          "depth": 1,
+          "work": 13,
+          "violation": {
+            "name": "deadlock",
+            "trace": [
+              {
+                "action": null,
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "native": {
+        "result": {
+          "status": "deadlock",
+          "reason": null,
+          "states": 3,
+          "generated": 3,
+          "depth": 1,
+          "work": 13,
+          "violation": {
+            "name": "deadlock",
+            "trace": [
+              {
+                "action": null,
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": false
+                  }
+                ]
+              },
+              {
+                "action": "Next",
+                "values": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "reference": {
+        "status": "deadlock",
+        "states": 3,
+        "generated": 3,
+        "exit": 11
+      },
+      "witness": {
+        "input": {
+          "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLES visible,flag0\nInit == visible = 0 /\\ flag0 = FALSE\nNext == (/\\ ~flag0 /\\ flag0' = TRUE /\\ UNCHANGED <<visible>>) \\/ (~flag0 /\\ visible' = (IF visible < 3 THEN visible + 1 ELSE 0) /\\ UNCHANGED <<flag0>>)\nSafe == visible <= 3\n__HasNext == ENABLED Next\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (visible = 0 /\\ flag0 = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (visible' = 0 /\\ flag0' = TRUE)) \\/ (__position = 1 /\\ __position' = 1 /\\ (visible' = 0 /\\ flag0' = TRUE))) /\\ (Next \\/ UNCHANGED <<visible,flag0>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<visible,flag0,__position>> /\\ WF_<<visible,flag0,__position>>(__TraceNext)\n__Expected == <>(~(__HasNext))\n====",
+          "expected": "complete",
+          "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+        },
+        "status": "complete",
+        "states": 2
+      },
+      "differences": []
+    },
+    "original": {
+      "status": "deadlock",
+      "reason": null,
+      "states": 3,
+      "generated": 3,
+      "depth": 1,
+      "work": 13,
+      "violation": {
+        "name": "deadlock",
+        "trace": [
+          {
+            "action": null,
+            "values": [
+              {
+                "type": "int",
+                "value": "0"
+              },
+              {
+                "type": "bool",
+                "value": false
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "int",
+                "value": "0"
+              },
+              {
+                "type": "bool",
+                "value": true
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "workers8": {
+      "kind": "safety",
+      "result": {
+        "status": "deadlock",
+        "reason": null,
+        "states": 3,
+        "generated": 3,
+        "depth": 1,
+        "work": 13,
+        "violation": {
+          "name": "deadlock",
+          "trace": [
+            {
+              "action": null,
+              "values": [
+                {
+                  "type": "int",
+                  "value": "0"
+                },
+                {
+                  "type": "bool",
+                  "value": false
+                }
+              ]
+            },
+            {
+              "action": "Next",
+              "values": [
+                {
+                  "type": "int",
+                  "value": "0"
+                },
+                {
+                  "type": "bool",
+                  "value": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "report": {
+      "input": {
+        "name": "por-fallback-reset",
+        "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLES visible,flag0\nInit == visible = 0 /\\ flag0 = FALSE\nNext == (/\\ ~flag0 /\\ flag0' = TRUE /\\ UNCHANGED <<visible>>) \\/ (visible' = (IF visible < 3 THEN visible + 1 ELSE IF flag0 THEN 0 ELSE 0) /\\ UNCHANGED <<flag0>>)\nSafe == visible <= 3\n====",
+        "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+        "family": "graph"
+      },
+      "comparison": {
+        "states": false,
+        "generated": false,
+        "shortestTrace": false
+      },
+      "classification": "compared",
+      "ours": {
+        "result": {
+          "status": "complete",
+          "reason": null,
+          "states": 8,
+          "generated": 13,
+          "depth": 4,
+          "work": 47,
+          "violation": null
+        }
+      },
+      "native": {
+        "result": {
+          "status": "complete",
+          "reason": null,
+          "states": 8,
+          "generated": 13,
+          "depth": 4,
+          "work": 47,
+          "violation": null
+        }
+      },
+      "reference": {
+        "status": "complete",
+        "states": 8,
+        "generated": 13,
+        "exit": 0
+      },
+      "differences": []
+    },
+    "original": {
+      "status": "complete",
+      "reason": null,
+      "states": 8,
+      "generated": 13,
+      "depth": 4,
+      "work": 47,
+      "violation": null
+    },
+    "workers8": {
+      "kind": "safety",
+      "result": {
+        "status": "complete",
+        "reason": null,
+        "states": 8,
+        "generated": 13,
+        "depth": 4,
+        "work": 47,
+        "violation": null
+      }
+    }
+  }
+]

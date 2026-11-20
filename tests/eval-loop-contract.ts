@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { compareTrials } from "../evals/benchmark.js";
-import { parsePlan } from "../evals/protocol.js";
-import { readPlan, runEvaluation } from "../evals/runner.js";
+import { compareTrials } from "../evals/experiments/benchmark.js";
+import { parsePlan } from "../evals/experiments/protocol.js";
+import { readPlan, runEvaluation } from "../evals/experiments/runner.js";
 
 export const registerEvalLoopContract = (
   test: (name: string, run: () => void | Promise<void>) => unknown,

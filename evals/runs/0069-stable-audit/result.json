@@ -1,0 +1,5100 @@
+{
+  "status": "partial-reference",
+  "collection": "complete",
+  "referenceFailures": [
+    {
+      "name": "Blank File Parse Error",
+      "family": "modules.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "infrastructure",
+      "tlaTs": "rejected",
+      "packet": "cases/150"
+    }
+  ],
+  "compatibility": "partial",
+  "cases": 368,
+  "nativeWasmComparisons": 368,
+  "matrix": {
+    "accepted/accepted": 173,
+    "syntax/syntax": 116,
+    "accepted/unsupported": 40,
+    "accepted/syntax": 23,
+    "syntax/accepted": 13,
+    "syntax/unsupported": 2,
+    "infrastructure/syntax": 1
+  },
+  "mismatches": [
+    {
+      "name": "Basic Assume/Prove",
+      "family": "assume-prove.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/13"
+    },
+    {
+      "name": "Nested Assume/Prove With Label",
+      "family": "assume-prove.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/14"
+    },
+    {
+      "name": "Assume/Prove With New Constant",
+      "family": "assume-prove.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/15"
+    },
+    {
+      "name": "Assume/Prove With New Operator",
+      "family": "assume-prove.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/16"
+    },
+    {
+      "name": "Assume/Prove in Suffices Step",
+      "family": "assume-prove.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/17"
+    },
+    {
+      "name": "Assume/Prove with Mixed Assumptions",
+      "family": "assume-prove.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/18"
+    },
+    {
+      "name": "Conjunct Inside Ambiguous Case (GH tlaplus/tlaplus #487)",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/29"
+    },
+    {
+      "name": "CASE Separator Aligned with Conjunction Bullet\nThe F -> G arm belongs to the outer CASE A. D -> E stays in CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/30"
+    },
+    {
+      "name": "Outer OTHER After CASE in Conjunction List\nThe OTHER -> G arm belongs to the outer CASE A. D -> E stays in CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/32"
+    },
+    {
+      "name": "Outer CASE Arm After CASE in Conjunction List\nThe F -> G arm belongs to the outer CASE A. D -> E stays in CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/33"
+    },
+    {
+      "name": "CASE Arms Across Nested Conjunction and Disjunction Lists\nE -> F belongs to CASE C, G -> H to CASE B, and I -> K to CASE A.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/34"
+    },
+    {
+      "name": "CASE Separator Aligned with Disjunction Bullet\nThe F -> G arm belongs to the outer CASE A. D -> E stays in CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/37"
+    },
+    {
+      "name": "Outer OTHER After CASE in Disjunction List\nThe OTHER -> G arm belongs to the outer CASE A. D -> E stays in CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/39"
+    },
+    {
+      "name": "Outer CASE Arm After CASE in Disjunction List\nThe F -> G arm belongs to the outer CASE A. D -> E stays in CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/40"
+    },
+    {
+      "name": "CASE Arms Across Nested Disjunction and Conjunction Lists\nE -> F belongs to CASE C, G -> H to CASE B, and I -> K to CASE A.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/41"
+    },
+    {
+      "name": "Keyword-Unit-Terminated Conjlist",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/63"
+    },
+    {
+      "name": "Keyword-Unit-Terminated Disjlist",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/85"
+    },
+    {
+      "name": "Infix Operator Definition",
+      "family": "infix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/115"
+    },
+    {
+      "name": "Infix Operator Declaration as Parameter",
+      "family": "infix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/117"
+    },
+    {
+      "name": "Infix Operator Application",
+      "family": "infix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/118"
+    },
+    {
+      "name": "Infix Operators as Parameters",
+      "family": "infix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/121"
+    },
+    {
+      "name": "Nonfix Infix Operators",
+      "family": "infix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/122"
+    },
+    {
+      "name": "Jlists Containing Colon-Prefixed Infix Operators (GH87)",
+      "family": "jlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/127"
+    },
+    {
+      "name": "Label With Parameters",
+      "family": "labels.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/130"
+    },
+    {
+      "name": "Label with Subexpression Prefix (GH tlaplus/tlaplus #885)",
+      "family": "labels.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "rejected",
+      "packet": "cases/133"
+    },
+    {
+      "name": "RECURSIVE inside LET/IN",
+      "family": "let_in.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/134"
+    },
+    {
+      "name": "Conjlist with RECURSIVE in LET/IN",
+      "family": "let_in.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/136"
+    },
+    {
+      "name": "Conjlist with INSTANCE in LET/IN",
+      "family": "let_in.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/137"
+    },
+    {
+      "name": "Disjlist with RECURSIVE in LET/IN",
+      "family": "let_in.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/140"
+    },
+    {
+      "name": "Disjlist with INSTANCE in LET/IN",
+      "family": "let_in.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/141"
+    },
+    {
+      "name": "Nested Modules",
+      "family": "modules.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/146"
+    },
+    {
+      "name": "Sequential Nested modules",
+      "family": "modules.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/147"
+    },
+    {
+      "name": "Definition After Nested Module",
+      "family": "modules.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/148"
+    },
+    {
+      "name": "Bitfield Number Formats",
+      "family": "number.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/154"
+    },
+    {
+      "name": "Archaic SetExcept Syntax",
+      "family": "old_syntax.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "rejected",
+      "packet": "cases/157"
+    },
+    {
+      "name": "LAMBDA Parameter",
+      "family": "operators.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/162"
+    },
+    {
+      "name": "Operators with Colon Prefixes & Jlists (GH TSTLA #87)",
+      "family": "operators.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/166"
+    },
+    {
+      "name": "Obvious Proof",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/181"
+    },
+    {
+      "name": "Named Obvious Proof",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/182"
+    },
+    {
+      "name": "Omitted Proof",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/183"
+    },
+    {
+      "name": "Proof by Definition",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/184"
+    },
+    {
+      "name": "Proof by Multiple Definitions",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/185"
+    },
+    {
+      "name": "Proof by Module References",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/186"
+    },
+    {
+      "name": "Proof by QED",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/187"
+    },
+    {
+      "name": "Proof by QED with implicit step level",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/188"
+    },
+    {
+      "name": "Proof with Variety of Step Types",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "rejected",
+      "packet": "cases/190"
+    },
+    {
+      "name": "Proof with INSTANCE step type",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/191"
+    },
+    {
+      "name": "Stepped Proof by Definition",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/192"
+    },
+    {
+      "name": "Proof with Star Steps",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/193"
+    },
+    {
+      "name": "Proof with Plus Step",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/194"
+    },
+    {
+      "name": "Nested Proof",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/195"
+    },
+    {
+      "name": "Nested Proof Off QED",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/196"
+    },
+    {
+      "name": "Proof with Nested Terminal Proof",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/197"
+    },
+    {
+      "name": "Implicit Nested Proof Levels",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/198"
+    },
+    {
+      "name": "Implicit Proof Steps With Names",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "rejected",
+      "packet": "cases/199"
+    },
+    {
+      "name": "Plus Proof Step With Name",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "rejected",
+      "packet": "cases/200"
+    },
+    {
+      "name": "Proof Containing Jlist",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/201"
+    },
+    {
+      "name": "Proof Level Change Terminates Jlist",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/202"
+    },
+    {
+      "name": "Invalid Use of LOCAL in Proof",
+      "family": "proofs.txt",
+      "corpusExpected": "syntax",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "rejected",
+      "packet": "cases/203"
+    },
+    {
+      "name": "Basic Recursive Declaration",
+      "family": "recursive.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/222"
+    },
+    {
+      "name": "Recursive Declaration With Reference",
+      "family": "recursive.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/223"
+    },
+    {
+      "name": "Recursive Declaration Without Parameters",
+      "family": "recursive.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/224"
+    },
+    {
+      "name": "Multiple Recursive Declarations",
+      "family": "recursive.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/225"
+    },
+    {
+      "name": "Mixed Recursive Declarations",
+      "family": "recursive.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/226"
+    },
+    {
+      "name": "Step Expression With Parameterized Subscript",
+      "family": "step_expressions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/241"
+    },
+    {
+      "name": "String with Backtick",
+      "family": "string.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/252"
+    },
+    {
+      "name": "Subexpression Tree Navigation",
+      "family": "subexpressions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/254"
+    },
+    {
+      "name": "Proof Step ID Subexpression Tree Navigation",
+      "family": "subexpressions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/255"
+    },
+    {
+      "name": "Jlist Inside Function Evaluation",
+      "family": "unicode/functions-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/325"
+    },
+    {
+      "name": "Unicode Junct Tokens as Higher-Level Parameters (GH TSTLA #96)",
+      "family": "unicode/operators-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/338"
+    },
+    {
+      "name": "Unicode String",
+      "family": "unicode/string-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/349"
+    },
+    {
+      "name": "INSTANCE With Operator Substitutions",
+      "family": "unit.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/356"
+    },
+    {
+      "name": "Simple Use or Hide",
+      "family": "use_or_hide.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/364"
+    },
+    {
+      "name": "Hide Multiple Definitions",
+      "family": "use_or_hide.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/365"
+    },
+    {
+      "name": "Complicated Use & Hide",
+      "family": "use_or_hide.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/366"
+    },
+    {
+      "name": "Use & Hide Modules",
+      "family": "use_or_hide.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/367"
+    }
+  ],
+  "upstreamReferenceDifferences": [
+    {
+      "name": "domain-add",
+      "family": "prefix-focus",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/2"
+    },
+    {
+      "name": "subset-product",
+      "family": "prefix-focus",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/3"
+    },
+    {
+      "name": "union-product",
+      "family": "prefix-focus",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/4"
+    },
+    {
+      "name": "domain-product",
+      "family": "prefix-focus",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/5"
+    },
+    {
+      "name": "subset-union-conflict",
+      "family": "prefix-focus",
+      "corpusExpected": "syntax",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/6"
+    },
+    {
+      "name": "union-union-conflict",
+      "family": "prefix-focus",
+      "corpusExpected": "syntax",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/7"
+    },
+    {
+      "name": "domain-range-conflict",
+      "family": "prefix-focus",
+      "corpusExpected": "syntax",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/8"
+    },
+    {
+      "name": "Conjunct Inside Ambiguous Case (GH tlaplus/tlaplus #487)",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/29"
+    },
+    {
+      "name": "CASE Separator Aligned with Conjunction Bullet\nThe F -> G arm belongs to the outer CASE A. D -> E stays in CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/30"
+    },
+    {
+      "name": "Outer OTHER After CASE in Conjunction List\nThe OTHER -> G arm belongs to the outer CASE A. D -> E stays in CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/32"
+    },
+    {
+      "name": "Outer CASE Arm After CASE in Conjunction List\nThe F -> G arm belongs to the outer CASE A. D -> E stays in CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/33"
+    },
+    {
+      "name": "CASE Arms Across Nested Conjunction and Disjunction Lists\nE -> F belongs to CASE C, G -> H to CASE B, and I -> K to CASE A.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/34"
+    },
+    {
+      "name": "CASE Separator Aligned with Disjunction Bullet\nThe F -> G arm belongs to the outer CASE A. D -> E stays in CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/37"
+    },
+    {
+      "name": "Outer OTHER After CASE in Disjunction List\nThe OTHER -> G arm belongs to the outer CASE A. D -> E stays in CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/39"
+    },
+    {
+      "name": "Outer CASE Arm After CASE in Disjunction List\nThe F -> G arm belongs to the outer CASE A. D -> E stays in CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/40"
+    },
+    {
+      "name": "CASE Arms Across Nested Disjunction and Conjunction Lists\nE -> F belongs to CASE C, G -> H to CASE B, and I -> K to CASE A.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/41"
+    },
+    {
+      "name": "Cartesian Product as Parameter",
+      "family": "infix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/119"
+    },
+    {
+      "name": "Label with Subexpression Prefix (GH tlaplus/tlaplus #885)",
+      "family": "labels.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "rejected",
+      "packet": "cases/133"
+    },
+    {
+      "name": "Invalid Use of LOCAL in LET/IN",
+      "family": "let_in.txt",
+      "corpusExpected": "syntax",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/143"
+    },
+    {
+      "name": "Named Theorem After Submodule (GH tlaplus/tlaplus #430)",
+      "family": "modules.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/149"
+    },
+    {
+      "name": "Blank File Parse Error",
+      "family": "modules.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "infrastructure",
+      "tlaTs": "rejected",
+      "packet": "cases/150"
+    },
+    {
+      "name": "Archaic SetExcept Syntax",
+      "family": "old_syntax.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "rejected",
+      "packet": "cases/157"
+    },
+    {
+      "name": "Nonfix Minus (GH tlaplus/tlaplus #GH884)",
+      "family": "operators.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/163"
+    },
+    {
+      "name": "Nonfix Submodule Excl (GH tlaplus/tlaplus #GH884)",
+      "family": "operators.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/164"
+    },
+    {
+      "name": "Nonfix Double Exclamation Operator (GH TSTLA #GH97, GH tlaplus/tlaplus #884)",
+      "family": "operators.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/165"
+    },
+    {
+      "name": "Negative Prefix Op on RHS of Infix (GH tlaplus/tlaplus #893)",
+      "family": "operators.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/168"
+    },
+    {
+      "name": "Invalid Use of LOCAL in Proof",
+      "family": "proofs.txt",
+      "corpusExpected": "syntax",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "rejected",
+      "packet": "cases/203"
+    },
+    {
+      "name": "Empty Tuple Quantification (GH tlaplus/tlaplus #888)",
+      "family": "quantification.txt",
+      "corpusExpected": "syntax",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/208"
+    },
+    {
+      "name": "Step Expression Requiring Lookahead",
+      "family": "step_expressions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/244"
+    },
+    {
+      "name": "String with comment start",
+      "family": "string.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/248"
+    },
+    {
+      "name": "String with Backtick",
+      "family": "string.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/252"
+    },
+    {
+      "name": "Basic Unicode CASE",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/260"
+    },
+    {
+      "name": "Conjlist with CASE",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/261"
+    },
+    {
+      "name": "Conjlist inside CASE",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/262"
+    },
+    {
+      "name": "Disjlist with CASE",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/263"
+    },
+    {
+      "name": "Disjlist inside CASE",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/264"
+    },
+    {
+      "name": "Unicode Conjunct Inside Ambiguous Case (GH tlaplus/tlaplus #487)",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/265"
+    },
+    {
+      "name": "Unicode CASE Separator Aligned with Conjunction Bullet\nThe F → G arm belongs to the outer CASE A. D → E stays in CASE B.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/266"
+    },
+    {
+      "name": "Unicode CASE Separator One Column Right of Conjunction Bullet\nThe D → E and F → G arms both belong to the inner CASE B.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/267"
+    },
+    {
+      "name": "Unicode Outer OTHER After CASE in Conjunction List\nThe OTHER → G arm belongs to the outer CASE A. D → E stays in CASE B.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/268"
+    },
+    {
+      "name": "Unicode Outer CASE Arm After CASE in Conjunction List\nThe F → G arm belongs to the outer CASE A. D → E stays in CASE B.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/269"
+    },
+    {
+      "name": "Unicode CASE Arms Across Nested Conjunction and Disjunction Lists\nE → F belongs to CASE C, G → H to CASE B, and I → K to CASE A.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/270"
+    },
+    {
+      "name": "Unicode CASE Separator Aligned with Disjunction Bullet\nThe F → G arm belongs to the outer CASE A. D → E stays in CASE B.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/273"
+    },
+    {
+      "name": "Unicode CASE Separator One Column Right of Disjunction Bullet\nThe D → E and F → G arms both belong to the inner CASE B.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/274"
+    },
+    {
+      "name": "Unicode Outer OTHER After CASE in Disjunction List\nThe OTHER → G arm belongs to the outer CASE A. D → E stays in CASE B.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/275"
+    },
+    {
+      "name": "Unicode Outer CASE Arm After CASE in Disjunction List\nThe F → G arm belongs to the outer CASE A. D → E stays in CASE B.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/276"
+    },
+    {
+      "name": "Unicode CASE Arms Across Nested Disjunction and Conjunction Lists\nE → F belongs to CASE C, G → H to CASE B, and I → K to CASE A.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/277"
+    },
+    {
+      "name": "Basic Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/280"
+    },
+    {
+      "name": "Inline Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/281"
+    },
+    {
+      "name": "Start-of-Line Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/282"
+    },
+    {
+      "name": "Left-Shifted Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/283"
+    },
+    {
+      "name": "Right-Shifted Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/284"
+    },
+    {
+      "name": "Separated Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/285"
+    },
+    {
+      "name": "Multiline Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/286"
+    },
+    {
+      "name": "Nested Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/287"
+    },
+    {
+      "name": "Start-of-Line Nested Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/288"
+    },
+    {
+      "name": "Infix Op Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/289"
+    },
+    {
+      "name": "Division Infix Op Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/290"
+    },
+    {
+      "name": "Infix Op Terminated Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/291"
+    },
+    {
+      "name": "Division Infix Op Terminated Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/292"
+    },
+    {
+      "name": "Not a Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/293"
+    },
+    {
+      "name": "Unicode Conjlist with Parentheses",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/294"
+    },
+    {
+      "name": "Unicode Conjlist Terminated by Parentheses",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/295"
+    },
+    {
+      "name": "Nested Unicode Conjlist Terminated by Parentheses",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/296"
+    },
+    {
+      "name": "Double-Nested Unicode Conjlist Terminated by Parentheses",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/297"
+    },
+    {
+      "name": "Module-End-Terminated Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/298"
+    },
+    {
+      "name": "Keyword-Unit-Terminated Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/299"
+    },
+    {
+      "name": "Unicode Conjlist with Empty Tuple",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/300"
+    },
+    {
+      "name": "Unicode Conjlist with Empty Set",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/301"
+    },
+    {
+      "name": "Basic Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/302"
+    },
+    {
+      "name": "Inline Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/303"
+    },
+    {
+      "name": "Start-of-Line Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/304"
+    },
+    {
+      "name": "Left-Shifted Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/305"
+    },
+    {
+      "name": "Right-Shifted Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/306"
+    },
+    {
+      "name": "Separated Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/307"
+    },
+    {
+      "name": "Multiline Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/308"
+    },
+    {
+      "name": "Nested Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/309"
+    },
+    {
+      "name": "Start-of-Line Nested Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/310"
+    },
+    {
+      "name": "Infix Op Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/311"
+    },
+    {
+      "name": "Division Infix Op Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/312"
+    },
+    {
+      "name": "Infix Op Terminated Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/313"
+    },
+    {
+      "name": "Division Infix Op Terminated Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/314"
+    },
+    {
+      "name": "Not a Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/315"
+    },
+    {
+      "name": "Unicode Disjlist with Parentheses",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/316"
+    },
+    {
+      "name": "Unicode Disjlist Terminated by Parentheses",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/317"
+    },
+    {
+      "name": "Nested Unicode Disjlist Terminated by Parentheses",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/318"
+    },
+    {
+      "name": "Double-Nested Unicode Disjlist Terminated by Parentheses",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/319"
+    },
+    {
+      "name": "Module-End-Terminated Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/320"
+    },
+    {
+      "name": "Keyword-Unit-Terminated Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/321"
+    },
+    {
+      "name": "Unicode Disjlist with Empty Tuple",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/322"
+    },
+    {
+      "name": "Unicode Disjlist with Empty Set",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/323"
+    },
+    {
+      "name": "Function Definition",
+      "family": "unicode/functions-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/324"
+    },
+    {
+      "name": "Jlist Inside Function Evaluation",
+      "family": "unicode/functions-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/325"
+    },
+    {
+      "name": "Function Literal",
+      "family": "unicode/functions-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/326"
+    },
+    {
+      "name": "Function Literal with Multiple Parameters and Jlist",
+      "family": "unicode/functions-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/327"
+    },
+    {
+      "name": "Jlist Inside Unicode Function Evaluation",
+      "family": "unicode/functions-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/328"
+    },
+    {
+      "name": "Jlist Inside Unicode Function Set",
+      "family": "unicode/functions-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/329"
+    },
+    {
+      "name": "Basic Label",
+      "family": "unicode/labels-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/330"
+    },
+    {
+      "name": "Label With Parameters",
+      "family": "unicode/labels-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/331"
+    },
+    {
+      "name": "Unicode Number Sets",
+      "family": "unicode/numbers-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/332"
+    },
+    {
+      "name": "Unicode Operator Definitions",
+      "family": "unicode/operators-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/333"
+    },
+    {
+      "name": "Unicode Operator Declarations as Parameters",
+      "family": "unicode/operators-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/334"
+    },
+    {
+      "name": "Unicode Operator Application",
+      "family": "unicode/operators-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/335"
+    },
+    {
+      "name": "Unicode Operator References",
+      "family": "unicode/operators-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/336"
+    },
+    {
+      "name": "Nonfix Unicode Operators",
+      "family": "unicode/operators-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/337"
+    },
+    {
+      "name": "Unicode Junct Tokens as Higher-Level Parameters (GH TSTLA #96)",
+      "family": "unicode/operators-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/338"
+    },
+    {
+      "name": "Bounded Quantification",
+      "family": "unicode/quantification-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/339"
+    },
+    {
+      "name": "Unbounded Quantification",
+      "family": "unicode/quantification-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/340"
+    },
+    {
+      "name": "Bounded CHOOSE",
+      "family": "unicode/quantification-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/341"
+    },
+    {
+      "name": "Unbounded CHOOSE",
+      "family": "unicode/quantification-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/342"
+    },
+    {
+      "name": "Set Map",
+      "family": "unicode/sets-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/343"
+    },
+    {
+      "name": "Set Map with Multiple Generators",
+      "family": "unicode/sets-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/344"
+    },
+    {
+      "name": "Set Filter",
+      "family": "unicode/sets-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/345"
+    },
+    {
+      "name": "Set Filter with Tuple",
+      "family": "unicode/sets-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/346"
+    },
+    {
+      "name": "Set Filter Precedence",
+      "family": "unicode/sets-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/347"
+    },
+    {
+      "name": "Set Filter with Jlist",
+      "family": "unicode/sets-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/348"
+    },
+    {
+      "name": "Unicode String",
+      "family": "unicode/string-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/349"
+    },
+    {
+      "name": "Tuple Literal",
+      "family": "unicode/tuples-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/350"
+    },
+    {
+      "name": "Tuple Literal with Jlist",
+      "family": "unicode/tuples-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/351"
+    }
+  ],
+  "records": [
+    {
+      "name": "subset-range",
+      "family": "prefix-focus",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/0"
+    },
+    {
+      "name": "union-range",
+      "family": "prefix-focus",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/1"
+    },
+    {
+      "name": "domain-add",
+      "family": "prefix-focus",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/2"
+    },
+    {
+      "name": "subset-product",
+      "family": "prefix-focus",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/3"
+    },
+    {
+      "name": "union-product",
+      "family": "prefix-focus",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/4"
+    },
+    {
+      "name": "domain-product",
+      "family": "prefix-focus",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/5"
+    },
+    {
+      "name": "subset-union-conflict",
+      "family": "prefix-focus",
+      "corpusExpected": "syntax",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/6"
+    },
+    {
+      "name": "union-union-conflict",
+      "family": "prefix-focus",
+      "corpusExpected": "syntax",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/7"
+    },
+    {
+      "name": "domain-range-conflict",
+      "family": "prefix-focus",
+      "corpusExpected": "syntax",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/8"
+    },
+    {
+      "name": "subset-parenthesized",
+      "family": "prefix-focus",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/9"
+    },
+    {
+      "name": "union-parenthesized",
+      "family": "prefix-focus",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/10"
+    },
+    {
+      "name": "domain-parenthesized",
+      "family": "prefix-focus",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/11"
+    },
+    {
+      "name": "subset-prime",
+      "family": "prefix-focus",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/12"
+    },
+    {
+      "name": "Basic Assume/Prove",
+      "family": "assume-prove.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/13"
+    },
+    {
+      "name": "Nested Assume/Prove With Label",
+      "family": "assume-prove.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/14"
+    },
+    {
+      "name": "Assume/Prove With New Constant",
+      "family": "assume-prove.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/15"
+    },
+    {
+      "name": "Assume/Prove With New Operator",
+      "family": "assume-prove.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/16"
+    },
+    {
+      "name": "Assume/Prove in Suffices Step",
+      "family": "assume-prove.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/17"
+    },
+    {
+      "name": "Assume/Prove with Mixed Assumptions",
+      "family": "assume-prove.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/18"
+    },
+    {
+      "name": "Basic Module Assumptions",
+      "family": "assume.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/19"
+    },
+    {
+      "name": "Named Module Assumptions",
+      "family": "assume.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/20"
+    },
+    {
+      "name": "Basic CASE",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/21"
+    },
+    {
+      "name": "Solitary CASE",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/22"
+    },
+    {
+      "name": "CASE with dangling else",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/23"
+    },
+    {
+      "name": "Conjlist with CASE",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/24"
+    },
+    {
+      "name": "Conjlist inside CASE",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/25"
+    },
+    {
+      "name": "Disjlist with CASE",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/26"
+    },
+    {
+      "name": "Disjlist inside CASE",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/27"
+    },
+    {
+      "name": "CASE in jlist with weird indentation",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/28"
+    },
+    {
+      "name": "Conjunct Inside Ambiguous Case (GH tlaplus/tlaplus #487)",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/29"
+    },
+    {
+      "name": "CASE Separator Aligned with Conjunction Bullet\nThe F -> G arm belongs to the outer CASE A. D -> E stays in CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/30"
+    },
+    {
+      "name": "CASE Separator One Column Right of Conjunction Bullet\nThe D -> E and F -> G arms both belong to the inner CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/31"
+    },
+    {
+      "name": "Outer OTHER After CASE in Conjunction List\nThe OTHER -> G arm belongs to the outer CASE A. D -> E stays in CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/32"
+    },
+    {
+      "name": "Outer CASE Arm After CASE in Conjunction List\nThe F -> G arm belongs to the outer CASE A. D -> E stays in CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/33"
+    },
+    {
+      "name": "CASE Arms Across Nested Conjunction and Disjunction Lists\nE -> F belongs to CASE C, G -> H to CASE B, and I -> K to CASE A.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/34"
+    },
+    {
+      "name": "CASE Separator Without Outer CASE in Conjunction List\nReject C -> D: the aligned separator cannot continue CASE A,\nand there is no outer CASE to receive the arm.",
+      "family": "case.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/35"
+    },
+    {
+      "name": "CASE Separator Across Open Parenthesis in Conjunction List\nReject D -> E: it cannot belong to CASE B at that indentation\nor cross the open parenthesis to belong to CASE A.",
+      "family": "case.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/36"
+    },
+    {
+      "name": "CASE Separator Aligned with Disjunction Bullet\nThe F -> G arm belongs to the outer CASE A. D -> E stays in CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/37"
+    },
+    {
+      "name": "CASE Separator One Column Right of Disjunction Bullet\nThe D -> E and F -> G arms both belong to the inner CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/38"
+    },
+    {
+      "name": "Outer OTHER After CASE in Disjunction List\nThe OTHER -> G arm belongs to the outer CASE A. D -> E stays in CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/39"
+    },
+    {
+      "name": "Outer CASE Arm After CASE in Disjunction List\nThe F -> G arm belongs to the outer CASE A. D -> E stays in CASE B.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/40"
+    },
+    {
+      "name": "CASE Arms Across Nested Disjunction and Conjunction Lists\nE -> F belongs to CASE C, G -> H to CASE B, and I -> K to CASE A.",
+      "family": "case.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/41"
+    },
+    {
+      "name": "CASE Separator Without Outer CASE in Disjunction List\nReject C -> D: the aligned separator cannot continue CASE A,\nand there is no outer CASE to receive the arm.",
+      "family": "case.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/42"
+    },
+    {
+      "name": "CASE Separator Across Open Parenthesis in Disjunction List\nReject D -> E: it cannot belong to CASE B at that indentation\nor cross the open parenthesis to belong to CASE A.",
+      "family": "case.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/43"
+    },
+    {
+      "name": "Basic Conjlist",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/44"
+    },
+    {
+      "name": "Inline Conjlist",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/45"
+    },
+    {
+      "name": "Start-of-Line Conjlist",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/46"
+    },
+    {
+      "name": "Left-Shifted Conjlist",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/47"
+    },
+    {
+      "name": "Right-Shifted Conjlist",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/48"
+    },
+    {
+      "name": "Separated Conjlist",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/49"
+    },
+    {
+      "name": "Multiline Conjlist",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/50"
+    },
+    {
+      "name": "Nested Conjlist",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/51"
+    },
+    {
+      "name": "Start-of-Line Nested Conjlist",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/52"
+    },
+    {
+      "name": "Infix Op Conjlist",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/53"
+    },
+    {
+      "name": "Division Infix Op Conjlist",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/54"
+    },
+    {
+      "name": "Infix Op Terminated Conjlist",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/55"
+    },
+    {
+      "name": "Division Infix Op Terminated Conjlist",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/56"
+    },
+    {
+      "name": "Not a Conjlist",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/57"
+    },
+    {
+      "name": "Conjlist with Parentheses",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/58"
+    },
+    {
+      "name": "Conjlist Terminated by Parentheses",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/59"
+    },
+    {
+      "name": "Nested Conjlist Terminated by Parentheses",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/60"
+    },
+    {
+      "name": "Double-Nested Conjlist Terminated by Parentheses",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/61"
+    },
+    {
+      "name": "Module-End-Terminated Conjlist",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/62"
+    },
+    {
+      "name": "Keyword-Unit-Terminated Conjlist",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/63"
+    },
+    {
+      "name": "Conjlist with Empty Tuple",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/64"
+    },
+    {
+      "name": "Conjlist with Empty Set",
+      "family": "conjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/65"
+    },
+    {
+      "name": "Basic Disjlist",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/66"
+    },
+    {
+      "name": "Inline Disjlist",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/67"
+    },
+    {
+      "name": "Start-of-Line Disjlist",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/68"
+    },
+    {
+      "name": "Left-Shifted Disjlist",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/69"
+    },
+    {
+      "name": "Right-Shifted Disjlist",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/70"
+    },
+    {
+      "name": "Separated Disjlist",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/71"
+    },
+    {
+      "name": "Multiline Disjlist",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/72"
+    },
+    {
+      "name": "Nested Disjlist",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/73"
+    },
+    {
+      "name": "Start-of-Line Nested Disjlist",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/74"
+    },
+    {
+      "name": "Infix Op Disjlist",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/75"
+    },
+    {
+      "name": "Division Infix Op Disjlist",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/76"
+    },
+    {
+      "name": "Infix Op Terminated Disjlist",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/77"
+    },
+    {
+      "name": "Division Infix Op Terminated Disjlist",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/78"
+    },
+    {
+      "name": "Not a Disjlist",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/79"
+    },
+    {
+      "name": "Disjlist with Parentheses",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/80"
+    },
+    {
+      "name": "Disjlist Terminated by Parentheses",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/81"
+    },
+    {
+      "name": "Nested Disjlist Terminated by Parentheses",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/82"
+    },
+    {
+      "name": "Double-Nested Disjlist Terminated by Parentheses",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/83"
+    },
+    {
+      "name": "Module-End-Terminated Disjlist",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/84"
+    },
+    {
+      "name": "Keyword-Unit-Terminated Disjlist",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/85"
+    },
+    {
+      "name": "Disjlist with Empty Tuple",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/86"
+    },
+    {
+      "name": "Disjlist with Empty Set",
+      "family": "disjlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/87"
+    },
+    {
+      "name": "Basic record update",
+      "family": "except.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/88"
+    },
+    {
+      "name": "Single nested record update",
+      "family": "except.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/89"
+    },
+    {
+      "name": "Single nested record update with dot syntax",
+      "family": "except.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/90"
+    },
+    {
+      "name": "Multiple nested record updates",
+      "family": "except.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/91"
+    },
+    {
+      "name": "Multiple nested record updates with dot syntax",
+      "family": "except.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/92"
+    },
+    {
+      "name": "Multiple nested record updates with mixed dot/function syntax",
+      "family": "except.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/93"
+    },
+    {
+      "name": "Nested Parentheses",
+      "family": "expressions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/94"
+    },
+    {
+      "name": "Tuple Literal",
+      "family": "expressions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/95"
+    },
+    {
+      "name": "Tuple Literal with Jlist",
+      "family": "expressions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/96"
+    },
+    {
+      "name": "Basic Weak Fairness",
+      "family": "fairness.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/97"
+    },
+    {
+      "name": "Basic Strong Fairness",
+      "family": "fairness.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/98"
+    },
+    {
+      "name": "Weak Fairness Ambiguity",
+      "family": "fairness.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/99"
+    },
+    {
+      "name": "Strong Fairness Ambiguity",
+      "family": "fairness.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/100"
+    },
+    {
+      "name": "Fairness with Tuple Literal",
+      "family": "fairness.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/101"
+    },
+    {
+      "name": "Function Definition",
+      "family": "functions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/102"
+    },
+    {
+      "name": "Function Evaluation",
+      "family": "functions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/103"
+    },
+    {
+      "name": "Jlist Inside Function Evaluation",
+      "family": "functions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/104"
+    },
+    {
+      "name": "Function Literal",
+      "family": "functions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/105"
+    },
+    {
+      "name": "Function Literal with Multiple Parameters and Jlist",
+      "family": "functions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/106"
+    },
+    {
+      "name": "Function Set",
+      "family": "functions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/107"
+    },
+    {
+      "name": "Jlist Inside Function Set",
+      "family": "functions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/108"
+    },
+    {
+      "name": "ITE with Strings",
+      "family": "if_then_else.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/109"
+    },
+    {
+      "name": "Conjlist with ITE",
+      "family": "if_then_else.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/110"
+    },
+    {
+      "name": "Conjlist inside ITE",
+      "family": "if_then_else.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/111"
+    },
+    {
+      "name": "Disjlist with ITE",
+      "family": "if_then_else.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/112"
+    },
+    {
+      "name": "Disjlist inside ITE",
+      "family": "if_then_else.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/113"
+    },
+    {
+      "name": "Cartesian Product Infix Op Definition",
+      "family": "infix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/114"
+    },
+    {
+      "name": "Infix Operator Definition",
+      "family": "infix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/115"
+    },
+    {
+      "name": "Cartesian Product Declaration as Parameter",
+      "family": "infix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/116"
+    },
+    {
+      "name": "Infix Operator Declaration as Parameter",
+      "family": "infix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/117"
+    },
+    {
+      "name": "Infix Operator Application",
+      "family": "infix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/118"
+    },
+    {
+      "name": "Cartesian Product as Parameter",
+      "family": "infix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/119"
+    },
+    {
+      "name": "Infix Minus as Parameter",
+      "family": "infix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/120"
+    },
+    {
+      "name": "Infix Operators as Parameters",
+      "family": "infix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/121"
+    },
+    {
+      "name": "Nonfix Infix Operators",
+      "family": "infix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/122"
+    },
+    {
+      "name": "Conjlist Followed by Disjunct",
+      "family": "jlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/123"
+    },
+    {
+      "name": "Disjlist Followed by Conjunct",
+      "family": "jlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/124"
+    },
+    {
+      "name": "Two Mismatched Jlists",
+      "family": "jlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/125"
+    },
+    {
+      "name": "Nested Alternating Jlists",
+      "family": "jlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/126"
+    },
+    {
+      "name": "Jlists Containing Colon-Prefixed Infix Operators (GH87)",
+      "family": "jlist.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/127"
+    },
+    {
+      "name": "Invalid parentheses use in jlist",
+      "family": "jlist.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/128"
+    },
+    {
+      "name": "Basic Label",
+      "family": "labels.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/129"
+    },
+    {
+      "name": "Label With Parameters",
+      "family": "labels.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/130"
+    },
+    {
+      "name": "Label not interfering with precedence",
+      "family": "labels.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/131"
+    },
+    {
+      "name": "Label interfering with precedence",
+      "family": "labels.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/132"
+    },
+    {
+      "name": "Label with Subexpression Prefix (GH tlaplus/tlaplus #885)",
+      "family": "labels.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "rejected",
+      "packet": "cases/133"
+    },
+    {
+      "name": "RECURSIVE inside LET/IN",
+      "family": "let_in.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/134"
+    },
+    {
+      "name": "Conjlist with LET/IN",
+      "family": "let_in.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/135"
+    },
+    {
+      "name": "Conjlist with RECURSIVE in LET/IN",
+      "family": "let_in.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/136"
+    },
+    {
+      "name": "Conjlist with INSTANCE in LET/IN",
+      "family": "let_in.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/137"
+    },
+    {
+      "name": "Conjlist inside LET/IN",
+      "family": "let_in.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/138"
+    },
+    {
+      "name": "Disjlist with LET/IN",
+      "family": "let_in.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/139"
+    },
+    {
+      "name": "Disjlist with RECURSIVE in LET/IN",
+      "family": "let_in.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/140"
+    },
+    {
+      "name": "Disjlist with INSTANCE in LET/IN",
+      "family": "let_in.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/141"
+    },
+    {
+      "name": "Disjlist inside LET/IN",
+      "family": "let_in.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/142"
+    },
+    {
+      "name": "Invalid Use of LOCAL in LET/IN",
+      "family": "let_in.txt",
+      "corpusExpected": "syntax",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/143"
+    },
+    {
+      "name": "Single module",
+      "family": "modules.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/144"
+    },
+    {
+      "name": "Module with EXTENDS",
+      "family": "modules.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/145"
+    },
+    {
+      "name": "Nested Modules",
+      "family": "modules.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/146"
+    },
+    {
+      "name": "Sequential Nested modules",
+      "family": "modules.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/147"
+    },
+    {
+      "name": "Definition After Nested Module",
+      "family": "modules.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/148"
+    },
+    {
+      "name": "Named Theorem After Submodule (GH tlaplus/tlaplus #430)",
+      "family": "modules.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/149"
+    },
+    {
+      "name": "Blank File Parse Error",
+      "family": "modules.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "infrastructure",
+      "tlaTs": "rejected",
+      "packet": "cases/150"
+    },
+    {
+      "name": "Missing Module Terminator",
+      "family": "modules.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/151"
+    },
+    {
+      "name": "Terminating Open Parentheses",
+      "family": "modules.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/152"
+    },
+    {
+      "name": "Common Number Formats",
+      "family": "number.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/153"
+    },
+    {
+      "name": "Bitfield Number Formats",
+      "family": "number.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/154"
+    },
+    {
+      "name": "All Number Sets",
+      "family": "number.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/155"
+    },
+    {
+      "name": "Number Set Definitions",
+      "family": "number.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/156"
+    },
+    {
+      "name": "Archaic SetExcept Syntax",
+      "family": "old_syntax.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "rejected",
+      "packet": "cases/157"
+    },
+    {
+      "name": "Decimal No Leading Zero (GH tlaplus/tlaplus #596)\n\nA decimal literal must have at least one digit before the decimal point.\nSee https://github.com/tlaplus/rfcs/issues/19.",
+      "family": "old_syntax.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/158"
+    },
+    {
+      "name": "Lexically-Conflicting Nonfix Operators",
+      "family": "operators.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/159"
+    },
+    {
+      "name": "Minus and Negative",
+      "family": "operators.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/160"
+    },
+    {
+      "name": "Higher-Order Operator Parameter Declarations",
+      "family": "operators.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/161"
+    },
+    {
+      "name": "LAMBDA Parameter",
+      "family": "operators.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/162"
+    },
+    {
+      "name": "Nonfix Minus (GH tlaplus/tlaplus #GH884)",
+      "family": "operators.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/163"
+    },
+    {
+      "name": "Nonfix Submodule Excl (GH tlaplus/tlaplus #GH884)",
+      "family": "operators.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/164"
+    },
+    {
+      "name": "Nonfix Double Exclamation Operator (GH TSTLA #GH97, GH tlaplus/tlaplus #884)",
+      "family": "operators.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/165"
+    },
+    {
+      "name": "Operators with Colon Prefixes & Jlists (GH TSTLA #87)",
+      "family": "operators.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/166"
+    },
+    {
+      "name": "Junct Tokens as Higher-Level Parameters (GH TSTLA #96)",
+      "family": "operators.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/167"
+    },
+    {
+      "name": "Negative Prefix Op on RHS of Infix (GH tlaplus/tlaplus #893)",
+      "family": "operators.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/168"
+    },
+    {
+      "name": "Postfix Operator Definition",
+      "family": "postfix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/169"
+    },
+    {
+      "name": "Postfix Operator Declaration as Parameter",
+      "family": "postfix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/170"
+    },
+    {
+      "name": "Postfix Operator Application",
+      "family": "postfix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/171"
+    },
+    {
+      "name": "Postfix Operators as Parameters",
+      "family": "postfix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/172"
+    },
+    {
+      "name": "Nonfix Postfix Operators",
+      "family": "postfix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/173"
+    },
+    {
+      "name": "Prefix Operator Definition",
+      "family": "prefix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/174"
+    },
+    {
+      "name": "Prefix Operator Declaration as Parameter",
+      "family": "prefix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/175"
+    },
+    {
+      "name": "Prefix Operator Application",
+      "family": "prefix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/176"
+    },
+    {
+      "name": "Prefix Operator References",
+      "family": "prefix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/177"
+    },
+    {
+      "name": "Nonfix Prefix Operators",
+      "family": "prefix_op.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/178"
+    },
+    {
+      "name": "Theorem Without Proof",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/179"
+    },
+    {
+      "name": "Named Theorem Without Proof",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/180"
+    },
+    {
+      "name": "Obvious Proof",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/181"
+    },
+    {
+      "name": "Named Obvious Proof",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/182"
+    },
+    {
+      "name": "Omitted Proof",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/183"
+    },
+    {
+      "name": "Proof by Definition",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/184"
+    },
+    {
+      "name": "Proof by Multiple Definitions",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/185"
+    },
+    {
+      "name": "Proof by Module References",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/186"
+    },
+    {
+      "name": "Proof by QED",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/187"
+    },
+    {
+      "name": "Proof by QED with implicit step level",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/188"
+    },
+    {
+      "name": "Extra QED",
+      "family": "proofs.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/189"
+    },
+    {
+      "name": "Proof with Variety of Step Types",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "rejected",
+      "packet": "cases/190"
+    },
+    {
+      "name": "Proof with INSTANCE step type",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/191"
+    },
+    {
+      "name": "Stepped Proof by Definition",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/192"
+    },
+    {
+      "name": "Proof with Star Steps",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/193"
+    },
+    {
+      "name": "Proof with Plus Step",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/194"
+    },
+    {
+      "name": "Nested Proof",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/195"
+    },
+    {
+      "name": "Nested Proof Off QED",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/196"
+    },
+    {
+      "name": "Proof with Nested Terminal Proof",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/197"
+    },
+    {
+      "name": "Implicit Nested Proof Levels",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/198"
+    },
+    {
+      "name": "Implicit Proof Steps With Names",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "rejected",
+      "packet": "cases/199"
+    },
+    {
+      "name": "Plus Proof Step With Name",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "rejected",
+      "packet": "cases/200"
+    },
+    {
+      "name": "Proof Containing Jlist",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/201"
+    },
+    {
+      "name": "Proof Level Change Terminates Jlist",
+      "family": "proofs.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/202"
+    },
+    {
+      "name": "Invalid Use of LOCAL in Proof",
+      "family": "proofs.txt",
+      "corpusExpected": "syntax",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "rejected",
+      "packet": "cases/203"
+    },
+    {
+      "name": "Bounded Quantification",
+      "family": "quantification.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/204"
+    },
+    {
+      "name": "Verbose Bounded Quantification",
+      "family": "quantification.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/205"
+    },
+    {
+      "name": "Bounded Quantification With Tuples",
+      "family": "quantification.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/206"
+    },
+    {
+      "name": "Mixed Bounded Quantification With Tuples",
+      "family": "quantification.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/207"
+    },
+    {
+      "name": "Empty Tuple Quantification (GH tlaplus/tlaplus #888)",
+      "family": "quantification.txt",
+      "corpusExpected": "syntax",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/208"
+    },
+    {
+      "name": "Unbounded Quantification",
+      "family": "quantification.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/209"
+    },
+    {
+      "name": "Bounded CHOOSE",
+      "family": "quantification.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/210"
+    },
+    {
+      "name": "Bounded CHOOSE With Tuple",
+      "family": "quantification.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/211"
+    },
+    {
+      "name": "Unbounded CHOOSE",
+      "family": "quantification.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/212"
+    },
+    {
+      "name": "Unbounded CHOOSE With Tuple",
+      "family": "quantification.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/213"
+    },
+    {
+      "name": "Record Literal",
+      "family": "records.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/214"
+    },
+    {
+      "name": "Nested Record Literal",
+      "family": "records.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/215"
+    },
+    {
+      "name": "Record Literal with JList",
+      "family": "records.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/216"
+    },
+    {
+      "name": "Set of Records",
+      "family": "records.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/217"
+    },
+    {
+      "name": "Nested Set of Records",
+      "family": "records.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/218"
+    },
+    {
+      "name": "Set of Records with JList",
+      "family": "records.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/219"
+    },
+    {
+      "name": "Record Value",
+      "family": "records.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/220"
+    },
+    {
+      "name": "Record Value Inside Jlist",
+      "family": "records.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/221"
+    },
+    {
+      "name": "Basic Recursive Declaration",
+      "family": "recursive.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/222"
+    },
+    {
+      "name": "Recursive Declaration With Reference",
+      "family": "recursive.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/223"
+    },
+    {
+      "name": "Recursive Declaration Without Parameters",
+      "family": "recursive.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/224"
+    },
+    {
+      "name": "Multiple Recursive Declarations",
+      "family": "recursive.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/225"
+    },
+    {
+      "name": "Mixed Recursive Declarations",
+      "family": "recursive.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/226"
+    },
+    {
+      "name": "Empty Set",
+      "family": "sets.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/227"
+    },
+    {
+      "name": "Mistaken Set Filter Test",
+      "family": "sets.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/228"
+    },
+    {
+      "name": "Mistaken Set Filter Tuples Test",
+      "family": "sets.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/229"
+    },
+    {
+      "name": "Set Literal",
+      "family": "sets.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/230"
+    },
+    {
+      "name": "Set Literal with Jlist",
+      "family": "sets.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/231"
+    },
+    {
+      "name": "Set Map",
+      "family": "sets.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/232"
+    },
+    {
+      "name": "Set Map with Multiple Generators",
+      "family": "sets.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/233"
+    },
+    {
+      "name": "Set Filter",
+      "family": "sets.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/234"
+    },
+    {
+      "name": "Set Filter With Too Many Quantifiers",
+      "family": "sets.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/235"
+    },
+    {
+      "name": "Set Filter with Tuple",
+      "family": "sets.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/236"
+    },
+    {
+      "name": "Set Filter Precedence",
+      "family": "sets.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/237"
+    },
+    {
+      "name": "Set Filter with Jlist",
+      "family": "sets.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/238"
+    },
+    {
+      "name": "Step Expression Or Stuttering",
+      "family": "step_expressions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/239"
+    },
+    {
+      "name": "Step Expression No Stuttering",
+      "family": "step_expressions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/240"
+    },
+    {
+      "name": "Step Expression With Parameterized Subscript",
+      "family": "step_expressions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/241"
+    },
+    {
+      "name": "Step Expressions with Jlist",
+      "family": "step_expressions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/242"
+    },
+    {
+      "name": "Various Valid Step Expressions",
+      "family": "step_expressions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/243"
+    },
+    {
+      "name": "Step Expression Requiring Lookahead",
+      "family": "step_expressions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/244"
+    },
+    {
+      "name": "Basic String",
+      "family": "string.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/245"
+    },
+    {
+      "name": "Escape Quote String",
+      "family": "string.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/246"
+    },
+    {
+      "name": "Escape Escape String",
+      "family": "string.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/247"
+    },
+    {
+      "name": "String with comment start",
+      "family": "string.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/248"
+    },
+    {
+      "name": "String with block comment start",
+      "family": "string.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/249"
+    },
+    {
+      "name": "String Set",
+      "family": "string.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/250"
+    },
+    {
+      "name": "String with supported escape chars",
+      "family": "string.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/251"
+    },
+    {
+      "name": "String with Backtick",
+      "family": "string.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/252"
+    },
+    {
+      "name": "Basic Submodule Reference",
+      "family": "subexpressions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/253"
+    },
+    {
+      "name": "Subexpression Tree Navigation",
+      "family": "subexpressions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/254"
+    },
+    {
+      "name": "Proof Step ID Subexpression Tree Navigation",
+      "family": "subexpressions.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/255"
+    },
+    {
+      "name": "Empty Tuple",
+      "family": "tuples.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/256"
+    },
+    {
+      "name": "Nonempty Tuple",
+      "family": "tuples.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/257"
+    },
+    {
+      "name": "Tuple of Identifiers",
+      "family": "tuples.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/258"
+    },
+    {
+      "name": "Nested Tuple",
+      "family": "tuples.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/259"
+    },
+    {
+      "name": "Basic Unicode CASE",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/260"
+    },
+    {
+      "name": "Conjlist with CASE",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/261"
+    },
+    {
+      "name": "Conjlist inside CASE",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/262"
+    },
+    {
+      "name": "Disjlist with CASE",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/263"
+    },
+    {
+      "name": "Disjlist inside CASE",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/264"
+    },
+    {
+      "name": "Unicode Conjunct Inside Ambiguous Case (GH tlaplus/tlaplus #487)",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/265"
+    },
+    {
+      "name": "Unicode CASE Separator Aligned with Conjunction Bullet\nThe F → G arm belongs to the outer CASE A. D → E stays in CASE B.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/266"
+    },
+    {
+      "name": "Unicode CASE Separator One Column Right of Conjunction Bullet\nThe D → E and F → G arms both belong to the inner CASE B.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/267"
+    },
+    {
+      "name": "Unicode Outer OTHER After CASE in Conjunction List\nThe OTHER → G arm belongs to the outer CASE A. D → E stays in CASE B.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/268"
+    },
+    {
+      "name": "Unicode Outer CASE Arm After CASE in Conjunction List\nThe F → G arm belongs to the outer CASE A. D → E stays in CASE B.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/269"
+    },
+    {
+      "name": "Unicode CASE Arms Across Nested Conjunction and Disjunction Lists\nE → F belongs to CASE C, G → H to CASE B, and I → K to CASE A.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/270"
+    },
+    {
+      "name": "Unicode CASE Separator Without Outer CASE in Conjunction List\nReject C → D: the aligned separator cannot continue CASE A,\nand there is no outer CASE to receive the arm.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/271"
+    },
+    {
+      "name": "Unicode CASE Separator Across Open Parenthesis in Conjunction List\nReject D → E: it cannot belong to CASE B at that indentation\nor cross the open parenthesis to belong to CASE A.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/272"
+    },
+    {
+      "name": "Unicode CASE Separator Aligned with Disjunction Bullet\nThe F → G arm belongs to the outer CASE A. D → E stays in CASE B.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/273"
+    },
+    {
+      "name": "Unicode CASE Separator One Column Right of Disjunction Bullet\nThe D → E and F → G arms both belong to the inner CASE B.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/274"
+    },
+    {
+      "name": "Unicode Outer OTHER After CASE in Disjunction List\nThe OTHER → G arm belongs to the outer CASE A. D → E stays in CASE B.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/275"
+    },
+    {
+      "name": "Unicode Outer CASE Arm After CASE in Disjunction List\nThe F → G arm belongs to the outer CASE A. D → E stays in CASE B.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/276"
+    },
+    {
+      "name": "Unicode CASE Arms Across Nested Disjunction and Conjunction Lists\nE → F belongs to CASE C, G → H to CASE B, and I → K to CASE A.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/277"
+    },
+    {
+      "name": "Unicode CASE Separator Without Outer CASE in Disjunction List\nReject C → D: the aligned separator cannot continue CASE A,\nand there is no outer CASE to receive the arm.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/278"
+    },
+    {
+      "name": "Unicode CASE Separator Across Open Parenthesis in Disjunction List\nReject D → E: it cannot belong to CASE B at that indentation\nor cross the open parenthesis to belong to CASE A.",
+      "family": "unicode/case-unicode.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/279"
+    },
+    {
+      "name": "Basic Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/280"
+    },
+    {
+      "name": "Inline Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/281"
+    },
+    {
+      "name": "Start-of-Line Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/282"
+    },
+    {
+      "name": "Left-Shifted Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/283"
+    },
+    {
+      "name": "Right-Shifted Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/284"
+    },
+    {
+      "name": "Separated Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/285"
+    },
+    {
+      "name": "Multiline Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/286"
+    },
+    {
+      "name": "Nested Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/287"
+    },
+    {
+      "name": "Start-of-Line Nested Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/288"
+    },
+    {
+      "name": "Infix Op Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/289"
+    },
+    {
+      "name": "Division Infix Op Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/290"
+    },
+    {
+      "name": "Infix Op Terminated Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/291"
+    },
+    {
+      "name": "Division Infix Op Terminated Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/292"
+    },
+    {
+      "name": "Not a Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/293"
+    },
+    {
+      "name": "Unicode Conjlist with Parentheses",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/294"
+    },
+    {
+      "name": "Unicode Conjlist Terminated by Parentheses",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/295"
+    },
+    {
+      "name": "Nested Unicode Conjlist Terminated by Parentheses",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/296"
+    },
+    {
+      "name": "Double-Nested Unicode Conjlist Terminated by Parentheses",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/297"
+    },
+    {
+      "name": "Module-End-Terminated Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/298"
+    },
+    {
+      "name": "Keyword-Unit-Terminated Unicode Conjlist",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/299"
+    },
+    {
+      "name": "Unicode Conjlist with Empty Tuple",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/300"
+    },
+    {
+      "name": "Unicode Conjlist with Empty Set",
+      "family": "unicode/conjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/301"
+    },
+    {
+      "name": "Basic Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/302"
+    },
+    {
+      "name": "Inline Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/303"
+    },
+    {
+      "name": "Start-of-Line Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/304"
+    },
+    {
+      "name": "Left-Shifted Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/305"
+    },
+    {
+      "name": "Right-Shifted Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/306"
+    },
+    {
+      "name": "Separated Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/307"
+    },
+    {
+      "name": "Multiline Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/308"
+    },
+    {
+      "name": "Nested Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/309"
+    },
+    {
+      "name": "Start-of-Line Nested Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/310"
+    },
+    {
+      "name": "Infix Op Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/311"
+    },
+    {
+      "name": "Division Infix Op Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/312"
+    },
+    {
+      "name": "Infix Op Terminated Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/313"
+    },
+    {
+      "name": "Division Infix Op Terminated Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/314"
+    },
+    {
+      "name": "Not a Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/315"
+    },
+    {
+      "name": "Unicode Disjlist with Parentheses",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/316"
+    },
+    {
+      "name": "Unicode Disjlist Terminated by Parentheses",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/317"
+    },
+    {
+      "name": "Nested Unicode Disjlist Terminated by Parentheses",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/318"
+    },
+    {
+      "name": "Double-Nested Unicode Disjlist Terminated by Parentheses",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/319"
+    },
+    {
+      "name": "Module-End-Terminated Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/320"
+    },
+    {
+      "name": "Keyword-Unit-Terminated Unicode Disjlist",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/321"
+    },
+    {
+      "name": "Unicode Disjlist with Empty Tuple",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/322"
+    },
+    {
+      "name": "Unicode Disjlist with Empty Set",
+      "family": "unicode/disjlist-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/323"
+    },
+    {
+      "name": "Function Definition",
+      "family": "unicode/functions-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/324"
+    },
+    {
+      "name": "Jlist Inside Function Evaluation",
+      "family": "unicode/functions-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/325"
+    },
+    {
+      "name": "Function Literal",
+      "family": "unicode/functions-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/326"
+    },
+    {
+      "name": "Function Literal with Multiple Parameters and Jlist",
+      "family": "unicode/functions-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/327"
+    },
+    {
+      "name": "Jlist Inside Unicode Function Evaluation",
+      "family": "unicode/functions-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/328"
+    },
+    {
+      "name": "Jlist Inside Unicode Function Set",
+      "family": "unicode/functions-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/329"
+    },
+    {
+      "name": "Basic Label",
+      "family": "unicode/labels-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/330"
+    },
+    {
+      "name": "Label With Parameters",
+      "family": "unicode/labels-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/331"
+    },
+    {
+      "name": "Unicode Number Sets",
+      "family": "unicode/numbers-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/332"
+    },
+    {
+      "name": "Unicode Operator Definitions",
+      "family": "unicode/operators-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/333"
+    },
+    {
+      "name": "Unicode Operator Declarations as Parameters",
+      "family": "unicode/operators-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/334"
+    },
+    {
+      "name": "Unicode Operator Application",
+      "family": "unicode/operators-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/335"
+    },
+    {
+      "name": "Unicode Operator References",
+      "family": "unicode/operators-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/336"
+    },
+    {
+      "name": "Nonfix Unicode Operators",
+      "family": "unicode/operators-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/337"
+    },
+    {
+      "name": "Unicode Junct Tokens as Higher-Level Parameters (GH TSTLA #96)",
+      "family": "unicode/operators-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/338"
+    },
+    {
+      "name": "Bounded Quantification",
+      "family": "unicode/quantification-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/339"
+    },
+    {
+      "name": "Unbounded Quantification",
+      "family": "unicode/quantification-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/340"
+    },
+    {
+      "name": "Bounded CHOOSE",
+      "family": "unicode/quantification-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/341"
+    },
+    {
+      "name": "Unbounded CHOOSE",
+      "family": "unicode/quantification-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/342"
+    },
+    {
+      "name": "Set Map",
+      "family": "unicode/sets-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/343"
+    },
+    {
+      "name": "Set Map with Multiple Generators",
+      "family": "unicode/sets-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/344"
+    },
+    {
+      "name": "Set Filter",
+      "family": "unicode/sets-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/345"
+    },
+    {
+      "name": "Set Filter with Tuple",
+      "family": "unicode/sets-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/346"
+    },
+    {
+      "name": "Set Filter Precedence",
+      "family": "unicode/sets-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/347"
+    },
+    {
+      "name": "Set Filter with Jlist",
+      "family": "unicode/sets-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/348"
+    },
+    {
+      "name": "Unicode String",
+      "family": "unicode/string-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/349"
+    },
+    {
+      "name": "Tuple Literal",
+      "family": "unicode/tuples-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/350"
+    },
+    {
+      "name": "Tuple Literal with Jlist",
+      "family": "unicode/tuples-unicode.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "accepted",
+      "packet": "cases/351"
+    },
+    {
+      "name": "VARIABLE Declaration",
+      "family": "unit.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/352"
+    },
+    {
+      "name": "CONSTANT Declaration",
+      "family": "unit.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/353"
+    },
+    {
+      "name": "Basic Operator Definition",
+      "family": "unit.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/354"
+    },
+    {
+      "name": "INSTANCE With Jlist Substitutions",
+      "family": "unit.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/355"
+    },
+    {
+      "name": "INSTANCE With Operator Substitutions",
+      "family": "unit.txt",
+      "corpusExpected": "accepted",
+      "rtla": "syntax",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/356"
+    },
+    {
+      "name": "LOCAL Declarations",
+      "family": "unit.txt",
+      "corpusExpected": "accepted",
+      "rtla": "accepted",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/357"
+    },
+    {
+      "name": "Invalid LOCAL Declaration of CONSTANT",
+      "family": "unit.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/358"
+    },
+    {
+      "name": "Invalid LOCAL Declaration of VARIABLE",
+      "family": "unit.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/359"
+    },
+    {
+      "name": "Invalid LOCAL Declaration of THEOREM",
+      "family": "unit.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/360"
+    },
+    {
+      "name": "Invalid LOCAL Declaration of RECURSIVE",
+      "family": "unit.txt",
+      "corpusExpected": "syntax",
+      "rtla": "unsupported",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/361"
+    },
+    {
+      "name": "Invalid LOCAL Declaration of ASSUME",
+      "family": "unit.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/362"
+    },
+    {
+      "name": "Invalid LOCAL Declaration of USE",
+      "family": "unit.txt",
+      "corpusExpected": "syntax",
+      "rtla": "syntax",
+      "sany": "syntax",
+      "tlaTs": "rejected",
+      "packet": "cases/363"
+    },
+    {
+      "name": "Simple Use or Hide",
+      "family": "use_or_hide.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/364"
+    },
+    {
+      "name": "Hide Multiple Definitions",
+      "family": "use_or_hide.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/365"
+    },
+    {
+      "name": "Complicated Use & Hide",
+      "family": "use_or_hide.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/366"
+    },
+    {
+      "name": "Use & Hide Modules",
+      "family": "use_or_hide.txt",
+      "corpusExpected": "accepted",
+      "rtla": "unsupported",
+      "sany": "accepted",
+      "tlaTs": "accepted",
+      "packet": "cases/367"
+    }
+  ]
+}

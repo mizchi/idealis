@@ -1,0 +1,18 @@
+IDEALIS_CHECKER_PLAN=0063-evaluator-tuning IDEALIS_CHECKER_COMPARE_V2=1 node dist/evals/p0-checker/corpus.js '.artifacts/0063-before' '.artifacts/0063-a-full' '.artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java' '.artifacts/tlc/tla2tools.jar' '.artifacts/tlc/jre.tar.gz' 'evals/runs/0063-corpus-selected'
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: {"kind":"error","code":"protocol","message":"Unsupported TLA input: expression or operator nesting exceeds 40"}
+    at file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/p0-checker/corpus.js:154:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.22.2
+error: Recipe `evaluator-corpus` failed on line 711 with exit code 1

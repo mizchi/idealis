@@ -3,7 +3,7 @@ import {
   createManifest,
   mergeReports,
   partitionTasks,
-} from "../src/sharding.js";
+} from "../packages/idealis/src/sharding.js";
 
 export const registerShardingContract = (
   test: (name: string, run: () => void | Promise<void>) => unknown,

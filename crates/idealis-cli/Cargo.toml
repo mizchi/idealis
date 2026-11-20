@@ -1,0 +1,17 @@
+[package]
+name = "idealis-cli"
+version = "0.1.0-alpha.0"
+edition = "2024"
+default-run = "idealis-cli"
+description = "Finite TLA+ checking and model differential sessions"
+repository = "https://github.com/mizchi/idealis"
+license = "MIT"
+readme = "README.md"
+include = ["src/**", "tests/**", "Cargo.toml", "Cargo.lock", "README.md", "SUPPORT.md", "LICENSE"]
+
+[dependencies]
+rtla = { path = "../rtla", version = "=0.1.0-alpha.0" }
+rtla-compiler = { path = "../rtla-compiler", version = "=0.1.0-alpha.0" }
+rtlc = { path = "../rtlc", version = "=0.1.0-alpha.0" }
+idealis-connect = { path = "../idealis-connect", version = "=0.1.0-alpha.0" }
+serde_json = "1.0"

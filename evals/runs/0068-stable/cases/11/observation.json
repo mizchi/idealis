@@ -1,0 +1,245 @@
+{
+  "actual": {
+    "kind": "module",
+    "module": {
+      "name": "Test",
+      "extends": [],
+      "constants": [],
+      "variables": [],
+      "definitions": [
+        {
+          "name": "Expr",
+          "kind": "Operator",
+          "params": [],
+          "body": {
+            "kind": "Apply",
+            "operator": "..",
+            "args": [
+              {
+                "kind": "Apply",
+                "operator": "DOMAIN",
+                "args": [
+                  {
+                    "kind": "Identifier",
+                    "name": "f",
+                    "location": {
+                      "start": 38,
+                      "end": 39,
+                      "line": 2,
+                      "column": 17
+                    }
+                  }
+                ],
+                "location": {
+                  "start": 31,
+                  "end": 37,
+                  "line": 2,
+                  "column": 10
+                }
+              },
+              {
+                "kind": "Identifier",
+                "name": "n",
+                "location": {
+                  "start": 44,
+                  "end": 45,
+                  "line": 2,
+                  "column": 23
+                }
+              }
+            ],
+            "location": {
+              "start": 41,
+              "end": 43,
+              "line": 2,
+              "column": 20
+            }
+          },
+          "isLocal": false,
+          "isRecursive": false,
+          "location": {
+            "start": 22,
+            "end": 26,
+            "line": 2,
+            "column": 1
+          }
+        }
+      ],
+      "assumptions": [],
+      "theorems": [],
+      "location": {
+        "start": 0,
+        "end": 4,
+        "line": 1,
+        "column": 1
+      }
+    }
+  },
+  "reference": {
+    "kind": "accepted",
+    "tree": {
+      "kind": 382,
+      "image": "N_Module",
+      "children": [
+        {
+          "kind": 333,
+          "image": "N_BeginModule",
+          "children": [
+            {
+              "kind": 3,
+              "image": "---- MODULE",
+              "children": []
+            },
+            {
+              "kind": 231,
+              "image": "Test",
+              "children": []
+            },
+            {
+              "kind": 35,
+              "image": "----",
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": 350,
+          "image": "N_Extends",
+          "children": []
+        },
+        {
+          "kind": 334,
+          "image": "N_Body",
+          "children": [
+            {
+              "kind": 389,
+              "image": "N_OperatorDefinition",
+              "children": [
+                {
+                  "kind": 366,
+                  "image": "N_IdentLHS",
+                  "children": [
+                    {
+                      "kind": 231,
+                      "image": "Expr",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "kind": 92,
+                  "image": "==",
+                  "children": []
+                },
+                {
+                  "kind": 371,
+                  "image": "N_InfixExpr",
+                  "children": [
+                    {
+                      "kind": 393,
+                      "image": "N_ParenExpr",
+                      "children": [
+                        {
+                          "kind": 93,
+                          "image": "(",
+                          "children": []
+                        },
+                        {
+                          "kind": 399,
+                          "image": "N_PrefixExpr",
+                          "children": [
+                            {
+                              "kind": 362,
+                              "image": "N_GenPrefixOp",
+                              "children": [
+                                {
+                                  "kind": 367,
+                                  "image": "N_IdPrefix",
+                                  "children": []
+                                },
+                                {
+                                  "kind": 401,
+                                  "image": "DOMAIN",
+                                  "children": []
+                                }
+                              ]
+                            },
+                            {
+                              "kind": 358,
+                              "image": "N_GeneralId",
+                              "children": [
+                                {
+                                  "kind": 367,
+                                  "image": "N_IdPrefix",
+                                  "children": []
+                                },
+                                {
+                                  "kind": 231,
+                                  "image": "f",
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "kind": 94,
+                          "image": ")",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "kind": 359,
+                      "image": "N_GenInfixOp",
+                      "children": [
+                        {
+                          "kind": 367,
+                          "image": "N_IdPrefix",
+                          "children": []
+                        },
+                        {
+                          "kind": 373,
+                          "image": "..",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "kind": 358,
+                      "image": "N_GeneralId",
+                      "children": [
+                        {
+                          "kind": 367,
+                          "image": "N_IdPrefix",
+                          "children": []
+                        },
+                        {
+                          "kind": 231,
+                          "image": "n",
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": 345,
+          "image": "N_EndModule",
+          "children": [
+            {
+              "kind": 36,
+              "image": "====",
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "tlaTs": "accepted"
+}

@@ -1,0 +1,21 @@
+# 0052: workspaceの差分検査とチューニングをoracleへ統合する
+
+## 変更する境界
+
+固定入力の照合器idealis-oracleを、既存TS evalと回帰の差分assertionから使う。Rustのversion付きJSON batch境界とimport不要のWasmを追加し、workspace用のNode adapterから同じOracleGroupを実行する。JS値のsnapshotはundefined・bigint・NaN・負のzeroを区別し、対応しない値や循環を黙ってJSONへ落とさない。snapshotは既存遷移ロジックから独立した輸送形式に限る。
+
+移行対象はrtla parser/compiler、rtlc/coreのnative/Wasmとbefore/after、SMTのnative/WasmとZ3、Alloyのnative/Wasm、testing core。既存の正規化、期待status、SATモデルのZ3検証、TLCの分類・反例再実行は維持する。metadataの整合性検査、単独の期待値テスト、古いrunのJSON形式や内容は一括変更しない。移行した場所と残した判定を一覧へ記録する。solver/checkerのunknownや意図したエラーの応答一致は、protocolの回帰一致として扱い、性質の成功と混同しない。
+
+## チューニング用の比較
+
+既存のJSONL実装をbaseline/candidateとして登録する汎用eval runnerを作る。source/binaryとrequestを固定したsnapshotを作り、現在のworkspaceを別snapshotへ保存して比較する。rtla、idealis-core（rtla-compiler/rtlcを含む）、idealis-smt、ralloy、idealis-testing、idealis-oracleの各実行境界を対象にする。純粋で独立したrequestを選び、handle/sessionの状態を測定順へ漏らさない。
+
+同一groupのcheckとbenchで全応答を照合する。referenceはbaselineの別process、速度baselineもbaselineを明示する。coldは各呼出で起動、reusedは独立した常駐JSONL processへ要求する。両者を別groupとし、起動・IPC・JSONの費用を含む指標と明記する。7 samples、1 warmup、3 iterations、固定呼出上限で実行する。profile/criterionの代替統計とは主張しない。worker並列化は計測へ入れない。
+
+今回は検査器のアルゴリズムを変えない。同一revisionのsnapshot同士を正常対照として走らせ、baseline/candidate・保存oracle・raw sample・実行順・再生を確認する。結果改変・プロセス失敗・不正JSON・途中drift・不正manifestは陰性対照で検出し、速度比を成功値にしない。機能追加によるbridge費用を記録し、checker高速化の主張はしない。
+
+## 検証と保存
+
+最初に未実装APIでRedを確認する。Rust wireの入力検査とstatus、JS snapshotの旧deepStrictEqualとの対照、移行した既存回帰を通す。Wasmを実Chromiumでも実行する。必要なbuildを先に済ませ、測定中は他のbuild/test/solver/profileを実行しない。保存artifactは変更せず、新しいrunだけを追加する。
+
+just check/browser、oracle-test、移行対象の既存contractとeval/replay、runtime-build/test、evaluate/replay-evaluation、変更対象のfmt/clippyと配布consumerを確認する。チェックリストとJevのlive同期・offline/staged検査、CIとjustfileを更新する。PR/push/mergeは今回の対象に含めない。

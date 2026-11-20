@@ -1,17 +1,17 @@
-import { bounds, config } from "../evals/quint-generated/cases.js";
+import { bounds, config } from "../evals/experiments/quint-generated/cases.js";
 import {
   type CacheModelInput,
   runCachedModels,
-} from "../evals/verified-cache/scenarios.js";
-import { createCheckCache } from "../src/check-cache.js";
-import { createHttpCheckCacheStore } from "../src/check-cache-http.js";
-import type { SafetyExpansionCache } from "../src/contracts.js";
-import { createPortableWasm } from "../src/portable-wasm.js";
+} from "../evals/experiments/verified-cache/scenarios.js";
+import { createHttpCheckCacheStore } from "../packages/idealis/src/check-cache-http.js";
+import { createCheckCache } from "../packages/idealis/src/check-cache.js";
+import type { SafetyExpansionCache } from "../packages/idealis/src/contracts.js";
+import { createPortableWasm } from "../packages/idealis/src/portable-wasm.js";
 import {
   checkSafetyIncremental,
   createSafetyExpansionCache,
-} from "../src/safety-expansions.js";
-import { compileTlaSource } from "../src/tla-source.js";
+} from "../packages/idealis/src/safety-expansions.js";
+import { compileTlaSource } from "../packages/idealis/src/tla-source.js";
 
 export const run = async (
   endpoint: string,

@@ -1,0 +1,25 @@
+from pathlib import Path
+import json,hashlib
+root=Path('evals/runs/0057-comparison-b')
+pairs=[]
+for model in ['function-cube','parallel-channels']:
+ for route in ['native-1','native-8','wasm']:
+  for iteration in range(4):
+   paths=[root/f'{model}-{iteration}-{stage}-{route}.json' for stage in ['before','after']]
+   values=[json.loads(path.read_text())['output']['result'] for path in paths]
+   assert values[0]==values[1],(model,route,iteration)
+   pairs.append({'model':model,'route':route,'iteration':iteration,'result':values[0],'files':[{'path':str(path),'sha256':hashlib.sha256(path.read_bytes()).hexdigest()} for path in paths]})
+snapshot=json.loads(Path('.artifacts/0057-after-b/manifest.json').read_text())
+sources=[source for source in snapshot['sources'] if source['path'].endswith(('.rs','.toml','.lock','.json'))]
+for source in sources:
+ assert hashlib.sha256(Path(source['path']).read_bytes()).hexdigest()==source['sha256'],source['path']
+binaries=[]
+for name,path in [('idealis-core','crates/idealis-core/target/release/idealis-core'),('idealis_core.wasm','crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm')]:
+ assert Path('.artifacts/0057-after-b',name).read_bytes()==Path(path).read_bytes(),name
+ binaries.append({'path':path,'sha256':hashlib.sha256(Path(path).read_bytes()).hexdigest()})
+assert json.loads(Path('.artifacts/criterion-safety/inputs.json').read_text())==json.loads(Path('crates/rtlc/src/bench-fixtures.json').read_text())
+output=Path('evals/runs/0057-verification/parity-proof.json')
+with output.open('x') as stream:
+ json.dump({'status':'complete','largeBeforeAfterPairs':pairs,'measuredSourcesMatch':sources,'measuredBinariesMatch':binaries,'criterionFixtureJsonEquality':True},stream,indent=2)
+ stream.write('\n')
+print('24 complete result pairs, 71 source hashes, native/Wasm binaries, Criterion fixture JSON matched')

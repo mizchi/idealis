@@ -1,0 +1,581 @@
+[
+  {
+    "name": "named",
+    "family": "higher",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nApply(F(_), value) == F(value)\nInc(value) == (value+1)%3\nInit == x = 0\nNext == x'=Apply(Inc,x)\nSafe == x \\in 0..2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 3
+  },
+  {
+    "name": "capture",
+    "family": "higher",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nApply(F(_), value) == F(value)\nInit == x = 0\nNext == \\E delta \\in 1..2: x'=Apply(LAMBDA value: (value+delta)%3,x)\nSafe == x \\in 0..2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 3
+  },
+  {
+    "name": "forward",
+    "family": "higher",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nApply(F(_), value) == F(value)\nForward(G(_), value) == Apply(G,value)\nInit == x = 0\nNext == x'=Forward(LAMBDA value: (value+1)%3,x)\nSafe == x \\in 0..2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 3
+  },
+  {
+    "name": "builtin",
+    "family": "higher",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nCombine(F(_,_), left, right) == F(left,right)\nInit == x = 0\nNext == x'=Combine(+,x,1)%3\nSafe == x \\in 0..2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 3
+  },
+  {
+    "name": "action",
+    "family": "higher",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nRun(A(_), value) == A(value)\nAssign(value) == x'=value\nInit == x = 0\nNext == Run(Assign,(x+1)%3)\nSafe == x \\in 0..2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 3
+  },
+  {
+    "name": "operand",
+    "family": "selection",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nOp == 1+2\nInit == x = Op!2\nNext == UNCHANGED x\nSafe == x=2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "conditional",
+    "family": "selection",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nOp(value) == IF value=0 THEN 10 ELSE 20\nInit == x = Op(0)!2\nNext == UNCHANGED x\nSafe == x=10\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "label",
+    "family": "selection",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nOp(value) == \\A bound \\in 0..2: label(bound)::value+bound\nInit == x = Op(1)!label(2)\nNext == UNCHANGED x\nSafe == x=3\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "bound-arguments",
+    "family": "selection",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nOp == \\A bound \\in 0..2: bound+1\nInit == x = Op!(2)\nNext == UNCHANGED x\nSafe == x=3\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "bound-operator",
+    "family": "selection",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nOp == \\A bound \\in 0..2: bound+1\nApply(F(_), value) == F(value)\nInit == x = Apply(Op!@,2)\nNext == UNCHANGED x\nSafe == x=3\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "case",
+    "family": "selection",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nOp == CASE TRUE -> 3 [] OTHER -> 4\nInit == x = Op!1!2\nNext == UNCHANGED x\nSafe == x=3\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "let-definition",
+    "family": "selection",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nOp == LET Inner(value) == value+1 IN TRUE\nInit == x = Op!:!Inner(2)\nNext == UNCHANGED x\nSafe == x=3\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "record",
+    "family": "selection",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nOp == [first |-> 1, second |-> 3]\nInit == x = Op!2\nNext == UNCHANGED x\nSafe == x=3\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "factorial",
+    "family": "recursion",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nRECURSIVE Fact(_)\nFact(value) == IF value=0 THEN 1 ELSE value*Fact(value-1)\nInit == x = 3\nNext == x'=Fact(5)\nSafe == x=3 \\/ x=120\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [2],
+    "status": "complete",
+    "states": 2
+  },
+  {
+    "name": "mutual",
+    "family": "recursion",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nRECURSIVE Even(_), Odd(_)\nEven(value) == IF value=0 THEN TRUE ELSE Odd(value-1)\nOdd(value) == IF value=0 THEN FALSE ELSE Even(value-1)\nInit == x = 3\nNext == x'=IF Even(6) THEN 6 ELSE 7\nSafe == x=3 \\/ x=6\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [2],
+    "status": "complete",
+    "states": 2
+  },
+  {
+    "name": "state",
+    "family": "recursion",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nRECURSIVE Sum(_)\nSum(value) == IF value=0 THEN 0 ELSE value+Sum(value-1)\nInit == x = 3\nNext == x'=IF x=3 THEN Sum(x) ELSE x\nSafe == x=3 \\/ x=6\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [2],
+    "status": "complete",
+    "states": 2
+  },
+  {
+    "name": "function",
+    "family": "recursive-function",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nFactorial[value \\in 0..5] == IF value=0 THEN 1 ELSE value*Factorial[value-1]\nInit == x = Factorial[5]\nNext == UNCHANGED x\nSafe == x=120\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "multi-key",
+    "family": "recursive-function",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nFn[left \\in 0..2, right \\in 0..2] == IF left=0 THEN right ELSE Fn[left-1,right]+1\nInit == x = Fn[2,1]\nNext == UNCHANGED x\nSafe == x=3\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "tuple-key",
+    "family": "recursive-function",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nFn[<<left,right>> \\in {<<0,1>>, <<1,1>>, <<2,1>>}] == IF left=0 THEN right ELSE Fn[<<left-1,right>>]+1\nInit == x = Fn[<<2,1>>]\nNext == UNCHANGED x\nSafe == x=3\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "domain",
+    "family": "recursive-function",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nFn[value \\in 0..1] == IF value=0 THEN 0 ELSE Fn[1]\nInit == x = DOMAIN Fn\nNext == UNCHANGED x\nSafe == x=0..1\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "requested-key",
+    "family": "recursive-function",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nFn[value \\in 0..1] == IF value=0 THEN 0 ELSE Fn[1]\nInit == x = Fn[0]\nNext == UNCHANGED x\nSafe == x=0\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "except-argument",
+    "family": "callback",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals, Sequences, TLC\nVARIABLE x\nApply(F(_), value) == F(value)\nUpdate(value) == [<<1>> EXCEPT ![1]=@+value]\nInit == x = [<<2>> EXCEPT ![1]=Apply(Update,@)[1]]\nNext == UNCHANGED x\nSafe == x = <<3>>\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "forwarded-select",
+    "family": "callback",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals, Sequences, TLC\nVARIABLE x\nFilter(P(_), seq) == SelectSeq(seq,P)\nInit == x = Filter(LAMBDA value: value>1,<<1,2,3>>)\nNext == UNCHANGED x\nSafe == x = <<2,3>>\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "select-lambda",
+    "family": "callback",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals, Sequences, TLC\nVARIABLE x\n\nInit == x = SelectSeq(<<1,2,3>>,LAMBDA value: value>1)\nNext == UNCHANGED x\nSafe == x = <<2,3>>\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "sort-lambda",
+    "family": "callback",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals, Sequences, TLC\nVARIABLE x\n\nInit == x = SortSeq(<<3,1,2>>,LAMBDA left,right: left<=right)\nNext == UNCHANGED x\nSafe == x = <<1,2,3>>\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "instance-parameter",
+    "family": "module",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nC(limit) == INSTANCE Counter WITH Limit <- limit, value <- x\nInit == C(2)!Init\nNext == C(2)!Next\nSafe == C(2)!Safe\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Counter": "---- MODULE Counter ----\nEXTENDS Naturals\nCONSTANT Limit\nVARIABLE value\nInit == value=0\nNext == value'=IF value<Limit THEN value+1 ELSE 0\nSafe == value \\in 0..Limit\n===="
+    },
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 3
+  },
+  {
+    "name": "let-instance",
+    "family": "module",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\n\nInit == x = 0\nNext == \\E delta \\in 1..2: LET C(limit) == INSTANCE Counter WITH Limit <- limit, value <- x IN C(delta)!Next\nSafe == x \\in 0..2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Counter": "---- MODULE Counter ----\nEXTENDS Naturals\nCONSTANT Limit\nVARIABLE value\nInit == value=0\nNext == value'=IF value<Limit THEN value+1 ELSE 0\nSafe == value \\in 0..Limit\n===="
+    },
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 3
+  },
+  {
+    "name": "nested",
+    "family": "module",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nCONSTANT N\n---- MODULE Inner ----\nInit == x=0\nNext == x'=IF x<N THEN x+1 ELSE 0\n====\nI == INSTANCE Inner\nInit == x = 0\nNext == I!Next\nSafe == x \\in 0..N\n====",
+    "config": "CONSTANT N=2\nINIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 3
+  },
+  {
+    "name": "nested-shadow",
+    "family": "module-rejection",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nCONSTANT N\n---- MODULE Inner ----\nCONSTANT N\nValue == N\n====\nI == INSTANCE Inner WITH N <- 1\nInit == x = I!Value\nNext == UNCHANGED x\nSafe == x=1\n====",
+    "config": "CONSTANT N=2\nINIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "error",
+    "states": null
+  },
+  {
+    "name": "nested-operator-capture",
+    "family": "module",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nBase == 2\n---- MODULE Inner ----\nValue == Base\n====\nI == INSTANCE Inner\nInit == x = I!Value\nNext == UNCHANGED x\nSafe == x=2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "nested-extends",
+    "family": "module",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nCONSTANT N\n---- MODULE First ----\nValue == N\n====\n---- MODULE Second ----\nEXTENDS First\nResult == Value\n====\nI == INSTANCE Second\nInit == x = I!Result\nNext == UNCHANGED x\nSafe == x=2\n====",
+    "config": "CONSTANT N=2\nINIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "namespace-operator",
+    "family": "module-rejection",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nI(increment) == INSTANCE Parameter WITH N <- increment\nApply(F(_), value) == F(value)\nInit == x = 0\nNext == x'=Apply(I(1)!Add,x)%3\nSafe == x \\in 0..2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Parameter": "---- MODULE Parameter ----\nEXTENDS Naturals\nCONSTANT N\nAdd(value) == value+N\n===="
+    },
+    "versions": [1, 2],
+    "status": "error",
+    "states": null
+  },
+  {
+    "name": "namespace-all-parameters",
+    "family": "module",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nI(increment) == INSTANCE Parameter WITH N <- increment\nCombine(F(_,_), left, right) == F(left,right)\nInit == x = 0\nNext == x'=Combine(I!Add,1,x)%3\nSafe == x \\in 0..2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Parameter": "---- MODULE Parameter ----\nEXTENDS Naturals\nCONSTANT N\nAdd(value) == value+N\n===="
+    },
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 3
+  },
+  {
+    "name": "nested-capture-override",
+    "family": "module-rejection",
+    "source": "---- MODULE Completion ----\nCONSTANT N\nVARIABLE x\n---- MODULE Inner ----\nValue == N\n====\nI == INSTANCE Inner WITH N <- 1\nInit == x=I!Value\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "CONSTANT N=2\nINIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "versions": [1, 2],
+    "status": "error",
+    "states": null
+  },
+  {
+    "name": "grouped-let-captures",
+    "family": "binding",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nApply(F(_),value) == F(value)\nInit == x = 0\nNext == UNCHANGED x\nSafe == \\A left,right \\in {1,2}: LET Add(value) == left+right+value IN Add(0)=left+right\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "grouped-lambda-captures",
+    "family": "binding",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nApply(F(_),value) == F(value)\nInit == x = 0\nNext == UNCHANGED x\nSafe == \\A left,right \\in {1,2}: Apply(LAMBDA value: left+right+value,0)=left+right\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "recursive-guard",
+    "family": "recursion",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nRECURSIVE Even(_)\nEven(value) == IF value=0 THEN TRUE ELSE IF value=1 THEN FALSE ELSE Even(value-2)\nInit == x = 0\nNext == Even(2*x) /\\ x'=(x+1)%3\nSafe == []Even(2*x)\n====",
+    "config": "INIT Init\nNEXT Next\nPROPERTY Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [2],
+    "status": "complete",
+    "states": 3
+  },
+  {
+    "name": "label-missing-bound",
+    "family": "module-rejection",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nUnused == \\A bound \\in {1}: label::TRUE\nInit == x = 0\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "error",
+    "states": null
+  },
+  {
+    "name": "label-extra-bound",
+    "family": "module-rejection",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nUnused == \\A bound \\in {1}: label(other)::TRUE\nInit == x = 0\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "error",
+    "states": null
+  },
+  {
+    "name": "label-duplicate",
+    "family": "module-rejection",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nUnused == IF TRUE THEN label::1 ELSE label::2\nInit == x = 0\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "error",
+    "states": null
+  },
+  {
+    "name": "label-except",
+    "family": "module-rejection",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nUnused == [<<1>> EXCEPT ![1]=label::@]\nInit == x = 0\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "error",
+    "states": null
+  },
+  {
+    "name": "lambda-builtin",
+    "family": "module-rejection",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nApply(F(_),value) == F(value)\nUnused == Apply(LAMBDA TRUE: TRUE,1)\nInit == x = 0\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "error",
+    "states": null
+  },
+  {
+    "name": "recursive-wrong-arity",
+    "family": "module-rejection",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nRECURSIVE Unused(_,_)\nUnused(value) == value\nInit == x = 0\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "error",
+    "states": null
+  },
+  {
+    "name": "label-nested",
+    "family": "declaration",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nUnused == \\A outer \\in {1}: first(outer):: \\A inner \\in {2}: second(inner)::TRUE\nInit == x = 0\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "label-function",
+    "family": "declaration",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nUnused[bound \\in {1}] == label(bound)::bound\nInit == x = 0\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "label-lambda",
+    "family": "declaration",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nApply(F(_),value) == F(value)\nUnused == \\A outer \\in {1}: Apply(LAMBDA inner: label(outer,inner)::TRUE,2)\nInit == x = 0\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "except-enabled-dynamic",
+    "family": "capture",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals, Sequences\nVARIABLE x\n\nInit == x = 0\nNext == UNCHANGED x\nSafe == x=0 /\\ [<<9>> EXCEPT ![1] = LET Step(value) == @=4 /\\ x'=value IN [<<4>> EXCEPT ![1] = ENABLED Step(x)][1]][1]\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "except-choose-domain",
+    "family": "capture",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\n\nInit == x = 0\nNext == UNCHANGED x\nSafe == x=0 /\\ [<<{9}>> EXCEPT ![1] = LET Pick == CHOOSE value \\in @: TRUE IN Pick=9][1]\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "except-unused-choose",
+    "family": "capture",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\n\nInit == x = 0\nNext == UNCHANGED x\nSafe == x=0 /\\ [<<{9}>> EXCEPT ![1] = LET Pick == CHOOSE value \\in {}: @=value IN TRUE][1]\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "except-function-head",
+    "family": "capture",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\n\nInit == x = 0\nNext == UNCHANGED x\nSafe == x=0 /\\ [<<{9}>> EXCEPT ![1] = LET Fn[value \\in @] == value IN Fn[9]=9][1]\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "except-function-value",
+    "family": "capture",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\n\nInit == x = 0\nNext == UNCHANGED x\nSafe == x=0 /\\ [<<{9}>> EXCEPT ![1] = LET Fn == [value \\in @ |-> value] IN Fn[9]=9][1]\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "assumption-lambda",
+    "family": "higher",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals, Sequences\nVARIABLE x\nASSUME SelectSeq(<<1,2>>,LAMBDA value: value>1) = <<2>>\nInit == x = 0\nNext == UNCHANGED x\nSafe == x=0\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "instance-recursive-function",
+    "family": "module",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nI(limit) == INSTANCE Functions WITH Limit <- limit\nInit == x = I(5)!Factorial[5]\nNext == UNCHANGED x\nSafe == x=120\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Functions": "---- MODULE Functions ----\nEXTENDS Naturals\nCONSTANT Limit\nFactorial[value \\in 0..Limit] == IF value=0 THEN 1 ELSE value*Factorial[value-1]\n===="
+    },
+    "versions": [2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "fold-recursive",
+    "family": "recursion",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals, Apalache\nVARIABLE x\nRECURSIVE Add(_,_)\nAdd(left,right) == IF right=0 THEN left ELSE Add(left+1,right-1)\nInit == x = ApaFoldSeqLeft(Add,0,<<1,2,3>>)\nNext == UNCHANGED x\nSafe == x=6\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "except-zero-arity",
+    "family": "capture",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals, Sequences\nVARIABLE x\n\nInit == x = 0\nNext == UNCHANGED x\nSafe == x=0 /\\ [<<9>> EXCEPT ![1] = LET Step == @=9 /\\ x'=x IN [<<4>> EXCEPT ![1] = ENABLED Step][1]][1]\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [2],
+    "status": "complete",
+    "states": 1
+  },
+  {
+    "name": "specialized-action-trace",
+    "family": "higher-action",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nRun(A(_),value) == A(value)\nAssign(value) == x'=value\nInit == x = 0\nNext == Run(Assign,(x+1)%3)\nSafe == x=0\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "invariant-violation",
+    "states": 2
+  },
+  {
+    "name": "selector-action-trace",
+    "family": "selection-action",
+    "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nOp(value) == label:: x'=value\nInit == x = 0\nNext == Op((x+1)%3)!label\nSafe == x=0\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "versions": [1, 2],
+    "status": "invariant-violation",
+    "states": 2
+  }
+]

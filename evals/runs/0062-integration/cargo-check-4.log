@@ -1,0 +1,17 @@
+    Checking rtla-compiler v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtla-compiler)
+    Checking idealis-core v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/idealis-core)
+error[E0063]: missing field `symmetry` in initializer of `SafetyProgram`
+  --> tests/deep_request_drop.rs:29:5
+   |
+29 |     SafetyProgram {
+   |     ^^^^^^^^^^^^^ missing `symmetry`
+
+error[E0063]: missing field `options` in initializer of `idealis_core::Request`
+  --> tests/deep_request_drop.rs:66:26
+   |
+66 |                 request: Request::CheckSafety {
+   |                          ^^^^^^^^^^^^^^^^^^^^ missing `options`
+
+For more information about this error, try `rustc --explain E0063`.
+error: could not compile `idealis-core` (test "deep_request_drop") due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...

@@ -22,7 +22,7 @@ import { readFile } from "node:fs/promises";
 import {
   checkPortableConformance,
   createPortableWasm,
-} from "./src/portable.js";
+} from "@mizchi/idealis/portable";
 import { counterModel, createCounter } from "./examples/durable-counter.js";
 
 const core = await createPortableWasm(

@@ -1,11 +1,16 @@
 use crate::CoreError;
-use crate::ir::{Binding, Branch, Domain, Expression, FoldOrder, Scalar, Step};
+use crate::ir::{
+    Binding, Branch, DefinitionBody, Domain, Expression, FoldOrder, Scalar, Step, TemporalFormula,
+};
 use crate::safety_values::Arena;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::safety_values::ValueRemap;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
+
+#[path = "safety_lazy.rs"]
+mod lazy;
 
 #[derive(Clone, Copy)]
 pub(crate) struct EvalContext<'a> {
@@ -15,7 +20,8 @@ pub(crate) struct EvalContext<'a> {
     pub old: Option<Scalar>,
     pub prime: bool,
     pub(crate) frame: Option<&'a CallFrame>,
-    pub(crate) evaluation_depth: usize,
+    pub(crate) evaluation_depth: u8,
+    pub(crate) recursive: bool,
 }
 
 #[derive(Clone)]
@@ -36,12 +42,12 @@ impl Argument {
     fn new(
         expression: &Expression,
         context: EvalContext<'_>,
-        caller: &Option<Arc<CallFrame>>,
+        frame: Option<Arc<CallFrame>>,
     ) -> Self {
         Self {
             expression: Arc::new(expression.clone()),
             locals: context.locals.to_vec(),
-            frame: caller.clone(),
+            frame,
             old: context.old,
         }
     }
@@ -71,15 +77,19 @@ impl CallFrame {
         captures: &[Expression],
         context: EvalContext<'_>,
     ) -> Self {
-        let caller = context.frame.cloned().map(Arc::new);
+        let parent = context
+            .frame
+            .filter(|_| !arguments.is_empty() || !captures.is_empty())
+            .cloned()
+            .map(Arc::new);
         Self {
             arguments: arguments
                 .iter()
-                .map(|value| Argument::new(value, context, &caller))
+                .map(|value| Argument::new(value, context, parent.clone()))
                 .collect(),
             captures: captures
                 .iter()
-                .map(|value| Argument::new(value, context, &caller))
+                .map(|value| Argument::new(value, context, parent.clone()))
                 .collect(),
         }
     }
@@ -95,19 +105,25 @@ impl<'a> EvalContext<'a> {
             prime: false,
             frame: None,
             evaluation_depth: 0,
+            recursive: false,
         }
     }
-    fn descend(self, arena: &Arena) -> Result<Self, CoreError> {
+    #[inline]
+    pub(crate) fn descend(&mut self, arena: &Arena) -> Result<(), CoreError> {
         if arena.metadata.is_none() && arena.definitions.is_empty() && self.frame.is_none() {
-            return Ok(self);
+            return Ok(());
         }
         if self.evaluation_depth >= 128 {
+            if self.recursive {
+                return Err(CoreError {
+                    code: "evaluation-budget",
+                    message: "Recursive safety evaluation nesting exceeds 128".into(),
+                });
+            }
             return Err(CoreError::protocol("Safety evaluation nesting exceeds 128"));
         }
-        Ok(Self {
-            evaluation_depth: self.evaluation_depth + 1,
-            ..self
-        })
+        self.evaluation_depth += 1;
+        Ok(())
     }
     fn read(self, slot: usize, next: bool) -> Result<Scalar, CoreError> {
         if next || self.prime {
@@ -148,29 +164,88 @@ pub(crate) fn register_branch_memberships<'a>(
     branches: &'a [Branch],
     visitor: &mut impl FnMut(&'a Expression),
 ) {
-    for branch in branches {
-        for step in &branch.steps {
-            match step {
-                Step::Frame {
-                    arguments,
-                    captures,
-                    branches,
-                    ..
-                } => {
-                    for expression in arguments.iter().chain(captures) {
+    let mut pending = vec![branches];
+    while let Some(branches) = pending.pop() {
+        for branch in branches {
+            for step in &branch.steps {
+                match step {
+                    Step::Frame {
+                        arguments,
+                        captures,
+                        branches,
+                        ..
+                    } => {
+                        for expression in arguments.iter().chain(captures) {
+                            visitor(expression);
+                        }
+                        pending.push(branches);
+                    }
+                    Step::Call {
+                        arguments,
+                        captures,
+                        ..
+                    } => {
+                        for expression in arguments.iter().chain(captures) {
+                            visitor(expression);
+                        }
+                    }
+                    Step::Guard { expression }
+                    | Step::Assign {
+                        value: expression, ..
+                    } => visitor(expression),
+                    Step::Bind { domain, .. } | Step::Choose { domain, .. } => {
+                        for expression in domain.children() {
+                            visitor(expression);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+pub(crate) fn register_formula_memberships<'a>(
+    formula: &'a TemporalFormula,
+    visitor: &mut impl FnMut(&'a Expression),
+) {
+    let mut pending = vec![formula];
+    while let Some(formula) = pending.pop() {
+        match formula {
+            TemporalFormula::Call {
+                arguments,
+                captures,
+                ..
+            } => {
+                for expression in arguments.iter().chain(captures) {
+                    visitor(expression);
+                }
+            }
+            TemporalFormula::Frame {
+                arguments,
+                captures,
+                formula,
+                ..
+            } => {
+                for expression in arguments.iter().chain(captures) {
+                    visitor(expression);
+                }
+                pending.push(formula);
+            }
+            TemporalFormula::Atom { expression } => visitor(expression),
+            TemporalFormula::Not { formula }
+            | TemporalFormula::Always { formula }
+            | TemporalFormula::Eventually { formula } => pending.push(formula),
+            TemporalFormula::And { left, right } | TemporalFormula::Or { left, right } => {
+                pending.extend([left.as_ref(), right.as_ref()]);
+            }
+            TemporalFormula::Forall { bounds, formula }
+            | TemporalFormula::Exists { bounds, formula } => {
+                for binding in bounds {
+                    for expression in binding.domain.children() {
                         visitor(expression);
                     }
-                    register_branch_memberships(branches, visitor);
                 }
-                Step::Guard { expression }
-                | Step::Assign {
-                    value: expression, ..
-                } => visitor(expression),
-                Step::Bind { domain, .. } | Step::Choose { domain, .. } => {
-                    for expression in domain.children() {
-                        visitor(expression);
-                    }
-                }
+                pending.push(formula);
             }
         }
     }
@@ -193,6 +268,7 @@ impl Validation {
     }
 }
 
+#[derive(Clone)]
 pub(crate) enum Values {
     Range(std::ops::RangeInclusive<i32>),
     Items(std::vec::IntoIter<Scalar>),
@@ -298,7 +374,7 @@ pub(crate) fn validate_branches(
         };
         for step in &branch.steps {
             match step {
-                Step::Frame { .. } => {
+                Step::Frame { .. } | Step::Call { .. } => {
                     return Err(CoreError::protocol(
                         "Operator references require safety IR v2",
                     ));
@@ -456,6 +532,10 @@ impl Expression {
                 consequent,
                 alternative,
             } => vec![condition, consequent, alternative],
+            Self::Assert { condition, message } => vec![condition, message],
+            Self::SelectSeq { sequence, body, .. } | Self::SortSeq { sequence, body, .. } => {
+                vec![sequence, body]
+            }
             Self::In { value, domain } => {
                 let mut children = vec![value.as_ref()];
                 children.extend(domain.children());
@@ -657,6 +737,33 @@ impl Expression {
                 body.validate_with(child)?;
                 return Ok(());
             }
+            Self::SelectSeq {
+                slot,
+                sequence,
+                body,
+            }
+            | Self::SortSeq {
+                slot,
+                sequence,
+                body,
+            } => {
+                let arity = if matches!(self, Self::SortSeq { .. }) {
+                    2
+                } else {
+                    1
+                };
+                if *slot != ctx.locals || ctx.locals + arity > 40 {
+                    return Err(CoreError::protocol(
+                        "Invalid sequence callback variable slot",
+                    ));
+                }
+                sequence.validate_with(ctx.child())?;
+                body.validate_with(Validation {
+                    locals: ctx.locals + arity,
+                    ..ctx.child()
+                })?;
+                return Ok(());
+            }
             Self::Update { target, updates } => {
                 target.validate_with(ctx.child())?;
                 for update in updates {
@@ -696,13 +803,37 @@ impl Expression {
         }
         Ok(())
     }
-    #[inline]
+    #[inline(always)]
     pub(crate) fn eval(
         &self,
         ctx: EvalContext<'_>,
         arena: &mut Arena,
     ) -> Result<Scalar, CoreError> {
-        let ctx = ctx.descend(arena)?;
+        if ctx.evaluation_depth >= 128 {
+            let mut checked = ctx;
+            checked.descend(arena)?;
+        }
+        match self {
+            Self::Literal { value } => Ok(*value),
+            Self::Read { slot, next } => ctx.read(*slot, *next),
+            Self::Bound { slot } => ctx
+                .locals
+                .get(*slot)
+                .copied()
+                .ok_or_else(|| CoreError::protocol("Unbound quantified variable")),
+            Self::Old => ctx
+                .old
+                .ok_or_else(|| CoreError::protocol("Unbound EXCEPT @")),
+            _ => self.eval_nonleaf(ctx, arena),
+        }
+    }
+    #[inline(never)]
+    fn eval_nonleaf(
+        &self,
+        mut ctx: EvalContext<'_>,
+        arena: &mut Arena,
+    ) -> Result<Scalar, CoreError> {
+        ctx.descend(arena)?;
         match self {
             Self::Prime { .. }
             | Self::Not { .. }
@@ -724,24 +855,15 @@ impl Expression {
             | Self::Implies { .. }
             | Self::If { .. }
             | Self::In { .. } => self.eval_scalar_operator(ctx, arena),
-            Self::Enabled { .. } => self.eval_enabled(ctx, arena),
             Self::Frame { .. }
             | Self::Call { .. }
             | Self::Parameter { .. }
             | Self::Capture { .. } => self.eval_reference(ctx, arena, Self::eval),
-            Self::Literal { value } => Ok(*value),
-            Self::Read { slot, next } => ctx.read(*slot, *next),
-            Self::Bound { slot } => ctx
-                .locals
-                .get(*slot)
-                .copied()
-                .ok_or_else(|| CoreError::protocol("Unbound quantified variable")),
-            Self::Old => ctx
-                .old
-                .ok_or_else(|| CoreError::protocol("Unbound EXCEPT @")),
+            Self::Enabled { .. } => self.eval_enabled(ctx, arena),
             _ => self.eval_operator(ctx, arena),
         }
     }
+
     fn eval_reference<T>(
         &self,
         ctx: EvalContext<'_>,
@@ -779,9 +901,13 @@ impl Expression {
                     .get(*definition)
                     .ok_or_else(|| CoreError::protocol("Unknown safety definition"))?;
                 let frame = CallFrame::new(arguments, captures, ctx);
+                let DefinitionBody::Expression(body) = &definition.body else {
+                    return Err(CoreError::protocol("Invalid safety call body kind"));
+                };
                 evaluate(
-                    &definition.body,
+                    body,
                     EvalContext {
+                        recursive: ctx.recursive || definition.recursive,
                         locals: &[],
                         frame: Some(&frame),
                         old: None,
@@ -807,6 +933,7 @@ impl Expression {
             _ => Err(CoreError::protocol("Expected a lexical reference")),
         }
     }
+
     fn eval_scalar_operator(
         &self,
         ctx: EvalContext<'_>,
@@ -952,6 +1079,7 @@ impl Expression {
                             prime: false,
                             frame: ctx.frame,
                             evaluation_depth: ctx.evaluation_depth,
+                            recursive: ctx.recursive,
                         },
                         &mut next,
                         arena,
@@ -960,7 +1088,9 @@ impl Expression {
                                 let context = EvalContext {
                                     locals: ctx.locals,
                                     frame: ctx.frame,
-                                    evaluation_depth: ctx.evaluation_depth + branch.steps.len() + 1,
+                                    evaluation_depth: ctx.evaluation_depth.saturating_add(
+                                        u8::try_from(branch.steps.len() + 1).unwrap_or(u8::MAX),
+                                    ),
                                     old,
                                     ..EvalContext::new(&current, next)
                                 };
@@ -992,17 +1122,27 @@ impl Expression {
     #[inline(never)]
     fn eval_operator(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
         Ok(match self {
-            Self::Literal { .. }
-            | Self::Read { .. }
-            | Self::Bound { .. }
-            | Self::Old
-            | Self::Frame { .. }
+            Self::Literal { .. } | Self::Read { .. } | Self::Bound { .. } | Self::Old => {
+                return self.eval(ctx, arena);
+            }
+            Self::Frame { .. }
             | Self::Call { .. }
             | Self::Parameter { .. }
             | Self::Capture { .. } => {
-                return self.eval(ctx, arena);
+                return self.eval_reference(ctx, arena, Self::eval);
             }
-            Self::Data { value } => arena.data(value)?,
+            Self::Data { value } => arena.data_expression(self, value)?,
+            Self::Assert { condition, message } => {
+                let condition = condition.eval(ctx, arena)?;
+                let message = message.eval(ctx, arena)?;
+                if condition != Scalar::Bool(true) {
+                    return Err(CoreError::protocol(&format!(
+                        "TLC assertion failed: {:?}",
+                        arena.portable(message)?
+                    )));
+                }
+                Scalar::Bool(true)
+            }
             Self::UnmatchedCase { location } => {
                 return Err(CoreError::protocol(&format!(
                     "Attempted to evaluate a CASE with no conditions true at {location}"
@@ -1051,6 +1191,11 @@ impl Expression {
                 arena.function(result)?
             }
             Self::At { target, key } => {
+                if arena.metadata.is_some() {
+                    let target = target.eval_function(ctx, arena)?;
+                    let key = key.eval(ctx, arena)?;
+                    return target.at(key, arena);
+                }
                 let target = target.eval(ctx, arena)?;
                 let key = key.eval(ctx, arena)?;
                 arena.at(target, key)?
@@ -1176,7 +1321,86 @@ impl Expression {
                 }
                 result
             }
+            Self::SelectSeq {
+                slot,
+                sequence,
+                body,
+            } => {
+                if *slot != ctx.locals.len() {
+                    return Err(CoreError::protocol(
+                        "Invalid sequence callback variable slot",
+                    ));
+                }
+                let source = sequence.eval(ctx, arena)?;
+                let elements = arena.sequence(source)?;
+                arena.consume(elements.len())?;
+                let mut locals = ctx.locals.to_vec();
+                locals.push(Scalar::Bool(false));
+                let mut selected = vec![];
+                for element in elements {
+                    arena.tick()?;
+                    locals[*slot] = element;
+                    if body
+                        .eval(
+                            EvalContext {
+                                locals: &locals,
+                                ..ctx
+                            },
+                            arena,
+                        )?
+                        .boolean()?
+                    {
+                        selected.push(element);
+                    }
+                }
+                arena.tuple(selected)?
+            }
+            Self::SortSeq {
+                slot,
+                sequence,
+                body,
+            } => {
+                if *slot != ctx.locals.len() {
+                    return Err(CoreError::protocol(
+                        "Invalid sequence callback variable slot",
+                    ));
+                }
+                let source = sequence.eval(ctx, arena)?;
+                let mut elements = arena.sequence(source)?;
+                arena.consume(elements.len())?;
+                let mut locals = ctx.locals.to_vec();
+                locals.extend([Scalar::Bool(false); 2]);
+                for index in 1..elements.len() {
+                    arena.tick()?;
+                    let element = elements[index];
+                    let mut position = index;
+                    while position > 0 {
+                        arena.tick()?;
+                        locals[*slot] = element;
+                        locals[*slot + 1] = elements[position - 1];
+                        if !body
+                            .eval(
+                                EvalContext {
+                                    locals: &locals,
+                                    ..ctx
+                                },
+                                arena,
+                            )?
+                            .boolean()?
+                        {
+                            break;
+                        }
+                        elements[position] = elements[position - 1];
+                        position -= 1;
+                    }
+                    elements[position] = element;
+                }
+                arena.tuple(elements)?
+            }
             Self::Domain { argument } => {
+                if arena.metadata.is_some() {
+                    return argument.eval_function(ctx, arena)?.domain(arena);
+                }
                 let value = argument.eval(ctx, arena)?;
                 arena.domain(value)?
             }
@@ -1440,7 +1664,8 @@ impl MembershipSet {
         ctx: EvalContext<'_>,
         arena: &mut Arena,
     ) -> Result<Arc<Self>, CoreError> {
-        let ctx = ctx.descend(arena)?;
+        let mut ctx = ctx;
+        ctx.descend(arena)?;
         if matches!(
             expression,
             Expression::Frame { .. }
@@ -1619,11 +1844,16 @@ impl MembershipSet {
                 Ok(true)
             }
             MembershipKind::Functions { domain, range } => {
-                let entries = arena.entries(value)?;
                 if !arena.has_domain(value, *domain)? {
                     return Ok(false);
                 }
-                for (_, element) in entries {
+                if let MembershipKind::Finite(set) = range.kind
+                    && let Some(count) = arena.binary_function_membership(value, set)
+                {
+                    arena.consume(count)?;
+                    return Ok(true);
+                }
+                for element in arena.function_values(value)? {
                     arena.tick()?;
                     if !range.contains(element, arena)? {
                         return Ok(false);
@@ -1663,7 +1893,8 @@ pub(crate) fn visit_bindings(
     arena: &mut Arena,
     visitor: &mut impl FnMut(EvalContext<'_>, &mut Arena) -> Result<bool, CoreError>,
 ) -> Result<bool, CoreError> {
-    let ctx = ctx.descend(arena)?;
+    let mut ctx = ctx;
+    ctx.descend(arena)?;
     let Some(binding) = bindings.get(position) else {
         return visitor(ctx, arena);
     };
@@ -1738,13 +1969,44 @@ pub(crate) fn visit_branch(
     arena: &mut Arena,
     visitor: &mut BranchVisitor<'_>,
 ) -> Result<bool, CoreError> {
-    let ctx = ctx.descend(arena)?;
+    let mut ctx = ctx;
+    ctx.descend(arena)?;
     arena.tick()?;
     let Some(step) = branch.steps.get(position) else {
         return visitor(next, arena);
     };
     let context = EvalContext { next, ..ctx };
     match step {
+        Step::Call {
+            definition,
+            arguments,
+            captures,
+        } => {
+            arena.consume(1)?;
+            let definition = arena
+                .definitions
+                .get(*definition)
+                .ok_or_else(|| CoreError::protocol("Unknown safety definition"))?;
+            let DefinitionBody::Action(branches) = &definition.body else {
+                return Err(CoreError::protocol("Invalid safety call body kind"));
+            };
+            let frame = CallFrame::new(arguments, captures, context);
+            let inner = EvalContext {
+                recursive: ctx.recursive || definition.recursive,
+                locals: &[],
+                frame: Some(&frame),
+                old: None,
+                ..ctx
+            };
+            for inner_branch in branches {
+                if visit_branch(inner_branch, 0, inner, next, arena, &mut |next, arena| {
+                    visit_branch(branch, position + 1, ctx, next, arena, visitor)
+                })? {
+                    return Ok(true);
+                }
+            }
+            Ok(false)
+        }
         Step::Frame {
             arguments,
             captures,
@@ -1846,6 +2108,42 @@ mod tests {
     use crate::Value;
     use crate::ir::{Expression, Scalar};
     use crate::safety_values::Arena;
+
+    #[test]
+    fn v1_enabled_subscript_keeps_the_existing_long_branch_limit() {
+        use crate::ir::{Branch, Step};
+        let mut steps = vec![Step::Assign {
+            slot: 0,
+            value: Expression::Read {
+                slot: 0,
+                next: false,
+            },
+        }];
+        steps.extend((0..129).map(|_| Step::Guard {
+            expression: Expression::Literal {
+                value: Scalar::Bool(true),
+            },
+        }));
+        let expression = Expression::Enabled {
+            branches: vec![Branch {
+                name: "Long".into(),
+                steps,
+            }],
+            subscript: Some(Box::new(Expression::Read {
+                slot: 0,
+                next: false,
+            })),
+        };
+        assert_eq!(
+            expression
+                .eval(
+                    EvalContext::new(&[Scalar::Int(0)], &[]),
+                    &mut Arena::new(1000)
+                )
+                .unwrap(),
+            Scalar::Bool(false)
+        );
+    }
 
     fn fold(
         order: &str,
@@ -2163,6 +2461,7 @@ mod tests {
             prime: false,
             frame: None,
             evaluation_depth: 0,
+            recursive: false,
         };
         let mut arena = Arena::new(0);
         for (expression, expected) in [

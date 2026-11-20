@@ -1,0 +1,356 @@
+{
+  "status": "complete",
+  "plan": "0057",
+  "adopted": "candidate B",
+  "notAdopted": "candidate A: packed function parallel regression",
+  "checks": [
+    {
+      "command": "just check",
+      "status": "passed"
+    },
+    {
+      "command": "just browser",
+      "status": "passed"
+    },
+    {
+      "command": "just portable-test",
+      "status": "passed"
+    },
+    {
+      "command": "just safety-test",
+      "status": "passed"
+    },
+    {
+      "command": "just criterion-test",
+      "status": "passed"
+    },
+    {
+      "command": "node --test dist/evals/*/contract-test.js",
+      "status": "passed"
+    },
+    {
+      "command": "just runtime-build",
+      "status": "passed"
+    },
+    {
+      "command": "just runtime-test",
+      "status": "passed"
+    },
+    {
+      "command": "just evaluate",
+      "status": "passed"
+    },
+    {
+      "command": "just replay-evaluation",
+      "status": "passed"
+    },
+    {
+      "command": "just package",
+      "status": "passed"
+    },
+    {
+      "command": "just tlc-diff-test <java> <jar>",
+      "status": "passed"
+    },
+    {
+      "command": "just tlc-diff <java> <jar> development evals/runs/0057-tlc",
+      "status": "passed"
+    },
+    {
+      "command": "just tlc-diff <java> <jar> confirmation evals/runs/0057-tlc-confirmation",
+      "status": "passed"
+    },
+    {
+      "command": "just tlc-diff-replay <java> <jar> evals/runs/0057-tlc evals/runs/0057-tlc-replay",
+      "status": "passed"
+    },
+    {
+      "command": "just support-plan",
+      "status": "passed"
+    },
+    {
+      "command": "just support-sync",
+      "status": "passed"
+    },
+    {
+      "command": "just support-check",
+      "status": "passed"
+    },
+    {
+      "command": "just support-check-staged",
+      "status": "passed"
+    },
+    {
+      "command": "pnpm check (final docs)",
+      "status": "passed"
+    }
+  ],
+  "red": "red.log: new borrowed view API absent on baseline",
+  "mutation": "not run; no mutation targets or shared TS tests changed, no Rust mutation score claimed",
+  "tlc": {
+    "0057-tlc": {
+      "cases": 155,
+      "matched": 153,
+      "rejectedInputs": 2,
+      "modelErrors": 30,
+      "witnesses": 105,
+      "infrastructureErrors": 0,
+      "incomplete": 0,
+      "mismatches": []
+    },
+    "0057-tlc-confirmation": {
+      "cases": 32,
+      "matched": 32,
+      "rejectedInputs": 0,
+      "modelErrors": 0,
+      "witnesses": 19,
+      "infrastructureErrors": 0,
+      "incomplete": 0,
+      "mismatches": []
+    },
+    "0057-tlc-replay": {
+      "cases": 155,
+      "matched": 153,
+      "rejectedInputs": 2,
+      "modelErrors": 30,
+      "witnesses": 105,
+      "infrastructureErrors": 0,
+      "incomplete": 0,
+      "mismatches": []
+    }
+  },
+  "files": [
+    {
+      "path": "after-validation.json",
+      "sha256": "8c7731d9a02fee7d06b37bf73300c133fe4f9bdb1ffd57ed32cd3e413c6be813"
+    },
+    {
+      "path": "b-build.log",
+      "sha256": "9fc28921eb17d84ad2902862022500d4ba56aa0fb8ca1875b3765fcb11bf8319"
+    },
+    {
+      "path": "b-clippy.log",
+      "sha256": "ca3ca708651f87d69b629c8f3fe7d073da74a19080238e08c91dfacbfa16bd8d"
+    },
+    {
+      "path": "b-criterion-build.log",
+      "sha256": "e1e1f77304245f179714cfbd103d9bca8b1cfd1e89c57af45df3d99dd7399838"
+    },
+    {
+      "path": "b-expanded-tests-before.log",
+      "sha256": "b2677d039d6197f56403bc80b495ac8ae0fb1f2dcfb6461b66d9ade68c672902"
+    },
+    {
+      "path": "b-tests.log",
+      "sha256": "ecbd74b5346b4cbfe6707e87866a1e5293a15491a63001dda9b31808af9186e4"
+    },
+    {
+      "path": "before-source.tar.gz",
+      "sha256": "cf65669e8055c5cbd054d0fcfbd57b5e52fd33954b5e54fee98d746c05b6b533"
+    },
+    {
+      "path": "build.log",
+      "sha256": "01ba761efc3ec632508bd68c4ba7a8a94699f842084195fbe8ebd6e56842916c"
+    },
+    {
+      "path": "candidate-a-source.tar.gz",
+      "sha256": "193b182e87d8bf16cc64f65f8e6c129830d95f7adedc6c763e4a9d8e02478e11"
+    },
+    {
+      "path": "candidate-b-source.tar.gz",
+      "sha256": "444571456b961ff80943e5a55e26d54dd41220f84379066a153ba77ff9d0884a"
+    },
+    {
+      "path": "clippy.log",
+      "sha256": "56f4a886130544b187666a016b9bdfa06191dea8db5dc1ca23754befe5643cd1"
+    },
+    {
+      "path": "comparison-b.log",
+      "sha256": "36455ad7b2c59bc8029b0321086ab46909cca33f459112f89e2be4d279c76a64"
+    },
+    {
+      "path": "comparison.log",
+      "sha256": "fb2be665f7a09aef46e01d5cf4391c43a76595bc52327581a26ca5fa9756f56c"
+    },
+    {
+      "path": "criterion-b.log",
+      "sha256": "a8286440b1d1aae442874fa9367b3d396f2e8922a74016ef589d088aaa055f54"
+    },
+    {
+      "path": "criterion-build.log",
+      "sha256": "ec3eeb8667d8165f60a7534d7b37ad2d8d6209721ab5e4332c924589a3aaab12"
+    },
+    {
+      "path": "criterion-inputs.json",
+      "sha256": "d9a95e8abff4900e74ca918a9fbd9ae6d1b9fcb39d00a9759ef114044a85b835"
+    },
+    {
+      "path": "criterion.log",
+      "sha256": "947b48d6b3775f8dd10e65ac5f826c9dd2dbd2e4b965dd4b3f59f95f8d36dbe0"
+    },
+    {
+      "path": "driver-build.log",
+      "sha256": "80a1a5a215e40ab2060bf2ee500b157a39e8264b45d5cb8f1910ab1dbe3b20be"
+    },
+    {
+      "path": "final-browser.log",
+      "sha256": "c180374a0c208fb4c55bddf3b84a6a0057c6047eeee948a5a24fa1afd534668f"
+    },
+    {
+      "path": "final-check.log",
+      "sha256": "2824051494ef383e17406d788ac8667139d20e1a0bdc17c96e084ffd4fa7d689"
+    },
+    {
+      "path": "final-criterion-test.log",
+      "sha256": "45302e5fae7283529c45fe61584344c86f626368389bbbaca40fbe2446da1ffb"
+    },
+    {
+      "path": "final-eval-contracts.log",
+      "sha256": "74ea106c7587c4ebfacb19a557fc18a5453fd0888295885d3160f2c3ea98b877"
+    },
+    {
+      "path": "final-evaluate.log",
+      "sha256": "152cc2bc49ecd907fa8fe3a22c7e825ac5578521afa927de6c3143bc4ea0b62f"
+    },
+    {
+      "path": "final-lint.log",
+      "sha256": "ce0bbd748a43aa233d9b6a8c0bdfa695a8788dae3692e3112af7d8daaec8ab0a"
+    },
+    {
+      "path": "final-package.log",
+      "sha256": "f3d3e9f437b0f2be191a55809684fa0862484b8075d98835024625d2e030213a"
+    },
+    {
+      "path": "final-portable.log",
+      "sha256": "72f9576df932c1ba87b68d337c52d27dad1d99826a155f410d730b771b2519c2"
+    },
+    {
+      "path": "final-replay-evaluation.log",
+      "sha256": "726981d4697b24e2a613fba5f4379f0e2dfa82348043181862831a63053d077d"
+    },
+    {
+      "path": "final-runtime-build.log",
+      "sha256": "42102c18c2aa40fa9012b786991a9f1df566767d9c9fdd5ef0486bfcd2f612aa"
+    },
+    {
+      "path": "final-runtime-test.log",
+      "sha256": "76f15b9065d22f86b1d46cf5fff7e1ead23498f41274ea1a2a9df8af9605ff0b"
+    },
+    {
+      "path": "final-safety.log",
+      "sha256": "5096ef544eeb440e99370e1fcfbbb79c9d8825e36ade3b66a1d8b84f0747dc65"
+    },
+    {
+      "path": "final-tlc-confirmation.log",
+      "sha256": "9d791f275748fb19c4e360d8cbf519b559a1bfa5039010bf95ade5e3092bd981"
+    },
+    {
+      "path": "final-tlc-replay.log",
+      "sha256": "88790a3df8bed6fe9760d5c532d8bd00d1360aa241b125d2a3143bc7ac64e0c4"
+    },
+    {
+      "path": "final-tlc-tests.log",
+      "sha256": "b4a5068d51a1ad3084d2c2a101857eb91e0ca69cfa14595db3cb8ba8d2231b8e"
+    },
+    {
+      "path": "final-tlc.log",
+      "sha256": "653d2f8448c3b4574b6176451014f2e8d70363f95408bcfadb7f858eb4e7e9c1"
+    },
+    {
+      "path": "format.log",
+      "sha256": "d4df3e781045bef70d90ea9aa2dd51e7aa6211e1baa7a41832ba2f793d6f1537"
+    },
+    {
+      "path": "green.log",
+      "sha256": "d6c1249b868d2f308a40d77a2e3f92b8bae7e52ec03f0073b2aefc8964692804"
+    },
+    {
+      "path": "measure-a-commands.sh",
+      "sha256": "8104aa8a4395aa6dae1897b5a39bfbcd8605cd09ac74f2109a451098428f5c36"
+    },
+    {
+      "path": "measure-b-commands.sh",
+      "sha256": "154dc132e7198d66f9a630c15ef1cd19aa76660806e88825fa2c0238e73fbb0b"
+    },
+    {
+      "path": "parity-b.log",
+      "sha256": "08d0d69d535e6fb0f58d6ea6f14558791fb794b9257fcf1dd1b6aca4cbd55e74"
+    },
+    {
+      "path": "parity-proof.json",
+      "sha256": "99a9afb589cd9e83d98ab24aa84f43ca1a3b3ccc50db8817fc17921d608aebe6"
+    },
+    {
+      "path": "parity.log",
+      "sha256": "08d0d69d535e6fb0f58d6ea6f14558791fb794b9257fcf1dd1b6aca4cbd55e74"
+    },
+    {
+      "path": "plan-b-commit.log",
+      "sha256": "5dcb48cb127426865c9c806c3df227a0ed6c73e2095a4cafe36e9eb9d7c02ad8"
+    },
+    {
+      "path": "plan-commit.log",
+      "sha256": "62ae1de0b87d318cfece8da948d54aab513e80f4e0168d097d5dcce096feb588"
+    },
+    {
+      "path": "profile-build.log",
+      "sha256": "a69e6085f65fbbc85bf0989aa810cd4f894dc05aad22703efe49cf3588bffc38"
+    },
+    {
+      "path": "profile-summary.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "profile.log",
+      "sha256": "e38d319020f89b263141cf8bfbbc92bd7ae3adee7a844fde2ab96ebaf87e20d2"
+    },
+    {
+      "path": "proof-source.txt",
+      "sha256": "e07069bf56aa47e098fce6b10dd3749febb1b6653daceed3c8497d0bd02fea02"
+    },
+    {
+      "path": "proof.log",
+      "sha256": "b99266f2c27413ab2d1d9faaf3a0093746315a1ff54f4578611176e255e9338a"
+    },
+    {
+      "path": "red.log",
+      "sha256": "a56d4cefaebd4e90e053185c4134e7d84346d3ef66f6f327331d2f5064d1afbf"
+    },
+    {
+      "path": "summary-b.log",
+      "sha256": "d1a6b0462b68fbb40e53612d42062ca86e828a873fb5e093ed97d6241459b472"
+    },
+    {
+      "path": "summary.log",
+      "sha256": "3c8783c3d898831bdfb2fde48b0decfc8bfd3588f8d6a1830cf865bc0169d15f"
+    },
+    {
+      "path": "support-check-staged.log",
+      "sha256": "ba6e0230004998016f16d87fb5f3dce877014f9c3d7ca322b653f541b13c93f1"
+    },
+    {
+      "path": "support-check.log",
+      "sha256": "3896821505071af23fd92ea2e24d350d4c95bcccbf8c03b7ae148d78c0a4b062"
+    },
+    {
+      "path": "support-plan-final.log",
+      "sha256": "58adbdf59aea2e5d405ccf0826d2a4577ae1b838aa8a96f8c73b4626b7a7eff3"
+    },
+    {
+      "path": "support-plan.log",
+      "sha256": "58adbdf59aea2e5d405ccf0826d2a4577ae1b838aa8a96f8c73b4626b7a7eff3"
+    },
+    {
+      "path": "support-sync.log",
+      "sha256": "f50b2f333b67933f3e27ebf4985f7dbf12dada2fd54f39c47839dc109631f601"
+    },
+    {
+      "path": "tests.log",
+      "sha256": "28874d2f3fdcc78a50768c69ee6f8ca494cb5c25db92d07ec60b81b65be80608"
+    },
+    {
+      "path": "validation-commands.sh",
+      "sha256": "bc85e5dbbda3332eb3d6e9e2b7f8618e93cac67f1541f8177d13f8ffbaf89266"
+    }
+  ]
+}

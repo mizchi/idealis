@@ -1,0 +1,26 @@
+symmetry/counter-product/current
+                        time:   [9.6955 ms 9.7808 ms 9.8854 ms]
+                        thrpt:  [8.3907 Melem/s 8.4804 Melem/s 8.5550 Melem/s]
+Found 1 outliers among 20 measurements (5.00%)
+  1 (5.00%) high mild
+symmetry/counter-product/instructions
+                        time:   [15.849 ms 18.808 ms 22.940 ms]
+                        thrpt:  [3.6157 Melem/s 4.4101 Melem/s 5.2335 Melem/s]
+Found 2 outliers among 20 measurements (10.00%)
+  1 (5.00%) high mild
+  1 (5.00%) high severe
+
+Benchmarking symmetry/counter-product/current
+Benchmarking symmetry/counter-product/current: Warming up for 500.00 ms
+Benchmarking symmetry/counter-product/current: Collecting 20 samples in estimated 1.1253 s (100 iterations)
+Benchmarking symmetry/counter-product/current: Analyzing
+Benchmarking symmetry/counter-product/instructions
+Benchmarking symmetry/counter-product/instructions: Warming up for 500.00 ms
+Benchmarking symmetry/counter-product/instructions: Collecting 20 samples in estimated 1.2626 s (60 iterations)
+Benchmarking symmetry/counter-product/instructions: Analyzing
+
+thread 'main' (55111957) panicked at src/symmetry_benchmarks.rs:38:13:
+assertion `left == right` failed
+  left: "bounded"
+ right: "complete"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

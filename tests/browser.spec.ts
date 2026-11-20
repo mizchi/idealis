@@ -3,37 +3,23 @@ import { createServer, type Server } from "node:http";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { expect, test } from "@playwright/test";
-import { build } from "esbuild";
-import { config, names } from "../evals/quint-generated/cases.js";
+import { config, names } from "../evals/experiments/quint-generated/cases.js";
+import { bundleModule } from "../scripts/bundle-module.js";
 
 let server: Server | undefined;
 let origin: string;
 
 test.beforeAll(async () => {
-  const core = await build({
-    entryPoints: ["src/index.ts"],
-    bundle: true,
-    platform: "browser",
-    format: "esm",
-    write: false,
-    metafile: true,
-  });
+  const core = await bundleModule("packages/idealis/src/index.ts");
   expect(
-    Object.keys(core.metafile.inputs).every((name) => name.startsWith("src/")),
+    core.inputs.every((name) => name.startsWith("packages/idealis/src/")),
   ).toBe(true);
-  const bundle = await build({
-    entryPoints: ["tests/browser-entry.ts"],
-    bundle: true,
-    platform: "browser",
-    format: "iife",
+  const bundle = await bundleModule("tests/browser-entry.ts", {
     globalName: "idealisBrowser",
-    define: { global: "globalThis" },
+    define: { global: "globalThis", "import.meta": "{}" },
     alias: { "node:zlib": "fflate" },
     external: ["bun:jsc"],
-    write: false,
   });
-  const output = bundle.outputFiles[0];
-  if (!output) throw new Error("Browser bundle was empty");
   const z3 = dirname(createRequire(import.meta.url).resolve("z3-solver"));
   const assets = new Map([
     [
@@ -45,12 +31,18 @@ test.beforeAll(async () => {
         type: "application/wasm",
       },
     ],
-    ["/bundle.js", { body: output.contents, type: "text/javascript" }],
+    [
+      "/bundle.js",
+      {
+        body: Buffer.from(bundle.code),
+        type: "text/javascript; charset=utf-8",
+      },
+    ],
     [
       "/z3-built.js",
       {
         body: await readFile(join(z3, "z3-built.js")),
-        type: "text/javascript",
+        type: "text/javascript; charset=utf-8",
       },
     ],
     [
@@ -93,7 +85,7 @@ for (const irVersion of [undefined, 1, 2] as const)
       await Promise.all(
         names.map(async (name) => {
           const source = await readFile(
-            `evals/fixtures/quint-generated/generated/${name}.tla`,
+            `fixtures/quint-generated/generated/${name}.tla`,
             "utf8",
           );
           return ["safety", "broken"].map((property) => ({

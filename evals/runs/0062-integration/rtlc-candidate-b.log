@@ -1,0 +1,38 @@
+   Compiling rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+error[E0308]: mismatched types
+   --> src/safety_expressions.rs:999:78
+    |
+999 | ...                   evaluation_depth: ctx.evaluation_depth + branch.steps.len() + 1,
+    |                                                                ^^^^^^^^^^^^^^^^^^ expected `u8`, found `usize`
+
+error[E0277]: cannot add `usize` to `u8`
+   --> src/safety_expressions.rs:999:76
+    |
+999 | ...                   evaluation_depth: ctx.evaluation_depth + branch.steps.len() + 1,
+    |                                                              ^ no implementation for `u8 + usize`
+    |
+    = help: the trait `Add<usize>` is not implemented for `u8`
+help: the following other types implement trait `Add<Rhs>`
+   --> /Users/mz/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/ops/arith.rs:98:9
+    |
+ 98 |         const impl Add for $t {
+    |         ^^^^^^^^^^^^^^^^^^^^^ `u8` implements `Add`
+...
+113 | add_impl! { usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128 f16 f32 f64 f128 }
+    | ---------------------------------------------------------------------------------- in this macro invocation
+    |
+   ::: /Users/mz/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/internal_macros.rs:22:9
+    |
+ 22 |         const impl $imp<$u> for &$t {
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^ `&u8` implements `Add<u8>`
+...
+ 33 |         const impl $imp<&$u> for $t {
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^ `u8` implements `Add<&u8>`
+...
+ 44 |         const impl $imp<&$u> for &$t {
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `&u8` implements `Add`
+    = note: this error originates in the macro `add_impl` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+Some errors have detailed explanations: E0277, E0308.
+For more information about an error, try `rustc --explain E0277`.
+error: could not compile `rtlc` (lib test) due to 2 previous errors

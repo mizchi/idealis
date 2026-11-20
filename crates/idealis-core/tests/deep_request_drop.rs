@@ -36,6 +36,7 @@ fn deep_action_frame_program() -> SafetyProgram {
         invariants: vec![],
         assumptions: vec![],
         check_deadlock: false,
+        symmetry: None,
         initial_properties: vec![],
         action_properties: vec![],
         properties: vec![],
@@ -43,6 +44,7 @@ fn deep_action_frame_program() -> SafetyProgram {
         constraints: vec![],
         action_constraints: vec![],
         definitions: Some(vec![Definition {
+            recursive: false,
             id: 0,
             parameter_count: 0,
             capture_count: 0,
@@ -51,7 +53,8 @@ fn deep_action_frame_program() -> SafetyProgram {
             body: Expression::Enabled {
                 branches,
                 subscript: None,
-            },
+            }
+            .into(),
         }]),
     }
 }
@@ -64,6 +67,7 @@ fn deep_drop_engine_handle_check_safety_action_frames() {
             Engine::default().handle(Command {
                 version: 1,
                 request: Request::CheckSafety {
+                    options: None,
                     program: deep_action_frame_program(),
                     bounds: SafetyBounds {
                         max_depth: 8,

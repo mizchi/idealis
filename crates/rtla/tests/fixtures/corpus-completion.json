@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Nested Assume/Prove With Label",
+    "family": "assume-prove.txt",
+    "source": "\n---- MODULE Test ----\nTHEOREM thm ==\n  ASSUME asm :: \n    ASSUME P\n    PROVE Q\n  PROVE C\nOMITTED\n====\n\n",
+    "expected": "accepted",
+    "attributes": [],
+    "expectedAst": "\n(source_file (module (header_line) name: (identifier) (header_line)\n  (theorem\n    name: (identifier) (def_eq)\n    statement: (assume_prove\n      assumption: (inner_assume_prove\n        (identifier) (label_as)\n        (assume_prove\n          assumption: (identifier_ref)\n          conclusion: (identifier_ref)\n        )\n      )\n      conclusion: (identifier_ref)\n    )\n    proof: (terminal_proof)\n  )\n(double_line)))\n\n",
+    "origin": "tlatools/org.lamport.tlatools/test/tla2sany/corpus/assume-prove.txt"
+  },
+  {
+    "name": "Assume/Prove with Mixed Assumptions",
+    "family": "assume-prove.txt",
+    "source": "\n---- MODULE Test ----\nTHEOREM thm ==\n  ASSUME\n    NEW f,\n    1 + 2,\n    /\\ 1\n    /\\ 2,\n    lbl :: ASSUME P PROVE Q\n  PROVE C\nOMITTED\n====\n\n",
+    "expected": "accepted",
+    "attributes": [],
+    "expectedAst": "\n(source_file (module (header_line) name: (identifier) (header_line)\n  (theorem\n    name: (identifier) (def_eq)\n    statement: (assume_prove\n      assumption: (new (identifier))\n      assumption: (bound_infix_op lhs: (nat_number) symbol: (plus) rhs: (nat_number))\n      assumption: (conj_list (conj_item (bullet_conj) (nat_number)) (conj_item (bullet_conj) (nat_number)))\n      assumption: (inner_assume_prove\n        (identifier)\n        (label_as)\n        (assume_prove\n          assumption: (identifier_ref)\n          conclusion: (identifier_ref)\n        )\n      )\n      conclusion: (identifier_ref)\n    )\n    proof: (terminal_proof)\n  )\n(double_line)))\n\n",
+    "origin": "tlatools/org.lamport.tlatools/test/tla2sany/corpus/assume-prove.txt"
+  },
+  {
+    "name": "Bitfield Number Formats",
+    "family": "number.txt",
+    "source": "\n---- MODULE Test ----\nop == \\b01010101\nop == \\B10101010\nop == \\o01234567\nop == \\O76543210\nop == \\h0123456789abcdef\nop == \\H9876543210FEDCBA\n====\n\n",
+    "expected": "accepted",
+    "attributes": [],
+    "expectedAst": "\n(source_file (module (header_line) (identifier) (header_line)\n  (operator_definition (identifier) (def_eq) (binary_number (format) (value)))\n  (operator_definition (identifier) (def_eq) (binary_number (format) (value)))\n  (operator_definition (identifier) (def_eq) (octal_number (format) (value)))\n  (operator_definition (identifier) (def_eq) (octal_number (format) (value)))\n  (operator_definition (identifier) (def_eq) (hex_number (format) (value)))\n  (operator_definition (identifier) (def_eq) (hex_number (format) (value)))\n(double_line)))\n\n",
+    "origin": "tlatools/org.lamport.tlatools/test/tla2sany/corpus/number.txt"
+  },
+  {
+    "name": "Step Expression With Parameterized Subscript",
+    "family": "step_expressions.txt",
+    "source": "\n---- MODULE Test ----\nop == [A]_M(S)!vars\n====\n\n",
+    "expected": "accepted",
+    "attributes": [],
+    "expectedAst": "\n(source_file (module (header_line) name: (identifier) (header_line)\n  (operator_definition name: (identifier) (def_eq) definition:\n    (step_expr_or_stutter\n      (identifier_ref)\n      (prefixed_op\n        prefix: (subexpr_prefix (subexpr_component\n          (bound_op name: (identifier_ref) parameter: (identifier_ref))\n        ))\n        op: (identifier_ref)\n      )\n    )\n  )\n(double_line)))\n\n",
+    "origin": "tlatools/org.lamport.tlatools/test/tla2sany/corpus/step_expressions.txt"
+  },
+  {
+    "name": "Unicode Operator References",
+    "family": "unicode/operators-unicode.txt",
+    "source": "\n---- MODULE Test ----\nop ≜ f(\n  □,\n  ◇,\n  ¬,\n  ≈,\n  ≔,\n  ≍,\n  ◯,\n  ⩴,\n  ●,\n  ∩,\n  ⋅,\n  ∘,\n  ≅,\n  ∪,\n  ÷,\n  ≐,\n  ‥,\n  …,\n  ≡,\n  ‼,\n  ≥,\n  ≫,\n  ⇔,\n  ⇒,\n  ∈,\n  ∧,\n  ⫤,\n  ↝,\n  ≤,\n  ≪,\n  ∨,\n  ⊣,\n  ≠,\n  ∉,\n  ⊙,\n  ⊖,\n  ⊕,\n  ⊘,\n  ⊗,\n  ⇸,\n  ≺,\n  ⪯,\n  ∝,\n  ⁇,\n  ⊨,\n  ⊢,\n  ∼,\n  ≃,\n  ⊓,\n  ⊔,\n  ⊏,\n  ⊑,\n  ⊐,\n  ⊒,\n  ⋆,\n  ⊂,\n  ⊆,\n  ≻,\n  ⪰,\n  ⊃,\n  ⊇,\n  ×,\n  ⊎,\n  ‖,\n  ≀,\n  ⁺\n)\n====\n\n",
+    "expected": "accepted",
+    "attributes": [],
+    "expectedAst": "\n(source_file (module (header_line) name: (identifier) (header_line)\n  (operator_definition name: (identifier) (def_eq) definition: (bound_op name: (identifier_ref)\n    parameter: (prefix_op_symbol (always))\n    parameter: (prefix_op_symbol (eventually))\n    parameter: (prefix_op_symbol (lnot))\n    parameter: (infix_op_symbol (approx))\n    parameter: (infix_op_symbol (assign))\n    parameter: (infix_op_symbol (asymp))\n    parameter: (infix_op_symbol (bigcirc))\n    parameter: (infix_op_symbol (bnf_rule))\n    parameter: (infix_op_symbol (bullet))\n    parameter: (infix_op_symbol (cap))\n    parameter: (infix_op_symbol (cdot))\n    parameter: (infix_op_symbol (circ))\n    parameter: (infix_op_symbol (cong))\n    parameter: (infix_op_symbol (cup))\n    parameter: (infix_op_symbol (div))\n    parameter: (infix_op_symbol (doteq))\n    parameter: (infix_op_symbol (dots_2))\n    parameter: (infix_op_symbol (dots_3))\n    parameter: (infix_op_symbol (equiv))\n    parameter: (infix_op_symbol (excl))\n    parameter: (infix_op_symbol (geq))\n    parameter: (infix_op_symbol (gg))\n    parameter: (infix_op_symbol (iff))\n    parameter: (infix_op_symbol (implies))\n    parameter: (infix_op_symbol (in))\n    parameter: (infix_op_symbol (land))\n    parameter: (infix_op_symbol (ld_ttile))\n    parameter: (infix_op_symbol (leads_to))\n    parameter: (infix_op_symbol (leq))\n    parameter: (infix_op_symbol (ll))\n    parameter: (infix_op_symbol (lor))\n    parameter: (infix_op_symbol (ls_ttile))\n    parameter: (infix_op_symbol (neq))\n    parameter: (infix_op_symbol (notin))\n    parameter: (infix_op_symbol (odot))\n    parameter: (infix_op_symbol (ominus))\n    parameter: (infix_op_symbol (oplus))\n    parameter: (infix_op_symbol (oslash))\n    parameter: (infix_op_symbol (otimes))\n    parameter: (infix_op_symbol (plus_arrow))\n    parameter: (infix_op_symbol (prec))\n    parameter: (infix_op_symbol (preceq))\n    parameter: (infix_op_symbol (propto))\n    parameter: (infix_op_symbol (qq))\n    parameter: (infix_op_symbol (rd_ttile))\n    parameter: (infix_op_symbol (rs_ttile))\n    parameter: (infix_op_symbol (sim))\n    parameter: (infix_op_symbol (simeq))\n    parameter: (infix_op_symbol (sqcap))\n    parameter: (infix_op_symbol (sqcup))\n    parameter: (infix_op_symbol (sqsubset))\n    parameter: (infix_op_symbol (sqsubseteq))\n    parameter: (infix_op_symbol (sqsupset))\n    parameter: (infix_op_symbol (sqsupseteq))\n    parameter: (infix_op_symbol (star))\n    parameter: (infix_op_symbol (subset))\n    parameter: (infix_op_symbol (subseteq))\n    parameter: (infix_op_symbol (succ))\n    parameter: (infix_op_symbol (succeq))\n    parameter: (infix_op_symbol (supset))\n    parameter: (infix_op_symbol (supseteq))\n    parameter: (infix_op_symbol (times))\n    parameter: (infix_op_symbol (uplus))\n    parameter: (infix_op_symbol (vertvert))\n    parameter: (infix_op_symbol (wr))\n    parameter: (postfix_op_symbol (sup_plus))\n  ))\n(double_line)))\n\n",
+    "origin": "tlatools/org.lamport.tlatools/test/tla2sany/corpus/unicode/operators-unicode.txt"
+  }
+]

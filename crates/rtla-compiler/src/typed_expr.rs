@@ -171,7 +171,8 @@ impl Compiler<'_> {
                     old.locals.insert("@".into(), I::Old);
                     old.order.retain(|name| name != "@");
                     old.order.push("@".into());
-                    let binding = self.binding_id(update.value.location.start, 2, 0);
+                    let binding =
+                        self.binding_at(context.origin, update.value.location.start, 2, 0);
                     old.binding_ids.insert("@".into(), binding);
                     old.projection.insert(binding, I::Old);
                     lowered.push(ir::Update {
@@ -341,7 +342,7 @@ impl Compiler<'_> {
     ) -> Result<I> {
         let child = context.nested()?;
         let demanded = self.membership_demands(name, context, membership)?;
-        let position = self.scopes[context.scope][name].definition.location.start;
+        let position = self.scopes[context.scope][name].id;
         let arguments = args
             .iter()
             .enumerate()
@@ -383,7 +384,8 @@ impl Compiler<'_> {
             for (index, name) in names.iter().enumerate() {
                 child.order.retain(|item| item != *name);
                 child.order.push((*name).clone());
-                let binding_id = self.binding_id(bound.set.location.start, 1, index);
+                let binding_id =
+                    self.named_binding_at(context.origin, bound.set.location.start, 1, index, name);
                 child.binding_ids.insert((*name).clone(), binding_id);
                 let value = if matches!(bound.pattern, Pattern::Tuple { .. }) {
                     I::At {
@@ -590,9 +592,7 @@ impl Compiler<'_> {
             .ok_or_else(|| CompileError {
                 message: format!("operator {name}"),
             })?;
-        if entry.definition.is_recursive
-            || context.call_ids.contains(&entry.definition.location.start)
-        {
+        if !entry.definition.is_recursive && context.call_ids.contains(&entry.id) {
             return unsupported(format!("fold operator {name}"));
         }
         let DefinitionKind::Operator { params } = &entry.definition.head else {
@@ -640,6 +640,56 @@ impl Compiler<'_> {
     ) -> Result<I> {
         if self.has(context, operator) {
             return self.shared_ir(operator, args, context);
+        }
+        if (operator == "SelectSeq" && self.extends("Sequences"))
+            || (operator == "SortSeq" && self.extends("TLC"))
+        {
+            if args.len() != 2 {
+                return unsupported(format!("operator arity {operator}"));
+            }
+            let arity = if operator == "SortSeq" { 2 } else { 1 };
+            let E::Identifier { name } = &args[1].node else {
+                return unsupported("callback operator argument");
+            };
+            if context.locals.contains_key(name) || context.bound + arity > 40 {
+                return unsupported(format!("callback operator {name}"));
+            }
+            let body = Box::new(
+                self.shared_arguments_ir(
+                    name,
+                    (0..arity)
+                        .map(|index| I::Bound {
+                            slot: context.bound + index,
+                        })
+                        .collect(),
+                    context,
+                    false,
+                    BTreeMap::new(),
+                )?,
+            );
+            let sequence = Box::new(self.expression_ir(&args[0], child)?);
+            return Ok(if arity == 1 {
+                I::SelectSeq {
+                    slot: context.bound,
+                    sequence,
+                    body,
+                }
+            } else {
+                I::SortSeq {
+                    slot: context.bound,
+                    sequence,
+                    body,
+                }
+            });
+        }
+        if operator == "Assert" && self.extends("TLC") {
+            if args.len() != 2 {
+                return unsupported("operator arity Assert");
+            }
+            return Ok(I::Assert {
+                condition: Box::new(self.expression_ir(&args[0], child)?),
+                message: Box::new(self.expression_ir(&args[1], child)?),
+            });
         }
         if self.extends("Apalache") && ["ApaFoldSet", "ApaFoldSeqLeft"].contains(&operator) {
             if args.len() != 3 {
@@ -931,16 +981,12 @@ impl Compiler<'_> {
                         parent: frame,
                         depth,
                     });
-                    pending.push((
-                        self.shared[*definition]
-                            .definition
-                            .as_ref()
-                            .unwrap()
-                            .body
-                            .clone(),
-                        Some(next),
-                        depth + 1,
-                    ));
+                    let ir::DefinitionBody::Expression(body) =
+                        &self.shared[*definition].definition.as_ref().unwrap().body
+                    else {
+                        return unsupported("generative UNCHANGED requires state variables");
+                    };
+                    pending.push((body.clone(), Some(next), depth + 1));
                 }
                 I::Frame { .. } => {
                     let next = frames.len();

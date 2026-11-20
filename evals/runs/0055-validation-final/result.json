@@ -1,0 +1,85 @@
+{
+  "status": "complete",
+  "commands": [
+    {
+      "command": "just check",
+      "status": "passed",
+      "log": "check.log",
+      "sha256": "48b3dae94383a1578b67c9ce74e164cde83af0d0337ea2602f0cbbb5f328e0e6"
+    },
+    {
+      "command": "just browser",
+      "status": "passed",
+      "log": "browser.log",
+      "sha256": "33cce9410e9ab6040fc1567e30794b62ad975516d25f2354d6ac39b8dc2d6c0d"
+    },
+    {
+      "command": "just oracle-test",
+      "status": "passed",
+      "log": "oracle-test.log",
+      "sha256": "33e5cd639db708bd81593774254ccce2df916cfbc9679c23d0b1761ed9ffbdd0"
+    },
+    {
+      "command": "node --test dist/evals/*/contract-test.js",
+      "status": "passed",
+      "log": "eval-contracts.log",
+      "sha256": "fd4b106ce74324529212aaaeaf3165d757ca6283d9a260bb2c053655bb0d7575"
+    },
+    {
+      "command": "just runtime-build",
+      "status": "passed",
+      "log": "runtime-build.log",
+      "sha256": "42102c18c2aa40fa9012b786991a9f1df566767d9c9fdd5ef0486bfcd2f612aa"
+    },
+    {
+      "command": "just runtime-test",
+      "status": "passed",
+      "log": "runtime-test.log",
+      "sha256": "3a08785abbe6f2996b4d386419d9340c70a6493ea3e055bb17aedb1dde2e37b8"
+    },
+    {
+      "command": "just evaluate",
+      "status": "passed",
+      "log": "evaluate.log",
+      "sha256": "848c1537ba3ccc828f38a4e4b1214f4943266bb1861a97951a7e49b580eebec8"
+    },
+    {
+      "command": "just replay-evaluation",
+      "status": "passed",
+      "log": "replay-evaluation.log",
+      "sha256": "726981d4697b24e2a613fba5f4379f0e2dfa82348043181862831a63053d077d"
+    },
+    {
+      "command": "just mutation",
+      "status": "passed",
+      "log": "mutation.log",
+      "sha256": "3d356830da1e8a048c5f3cb34d74c40daa878f892a146dfb1d58794320dcfa3a"
+    },
+    {
+      "command": "just cross-test",
+      "status": "passed",
+      "log": "cross.log",
+      "sha256": "79da2bf68c3fcf0a1e7987c56ad783a35a472f5f85537e8026dc0aaab7549474"
+    },
+    {
+      "command": "just async-test",
+      "status": "passed",
+      "log": "async.log",
+      "sha256": "78778c4bb90606ea2311648cb98b33da8cba6eac1b44632e6db9c5b1facde718"
+    },
+    {
+      "command": "just package",
+      "status": "passed",
+      "log": "package.log",
+      "sha256": "e5eefec4bc41226f1e183eb36a94002a173c86a2fbe31c17fbd08c1d64c915c8"
+    }
+  ],
+  "notes": [
+    "Final snapshot preserves own-data-property construction under inherited object/array setters; Red and Green logs retained.",
+    "147 eval contract tests and 23 Rust oracle tests passed, with 1128 observation forms against the unchanged public serde parser.",
+    "No Rust/Wasm product changes followed Criterion or native/Wasm compatibility measurements. Final snapshot was measured separately with the same budgets.",
+    "Live support-sync, offline support-check and 8 support gate tests passed; crate evidence unchanged after the snapshot setter fix.",
+    "Mutation reused 109 cached evaluations: 104 killed, 5 survived, 133 compile errors; score 95.4%.",
+    "Local checks only; no remote CI, PR, publishing or merge."
+  ]
+}

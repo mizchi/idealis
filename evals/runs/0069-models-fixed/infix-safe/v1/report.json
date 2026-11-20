@@ -1,0 +1,41 @@
+{
+  "input": {
+    "name": "infix-safe",
+    "family": "graph",
+    "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft %% right == ~left\nInit == x = FALSE\nNext == x' = (x %% TRUE)\nSafe == x \\in BOOLEAN\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "expected": "complete",
+    "irVersion": 1
+  },
+  "comparison": {},
+  "classification": "compared",
+  "ours": {
+    "result": {
+      "status": "complete",
+      "reason": null,
+      "states": 2,
+      "generated": 3,
+      "depth": 1,
+      "work": 6,
+      "violation": null
+    }
+  },
+  "native": {
+    "result": {
+      "status": "complete",
+      "reason": null,
+      "states": 2,
+      "generated": 3,
+      "depth": 1,
+      "work": 6,
+      "violation": null
+    }
+  },
+  "reference": {
+    "status": "complete",
+    "states": 2,
+    "generated": 3,
+    "exit": 0
+  },
+  "differences": []
+}

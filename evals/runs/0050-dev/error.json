@@ -1,0 +1,763 @@
+{
+  "status": "error",
+  "message": "AssertionError [ERR_ASSERTION]: multiple-initial/Init\n+ actual - expected\n\n  {\n+   distinct: 3,\n-   distinct: 2,\n    generated: 3\n  }\n",
+  "reports": [
+    {
+      "name": "counter",
+      "probes": [
+        {
+          "bounds": {
+            "maxDepth": 100,
+            "maxStates": 1000,
+            "maxWork": 1000000,
+            "maxTemporalNodes": 10000
+          },
+          "measured": {
+            "kind": "safety-coverage",
+            "report": {
+              "result": {
+                "status": "complete",
+                "reason": null,
+                "states": 4,
+                "generated": 8,
+                "depth": 3,
+                "work": 24,
+                "violation": null
+              },
+              "coverage": {
+                "initial": [
+                  {
+                    "name": "Init",
+                    "attempts": 1,
+                    "enabled": 1,
+                    "generated": 1,
+                    "distinct": 1,
+                    "work": 2
+                  }
+                ],
+                "next": [
+                  {
+                    "name": "Advance",
+                    "attempts": 4,
+                    "enabled": 3,
+                    "generated": 3,
+                    "distinct": 3,
+                    "work": 10
+                  },
+                  {
+                    "name": "Stay",
+                    "attempts": 4,
+                    "enabled": 4,
+                    "generated": 4,
+                    "distinct": 0,
+                    "work": 8
+                  },
+                  {
+                    "name": "Unused",
+                    "attempts": 4,
+                    "enabled": 0,
+                    "generated": 0,
+                    "distinct": 0,
+                    "work": 4
+                  }
+                ],
+                "unattributedWork": 0
+              }
+            }
+          }
+        },
+        {
+          "bounds": {
+            "maxDepth": 100,
+            "maxStates": 1000,
+            "maxWork": 1,
+            "maxTemporalNodes": 10000
+          },
+          "measured": {
+            "kind": "safety-coverage",
+            "report": {
+              "result": {
+                "status": "bounded",
+                "reason": "work",
+                "states": 0,
+                "generated": 0,
+                "depth": 0,
+                "work": 1,
+                "violation": null
+              },
+              "coverage": {
+                "initial": [
+                  {
+                    "name": "Init",
+                    "attempts": 1,
+                    "enabled": 0,
+                    "generated": 0,
+                    "distinct": 0,
+                    "work": 1
+                  }
+                ],
+                "next": [
+                  {
+                    "name": "Advance",
+                    "attempts": 0,
+                    "enabled": 0,
+                    "generated": 0,
+                    "distinct": 0,
+                    "work": 0
+                  },
+                  {
+                    "name": "Stay",
+                    "attempts": 0,
+                    "enabled": 0,
+                    "generated": 0,
+                    "distinct": 0,
+                    "work": 0
+                  },
+                  {
+                    "name": "Unused",
+                    "attempts": 0,
+                    "enabled": 0,
+                    "generated": 0,
+                    "distinct": 0,
+                    "work": 0
+                  }
+                ],
+                "unattributedWork": 0
+              }
+            }
+          }
+        },
+        {
+          "bounds": {
+            "maxDepth": 100,
+            "maxStates": 1000,
+            "maxWork": 17,
+            "maxTemporalNodes": 10000
+          },
+          "measured": {
+            "kind": "safety-coverage",
+            "report": {
+              "result": {
+                "status": "bounded",
+                "reason": "work",
+                "states": 4,
+                "generated": 6,
+                "depth": 3,
+                "work": 17,
+                "violation": null
+              },
+              "coverage": {
+                "initial": [
+                  {
+                    "name": "Init",
+                    "attempts": 1,
+                    "enabled": 1,
+                    "generated": 1,
+                    "distinct": 1,
+                    "work": 2
+                  }
+                ],
+                "next": [
+                  {
+                    "name": "Advance",
+                    "attempts": 3,
+                    "enabled": 3,
+                    "generated": 3,
+                    "distinct": 3,
+                    "work": 9
+                  },
+                  {
+                    "name": "Stay",
+                    "attempts": 3,
+                    "enabled": 2,
+                    "generated": 2,
+                    "distinct": 0,
+                    "work": 4
+                  },
+                  {
+                    "name": "Unused",
+                    "attempts": 2,
+                    "enabled": 0,
+                    "generated": 0,
+                    "distinct": 0,
+                    "work": 2
+                  }
+                ],
+                "unattributedWork": 0
+              }
+            }
+          }
+        },
+        {
+          "bounds": {
+            "maxDepth": 100,
+            "maxStates": 1,
+            "maxWork": 1000000,
+            "maxTemporalNodes": 10000
+          },
+          "measured": {
+            "kind": "safety-coverage",
+            "report": {
+              "result": {
+                "status": "bounded",
+                "reason": "states",
+                "states": 1,
+                "generated": 2,
+                "depth": 0,
+                "work": 5,
+                "violation": null
+              },
+              "coverage": {
+                "initial": [
+                  {
+                    "name": "Init",
+                    "attempts": 1,
+                    "enabled": 1,
+                    "generated": 1,
+                    "distinct": 1,
+                    "work": 2
+                  }
+                ],
+                "next": [
+                  {
+                    "name": "Advance",
+                    "attempts": 1,
+                    "enabled": 1,
+                    "generated": 1,
+                    "distinct": 0,
+                    "work": 3
+                  },
+                  {
+                    "name": "Stay",
+                    "attempts": 0,
+                    "enabled": 0,
+                    "generated": 0,
+                    "distinct": 0,
+                    "work": 0
+                  },
+                  {
+                    "name": "Unused",
+                    "attempts": 0,
+                    "enabled": 0,
+                    "generated": 0,
+                    "distinct": 0,
+                    "work": 0
+                  }
+                ],
+                "unattributedWork": 0
+              }
+            }
+          }
+        },
+        {
+          "bounds": {
+            "maxDepth": 0,
+            "maxStates": 1000,
+            "maxWork": 1000000,
+            "maxTemporalNodes": 10000
+          },
+          "measured": {
+            "kind": "safety-coverage",
+            "report": {
+              "result": {
+                "status": "bounded",
+                "reason": "depth",
+                "states": 1,
+                "generated": 3,
+                "depth": 0,
+                "work": 8,
+                "violation": null
+              },
+              "coverage": {
+                "initial": [
+                  {
+                    "name": "Init",
+                    "attempts": 1,
+                    "enabled": 1,
+                    "generated": 1,
+                    "distinct": 1,
+                    "work": 2
+                  }
+                ],
+                "next": [
+                  {
+                    "name": "Advance",
+                    "attempts": 1,
+                    "enabled": 1,
+                    "generated": 1,
+                    "distinct": 0,
+                    "work": 3
+                  },
+                  {
+                    "name": "Stay",
+                    "attempts": 1,
+                    "enabled": 1,
+                    "generated": 1,
+                    "distinct": 0,
+                    "work": 2
+                  },
+                  {
+                    "name": "Unused",
+                    "attempts": 1,
+                    "enabled": 0,
+                    "generated": 0,
+                    "distinct": 0,
+                    "work": 1
+                  }
+                ],
+                "unattributedWork": 0
+              }
+            }
+          }
+        },
+        {
+          "bounds": {
+            "maxDepth": 100,
+            "maxStates": 1000,
+            "maxWork": 1000000,
+            "maxTemporalNodes": 1
+          },
+          "measured": {
+            "kind": "safety-coverage",
+            "report": {
+              "result": {
+                "status": "complete",
+                "reason": null,
+                "states": 4,
+                "generated": 8,
+                "depth": 3,
+                "work": 24,
+                "violation": null
+              },
+              "coverage": {
+                "initial": [
+                  {
+                    "name": "Init",
+                    "attempts": 1,
+                    "enabled": 1,
+                    "generated": 1,
+                    "distinct": 1,
+                    "work": 2
+                  }
+                ],
+                "next": [
+                  {
+                    "name": "Advance",
+                    "attempts": 4,
+                    "enabled": 3,
+                    "generated": 3,
+                    "distinct": 3,
+                    "work": 10
+                  },
+                  {
+                    "name": "Stay",
+                    "attempts": 4,
+                    "enabled": 4,
+                    "generated": 4,
+                    "distinct": 0,
+                    "work": 8
+                  },
+                  {
+                    "name": "Unused",
+                    "attempts": 4,
+                    "enabled": 0,
+                    "generated": 0,
+                    "distinct": 0,
+                    "work": 4
+                  }
+                ],
+                "unattributedWork": 0
+              }
+            }
+          }
+        }
+      ],
+      "reference": {
+        "status": "complete",
+        "counts": [
+          [
+            "Init",
+            {
+              "generated": 1,
+              "distinct": 1
+            }
+          ],
+          [
+            "Advance",
+            {
+              "generated": 3,
+              "distinct": 3
+            }
+          ],
+          [
+            "Stay",
+            {
+              "generated": 4,
+              "distinct": 0
+            }
+          ],
+          [
+            "Unused",
+            {
+              "generated": 0,
+              "distinct": 0
+            }
+          ]
+        ],
+        "compared": true
+      },
+      "witness": null
+    },
+    {
+      "name": "duplicate-actions",
+      "probes": [
+        {
+          "bounds": {
+            "maxDepth": 100,
+            "maxStates": 1000,
+            "maxWork": 1000000,
+            "maxTemporalNodes": 10000
+          },
+          "measured": {
+            "kind": "safety-coverage",
+            "report": {
+              "result": {
+                "status": "complete",
+                "reason": null,
+                "states": 3,
+                "generated": 5,
+                "depth": 2,
+                "work": 16,
+                "violation": null
+              },
+              "coverage": {
+                "initial": [
+                  {
+                    "name": "Init",
+                    "attempts": 1,
+                    "enabled": 1,
+                    "generated": 1,
+                    "distinct": 1,
+                    "work": 2
+                  }
+                ],
+                "next": [
+                  {
+                    "name": "First",
+                    "attempts": 3,
+                    "enabled": 2,
+                    "generated": 2,
+                    "distinct": 2,
+                    "work": 7
+                  },
+                  {
+                    "name": "Second",
+                    "attempts": 3,
+                    "enabled": 2,
+                    "generated": 2,
+                    "distinct": 0,
+                    "work": 7
+                  }
+                ],
+                "unattributedWork": 0
+              }
+            }
+          }
+        },
+        {
+          "bounds": {
+            "maxDepth": 100,
+            "maxStates": 1000,
+            "maxWork": 1,
+            "maxTemporalNodes": 10000
+          },
+          "measured": {
+            "kind": "safety-coverage",
+            "report": {
+              "result": {
+                "status": "bounded",
+                "reason": "work",
+                "states": 0,
+                "generated": 0,
+                "depth": 0,
+                "work": 1,
+                "violation": null
+              },
+              "coverage": {
+                "initial": [
+                  {
+                    "name": "Init",
+                    "attempts": 1,
+                    "enabled": 0,
+                    "generated": 0,
+                    "distinct": 0,
+                    "work": 1
+                  }
+                ],
+                "next": [
+                  {
+                    "name": "First",
+                    "attempts": 0,
+                    "enabled": 0,
+                    "generated": 0,
+                    "distinct": 0,
+                    "work": 0
+                  },
+                  {
+                    "name": "Second",
+                    "attempts": 0,
+                    "enabled": 0,
+                    "generated": 0,
+                    "distinct": 0,
+                    "work": 0
+                  }
+                ],
+                "unattributedWork": 0
+              }
+            }
+          }
+        },
+        {
+          "bounds": {
+            "maxDepth": 100,
+            "maxStates": 1000,
+            "maxWork": 17,
+            "maxTemporalNodes": 10000
+          },
+          "measured": {
+            "kind": "safety-coverage",
+            "report": {
+              "result": {
+                "status": "complete",
+                "reason": null,
+                "states": 3,
+                "generated": 5,
+                "depth": 2,
+                "work": 16,
+                "violation": null
+              },
+              "coverage": {
+                "initial": [
+                  {
+                    "name": "Init",
+                    "attempts": 1,
+                    "enabled": 1,
+                    "generated": 1,
+                    "distinct": 1,
+                    "work": 2
+                  }
+                ],
+                "next": [
+                  {
+                    "name": "First",
+                    "attempts": 3,
+                    "enabled": 2,
+                    "generated": 2,
+                    "distinct": 2,
+                    "work": 7
+                  },
+                  {
+                    "name": "Second",
+                    "attempts": 3,
+                    "enabled": 2,
+                    "generated": 2,
+                    "distinct": 0,
+                    "work": 7
+                  }
+                ],
+                "unattributedWork": 0
+              }
+            }
+          }
+        },
+        {
+          "bounds": {
+            "maxDepth": 100,
+            "maxStates": 1,
+            "maxWork": 1000000,
+            "maxTemporalNodes": 10000
+          },
+          "measured": {
+            "kind": "safety-coverage",
+            "report": {
+              "result": {
+                "status": "bounded",
+                "reason": "states",
+                "states": 1,
+                "generated": 2,
+                "depth": 0,
+                "work": 5,
+                "violation": null
+              },
+              "coverage": {
+                "initial": [
+                  {
+                    "name": "Init",
+                    "attempts": 1,
+                    "enabled": 1,
+                    "generated": 1,
+                    "distinct": 1,
+                    "work": 2
+                  }
+                ],
+                "next": [
+                  {
+                    "name": "First",
+                    "attempts": 1,
+                    "enabled": 1,
+                    "generated": 1,
+                    "distinct": 0,
+                    "work": 3
+                  },
+                  {
+                    "name": "Second",
+                    "attempts": 0,
+                    "enabled": 0,
+                    "generated": 0,
+                    "distinct": 0,
+                    "work": 0
+                  }
+                ],
+                "unattributedWork": 0
+              }
+            }
+          }
+        },
+        {
+          "bounds": {
+            "maxDepth": 0,
+            "maxStates": 1000,
+            "maxWork": 1000000,
+            "maxTemporalNodes": 10000
+          },
+          "measured": {
+            "kind": "safety-coverage",
+            "report": {
+              "result": {
+                "status": "bounded",
+                "reason": "depth",
+                "states": 1,
+                "generated": 3,
+                "depth": 0,
+                "work": 8,
+                "violation": null
+              },
+              "coverage": {
+                "initial": [
+                  {
+                    "name": "Init",
+                    "attempts": 1,
+                    "enabled": 1,
+                    "generated": 1,
+                    "distinct": 1,
+                    "work": 2
+                  }
+                ],
+                "next": [
+                  {
+                    "name": "First",
+                    "attempts": 1,
+                    "enabled": 1,
+                    "generated": 1,
+                    "distinct": 0,
+                    "work": 3
+                  },
+                  {
+                    "name": "Second",
+                    "attempts": 1,
+                    "enabled": 1,
+                    "generated": 1,
+                    "distinct": 0,
+                    "work": 3
+                  }
+                ],
+                "unattributedWork": 0
+              }
+            }
+          }
+        },
+        {
+          "bounds": {
+            "maxDepth": 100,
+            "maxStates": 1000,
+            "maxWork": 1000000,
+            "maxTemporalNodes": 1
+          },
+          "measured": {
+            "kind": "safety-coverage",
+            "report": {
+              "result": {
+                "status": "complete",
+                "reason": null,
+                "states": 3,
+                "generated": 5,
+                "depth": 2,
+                "work": 16,
+                "violation": null
+              },
+              "coverage": {
+                "initial": [
+                  {
+                    "name": "Init",
+                    "attempts": 1,
+                    "enabled": 1,
+                    "generated": 1,
+                    "distinct": 1,
+                    "work": 2
+                  }
+                ],
+                "next": [
+                  {
+                    "name": "First",
+                    "attempts": 3,
+                    "enabled": 2,
+                    "generated": 2,
+                    "distinct": 2,
+                    "work": 7
+                  },
+                  {
+                    "name": "Second",
+                    "attempts": 3,
+                    "enabled": 2,
+                    "generated": 2,
+                    "distinct": 0,
+                    "work": 7
+                  }
+                ],
+                "unattributedWork": 0
+              }
+            }
+          }
+        }
+      ],
+      "reference": {
+        "status": "complete",
+        "counts": [
+          [
+            "Init",
+            {
+              "generated": 1,
+              "distinct": 1
+            }
+          ],
+          [
+            "First",
+            {
+              "generated": 2,
+              "distinct": 2
+            }
+          ],
+          [
+            "Second",
+            {
+              "generated": 2,
+              "distinct": 0
+            }
+          ]
+        ],
+        "compared": true
+      },
+      "witness": null
+    }
+  ]
+}

@@ -1,0 +1,1951 @@
+{
+  "jarSha256": "7e53aa636dac8a3cb0533f343115c0548e03fc0ce5edc7739becf58d3d0fb84f",
+  "cases": [
+    {
+      "name": "subset-range",
+      "origin": "SANY Operators.java: SUBSET/UNION 8..8, DOMAIN 9..9",
+      "source": "---- MODULE Test ----\nExpr == SUBSET 1..2\n====",
+      "tree": {
+        "kind": 382,
+        "image": "N_Module",
+        "children": [
+          {
+            "kind": 333,
+            "image": "N_BeginModule",
+            "children": [
+              {
+                "kind": 3,
+                "image": "---- MODULE",
+                "children": []
+              },
+              {
+                "kind": 289,
+                "image": "Test",
+                "children": []
+              },
+              {
+                "kind": 36,
+                "image": "----",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": 350,
+            "image": "N_Extends",
+            "children": []
+          },
+          {
+            "kind": 334,
+            "image": "N_Body",
+            "children": [
+              {
+                "kind": 389,
+                "image": "N_OperatorDefinition",
+                "children": [
+                  {
+                    "kind": 366,
+                    "image": "N_IdentLHS",
+                    "children": [
+                      {
+                        "kind": 289,
+                        "image": "Expr",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": 93,
+                    "image": "==",
+                    "children": []
+                  },
+                  {
+                    "kind": 399,
+                    "image": "N_PrefixExpr",
+                    "children": [
+                      {
+                        "kind": 362,
+                        "image": "N_GenPrefixOp",
+                        "children": [
+                          {
+                            "kind": 367,
+                            "image": "N_IdPrefix",
+                            "children": []
+                          },
+                          {
+                            "kind": 401,
+                            "image": "SUBSET",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "kind": 371,
+                        "image": "N_InfixExpr",
+                        "children": [
+                          {
+                            "kind": 385,
+                            "image": "N_Number",
+                            "children": [
+                              {
+                                "kind": 109,
+                                "image": "1",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "kind": 359,
+                            "image": "N_GenInfixOp",
+                            "children": [
+                              {
+                                "kind": 367,
+                                "image": "N_IdPrefix",
+                                "children": []
+                              },
+                              {
+                                "kind": 373,
+                                "image": "..",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "kind": 385,
+                            "image": "N_Number",
+                            "children": [
+                              {
+                                "kind": 109,
+                                "image": "2",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": 345,
+            "image": "N_EndModule",
+            "children": [
+              {
+                "kind": 37,
+                "image": "====",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "Proof by QED with implicit step level",
+      "origin": "tlatools/org.lamport.tlatools/test/tla2sany/corpus/proofs.txt",
+      "source": "\n---- MODULE Test ----\nTHEOREM TRUE\nPROOF\n  <1>a TRUE\n  <1>b QED BY <*>a\n====\n\n",
+      "tree": {
+        "kind": 382,
+        "image": "N_Module",
+        "children": [
+          {
+            "kind": 333,
+            "image": "N_BeginModule",
+            "children": [
+              {
+                "kind": 3,
+                "image": "---- MODULE",
+                "children": []
+              },
+              {
+                "kind": 289,
+                "image": "Test",
+                "children": []
+              },
+              {
+                "kind": 36,
+                "image": "----",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": 350,
+            "image": "N_Extends",
+            "children": []
+          },
+          {
+            "kind": 334,
+            "image": "N_Body",
+            "children": [
+              {
+                "kind": 422,
+                "image": "N_Theorem",
+                "children": [
+                  {
+                    "kind": 67,
+                    "image": "THEOREM",
+                    "children": []
+                  },
+                  {
+                    "kind": 358,
+                    "image": "N_GeneralId",
+                    "children": [
+                      {
+                        "kind": 367,
+                        "image": "N_IdPrefix",
+                        "children": []
+                      },
+                      {
+                        "kind": 289,
+                        "image": "TRUE",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": 402,
+                    "image": "N_Proof",
+                    "children": [
+                      {
+                        "kind": 75,
+                        "image": "PROOF",
+                        "children": []
+                      },
+                      {
+                        "kind": 406,
+                        "image": "N_ProofStep",
+                        "children": [
+                          {
+                            "kind": 290,
+                            "image": "<1>a",
+                            "children": []
+                          },
+                          {
+                            "kind": 444,
+                            "image": "N_AssertStep",
+                            "children": [
+                              {
+                                "kind": 358,
+                                "image": "N_GeneralId",
+                                "children": [
+                                  {
+                                    "kind": 367,
+                                    "image": "N_IdPrefix",
+                                    "children": []
+                                  },
+                                  {
+                                    "kind": 289,
+                                    "image": "TRUE",
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "kind": 406,
+                        "image": "N_ProofStep",
+                        "children": [
+                          {
+                            "kind": 290,
+                            "image": "<1>b",
+                            "children": []
+                          },
+                          {
+                            "kind": 407,
+                            "image": "N_QEDStep",
+                            "children": [
+                              {
+                                "kind": 78,
+                                "image": "QED",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "kind": 435,
+                            "image": "N_TerminalProof",
+                            "children": [
+                              {
+                                "kind": 63,
+                                "image": "BY",
+                                "children": []
+                              },
+                              {
+                                "kind": 358,
+                                "image": "N_GeneralId",
+                                "children": [
+                                  {
+                                    "kind": 367,
+                                    "image": "N_IdPrefix",
+                                    "children": []
+                                  },
+                                  {
+                                    "kind": 291,
+                                    "image": "<1>a",
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": 345,
+            "image": "N_EndModule",
+            "children": [
+              {
+                "kind": 37,
+                "image": "====",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "Unbounded Quantification",
+      "origin": "tlatools/org.lamport.tlatools/test/tla2sany/corpus/quantification.txt",
+      "source": "\n---- MODULE Test ----\nop == \\A x : TRUE\nop == \\E x, y : FALSE\nop == \\AA x, y, z : TRUE\nop == \\EE x, y, z, w : FALSE\n====\n\n",
+      "tree": {
+        "kind": 382,
+        "image": "N_Module",
+        "children": [
+          {
+            "kind": 333,
+            "image": "N_BeginModule",
+            "children": [
+              {
+                "kind": 3,
+                "image": "---- MODULE",
+                "children": []
+              },
+              {
+                "kind": 289,
+                "image": "Test",
+                "children": []
+              },
+              {
+                "kind": 36,
+                "image": "----",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": 350,
+            "image": "N_Extends",
+            "children": []
+          },
+          {
+            "kind": 334,
+            "image": "N_Body",
+            "children": [
+              {
+                "kind": 389,
+                "image": "N_OperatorDefinition",
+                "children": [
+                  {
+                    "kind": 366,
+                    "image": "N_IdentLHS",
+                    "children": [
+                      {
+                        "kind": 289,
+                        "image": "op",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": 93,
+                    "image": "==",
+                    "children": []
+                  },
+                  {
+                    "kind": 425,
+                    "image": "N_UnboundedQuant",
+                    "children": [
+                      {
+                        "kind": 49,
+                        "image": "\\A",
+                        "children": []
+                      },
+                      {
+                        "kind": 289,
+                        "image": "x",
+                        "children": []
+                      },
+                      {
+                        "kind": 89,
+                        "image": ":",
+                        "children": []
+                      },
+                      {
+                        "kind": 358,
+                        "image": "N_GeneralId",
+                        "children": [
+                          {
+                            "kind": 367,
+                            "image": "N_IdPrefix",
+                            "children": []
+                          },
+                          {
+                            "kind": 289,
+                            "image": "TRUE",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": 389,
+                "image": "N_OperatorDefinition",
+                "children": [
+                  {
+                    "kind": 366,
+                    "image": "N_IdentLHS",
+                    "children": [
+                      {
+                        "kind": 289,
+                        "image": "op",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": 93,
+                    "image": "==",
+                    "children": []
+                  },
+                  {
+                    "kind": 425,
+                    "image": "N_UnboundedQuant",
+                    "children": [
+                      {
+                        "kind": 47,
+                        "image": "\\E",
+                        "children": []
+                      },
+                      {
+                        "kind": 289,
+                        "image": "x",
+                        "children": []
+                      },
+                      {
+                        "kind": 88,
+                        "image": ",",
+                        "children": []
+                      },
+                      {
+                        "kind": 289,
+                        "image": "y",
+                        "children": []
+                      },
+                      {
+                        "kind": 89,
+                        "image": ":",
+                        "children": []
+                      },
+                      {
+                        "kind": 358,
+                        "image": "N_GeneralId",
+                        "children": [
+                          {
+                            "kind": 367,
+                            "image": "N_IdPrefix",
+                            "children": []
+                          },
+                          {
+                            "kind": 289,
+                            "image": "FALSE",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": 389,
+                "image": "N_OperatorDefinition",
+                "children": [
+                  {
+                    "kind": 366,
+                    "image": "N_IdentLHS",
+                    "children": [
+                      {
+                        "kind": 289,
+                        "image": "op",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": 93,
+                    "image": "==",
+                    "children": []
+                  },
+                  {
+                    "kind": 425,
+                    "image": "N_UnboundedQuant",
+                    "children": [
+                      {
+                        "kind": 61,
+                        "image": "\\AA",
+                        "children": []
+                      },
+                      {
+                        "kind": 289,
+                        "image": "x",
+                        "children": []
+                      },
+                      {
+                        "kind": 88,
+                        "image": ",",
+                        "children": []
+                      },
+                      {
+                        "kind": 289,
+                        "image": "y",
+                        "children": []
+                      },
+                      {
+                        "kind": 88,
+                        "image": ",",
+                        "children": []
+                      },
+                      {
+                        "kind": 289,
+                        "image": "z",
+                        "children": []
+                      },
+                      {
+                        "kind": 89,
+                        "image": ":",
+                        "children": []
+                      },
+                      {
+                        "kind": 358,
+                        "image": "N_GeneralId",
+                        "children": [
+                          {
+                            "kind": 367,
+                            "image": "N_IdPrefix",
+                            "children": []
+                          },
+                          {
+                            "kind": 289,
+                            "image": "TRUE",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": 389,
+                "image": "N_OperatorDefinition",
+                "children": [
+                  {
+                    "kind": 366,
+                    "image": "N_IdentLHS",
+                    "children": [
+                      {
+                        "kind": 289,
+                        "image": "op",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": 93,
+                    "image": "==",
+                    "children": []
+                  },
+                  {
+                    "kind": 425,
+                    "image": "N_UnboundedQuant",
+                    "children": [
+                      {
+                        "kind": 60,
+                        "image": "\\EE",
+                        "children": []
+                      },
+                      {
+                        "kind": 289,
+                        "image": "x",
+                        "children": []
+                      },
+                      {
+                        "kind": 88,
+                        "image": ",",
+                        "children": []
+                      },
+                      {
+                        "kind": 289,
+                        "image": "y",
+                        "children": []
+                      },
+                      {
+                        "kind": 88,
+                        "image": ",",
+                        "children": []
+                      },
+                      {
+                        "kind": 289,
+                        "image": "z",
+                        "children": []
+                      },
+                      {
+                        "kind": 88,
+                        "image": ",",
+                        "children": []
+                      },
+                      {
+                        "kind": 289,
+                        "image": "w",
+                        "children": []
+                      },
+                      {
+                        "kind": 89,
+                        "image": ":",
+                        "children": []
+                      },
+                      {
+                        "kind": 358,
+                        "image": "N_GeneralId",
+                        "children": [
+                          {
+                            "kind": 367,
+                            "image": "N_IdPrefix",
+                            "children": []
+                          },
+                          {
+                            "kind": 289,
+                            "image": "FALSE",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": 345,
+            "image": "N_EndModule",
+            "children": [
+              {
+                "kind": 37,
+                "image": "====",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "Mistaken Set Filter Tuples Test",
+      "origin": "tlatools/org.lamport.tlatools/test/tla2sany/corpus/sets.txt",
+      "source": "\n---- MODULE Test ----\n\nop == {<<x, y>> \\in Nat}\n\n====\n\n",
+      "tree": {
+        "kind": 382,
+        "image": "N_Module",
+        "children": [
+          {
+            "kind": 333,
+            "image": "N_BeginModule",
+            "children": [
+              {
+                "kind": 3,
+                "image": "---- MODULE",
+                "children": []
+              },
+              {
+                "kind": 289,
+                "image": "Test",
+                "children": []
+              },
+              {
+                "kind": 36,
+                "image": "----",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": 350,
+            "image": "N_Extends",
+            "children": []
+          },
+          {
+            "kind": 334,
+            "image": "N_Body",
+            "children": [
+              {
+                "kind": 389,
+                "image": "N_OperatorDefinition",
+                "children": [
+                  {
+                    "kind": 366,
+                    "image": "N_IdentLHS",
+                    "children": [
+                      {
+                        "kind": 289,
+                        "image": "op",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": 93,
+                    "image": "==",
+                    "children": []
+                  },
+                  {
+                    "kind": 411,
+                    "image": "N_SetEnumerate",
+                    "children": [
+                      {
+                        "kind": 100,
+                        "image": "{",
+                        "children": []
+                      },
+                      {
+                        "kind": 371,
+                        "image": "N_InfixExpr",
+                        "children": [
+                          {
+                            "kind": 358,
+                            "image": "N_GeneralId",
+                            "children": [
+                              {
+                                "kind": 367,
+                                "image": "N_IdPrefix",
+                                "children": []
+                              },
+                              {
+                                "kind": 365,
+                                "image": "N_IdentifierTuple",
+                                "children": [
+                                  {
+                                    "kind": 102,
+                                    "image": "<<",
+                                    "children": []
+                                  },
+                                  {
+                                    "kind": 289,
+                                    "image": "x",
+                                    "children": []
+                                  },
+                                  {
+                                    "kind": 88,
+                                    "image": ",",
+                                    "children": []
+                                  },
+                                  {
+                                    "kind": 289,
+                                    "image": "y",
+                                    "children": []
+                                  },
+                                  {
+                                    "kind": 104,
+                                    "image": ">>",
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "kind": 359,
+                            "image": "N_GenInfixOp",
+                            "children": [
+                              {
+                                "kind": 367,
+                                "image": "N_IdPrefix",
+                                "children": []
+                              },
+                              {
+                                "kind": 427,
+                                "image": "\\in",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "kind": 358,
+                            "image": "N_GeneralId",
+                            "children": [
+                              {
+                                "kind": 367,
+                                "image": "N_IdPrefix",
+                                "children": []
+                              },
+                              {
+                                "kind": 289,
+                                "image": "Nat",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "kind": 101,
+                        "image": "}",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": 345,
+            "image": "N_EndModule",
+            "children": [
+              {
+                "kind": 37,
+                "image": "====",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "Escape Quote String",
+      "origin": "tlatools/org.lamport.tlatools/test/tla2sany/corpus/string.txt",
+      "source": "\n---- MODULE Test ----\nop == \"The cow goes \\\"moo\\\", the chicken goes \\\"cluck cluck\\\"\"\n====\n\n",
+      "tree": {
+        "kind": 382,
+        "image": "N_Module",
+        "children": [
+          {
+            "kind": 333,
+            "image": "N_BeginModule",
+            "children": [
+              {
+                "kind": 3,
+                "image": "---- MODULE",
+                "children": []
+              },
+              {
+                "kind": 289,
+                "image": "Test",
+                "children": []
+              },
+              {
+                "kind": 36,
+                "image": "----",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": 350,
+            "image": "N_Extends",
+            "children": []
+          },
+          {
+            "kind": 334,
+            "image": "N_Body",
+            "children": [
+              {
+                "kind": 389,
+                "image": "N_OperatorDefinition",
+                "children": [
+                  {
+                    "kind": 366,
+                    "image": "N_IdentLHS",
+                    "children": [
+                      {
+                        "kind": 289,
+                        "image": "op",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": 93,
+                    "image": "==",
+                    "children": []
+                  },
+                  {
+                    "kind": 418,
+                    "image": "\"The cow goes \"moo\", the chicken goes \"cluck cluck\"\"",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": 345,
+            "image": "N_EndModule",
+            "children": [
+              {
+                "kind": 37,
+                "image": "====",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "Subexpression Tree Navigation",
+      "origin": "tlatools/org.lamport.tlatools/test/tla2sany/corpus/subexpressions.txt",
+      "source": "\n---- MODULE Test ----\ntree_nav == op(a, b)!<<!>>!3!(x, y)!:!@\n====\n\n",
+      "tree": {
+        "kind": 382,
+        "image": "N_Module",
+        "children": [
+          {
+            "kind": 333,
+            "image": "N_BeginModule",
+            "children": [
+              {
+                "kind": 3,
+                "image": "---- MODULE",
+                "children": []
+              },
+              {
+                "kind": 289,
+                "image": "Test",
+                "children": []
+              },
+              {
+                "kind": 36,
+                "image": "----",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": 350,
+            "image": "N_Extends",
+            "children": []
+          },
+          {
+            "kind": 334,
+            "image": "N_Body",
+            "children": [
+              {
+                "kind": 389,
+                "image": "N_OperatorDefinition",
+                "children": [
+                  {
+                    "kind": 366,
+                    "image": "N_IdentLHS",
+                    "children": [
+                      {
+                        "kind": 289,
+                        "image": "tree_nav",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": 93,
+                    "image": "==",
+                    "children": []
+                  },
+                  {
+                    "kind": 358,
+                    "image": "N_GeneralId",
+                    "children": [
+                      {
+                        "kind": 367,
+                        "image": "N_IdPrefix",
+                        "children": [
+                          {
+                            "kind": 368,
+                            "image": "N_IdPrefixElement",
+                            "children": [
+                              {
+                                "kind": 289,
+                                "image": "op",
+                                "children": []
+                              },
+                              {
+                                "kind": 388,
+                                "image": "N_OpArgs",
+                                "children": [
+                                  {
+                                    "kind": 94,
+                                    "image": "(",
+                                    "children": []
+                                  },
+                                  {
+                                    "kind": 358,
+                                    "image": "N_GeneralId",
+                                    "children": [
+                                      {
+                                        "kind": 367,
+                                        "image": "N_IdPrefix",
+                                        "children": []
+                                      },
+                                      {
+                                        "kind": 289,
+                                        "image": "a",
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "kind": 88,
+                                    "image": ",",
+                                    "children": []
+                                  },
+                                  {
+                                    "kind": 358,
+                                    "image": "N_GeneralId",
+                                    "children": [
+                                      {
+                                        "kind": 367,
+                                        "image": "N_IdPrefix",
+                                        "children": []
+                                      },
+                                      {
+                                        "kind": 289,
+                                        "image": "b",
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "kind": 95,
+                                    "image": ")",
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "kind": 105,
+                                "image": "!",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "kind": 368,
+                            "image": "N_IdPrefixElement",
+                            "children": [
+                              {
+                                "kind": 433,
+                                "image": "<<",
+                                "children": []
+                              },
+                              {
+                                "kind": 105,
+                                "image": "!",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "kind": 368,
+                            "image": "N_IdPrefixElement",
+                            "children": [
+                              {
+                                "kind": 433,
+                                "image": ">>",
+                                "children": []
+                              },
+                              {
+                                "kind": 105,
+                                "image": "!",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "kind": 368,
+                            "image": "N_IdPrefixElement",
+                            "children": [
+                              {
+                                "kind": 433,
+                                "image": "N_StructOp",
+                                "children": [
+                                  {
+                                    "kind": 385,
+                                    "image": "N_Number",
+                                    "children": [
+                                      {
+                                        "kind": 109,
+                                        "image": "3",
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "kind": 105,
+                                "image": "!",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "kind": 368,
+                            "image": "N_IdPrefixElement",
+                            "children": [
+                              {
+                                "kind": 388,
+                                "image": "N_OpArgs",
+                                "children": [
+                                  {
+                                    "kind": 94,
+                                    "image": "(",
+                                    "children": []
+                                  },
+                                  {
+                                    "kind": 358,
+                                    "image": "N_GeneralId",
+                                    "children": [
+                                      {
+                                        "kind": 367,
+                                        "image": "N_IdPrefix",
+                                        "children": []
+                                      },
+                                      {
+                                        "kind": 289,
+                                        "image": "x",
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "kind": 88,
+                                    "image": ",",
+                                    "children": []
+                                  },
+                                  {
+                                    "kind": 358,
+                                    "image": "N_GeneralId",
+                                    "children": [
+                                      {
+                                        "kind": 367,
+                                        "image": "N_IdPrefix",
+                                        "children": []
+                                      },
+                                      {
+                                        "kind": 289,
+                                        "image": "y",
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "kind": 95,
+                                    "image": ")",
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "kind": 105,
+                                "image": "!",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "kind": 368,
+                            "image": "N_IdPrefixElement",
+                            "children": [
+                              {
+                                "kind": 433,
+                                "image": ":",
+                                "children": []
+                              },
+                              {
+                                "kind": 105,
+                                "image": "!",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "kind": 433,
+                        "image": "@",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": 345,
+            "image": "N_EndModule",
+            "children": [
+              {
+                "kind": 37,
+                "image": "====",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "capture",
+      "origin": "0070 focused control",
+      "source": "---- MODULE Completion ----\nEXTENDS Naturals\nVARIABLE x\nApply(F(_), value) == F(value)\nInit == x = 0\nNext == \\E delta \\in 1..2: x'=Apply(LAMBDA value: (value+delta)%3,x)\nSafe == x \\in 0..2\n====",
+      "tree": {
+        "kind": 382,
+        "image": "N_Module",
+        "children": [
+          {
+            "kind": 333,
+            "image": "N_BeginModule",
+            "children": [
+              {
+                "kind": 3,
+                "image": "---- MODULE",
+                "children": []
+              },
+              {
+                "kind": 289,
+                "image": "Completion",
+                "children": []
+              },
+              {
+                "kind": 36,
+                "image": "----",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": 350,
+            "image": "N_Extends",
+            "children": [
+              {
+                "kind": 48,
+                "image": "EXTENDS",
+                "children": []
+              },
+              {
+                "kind": 289,
+                "image": "Naturals",
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": 334,
+            "image": "N_Body",
+            "children": [
+              {
+                "kind": 426,
+                "image": "N_VariableDeclaration",
+                "children": [
+                  {
+                    "kind": 85,
+                    "image": "VARIABLE",
+                    "children": []
+                  },
+                  {
+                    "kind": 289,
+                    "image": "x",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "kind": 389,
+                "image": "N_OperatorDefinition",
+                "children": [
+                  {
+                    "kind": 366,
+                    "image": "N_IdentLHS",
+                    "children": [
+                      {
+                        "kind": 289,
+                        "image": "Apply",
+                        "children": []
+                      },
+                      {
+                        "kind": 94,
+                        "image": "(",
+                        "children": []
+                      },
+                      {
+                        "kind": 363,
+                        "image": "N_IdentDecl",
+                        "children": [
+                          {
+                            "kind": 289,
+                            "image": "F",
+                            "children": []
+                          },
+                          {
+                            "kind": 94,
+                            "image": "(",
+                            "children": []
+                          },
+                          {
+                            "kind": 92,
+                            "image": "_",
+                            "children": []
+                          },
+                          {
+                            "kind": 95,
+                            "image": ")",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "kind": 88,
+                        "image": ",",
+                        "children": []
+                      },
+                      {
+                        "kind": 363,
+                        "image": "N_IdentDecl",
+                        "children": [
+                          {
+                            "kind": 289,
+                            "image": "value",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "kind": 95,
+                        "image": ")",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": 93,
+                    "image": "==",
+                    "children": []
+                  },
+                  {
+                    "kind": 387,
+                    "image": "N_OpApplication",
+                    "children": [
+                      {
+                        "kind": 358,
+                        "image": "N_GeneralId",
+                        "children": [
+                          {
+                            "kind": 367,
+                            "image": "N_IdPrefix",
+                            "children": []
+                          },
+                          {
+                            "kind": 289,
+                            "image": "F",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "kind": 388,
+                        "image": "N_OpArgs",
+                        "children": [
+                          {
+                            "kind": 94,
+                            "image": "(",
+                            "children": []
+                          },
+                          {
+                            "kind": 358,
+                            "image": "N_GeneralId",
+                            "children": [
+                              {
+                                "kind": 367,
+                                "image": "N_IdPrefix",
+                                "children": []
+                              },
+                              {
+                                "kind": 289,
+                                "image": "value",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "kind": 95,
+                            "image": ")",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": 389,
+                "image": "N_OperatorDefinition",
+                "children": [
+                  {
+                    "kind": 366,
+                    "image": "N_IdentLHS",
+                    "children": [
+                      {
+                        "kind": 289,
+                        "image": "Init",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": 93,
+                    "image": "==",
+                    "children": []
+                  },
+                  {
+                    "kind": 371,
+                    "image": "N_InfixExpr",
+                    "children": [
+                      {
+                        "kind": 358,
+                        "image": "N_GeneralId",
+                        "children": [
+                          {
+                            "kind": 367,
+                            "image": "N_IdPrefix",
+                            "children": []
+                          },
+                          {
+                            "kind": 289,
+                            "image": "x",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "kind": 359,
+                        "image": "N_GenInfixOp",
+                        "children": [
+                          {
+                            "kind": 367,
+                            "image": "N_IdPrefix",
+                            "children": []
+                          },
+                          {
+                            "kind": 373,
+                            "image": "=",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "kind": 385,
+                        "image": "N_Number",
+                        "children": [
+                          {
+                            "kind": 109,
+                            "image": "0",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": 389,
+                "image": "N_OperatorDefinition",
+                "children": [
+                  {
+                    "kind": 366,
+                    "image": "N_IdentLHS",
+                    "children": [
+                      {
+                        "kind": 289,
+                        "image": "Next",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": 93,
+                    "image": "==",
+                    "children": []
+                  },
+                  {
+                    "kind": 335,
+                    "image": "N_BoundedQuant",
+                    "children": [
+                      {
+                        "kind": 47,
+                        "image": "\\E",
+                        "children": []
+                      },
+                      {
+                        "kind": 408,
+                        "image": "N_QuantBound",
+                        "children": [
+                          {
+                            "kind": 289,
+                            "image": "delta",
+                            "children": []
+                          },
+                          {
+                            "kind": 427,
+                            "image": "\\in",
+                            "children": []
+                          },
+                          {
+                            "kind": 371,
+                            "image": "N_InfixExpr",
+                            "children": [
+                              {
+                                "kind": 385,
+                                "image": "N_Number",
+                                "children": [
+                                  {
+                                    "kind": 109,
+                                    "image": "1",
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "kind": 359,
+                                "image": "N_GenInfixOp",
+                                "children": [
+                                  {
+                                    "kind": 367,
+                                    "image": "N_IdPrefix",
+                                    "children": []
+                                  },
+                                  {
+                                    "kind": 373,
+                                    "image": "..",
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "kind": 385,
+                                "image": "N_Number",
+                                "children": [
+                                  {
+                                    "kind": 109,
+                                    "image": "2",
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "kind": 89,
+                        "image": ":",
+                        "children": []
+                      },
+                      {
+                        "kind": 371,
+                        "image": "N_InfixExpr",
+                        "children": [
+                          {
+                            "kind": 395,
+                            "image": "N_PostfixExpr",
+                            "children": [
+                              {
+                                "kind": 358,
+                                "image": "N_GeneralId",
+                                "children": [
+                                  {
+                                    "kind": 367,
+                                    "image": "N_IdPrefix",
+                                    "children": []
+                                  },
+                                  {
+                                    "kind": 289,
+                                    "image": "x",
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "kind": 361,
+                                "image": "N_GenPostfixOp",
+                                "children": [
+                                  {
+                                    "kind": 367,
+                                    "image": "N_IdPrefix",
+                                    "children": []
+                                  },
+                                  {
+                                    "kind": 397,
+                                    "image": "'",
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "kind": 359,
+                            "image": "N_GenInfixOp",
+                            "children": [
+                              {
+                                "kind": 367,
+                                "image": "N_IdPrefix",
+                                "children": []
+                              },
+                              {
+                                "kind": 373,
+                                "image": "=",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "kind": 387,
+                            "image": "N_OpApplication",
+                            "children": [
+                              {
+                                "kind": 358,
+                                "image": "N_GeneralId",
+                                "children": [
+                                  {
+                                    "kind": 367,
+                                    "image": "N_IdPrefix",
+                                    "children": []
+                                  },
+                                  {
+                                    "kind": 289,
+                                    "image": "Apply",
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "kind": 388,
+                                "image": "N_OpArgs",
+                                "children": [
+                                  {
+                                    "kind": 94,
+                                    "image": "(",
+                                    "children": []
+                                  },
+                                  {
+                                    "kind": 430,
+                                    "image": "N_Lambda",
+                                    "children": [
+                                      {
+                                        "kind": 73,
+                                        "image": "LAMBDA",
+                                        "children": []
+                                      },
+                                      {
+                                        "kind": 289,
+                                        "image": "value",
+                                        "children": []
+                                      },
+                                      {
+                                        "kind": 89,
+                                        "image": ":",
+                                        "children": []
+                                      },
+                                      {
+                                        "kind": 371,
+                                        "image": "N_InfixExpr",
+                                        "children": [
+                                          {
+                                            "kind": 393,
+                                            "image": "N_ParenExpr",
+                                            "children": [
+                                              {
+                                                "kind": 94,
+                                                "image": "(",
+                                                "children": []
+                                              },
+                                              {
+                                                "kind": 371,
+                                                "image": "N_InfixExpr",
+                                                "children": [
+                                                  {
+                                                    "kind": 358,
+                                                    "image": "N_GeneralId",
+                                                    "children": [
+                                                      {
+                                                        "kind": 367,
+                                                        "image": "N_IdPrefix",
+                                                        "children": []
+                                                      },
+                                                      {
+                                                        "kind": 289,
+                                                        "image": "value",
+                                                        "children": []
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "kind": 359,
+                                                    "image": "N_GenInfixOp",
+                                                    "children": [
+                                                      {
+                                                        "kind": 367,
+                                                        "image": "N_IdPrefix",
+                                                        "children": []
+                                                      },
+                                                      {
+                                                        "kind": 373,
+                                                        "image": "+",
+                                                        "children": []
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "kind": 358,
+                                                    "image": "N_GeneralId",
+                                                    "children": [
+                                                      {
+                                                        "kind": 367,
+                                                        "image": "N_IdPrefix",
+                                                        "children": []
+                                                      },
+                                                      {
+                                                        "kind": 289,
+                                                        "image": "delta",
+                                                        "children": []
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "kind": 95,
+                                                "image": ")",
+                                                "children": []
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "kind": 359,
+                                            "image": "N_GenInfixOp",
+                                            "children": [
+                                              {
+                                                "kind": 367,
+                                                "image": "N_IdPrefix",
+                                                "children": []
+                                              },
+                                              {
+                                                "kind": 373,
+                                                "image": "%",
+                                                "children": []
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "kind": 385,
+                                            "image": "N_Number",
+                                            "children": [
+                                              {
+                                                "kind": 109,
+                                                "image": "3",
+                                                "children": []
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "kind": 88,
+                                    "image": ",",
+                                    "children": []
+                                  },
+                                  {
+                                    "kind": 358,
+                                    "image": "N_GeneralId",
+                                    "children": [
+                                      {
+                                        "kind": 367,
+                                        "image": "N_IdPrefix",
+                                        "children": []
+                                      },
+                                      {
+                                        "kind": 289,
+                                        "image": "x",
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "kind": 95,
+                                    "image": ")",
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": 389,
+                "image": "N_OperatorDefinition",
+                "children": [
+                  {
+                    "kind": 366,
+                    "image": "N_IdentLHS",
+                    "children": [
+                      {
+                        "kind": 289,
+                        "image": "Safe",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": 93,
+                    "image": "==",
+                    "children": []
+                  },
+                  {
+                    "kind": 371,
+                    "image": "N_InfixExpr",
+                    "children": [
+                      {
+                        "kind": 358,
+                        "image": "N_GeneralId",
+                        "children": [
+                          {
+                            "kind": 367,
+                            "image": "N_IdPrefix",
+                            "children": []
+                          },
+                          {
+                            "kind": 289,
+                            "image": "x",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "kind": 359,
+                        "image": "N_GenInfixOp",
+                        "children": [
+                          {
+                            "kind": 367,
+                            "image": "N_IdPrefix",
+                            "children": []
+                          },
+                          {
+                            "kind": 373,
+                            "image": "\\in",
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "kind": 371,
+                        "image": "N_InfixExpr",
+                        "children": [
+                          {
+                            "kind": 385,
+                            "image": "N_Number",
+                            "children": [
+                              {
+                                "kind": 109,
+                                "image": "0",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "kind": 359,
+                            "image": "N_GenInfixOp",
+                            "children": [
+                              {
+                                "kind": 367,
+                                "image": "N_IdPrefix",
+                                "children": []
+                              },
+                              {
+                                "kind": 373,
+                                "image": "..",
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "kind": 385,
+                            "image": "N_Number",
+                            "children": [
+                              {
+                                "kind": 109,
+                                "image": "2",
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": 345,
+            "image": "N_EndModule",
+            "children": [
+              {
+                "kind": 37,
+                "image": "====",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -12,7 +12,7 @@ import {
   checkTrace,
   decodeTrace,
   encodeTrace,
-} from "../src/index.js";
+} from "../packages/idealis/src/index.js";
 
 export const registerContract = (
   test: (name: string, run: () => void | Promise<void>) => unknown,

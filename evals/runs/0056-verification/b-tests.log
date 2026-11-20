@@ -1,0 +1,134 @@
+   Compiling rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.56s
+     Running unittests src/lib.rs (crates/rtlc/target/debug/deps/rtlc-4755f7e95d4686b7)
+
+running 25 tests
+test safety::parallel::tests::candidates_keep_snapshots_and_order_when_buffers_are_reused ... ok
+test safety::tests::colliding_hashes_keep_distinct_typed_states ... ok
+test safety::parallel::schedule_tests::batch_tracks_fanout_and_stays_bounded ... ok
+test safety_expressions::tests::leaf_evaluation_preserves_context_errors_and_lazy_branches ... ok
+test safety_expressions::tests::cached_type_results_compare_descriptors_after_hash_collisions ... ok
+test safety_expressions::tests::cached_membership_values_and_descriptors_remap_with_worker_references ... ok
+test safety_expressions::tests::preparing_types_does_not_evaluate_an_unreached_branch_or_cache_an_error ... ok
+test safety_expressions::tests::record_types_depending_on_bound_variables_are_not_reused ... ok
+test safety_values::compact_domain_collision_tests::packed_functions_compare_domains_after_a_domain_hash_collision ... ok
+test safety_expressions::tests::successful_record_type_checks_reuse_their_work ... ok
+test safety_expressions::tests::fold_charges_each_iteration_and_exhaustion_is_an_error ... ok
+test safety_values::compact_domain_owner_tests::a_worker_created_domain_is_registered_in_the_root_and_reused ... ok
+test safety_values::tests::colliding_function_hashes_keep_distinct_values ... ok
+test safety_values::tests::collisions_in_an_overlay_keep_base_and_local_values_distinct ... ok
+test safety_values::compact_overlay_tests::overlays_remap_function_keys_and_payloads_without_mutating_the_base ... ok
+test safety_expressions::tests::fold_slots_are_scoped_and_collection_uses_outer_scope ... ok
+test safety_values::tests::integer_positions_preserve_sparse_domains_and_missing_keys ... ok
+test safety_values::tests::replacement_keeps_the_normalized_domain_and_canonical_identity ... ok
+test safety_work::tests::another_worker_can_spend_unused_credit_below_the_reservation_size ... ok
+test safety_values::tests::worker_values_share_the_base_and_remap_conflicting_local_references ... ok
+test safety_values::compact_function_tests::updates_share_immutable_domains_and_preserve_typed_canonical_values ... ok
+test safety_work::tests::oversized_consumption_returns_the_actual_remaining_work ... ok
+test safety_expressions::tests::fold_reserves_two_slots_without_raising_the_bound_limit ... ok
+test safety_values::tests::fold_order_visits_shared_cells_once_per_call_and_obeys_the_work_budget ... ok
+test safety_work::tests::concurrent_workers_consume_exactly_the_global_budget ... ok
+
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/coverage.rs (crates/rtlc/target/debug/deps/coverage-922158a4a9120168)
+
+running 6 tests
+test evaluation_errors_are_not_partial_success_reports ... ok
+test action_rows_distinguish_attempts_candidates_and_new_states ... ok
+test partial_work_is_accounted_when_a_branch_exhausts_the_budget ... ok
+test unreachable_and_same_name_branches_remain_separate ... ok
+test repeated_initial_candidates_are_not_new_states ... ok
+test temporal_work_is_not_attributed_to_the_last_action ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/operators.rs (crates/rtlc/target/debug/deps/operators-824135d98635e99d)
+
+running 4 tests
+test callbacks_reject_invalid_slots_even_in_unexecuted_branches ... ok
+test assert_evaluates_its_message_before_testing_the_condition ... ok
+test callback_arity_counts_towards_the_bound_variable_limit ... ok
+test selection_and_every_insertion_comparison_are_bounded ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/parallel_safety.rs (crates/rtlc/target/debug/deps/parallel_safety-25fbc92e25737a6f)
+
+running 5 tests
+test parallel_diamond_deduplicates_and_keeps_bfs_counts ... ok
+test parallel_trace_is_the_same_shortest_trace ... ok
+test global_cuts_remain_bounded_and_worker_zero_is_rejected ... ok
+test parallel_constraints_keep_boundary_violations_and_counts ... ok
+test converging_workers_validate_each_canonical_state_once ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/standalone.rs (crates/rtlc/target/debug/deps/standalone-a6c5535d99ea86b8)
+
+running 4 tests
+test shortest_violation_and_empty_initial_states_remain_distinct ... ok
+test typed_ir_checks_without_idealis ... ok
+test wire_contract_roundtrips_and_rejects_internal_references ... ok
+test unmatched_case_wire_contract_requires_a_nonempty_location ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/temporal_sets.rs (crates/rtlc/target/debug/deps/temporal_sets-6c7f2c1ff61f7b90)
+
+running 1 test
+test quantified_obligations_cross_word_and_storage_boundaries ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running src/coverage_benchmarks.rs (crates/rtlc/target/debug/deps/coverage-0ed0e99ea6db7158)
+Testing coverage/ring-4/off
+Success
+
+Testing coverage/ring-4/on
+Success
+
+Testing coverage/ring-1000/off
+Success
+
+Testing coverage/ring-1000/on
+Success
+
+     Running src/benchmarks.rs (crates/rtlc/target/debug/deps/safety-6ff2a72f4132f42b)
+Testing values/intern-new-functions
+Success
+Testing values/intern-existing-functions
+Success
+Testing values/except-function
+Success
+Testing values/except-record
+Success
+
+Testing membership/function-cube
+Success
+Testing membership/parallel-channels
+Success
+
+Testing search/counter-product/1
+Success
+Testing search/counter-product/8
+Success
+Testing search/function-cube/1
+Success
+Testing search/function-cube/8
+Success
+Testing search/parallel-channels/1
+Success
+Testing search/parallel-channels/8
+Success
+Testing search/linear-ring/1
+Success
+Testing search/linear-ring/8
+Success
+
+     Running unittests examples/counter.rs (crates/rtlc/target/debug/examples/counter-e28a761874087ac6)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

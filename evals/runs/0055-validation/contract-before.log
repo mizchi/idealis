@@ -1,0 +1,48 @@
+   Compiling idealis-oracle v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/oracle)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.27s
+     Running unittests src/lib.rs (crates/oracle/target/debug/deps/idealis_oracle-f1f8222ab459fbb5)
+
+running 1 test
+test wire::tests::reused_output_replaces_success_and_error_without_trailing_bytes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (crates/oracle/target/debug/deps/idealis_oracle-b51977c8c78d0874)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/bytes.rs (crates/oracle/target/debug/deps/bytes-6af81c244f0bc96b)
+
+running 2 tests
+test malformed_or_empty_batches_are_errors ... ok
+test byte_output_preserves_complete_reports_for_values_and_failure_observations ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/json.rs (crates/oracle/target/debug/deps/json-5abeb252fc1badc1)
+
+running 4 tests
+test duplicate_observation_fields_are_rejected ... ok
+test json_batches_use_the_same_group_and_preserve_inputs_and_failures ... ok
+test malformed_or_vacuous_batches_cannot_match ... ok
+test observations_require_exact_variant_fields_in_any_key_order ... FAILED
+
+failures:
+
+---- observations_require_exact_variant_fields_in_any_key_order stdout ----
+
+thread 'observations_require_exact_variant_fields_in_any_key_order' (52583641) panicked at tests/json.rs:87:9:
+assertion `left == right` failed: {"cases":[{"actual":[{"kind":"value","value":7},{"kind":"value","value":8}],"id":"one","input":{"source":"model"},"reference":["value",null]}],"group":"wire","implementations":["native","wasm"],"reference":"oracle","version":1}
+  left: String("checked")
+ right: "error"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    observations_require_exact_variant_fields_in_any_key_order
+
+test result: FAILED. 3 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test json`

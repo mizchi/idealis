@@ -1,0 +1,360 @@
+{
+  "actual": {
+    "kind": "module",
+    "module": {
+      "name": "Test",
+      "extends": [],
+      "constants": [],
+      "variables": [],
+      "definitions": [
+        {
+          "name": "op",
+          "kind": "Operator",
+          "params": [],
+          "body": {
+            "kind": "And",
+            "operands": [
+              {
+                "kind": "Number",
+                "value": 1,
+                "location": {
+                  "start": 36,
+                  "end": 37,
+                  "line": 4,
+                  "column": 8
+                }
+              },
+              {
+                "kind": "FunctionApplication",
+                "function": {
+                  "kind": "Identifier",
+                  "name": "f",
+                  "location": {
+                    "start": 45,
+                    "end": 46,
+                    "line": 5,
+                    "column": 8
+                  }
+                },
+                "args": [
+                  {
+                    "kind": "Or",
+                    "operands": [
+                      {
+                        "kind": "Number",
+                        "value": 2,
+                        "location": {
+                          "start": 59,
+                          "end": 60,
+                          "line": 6,
+                          "column": 12
+                        }
+                      },
+                      {
+                        "kind": "Number",
+                        "value": 3,
+                        "location": {
+                          "start": 72,
+                          "end": 73,
+                          "line": 7,
+                          "column": 12
+                        }
+                      }
+                    ],
+                    "isBulleted": true,
+                    "location": {
+                      "start": 56,
+                      "end": 58,
+                      "line": 6,
+                      "column": 9
+                    }
+                  },
+                  {
+                    "kind": "And",
+                    "operands": [
+                      {
+                        "kind": "Number",
+                        "value": 4,
+                        "location": {
+                          "start": 86,
+                          "end": 87,
+                          "line": 8,
+                          "column": 12
+                        }
+                      }
+                    ],
+                    "isBulleted": true,
+                    "location": {
+                      "start": 83,
+                      "end": 85,
+                      "line": 8,
+                      "column": 9
+                    }
+                  }
+                ],
+                "location": {
+                  "start": 46,
+                  "end": 47,
+                  "line": 5,
+                  "column": 9
+                }
+              }
+            ],
+            "isBulleted": true,
+            "location": {
+              "start": 33,
+              "end": 35,
+              "line": 4,
+              "column": 5
+            }
+          },
+          "isLocal": false,
+          "isRecursive": false,
+          "location": {
+            "start": 23,
+            "end": 25,
+            "line": 3,
+            "column": 1
+          }
+        }
+      ],
+      "assumptions": [],
+      "theorems": [],
+      "location": {
+        "start": 1,
+        "end": 5,
+        "line": 2,
+        "column": 1
+      }
+    }
+  },
+  "reference": {
+    "kind": "accepted",
+    "tree": {
+      "kind": 382,
+      "image": "N_Module",
+      "children": [
+        {
+          "kind": 333,
+          "image": "N_BeginModule",
+          "children": [
+            {
+              "kind": 3,
+              "image": "---- MODULE",
+              "children": []
+            },
+            {
+              "kind": 231,
+              "image": "Test",
+              "children": []
+            },
+            {
+              "kind": 35,
+              "image": "----",
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": 350,
+          "image": "N_Extends",
+          "children": []
+        },
+        {
+          "kind": 334,
+          "image": "N_Body",
+          "children": [
+            {
+              "kind": 389,
+              "image": "N_OperatorDefinition",
+              "children": [
+                {
+                  "kind": 366,
+                  "image": "N_IdentLHS",
+                  "children": [
+                    {
+                      "kind": 231,
+                      "image": "op",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "kind": 92,
+                  "image": "==",
+                  "children": []
+                },
+                {
+                  "kind": 341,
+                  "image": "N_ConjList",
+                  "children": [
+                    {
+                      "kind": 340,
+                      "image": "N_ConjItem",
+                      "children": [
+                        {
+                          "kind": 130,
+                          "image": "/\\",
+                          "children": []
+                        },
+                        {
+                          "kind": 385,
+                          "image": "N_Number",
+                          "children": [
+                            {
+                              "kind": 110,
+                              "image": "1",
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "kind": 340,
+                      "image": "N_ConjItem",
+                      "children": [
+                        {
+                          "kind": 130,
+                          "image": "/\\",
+                          "children": []
+                        },
+                        {
+                          "kind": 352,
+                          "image": "N_FcnAppl",
+                          "children": [
+                            {
+                              "kind": 358,
+                              "image": "N_GeneralId",
+                              "children": [
+                                {
+                                  "kind": 367,
+                                  "image": "N_IdPrefix",
+                                  "children": []
+                                },
+                                {
+                                  "kind": 231,
+                                  "image": "f",
+                                  "children": []
+                                }
+                              ]
+                            },
+                            {
+                              "kind": 96,
+                              "image": "[",
+                              "children": []
+                            },
+                            {
+                              "kind": 344,
+                              "image": "N_DisjList",
+                              "children": [
+                                {
+                                  "kind": 343,
+                                  "image": "N_DisjItem",
+                                  "children": [
+                                    {
+                                      "kind": 133,
+                                      "image": "\\/",
+                                      "children": []
+                                    },
+                                    {
+                                      "kind": 385,
+                                      "image": "N_Number",
+                                      "children": [
+                                        {
+                                          "kind": 110,
+                                          "image": "2",
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "kind": 343,
+                                  "image": "N_DisjItem",
+                                  "children": [
+                                    {
+                                      "kind": 133,
+                                      "image": "\\/",
+                                      "children": []
+                                    },
+                                    {
+                                      "kind": 385,
+                                      "image": "N_Number",
+                                      "children": [
+                                        {
+                                          "kind": 110,
+                                          "image": "3",
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "kind": 87,
+                              "image": ",",
+                              "children": []
+                            },
+                            {
+                              "kind": 341,
+                              "image": "N_ConjList",
+                              "children": [
+                                {
+                                  "kind": 340,
+                                  "image": "N_ConjItem",
+                                  "children": [
+                                    {
+                                      "kind": 130,
+                                      "image": "/\\",
+                                      "children": []
+                                    },
+                                    {
+                                      "kind": 385,
+                                      "image": "N_Number",
+                                      "children": [
+                                        {
+                                          "kind": 110,
+                                          "image": "4",
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "kind": 98,
+                              "image": "]",
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": 345,
+          "image": "N_EndModule",
+          "children": [
+            {
+              "kind": 36,
+              "image": "====",
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "tlaTs": "accepted"
+}

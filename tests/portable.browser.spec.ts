@@ -1,23 +1,16 @@
 import { readFile } from "node:fs/promises";
 import { createServer, type Server } from "node:http";
 import { expect, test } from "@playwright/test";
-import { build } from "esbuild";
-import { cases } from "../evals/collections-temporal/cases.js";
-import { compileTlaSafety } from "../src/tla-safety.js";
+import { cases } from "../evals/experiments/collections-temporal/cases.js";
+import { compileTlaSafety } from "../packages/idealis/src/tla-safety.js";
+import { bundleModule } from "../scripts/bundle-module.js";
 
 let server: Server | undefined;
 let origin: string;
 test.beforeAll(async () => {
-  const bundle = await build({
-    entryPoints: ["tests/portable-browser-entry.ts"],
-    bundle: true,
-    platform: "browser",
-    format: "iife",
+  const bundle = await bundleModule("tests/portable-browser-entry.ts", {
     globalName: "portableBrowser",
-    write: false,
   });
-  const output = bundle.outputFiles[0];
-  if (!output) throw new Error("Missing portable browser bundle");
   const wasm = await readFile(
     "crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm",
   );
@@ -52,13 +45,25 @@ test.beforeAll(async () => {
   const modules = await readFile(
     "crates/rtla-compiler/tests/modules-support.json",
   );
+  const completion = await readFile(
+    "crates/rtla-compiler/tests/frontend-completion.json",
+  );
+  const recursive = await readFile(
+    "crates/rtla-compiler/tests/recursive-actions.json",
+  );
+  const frontend = await readFile(
+    "crates/rtla-compiler/tests/frontend-semantics.json",
+  );
+  const operators = await readFile(
+    "crates/rtla-compiler/tests/operators-support.json",
+  );
   server = createServer((request, response) => {
     response.setHeader(
       "Content-Type",
       request.url === "/core.wasm"
         ? "application/wasm"
         : request.url === "/bundle.js"
-          ? "text/javascript"
+          ? "text/javascript; charset=utf-8"
           : request.url === "/safety.json" || request.url === "/complex.json"
             ? "application/json"
             : "text/html",
@@ -67,7 +72,7 @@ test.beforeAll(async () => {
       request.url === "/core.wasm"
         ? wasm
         : request.url === "/bundle.js"
-          ? output.contents
+          ? Buffer.from(bundle.code)
           : request.url === "/safety.json"
             ? safety
             : request.url === "/complex.json"
@@ -76,7 +81,15 @@ test.beforeAll(async () => {
                 ? finite
                 : request.url === "/modules.json"
                   ? modules
-                  : '<!doctype html><title>idealis portable core</title><script src="/bundle.js"></script>',
+                  : request.url === "/operators.json"
+                    ? operators
+                    : request.url === "/completion.json"
+                      ? completion
+                      : request.url === "/recursive-actions.json"
+                        ? recursive
+                        : request.url === "/frontend-semantics.json"
+                          ? frontend
+                          : '<!doctype html><title>idealis portable core</title><script src="/bundle.js"></script>',
     );
   });
   await new Promise<void>((resolve) => server?.listen(0, "127.0.0.1", resolve));
@@ -113,6 +126,131 @@ test("runs the shared Rust core in Chromium without host imports or cross-origin
     broken: "mismatch",
     replay: "mismatch",
     steps: 3,
+    isolated: false,
+    coverageCases: 14,
+  });
+});
+
+test("reduces a model-value symmetry group in Chromium without host imports", async ({
+  page,
+}) => {
+  await page.goto(origin);
+  const result = await page.evaluate(async () => {
+    const api: unknown = Reflect.get(globalThis, "portableBrowser");
+    if (
+      typeof api !== "object" ||
+      api === null ||
+      !("runSymmetry" in api) ||
+      typeof api.runSymmetry !== "function"
+    )
+      throw new Error("Missing browser symmetry API");
+    return api.runSymmetry();
+  });
+  expect(result).toEqual({
+    status: "complete",
+    states: 10,
+    generated: 31,
+    originalStates: 27,
+    records: { status: "complete", states: 56, generated: 337 },
+    sets: { status: "complete", states: 20, generated: 121 },
+    actions: { status: "complete", states: 10, generated: 19 },
+    por: { status: "complete", states: 7, generated: 8 },
+    isolated: false,
+  });
+});
+
+test("executes shared operator IR and bounds exponential work in Chromium", async ({
+  page,
+}) => {
+  await page.goto(origin);
+  const result = await page.evaluate(async () => {
+    const api: unknown = Reflect.get(globalThis, "portableBrowser");
+    if (
+      typeof api !== "object" ||
+      api === null ||
+      !("runSharedIr" in api) ||
+      typeof api.runSharedIr !== "function"
+    )
+      throw new Error("Missing shared IR browser API");
+    return api.runSharedIr();
+  });
+  expect(result).toEqual({
+    version: 2,
+    status: "complete",
+    states: 1,
+    generated: 2,
+    bounded: { status: "bounded", reason: "work", work: 256 },
+    isolated: false,
+  });
+});
+
+test("executes the completed Rust frontend and recursion budget in Chromium", async ({
+  page,
+}) => {
+  await page.goto(origin);
+  const result = await page.evaluate(async () => {
+    const api: unknown = Reflect.get(globalThis, "portableBrowser");
+    if (
+      typeof api !== "object" ||
+      api === null ||
+      !("runFrontendCompletion" in api) ||
+      typeof api.runFrontendCompletion !== "function"
+    )
+      throw new Error("Missing frontend browser API");
+    return api.runFrontendCompletion();
+  });
+  expect(result).toEqual({
+    matched: 78,
+    rejected: 18,
+    evaluation: "evaluation",
+    unicode: "complete",
+    isolated: false,
+  });
+});
+
+test("generates recursive assignment actions and keeps budget exhaustion inconclusive in Chromium", async ({
+  page,
+}) => {
+  await page.goto(origin);
+  const result = await page.evaluate(async () => {
+    const api: unknown = Reflect.get(globalThis, "portableBrowser");
+    if (
+      typeof api !== "object" ||
+      api === null ||
+      !("runRecursiveActions" in api) ||
+      typeof api.runRecursiveActions !== "function"
+    )
+      throw new Error("Missing recursive action browser API");
+    return api.runRecursiveActions();
+  });
+  expect(result).toEqual({
+    matched: 23,
+    rejected: 1,
+    bounded: 2,
+    isolated: false,
+  });
+});
+
+test("checks levels, lazy functions and shared templates in Chromium", async ({
+  page,
+}) => {
+  await page.goto(origin);
+  const result = await page.evaluate(async () => {
+    const api: unknown = Reflect.get(globalThis, "portableBrowser");
+    if (
+      typeof api !== "object" ||
+      api === null ||
+      !("runFrontendSemantics" in api) ||
+      typeof api.runFrontendSemantics !== "function"
+    )
+      throw new Error("Missing frontend semantics browser API");
+    return api.runFrontendSemantics();
+  });
+  expect(result).toEqual({
+    matched: 64,
+    rejected: 12,
+    modelErrors: 4,
+    bounded: 1,
     isolated: false,
   });
 });

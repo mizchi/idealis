@@ -1,0 +1,23 @@
+[package]
+name = "roracle-typed-probe"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["rlib", "cdylib"]
+
+[features]
+component = []
+node = ["dep:napi", "dep:napi-derive", "dep:napi-build"]
+
+[dependencies]
+roracle = { path = "../../../../crates/roracle" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+wit-bindgen = "=0.63.0"
+napi = { version = "=3.16.2", default-features = false, features = ["napi4", "dyn-symbols"], optional = true }
+napi-derive = { version = "=3.7.1", optional = true }
+
+[build-dependencies]
+napi-build = { version = "=2.6.0", optional = true }

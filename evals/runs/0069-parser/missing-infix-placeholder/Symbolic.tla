@@ -1,0 +1,3 @@
+---- MODULE Symbolic ----
+CONSTANT _ %%
+====

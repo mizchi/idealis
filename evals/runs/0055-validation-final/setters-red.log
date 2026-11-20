@@ -1,0 +1,36 @@
+✔ oracle equality retains the previous strict equality on portable snapshots (8.445458ms)
+✔ nonportable values and cycles fail explicitly instead of losing data (0.142917ms)
+✔ batch wire preserves unknown and execution failure without matching them (2.009292ms)
+✔ declared workspace migration sites all use the shared oracle (2.771375ms)
+✔ mutating an input is observed on the next call and does not alter a previous report (0.185208ms)
+✔ snapshot traversal preserves special keys, shared values and exact depth (0.255084ms)
+✔ snapshot rejects hidden fields, extended arrays and accessors without invoking them (0.1195ms)
+✖ snapshot output defines own data properties without invoking inherited setters (0.684292ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 51.8
+
+✖ failing tests:
+
+test at dist/evals/workspace-oracle/contract-test.js:161:1
+✖ snapshot output defines own data properties without invoking inherited setters (0.684292ms)
+  evalmachine.<anonymous>:72
+      Object.defineProperty(Object.prototype, "inherited", {set() {throw new Error("inherited object setter invoked");}});
+                                                                   ^
+  
+  Error: inherited object setter invoked
+      at Object.set (evalmachine.<anonymous>:72:72)
+      at visit (evalmachine.<anonymous>:65:29)
+      at snapshot (evalmachine.<anonymous>:70:12)
+      at evalmachine.<anonymous>:73:20
+      at Script.runInContext (node:vm:149:12)
+      at Script.runInNewContext (node:vm:154:17)
+      at runInNewContext (node:vm:310:38)
+      at TestContext.<anonymous> (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/workspace-oracle/contract-test.js:162:20)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)

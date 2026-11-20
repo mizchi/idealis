@@ -9,6 +9,7 @@ pub(crate) enum Kind {
     Decimal,
     String,
     Symbol,
+    Step,
     End,
 }
 #[derive(Clone, Debug)]
@@ -60,62 +61,224 @@ const KEYWORDS: &[&str] = &[
     "VARIABLE",
     "VARIABLES",
     "WITH",
+    "STATE",
+    "ACTION",
+    "TEMPORAL",
+    "ONLY",
+    "DEFS",
+    "DEFINE",
+    "HAVE",
+    "TAKE",
+    "WITNESS",
+    "PICK",
+    "SUFFICES",
+    "QED",
 ];
 const SYMBOLS: &[&str] = &[
     "-+->", "<=>", "|->", ">>_", "...", "::=", "^+", "^*", "^#", "=>", "==", "<<", ">>", "<=",
     ">=", "=<", "/\\", "\\/", "/=", "[]", "]_", "<>", "->", "<-", "~>", "..", "::", ":=", ":>",
-    "<:", "@@", "++", "--", "**", "//", "^^", "||", "&&", "%%", "##", "$$", "??", "!!", "=", "<",
-    ">", "/", "[", "]", "(", ")", "{", "}", "|", "-", "~", ".", "+", "*", "^", "%", ",", ":", "!",
-    "@", "'", "_", "\\", "&", "$", "?",
+    "<:", "@@", "++", "--", "**", "//", "^^", "||", "&&", "%%", "##", "$$", "??", "!!", "-.", "=",
+    "<", ">", "/", "[", "]", "(", ")", "{", "}", "|", "-", "~", ".", "+", "*", "^", "%", ",", ":",
+    "!", "@", "'", "_", "\\", "&", "$", "?",
 ];
 const ALIASES: &[(&str, &str)] = &[
-    ("\\in", "\\in"),
-    ("\\notin", "\\notin"),
-    ("\\subseteq", "\\subseteq"),
-    ("\\cup", "\\cup"),
-    ("\\union", "\\cup"),
-    ("\\cap", "\\cap"),
-    ("\\intersect", "\\cap"),
-    ("\\X", "\\X"),
+    ("\\lnot", "~"),
+    ("~", "~"),
+    ("\\neg", "~"),
+    ("¬", "~"),
+    ("[]", "[]"),
+    ("□", "[]"),
+    ("<>", "<>"),
+    ("◇", "<>"),
+    ("\\land", "/\\"),
+    ("/\\", "/\\"),
+    ("∧", "/\\"),
+    ("\\lor", "\\/"),
+    ("\\/", "\\/"),
+    ("∨", "\\/"),
+    ("\\equiv", "<=>"),
+    ("<=>", "<=>"),
+    ("≡", "<=>"),
+    ("⇔", "<=>"),
+    ("/=", "#"),
+    ("#", "#"),
+    ("≠", "#"),
+    ("\\leq", "<="),
+    ("<=", "<="),
+    ("=<", "<="),
+    ("≤", "<="),
+    ("\\geq", ">="),
+    (">=", ">="),
+    ("≥", ">="),
     ("\\times", "\\X"),
+    ("\\X", "\\X"),
+    ("×", "\\X"),
+    ("\\intersect", "\\cap"),
+    ("\\cap", "\\cap"),
+    ("∩", "\\cap"),
+    ("\\union", "\\cup"),
+    ("\\cup", "\\cup"),
+    ("∪", "\\cup"),
     ("\\o", "\\o"),
     ("\\circ", "\\o"),
-    ("\\div", "\\div"),
-    ("\\land", "/\\"),
-    ("\\lor", "\\/"),
-    ("\\lnot", "~"),
-    ("\\neg", "~"),
-    ("\\equiv", "<=>"),
-    ("\\leq", "<="),
-    ("\\geq", ">="),
-    ("\\A", "\\A"),
-    ("\\forall", "\\A"),
-    ("\\E", "\\E"),
-    ("\\exists", "\\E"),
-    ("\\AA", "\\AA"),
-    ("\\EE", "\\EE"),
+    ("∘", "\\o"),
+    ("\\oplus", "\\oplus"),
+    ("(+)", "\\oplus"),
+    ("⊕", "\\oplus"),
+    ("\\ominus", "\\ominus"),
+    ("(-)", "\\ominus"),
+    ("⊖", "\\ominus"),
+    ("\\odot", "\\odot"),
+    ("(.)", "\\odot"),
+    ("⊙", "\\odot"),
+    ("\\oslash", "\\oslash"),
+    ("(/)", "\\oslash"),
+    ("⊘", "\\oslash"),
+    ("\\otimes", "\\otimes"),
+    ("(\\X)", "\\otimes"),
+    ("⊗", "\\otimes"),
+    ("\\approx", "\\approx"),
+    ("≈", "\\approx"),
+    (":=", ":="),
+    ("≔", ":="),
+    ("\\asymp", "\\asymp"),
+    ("≍", "\\asymp"),
+    ("\\bigcirc", "\\bigcirc"),
+    ("◯", "\\bigcirc"),
+    ("::=", "::="),
+    ("⩴", "::="),
+    ("\\bullet", "\\bullet"),
+    ("●", "\\bullet"),
     ("\\cdot", "\\cdot"),
+    ("⋅", "\\cdot"),
+    ("\\cong", "\\cong"),
+    ("≅", "\\cong"),
+    ("\\div", "\\div"),
+    ("÷", "\\div"),
+    ("\\doteq", "\\doteq"),
+    ("≐", "\\doteq"),
+    ("..", ".."),
+    ("‥", ".."),
+    ("...", "..."),
+    ("…", "..."),
+    ("!!", "!!"),
+    ("‼", "!!"),
+    ("\\gg", "\\gg"),
+    ("≫", "\\gg"),
+    ("=>", "=>"),
+    ("⇒", "=>"),
+    ("\\in", "\\in"),
     ("∈", "\\in"),
+    ("=|", "=|"),
+    ("⫤", "=|"),
+    ("~>", "~>"),
+    ("↝", "~>"),
+    ("\\ll", "\\ll"),
+    ("≪", "\\ll"),
+    ("-|", "-|"),
+    ("⊣", "-|"),
+    ("\\notin", "\\notin"),
     ("∉", "\\notin"),
+    ("-+->", "-+->"),
+    ("⇸", "-+->"),
+    ("\\prec", "\\prec"),
+    ("≺", "\\prec"),
+    ("\\preceq", "\\preceq"),
+    ("⪯", "\\preceq"),
+    ("\\propto", "\\propto"),
+    ("∝", "\\propto"),
+    ("??", "??"),
+    ("⁇", "??"),
+    ("|=", "|="),
+    ("⊨", "|="),
+    ("|-", "|-"),
+    ("⊢", "|-"),
+    ("\\sim", "\\sim"),
+    ("∼", "\\sim"),
+    ("\\simeq", "\\simeq"),
+    ("≃", "\\simeq"),
+    ("\\sqcap", "\\sqcap"),
+    ("⊓", "\\sqcap"),
+    ("\\sqcup", "\\sqcup"),
+    ("⊔", "\\sqcup"),
+    ("\\sqsubset", "\\sqsubset"),
+    ("⊏", "\\sqsubset"),
+    ("\\sqsubseteq", "\\sqsubseteq"),
+    ("⊑", "\\sqsubseteq"),
+    ("\\sqsupset", "\\sqsupset"),
+    ("⊐", "\\sqsupset"),
+    ("\\sqsupseteq", "\\sqsupseteq"),
+    ("⊒", "\\sqsupseteq"),
+    ("\\star", "\\star"),
+    ("⋆", "\\star"),
+    ("\\subset", "\\subset"),
+    ("⊂", "\\subset"),
+    ("\\subseteq", "\\subseteq"),
     ("⊆", "\\subseteq"),
-    ("∪", "\\cup"),
-    ("∩", "\\cap"),
+    ("\\succ", "\\succ"),
+    ("≻", "\\succ"),
+    ("\\succeq", "\\succeq"),
+    ("⪰", "\\succeq"),
+    ("\\supset", "\\supset"),
+    ("⊃", "\\supset"),
+    ("\\supseteq", "\\supseteq"),
+    ("⊇", "\\supseteq"),
+    ("\\uplus", "\\uplus"),
+    ("⊎", "\\uplus"),
+    ("||", "||"),
+    ("‖", "||"),
+    ("\\wr", "\\wr"),
+    ("≀", "\\wr"),
+    ("^+", "^+"),
+    ("⁺", "^+"),
+    ("'", "'"),
+    ("^", "^"),
+    ("/", "/"),
+    ("*", "*"),
+    ("-", "-"),
+    ("-.", "-."),
+    ("+", "+"),
+    ("=", "="),
+    ("^*", "^*"),
+    ("^#", "^#"),
+    ("<", "<"),
+    (">", ">"),
+    ("\\", "\\"),
+    ("|", "|"),
+    ("&&", "&&"),
+    ("&", "&"),
+    ("$$", "$$"),
+    ("$", "$"),
+    ("%%", "%%"),
+    ("%", "%"),
+    ("##", "##"),
+    ("++", "++"),
+    ("--", "--"),
+    ("**", "**"),
+    ("//", "//"),
+    ("^^", "^^"),
+    ("@@", "@@"),
+    ("<:", "<:"),
+    (":>", ":>"),
+    ("\\forall", "\\A"),
+    ("\\exists", "\\E"),
     ("∀", "\\A"),
     ("∃", "\\E"),
-    ("∧", "/\\"),
-    ("∨", "\\/"),
-    ("¬", "~"),
-    ("≤", "<="),
-    ("≥", ">="),
-    ("≠", "#"),
-    ("⇒", "=>"),
-    ("⇔", "<=>"),
-    ("□", "[]"),
-    ("◇", "<>"),
-    ("×", "\\X"),
     ("⟨", "<<"),
+    ("⟩_", ">>_"),
     ("⟩", ">>"),
-    ("#", "#"),
+    ("∷", "::"),
+    ("≜", "=="),
+    ("→", "->"),
+    ("←", "<-"),
+    ("↦", "|->"),
+    ("ℕ", "Nat"),
+    ("ℤ", "Int"),
+    ("ℝ", "Real"),
+    ("\\A", "\\A"),
+    ("\\E", "\\E"),
+    ("\\AA", "\\AA"),
+    ("\\EE", "\\EE"),
 ];
 
 struct Scanner<'a> {
@@ -164,6 +327,7 @@ pub(crate) fn tokenize(source: &str, start: usize, module: bool) -> Result<Vec<T
     };
     scanner.advance(start);
     let mut tokens = vec![];
+    let mut module_depth = 0usize;
     while scanner.offset < source.len() {
         let rest = &source[scanner.offset..];
         let character = rest.chars().next().expect("nonempty source suffix");
@@ -248,6 +412,29 @@ pub(crate) fn tokenize(source: &str, start: usize, module: bool) -> Result<Vec<T
                 .take_while(|byte| *byte == character as u8)
                 .count();
             (rest[..4].into(), Kind::Symbol, length)
+        } else if character == '<'
+            && rest.find('>').is_some_and(|end| {
+                let level = &rest[1..end];
+                !level.is_empty()
+                    && (level == "+"
+                        || level == "*"
+                        || level.bytes().all(|byte| byte.is_ascii_digit()))
+            })
+        {
+            let end = rest.find('>').unwrap() + 1;
+            let suffix = rest[end..]
+                .bytes()
+                .take_while(|byte| byte.is_ascii_alphanumeric() || *byte == b'_')
+                .count();
+            let end = end + suffix;
+            let end = if suffix == 0 && matches!(rest.as_bytes().get(end), Some(b'*' | b'-')) {
+                end + 1
+            } else {
+                end
+            };
+            let dots = rest[end..].bytes().take_while(|byte| *byte == b'.').count();
+            let end = end + dots;
+            (rest[..end].into(), Kind::Step, end)
         } else if character.is_ascii_alphanumeric() || character == '_' {
             let length = if rest.starts_with("WF_") || rest.starts_with("SF_") {
                 3
@@ -312,25 +499,44 @@ pub(crate) fn tokenize(source: &str, start: usize, module: bool) -> Result<Vec<T
                 return Err(scanner.error("Missing based numeral digits"));
             }
             (rest[..length].into(), Kind::Number, length)
-        } else if let Some((spelling, text)) = ALIASES
-            .iter()
-            .filter(|(spelling, _)| rest.starts_with(spelling))
-            .max_by_key(|(spelling, _)| spelling.len())
-        {
-            ((*text).into(), Kind::Symbol, spelling.len())
-        } else if let Some(symbol) = SYMBOLS.iter().find(|symbol| rest.starts_with(**symbol)) {
-            let text = match *symbol {
-                "/=" => "#",
-                "=<" => "<=",
-                _ => symbol,
-            };
-            (text.into(), Kind::Symbol, symbol.len())
         } else {
-            return Err(scanner.error("Unrecognized character"));
+            let alias = ALIASES
+                .iter()
+                .filter(|(spelling, _)| rest.starts_with(spelling))
+                .max_by_key(|(spelling, _)| spelling.len());
+            let symbol = SYMBOLS
+                .iter()
+                .filter(|symbol| rest.starts_with(**symbol))
+                .max_by_key(|symbol| symbol.len());
+            match (alias, symbol) {
+                (Some((spelling, text)), symbol)
+                    if symbol.is_none_or(|symbol| spelling.len() >= symbol.len()) =>
+                {
+                    let kind = if matches!(*text, "Nat" | "Int" | "Real") {
+                        Kind::Name
+                    } else {
+                        Kind::Symbol
+                    };
+                    ((*text).into(), kind, spelling.len())
+                }
+                (_, Some(symbol)) => {
+                    let text = match *symbol {
+                        "/=" => "#",
+                        "=<" => "<=",
+                        _ => symbol,
+                    };
+                    (text.into(), Kind::Symbol, symbol.len())
+                }
+                _ => return Err(scanner.error("Unrecognized character")),
+            }
         };
         scanner.advance(length);
         location.end = scanner.offset;
         let raw = source[location.start..location.end].into();
+        let is_module_header = text == "MODULE"
+            && tokens
+                .last()
+                .is_some_and(|token: &Token| token.text == "----");
         let is_module_end = text == "====";
         tokens.push(Token {
             text,
@@ -338,8 +544,15 @@ pub(crate) fn tokenize(source: &str, start: usize, module: bool) -> Result<Vec<T
             kind,
             location,
         });
-        if module && is_module_end {
-            break;
+        if module {
+            if is_module_header {
+                module_depth += 1;
+            } else if is_module_end {
+                module_depth -= 1;
+                if module_depth == 0 {
+                    break;
+                }
+            }
         }
     }
     tokens.push(Token {

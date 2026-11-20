@@ -1,0 +1,76 @@
+pnpm package:prepare
+
+> @mizchi/idealis@0.1.0-alpha.0 package:prepare /Users/mz/ghq/github.com/mizchi/idealis
+> pnpm testing:build && pnpm ralloy:build && pnpm rsmt:build && pnpm portable:build && pnpm rtla:build && pnpm build && node dist/scripts/package.js
+
+
+> @mizchi/idealis@0.1.0-alpha.0 testing:build /Users/mz/ghq/github.com/mizchi/idealis
+> pnpm oracle:build && cargo build --release --locked --manifest-path crates/idealis-testing/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/idealis-testing/Cargo.toml
+
+
+> @mizchi/idealis@0.1.0-alpha.0 oracle:build /Users/mz/ghq/github.com/mizchi/idealis
+> cargo build --release --locked --manifest-path crates/oracle/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/oracle/Cargo.toml
+
+    Finished `release` profile [optimized] target(s) in 0.02s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.02s
+    Finished `release` profile [optimized] target(s) in 0.01s
+
+> @mizchi/idealis@0.1.0-alpha.0 ralloy:build /Users/mz/ghq/github.com/mizchi/idealis
+> pnpm oracle:build && cargo build --release --locked --manifest-path crates/ralloy/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/ralloy/Cargo.toml
+
+
+> @mizchi/idealis@0.1.0-alpha.0 oracle:build /Users/mz/ghq/github.com/mizchi/idealis
+> cargo build --release --locked --manifest-path crates/oracle/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/oracle/Cargo.toml
+
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.02s
+    Finished `release` profile [optimized] target(s) in 0.01s
+
+> @mizchi/idealis@0.1.0-alpha.0 rsmt:build /Users/mz/ghq/github.com/mizchi/idealis
+> pnpm oracle:build && cargo build --release --locked --manifest-path crates/idealis-smt/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/idealis-smt/Cargo.toml
+
+
+> @mizchi/idealis@0.1.0-alpha.0 oracle:build /Users/mz/ghq/github.com/mizchi/idealis
+> cargo build --release --locked --manifest-path crates/oracle/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/oracle/Cargo.toml
+
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.03s
+    Finished `release` profile [optimized] target(s) in 0.02s
+
+> @mizchi/idealis@0.1.0-alpha.0 portable:build /Users/mz/ghq/github.com/mizchi/idealis
+> pnpm oracle:build && cargo build --release --locked --manifest-path crates/idealis-core/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/idealis-core/Cargo.toml
+
+
+> @mizchi/idealis@0.1.0-alpha.0 oracle:build /Users/mz/ghq/github.com/mizchi/idealis
+> cargo build --release --locked --manifest-path crates/oracle/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/oracle/Cargo.toml
+
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+
+> @mizchi/idealis@0.1.0-alpha.0 rtla:build /Users/mz/ghq/github.com/mizchi/idealis
+> pnpm oracle:build && cargo build --release --locked --manifest-path crates/rtla/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/rtla/Cargo.toml
+
+
+> @mizchi/idealis@0.1.0-alpha.0 oracle:build /Users/mz/ghq/github.com/mizchi/idealis
+> cargo build --release --locked --manifest-path crates/oracle/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/oracle/Cargo.toml
+
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+
+> @mizchi/idealis@0.1.0-alpha.0 build /Users/mz/ghq/github.com/mizchi/idealis
+> tsc -p tsconfig.build.json
+
+Verified npm, rtla/rtla-compiler/rtlc/idealis-core/idealis-smt/ralloy/idealis-testing/idealis-oracle Cargo and Wasm artifacts: /Users/mz/ghq/github.com/mizchi/idealis/.artifacts/packages
+pnpm package:test
+
+> @mizchi/idealis@0.1.0-alpha.0 package:test /Users/mz/ghq/github.com/mizchi/idealis
+> node dist/scripts/package-test.js
+
+{"status":"complete","oracle":"standalone idealis-oracle consumer checked","oracleJson":"standalone oracle JSON consumer checked","oracleDependencies":["idealis-oracle","itoa","memchr","oracle-consumer","proc-macro2","quote","serde","serde_core","serde_derive","serde_json","syn","unicode-ident","zmij"],"node":"packaged TS/Wasm consumer matched without solvers","typecheck":"passed without solver declarations","rust":"packaged Rust consumer matched","rtlc":"standalone rtlc consumer checked","rtla":"standalone rtla consumer parsed","rsmt":"standalone idealis-smt consumer checked","ralloy":"standalone ralloy consumer checked","testing":"standalone idealis-testing consumer checked","testingSchedule":"standalone schedule generator checked","testingDependencies":["idealis-testing","itoa","memchr","proc-macro2","quote","serde","serde_core","serde_derive","serde_json","syn","testing-consumer","unicode-ident","zmij"],"ralloyDependencies":["itoa","memchr","proc-macro2","quote","ralloy","ralloy-consumer","serde","serde_core","serde_derive","serde_json","syn","unicode-ident","zmij"],"rsmtDependencies":["autocfg","idealis-smt","idealis-smt-consumer","itoa","memchr","num-bigint","num-integer","num-traits","proc-macro2","quote","serde","serde_core","serde_derive","serde_json","syn","unicode-ident","zmij"],"parserWasm":"packaged rtla Wasm parsed without solvers","cliExitCodes":[0,1,2],"consumer":"/var/folders/_h/_rf455xj4h3_3g6z86pg244c0000gn/T/idealis-consumer-ziVcI1","artifacts":["mizchi-idealis-0.1.0-alpha.0.tgz","idealis-core-0.1.0-alpha.0.crate","rtlc-0.1.0-alpha.0.crate","rtla-0.1.0-alpha.0.crate","rtla-compiler-0.1.0-alpha.0.crate","idealis-smt-0.1.0-alpha.0.crate","ralloy-0.1.0-alpha.0.crate","idealis-testing-0.1.0-alpha.0.crate","idealis-oracle-0.1.0-alpha.0.crate"]}

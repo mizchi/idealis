@@ -1,8 +1,9 @@
 mod finite;
 pub use rtla_compiler::{CompileOptions, IrVersion};
 pub use rtlc::{
-    CoreError, ExpansionOptions, ExpansionStats, SafetyBounds, SafetyExpansionCache, SafetyProgram,
-    SafetyResult, Value,
+    CoreError, ExpansionOptions, ExpansionStats, PreparedSafetyProgram, SafetyActionCoverage,
+    SafetyBounds, SafetyCoverage, SafetyCoverageReport, SafetyExpansionCache, SafetyOptions,
+    SafetyProgram, SafetyResult, Value,
 };
 mod history;
 pub use history::{ConcurrentHistory, ConcurrentResult, ConcurrentStatus, HistoryEvent};
@@ -28,7 +29,13 @@ pub fn compile_tla_with_options(
     config: &str,
     options: CompileOptions,
 ) -> Result<SafetyProgram, CoreError> {
-    compile_tla_bundle(source, config, &BTreeMap::new(), options)
+    compile_tla_bundle(
+        source,
+        config,
+        &BTreeMap::new(),
+        options,
+        rtla::SyntaxVersion::default(),
+    )
 }
 
 fn compile_tla_bundle(
@@ -36,17 +43,18 @@ fn compile_tla_bundle(
     config: &str,
     sources: &BTreeMap<String, String>,
     options: CompileOptions,
+    syntax: rtla::SyntaxVersion,
 ) -> Result<SafetyProgram, CoreError> {
     if sources.len() > 256 {
         return Err(CoreError::protocol("source bundle exceeds 256 modules"));
     }
-    let module = rtla::parse_module(source)
+    let module = rtla::parse_module_with_version(source, syntax)
         .map_err(|error| CoreError::protocol(&format!("TLA parsing: {error}")))?;
     let config = rtla::parse_config(config)
         .map_err(|error| CoreError::protocol(&format!("TLC configuration: {error}")))?;
     let mut modules = vec![];
     for (name, source) in sources {
-        let module = rtla::parse_module(source)
+        let module = rtla::parse_module_with_version(source, syntax)
             .map_err(|error| CoreError::protocol(&format!("TLA module {name}: {error}")))?;
         if module.name != *name {
             return Err(CoreError::protocol(&format!(
@@ -160,6 +168,21 @@ pub enum Response {
 fn default_ir_version() -> u8 {
     1
 }
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SafetyCheck {
+    pub bounds: SafetyBounds,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub options: Option<SafetyOptions>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(tag = "kind", rename_all = "kebab-case", deny_unknown_fields)]
+pub enum SafetyBatchResult {
+    Safety { result: SafetyResult },
+    Error { code: String, message: String },
+}
 #[allow(non_snake_case)]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "kebab-case", deny_unknown_fields)]
@@ -171,6 +194,8 @@ pub enum Request {
         modules: BTreeMap<String, String>,
         #[serde(default = "default_ir_version")]
         irVersion: u8,
+        #[serde(default)]
+        syntaxVersion: rtla::SyntaxVersion,
     },
     CheckTla {
         source: String,
@@ -179,6 +204,8 @@ pub enum Request {
         modules: BTreeMap<String, String>,
         #[serde(default = "default_ir_version")]
         irVersion: u8,
+        #[serde(default)]
+        syntaxVersion: rtla::SyntaxVersion,
         bounds: SafetyBounds,
     },
     #[cfg(not(target_arch = "wasm32"))]
@@ -190,6 +217,28 @@ pub enum Request {
     CheckSafety {
         program: SafetyProgram,
         bounds: SafetyBounds,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        options: Option<SafetyOptions>,
+    },
+    CheckSafetyCoverage {
+        program: SafetyProgram,
+        bounds: SafetyBounds,
+    },
+    PrepareSafety {
+        program: SafetyProgram,
+    },
+    CheckPreparedSafety {
+        handle: u32,
+        bounds: SafetyBounds,
+        #[serde(default)]
+        options: Option<SafetyOptions>,
+    },
+    CheckPreparedSafetyBatch {
+        handle: u32,
+        jobs: Vec<SafetyCheck>,
+    },
+    ReleaseSafety {
+        handle: u32,
     },
     #[serde(rename_all = "camelCase")]
     CheckSafetyIncremental {
@@ -274,6 +323,18 @@ pub enum Message {
     Safety {
         result: SafetyResult,
     },
+    SafetyCoverage {
+        report: SafetyCoverageReport,
+    },
+    Loaded {
+        handle: u32,
+    },
+    SafetyPrepared {
+        handle: u32,
+    },
+    SafetyBatch {
+        results: Vec<SafetyBatchResult>,
+    },
     IncrementalSafety {
         result: SafetyResult,
         cache: SafetyExpansionCache,
@@ -281,9 +342,6 @@ pub enum Message {
     },
     SafetyExpansions {
         cache: SafetyExpansionCache,
-    },
-    Loaded {
-        handle: u32,
     },
     Released,
     History {
@@ -507,6 +565,7 @@ pub struct Engine {
     session: Option<Session>,
     finite: Option<Arc<PreparedFiniteModel>>,
     models: BTreeMap<u32, Arc<PreparedFiniteModel>>,
+    safety_programs: BTreeMap<u32, PreparedSafetyProgram>,
     active_handle: Option<u32>,
     next_handle: u32,
     next_id: u32,
@@ -517,6 +576,7 @@ impl Default for Engine {
             session: None,
             finite: None,
             models: BTreeMap::new(),
+            safety_programs: BTreeMap::new(),
             active_handle: None,
             next_handle: 1,
             next_id: 1,
@@ -552,6 +612,7 @@ impl Engine {
                 config,
                 modules,
                 irVersion,
+                syntaxVersion,
             } => Ok(Message::Compiled {
                 program: compile_tla_bundle(
                     &source,
@@ -561,6 +622,7 @@ impl Engine {
                         irVersion: IrVersion::try_from(irVersion)
                             .map_err(|error| CoreError::protocol(&error.to_string()))?,
                     },
+                    syntaxVersion,
                 )?,
             }),
             Request::CheckTla {
@@ -568,6 +630,7 @@ impl Engine {
                 config,
                 modules,
                 irVersion,
+                syntaxVersion,
                 bounds,
             } => Ok(Message::Safety {
                 result: compile_tla_bundle(
@@ -578,6 +641,7 @@ impl Engine {
                         irVersion: IrVersion::try_from(irVersion)
                             .map_err(|error| CoreError::protocol(&error.to_string()))?,
                     },
+                    syntaxVersion,
                 )?
                 .check(bounds)?,
             }),
@@ -589,9 +653,65 @@ impl Engine {
             } => Ok(Message::Safety {
                 result: program.check_parallel(bounds, workers)?,
             }),
-            Request::CheckSafety { program, bounds } => Ok(Message::Safety {
-                result: program.check(bounds)?,
+            Request::CheckSafety {
+                program,
+                bounds,
+                options,
+            } => Ok(Message::Safety {
+                result: program.check_with_options(bounds, options.unwrap_or_default())?,
             }),
+            Request::CheckSafetyCoverage { program, bounds } => Ok(Message::SafetyCoverage {
+                report: program.check_with_coverage(bounds)?,
+            }),
+            Request::PrepareSafety { program } => {
+                let prepared = program.prepare()?;
+                let next = self
+                    .next_handle
+                    .checked_add(1)
+                    .ok_or_else(|| CoreError::protocol("Model handles exhausted"))?;
+                let handle = self.next_handle;
+                self.safety_programs.insert(handle, prepared);
+                self.next_handle = next;
+                Ok(Message::SafetyPrepared { handle })
+            }
+            Request::CheckPreparedSafety {
+                handle,
+                bounds,
+                options,
+            } => Ok(Message::Safety {
+                result: self
+                    .get_safety_program(handle)?
+                    .check_with_options(bounds, options.unwrap_or_default())?,
+            }),
+            Request::CheckPreparedSafetyBatch { handle, jobs } => {
+                let program = self.get_safety_program(handle)?;
+                if jobs.is_empty() || jobs.len() > 256 {
+                    return Err(CoreError::protocol(
+                        "Safety batch must contain 1 to 256 jobs",
+                    ));
+                }
+                let results = jobs
+                    .into_iter()
+                    .map(|job| {
+                        match program
+                            .check_with_options(job.bounds, job.options.unwrap_or_default())
+                        {
+                            Ok(result) => SafetyBatchResult::Safety { result },
+                            Err(error) => SafetyBatchResult::Error {
+                                code: error.code.into(),
+                                message: error.message,
+                            },
+                        }
+                    })
+                    .collect();
+                Ok(Message::SafetyBatch { results })
+            }
+            Request::ReleaseSafety { handle } => {
+                self.safety_programs
+                    .remove(&handle)
+                    .ok_or_else(|| CoreError::protocol("Unknown safety handle"))?;
+                Ok(Message::Released)
+            }
             Request::CheckSafetyIncremental {
                 enabled,
                 program,
@@ -755,6 +875,12 @@ impl Engine {
         self.active_handle = handle;
         self.drive(effect)
     }
+    fn get_safety_program(&self, handle: u32) -> Result<&PreparedSafetyProgram, CoreError> {
+        self.safety_programs
+            .get(&handle)
+            .ok_or_else(|| CoreError::protocol("Unknown safety handle"))
+    }
+
     fn get_model(&self, handle: u32) -> Result<Arc<PreparedFiniteModel>, CoreError> {
         self.models
             .get(&handle)

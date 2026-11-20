@@ -1,16 +1,21 @@
-import { compileCounterTable, runTable } from "../evals/runtime/table.js";
-import { createWasmKernel } from "../evals/runtime/wasm.js";
-import { planBudget } from "../src/budget.js";
+import {
+  compileCounterTable,
+  runTable,
+} from "../evals/experiments/runtime/table.js";
+import { createWasmKernel } from "../evals/experiments/runtime/wasm.js";
+import { planBudget } from "../packages/idealis/src/budget.js";
 import {
   createManifest,
   mergeReports,
   partitionTasks,
-} from "../src/sharding.js";
+} from "../packages/idealis/src/sharding.js";
 
-export const run = async (): Promise<Record<string, unknown>> => {
+export const run = async (assetBase = ""): Promise<Record<string, unknown>> => {
   const table = compileCounterTable();
   const wasm = await createWasmKernel(
-    new Uint8Array(await (await fetch("/runtime.wasm")).arrayBuffer()),
+    new Uint8Array(
+      await (await fetch(`${assetBase}/runtime.wasm`)).arrayBuffer(),
+    ),
     table,
   );
   const options = {

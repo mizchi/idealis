@@ -1,0 +1,82 @@
+{
+  "status": "complete",
+  "scope": "Four still unsupported infix forms retain syntax refusals; only their exact diagnostics changed after symbolic references were added.",
+  "changes": [
+    {
+      "id": "ts-only-infix/##",
+      "before": {
+        "error": "Unexpected token \"#\""
+      },
+      "actual": {
+        "kind": "error",
+        "error": {
+          "kind": "syntax",
+          "message": "Unexpected token after expression",
+          "location": {
+            "start": 5,
+            "end": 6,
+            "line": 1,
+            "column": 6
+          }
+        }
+      }
+    },
+    {
+      "id": "ts-only-infix/-|",
+      "before": {
+        "error": "Unexpected token \"|\""
+      },
+      "actual": {
+        "kind": "error",
+        "error": {
+          "kind": "syntax",
+          "message": "Unexpected token after expression",
+          "location": {
+            "start": 5,
+            "end": 6,
+            "line": 1,
+            "column": 6
+          }
+        }
+      }
+    },
+    {
+      "id": "ts-only-infix/=|",
+      "before": {
+        "error": "Unexpected token \"|\""
+      },
+      "actual": {
+        "kind": "error",
+        "error": {
+          "kind": "syntax",
+          "message": "Unexpected token after expression",
+          "location": {
+            "start": 5,
+            "end": 6,
+            "line": 1,
+            "column": 6
+          }
+        }
+      }
+    },
+    {
+      "id": "ts-only-infix/|=",
+      "before": {
+        "error": "Unexpected token \"=\""
+      },
+      "actual": {
+        "kind": "error",
+        "error": {
+          "kind": "syntax",
+          "message": "Unexpected token after expression",
+          "location": {
+            "start": 5,
+            "end": 6,
+            "line": 1,
+            "column": 6
+          }
+        }
+      }
+    }
+  ]
+}

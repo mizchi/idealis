@@ -1,0 +1,22 @@
+name: Browser compatibility
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: browser-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  CI: true
+jobs:
+  compatibility:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      - run: rustup target add wasm32-unknown-unknown
+      - run: just wasm-build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: >-
+          pnpm exec playwright test --workers=1
+          --project core portable rtla runtime oracle sat testing schedules fuzz smt alloy alloy-instance

@@ -1,0 +1,142 @@
+{
+  "input": "Choice",
+  "route": "after-wasm-v1",
+  "iteration": 3,
+  "warmup": false,
+  "status": "complete",
+  "compileMs": 0.1041670000000181,
+  "checkMs": 0.026292000000012195,
+  "sourceMs": 0.07787500000000591,
+  "irBytes": 943,
+  "definitions": null,
+  "result": {
+    "status": "complete",
+    "reason": null,
+    "states": 3,
+    "generated": 10,
+    "depth": 1,
+    "work": 23,
+    "violation": null
+  },
+  "program": {
+    "format": "modelt.safety-program",
+    "version": 1,
+    "name": "Choice",
+    "variables": [
+      "value"
+    ],
+    "initial": [
+      {
+        "name": "init",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "literal",
+              "value": {
+                "type": "int",
+                "value": "0"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "next": [
+      {
+        "name": "step",
+        "steps": [
+          {
+            "kind": "bind",
+            "slot": 0,
+            "domain": {
+              "kind": "set",
+              "values": [
+                {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                },
+                {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "1"
+                  }
+                },
+                {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "2"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "bound",
+              "slot": 0
+            }
+          }
+        ]
+      }
+    ],
+    "invariants": [
+      {
+        "name": "safety",
+        "expression": {
+          "op": "and",
+          "left": {
+            "op": "and",
+            "left": {
+              "op": "literal",
+              "value": {
+                "type": "bool",
+                "value": true
+              }
+            },
+            "right": {
+              "op": "ge",
+              "left": {
+                "op": "read",
+                "slot": 0,
+                "next": false
+              },
+              "right": {
+                "op": "literal",
+                "value": {
+                  "type": "int",
+                  "value": "0"
+                }
+              }
+            }
+          },
+          "right": {
+            "op": "le",
+            "left": {
+              "op": "read",
+              "slot": 0,
+              "next": false
+            },
+            "right": {
+              "op": "literal",
+              "value": {
+                "type": "int",
+                "value": "2"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "assumptions": [],
+    "checkDeadlock": true
+  }
+}

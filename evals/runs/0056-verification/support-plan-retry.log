@@ -1,0 +1,17 @@
+node --experimental-strip-types scripts/check-support.ts --dry-run
+rtla: 3 comparisons, 21 sources, 49697 chars
+rtla-compiler: 5 comparisons, 20 sources, 170442 chars
+[{"comparisonId":"rtlc-implementation-4","path":"crates/rtlc/SUPPORT.md","code":"excerpt-budget"}]
++ actual - expected
+
++ [
++   {
++     code: 'excerpt-budget',
++     comparisonId: 'rtlc-implementation-4',
++     path: 'crates/rtlc/SUPPORT.md'
++   }
++ ]
+- []
+
+Checklist review is incomplete. Run just support-sync (or support-sync-staged), inspect the findings, then stage SUPPORT.md and .jev-lint/checklists.
+error: Recipe `support-plan` failed on line 11 with exit code 3

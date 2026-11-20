@@ -1,6 +1,6 @@
 # RustでSMT-LIBの一部を解く実験
 
-整数の差分制約とBoolean式を解く独立した[`idealis-smt` crate](../crates/idealis-smt)を提供する。実験用crateから移し、nativeとホストimport不要のWasmを同じソースから生成する。idealisの他crateへ依存せず、idealisの公開backendや既存のZ3 adapterには接続していない。
+整数の差分制約とBoolean式を解く独立した[`rusmt` crate](../crates/rusmt)を提供する。実験用crateから移し、nativeとホストimport不要のWasmを同じソースから生成する。idealisの他crateへ依存せず、idealisの公開backendや既存のZ3 adapterには接続していない。
 
 Z3を再利用する比較でも、小さいTTL・amount・schedulerのnative問い合わせは約3.0-3.4倍速かった。Boolean UNSATでは約34倍遅い例と予算切れが残る。[比較条件と全17入力](../evals/iterations/0031-smt-reuse.md)を確認してから用途を判断する。
 
@@ -48,7 +48,7 @@ workは式の処理と制約の緩和を数える。parserの費用やwall clock
 
 ## 実験用のAPI
 
-Rustは`idealis_smt::Problem::parse(source)`と`Problem::solve(max_work)`を持つ。`Problem::solve_assuming(&[Assumption], max_work)`は一時的なBool literalを加えて解く。`Assumption { symbol, positive }`は宣言済みBool名と極性を表す。nativeの`idealis-smt` binaryと`idealis-smt.wasm`は共通の`Engine`を使う。[TS側のwire型](../evals/smt-subset/wire.ts)がリクエストと応答を定義する。
+Rustは`rusmt::Problem::parse(source)`と`Problem::solve(max_work)`を持つ。`Problem::solve_assuming(&[Assumption], max_work)`は一時的なBool literalを加えて解く。`Assumption { symbol, positive }`は宣言済みBool名と極性を表す。nativeの`rusmt` binaryと`rusmt.wasm`は共通の`Engine`を使う。[TS側のwire型](../evals/experiments/smt-subset/wire.ts)がリクエストと応答を定義する。
 
 ```json
 {
@@ -98,7 +98,7 @@ workは全checkで共有し、各結果の`stats.work`を差し引く。残り0�
 
 各checkは探索をやり直す。Scriptを再求解しても前回の消費やassumptionsを持ち越さず、学習状態や中断地点の再利用は行わない。
 
-[Wasm loader](../evals/smt-subset/wasm.ts)はNodeやZ3へ依存しない。実Chromiumで`crossOriginIsolated === false`のままSAT、UNSAT、unknown、未対応、再利用を検査した。0030で測定した生Wasmは330,749 bytesで、Z3 Wasmは39,205,260 bytesだった。対応機能が異なるため、汎用ソルバー同士の容量比較にはしない。
+[Wasm loader](../evals/experiments/smt-subset/wasm.ts)はNodeやZ3へ依存しない。実Chromiumで`crossOriginIsolated === false`のままSAT、UNSAT、unknown、未対応、再利用を検査した。0030で測定した生Wasmは330,749 bytesで、Z3 Wasmは39,205,260 bytesだった。対応機能が異なるため、汎用ソルバー同士の容量比較にはしない。
 
 [評価0040](../evals/iterations/0040-smt-expansion.md)では、定数倍・整数iteの確認用140式と21件のcontext問い合わせをZ3へ照合した。旧版が受理した式は1/140、新版は140/140。新機能を狙った人工入力の対応率で、実用入力全体の対応率や速度の比較ではない。
 
@@ -111,15 +111,15 @@ workは全checkで共有し、各結果の`stats.work`を差し引く。残り0�
 Node.js 24+、pnpm、just、Rustと`wasm32-unknown-unknown` targetを用意する。確認済みrunのディレクトリは上書きできないので、新しいパスを指定する。
 
 ```sh
-just rsmt-build
-just rsmt-test
-just rsmt-example
-pnpm build
-node --test dist/evals/smt-subset/contract-test.js
+just rusmt-build
+just rusmt-test
+just rusmt-example
+just build
+node --test dist/tests/smt-subset/contract-test.js
 just smt-browser
 just smt-expansion-test
 just smt-script-test
-just rsmt-criterion
+just rusmt-criterion
 just smt-verify development .artifacts/smt-dev
 just smt-verify confirmation .artifacts/smt-confirm .artifacts/smt-dev
 just smt-bench .artifacts/smt-bench /absolute/path/to/z3
@@ -127,7 +127,7 @@ just smt-bench .artifacts/smt-bench /absolute/path/to/z3
 
 Z3 nativeは[公式5.4.1 release](https://github.com/Z3Prover/z3/releases/tag/z3-5.4.1)を使う。比較対象のnpm `z3-solver`も5.4.1。評価に使ったmacOS arm64 archiveのSHA-256は`a4a878121e81dfc297d027dd0b51dc4f08feb4296d6ecace42bfbc87a29d6d58`で、記録した実行binaryのhashとは区別する。
 
-`smt-build` / `smt-test` / `smt-criterion`は既存の呼び出し用に残す。`just package`はidealis-smtのcrate archive、WasmとABI manifestも作り、archiveだけを展開したRust consumerで検査する。過去の0030/0031の性能値は移動前の測定として保持する。
+`smt-build` / `smt-test` / `smt-criterion`は既存の呼び出し用に残す。`just package`はrusmtのcrate archive、WasmとABI manifestも作り、archiveだけを展開したRust consumerで検査する。過去の0030/0031の性能値は移動前の測定として保持する。
 
 ## 採否
 

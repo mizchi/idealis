@@ -1,0 +1,22 @@
+   Compiling rtla-compiler v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtla-compiler)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.75s
+     Running tests/symmetry.rs (crates/rtla-compiler/target/debug/deps/symmetry-1fd9e25521fe953b)
+
+running 1 test
+test symmetry_does_not_treat_shadowed_permutations_as_the_tlc_builtin ... FAILED
+
+failures:
+
+---- symmetry_does_not_treat_shadowed_permutations_as_the_tlc_builtin stdout ----
+
+thread 'symmetry_does_not_treat_shadowed_permutations_as_the_tlc_builtin' (54544926) panicked at tests/symmetry.rs:219:5:
+assertion failed: compile(&constant, &format!("CONSTANT Permutations=0\n{config}")).is_err()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    symmetry_does_not_treat_shadowed_permutations_as_the_tlc_builtin
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test symmetry`

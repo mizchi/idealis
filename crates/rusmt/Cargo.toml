@@ -1,0 +1,32 @@
+[package]
+name = "rusmt"
+version = "0.1.0-alpha.0"
+edition = "2024"
+description = "Portable SMT-LIB subset solver for Boolean and integer difference constraints"
+repository = "https://github.com/mizchi/idealis"
+readme = "README.md"
+license = "MIT"
+include = ["src/**", "tests/**", "examples/**", "benches/**", "Cargo.toml", "Cargo.lock", "README.md", "SUPPORT.md", "LICENSE"]
+
+[lib]
+crate-type = ["rlib", "cdylib"]
+
+[[bench]]
+name = "solver"
+harness = false
+
+[dependencies]
+num-bigint = "0.4"
+num-traits = "0.2"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+criterion = { version = "0.8.2", default-features = false, features = ["cargo_bench_support"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

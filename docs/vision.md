@@ -42,6 +42,8 @@ flowchart TD
 
 [Quint Connect](https://github.com/quint-co/quint-connect)は、Quintから生成したトレースをDriver経由でRust実装へ再生し、実装の状態を仕様に対応付けて検査する。この接続方法を参考に、idealisでは同じモデル・操作列・期待観測を複数言語の実装へ使いたい。
 
+ITF を読み、同じトレースを Rust・TypeScript・Go の実装で再生する入口を [idealis connect の API 案](connect.md) にまとめた。
+
 目標とする開発の流れは次のとおり。
 
 1. 状態・操作・invariant・環境仮定を仕様に書く。モデル自体の矛盾や性質違反を検査する。
@@ -105,3 +107,11 @@ TLA+系checkerとSMT backendをつなぐ際は、以下を変換の契約に含�
 4. 対応する注釈・言語機能・理論を増やし、counterexampleをソース位置と再現可能なcaseへ戻す。
 
 採用判断は、実装で再現した仕様とのずれ、反例の理解と再生、正常版の対照、CIでの実行・診断費用で行う。新しいbackendや理論の追加そのものを成果の指標にしない。条件と保証範囲を[evals](../evals/README.md)へ記録しながら、試作から使える経路を選ぶ。
+
+## TODO — Java 不要 CLI の互換範囲
+
+connect の設計を先行し、次の互換対応は後続タスクで扱う。現状の範囲は [idealis-cli の対応表](../crates/idealis-cli/SUPPORT.md) を参照。
+
+- [ ] TLC の simulation（`-simulate` と seed）、深さ優先の反復深化（`-dfid`）に対応する。
+- [ ] TLC の `-tool` 出力、checkpoint の作成と `-recover` による再開を対応表に分けて追加する。
+- [ ] SANY の名前解決・level 検査の未対応例を fixture 化する。各項目は公式 v1.7.4 と同じ入力で診断・終了コード・必要な出力を比較してから対応済みにする。

@@ -1,0 +1,453 @@
+{
+  "status": "complete",
+  "plan": "0063-evaluator-tuning",
+  "baseline": "162fd73d",
+  "planCommit": "3e804b5f",
+  "runs": [
+    {
+      "name": "0063-corpus-a",
+      "status": "complete",
+      "sha256": "b29e799661ed8940717b47f58e9eb9f57f107642ef4a41b2ebb419a0d6046af0"
+    },
+    {
+      "name": "0063-corpus-selected",
+      "status": "failed",
+      "sha256": "90ebbacc84c7e5675a70ced2098ae79a997daf6cb1416bd97f1c02c7ea457036"
+    },
+    {
+      "name": "0063-corpus-selected-fixed",
+      "status": "complete",
+      "sha256": "c521d4ccebc0efbc3d4bc063cab60e5cb63cd68756b2d3204a913e8729be5728"
+    },
+    {
+      "name": "0063-corpus-summary",
+      "status": "complete",
+      "sha256": "e61c7b76502ba07cae85e4b057c0d7ead3393b0f393b5485cb4a817ca5cdb933"
+    },
+    {
+      "name": "0063-kernel-a",
+      "status": "complete",
+      "scope": "Four Criterion repetitions; corresponding summary validates expected counts."
+    },
+    {
+      "name": "0063-kernel-a-summary",
+      "status": "complete",
+      "sha256": "461e77c851911b3c2fbbd1a8aa3862246fb0c54ee64437b0017397d23e4f5578"
+    },
+    {
+      "name": "0063-kernel-b",
+      "status": "complete",
+      "scope": "Four Criterion repetitions; corresponding summary validates expected counts."
+    },
+    {
+      "name": "0063-kernel-b-summary",
+      "status": "complete",
+      "sha256": "a73919d255ee259f54c6cd4ebe2c943e9e75187f011d41927175df299b342e81"
+    },
+    {
+      "name": "0063-kernel-c",
+      "status": "complete",
+      "scope": "Four Criterion repetitions; corresponding summary validates expected counts."
+    },
+    {
+      "name": "0063-kernel-c-summary",
+      "status": "complete",
+      "sha256": "1ec2c845648ac9c035d93ed3964e5776a1ba194bde096ca2ac52fc617c26fbe5"
+    },
+    {
+      "name": "0063-kernel-confirmation",
+      "status": "complete",
+      "scope": "Four Criterion repetitions; corresponding summary validates expected counts."
+    },
+    {
+      "name": "0063-kernel-confirmation-summary",
+      "status": "complete",
+      "sha256": "69367f29a408c6ec9c49019a88002f3d3d1ea2d71184832748e37289b9716096"
+    },
+    {
+      "name": "0063-kernel-final",
+      "status": "complete",
+      "scope": "Four Criterion repetitions; corresponding summary validates expected counts."
+    },
+    {
+      "name": "0063-kernel-final-summary",
+      "status": "complete",
+      "sha256": "360e101ce6a2c98c3f41bef99d1cc412abd6caa86d4a0722b3a8c96f091b47d4"
+    },
+    {
+      "name": "0063-kernel-selected",
+      "status": "complete",
+      "scope": "Four Criterion repetitions; corresponding summary validates expected counts."
+    },
+    {
+      "name": "0063-kernel-selected-summary",
+      "status": "complete",
+      "sha256": "2a764932cbe7c45168839810ff02a8e9113af5f8dd8d4fdc0d381e694d25afad"
+    },
+    {
+      "name": "0063-parity",
+      "status": "complete",
+      "sha256": "98e470864644ae279cbf83a51ff4db9138398977a0ff17096a90dbdf3f4113d7"
+    },
+    {
+      "name": "0063-tcommit-profile",
+      "status": "complete",
+      "sha256": "2fdbeba447efc0850f522a386e426d0da597a09a9e8f50a8b331d6fda1f55f8f"
+    },
+    {
+      "name": "0063-verification",
+      "status": "complete",
+      "sha256": "76824de289ca121686f4dab4083594fc76b639e29f901193f63f474215d3b0bf"
+    }
+  ],
+  "snapshots": [
+    {
+      "stage": "before",
+      "manifestSha256": "fadb9802fc32f7df8a8602bb97fa9a8c141c3d8437b682a74d17d6b24fa82308",
+      "sourceSha256": "a0411de0aec1542694a5b5afb817dd1250301c21ab6177fc88f5dd6d1a56a23e",
+      "files": [
+        {
+          "path": "criterion.json",
+          "sha256": "9b17c625166aa1af08d05dab4862e1bc9ad57a3a5d72de6f548f93f976b19e8a"
+        },
+        {
+          "path": "idealis-core",
+          "sha256": "e18500a35e6cffcc16e0ed3ed660af8219e11c3800459636668eb01c2fdb91f2"
+        },
+        {
+          "path": "idealis_core.wasm",
+          "sha256": "b9a66607edae6705a94c0ce71c7dfc870ec7652f16d0df6919e6326a53f2c105"
+        },
+        {
+          "path": "safety-bench",
+          "sha256": "c5fbc27d94d19a124b0f24f29b61bcb3b170143d64612ecbd58fa9c275bb0adf"
+        },
+        {
+          "path": "source.tar",
+          "sha256": "1df1ffd0f6a85bbb5cc31ccff86ba93bffc3d9d430f6c63bbe05ab4d069594d4"
+        }
+      ]
+    },
+    {
+      "stage": "a",
+      "manifestSha256": "ee909e8817f60fce4b800352eb2bde2a7cd88807c348533e7f5fbb2d6ce1f5ed",
+      "sourceSha256": "b26f638571fea21c1a37227162c66551eb1c6e9fb6426b8c3dd1c94a76aa5d2e",
+      "files": [
+        {
+          "path": "criterion.json",
+          "sha256": "850a250870a60bd511f6622e62df47949bf51d4ece8c4e487d90ae446431ab5a"
+        },
+        {
+          "path": "safety-bench",
+          "sha256": "8ab3745d9aaae74f4b5f4b07b274616ec4f88d6ff91aa636f5ea92a18b11d1eb"
+        },
+        {
+          "path": "source.tar",
+          "sha256": "a627ff1ca52fb41018ca1c1355ed2f192410742cb2cfd28f92590ab16b55f34a"
+        }
+      ]
+    },
+    {
+      "stage": "a-full",
+      "manifestSha256": "7de7d40348cd310b6897e091f7e3c27e2dcebc0865f45c8b42d9b70afbc17cf0",
+      "sourceSha256": "b26f638571fea21c1a37227162c66551eb1c6e9fb6426b8c3dd1c94a76aa5d2e",
+      "files": [
+        {
+          "path": "criterion.json",
+          "sha256": "850a250870a60bd511f6622e62df47949bf51d4ece8c4e487d90ae446431ab5a"
+        },
+        {
+          "path": "idealis-core",
+          "sha256": "7b211beeffc2fb3cb4fd7d56834e865b190000937d7900f06b9c2998c6840557"
+        },
+        {
+          "path": "idealis_core.wasm",
+          "sha256": "68a2de5e23a968c0b8707174c3c1bd3236356fdc3075b5ca39e2969adb4a3fae"
+        },
+        {
+          "path": "safety-bench",
+          "sha256": "8ab3745d9aaae74f4b5f4b07b274616ec4f88d6ff91aa636f5ea92a18b11d1eb"
+        },
+        {
+          "path": "source.tar",
+          "sha256": "a627ff1ca52fb41018ca1c1355ed2f192410742cb2cfd28f92590ab16b55f34a"
+        }
+      ]
+    },
+    {
+      "stage": "b",
+      "manifestSha256": "25b290562deeeb937be86b67205bb579453aa9ccabf0dec5e6430b8f26c1314c",
+      "sourceSha256": "eaf44eb0d84a35ba1c615b747866bb28d0a1333775dc786d9249ad1ac564e78f",
+      "files": [
+        {
+          "path": "criterion.json",
+          "sha256": "0beba6d27612a65c4647d0c5df18a8a85690d1a4de92e3d261d52a0e7c237c92"
+        },
+        {
+          "path": "safety-bench",
+          "sha256": "f0f4c0a83223fd44b3d3afe2359d7eff6197a4b696a48d32cde9921319b93640"
+        },
+        {
+          "path": "source.tar",
+          "sha256": "f5b5e9f7cdbee01b46644b1b17055644a3e216a92ea4a18b1b24c86527eb4a30"
+        }
+      ]
+    },
+    {
+      "stage": "c",
+      "manifestSha256": "522c704199f0f864304d47a1ecc2f5c328622b5322cc8a48642723323ec202be",
+      "sourceSha256": "3152381f39fdef7c5f4821890c6a44470085757e5dd5738c6a6497aa0f05e76b",
+      "files": [
+        {
+          "path": "criterion.json",
+          "sha256": "1815ecbb05a485aab53da0c00c957b2a193f2f3e389b3c047a9b5f94e7621784"
+        },
+        {
+          "path": "safety-bench",
+          "sha256": "bb878691c4b0b87ca6e13063a22a986b7d8ab3969797cbb299fb60c10d449c31"
+        },
+        {
+          "path": "source.tar",
+          "sha256": "913451abcde685dbce86692b2e2035252b44fdadfa956dde7c415e4322176e8c"
+        }
+      ]
+    },
+    {
+      "stage": "final",
+      "manifestSha256": "df1f55da328e9aa989b6c55fafc0268cc39fc76b3c1a52899c60ac1364248297",
+      "sourceSha256": "e27244646c2caf468143b6d50c2a6bc084d86b98d949e243d7de4a2e19f0b618",
+      "files": [
+        {
+          "path": "criterion.json",
+          "sha256": "850a250870a60bd511f6622e62df47949bf51d4ece8c4e487d90ae446431ab5a"
+        },
+        {
+          "path": "idealis-core",
+          "sha256": "7b211beeffc2fb3cb4fd7d56834e865b190000937d7900f06b9c2998c6840557"
+        },
+        {
+          "path": "idealis_core.wasm",
+          "sha256": "68a2de5e23a968c0b8707174c3c1bd3236356fdc3075b5ca39e2969adb4a3fae"
+        },
+        {
+          "path": "safety-bench",
+          "sha256": "8ab3745d9aaae74f4b5f4b07b274616ec4f88d6ff91aa636f5ea92a18b11d1eb"
+        },
+        {
+          "path": "source.tar",
+          "sha256": "7ddab2da3fd095e7e009f8eb996dc86a35abaf5b6dca0ee5f0da57f10d89f816"
+        }
+      ]
+    }
+  ],
+  "logs": [
+    {
+      "name": "0063-a-build.log",
+      "sha256": "aa81a4f8c4500fc990ed466d4711331c37d6c4faae6109609c255041095437ad"
+    },
+    {
+      "name": "0063-a-portable-build.log",
+      "sha256": "e5cbf825f533254eca8bc5d2d2d4f3c76727afbf3419f78852af94d1042d29fc"
+    },
+    {
+      "name": "0063-a-tests.log",
+      "sha256": "ea9b395b2971325727406fa3aa01acfdcb2a84e64fec9bcd337f6b25c1b7c3de"
+    },
+    {
+      "name": "0063-b-build.log",
+      "sha256": "93b0201f1f8d9c44de1cde68effc4e89d013e5f538e7c919f6fdef27740ed140"
+    },
+    {
+      "name": "0063-b-ts-build.log",
+      "sha256": "80a1a5a215e40ab2060bf2ee500b157a39e8264b45d5cb8f1910ab1dbe3b20be"
+    },
+    {
+      "name": "0063-c-build.log",
+      "sha256": "5cf36f9373935cfedc8a955c08442e64b057374e0baa80a7b33f3435052cad35"
+    },
+    {
+      "name": "0063-c-ts-build.log",
+      "sha256": "80a1a5a215e40ab2060bf2ee500b157a39e8264b45d5cb8f1910ab1dbe3b20be"
+    },
+    {
+      "name": "0063-corpus-a.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "0063-corpus-repair-build.log",
+      "sha256": "80a1a5a215e40ab2060bf2ee500b157a39e8264b45d5cb8f1910ab1dbe3b20be"
+    },
+    {
+      "name": "0063-corpus-selected-fixed.log",
+      "sha256": "cd1d99892af0241e41e68d8718b179f0e61a6b7ae64db4286c7b6dd1bf4f8d6f"
+    },
+    {
+      "name": "0063-corpus-selected.log",
+      "sha256": "ce610c6fc69e2a6bcfe4b91becf8121e06ab8fefb4772b9300a8aea6af449af7"
+    },
+    {
+      "name": "0063-corpus-summary.log",
+      "sha256": "a4deda18fcf311d61c687fa461c29b521fa0757fe343b6453f7583d70ff2a951"
+    },
+    {
+      "name": "0063-final-check.log",
+      "sha256": "2dcca9280333e7e8fcd03c13671fcbbff6a5daee6cc91a6a2a07838edbae7892"
+    },
+    {
+      "name": "0063-final-typecheck.log",
+      "sha256": "9e7b90b3cc2192e8704686a2a61131db5e3146df415b9433254bd3c6ff3cd757"
+    },
+    {
+      "name": "0063-kernel-a.log",
+      "sha256": "3ffd6f65c200148615960509d89d8cfdf1b4f2bc69b7adfe5b79465f83ffa9fd"
+    },
+    {
+      "name": "0063-kernel-b.log",
+      "sha256": "86440e319964ef233275773172a53eb2f2c0dfc46dc6d4f89b88eb0259c93cc0"
+    },
+    {
+      "name": "0063-kernel-c.log",
+      "sha256": "db60abf6e511e62872ead26cb1c9aa979920aa50004f22a17baf48b02380d633"
+    },
+    {
+      "name": "0063-kernel-confirmation.log",
+      "sha256": "baf47eb60b522664c79775bcdacb16425c631318852d39ab231462e1f018e035"
+    },
+    {
+      "name": "0063-kernel-final.log",
+      "sha256": "80ad564d00f6025baf3bdf548c5ddce600b62cfeb8da636ea608a8b9d69b15b7"
+    },
+    {
+      "name": "0063-kernel-selected.log",
+      "sha256": "ed8514831b0c4e5cbe1af24a882fa9840fb82ef0fcfcd6a1b9af59278c36504b"
+    },
+    {
+      "name": "0063-parity.log",
+      "sha256": "9e96e3a845d9f4ae82ecf640dac8da21ecbce9d67f436fcd43dd0c0a2da867c0"
+    },
+    {
+      "name": "0063-prepared-before.log",
+      "sha256": "3411ceed1ff3ccf81cb052d88d108d263ba9bfd37ee690c2a12a0d1c3163977e"
+    },
+    {
+      "name": "0063-preverify-build.log",
+      "sha256": "80a1a5a215e40ab2060bf2ee500b157a39e8264b45d5cb8f1910ab1dbe3b20be"
+    },
+    {
+      "name": "0063-profile-build.log",
+      "sha256": "81b54848995ef1ec740a066417a7c80741e907134e0ccff85b3936a7f94a9af6"
+    },
+    {
+      "name": "0063-selected-bench-build.log",
+      "sha256": "7d76dcf909430efae1826dfaffdde31a933b4434bcfef7c8a436d480063be0ba"
+    },
+    {
+      "name": "0063-selected-ts-build.log",
+      "sha256": "80a1a5a215e40ab2060bf2ee500b157a39e8264b45d5cb8f1910ab1dbe3b20be"
+    },
+    {
+      "name": "0063-summary-build.log",
+      "sha256": "80a1a5a215e40ab2060bf2ee500b157a39e8264b45d5cb8f1910ab1dbe3b20be"
+    },
+    {
+      "name": "0063-support-check-staged.log",
+      "sha256": "879cff940025ca7519ea33fb26ec344921571fc7d605f5814ab8d6d325491bb5"
+    },
+    {
+      "name": "0063-support-check.log",
+      "sha256": "f00bb29737f877ad894bd6e1c9404438eb0b56a4a3a5339479d1ea4e28e413f6"
+    },
+    {
+      "name": "0063-support-plan.log",
+      "sha256": "602d9496a17d3790a866cc927a4a286aab4e40b158cd0d4f216ddb1ae6233bd0"
+    },
+    {
+      "name": "0063-support-sync-fixed.log",
+      "sha256": "08c76f51d15566ea5a65c066a4246611cdf7a9b365c2269faeb549ffed9b0c87"
+    },
+    {
+      "name": "0063-support-sync-staged.log",
+      "sha256": "59447a8812f5e889349ef0c3bf99913189bede0261af4eb5532ec20a933d6c65"
+    },
+    {
+      "name": "0063-support-sync.log",
+      "sha256": "5fdf136901b1346402e32e793525cf0fa726a47982770612995cc2532ccc1d75"
+    },
+    {
+      "name": "0063-tcommit-profile.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "0063-ts-build.log",
+      "sha256": "80a1a5a215e40ab2060bf2ee500b157a39e8264b45d5cb8f1910ab1dbe3b20be"
+    },
+    {
+      "name": "0063-verification.log",
+      "sha256": "498accc6a9e27a82b32c7b7002d9cba42aec5381b962197cdba7d4fe89cbbd72"
+    }
+  ],
+  "drivers": [
+    {
+      "path": "evals/evaluator-tuning/corpus-summary.ts",
+      "archive": "drivers/0-corpus-summary.ts",
+      "sha256": "51d6968c0da184b376acb4a96b0f8813afb0c6e78a9461303740d16c90501e43"
+    },
+    {
+      "path": "evals/evaluator-tuning/summarize.ts",
+      "archive": "drivers/1-summarize.ts",
+      "sha256": "22ed09cda0254ffe69568e7cc0b92216d708b7a5e7ca7868965d3127c3bbeb93"
+    },
+    {
+      "path": "evals/p0-checker/corpus.ts",
+      "archive": "drivers/2-corpus.ts",
+      "sha256": "4c1240a27ba7ca9555d6dc0e473961d4afd94addf0b37341292789d3dc63b54b"
+    },
+    {
+      "path": "evals/p0-checker/profile.ts",
+      "archive": "drivers/3-profile.ts",
+      "sha256": "1ee6b602618f98906ec49d02061050a5eb8d89705b31cbb4b1a39a7027f1b578"
+    },
+    {
+      "path": "evals/p0-checker/verify.ts",
+      "archive": "drivers/4-verify.ts",
+      "sha256": "bf14a1f18d3902d399bebeb0ab49d453814e4d4885d873acbd14702954f4a3b9"
+    },
+    {
+      "path": "evals/oracle-tuning/kernel.ts",
+      "archive": "drivers/5-kernel.ts",
+      "sha256": "239f53dc4d248c534eeff67d822182fb130fb906e837c2e377cdb52c6113db77"
+    },
+    {
+      "path": "scripts/check-support.ts",
+      "archive": "drivers/6-check-support.ts",
+      "sha256": "f0e071e0904fbd1bf0dbfde6aeb99c5e263c1277dbe19a076c5e29de41afd2b0"
+    },
+    {
+      "path": "justfile",
+      "archive": "drivers/7-justfile",
+      "sha256": "be000eac07a8565dc512aae83ca137be6f61c50cabbf3f6f2dbe9dc9f02690fe"
+    },
+    {
+      "path": "evals/plans/0063-evaluator-tuning.md",
+      "archive": "drivers/8-0063-evaluator-tuning.md",
+      "sha256": "155817380779d37d6f8da160c7e62900c5fb76866305950636ec446278832016"
+    },
+    {
+      "path": "evals/iterations/0063-evaluator-tuning.md",
+      "archive": "drivers/9-0063-evaluator-tuning.md",
+      "sha256": "0c83931fa8acbd482776f79cb11484db4c53c8e7bb2ff104cb76f863233d3ccb"
+    },
+    {
+      "path": ".artifacts/0063-save.ts",
+      "archive": "drivers/10-0063-save.ts",
+      "sha256": "9cb953ff5dcc169476772ee1b0f5444965dff5ad7a2940e2aba8c58113408e9c"
+    }
+  ],
+  "reconstructedFailedDriver": true,
+  "verification": {
+    "status": "complete",
+    "unchanged": true,
+    "checks": 21
+  },
+  "limitations": "Six source archives include a/a-full variants. Intermediate failed development drivers are not all archived. The before-v2 omission driver is reconstructed only when its exact recorded hash matches. Profile sampling and normal timing are separate."
+}

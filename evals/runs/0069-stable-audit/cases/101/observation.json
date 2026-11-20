@@ -1,0 +1,366 @@
+{
+  "actual": {
+    "kind": "module",
+    "module": {
+      "name": "Test",
+      "extends": [],
+      "constants": [],
+      "variables": [],
+      "definitions": [
+        {
+          "name": "op",
+          "kind": "Operator",
+          "params": [],
+          "body": {
+            "kind": "WeakFairness",
+            "subscript": {
+              "kind": "Tuple",
+              "elements": [
+                {
+                  "kind": "Identifier",
+                  "name": "x",
+                  "location": {
+                    "start": 34,
+                    "end": 35,
+                    "line": 3,
+                    "column": 12
+                  }
+                },
+                {
+                  "kind": "Identifier",
+                  "name": "y",
+                  "location": {
+                    "start": 37,
+                    "end": 38,
+                    "line": 3,
+                    "column": 15
+                  }
+                }
+              ],
+              "location": {
+                "start": 32,
+                "end": 34,
+                "line": 3,
+                "column": 10
+              }
+            },
+            "action": {
+              "kind": "Identifier",
+              "name": "f",
+              "location": {
+                "start": 41,
+                "end": 42,
+                "line": 3,
+                "column": 19
+              }
+            },
+            "location": {
+              "start": 29,
+              "end": 32,
+              "line": 3,
+              "column": 7
+            }
+          },
+          "isLocal": false,
+          "isRecursive": false,
+          "location": {
+            "start": 23,
+            "end": 25,
+            "line": 3,
+            "column": 1
+          }
+        },
+        {
+          "name": "op",
+          "kind": "Operator",
+          "params": [],
+          "body": {
+            "kind": "StrongFairness",
+            "subscript": {
+              "kind": "Identifier",
+              "name": "x",
+              "location": {
+                "start": 53,
+                "end": 54,
+                "line": 4,
+                "column": 10
+              }
+            },
+            "action": {
+              "kind": "Identifier",
+              "name": "f",
+              "location": {
+                "start": 55,
+                "end": 56,
+                "line": 4,
+                "column": 12
+              }
+            },
+            "location": {
+              "start": 50,
+              "end": 53,
+              "line": 4,
+              "column": 7
+            }
+          },
+          "isLocal": false,
+          "isRecursive": false,
+          "location": {
+            "start": 44,
+            "end": 46,
+            "line": 4,
+            "column": 1
+          }
+        }
+      ],
+      "assumptions": [],
+      "theorems": [],
+      "location": {
+        "start": 1,
+        "end": 5,
+        "line": 2,
+        "column": 1
+      }
+    }
+  },
+  "reference": {
+    "kind": "accepted",
+    "tree": {
+      "kind": 382,
+      "image": "N_Module",
+      "children": [
+        {
+          "kind": 333,
+          "image": "N_BeginModule",
+          "children": [
+            {
+              "kind": 3,
+              "image": "---- MODULE",
+              "children": []
+            },
+            {
+              "kind": 231,
+              "image": "Test",
+              "children": []
+            },
+            {
+              "kind": 35,
+              "image": "----",
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": 350,
+          "image": "N_Extends",
+          "children": []
+        },
+        {
+          "kind": 334,
+          "image": "N_Body",
+          "children": [
+            {
+              "kind": 389,
+              "image": "N_OperatorDefinition",
+              "children": [
+                {
+                  "kind": 366,
+                  "image": "N_IdentLHS",
+                  "children": [
+                    {
+                      "kind": 231,
+                      "image": "op",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "kind": 92,
+                  "image": "==",
+                  "children": []
+                },
+                {
+                  "kind": 351,
+                  "image": "N_FairnessExpr",
+                  "children": [
+                    {
+                      "kind": 85,
+                      "image": "WF_",
+                      "children": []
+                    },
+                    {
+                      "kind": 423,
+                      "image": "N_Tuple",
+                      "children": [
+                        {
+                          "kind": 103,
+                          "image": "<<",
+                          "children": []
+                        },
+                        {
+                          "kind": 358,
+                          "image": "N_GeneralId",
+                          "children": [
+                            {
+                              "kind": 367,
+                              "image": "N_IdPrefix",
+                              "children": []
+                            },
+                            {
+                              "kind": 231,
+                              "image": "x",
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "kind": 87,
+                          "image": ",",
+                          "children": []
+                        },
+                        {
+                          "kind": 358,
+                          "image": "N_GeneralId",
+                          "children": [
+                            {
+                              "kind": 367,
+                              "image": "N_IdPrefix",
+                              "children": []
+                            },
+                            {
+                              "kind": 231,
+                              "image": "y",
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "kind": 105,
+                          "image": ">>",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "kind": 93,
+                      "image": "(",
+                      "children": []
+                    },
+                    {
+                      "kind": 358,
+                      "image": "N_GeneralId",
+                      "children": [
+                        {
+                          "kind": 367,
+                          "image": "N_IdPrefix",
+                          "children": []
+                        },
+                        {
+                          "kind": 231,
+                          "image": "f",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "kind": 94,
+                      "image": ")",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": 389,
+              "image": "N_OperatorDefinition",
+              "children": [
+                {
+                  "kind": 366,
+                  "image": "N_IdentLHS",
+                  "children": [
+                    {
+                      "kind": 231,
+                      "image": "op",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "kind": 92,
+                  "image": "==",
+                  "children": []
+                },
+                {
+                  "kind": 351,
+                  "image": "N_FairnessExpr",
+                  "children": [
+                    {
+                      "kind": 58,
+                      "image": "SF_",
+                      "children": []
+                    },
+                    {
+                      "kind": 358,
+                      "image": "N_GeneralId",
+                      "children": [
+                        {
+                          "kind": 367,
+                          "image": "N_IdPrefix",
+                          "children": []
+                        },
+                        {
+                          "kind": 231,
+                          "image": "x",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "kind": 93,
+                      "image": "(",
+                      "children": []
+                    },
+                    {
+                      "kind": 358,
+                      "image": "N_GeneralId",
+                      "children": [
+                        {
+                          "kind": 367,
+                          "image": "N_IdPrefix",
+                          "children": []
+                        },
+                        {
+                          "kind": 231,
+                          "image": "f",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "kind": 94,
+                      "image": ")",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": 345,
+          "image": "N_EndModule",
+          "children": [
+            {
+              "kind": 36,
+              "image": "====",
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "tlaTs": "accepted"
+}

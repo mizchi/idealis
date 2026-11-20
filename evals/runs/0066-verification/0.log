@@ -1,0 +1,192 @@
+
+> @mizchi/idealis@0.1.0-alpha.0 check /Users/mz/ghq/github.com/mizchi/idealis
+> biome check .
+
+ ELIFECYCLE  Command failed with exit code 1.
+pnpm check
+evals/alloy-subset/run.ts:159:5 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    157 │   await appendFile(
+    158 │     "evals/runs/ledger.jsonl",
+  > 159 │     JSON.stringify({
+        │     ^^^^^^^^^^^^^^^^
+  > 160 │       runId: basename(directory),
+  > 161 │       kind: "ralloy-differential",
+  > 162 │       status: "complete",
+  > 163 │       sourceVersion: stamp.sourceVersion,
+  > 164 │     }) + "\n",
+        │     ^^^^^^^^^
+    165 │   );
+    166 │ } catch (error) {
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
+  i Unsafe fix: Use a template literal.
+  
+    157 157 │     await appendFile(
+    158 158 │       "evals/runs/ledger.jsonl",
+    159     │ - ····JSON.stringify({
+        159 │ + ····`${JSON.stringify({
+    160 160 │         runId: basename(directory),
+    161 161 │         kind: "ralloy-differential",
+    162 162 │         status: "complete",
+    163 163 │         sourceVersion: stamp.sourceVersion,
+    164     │ - ····})·+·"\n",
+        164 │ + ····})}\n`,
+    165 165 │     );
+    166 166 │   } catch (error) {
+  
+
+evals/alloy-subset/run.ts:178:5 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    176 │   await appendFile(
+    177 │     "evals/runs/ledger.jsonl",
+  > 178 │     JSON.stringify({
+        │     ^^^^^^^^^^^^^^^^
+  > 179 │       runId: basename(directory),
+  > 180 │       kind: "ralloy-differential",
+  > 181 │       status: "error",
+  > 182 │       sourceVersion: stamp.sourceVersion,
+  > 183 │     }) + "\n",
+        │     ^^^^^^^^^
+    184 │   );
+    185 │   throw error;
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
+  i Unsafe fix: Use a template literal.
+  
+    176 176 │     await appendFile(
+    177 177 │       "evals/runs/ledger.jsonl",
+    178     │ - ····JSON.stringify({
+        178 │ + ····`${JSON.stringify({
+    179 179 │         runId: basename(directory),
+    180 180 │         kind: "ralloy-differential",
+    181 181 │         status: "error",
+    182 182 │         sourceVersion: stamp.sourceVersion,
+    183     │ - ····})·+·"\n",
+        183 │ + ····})}\n`,
+    184 184 │     );
+    185 185 │     throw error;
+  
+
+evals/smt-subset/benchmark.ts:22:22 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+    20 │   wasmPath,
+    21 │ } from "./clients.js";
+  > 22 │ import { benchmarks, type Input } from "./corpus.js";
+       │                      ^^^^^^^^^^
+    23 │ import { digest, fingerprint } from "./provenance.js";
+    24 │ import { createWasm } from "./wasm.js";
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    22 │ import·{·benchmarks,·type·Input·}·from·"./corpus.js";
+       │                      -----------                     
+
+src/backend.ts:470:5 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    468 │   const first = obligations[0];
+    469 │   if (
+  > 470 │     !first ||
+        │     ^^^^^^^^^
+  > 471 │     first.query.kind !== "induction" ||
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    472 │     first.query.obligation === "all"
+    473 │   )
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    468 468 │     const first = obligations[0];
+    469 469 │     if (
+    470     │ - ····!first·||
+    471     │ - ····first.query.kind·!==·"induction"·||
+        470 │ + ····first?.query.kind·!==·"induction"·||
+    472 471 │       first.query.obligation === "all"
+    473 472 │     )
+  
+
+src/tla-safety.ts:2335:13 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    2333 │             edge.role === "frame-body" && edge.node.space === "ir-expression",
+    2334 │         );
+  > 2335 │         if (!body || body.node.space !== "ir-expression")
+         │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2336 │           return unsupported(message);
+    2337 │         pending.push({ value: body.node.value, frame: next });
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    2333 2333 │               edge.role === "frame-body" && edge.node.space === "ir-expression",
+    2334 2334 │           );
+    2335      │ - ········if·(!body·||·body.node.space·!==·"ir-expression")
+         2335 │ + ········if·(body?.node.space·!==·"ir-expression")
+    2336 2336 │             return unsupported(message);
+    2337 2337 │           pending.push({ value: body.node.value, frame: next });
+  
+
+evals/iterations/0066-domain-offset.md format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+     9  9 │   原本TCommit RM=8、Quint6生成物、sharing chainの11入力をv1/v2で比較した。各1 warmup + 3 samples、順序を回転・反転する。before/after native/Wasmのcompiled program・version・result全体・拒否の264比較が一致した。TCommitの6,816状態・53,513生成も保存済みTLC oracleと一致する。
+    10 10 │   
+    11    │ - |·TCommit経路·|·before·ms·|·after·ms·|
+    12    │ - |·---·|·---:·|·---:·|
+    13    │ - |·native·v1·IR·check·|·113.057·|·108.230·|
+    14    │ - |·native·v2·IR·check·|·117.990·|·114.636·|
+    15    │ - |·native·v1·新規process·|·116.023·|·111.542·|
+    16    │ - |·native·v2·新規process·|·122.041·|·118.068·|
+    17    │ - |·Node·Wasm·v1·IR·check·|·170.425·|·165.581·|
+    18    │ - |·Node·Wasm·v2·IR·check·|·175.094·|·170.535·|
+       11 │ + |·TCommit経路···········|·before·ms·|·after·ms·|
+       12 │ + |·---------------------·|·--------:·|·-------:·|
+       13 │ + |·native·v1·IR·check····|···113.057·|··108.230·|
+       14 │ + |·native·v2·IR·check····|···117.990·|··114.636·|
+       15 │ + |·native·v1·新規process·|···116.023·|··111.542·|
+       16 │ + |·native·v2·新規process·|···122.041·|··118.068·|
+       17 │ + |·Node·Wasm·v1·IR·check·|···170.425·|··165.581·|
+       18 │ + |·Node·Wasm·v2·IR·check·|···175.094·|··170.535·|
+    19 19 │   
+    20 20 │   中央値。check要求はIR decodeと準備を含み、新規processはsource frontend・Node親のJSON encode・macOS time wrapperも含む。Node自体の起動は含まない。ピークRSSの中央値はnative v1が6,242,304→6,307,840 bytes、v2が6,225,920→6,242,304 bytesで、メモリ削減の根拠にはならない。[初回raw](../runs/0066-corpus/result.json)と[全sampleの照合・集計](../runs/0066-corpus-summary/result.json)を参照。
+    ····· │ 
+    22 22 │   初回のnative短縮は約3〜4%で5%へ届かなかった。実行前にplanへ追加し、同じ固定binaryのnative IR checkだけを1 warmup + 12 samplesで確認した。各回は同じcompiled IRへ問い合わせ、完全応答を照合した。
+    23 23 │   
+    24    │ - |·追加確認·|·before·min·/·median·/·max·ms·|·after·min·/·median·/·max·ms·|·中央値の変化·|
+    25    │ - |·---·|·---:·|·---:·|·---:·|
+    26    │ - |·native·v1·|·103.561·/·105.014·/·106.865·|·96.375·/·97.611·/·98.689·|·-7.0%·|
+    27    │ - |·native·v2·|·108.479·/·109.608·/·110.291·|·101.252·/·102.555·/·103.980·|·-6.4%·|
+       24 │ + |·追加確認··|·before·min·/·median·/·max·ms·|·after·min·/·median·/·max·ms·|·中央値の変化·|
+       25 │ + |·---------·|·---------------------------:·|·--------------------------:·|·-----------:·|
+       26 │ + |·native·v1·|··103.561·/·105.014·/·106.865·|····96.375·/·97.611·/·98.689·|········-7.0%·|
+       27 │ + |·native·v2·|··108.479·/·109.608·/·110.291·|·101.252·/·102.555·/·103.980·|········-6.4%·|
+    28 28 │   
+    29 29 │   コンパイル・起動を除く常駐JSONL API区間。経路順を回転・反転し、[52試行の原応答](../runs/0066-tcommit-confirmation/result.json)を保存した。初回は他モデル・Wasmとも混在する常駐process、追加確認はTCommit IR checkだけのprocessである。条件が異なるため数値をpoolせず、起動込みの7%短縮とは主張しない。Apple M5 arm64、32 GiB、Node 24.22.2、非専用ホスト。
+  
+
+Checked 690 files in 110ms. No fixes applied.
+Found 1 error.
+Found 3 warnings.
+Found 2 infos.
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+error: Recipe `check` failed on line 291 with exit code 1

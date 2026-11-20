@@ -1,0 +1,12 @@
+
+> @mizchi/idealis@0.1.0-alpha.0 build /Users/mz/ghq/github.com/mizchi/idealis
+> tsc -p tsconfig.build.json
+
+evals/p0-checker/contract-test.ts(71,29): error TS2379: Argument of type '{ format: "modelt.safety-program"; name: string; variables: readonly string[]; initial: readonly SafetyBranch<1>[]; next: readonly SafetyBranch<1>[]; invariants: readonly SafetyPredicate<1>[]; ... 10 more ...; definitions: never[]; } | { ...; }' is not assignable to parameter of type 'SafetyProgram' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ format: "modelt.safety-program"; name: string; variables: readonly string[]; initial: readonly SafetyBranch<1>[]; next: readonly SafetyBranch<1>[]; invariants: readonly SafetyPredicate<1>[]; ... 10 more ...; definitions: never[]; }' is not assignable to type 'SafetyProgram' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ format: "modelt.safety-program"; name: string; variables: readonly string[]; initial: readonly SafetyBranch<1>[]; next: readonly SafetyBranch<1>[]; invariants: readonly SafetyPredicate<1>[]; ... 10 more ...; definitions: never[]; }' is not assignable to type 'SafetyProgramV2' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'initial' are incompatible.
+        Type 'readonly SafetyBranch<1>[]' is not assignable to type 'readonly SafetyBranch<2>[]'.
+          Type 'SafetyBranch<1>' is not assignable to type 'SafetyBranch<2>'.
+            Type '1' is not assignable to type '2'.
+ ELIFECYCLE  Command failed with exit code 2.

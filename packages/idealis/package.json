@@ -1,0 +1,139 @@
+{
+  "name": "@mizchi/idealis",
+  "version": "0.1.0-alpha.0",
+  "description": "Portable finite models, conformance checking and reproducible fault tests for TypeScript and Rust",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "exports": {
+    "./backend": {
+      "types": "./dist/src/backend.d.ts",
+      "default": "./dist/src/backend.js"
+    },
+    "./scheduling": {
+      "types": "./dist/src/scheduling.d.ts",
+      "default": "./dist/src/scheduling.js"
+    },
+    "./portable": {
+      "types": "./dist/src/portable.d.ts",
+      "default": "./dist/src/portable.js"
+    },
+    "./budget": {
+      "types": "./dist/src/budget.d.ts",
+      "default": "./dist/src/budget.js"
+    },
+    "./sharding": {
+      "types": "./dist/src/sharding.d.ts",
+      "default": "./dist/src/sharding.js"
+    },
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./property": {
+      "types": "./dist/src/property.d.ts",
+      "default": "./dist/src/property.js"
+    },
+    "./tla": {
+      "types": "./dist/src/tla.d.ts",
+      "default": "./dist/src/tla.js"
+    },
+    "./smt": {
+      "types": "./dist/src/smt.d.ts",
+      "default": "./dist/src/smt.js"
+    },
+    "./finite": {
+      "types": "./dist/src/finite.d.ts",
+      "default": "./dist/src/finite.js"
+    },
+    "./host": {
+      "types": "./dist/src/host.d.ts",
+      "default": "./dist/src/host.js"
+    },
+    "./history": {
+      "types": "./dist/src/history.d.ts",
+      "default": "./dist/src/history.js"
+    },
+    "./shrink": {
+      "types": "./dist/src/shrink.d.ts",
+      "default": "./dist/src/shrink.js"
+    },
+    "./core.wasm": "./assets/idealis-core.wasm",
+    "./rtla.wasm": "./assets/rtla.wasm",
+    "./alloy": {
+      "types": "./dist/src/alloy.d.ts",
+      "default": "./dist/src/alloy.js"
+    },
+    "./ralloy.wasm": "./assets/ralloy.wasm",
+    "./testing": {
+      "types": "./dist/src/testing.d.ts",
+      "default": "./dist/src/testing.js"
+    },
+    "./testing.wasm": "./assets/idealis-connect.wasm",
+    "./check-cache": {
+      "types": "./dist/src/check-cache.d.ts",
+      "default": "./dist/src/check-cache.js"
+    },
+    "./check-cache/http": {
+      "types": "./dist/src/check-cache-http.d.ts",
+      "default": "./dist/src/check-cache-http.js"
+    },
+    "./check-cache/node": {
+      "types": "./dist/src/check-cache-node.d.ts",
+      "default": "./dist/src/check-cache-node.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mizchi/idealis.git",
+    "directory": "packages/idealis"
+  },
+  "files": [
+    "dist/src",
+    "dist/cli",
+    "assets/idealis-cli.wasm",
+    "assets/idealis-core.wasm",
+    "assets/manifest.json",
+    "assets/rtla.wasm",
+    "assets/rtla-manifest.json",
+    "assets/ralloy.wasm",
+    "assets/ralloy-manifest.json",
+    "assets/idealis-connect.wasm",
+    "assets/idealis-connect-manifest.json",
+    "README.md",
+    "LICENSE",
+    "docs"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "tag": "next"
+  },
+  "bin": {
+    "idealis": "bin/idealis.js"
+  },
+  "peerDependencies": {
+    "fast-check": "4.10.2",
+    "fflate": "0.8.3",
+    "tla-ts": "0.0.10",
+    "z3-solver": "5.4.1"
+  },
+  "peerDependenciesMeta": {
+    "fast-check": {
+      "optional": true
+    },
+    "fflate": {
+      "optional": true
+    },
+    "tla-ts": {
+      "optional": true
+    },
+    "z3-solver": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "prepack": "just package-prepack"
+  }
+}

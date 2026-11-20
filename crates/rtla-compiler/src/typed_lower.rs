@@ -1,5 +1,6 @@
 use crate::{
-    AnonymousFrame, CompileError, Compiler, Context, E, Expression, Phase, Result, unsupported,
+    AnonymousFrame, CompileError, Compiler, Context, DefinitionKind, E, Expression, Phase, Result,
+    unsupported,
 };
 use crate::{
     analysis::{Node, NodeMut, analysis_children},
@@ -342,6 +343,101 @@ impl Compiler<'_> {
             )]),
         }
     }
+    fn template_expression<'a>(&'a self, mut formula: &'a T, mut always: bool) -> Option<I> {
+        let mut frames = vec![];
+        loop {
+            if frames.len() > 128 {
+                return None;
+            }
+            match formula {
+                T::Call {
+                    definition,
+                    arguments,
+                    captures,
+                } => {
+                    let definition = self.shared.get(*definition)?.definition.as_ref()?;
+                    let ir::DefinitionBody::Temporal(body) = &definition.body else {
+                        return None;
+                    };
+                    frames.push((
+                        arguments.clone(),
+                        captures.clone(),
+                        definition.parameter_count,
+                        definition.capture_count,
+                        definition.local_scope,
+                    ));
+                    formula = body;
+                }
+                T::Frame {
+                    arguments,
+                    captures,
+                    parameter_count,
+                    capture_count,
+                    local_scope,
+                    formula: body,
+                } => {
+                    frames.push((
+                        arguments.clone(),
+                        captures.clone(),
+                        *parameter_count,
+                        *capture_count,
+                        *local_scope,
+                    ));
+                    formula = body;
+                }
+                T::Always { formula: body } if always => {
+                    always = false;
+                    formula = body;
+                }
+                T::Atom { expression } if !always => {
+                    let mut expression = expression.clone();
+                    for (arguments, captures, parameter_count, capture_count, local_scope) in
+                        frames.into_iter().rev()
+                    {
+                        expression = I::Frame {
+                            arguments,
+                            captures,
+                            parameter_count,
+                            capture_count,
+                            local_scope,
+                            body: Box::new(expression),
+                        };
+                    }
+                    return Some(expression);
+                }
+                _ => return None,
+            }
+        }
+    }
+    fn template_frame(&self, name: &str, context: &Context) -> bool {
+        let entry = &self.scopes[context.scope][name];
+        context.bound > 0
+            || !entry.projection.is_empty()
+            || matches!(&entry.definition.head, DefinitionKind::Operator { params } if !params.is_empty())
+    }
+    fn template_call(
+        &mut self,
+        name: &str,
+        args: &[Expression],
+        context: &Context,
+        kind: ir::BodyKind,
+    ) -> Result<I> {
+        let child = context.nested()?;
+        let position = self.scopes[context.scope][name].id;
+        let demanded = self.membership_demands(name, context, false)?;
+        let mut arguments = vec![];
+        for (slot, value) in args.iter().enumerate() {
+            let binding = self.binding_id(position, 0, slot);
+            arguments.push(if demanded.contains(&binding) {
+                self.membership_ir(value, &child)?
+            } else {
+                self.expression_ir(value, &child)?
+            });
+        }
+        let targets =
+            self.call_targets_purpose(name, args, context, kind == ir::BodyKind::Action)?;
+        self.shared_body_ir(name, arguments, context, false, targets, kind)
+    }
     fn action_call_ir(
         &mut self,
         name: &str,
@@ -353,6 +449,25 @@ impl Compiler<'_> {
                 name,
                 vec![guard(self.shared_ir(name, args, context)?)],
             )]);
+        }
+        if self.scopes[context.scope][name].definition.is_recursive
+            || self.template_frame(name, context)
+        {
+            let mut call = self.template_call(name, args, context, ir::BodyKind::Action)?;
+            let I::Call {
+                definition,
+                arguments,
+                captures,
+            } = &mut call
+            else {
+                unreachable!()
+            };
+            let step = Step::Call {
+                definition: *definition,
+                arguments: std::mem::take(arguments),
+                captures: std::mem::take(captures),
+            };
+            return Ok(vec![branch(name, vec![step])]);
         }
         let (body, expanded) = self.call(name, args, context)?;
         let branches = self.action_ir(&body, &expanded, name)?;
@@ -516,6 +631,29 @@ impl Compiler<'_> {
         args: &[Expression],
         context: &Context,
     ) -> Result<T> {
+        if self.scopes[context.scope][name].definition.is_recursive {
+            return Ok(atom(self.shared_ir(name, args, context)?));
+        }
+        if self
+            .temporal_ids
+            .contains(&self.scopes[context.scope][name].id)
+            && self.template_frame(name, context)
+        {
+            let mut call = self.template_call(name, args, context, ir::BodyKind::Temporal)?;
+            let I::Call {
+                definition,
+                arguments,
+                captures,
+            } = &mut call
+            else {
+                unreachable!()
+            };
+            return Ok(T::Call {
+                definition: *definition,
+                arguments: std::mem::take(arguments),
+                captures: std::mem::take(captures),
+            });
+        }
         let (body, expanded) = self.call(name, args, context)?;
         let formula = self.temporal_ir(&body, &expanded)?;
         if let Some(frame) = &expanded.frame {
@@ -535,10 +673,82 @@ impl Compiler<'_> {
         next: &mut Option<Vec<ir::Branch>>,
         fairness: &mut Vec<T>,
     ) -> Result<()> {
+        if matches!(value.node, E::Forall { .. } | E::Exists { .. }) {
+            let formula = self.temporal_ir(value, context)?;
+            if !matches!(formula, T::Atom { .. }) {
+                fairness.push(formula);
+                return Ok(());
+            }
+        }
         match &value.node {
             E::Identifier { name } if self.has(context, name) => {
                 let (body, expanded) = self.call(name, &[], context)?;
                 self.parts_ir(&body, &expanded, initial, next, fairness)
+            }
+            E::Apply { operator, args } if self.has(context, operator) => {
+                for argument in args {
+                    let mut expression = self.expression_ir(argument, context)?;
+                    for frame in context.temporal_frames.iter().rev() {
+                        expression = frame_expression(frame, expression)?;
+                    }
+                    self.lower_pending()?;
+                    if typed::level_summary(
+                        Node::Expression(&expression),
+                        &self.level_cache.borrow(),
+                    )
+                    .base
+                        > 0
+                    {
+                        return unsupported("SPECIFICATION operator arguments must be constant");
+                    }
+                }
+                let (body, expanded) = self.call(operator, args, context)?;
+                let mut local_initial = None;
+                let mut local_next = None;
+                let mut local_fairness = vec![];
+                self.parts_ir(
+                    &body,
+                    &expanded,
+                    &mut local_initial,
+                    &mut local_next,
+                    &mut local_fairness,
+                )?;
+                if let Some(frame) = &expanded.frame {
+                    if let Some(branches) = local_initial.take() {
+                        local_initial =
+                            Some(vec![branch("Init", vec![frame_step(frame, branches)?])]);
+                    }
+                    if let Some(branches) = local_next.take() {
+                        local_next = Some(vec![branch("Next", vec![frame_step(frame, branches)?])]);
+                    }
+                    local_fairness = local_fairness
+                        .into_iter()
+                        .map(|formula| frame_formula(frame, formula))
+                        .collect::<Result<_>>()?;
+                }
+                if let Some(branches) = local_initial {
+                    *initial = Some(if let Some(previous) = initial.take() {
+                        let mut joined = vec![];
+                        for before in &previous {
+                            for after in &branches {
+                                let mut branch = after.clone();
+                                branch.steps.splice(0..0, before.steps.clone());
+                                joined.push(branch);
+                            }
+                        }
+                        typed::limited(joined)?
+                    } else {
+                        branches
+                    });
+                }
+                if let Some(branches) = local_next {
+                    if next.is_some() {
+                        return unsupported("multiple NEXT conjuncts");
+                    }
+                    *next = Some(branches);
+                }
+                fairness.extend(local_fairness);
+                Ok(())
             }
             E::And { .. } => {
                 for edge in analysis_children(Node::Source(value))
@@ -651,8 +861,12 @@ impl Compiler<'_> {
                 let name = name.ok_or_else(|| CompileError {
                     message: "INIT / NEXT".into(),
                 })?;
-                let (body, context) = self.operator(&name, phase)?;
-                let branches = self.action_ir(&body, &context, &name)?;
+                let branches = if self.scopes[0][&name].definition.is_recursive {
+                    self.action_call_ir(&name, &[], &self.root(phase))?
+                } else {
+                    let (body, context) = self.operator(&name, phase)?;
+                    self.action_ir(&body, &context, &name)?
+                };
                 if phase == Phase::Initial {
                     initial = Some(branches);
                 } else {
@@ -704,6 +918,7 @@ impl Compiler<'_> {
             invariants: vec![],
             assumptions: vec![],
             check_deadlock: self.config.check_deadlock,
+            symmetry: None,
             initial_properties: vec![],
             action_properties: vec![],
             properties: vec![],
@@ -723,14 +938,19 @@ impl Compiler<'_> {
             let formula = self.temporal_ir(&body, &context)?;
             typed::check_depth(Node::Temporal(&formula))?;
             self.lower_pending()?;
-            let initial_expression = typed::atom_expression(&formula);
-            let always_expression = typed::always_expression(&formula);
+            let initial_expression = self.template_expression(&formula, false);
+            let always_expression = self.template_expression(&formula, true);
             typed::validate_temporal(
                 &formula,
                 &[],
                 always_expression.is_some(),
                 &[],
                 &self.level_cache.borrow(),
+                &self
+                    .shared
+                    .iter()
+                    .filter_map(|entry| entry.definition.as_ref())
+                    .collect::<Vec<_>>(),
             )?;
             if let Some(expression) = initial_expression {
                 if typed::level_summary(Node::Expression(&expression), &self.level_cache.borrow())

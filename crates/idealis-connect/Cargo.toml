@@ -1,0 +1,31 @@
+[package]
+name = "idealis-connect"
+version = "0.1.0-alpha.0"
+edition = "2024"
+description = "Portable property testing, shrinking and differential replay sessions"
+repository = "https://github.com/mizchi/idealis"
+license = "MIT"
+readme = "README.md"
+include = ["src/**", "tests/**", "examples/**", "Cargo.toml", "Cargo.lock", "README.md", "SUPPORT.md", "LICENSE"]
+
+[lib]
+crate-type = ["rlib", "cdylib"]
+
+[features]
+tla = ["dep:idealis-core"]
+
+[dependencies]
+idealis-core = { version = "=0.1.0-alpha.0", path = "../idealis-core", optional = true }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[[example]]
+name = "tla_store"
+required-features = ["tla"]

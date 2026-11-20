@@ -31,16 +31,17 @@ cargo publish --locked --manifest-path crates/rtla/Cargo.toml
 cargo publish --locked --manifest-path crates/rtlc/Cargo.toml
 cargo publish --locked --manifest-path crates/rtla-compiler/Cargo.toml
 cargo publish --locked --manifest-path crates/idealis-core/Cargo.toml
-cargo publish --locked --manifest-path crates/idealis-smt/Cargo.toml
+cargo publish --locked --manifest-path crates/rusmt/Cargo.toml
 cargo publish --locked --manifest-path crates/ralloy/Cargo.toml
-cargo publish --locked --manifest-path crates/idealis-testing/Cargo.toml
+cargo publish --locked --manifest-path crates/idealis-connect/Cargo.toml
+cargo publish --locked --manifest-path crates/idealis-cli/Cargo.toml
 ```
 
 この手順は crate registry への公開を行う。Cargo の自動公開は未設定で、GitHub Release に `.crate` を添付する構成。
 
 ## 次回以降
 
-package.json / Cargo.toml の version を同じ新しい値にし、Cargo.lock と CHANGELOG を更新してチェックを通す。初回に `0.1.0-alpha.0` を公開した後は、同じ version のタグで再 publish しない。次の `0.1.0-alpha.1` 等へ上げる。
+`packages/idealis/package.json` / Cargo.toml の version を同じ新しい値にし、Cargo.lock と CHANGELOG を更新してチェックを通す。初回に `0.1.0-alpha.0` を公開した後は、同じ version のタグで再 publish しない。次の `0.1.0-alpha.1` 等へ上げる。
 
 `v<version>` の push は release.yml を起動する。tag / npm / Cargo の version 一致、型・テスト、pack、単独 consumer、ブラウザを検査してから OIDC で npm publish し、Wasm と archives を GitHub Release へ添付する。pre-release は next、安定版は latest。NPM_TOKEN は使わない。
 
@@ -58,8 +59,8 @@ PR は1ジョブで TS / Rust / ブラウザ / mutation / 実バグ評価 / cons
 
 `rtla-compiler`のarchiveはrtlaのASTをrtlcのIRへ変換する。idealis-core consumerは未公開のrtla・rtla-compiler・rtlcを`[patch.crates-io]`で解決し、ソースからのコンパイルと検査も実行する。parserとcheckerの単独consumerは従来の独立性を検査する。
 
-`idealis-smt`は5つ目の独立crate。`rsmt-<version>.crate`、`idealis-smt.wasm`、`idealis-smt-manifest.json`を配布物に加える。idealis-smtのarchiveだけを別ディレクトリへ展開し、SAT、UNSAT、unknown、未対応を検査する。依存graphへidealis-core、rtla、rtlc、Z3が入らないことも確認する。npmのSMT backendへの接続は追加していない。
+`rusmt`は5つ目の独立crate。`rusmt-<version>.crate`、`rusmt.wasm`、`rusmt-manifest.json`を配布物に加える。rusmtのarchiveだけを別ディレクトリへ展開し、SAT、UNSAT、unknown、未対応を検査する。依存graphへidealis-core、rtla、rtlc、Z3が入らないことも確認する。npmのSMT backendへの接続は追加していない。
 
 `ralloy`は6つ目の独立crate。`ralloy-<version>.crate`、`ralloy.wasm`、`ralloy-manifest.json`を加える。archiveだけを別consumerへ展開し、2-cycleの反例、予算切れ、不整合なfact、未対応構文を検査する。依存graphに他のidealis crateやZ3が含まれないこと、Wasmにホストimportがないことも確認する。npmには`@mizchi/idealis/alloy`と`@mizchi/idealis/ralloy.wasm`を含め、別consumerで探索と固定instanceの照合を検査する。汎用backendやCLIにはまだ接続していない。
 
-`idealis-testing`は7つ目の独立crate。archiveと`idealis-testing.wasm`、SHA256/ABI manifestを配布し、npmへ`./testing`と`./testing.wasm`を加える。別consumerで生成・縮小・再生・差分比較、Rustのstateful counter、依存graphの独立性とホストimport不要を検査する。registry publishはpackage検証から実行しない。
+`idealis-cli` は `idealis-connect` を使う JSONL 実行口で、それぞれの crate archive を配布する。`idealis-connect` はarchiveと`idealis-connect.wasm`、SHA256/ABI manifestを配布し、npmへ`./testing`と`./testing.wasm`を加える。別consumerで生成・縮小・再生・差分比較、Rustのstateful counter、依存graphの独立性とホストimport不要を検査する。registry publishはpackage検証から実行しない。

@@ -1,0 +1,727 @@
+{
+  "version": 1,
+  "name": "3-combined",
+  "mode": "reused",
+  "baseline": {
+    "path": "/Users/mz/.local/share/mise/installs/node/24.22.2/bin/node",
+    "args": [
+      "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/0055-final/worker.mjs",
+      "legacy"
+    ]
+  },
+  "candidate": {
+    "path": "/Users/mz/.local/share/mise/installs/node/24.22.2/bin/node",
+    "args": [
+      "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/0055-final/worker.mjs",
+      "oracle"
+    ]
+  },
+  "cases": [
+    {
+      "id": "rtla",
+      "request": {
+        "actual": {
+          "kind": "module",
+          "module": {
+            "name": "LinearRing",
+            "extends": [
+              "Naturals"
+            ],
+            "constants": [
+              {
+                "name": "N",
+                "arity": 0,
+                "location": {
+                  "start": 54,
+                  "end": 55,
+                  "line": 3,
+                  "column": 10
+                }
+              }
+            ],
+            "variables": [
+              {
+                "name": "x",
+                "arity": 0,
+                "location": {
+                  "start": 65,
+                  "end": 66,
+                  "line": 4,
+                  "column": 10
+                }
+              }
+            ],
+            "definitions": [
+              {
+                "name": "Init",
+                "kind": "Operator",
+                "params": [],
+                "body": {
+                  "kind": "Apply",
+                  "operator": "=",
+                  "args": [
+                    {
+                      "kind": "Identifier",
+                      "name": "x",
+                      "location": {
+                        "start": 75,
+                        "end": 76,
+                        "line": 5,
+                        "column": 9
+                      }
+                    },
+                    {
+                      "kind": "Number",
+                      "value": 0,
+                      "location": {
+                        "start": 77,
+                        "end": 78,
+                        "line": 5,
+                        "column": 11
+                      }
+                    }
+                  ],
+                  "location": {
+                    "start": 76,
+                    "end": 77,
+                    "line": 5,
+                    "column": 10
+                  }
+                },
+                "isLocal": false,
+                "isRecursive": false,
+                "location": {
+                  "start": 67,
+                  "end": 71,
+                  "line": 5,
+                  "column": 1
+                }
+              },
+              {
+                "name": "Next",
+                "kind": "Operator",
+                "params": [],
+                "body": {
+                  "kind": "Apply",
+                  "operator": "=",
+                  "args": [
+                    {
+                      "kind": "Prime",
+                      "expression": {
+                        "kind": "Identifier",
+                        "name": "x",
+                        "location": {
+                          "start": 87,
+                          "end": 88,
+                          "line": 6,
+                          "column": 9
+                        }
+                      },
+                      "location": {
+                        "start": 88,
+                        "end": 89,
+                        "line": 6,
+                        "column": 10
+                      }
+                    },
+                    {
+                      "kind": "If",
+                      "condition": {
+                        "kind": "Apply",
+                        "operator": "<",
+                        "args": [
+                          {
+                            "kind": "Identifier",
+                            "name": "x",
+                            "location": {
+                              "start": 93,
+                              "end": 94,
+                              "line": 6,
+                              "column": 15
+                            }
+                          },
+                          {
+                            "kind": "Apply",
+                            "operator": "-",
+                            "args": [
+                              {
+                                "kind": "Identifier",
+                                "name": "N",
+                                "location": {
+                                  "start": 95,
+                                  "end": 96,
+                                  "line": 6,
+                                  "column": 17
+                                }
+                              },
+                              {
+                                "kind": "Number",
+                                "value": 1,
+                                "location": {
+                                  "start": 97,
+                                  "end": 98,
+                                  "line": 6,
+                                  "column": 19
+                                }
+                              }
+                            ],
+                            "location": {
+                              "start": 96,
+                              "end": 97,
+                              "line": 6,
+                              "column": 18
+                            }
+                          }
+                        ],
+                        "location": {
+                          "start": 94,
+                          "end": 95,
+                          "line": 6,
+                          "column": 16
+                        }
+                      },
+                      "consequent": {
+                        "kind": "Apply",
+                        "operator": "+",
+                        "args": [
+                          {
+                            "kind": "Identifier",
+                            "name": "x",
+                            "location": {
+                              "start": 104,
+                              "end": 105,
+                              "line": 6,
+                              "column": 26
+                            }
+                          },
+                          {
+                            "kind": "Number",
+                            "value": 1,
+                            "location": {
+                              "start": 106,
+                              "end": 107,
+                              "line": 6,
+                              "column": 28
+                            }
+                          }
+                        ],
+                        "location": {
+                          "start": 105,
+                          "end": 106,
+                          "line": 6,
+                          "column": 27
+                        }
+                      },
+                      "alternative": {
+                        "kind": "Number",
+                        "value": 0,
+                        "location": {
+                          "start": 113,
+                          "end": 114,
+                          "line": 6,
+                          "column": 35
+                        }
+                      },
+                      "location": {
+                        "start": 90,
+                        "end": 92,
+                        "line": 6,
+                        "column": 12
+                      }
+                    }
+                  ],
+                  "location": {
+                    "start": 89,
+                    "end": 90,
+                    "line": 6,
+                    "column": 11
+                  }
+                },
+                "isLocal": false,
+                "isRecursive": false,
+                "location": {
+                  "start": 79,
+                  "end": 83,
+                  "line": 6,
+                  "column": 1
+                }
+              },
+              {
+                "name": "Safe",
+                "kind": "Operator",
+                "params": [],
+                "body": {
+                  "kind": "Apply",
+                  "operator": "\\in",
+                  "args": [
+                    {
+                      "kind": "Identifier",
+                      "name": "x",
+                      "location": {
+                        "start": 123,
+                        "end": 124,
+                        "line": 7,
+                        "column": 9
+                      }
+                    },
+                    {
+                      "kind": "Apply",
+                      "operator": "..",
+                      "args": [
+                        {
+                          "kind": "Number",
+                          "value": 0,
+                          "location": {
+                            "start": 129,
+                            "end": 130,
+                            "line": 7,
+                            "column": 15
+                          }
+                        },
+                        {
+                          "kind": "Apply",
+                          "operator": "-",
+                          "args": [
+                            {
+                              "kind": "Identifier",
+                              "name": "N",
+                              "location": {
+                                "start": 133,
+                                "end": 134,
+                                "line": 7,
+                                "column": 19
+                              }
+                            },
+                            {
+                              "kind": "Number",
+                              "value": 1,
+                              "location": {
+                                "start": 135,
+                                "end": 136,
+                                "line": 7,
+                                "column": 21
+                              }
+                            }
+                          ],
+                          "location": {
+                            "start": 134,
+                            "end": 135,
+                            "line": 7,
+                            "column": 20
+                          }
+                        }
+                      ],
+                      "location": {
+                        "start": 130,
+                        "end": 132,
+                        "line": 7,
+                        "column": 16
+                      }
+                    }
+                  ],
+                  "location": {
+                    "start": 125,
+                    "end": 128,
+                    "line": 7,
+                    "column": 11
+                  }
+                },
+                "isLocal": false,
+                "isRecursive": false,
+                "location": {
+                  "start": 115,
+                  "end": 119,
+                  "line": 7,
+                  "column": 1
+                }
+              }
+            ],
+            "assumptions": [],
+            "theorems": [],
+            "location": {
+              "start": 0,
+              "end": 4,
+              "line": 1,
+              "column": 1
+            }
+          }
+        },
+        "expected": {
+          "kind": "module",
+          "module": {
+            "name": "LinearRing",
+            "extends": [
+              "Naturals"
+            ],
+            "constants": [
+              {
+                "name": "N",
+                "arity": 0,
+                "location": {
+                  "start": 54,
+                  "end": 55,
+                  "line": 3,
+                  "column": 10
+                }
+              }
+            ],
+            "variables": [
+              {
+                "name": "x",
+                "arity": 0,
+                "location": {
+                  "start": 65,
+                  "end": 66,
+                  "line": 4,
+                  "column": 10
+                }
+              }
+            ],
+            "definitions": [
+              {
+                "name": "Init",
+                "kind": "Operator",
+                "params": [],
+                "body": {
+                  "kind": "Apply",
+                  "operator": "=",
+                  "args": [
+                    {
+                      "kind": "Identifier",
+                      "name": "x",
+                      "location": {
+                        "start": 75,
+                        "end": 76,
+                        "line": 5,
+                        "column": 9
+                      }
+                    },
+                    {
+                      "kind": "Number",
+                      "value": 0,
+                      "location": {
+                        "start": 77,
+                        "end": 78,
+                        "line": 5,
+                        "column": 11
+                      }
+                    }
+                  ],
+                  "location": {
+                    "start": 76,
+                    "end": 77,
+                    "line": 5,
+                    "column": 10
+                  }
+                },
+                "isLocal": false,
+                "isRecursive": false,
+                "location": {
+                  "start": 67,
+                  "end": 71,
+                  "line": 5,
+                  "column": 1
+                }
+              },
+              {
+                "name": "Next",
+                "kind": "Operator",
+                "params": [],
+                "body": {
+                  "kind": "Apply",
+                  "operator": "=",
+                  "args": [
+                    {
+                      "kind": "Prime",
+                      "expression": {
+                        "kind": "Identifier",
+                        "name": "x",
+                        "location": {
+                          "start": 87,
+                          "end": 88,
+                          "line": 6,
+                          "column": 9
+                        }
+                      },
+                      "location": {
+                        "start": 88,
+                        "end": 89,
+                        "line": 6,
+                        "column": 10
+                      }
+                    },
+                    {
+                      "kind": "If",
+                      "condition": {
+                        "kind": "Apply",
+                        "operator": "<",
+                        "args": [
+                          {
+                            "kind": "Identifier",
+                            "name": "x",
+                            "location": {
+                              "start": 93,
+                              "end": 94,
+                              "line": 6,
+                              "column": 15
+                            }
+                          },
+                          {
+                            "kind": "Apply",
+                            "operator": "-",
+                            "args": [
+                              {
+                                "kind": "Identifier",
+                                "name": "N",
+                                "location": {
+                                  "start": 95,
+                                  "end": 96,
+                                  "line": 6,
+                                  "column": 17
+                                }
+                              },
+                              {
+                                "kind": "Number",
+                                "value": 1,
+                                "location": {
+                                  "start": 97,
+                                  "end": 98,
+                                  "line": 6,
+                                  "column": 19
+                                }
+                              }
+                            ],
+                            "location": {
+                              "start": 96,
+                              "end": 97,
+                              "line": 6,
+                              "column": 18
+                            }
+                          }
+                        ],
+                        "location": {
+                          "start": 94,
+                          "end": 95,
+                          "line": 6,
+                          "column": 16
+                        }
+                      },
+                      "consequent": {
+                        "kind": "Apply",
+                        "operator": "+",
+                        "args": [
+                          {
+                            "kind": "Identifier",
+                            "name": "x",
+                            "location": {
+                              "start": 104,
+                              "end": 105,
+                              "line": 6,
+                              "column": 26
+                            }
+                          },
+                          {
+                            "kind": "Number",
+                            "value": 1,
+                            "location": {
+                              "start": 106,
+                              "end": 107,
+                              "line": 6,
+                              "column": 28
+                            }
+                          }
+                        ],
+                        "location": {
+                          "start": 105,
+                          "end": 106,
+                          "line": 6,
+                          "column": 27
+                        }
+                      },
+                      "alternative": {
+                        "kind": "Number",
+                        "value": 0,
+                        "location": {
+                          "start": 113,
+                          "end": 114,
+                          "line": 6,
+                          "column": 35
+                        }
+                      },
+                      "location": {
+                        "start": 90,
+                        "end": 92,
+                        "line": 6,
+                        "column": 12
+                      }
+                    }
+                  ],
+                  "location": {
+                    "start": 89,
+                    "end": 90,
+                    "line": 6,
+                    "column": 11
+                  }
+                },
+                "isLocal": false,
+                "isRecursive": false,
+                "location": {
+                  "start": 79,
+                  "end": 83,
+                  "line": 6,
+                  "column": 1
+                }
+              },
+              {
+                "name": "Safe",
+                "kind": "Operator",
+                "params": [],
+                "body": {
+                  "kind": "Apply",
+                  "operator": "\\in",
+                  "args": [
+                    {
+                      "kind": "Identifier",
+                      "name": "x",
+                      "location": {
+                        "start": 123,
+                        "end": 124,
+                        "line": 7,
+                        "column": 9
+                      }
+                    },
+                    {
+                      "kind": "Apply",
+                      "operator": "..",
+                      "args": [
+                        {
+                          "kind": "Number",
+                          "value": 0,
+                          "location": {
+                            "start": 129,
+                            "end": 130,
+                            "line": 7,
+                            "column": 15
+                          }
+                        },
+                        {
+                          "kind": "Apply",
+                          "operator": "-",
+                          "args": [
+                            {
+                              "kind": "Identifier",
+                              "name": "N",
+                              "location": {
+                                "start": 133,
+                                "end": 134,
+                                "line": 7,
+                                "column": 19
+                              }
+                            },
+                            {
+                              "kind": "Number",
+                              "value": 1,
+                              "location": {
+                                "start": 135,
+                                "end": 136,
+                                "line": 7,
+                                "column": 21
+                              }
+                            }
+                          ],
+                          "location": {
+                            "start": 134,
+                            "end": 135,
+                            "line": 7,
+                            "column": 20
+                          }
+                        }
+                      ],
+                      "location": {
+                        "start": 130,
+                        "end": 132,
+                        "line": 7,
+                        "column": 16
+                      }
+                    }
+                  ],
+                  "location": {
+                    "start": 125,
+                    "end": 128,
+                    "line": 7,
+                    "column": 11
+                  }
+                },
+                "isLocal": false,
+                "isRecursive": false,
+                "location": {
+                  "start": 115,
+                  "end": 119,
+                  "line": 7,
+                  "column": 1
+                }
+              }
+            ],
+            "assumptions": [],
+            "theorems": [],
+            "location": {
+              "start": 0,
+              "end": 4,
+              "line": 1,
+              "column": 1
+            }
+          }
+        }
+      },
+      "requirements": [
+        {
+          "pointer": "/status",
+          "value": "matched"
+        }
+      ]
+    },
+    {
+      "id": "idealis-core",
+      "request": {
+        "actual": {
+          "kind": "safety",
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 1000,
+            "generated": 1001,
+            "depth": 999,
+            "work": 2002,
+            "violation": null
+          }
+        },
+        "expected": {
+          "kind": "safety",
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 1000,
+            "generated": 1001,
+            "depth": 999,
+            "work": 2002,
+            "violation": null
+          }
+        }
+      },
+      "requirements": [
+        {
+          "pointer": "/status",
+          "value": "matched"
+        }
+      ]
+    }
+  ],
+  "config": {
+    "baseline": "baseline",
+    "scope": "Node reused roundtrip, request serialization and full comparison",
+    "samples": 20,
+    "warmup": 75,
+    "iterations": 25,
+    "max_evaluations": 10000
+  }
+}

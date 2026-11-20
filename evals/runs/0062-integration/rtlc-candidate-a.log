@@ -1,0 +1,79 @@
+   Compiling rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.74s
+     Running unittests src/lib.rs (crates/rtlc/target/debug/deps/rtlc-4755f7e95d4686b7)
+
+running 123 tests
+test safety::parallel::schedule_tests::batch_tracks_fanout_and_stays_bounded ... ok
+test safety::parallel::tests::candidates_keep_snapshots_and_order_when_buffers_are_reused ... ok
+test safety::tests::colliding_hashes_keep_distinct_typed_states ... ok
+test safety_definition_tests::analysis_parity_wire_direct_definition_localscope ... ok
+test safety_definition_tests::analysis_parity_wire_direct_definition_id ... ok
+test safety_definition_tests::analysis_parity_wire_direct_definition_parametercount ... ok
+test safety_definition_tests::analysis_parity_wire_direct_definition_capturecount ... ok
+test safety_definition_tests::analysis_parity_wire_direct_expression_bound_slot ... ok
+test safety_definition_tests::analysis_parity_wire_direct_binding_slot ... ok
+test safety_definition_tests::analysis_parity_wire_direct_binding_tuplesize ... ok
+test safety_definition_tests::analysis_parity_wire_direct_expression_call_definition ... ok
+test safety_definition_tests::analysis_parity_wire_direct_expression_capture_slot ... ok
+test safety_definition_tests::analysis_parity_wire_direct_expression_frame_localscope ... ok
+test safety_definition_tests::analysis_parity_wire_direct_expression_frame_capturecount ... ok
+test safety_definition_tests::analysis_parity_wire_direct_expression_fold_accumulator ... ok
+test safety_definition_tests::analysis_parity_wire_direct_expression_frame_parametercount ... ok
+test safety_definition_tests::analysis_parity_wire_direct_expression_parameter_slot ... ok
+test safety_definition_tests::analysis_parity_wire_direct_expression_read_slot ... ok
+test safety_definition_tests::all_anonymous_frame_kinds_are_rejected_by_v1 ... ok
+test safety_definition_tests::analysis_parity_wire_direct_step_assign_slot ... ok
+test safety_definition_tests::analysis_parity_wire_direct_step_bind_slot ... ok
+test safety_definition_tests::analysis_parity_wire_direct_step_bind_tuplesize ... ok
+test safety_definition_tests::analysis_parity_wire_direct_step_choose_slot ... ok
+test safety_definition_tests::analysis_parity_wire_direct_step_frame_capturecount ... ok
+test safety_definition_tests::analysis_parity_wire_direct_step_frame_localscope ... ok
+test safety_definition_tests::analysis_parity_wire_arity_and_slot_controls_remain_distinct_from_range_checks ... ok
+test safety_definition_tests::analysis_parity_wire_direct_step_frame_parametercount ... ok
+test safety_definition_tests::analysis_parity_wire_range_binding_slot ... ok
+test safety_definition_tests::analysis_parity_wire_direct_temporal_frame_capturecount ... ok
+test safety_definition_tests::analysis_parity_wire_range_binding_tuplesize ... ok
+test safety_definition_tests::analysis_parity_wire_range_definition_capturecount ... ok
+test safety_definition_tests::analysis_parity_wire_range_definition_id ... ok
+test safety_definition_tests::analysis_parity_wire_direct_temporal_frame_localscope ... ok
+test safety_definition_tests::analysis_parity_wire_range_definition_localscope ... ok
+test safety_definition_tests::analysis_parity_wire_range_expression_bound_slot ... ok
+test safety_definition_tests::analysis_parity_wire_range_definition_parametercount ... ok
+test safety_definition_tests::analysis_parity_wire_direct_temporal_frame_parametercount ... ok
+test safety_definition_tests::analysis_parity_wire_range_expression_call_definition ... ok
+test safety_definition_tests::analysis_parity_wire_range_expression_capture_slot ... ok
+test safety_definition_tests::analysis_parity_wire_range_expression_fold_accumulator ... ok
+test safety_definition_tests::analysis_parity_wire_range_expression_frame_capturecount ... ok
+test safety_definition_tests::analysis_parity_wire_range_expression_frame_localscope ... ok
+test safety_definition_tests::analysis_parity_wire_range_expression_frame_parametercount ... ok
+test safety_definition_tests::analysis_parity_wire_range_expression_parameter_slot ... ok
+test safety_definition_tests::analysis_parity_wire_range_expression_read_slot ... ok
+test safety_definition_tests::analysis_parity_wire_range_step_assign_slot ... ok
+test safety_definition_tests::analysis_parity_wire_range_step_bind_slot ... ok
+test safety_definition_tests::analysis_parity_wire_range_step_bind_tuplesize ... ok
+test safety_definition_tests::analysis_parity_wire_range_step_choose_slot ... ok
+test safety_definition_tests::analysis_parity_wire_range_step_frame_capturecount ... ok
+test safety_definition_tests::analysis_parity_wire_range_step_frame_localscope ... ok
+test safety_definition_tests::analysis_parity_wire_range_step_frame_parametercount ... ok
+test safety_definition_tests::analysis_parity_wire_range_temporal_frame_capturecount ... ok
+test safety_definition_tests::analysis_parity_wire_range_temporal_frame_localscope ... ok
+test safety_definition_tests::analysis_parity_wire_range_temporal_frame_parametercount ... ok
+test safety_definition_tests::anonymous_nested_identity_has_four_work_without_eager_argument_evaluation ... ok
+test safety_definition_tests::anonymous_temporal_frame_actuals_follow_prime_at_each_state_edge ... ok
+test safety_definition_tests::anonymous_prime_uses_requested_next_state_and_enabled_uses_fresh_candidates ... ok
+test safety_definition_tests::anonymous_bodies_cannot_implicitly_read_caller_locals_or_old ... ok
+test safety_definition_tests::anonymous_action_continuation_restores_caller_binder_and_keeps_next_assignments ... ok
+test safety_definition_tests::anonymous_temporal_frames_own_outer_binders_across_state_evaluations ... ok
+test safety_definition_tests::v2_call_arity_and_capture_count_are_checked_before_evaluation ... ok
+test safety_definition_tests::anonymous_frames_validate_counts_and_every_unused_actual ... ok
+test safety_definition_tests::v2_definition_acceptance_is_paired_with_self_cycle_refusal ... ok
+test safety_definition_tests::v2_definition_ids_are_dense_and_follow_table_order ... ok
+test safety_definition_tests::v2_callee_and_argument_binders_both_start_at_frame_local_slot_zero ... ok
+test safety_definition_tests::v2_decoding_is_versioned_and_rejects_unknown_fields ... ok
+
+thread 'safety_definition_tests::v2_dynamic_call_depth_is_checked_before_exhausting_the_native_stack' (55878912) has overflowed its stack
+fatal runtime error: stack overflow, aborting
+error: test failed, to rerun pass `--lib`
+
+Caused by:
+  process didn't exit successfully: `/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc/target/debug/deps/rtlc-4755f7e95d4686b7` (signal: 6, SIGABRT: process abort signal)

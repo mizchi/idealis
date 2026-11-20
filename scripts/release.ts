@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-const pkg = JSON.parse(await readFile("package.json", "utf8"));
+const pkg = JSON.parse(await readFile("packages/idealis/package.json", "utf8"));
 const tag = process.argv[2];
 if (tag !== `v${pkg.version}`)
   throw new Error("Release tag and package version differ");
@@ -11,9 +11,11 @@ for (const name of [
   "rtlc",
   "rtla",
   "rtla-compiler",
-  "idealis-smt",
+  "rusmt",
   "ralloy",
-  "idealis-testing",
+  "idealis-connect",
+  "idealis-cli",
+  "roracle",
 ]) {
   const cargo = await readFile(`crates/${name}/Cargo.toml`, "utf8");
   if (!cargo.includes(`version = "${pkg.version}"`))
@@ -34,18 +36,20 @@ if (process.argv[3] === "--publish") {
     [
       tarball,
       resolve(directory, `idealis-core-${pkg.version}.crate`),
+      resolve(directory, `roracle-${pkg.version}.crate`),
       resolve(directory, `rtlc-${pkg.version}.crate`),
       resolve(directory, `rtla-${pkg.version}.crate`),
       resolve(directory, `rtla-compiler-${pkg.version}.crate`),
-      resolve(directory, `idealis-smt-${pkg.version}.crate`),
+      resolve(directory, `rusmt-${pkg.version}.crate`),
       resolve(directory, `ralloy-${pkg.version}.crate`),
       resolve(directory, "ralloy.wasm"),
-      resolve(directory, `idealis-testing-${pkg.version}.crate`),
-      resolve(directory, "idealis-testing.wasm"),
-      resolve(directory, "idealis-testing-manifest.json"),
+      resolve(directory, `idealis-connect-${pkg.version}.crate`),
+      resolve(directory, `idealis-cli-${pkg.version}.crate`),
+      resolve(directory, "idealis-connect.wasm"),
+      resolve(directory, "idealis-connect-manifest.json"),
       resolve(directory, "ralloy-manifest.json"),
-      resolve(directory, "idealis-smt.wasm"),
-      resolve(directory, "idealis-smt-manifest.json"),
+      resolve(directory, "rusmt.wasm"),
+      resolve(directory, "rusmt-manifest.json"),
       resolve(directory, "rtla.wasm"),
       resolve(directory, "rtla-manifest.json"),
       resolve(directory, "idealis-core.wasm"),
@@ -72,18 +76,20 @@ if (process.argv[3] === "--publish") {
       tag,
       tarball,
       resolve(directory, `idealis-core-${pkg.version}.crate`),
+      resolve(directory, `roracle-${pkg.version}.crate`),
       resolve(directory, `rtlc-${pkg.version}.crate`),
       resolve(directory, `rtla-${pkg.version}.crate`),
       resolve(directory, `rtla-compiler-${pkg.version}.crate`),
-      resolve(directory, `idealis-smt-${pkg.version}.crate`),
+      resolve(directory, `rusmt-${pkg.version}.crate`),
       resolve(directory, `ralloy-${pkg.version}.crate`),
       resolve(directory, "ralloy.wasm"),
-      resolve(directory, `idealis-testing-${pkg.version}.crate`),
-      resolve(directory, "idealis-testing.wasm"),
-      resolve(directory, "idealis-testing-manifest.json"),
+      resolve(directory, `idealis-connect-${pkg.version}.crate`),
+      resolve(directory, `idealis-cli-${pkg.version}.crate`),
+      resolve(directory, "idealis-connect.wasm"),
+      resolve(directory, "idealis-connect-manifest.json"),
       resolve(directory, "ralloy-manifest.json"),
-      resolve(directory, "idealis-smt.wasm"),
-      resolve(directory, "idealis-smt-manifest.json"),
+      resolve(directory, "rusmt.wasm"),
+      resolve(directory, "rusmt-manifest.json"),
       resolve(directory, "rtla.wasm"),
       resolve(directory, "rtla-manifest.json"),
       resolve(directory, "idealis-core.wasm"),

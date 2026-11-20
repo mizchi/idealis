@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { planSchedule } from "../src/scheduling.js";
+import { planSchedule } from "../packages/idealis/src/scheduling.js";
 
 export const registerSchedulingContract = (
   test: (name: string, run: () => void | Promise<void>) => unknown,

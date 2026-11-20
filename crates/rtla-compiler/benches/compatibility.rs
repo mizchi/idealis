@@ -5,6 +5,33 @@ use std::hint::black_box;
 use std::time::Duration;
 
 fn measurements(criterion: &mut Criterion) {
+    let operators: Vec<Value> =
+        serde_json::from_str(include_str!("../tests/operators-support.json")).unwrap();
+    for name in [
+        "select-order",
+        "sort-ascending",
+        "assert-true",
+        "fair-forall",
+        "fair-intermittent-SF",
+    ] {
+        let case = operators.iter().find(|case| case["name"] == name).unwrap();
+        let module = rtla::parse_module(case["source"].as_str().unwrap()).unwrap();
+        let config = rtla::parse_config(case["config"].as_str().unwrap()).unwrap();
+        let program = rtla_compiler::compile(&module, &config).unwrap();
+        let bounds = SafetyBounds {
+            max_depth: 100,
+            max_states: 1000,
+            max_work: 1_000_000,
+            max_temporal_nodes: Some(10000),
+        };
+        assert_eq!(program.check(bounds).unwrap().status, case["expected"]);
+        criterion.bench_function(&format!("operators-compile/{name}"), |bencher| {
+            bencher.iter(|| rtla_compiler::compile(black_box(&module), black_box(&config)).unwrap())
+        });
+        criterion.bench_function(&format!("operators-check/{name}"), |bencher| {
+            bencher.iter(|| program.check(black_box(bounds)).unwrap())
+        });
+    }
     let cases: Vec<Value> =
         serde_json::from_str(include_str!("../tests/finite-support.json")).unwrap();
     for name in [

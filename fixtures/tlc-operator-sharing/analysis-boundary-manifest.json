@@ -1,0 +1,6171 @@
+{
+  "schemaVersion": 1,
+  "sourceReach": false,
+  "scope": "Named parser/context differences and adapters; recorded scope differences are not same-fragment or meaning oracles.",
+  "inputCap": 256,
+  "inputs": 209,
+  "expectedIds": [
+    "ts-only-infix/!!",
+    "ts-only-infix/##",
+    "ts-only-infix/$",
+    "ts-only-infix/$$",
+    "ts-only-infix/(+)",
+    "ts-only-infix/(-)",
+    "ts-only-infix/(.)",
+    "ts-only-infix/(/)",
+    "ts-only-infix/(\\X)",
+    "ts-only-infix/-|",
+    "ts-only-infix/::=",
+    "ts-only-infix/=|",
+    "ts-only-infix/??",
+    "ts-only-infix/\\approx",
+    "ts-only-infix/\\asymp",
+    "ts-only-infix/\\bigcirc",
+    "ts-only-infix/\\bullet",
+    "ts-only-infix/\\cong",
+    "ts-only-infix/\\doteq",
+    "ts-only-infix/\\gg",
+    "ts-only-infix/\\ll",
+    "ts-only-infix/\\odot",
+    "ts-only-infix/\\ominus",
+    "ts-only-infix/\\oplus",
+    "ts-only-infix/\\oslash",
+    "ts-only-infix/\\otimes",
+    "ts-only-infix/\\prec",
+    "ts-only-infix/\\preceq",
+    "ts-only-infix/\\propto",
+    "ts-only-infix/\\sim",
+    "ts-only-infix/\\simeq",
+    "ts-only-infix/\\sqcap",
+    "ts-only-infix/\\sqcup",
+    "ts-only-infix/\\sqsubset",
+    "ts-only-infix/\\sqsubseteq",
+    "ts-only-infix/\\sqsupset",
+    "ts-only-infix/\\sqsupseteq",
+    "ts-only-infix/\\star",
+    "ts-only-infix/\\subset",
+    "ts-only-infix/\\succ",
+    "ts-only-infix/\\succeq",
+    "ts-only-infix/\\supset",
+    "ts-only-infix/\\supseteq",
+    "ts-only-infix/\\uplus",
+    "ts-only-infix/\\wr",
+    "ts-only-infix/|-",
+    "ts-only-infix/|=",
+    "ts-only-unicode/⁺",
+    "ts-only-unicode/≈",
+    "ts-only-unicode/≔",
+    "ts-only-unicode/≍",
+    "ts-only-unicode/◯",
+    "ts-only-unicode/⩴",
+    "ts-only-unicode/●",
+    "ts-only-unicode/⋅",
+    "ts-only-unicode/≅",
+    "ts-only-unicode/÷",
+    "ts-only-unicode/≐",
+    "ts-only-unicode/…",
+    "ts-only-unicode/‼",
+    "ts-only-unicode/≫",
+    "ts-only-unicode/⫤",
+    "ts-only-unicode/≪",
+    "ts-only-unicode/⊣",
+    "ts-only-unicode/⊙",
+    "ts-only-unicode/⊖",
+    "ts-only-unicode/⊕",
+    "ts-only-unicode/⊘",
+    "ts-only-unicode/⊗",
+    "ts-only-unicode/⇸",
+    "ts-only-unicode/≺",
+    "ts-only-unicode/⪯",
+    "ts-only-unicode/∝",
+    "ts-only-unicode/⁇",
+    "ts-only-unicode/⊨",
+    "ts-only-unicode/⊢",
+    "ts-only-unicode/∼",
+    "ts-only-unicode/≃",
+    "ts-only-unicode/⊓",
+    "ts-only-unicode/⊔",
+    "ts-only-unicode/⊏",
+    "ts-only-unicode/⊑",
+    "ts-only-unicode/⊐",
+    "ts-only-unicode/⊒",
+    "ts-only-unicode/⋆",
+    "ts-only-unicode/⊂",
+    "ts-only-unicode/≻",
+    "ts-only-unicode/⪰",
+    "ts-only-unicode/⊃",
+    "ts-only-unicode/⊇",
+    "ts-only-unicode/⊎",
+    "ts-only-unicode/‖",
+    "ts-only-unicode/≀",
+    "shared-parser-refusal/-+->",
+    "shared-parser-refusal/@@",
+    "shared-parser-refusal/:>",
+    "shared-parser-refusal/<:",
+    "shared-parser-refusal/...",
+    "shared-parser-refusal/++",
+    "shared-parser-refusal/%%",
+    "shared-parser-refusal/|",
+    "shared-parser-refusal/||",
+    "shared-parser-refusal/--",
+    "shared-parser-refusal/**",
+    "shared-parser-refusal/&",
+    "shared-parser-refusal/&&",
+    "shared-parser-refusal//",
+    "shared-parser-refusal///",
+    "shared-parser-refusal/^^",
+    "shared-parser-refusal/\\cdot",
+    "shared-parser-refusal/^+",
+    "shared-parser-refusal/^*",
+    "shared-parser-refusal/^#",
+    "parser-only/decimal",
+    "parser-only/bracket",
+    "parser-only/product-X",
+    "parser-only/product-times",
+    "parser-only/product-glyph",
+    "parser-only/unbounded-\\A",
+    "parser-only/unbounded-\\forall",
+    "parser-only/unbounded-∀",
+    "parser-only/unbounded-\\E",
+    "parser-only/unbounded-\\exists",
+    "parser-only/unbounded-∃",
+    "parser-only/unbounded-\\AA",
+    "parser-only/unbounded-\\EE",
+    "parser-only/unbounded-choose",
+    "nonfix/=>",
+    "nonfix/<=>",
+    "nonfix/~>",
+    "nonfix/=",
+    "nonfix/#",
+    "nonfix/<",
+    "nonfix/>",
+    "nonfix/<=",
+    "nonfix/>=",
+    "nonfix/\\in",
+    "nonfix/\\notin",
+    "nonfix/\\subseteq",
+    "nonfix/\\cup",
+    "nonfix/\\cap",
+    "nonfix/\\",
+    "nonfix/..",
+    "nonfix/+",
+    "nonfix/-",
+    "nonfix/*",
+    "nonfix/\\o",
+    "nonfix/\\union",
+    "nonfix/\\intersect",
+    "nonfix/\\circ",
+    "nonfix/\\equiv",
+    "nonfix/\\leq",
+    "nonfix/\\geq",
+    "nonfix//=",
+    "nonfix/=<",
+    "nonfix/∈",
+    "nonfix/∩",
+    "nonfix/∪",
+    "nonfix/≥",
+    "nonfix/⇔",
+    "nonfix/⇒",
+    "nonfix/≤",
+    "nonfix/≠",
+    "nonfix/∉",
+    "nonfix/⊆",
+    "syntax-context/tuple-glyph/value",
+    "syntax-context/angle-glyph/action",
+    "syntax-context/angle-open-glyph/action",
+    "syntax-context/function-arrow/value",
+    "syntax-context/function-mapsto/value",
+    "syntax-context/record-mapsto/value",
+    "syntax-context/label-glyph/value",
+    "syntax-context/label-params/value",
+    "syntax-context/nonfix-minus/value",
+    "syntax-context/div/value",
+    "syntax-context/mod/value",
+    "syntax-context/pow/value",
+    "syntax-context/assignment/action",
+    "syntax-context/Variant/value",
+    "syntax-context/VariantTag/value",
+    "syntax-context/VariantGetUnsafe/value",
+    "syntax-context/temporal-forall/temporal",
+    "syntax-context/temporal-exists/temporal",
+    "syntax-context/Seq/value",
+    "syntax-context/definition-glyph/value",
+    "syntax-context/TLC-import/value",
+    "ts-parser-only/operator-reference",
+    "ts-parser-only/lambda",
+    "ts-parser-only/subexpression",
+    "instance/LET-instance",
+    "instance/LET-substitution",
+    "ts-only-semantic-alias/∘",
+    "ts-only-semantic-alias/‥",
+    "ts-only-semantic-alias/≡",
+    "ts-only-semantic-alias/↝",
+    "adapter/function-head",
+    "adapter/except-field",
+    "adapter/fold-seq-binder-capture",
+    "adapter/fold-set-binder-capture",
+    "adapter/function-head-explicit",
+    "adapter/ApaFoldSet-arity",
+    "adapter/ApaFoldSet-reference-value",
+    "adapter/ApaFoldSet-reference-unknown",
+    "adapter/ApaFoldSet-formal-count",
+    "adapter/ApaFoldSeqLeft-arity",
+    "adapter/ApaFoldSeqLeft-reference-value",
+    "adapter/ApaFoldSeqLeft-reference-unknown",
+    "adapter/ApaFoldSeqLeft-formal-count",
+    "annotation/Fairness.enabled"
+  ],
+  "cases": [
+    {
+      "id": "ts-only-infix/!!",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 !! 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 !! 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "!!"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply !!"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "!!",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/##",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ## 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ## 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "##"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply ##"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "##",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/$",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 $ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 $ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "$"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply $"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "$",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/$$",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 $$ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 $$ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "$$"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply $$"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "$$",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/(+)",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 (+) 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 (+) 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\oplus"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\oplus"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\oplus",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/(-)",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 (-) 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 (-) 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\ominus"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\ominus"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\ominus",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/(.)",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 (.) 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 (.) 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\odot"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\odot"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\odot",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/(/)",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 (/) 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 (/) 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\oslash"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\oslash"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\oslash",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/(\\X)",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 (\\X) 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 (\\X) 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\otimes"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\otimes"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\otimes",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/-|",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 -| 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 -| 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "-|"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply -|"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "-|",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/::=",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ::= 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ::= 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "::="
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply ::="
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "::=",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/=|",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 =| 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 =| 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "=|"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply =|"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "=|",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/??",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ?? 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ?? 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "??"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply ??"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "??",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\approx",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\approx 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\approx 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\approx"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\approx"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\approx",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\asymp",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\asymp 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\asymp 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\asymp"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\asymp"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\asymp",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\bigcirc",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\bigcirc 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\bigcirc 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\bigcirc"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\bigcirc"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\bigcirc",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\bullet",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\bullet 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\bullet 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\bullet"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\bullet"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\bullet",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\cong",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\cong 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\cong 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\cong"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\cong"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\cong",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\doteq",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\doteq 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\doteq 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\doteq"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\doteq"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\doteq",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\gg",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\gg 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\gg 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\gg"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\gg"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\gg",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\ll",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\ll 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\ll 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\ll"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\ll"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\ll",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\odot",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\odot 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\odot 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\odot"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\odot"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\odot",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\ominus",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\ominus 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\ominus 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\ominus"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\ominus"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\ominus",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\oplus",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\oplus 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\oplus 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\oplus"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\oplus"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\oplus",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\oslash",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\oslash 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\oslash 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\oslash"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\oslash"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\oslash",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\otimes",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\otimes 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\otimes 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\otimes"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\otimes"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\otimes",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\prec",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\prec 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\prec 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\prec"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\prec"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\prec",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\preceq",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\preceq 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\preceq 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\preceq"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\preceq"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\preceq",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\propto",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\propto 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\propto 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\propto"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\propto"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\propto",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\sim",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\sim 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\sim 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\sim"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\sim"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\sim",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\simeq",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\simeq 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\simeq 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\simeq"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\simeq"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\simeq",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\sqcap",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\sqcap 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\sqcap 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\sqcap"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\sqcap"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\sqcap",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\sqcup",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\sqcup 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\sqcup 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\sqcup"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\sqcup"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\sqcup",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\sqsubset",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\sqsubset 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\sqsubset 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\sqsubset"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\sqsubset"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\sqsubset",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\sqsubseteq",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\sqsubseteq 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\sqsubseteq 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\sqsubseteq"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\sqsubseteq"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\sqsubseteq",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\sqsupset",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\sqsupset 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\sqsupset 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\sqsupset"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\sqsupset"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\sqsupset",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\sqsupseteq",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\sqsupseteq 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\sqsupseteq 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\sqsupseteq"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\sqsupseteq"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\sqsupseteq",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\star",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\star 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\star 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\star"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\star"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\star",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\subset",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\subset 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\subset 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\subset"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\subset"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\subset",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\succ",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\succ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\succ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\succ"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\succ"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\succ",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\succeq",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\succeq 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\succeq 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\succeq"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\succeq"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\succeq",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\supset",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\supset 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\supset 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\supset"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\supset"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\supset",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\supseteq",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\supseteq 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\supseteq 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\supseteq"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\supseteq"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\supseteq",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\uplus",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\uplus 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\uplus 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\uplus"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\uplus"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\uplus",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/\\wr",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\wr 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\wr 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\wr"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\wr"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\wr",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/|-",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 |- 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 |- 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "|-"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply |-"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "|-",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-infix/|=",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 |= 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 |= 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "|="
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply |="
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "|=",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⁺",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1⁺\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1⁺",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "^+"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply ^+"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "^+",
+        "args": 1
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/≈",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ≈ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ≈ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\approx"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\approx"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\approx",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/≔",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ≔ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ≔ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": ":="
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply :="
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": ":=",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/≍",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ≍ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ≍ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\asymp"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\asymp"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\asymp",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/◯",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ◯ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ◯ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\bigcirc"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\bigcirc"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\bigcirc",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⩴",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⩴ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⩴ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "::="
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply ::="
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "::=",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/●",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ● 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ● 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\bullet"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\bullet"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\bullet",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⋅",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⋅ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⋅ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\cdot"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\cdot"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\cdot",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/≅",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ≅ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ≅ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\cong"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\cong"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\cong",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/÷",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ÷ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ÷ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\div"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\div"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\div",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/≐",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ≐ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ≐ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\doteq"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\doteq"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\doteq",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/…",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 … 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 … 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "..."
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply ..."
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "...",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/‼",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ‼ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ‼ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "!!"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply !!"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "!!",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/≫",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ≫ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ≫ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\gg"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\gg"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\gg",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⫤",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⫤ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⫤ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "=|"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply =|"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "=|",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/≪",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ≪ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ≪ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\ll"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\ll"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\ll",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⊣",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⊣ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⊣ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "-|"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply -|"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "-|",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⊙",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⊙ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⊙ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\odot"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\odot"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\odot",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⊖",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⊖ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⊖ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\ominus"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\ominus"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\ominus",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⊕",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⊕ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⊕ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\oplus"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\oplus"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\oplus",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⊘",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⊘ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⊘ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\oslash"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\oslash"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\oslash",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⊗",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⊗ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⊗ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\otimes"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\otimes"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\otimes",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⇸",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⇸ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⇸ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "-+->"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply -+->"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "-+->",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/≺",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ≺ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ≺ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\prec"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\prec"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\prec",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⪯",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⪯ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⪯ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\preceq"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\preceq"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\preceq",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/∝",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ∝ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ∝ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\propto"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\propto"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\propto",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⁇",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⁇ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⁇ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "??"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply ??"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "??",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⊨",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⊨ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⊨ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "|="
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply |="
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "|=",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⊢",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⊢ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⊢ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "|-"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply |-"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "|-",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/∼",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ∼ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ∼ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\sim"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\sim"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\sim",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/≃",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ≃ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ≃ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\simeq"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\simeq"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\simeq",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⊓",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⊓ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⊓ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\sqcap"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\sqcap"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\sqcap",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⊔",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⊔ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⊔ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\sqcup"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\sqcup"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\sqcup",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⊏",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⊏ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⊏ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\sqsubset"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\sqsubset"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\sqsubset",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⊑",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⊑ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⊑ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\sqsubseteq"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\sqsubseteq"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\sqsubseteq",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⊐",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⊐ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⊐ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\sqsupset"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\sqsupset"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\sqsupset",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⊒",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⊒ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⊒ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\sqsupseteq"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\sqsupseteq"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\sqsupseteq",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⋆",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⋆ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⋆ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\star"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\star"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\star",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⊂",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⊂ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⊂ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\subset"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\subset"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\subset",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/≻",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ≻ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ≻ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\succ"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\succ"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\succ",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⪰",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⪰ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⪰ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\succeq"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\succeq"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\succeq",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⊃",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⊃ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⊃ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\supset"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\supset"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\supset",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⊇",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⊇ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⊇ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\supseteq"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\supseteq"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\supseteq",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/⊎",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ⊎ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ⊎ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\uplus"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\uplus"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\uplus",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/‖",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ‖ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ‖ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "||"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply ||"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "||",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-unicode/≀",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ≀ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ≀ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\wr"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\wr"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\wr",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal/-+->",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 -+-> 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 -+-> 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "-+->"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply -+->"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "-+->",
+        "args": 2
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator -+->"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal/@@",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 @@ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 @@ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "@@"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply @@"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "@@",
+        "args": 2
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator @@"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal/:>",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 :> 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 :> 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": ":>"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply :>"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": ":>",
+        "args": 2
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator :>"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal/<:",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 <: 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 <: 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "<:"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply <:"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "<:",
+        "args": 2
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator <:"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal/...",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ... 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ... 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "..."
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply ..."
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "...",
+        "args": 2
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator ..."
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal/++",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ++ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ++ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "++"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply ++"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "++",
+        "args": 2
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator ++"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal/%%",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 %% 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 %% 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "%%"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply %%"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "%%",
+        "args": 2
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator %%"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal/|",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 | 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 | 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "|"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply |"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "|",
+        "args": 2
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator |"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal/||",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 || 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 || 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "||"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply ||"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "||",
+        "args": 2
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator ||"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal/--",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 -- 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 -- 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "--"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply --"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "--",
+        "args": 2
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator --"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal/**",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ** 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ** 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "**"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply **"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "**",
+        "args": 2
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator **"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal/&",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 & 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 & 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "&"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply &"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "&",
+        "args": 2
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator &"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal/&&",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 && 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 && 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "&&"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply &&"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "&&",
+        "args": 2
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator &&"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal//",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 / 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 / 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "/"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply /"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "/",
+        "args": 2
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator /"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal///",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 // 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 // 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "//"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply //"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "//",
+        "args": 2
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator //"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal/^^",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ^^ 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ^^ 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "^^"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply ^^"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "^^",
+        "args": 2
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator ^^"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal/\\cdot",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 \\cdot 1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 \\cdot 1",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\cdot"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\cdot"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\cdot",
+        "args": 2
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator \\cdot"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal/^+",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1^+\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1^+",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "^+"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply ^+"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "^+",
+        "args": 1
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator ^+"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal/^*",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1^*\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1^*",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "^*"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply ^*"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "^*",
+        "args": 1
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator ^*"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "shared-parser-refusal/^#",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1^#\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1^#",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "^#"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply ^#"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "^#",
+        "args": 1
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator ^#"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "parser-only/decimal",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1.5\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1.5",
+      "tsAst": {
+        "kind": "Decimal"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Decimal"
+      },
+      "rustParser": {
+        "kind": "Decimal"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression at 6:10"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "parser-only/bracket",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == [1]\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "[1]",
+      "tsAst": {
+        "kind": "Bracket"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Bracket"
+      },
+      "rustParser": {
+        "kind": "Bracket"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression at 6:10"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "parser-only/product-X",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == {1} \\X {2}\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "{1} \\X {2}",
+      "tsAst": {
+        "kind": "Product"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Product"
+      },
+      "rustParser": {
+        "kind": "Product"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression at 6:14"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "parser-only/product-times",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == {1} \\times {2}\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "{1} \\times {2}",
+      "tsAst": {
+        "kind": "Product"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Product"
+      },
+      "rustParser": {
+        "kind": "Product"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression at 6:14"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "parser-only/product-glyph",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == {1} × {2}\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "{1} × {2}",
+      "tsAst": {
+        "kind": "Product"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Product"
+      },
+      "rustParser": {
+        "kind": "Product"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression at 6:14"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "parser-only/unbounded-\\A",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\A n: TRUE\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\A n: TRUE",
+      "tsAst": {
+        "kind": "UnboundedQuantifier"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression UnboundedQuantifier"
+      },
+      "rustParser": {
+        "kind": "UnboundedQuantifier"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression at 6:10"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "parser-only/unbounded-\\forall",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\forall n: TRUE\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\forall n: TRUE",
+      "tsAst": {
+        "kind": "UnboundedQuantifier"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression UnboundedQuantifier"
+      },
+      "rustParser": {
+        "kind": "UnboundedQuantifier"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression at 6:10"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "parser-only/unbounded-∀",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ∀ n: TRUE\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "∀ n: TRUE",
+      "tsAst": {
+        "kind": "UnboundedQuantifier"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression UnboundedQuantifier"
+      },
+      "rustParser": {
+        "kind": "UnboundedQuantifier"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression at 6:10"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "parser-only/unbounded-\\E",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\E n: TRUE\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\E n: TRUE",
+      "tsAst": {
+        "kind": "UnboundedQuantifier"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression UnboundedQuantifier"
+      },
+      "rustParser": {
+        "kind": "UnboundedQuantifier"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression at 6:10"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "parser-only/unbounded-\\exists",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\exists n: TRUE\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\exists n: TRUE",
+      "tsAst": {
+        "kind": "UnboundedQuantifier"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression UnboundedQuantifier"
+      },
+      "rustParser": {
+        "kind": "UnboundedQuantifier"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression at 6:10"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "parser-only/unbounded-∃",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ∃ n: TRUE\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "∃ n: TRUE",
+      "tsAst": {
+        "kind": "UnboundedQuantifier"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression UnboundedQuantifier"
+      },
+      "rustParser": {
+        "kind": "UnboundedQuantifier"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression at 6:10"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "parser-only/unbounded-\\AA",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\AA n: TRUE\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\AA n: TRUE",
+      "tsAst": {
+        "kind": "UnboundedQuantifier"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression UnboundedQuantifier"
+      },
+      "rustParser": {
+        "kind": "UnboundedQuantifier"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression at 6:10"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "parser-only/unbounded-\\EE",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\EE n: TRUE\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\EE n: TRUE",
+      "tsAst": {
+        "kind": "UnboundedQuantifier"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression UnboundedQuantifier"
+      },
+      "rustParser": {
+        "kind": "UnboundedQuantifier"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression at 6:10"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "parser-only/unbounded-choose",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == CHOOSE n: TRUE\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "CHOOSE n: TRUE",
+      "tsAst": {
+        "kind": "Choose"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Choose"
+      },
+      "rustParser": {
+        "kind": "Choose"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression at 6:10"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "nonfix/=>",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == =>(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "=>(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "=>",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "=>",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/<=>",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == <=>(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "<=>(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "<=>",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "<=>",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/~>",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ~>(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nPROPERTY Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "~>(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "~>",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "~>",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/=",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == =(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "=(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "=",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "=",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/#",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == #(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "#(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "#",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "#",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/<",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == <(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "<(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "<",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "<",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/>",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == >(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": ">(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": ">",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": ">",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/<=",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == <=(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "<=(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "<=",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "<=",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/>=",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == >=(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": ">=(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": ">=",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": ">=",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/\\in",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\in(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\in(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\in",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\in",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/\\notin",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\notin(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\notin(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\notin",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\notin",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/\\subseteq",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\subseteq(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\subseteq(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\subseteq",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\subseteq",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/\\cup",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\cup(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\cup(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\cup",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\cup",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/\\cap",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\cap(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\cap(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\cap",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\cap",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/\\",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/..",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ..(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "..(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "..",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "..",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/+",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == +(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "+(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "+",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "+",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/-",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == -(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "-(1,2)",
+      "tsAst": {
+        "error": "Expected \")\" but found \",\" at line 6, column 13"
+      },
+      "tsCompile": {
+        "kind": "syntax-error",
+        "message": "Expected \")\" but found \",\" at line 6, column 13"
+      },
+      "rustParser": {
+        "error": "Expected ), found \",\"",
+        "errorKind": "syntax"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/*",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == *(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "*(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "*",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "*",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/\\o",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\o(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\o(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\o",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\o",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/\\union",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\union(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\union(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\cup",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\cup",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/\\intersect",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\intersect(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\intersect(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\cap",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\cap",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/\\circ",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\circ(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\circ(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\o",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\o",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/\\equiv",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\equiv(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\equiv(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "<=>",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "<=>",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/\\leq",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\leq(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\leq(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "<=",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "<=",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/\\geq",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\geq(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "\\geq(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": ">=",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": ">=",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix//=",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == /=(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "/=(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "#",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "#",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/=<",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == =<(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "=<(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "<=",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "<=",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/∈",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ∈(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "∈(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\in",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\in",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/∩",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ∩(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "∩(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\cap",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\cap",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/∪",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ∪(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "∪(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\cup",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\cup",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/≥",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ≥(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "≥(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": ">=",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": ">=",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/⇔",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ⇔(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "⇔(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "<=>",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "<=>",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/⇒",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ⇒(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "⇒(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "=>",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "=>",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/≤",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ≤(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "≤(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "<=",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "<=",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/≠",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ≠(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "≠(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "#",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "#",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/∉",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ∉(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "∉(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\notin",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\notin",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "nonfix/⊆",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ⊆(1,2)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "⊆(1,2)",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\subseteq",
+        "args": 2
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\subseteq",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "syntax-context/tuple-glyph/value",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ⟨1,2⟩\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/angle-glyph/action",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ⟨x' = x⟩_x\nNextWithProbe == UNCHANGED x /\\ Probe\n====",
+      "config": "INIT Init\nNEXT NextWithProbe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/angle-open-glyph/action",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ⟨x' = x>>_x\nNextWithProbe == UNCHANGED x /\\ Probe\n====",
+      "config": "INIT Init\nNEXT NextWithProbe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/function-arrow/value",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == [{1} → {2}]\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/function-mapsto/value",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == [n \\in {1} ↦ n]\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/record-mapsto/value",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == [a ↦ 1]\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/label-glyph/value",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == L ∷ TRUE\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/label-params/value",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == L(a):: TRUE\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: label L must list exactly the bound names in its labeling scope"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/nonfix-minus/value",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == -.(1)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/div/value",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 4 \\div 2\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply \\div"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/mod/value",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 4 % 2\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply %"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/pow/value",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 2 ^ 2\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply ^"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/assignment/action",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == x' := 0\nNextWithProbe == UNCHANGED x /\\ Probe\n====",
+      "config": "INIT Init\nNEXT NextWithProbe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Apply :="
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/Variant/value",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache, Variants\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == Variant(\"A\",1)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: modules or EXTENDS"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/VariantTag/value",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache, Variants\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == VariantTag(Variant(\"A\",1))\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: modules or EXTENDS"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/VariantGetUnsafe/value",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache, Variants\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == VariantGetUnsafe(\"A\",Variant(\"A\",1))\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: modules or EXTENDS"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/temporal-forall/temporal",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\A n \\in {1}: <> (x=n)\n====",
+      "config": "INIT Init\nNEXT Next\nPROPERTY Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Eventually"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/temporal-exists/temporal",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == \\E n \\in {1}: <> (x=n)\n====",
+      "config": "INIT Init\nNEXT Next\nPROPERTY Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Eventually"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/Seq/value",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == <<1>> \\in Seq({1})\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/definition-glyph/value",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe ≜ TRUE\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "syntax-context/TLC-import/value",
+      "scope": "named-context",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache, TLC\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == TRUE\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: modules or EXTENDS"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "ts-parser-only/operator-reference",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ApaFoldSet(+,0,{1})\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "ApaFoldSet(+,0,{1})",
+      "tsAst": {
+        "kind": "OperatorReference",
+        "path": [
+          "args",
+          0
+        ]
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: fold operator argument"
+      },
+      "rustParser": {
+        "kind": "Identifier",
+        "path": [
+          "args",
+          0
+        ],
+        "name": "+"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-parser-only/lambda",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ApaFoldSet(LAMBDA a,b: a+b,0,{1})\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "ApaFoldSet(LAMBDA a,b: a+b,0,{1})",
+      "tsAst": {
+        "kind": "Lambda",
+        "path": [
+          "args",
+          0
+        ]
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: fold operator argument"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "ApaFoldSet",
+        "args": 3
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-parser-only/subexpression",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nF == TRUE\nProbe == F!1\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "F!1",
+      "tsAst": {
+        "kind": "Subexpression",
+        "path": []
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: expression Subexpression"
+      },
+      "rustParser": {
+        "kind": "Selection"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "instance/LET-instance",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == LET I == INSTANCE Other IN TRUE\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "LET I == INSTANCE Other IN TRUE",
+      "tsAst": {
+        "kind": "Let"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: LET INSTANCE"
+      },
+      "rustParser": {
+        "kind": "LetModule"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "instance/LET-substitution",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == LET I == INSTANCE Other WITH C ← 1 IN TRUE\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "LET I == INSTANCE Other WITH C ← 1 IN TRUE",
+      "tsAst": {
+        "kind": "Let"
+      },
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: LET INSTANCE"
+      },
+      "rustParser": {
+        "kind": "LetModule"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-semantic-alias/∘",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == <<1>> ∘ <<2>>\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "<<1>> ∘ <<2>>",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "\\o"
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "\\o",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-semantic-alias/‥",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == 1 ‥ 2\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "1 ‥ 2",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": ".."
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "..",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-semantic-alias/≡",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == TRUE ≡ TRUE\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "TRUE ≡ TRUE",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "<=>"
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "<=>",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "ts-only-semantic-alias/↝",
+      "scope": "named-boundary",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == TRUE ↝ TRUE\n====",
+      "config": "INIT Init\nNEXT Next\nPROPERTY Probe\nCHECK_DEADLOCK FALSE",
+      "expression": "TRUE ↝ TRUE",
+      "tsAst": {
+        "kind": "Apply",
+        "operator": "~>"
+      },
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustParser": {
+        "kind": "Apply",
+        "operator": "~>",
+        "args": 2
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "TS-parser",
+        "Rust-native-parser",
+        "Rust-Wasm-parser"
+      ]
+    },
+    {
+      "id": "adapter/function-head",
+      "scope": "adapter",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nF(p) == LET f[i \\in p] == i IN f[9]\nProbe == F({9}) = 9\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "complete": true,
+      "equivalent": "adapter/function-head-explicit",
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile",
+        "TS-IR-native-check",
+        "TS-IR-Wasm-check",
+        "Rust-IR-native-check",
+        "Rust-IR-Wasm-check",
+        "TS-equivalence-compile:adapter/function-head-explicit"
+      ]
+    },
+    {
+      "id": "adapter/except-field",
+      "scope": "adapter",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ([ [a |-> 9] EXCEPT !.a = @ ]).a = 9\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "complete": true,
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile",
+        "TS-IR-native-check",
+        "TS-IR-Wasm-check",
+        "Rust-IR-native-check",
+        "Rust-IR-Wasm-check",
+        "TS-field-adapter-parser"
+      ]
+    },
+    {
+      "id": "adapter/fold-seq-binder-capture",
+      "scope": "adapter",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nOuter(p) == LET Fold(a,b) == a + b + p IN ApaFoldSeqLeft(Fold, 0, <<1>>)\nProbe == (\\A p \\in {9}: Outer(p) = 10)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "complete": true,
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile",
+        "TS-IR-native-check",
+        "TS-IR-Wasm-check",
+        "Rust-IR-native-check",
+        "Rust-IR-Wasm-check"
+      ]
+    },
+    {
+      "id": "adapter/fold-set-binder-capture",
+      "scope": "adapter",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nOuter(p) == LET Fold(a,b) == a + b + p IN ApaFoldSet(Fold, 0, {1})\nProbe == (\\A p \\in {9}: Outer(p) = 10)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "complete": true,
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile",
+        "TS-IR-native-check",
+        "TS-IR-Wasm-check",
+        "Rust-IR-native-check",
+        "Rust-IR-Wasm-check"
+      ]
+    },
+    {
+      "id": "adapter/function-head-explicit",
+      "scope": "adapter",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nF(p) == LET f == [i \\in p |-> i] IN f[9]\nProbe == F({9}) = 9\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "complete": true,
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile",
+        "TS-IR-native-check",
+        "TS-IR-Wasm-check",
+        "Rust-IR-native-check",
+        "Rust-IR-Wasm-check"
+      ]
+    },
+    {
+      "id": "adapter/ApaFoldSet-arity",
+      "scope": "refusal-adapter",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ApaFoldSet(Fold,0)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: fold arity"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: fold arity"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "adapter/ApaFoldSet-reference-value",
+      "scope": "refusal-adapter",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ApaFoldSet(1,0,{1})\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: fold operator argument"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: fold operator argument"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "adapter/ApaFoldSet-reference-unknown",
+      "scope": "refusal-adapter",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ApaFoldSet(Missing,0,{1})\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: fold operator Missing"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator Missing"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "adapter/ApaFoldSet-formal-count",
+      "scope": "refusal-adapter",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nFold(a) == a\nProbe == ApaFoldSet(Fold,0,{1})\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: fold operator Fold"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: fold operator Fold"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "adapter/ApaFoldSeqLeft-arity",
+      "scope": "refusal-adapter",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ApaFoldSeqLeft(Fold,0)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: fold arity"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: fold arity"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "adapter/ApaFoldSeqLeft-reference-value",
+      "scope": "refusal-adapter",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ApaFoldSeqLeft(1,0,{1})\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: fold operator argument"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: fold operator argument"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "adapter/ApaFoldSeqLeft-reference-unknown",
+      "scope": "refusal-adapter",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == ApaFoldSeqLeft(Missing,0,{1})\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: fold operator Missing"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: operator Missing"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "adapter/ApaFoldSeqLeft-formal-count",
+      "scope": "refusal-adapter",
+      "semanticReached": false,
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nFold(a) == a\nProbe == ApaFoldSeqLeft(Fold,0,{1})\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: fold operator Fold"
+      },
+      "rustCompile": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: fold operator Fold"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile"
+      ]
+    },
+    {
+      "id": "annotation/Fairness.enabled",
+      "scope": "annotation",
+      "semanticReached": false,
+      "annotation": "Fairness.enabled",
+      "source": "---- MODULE Probe ----\nEXTENDS Naturals, Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nProbe == WF_x(x' = x)\n====",
+      "config": "INIT Init\nNEXT Next\nPROPERTY Probe\nCHECK_DEADLOCK FALSE",
+      "tsCompile": {
+        "kind": "compiled"
+      },
+      "rustCompile": {
+        "kind": "compiled"
+      },
+      "irVersion": 2,
+      "routes": [
+        "TS-compile",
+        "Rust-native-compile",
+        "Rust-Wasm-compile",
+        "TS-annotation-parser"
+      ]
+    }
+  ],
+  "expectationBasis": [
+    "Reviewed parser/lexer source tables and lowering branches frozen by analysis-inventory.json digests.",
+    "The named syntax-context and nonfix cases retain the reviewed 3f-a3 input and exact refusal; these records are scope contracts, not independent meaning oracles.",
+    "Rust lexing of ##, =| and |- splits tokens according to ALIASES-before-SYMBOLS; |- is a different AST using | and unary minus, not acceptance of the |- operator.",
+    "Product location is the infix token; unsupported Apply diagnostics use operator NAME. Lambda and INSTANCE use explicit unsupported-syntax parser errors."
+  ],
+  "routeCalls": 892
+}

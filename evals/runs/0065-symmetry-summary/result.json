@@ -1,0 +1,1312 @@
+{
+  "status": "complete",
+  "plan": "0065-symmetry-allocation",
+  "input": "evals/runs/0065-symmetry-kernel",
+  "manifest": {
+    "metadata": [
+      {
+        "binarySha256": "f51d6dcdfa0fbedcabad270844ef26f929d3cd08e187ce5d26cfc3fca34a2974",
+        "benchSha256": "ad0a2bf76fdc9d3c1390640749611831d0345d5f3b9fb9d0cdc4e0f822ab8a56"
+      },
+      {
+        "binarySha256": "39b4cb497c4a28be449bb4e118e796a2051a9e2b54d864452ed5d037396ccaac",
+        "benchSha256": "ad0a2bf76fdc9d3c1390640749611831d0345d5f3b9fb9d0cdc4e0f822ab8a56"
+      }
+    ],
+    "cpu": "Apple M5",
+    "sampleSize": 20,
+    "warmupMs": 500,
+    "measurementMs": 1000,
+    "order": [
+      "before",
+      "after",
+      "after",
+      "before"
+    ]
+  },
+  "manifestSha256": "2fb9ce455c8484cc66fa5189dfcbef957132131e95c289a5e4751d32078f42fe",
+  "method": "Arithmetic mean of two Criterion mean estimates per side in ABBA order. Intervals are per repetition, not pooled.",
+  "records": [
+    {
+      "name": "symmetry/counter-5-3-safe_actions",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/counter-5-3-safe_actions/new/estimates.json",
+          "sha256": "76fb4b4e61fc5b6c0788264051a488982603501d9904e2aca45507943da20764",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 121782.75876437519,
+              "upper_bound": 122191.22294184924
+            },
+            "point_estimate": 121976.57084364069,
+            "standard_error": 104.44505056997748
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/counter-5-3-safe_actions/new/estimates.json",
+          "sha256": "3655ce3ac53c23e60697be0bba0d4eaf76b99bd4855be4c59f689828a2150d21",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 108698.68383746785,
+              "upper_bound": 109627.81349690967
+            },
+            "point_estimate": 109124.11918111662,
+            "standard_error": 239.3968009792192
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/counter-5-3-safe_actions/new/estimates.json",
+          "sha256": "1d151b73b2cab00f4b3dab1df2f5bd07bdd11ca3f376d8a20db15b53edf58675",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 109512.98943744088,
+              "upper_bound": 110655.0043115151
+            },
+            "point_estimate": 110014.92220303183,
+            "standard_error": 294.70331724006843
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/counter-5-3-safe_actions/new/estimates.json",
+          "sha256": "d1ed9f8b6fa8449752d049139d4f01511f535aa5f8b0af34e16ebfd6cb3da789",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 121369.59283371252,
+              "upper_bound": 124975.31585573271
+            },
+            "point_estimate": 122806.57585041519,
+            "standard_error": 959.2123212159378
+          }
+        }
+      ],
+      "beforeNs": 122391.57334702794,
+      "afterNs": 109569.52069207423,
+      "ratio": 0.8952374554529324,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/counter-5-3-safe_plain",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/counter-5-3-safe_plain/new/estimates.json",
+          "sha256": "c8d80ef41aae7b17cc95aa9ba3c15c605f79730c43aff8c00077a977306f365b",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1422375.0669984806,
+              "upper_bound": 1430740.1235367928
+            },
+            "point_estimate": 1426280.4635574436,
+            "standard_error": 2141.7927986199993
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/counter-5-3-safe_plain/new/estimates.json",
+          "sha256": "8972cd1cabfb68da63feddf1fd299839f1c0ef839d1c360210e9dad194e47e9f",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1418362.9792785826,
+              "upper_bound": 1423942.146985558
+            },
+            "point_estimate": 1421220.9419675737,
+            "standard_error": 1429.8509162645182
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/counter-5-3-safe_plain/new/estimates.json",
+          "sha256": "ad3f122cd067293e47fd9c2d9bfdb308db7f53f1b7a163c9bd64722f59f28e56",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1412552.8020426282,
+              "upper_bound": 1429919.7729792912
+            },
+            "point_estimate": 1419869.7540398254,
+            "standard_error": 4517.807838117275
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/counter-5-3-safe_plain/new/estimates.json",
+          "sha256": "a5d77fb1c8d05629faedcd6c42d3269ad2ba303510eae6649398b28a735d62c3",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1416906.8446969693,
+              "upper_bound": 1431456.8715123015
+            },
+            "point_estimate": 1423125.856506147,
+            "standard_error": 3777.3693806412834
+          }
+        }
+      ],
+      "beforeNs": 1424703.1600317953,
+      "afterNs": 1420545.3480036994,
+      "ratio": 0.9970816292511044,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/counter-5-3-safe_symmetry",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/counter-5-3-safe_symmetry/new/estimates.json",
+          "sha256": "62a3fc9da218aabe6671224e18171e6ee914610ccb5efba9b7c2b366f498ec99",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 168877.23596537398,
+              "upper_bound": 170973.17207881328
+            },
+            "point_estimate": 169900.5009193264,
+            "standard_error": 535.8111814511624
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/counter-5-3-safe_symmetry/new/estimates.json",
+          "sha256": "ac61375bcbce8c0070fd745858a84e097f36c2ed30b6959cd1abe10368070878",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 152955.72679617215,
+              "upper_bound": 156550.48810085718
+            },
+            "point_estimate": 154579.21659402258,
+            "standard_error": 923.1793537435555
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/counter-5-3-safe_symmetry/new/estimates.json",
+          "sha256": "b05843156ea608bbdf424c8d8fcb46b552e96a1c6290429345c2e73c91f076cf",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 153236.00584118374,
+              "upper_bound": 156303.59602325025
+            },
+            "point_estimate": 154444.10734910384,
+            "standard_error": 820.9387740593838
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/counter-5-3-safe_symmetry/new/estimates.json",
+          "sha256": "3119176025d69908d3223a472010684803d090fb2cc5df894d246e62b6fa7939",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 168995.99121100132,
+              "upper_bound": 170103.5367426827
+            },
+            "point_estimate": 169538.37063042744,
+            "standard_error": 282.60967048852194
+          }
+        }
+      ],
+      "beforeNs": 169719.4357748769,
+      "afterNs": 154511.6619715632,
+      "ratio": 0.9103946243170055,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/counter-7-5-safe_actions",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/counter-7-5-safe_actions/new/estimates.json",
+          "sha256": "dfab2ee6abd82611793c1d417af77e6672f7c07e4d9660affe9bdc20b344a5a4",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 2479784.4649725943,
+              "upper_bound": 2542791.949259141
+            },
+            "point_estimate": 2504951.0453556306,
+            "standard_error": 16775.575385108907
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/counter-7-5-safe_actions/new/estimates.json",
+          "sha256": "124bc2bfcef9b23160269af451bcf6aea3d035a6aa2161f89ffe0423b5d8d41e",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 2127824.7454473004,
+              "upper_bound": 2145037.631682305
+            },
+            "point_estimate": 2135676.1149842273,
+            "standard_error": 4403.223484621261
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/counter-7-5-safe_actions/new/estimates.json",
+          "sha256": "575c0d6db0cf0769dbb62f783978c007cfe65bb36b973c52915e3183bc7cb802",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 2134658.2803324717,
+              "upper_bound": 2144971.273981422
+            },
+            "point_estimate": 2139136.3302460196,
+            "standard_error": 2664.3985291130016
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/counter-7-5-safe_actions/new/estimates.json",
+          "sha256": "25a93cdd8d5f9cd65fb86daad26a5a75c6ea72b40dca669f89a04d03a3c5c3e5",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 2465717.7657905747,
+              "upper_bound": 2486736.262228363
+            },
+            "point_estimate": 2476014.526716546,
+            "standard_error": 5361.169637112904
+          }
+        }
+      ],
+      "beforeNs": 2490482.786036088,
+      "afterNs": 2137406.2226151237,
+      "ratio": 0.8582296712104847,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/counter-7-5-safe_plain",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/counter-7-5-safe_plain/new/estimates.json",
+          "sha256": "d235d13b299a02d01ac3022f9aff94043a13ecfd835266d95c882c2e3900747a",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 564464116.41,
+              "upper_bound": 567370265.02
+            },
+            "point_estimate": 565828854,
+            "standard_error": 742403.9704387526
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/counter-7-5-safe_plain/new/estimates.json",
+          "sha256": "aa8f94fb2801f1243bd2432b2a0f0c098c35914b8e7a5ae7092ac352dcd646f5",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 559533202.22875,
+              "upper_bound": 565831604.6137501
+            },
+            "point_estimate": 562232354.15,
+            "standard_error": 1634416.417517341
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/counter-7-5-safe_plain/new/estimates.json",
+          "sha256": "0e153c215a698b8bd47e01308f53ed8a83b554db99029a862c3cd3c2d1337d02",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 564263430.57375,
+              "upper_bound": 569608288.06125
+            },
+            "point_estimate": 566364212.45,
+            "standard_error": 1437591.5878269572
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/counter-7-5-safe_plain/new/estimates.json",
+          "sha256": "f1224dfb09f0a1abb940fa366e8231f6bde26f4055005d86e85e7988244fb5fb",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 556573165.88375,
+              "upper_bound": 565337390.2525
+            },
+            "point_estimate": 560539664.6,
+            "standard_error": 2252206.4677795484
+          }
+        }
+      ],
+      "beforeNs": 563184259.3,
+      "afterNs": 564298283.3,
+      "ratio": 1.0019780808529426,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/counter-7-5-safe_symmetry",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/counter-7-5-safe_symmetry/new/estimates.json",
+          "sha256": "f60df84afb87b38c86337999c05903de86b8055e12bd32357dd27b695e932d75",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 3597827.8863465176,
+              "upper_bound": 3648795.208583637
+            },
+            "point_estimate": 3621647.675110339,
+            "standard_error": 13099.945511516944
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/counter-7-5-safe_symmetry/new/estimates.json",
+          "sha256": "8f4b839ce0b7c8842e6688982de46502859428783ba232cab89b5bee8851f878",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 3103278.1479106643,
+              "upper_bound": 3127033.069999396
+            },
+            "point_estimate": 3115173.3135238364,
+            "standard_error": 6080.004769472752
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/counter-7-5-safe_symmetry/new/estimates.json",
+          "sha256": "86703d90c9e6eea60beea1787e5c7300966b1bbfcdbf5506f8bace97ace8684c",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 3100086.258979251,
+              "upper_bound": 3116999.836774929
+            },
+            "point_estimate": 3107852.4163488476,
+            "standard_error": 4342.948441899169
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/counter-7-5-safe_symmetry/new/estimates.json",
+          "sha256": "1f96d6b6c787406741eb166032cdf2d7fc9533cfdaf4580d7583781d761062c4",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 3565634.057661892,
+              "upper_bound": 3590203.701281245
+            },
+            "point_estimate": 3576418.761985992,
+            "standard_error": 6322.534668044387
+          }
+        }
+      ],
+      "beforeNs": 3599033.2185481656,
+      "afterNs": 3111512.864936342,
+      "ratio": 0.8645413020643118,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/joint-5_actions",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/joint-5_actions/new/estimates.json",
+          "sha256": "7d4794b1f4fb09e8c214139b423802f1d1675714962a4ac41b95ad969f9d031e",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 217281.73770895196,
+              "upper_bound": 219660.13752766052
+            },
+            "point_estimate": 218461.5060293064,
+            "standard_error": 606.4767368802907
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/joint-5_actions/new/estimates.json",
+          "sha256": "ad4fb7ffa55ca7b8a2de0ab53b4d302949cb98de39a0ef8cf1b1643c2e3900a6",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 192312.83298893555,
+              "upper_bound": 192989.56587219503
+            },
+            "point_estimate": 192637.40625584914,
+            "standard_error": 172.49915965570403
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/joint-5_actions/new/estimates.json",
+          "sha256": "25b20b879316cb312a311a9b7fdd5172f1efb07273a673b0cf75526315e5655b",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 194460.12875292823,
+              "upper_bound": 195143.8247160781
+            },
+            "point_estimate": 194787.67343672842,
+            "standard_error": 174.55585960049947
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/joint-5_actions/new/estimates.json",
+          "sha256": "dd700a7082bd96dcf6fa1c91b6b01ba1395a3ded0f5d888272f3157ec5c0b094",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 215108.2657128161,
+              "upper_bound": 217935.31065318405
+            },
+            "point_estimate": 216555.21257529134,
+            "standard_error": 723.9471545414168
+          }
+        }
+      ],
+      "beforeNs": 217508.35930229886,
+      "afterNs": 193712.5398462888,
+      "ratio": 0.8905981382401124,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/joint-5_plain",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/joint-5_plain/new/estimates.json",
+          "sha256": "8ebc113fd3631983ec88531064f013012210e12f8474cc3c155e56b884ee1d50",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1440235.2199722538,
+              "upper_bound": 1447198.3797451903
+            },
+            "point_estimate": 1443802.8745420377,
+            "standard_error": 1776.1108513578101
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/joint-5_plain/new/estimates.json",
+          "sha256": "b1a6356c369e1940cafe35dfe6c3aa6599b565af87d088ed90cfb40433684f19",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1453565.1938925774,
+              "upper_bound": 1459282.0867073976
+            },
+            "point_estimate": 1456204.6410379189,
+            "standard_error": 1454.3300335429929
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/joint-5_plain/new/estimates.json",
+          "sha256": "9b957fe3cb6556b1d7ef5547ed79d2b1bdc59382e0695db62fb40bf25e4adfe1",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1458444.9456934344,
+              "upper_bound": 1461172.2811335744
+            },
+            "point_estimate": 1459713.4764459373,
+            "standard_error": 697.3614378662883
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/joint-5_plain/new/estimates.json",
+          "sha256": "9428610fd6cc320c693a0d476e3b672cdee4ac85230dca8ebb16f8a08954e12a",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1446497.0657119215,
+              "upper_bound": 1454944.7913261598
+            },
+            "point_estimate": 1449868.602742228,
+            "standard_error": 2247.0644697133666
+          }
+        }
+      ],
+      "beforeNs": 1446835.7386421328,
+      "afterNs": 1457959.058741928,
+      "ratio": 1.0076880324439832,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/joint-5_symmetry",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/joint-5_symmetry/new/estimates.json",
+          "sha256": "6f9d5ed03812294907735efb7bba4e6d264f93735717edb2b5855b42e2a61fdc",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 307348.4938489417,
+              "upper_bound": 309500.502568394
+            },
+            "point_estimate": 308424.0159043231,
+            "standard_error": 549.5792581985588
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/joint-5_symmetry/new/estimates.json",
+          "sha256": "a9c4ef892a6b6002b8916460ba00f9a7cf0f797ac3b47b909724cf8b10c5b8f0",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 271388.07068844914,
+              "upper_bound": 276338.7934409212
+            },
+            "point_estimate": 273707.63584826386,
+            "standard_error": 1268.928536047661
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/joint-5_symmetry/new/estimates.json",
+          "sha256": "f993752126147d88b0e96b8e665dd12e7008478e92b2292f731fee0d4911c1ac",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 281420.74014568294,
+              "upper_bound": 283075.43671682116
+            },
+            "point_estimate": 282190.2678342421,
+            "standard_error": 424.18195836999996
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/joint-5_symmetry/new/estimates.json",
+          "sha256": "08b8517c536e5a28df6a6195503e66338b154a24a17a17318c406c9290670710",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 312593.60543473094,
+              "upper_bound": 314116.2855773326
+            },
+            "point_estimate": 313294.06896181934,
+            "standard_error": 390.90153382452047
+          }
+        }
+      ],
+      "beforeNs": 310859.0424330712,
+      "afterNs": 277948.951841253,
+      "ratio": 0.8941317893337336,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/monotone-10_plain",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/monotone-10_plain/new/estimates.json",
+          "sha256": "ac46691e646c90d0df6e4266b611459a26f83d90d589e1f5862f81f936752482",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 3974660.4387393654,
+              "upper_bound": 3999097.382800573
+            },
+            "point_estimate": 3986609.464759212,
+            "standard_error": 6232.959774266739
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/monotone-10_plain/new/estimates.json",
+          "sha256": "48f8f6d16d60b6e1d494bcd5e867d2e1c0b4c31fe323d3453b1241863bb268ad",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 3943437.6146479305,
+              "upper_bound": 3955379.254342016
+            },
+            "point_estimate": 3949504.988577244,
+            "standard_error": 3031.851632077166
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/monotone-10_plain/new/estimates.json",
+          "sha256": "b54861aee474dbbbc8b3600146eca72331e473ac9e22fce6d5f93da12b4fb242",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 3988959.209264506,
+              "upper_bound": 3998172.5257402314
+            },
+            "point_estimate": 3993562.8923488357,
+            "standard_error": 2347.5105001691977
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/monotone-10_plain/new/estimates.json",
+          "sha256": "9f1d51e4dc121a98e61bbf6889852696f459857dbc41c673d1826ab0e04f385f",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 3893512.229075792,
+              "upper_bound": 3914707.1694849865
+            },
+            "point_estimate": 3903054.8280929415,
+            "standard_error": 5443.986571563509
+          }
+        }
+      ],
+      "beforeNs": 3944832.146426077,
+      "afterNs": 3971533.94046304,
+      "ratio": 1.0067688036007196,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/monotone-10_por",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/monotone-10_por/new/estimates.json",
+          "sha256": "766810646dcb4fbd0f9e08a947883e37e5cefc811c7e88a6dd3becd92e0478dc",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 10100.347252711092,
+              "upper_bound": 10163.224623268494
+            },
+            "point_estimate": 10130.115705039727,
+            "standard_error": 16.038032557521383
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/monotone-10_por/new/estimates.json",
+          "sha256": "535f5cd72c9a8971e1db925cc0b16738200d466844e74674f49ed849c456b93d",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 9615.006001897451,
+              "upper_bound": 9725.756384532942
+            },
+            "point_estimate": 9660.14461983056,
+            "standard_error": 29.237600096873017
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/monotone-10_por/new/estimates.json",
+          "sha256": "6490fcf45c09a676fda85258039d6f867102c541d575a3e22bf1eb3f3fc6cd3d",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 9646.713470177872,
+              "upper_bound": 10073.285529825307
+            },
+            "point_estimate": 9796.014113239138,
+            "standard_error": 130.36064830955377
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/monotone-10_por/new/estimates.json",
+          "sha256": "06ac18e589751577c307c42344b354447adfc8e7385a67196522ddd6e550c17d",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 10070.674846872547,
+              "upper_bound": 10146.117351282976
+            },
+            "point_estimate": 10105.712072907501,
+            "standard_error": 19.243958171330913
+          }
+        }
+      ],
+      "beforeNs": 10117.913888973613,
+      "afterNs": 9728.07936653485,
+      "ratio": 0.9614708598317288,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/record-12-safe_actions-1",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/record-12-safe_actions-1/new/estimates.json",
+          "sha256": "b52ff0e5585cbb07ba1c3bb1ddb4bab433f3e7fa142132535227762d28fa4495",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 85200383.04375,
+              "upper_bound": 86133201.96
+            },
+            "point_estimate": 85675291.6,
+            "standard_error": 239194.25087205457
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/record-12-safe_actions-1/new/estimates.json",
+          "sha256": "776c1772f01be21f0af8d6c78a1dd7df5a8653e72f198f9aaf480500a20c25b8",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 71432026.8975,
+              "upper_bound": 71694937.8
+            },
+            "point_estimate": 71558745.95,
+            "standard_error": 67348.42397313843
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/record-12-safe_actions-1/new/estimates.json",
+          "sha256": "5db8674abf0935d441b042f2325612f5c09b53d84b8b0b5fdf752e03458c25a8",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 71825584.88375,
+              "upper_bound": 72314112.61375
+            },
+            "point_estimate": 72041629.05,
+            "standard_error": 125687.51934888479
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/record-12-safe_actions-1/new/estimates.json",
+          "sha256": "4ddf8fb24c16c38d5f341bec364083ea7250f581d7b9450ecd57058a6bbb3d55",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 85282043.47875,
+              "upper_bound": 85684207.55749999
+            },
+            "point_estimate": 85467268.95,
+            "standard_error": 103330.65222601466
+          }
+        }
+      ],
+      "beforeNs": 85571280.275,
+      "afterNs": 71800187.5,
+      "ratio": 0.8390687537834667,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/record-12-safe_actions-8",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/record-12-safe_actions-8/new/estimates.json",
+          "sha256": "559d8b4019735bae8d3105914ef86f57b12718cc8ce66bc98154be1cbc813ae9",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 72904939.245,
+              "upper_bound": 74064948.7325
+            },
+            "point_estimate": 73401599.95,
+            "standard_error": 301007.71130976634
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/record-12-safe_actions-8/new/estimates.json",
+          "sha256": "cfe59b1b4281c61b952cb2208a76201dd720eae96fc60523d18a9fa1bed21dd0",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 63338863.99125,
+              "upper_bound": 71666291.3725
+            },
+            "point_estimate": 66328835.4,
+            "standard_error": 2465188.6576971826
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/record-12-safe_actions-8/new/estimates.json",
+          "sha256": "eed01174c1ec563fb897635341928970fe5eb90737a01fef6623bacd3541d8bf",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 62275845.4875,
+              "upper_bound": 62775398.16375
+            },
+            "point_estimate": 62487056.2,
+            "standard_error": 129665.86564395935
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/record-12-safe_actions-8/new/estimates.json",
+          "sha256": "bc68524a2d11523f29a7604b022012a3aa54c3edcd9f9e42edc6b4cebbd06bbb",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 72206297.69624999,
+              "upper_bound": 73063952.30999999
+            },
+            "point_estimate": 72616920.85,
+            "standard_error": 218858.90053212046
+          }
+        }
+      ],
+      "beforeNs": 73009260.4,
+      "afterNs": 64407945.8,
+      "ratio": 0.8821887175287697,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/record-12-safe_symmetry-1",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/record-12-safe_symmetry-1/new/estimates.json",
+          "sha256": "acb2d6034c7c94d432cef7412f9a52e92c4f1287b032584ba25e4897c0b0f03d",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 175764222.6375,
+              "upper_bound": 177584047.41
+            },
+            "point_estimate": 176605760.45,
+            "standard_error": 465951.0004651488
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/record-12-safe_symmetry-1/new/estimates.json",
+          "sha256": "daedc6d430e17c86349458015e78fc200231e474b4032202fdd03e1c847e5897",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 149450770.61249998,
+              "upper_bound": 151022453.21625
+            },
+            "point_estimate": 150148783.25,
+            "standard_error": 403500.2678524807
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/record-12-safe_symmetry-1/new/estimates.json",
+          "sha256": "6b9587bd30cd02fcbe84e3c2d7dc4c40101a7274faf94714bbdac2bd6833c7fe",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 149427224.99125,
+              "upper_bound": 150999937.63625
+            },
+            "point_estimate": 150058208.4,
+            "standard_error": 414995.95178635506
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/record-12-safe_symmetry-1/new/estimates.json",
+          "sha256": "25325b8d189d6cc9fde34d985b20dd9b0ec43980361fd74695482f3473307244",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 176026704.79125002,
+              "upper_bound": 178716817.14499998
+            },
+            "point_estimate": 177155393.8,
+            "standard_error": 697946.166523427
+          }
+        }
+      ],
+      "beforeNs": 176880577.125,
+      "afterNs": 150103495.825,
+      "ratio": 0.8486149144511391,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/record-12-safe_symmetry-8",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/record-12-safe_symmetry-8/new/estimates.json",
+          "sha256": "2fec3a3dacfcff5f0edfe4cfcc7cefd7d95bacddc9becfcc5824dd3c31a51343",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 165983473.56625,
+              "upper_bound": 167265998.63625
+            },
+            "point_estimate": 166661216.5,
+            "standard_error": 326210.99471011234
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/record-12-safe_symmetry-8/new/estimates.json",
+          "sha256": "10b8de8f31f8c383272221f1792b664ca883beb51ec98096db7ad242b8512f31",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 138399931.41875002,
+              "upper_bound": 139376000.155
+            },
+            "point_estimate": 138860097.95,
+            "standard_error": 250292.61016039227
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/record-12-safe_symmetry-8/new/estimates.json",
+          "sha256": "861b1f03fefa060d0180268ffc32b725e909957844e1ba8b174ce763175b4af8",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 137485232.42,
+              "upper_bound": 138864783.56375
+            },
+            "point_estimate": 138110354.25,
+            "standard_error": 354497.74417469266
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/record-12-safe_symmetry-8/new/estimates.json",
+          "sha256": "b44abf237dfd6ba38c10e981a0b70b5657af520ac7ce5c930aab9eb03c9fec01",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 166587462.03750002,
+              "upper_bound": 167816546.27125
+            },
+            "point_estimate": 167192920.7,
+            "standard_error": 313515.4106318209
+          }
+        }
+      ],
+      "beforeNs": 166927068.6,
+      "afterNs": 138485226.1,
+      "ratio": 0.8296151562563293,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/record-5-safe_actions",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/record-5-safe_actions/new/estimates.json",
+          "sha256": "2e12a0ea1fe9dac5b706d1b839e5ada5af7116b8d51f7c904614591e33788ea8",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1471945.0628845037,
+              "upper_bound": 1479019.8995338918
+            },
+            "point_estimate": 1475249.1050299394,
+            "standard_error": 1809.0705507078073
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/record-5-safe_actions/new/estimates.json",
+          "sha256": "2eacb12c5430a8b02b500156cd0cd1990ee9736887a0c7b835a342cd4272dfbe",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1314537.0763648332,
+              "upper_bound": 1464959.655146447
+            },
+            "point_estimate": 1368679.7820473711,
+            "standard_error": 44331.36089569473
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/record-5-safe_actions/new/estimates.json",
+          "sha256": "379d50f161065cd7e3544ade66abd1d0f0f542603791a70b04d3bcf86e100fa5",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1325795.3792100255,
+              "upper_bound": 1329200.55282573
+            },
+            "point_estimate": 1327413.5162794676,
+            "standard_error": 871.946538042221
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/record-5-safe_actions/new/estimates.json",
+          "sha256": "d9c874574bba9eb63b77fe73692cad2c954f5fd908a742a7922ad10389a90abc",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1467550.0075695412,
+              "upper_bound": 1481890.3799667223
+            },
+            "point_estimate": 1474430.8928937134,
+            "standard_error": 3657.297749173005
+          }
+        }
+      ],
+      "beforeNs": 1474839.9989618263,
+      "afterNs": 1348046.6491634194,
+      "ratio": 0.9140290811968351,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/record-5-safe_plain",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/record-5-safe_plain/new/estimates.json",
+          "sha256": "81185ab44bad7f4376a1c19b5668524202aea30fb7f83d97f21bbdf3dd223bd7",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 18656457.480833333,
+              "upper_bound": 20467706.595416665
+            },
+            "point_estimate": 19337206.966666665,
+            "standard_error": 503521.92814774794
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/record-5-safe_plain/new/estimates.json",
+          "sha256": "54c5aa59f81e5492a755fa5e0d1ba571796f213178608eacbcd109257c4c1ea4",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 18668421.419999998,
+              "upper_bound": 19126254.277916666
+            },
+            "point_estimate": 18868502.75,
+            "standard_error": 117989.75675617115
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/record-5-safe_plain/new/estimates.json",
+          "sha256": "c3156f0f840ffcd90512fc18901177f19a85ede14b702ddcbecbfb70250912de",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 18829773.56416667,
+              "upper_bound": 18959405.633750003
+            },
+            "point_estimate": 18889202.083333332,
+            "standard_error": 33222.88015298757
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/record-5-safe_plain/new/estimates.json",
+          "sha256": "988fe1d199fde4b653e9868a1cae49d547055a898659d1d8eff9ff07cad410cc",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 18657072.167916663,
+              "upper_bound": 18760701.522916667
+            },
+            "point_estimate": 18703646.516666666,
+            "standard_error": 26613.41444062964
+          }
+        }
+      ],
+      "beforeNs": 19020426.741666667,
+      "afterNs": 18878852.416666664,
+      "ratio": 0.9925567219430537,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/record-5-safe_symmetry",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/record-5-safe_symmetry/new/estimates.json",
+          "sha256": "a2c67f817e530dd6e40b9c98a65aecb9a272b074c1b319f28d4f1af8418996dc",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1845126.4692764482,
+              "upper_bound": 1863796.6426667566
+            },
+            "point_estimate": 1853174.2326775896,
+            "standard_error": 4837.718496613226
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/record-5-safe_symmetry/new/estimates.json",
+          "sha256": "47e592845b05d965b7eb087f3aec6aa35afa2a1d681aed348ba3177eaa66e84a",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1672378.508544183,
+              "upper_bound": 1722402.8138537558
+            },
+            "point_estimate": 1693919.7110473409,
+            "standard_error": 12957.79862901813
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/record-5-safe_symmetry/new/estimates.json",
+          "sha256": "becc51d6ab7ce6b072bc7348ff0c9c2f3cc8df8bf77fc70873ef048052ded3a0",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1661850.5275041936,
+              "upper_bound": 1668533.0653863049
+            },
+            "point_estimate": 1665073.2263147314,
+            "standard_error": 1708.7971241688165
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/record-5-safe_symmetry/new/estimates.json",
+          "sha256": "d4f3e2a27b1ca03fd72400fc41316456f2dbdee527b6a679f7669a4fb3d55c75",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1812994.0680545273,
+              "upper_bound": 1825073.690244395
+            },
+            "point_estimate": 1818960.765371884,
+            "standard_error": 3077.573163671475
+          }
+        }
+      ],
+      "beforeNs": 1836067.4990247367,
+      "afterNs": 1679496.468681036,
+      "ratio": 0.9147247961053357,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/sets-5-safe_actions",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/sets-5-safe_actions/new/estimates.json",
+          "sha256": "946932684fbfa4728356443a4f316ba057d0abfd8c6b409abc5b6c392f8b2e05",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 260917.3779007627,
+              "upper_bound": 262538.1268675935
+            },
+            "point_estimate": 261705.6970458979,
+            "standard_error": 413.69531255961465
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/sets-5-safe_actions/new/estimates.json",
+          "sha256": "ceecefa0f2e02d5ef3e29d088c1dfaebbcc600f5ea1498d0efd913c5f61b0715",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 231499.13309879517,
+              "upper_bound": 232878.68166459003
+            },
+            "point_estimate": 232156.69523539543,
+            "standard_error": 352.5795722981674
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/sets-5-safe_actions/new/estimates.json",
+          "sha256": "f0bc444e82b4cadccfb96c84f38ea80737ec0dd51864df5033d5fc6cf0e265c7",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 233249.741025912,
+              "upper_bound": 235355.27789906412
+            },
+            "point_estimate": 234190.50586741307,
+            "standard_error": 542.9584317155854
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/sets-5-safe_actions/new/estimates.json",
+          "sha256": "adeee2304dcd6452c2164a0976a8d1be270e2dbb7c7c08ae0d72b5bbecac5e25",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 261834.8641587852,
+              "upper_bound": 263658.4222552794
+            },
+            "point_estimate": 262631.556225106,
+            "standard_error": 469.48653053109643
+          }
+        }
+      ],
+      "beforeNs": 262168.626635502,
+      "afterNs": 233173.60055140423,
+      "ratio": 0.8894031430983919,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/sets-5-safe_plain",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/sets-5-safe_plain/new/estimates.json",
+          "sha256": "3f3c47d33a82aa6ac0041acd24c2b3f6d46e869ff468a43c1ba449416789acc1",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 2923634.7736235997,
+              "upper_bound": 2933693.2605537446
+            },
+            "point_estimate": 2928468.15555109,
+            "standard_error": 2571.2197651886836
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/sets-5-safe_plain/new/estimates.json",
+          "sha256": "8d411351aae2fc4ee7347b83efc143c4e4b7351d06f69cb70ca3f8505d67a7e9",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 2965591.122136009,
+              "upper_bound": 2982896.463345117
+            },
+            "point_estimate": 2974082.7164634555,
+            "standard_error": 4410.959039868542
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/sets-5-safe_plain/new/estimates.json",
+          "sha256": "5163b85ea99c42e9d4ea1579d37633c595fa24a182e7f41559bebd771119847a",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 3004297.3357337583,
+              "upper_bound": 3014230.8752805283
+            },
+            "point_estimate": 3009091.200451011,
+            "standard_error": 2552.3619433966987
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/sets-5-safe_plain/new/estimates.json",
+          "sha256": "3145a2f24c691a6e6c1022d2044a19ffd9dc79e6e3a6f7770c30aa3618080d4c",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 2931088.3034136975,
+              "upper_bound": 2992795.7938362383
+            },
+            "point_estimate": 2957272.7394141583,
+            "standard_error": 16105.679427370524
+          }
+        }
+      ],
+      "beforeNs": 2942870.447482624,
+      "afterNs": 2991586.9584572334,
+      "ratio": 1.0165540793738583,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/sets-5-safe_symmetry",
+      "estimates": [
+        {
+          "path": "evals/runs/0065-symmetry-kernel/0/criterion/symmetry/sets-5-safe_symmetry/new/estimates.json",
+          "sha256": "ece24605cc0dc00c6b5d3156380b52409318d905d69c3198ec04cf96171adfb2",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 382395.6510593359,
+              "upper_bound": 392532.82582114334
+            },
+            "point_estimate": 386864.35913970985,
+            "standard_error": 2611.2122127275384
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/1/criterion/symmetry/sets-5-safe_symmetry/new/estimates.json",
+          "sha256": "d9aadeea3a136ee52c9b52e9d01f51e3736f8ffd6573691f703c66464323b0f9",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 340895.9701790841,
+              "upper_bound": 343353.29586844833
+            },
+            "point_estimate": 341914.74686997785,
+            "standard_error": 640.6222022302554
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/2/criterion/symmetry/sets-5-safe_symmetry/new/estimates.json",
+          "sha256": "eea7db8c5891aaa8e8ad1a98c48440ad2eb6500b09e028baae8aa1feebbf5b53",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 341874.9001964989,
+              "upper_bound": 344265.7153534837
+            },
+            "point_estimate": 343069.0534242458,
+            "standard_error": 610.7378141782292
+          }
+        },
+        {
+          "path": "evals/runs/0065-symmetry-kernel/3/criterion/symmetry/sets-5-safe_symmetry/new/estimates.json",
+          "sha256": "0b8de583292b6bf0a264fd5196ebddbe135351aa8839b8802fcc7d094b8908e1",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 379391.9769619694,
+              "upper_bound": 382453.55067322776
+            },
+            "point_estimate": 380917.65984955186,
+            "standard_error": 779.0585100012883
+          }
+        }
+      ],
+      "beforeNs": 383891.00949463085,
+      "afterNs": 342491.90014711185,
+      "ratio": 0.8921592110166414,
+      "regressionOver10Percent": false
+    }
+  ]
+}

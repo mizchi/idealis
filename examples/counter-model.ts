@@ -1,4 +1,4 @@
-import type { Model, Transition } from "../src/index.js";
+import type { Model, Transition } from "../packages/idealis/src/index.js";
 
 export interface Request {
   readonly id: string;

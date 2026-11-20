@@ -1,0 +1,15 @@
+   Compiling rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+error[E0609]: no field `domain` on type `&Vec<(ir::Scalar, ir::Scalar)>`
+    --> src/safety_values.rs:1154:45
+     |
+1154 |                 assert!(Arc::ptr_eq(&before.domain, &after.domain));
+     |                                             ^^^^^^ unknown field
+
+error[E0609]: no field `domain` on type `&Vec<(ir::Scalar, ir::Scalar)>`
+    --> src/safety_values.rs:1154:60
+     |
+1154 |                 assert!(Arc::ptr_eq(&before.domain, &after.domain));
+     |                                                            ^^^^^^ unknown field
+
+For more information about this error, try `rustc --explain E0609`.
+error: could not compile `rtlc` (lib test) due to 2 previous errors

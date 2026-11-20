@@ -4,7 +4,6 @@ import {
   cp,
   mkdir,
   mkdtemp,
-  readdir,
   readFile,
   realpath,
   writeFile,
@@ -12,45 +11,23 @@ import {
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { compileTlaSafety } from "../src/tla-safety.js";
+import { monotone, recordNodes } from "../evals/experiments/symmetry/cases.js";
+import { compileTlaSafety } from "../packages/idealis/src/tla-safety.js";
 
 const directory = resolve(process.argv[2] ?? ".artifacts/packages");
-const files = await readdir(directory);
-const tarball = files.find(
-  (file) => file.startsWith("mizchi-idealis-") && file.endsWith(".tgz"),
-);
-const crate = files.find(
-  (file) => file.startsWith("idealis-core-") && file.endsWith(".crate"),
-);
-const rtlcCrate = files.find(
-  (file) => file.startsWith("rtlc-") && file.endsWith(".crate"),
-);
-const rtlaCrate = files.find(
-  (file) => file.startsWith("rtla-") && file.endsWith(".crate"),
-);
-const compilerCrate = files.find(
-  (file) => file.startsWith("rtla-compiler-") && file.endsWith(".crate"),
-);
-const rsmtCrate = files.find(
-  (file) => file.startsWith("idealis-smt-") && file.endsWith(".crate"),
-);
-const ralloyCrate = files.find(
-  (file) => file.startsWith("ralloy-") && file.endsWith(".crate"),
-);
-const testingCrate = files.find(
-  (file) => file.startsWith("idealis-testing-") && file.endsWith(".crate"),
-);
-assert.ok(
-  tarball &&
-    crate &&
-    rtlcCrate &&
-    rtlaCrate &&
-    compilerCrate &&
-    rsmtCrate &&
-    ralloyCrate &&
-    testingCrate,
-  "Prepare npm and all seven Rust packages first, including standalone idealis-testing",
-);
+const version = JSON.parse(
+  await readFile("packages/idealis/package.json", "utf8"),
+).version;
+const tarball = `mizchi-idealis-${version}.tgz`;
+const crate = `idealis-core-${version}.crate`;
+const rtlcCrate = `rtlc-${version}.crate`;
+const rtlaCrate = `rtla-${version}.crate`;
+const compilerCrate = `rtla-compiler-${version}.crate`;
+const rusmtCrate = `rusmt-${version}.crate`;
+const ralloyCrate = `ralloy-${version}.crate`;
+const cliCrate = `idealis-cli-${version}.crate`;
+const connectCrate = `idealis-connect-${version}.crate`;
+const oracleCrate = `roracle-${version}.crate`;
 const consumer = await mkdtemp(join(tmpdir(), "idealis-consumer-"));
 await writeFile(
   join(consumer, "package.json"),
@@ -124,6 +101,10 @@ const sourceInput = {
 const safety = compileTlaSafety(sourceInput);
 await writeFile(join(consumer, "source.json"), JSON.stringify(sourceInput));
 await writeFile(
+  join(consumer, "reductions.json"),
+  JSON.stringify([recordNodes(3), monotone(3)]),
+);
+await writeFile(
   join(consumer, "safety-request.json"),
   JSON.stringify({
     version: 1,
@@ -147,7 +128,7 @@ await writeFile(
 import {readFile} from 'node:fs/promises';
 import {createTestingWasm} from '@mizchi/idealis/testing';
 import {createAlloyWasm,AlloyError} from '@mizchi/idealis/alloy';
-import {compileTlaSource,checkTlaSource,createPortableWasm,checkFiniteHistories,decodePortableTrace,loadFiniteModel,checkSafety} from '@mizchi/idealis/portable';
+import {compileTlaSource,checkTlaSource,createPortableWasm,checkFiniteHistories,decodePortableTrace,loadFiniteModel,checkSafety,checkSafetyCoverage,prepareSafetyProgram} from '@mizchi/idealis/portable';
 import {createHistoryRecorder} from '@mizchi/idealis/history';
 import {parseFiniteModel} from '@mizchi/idealis/finite';
 import {createSimulationHost} from '@mizchi/idealis/host';
@@ -208,8 +189,13 @@ const backendResult=await runBackend(createRtlcBackend(core,{version:'0.1.0-alph
 assert.equal(backendResult.outcome.kind,'counterexample');assert.equal(backendResult.outcome.witness.kind,'behavior');
 assert.deepEqual(parseBackendResult(JSON.parse(JSON.stringify(backendResult))),backendResult);
 assert.equal(checkSafety(core,safety.program,safety.bounds).violation.trace.length,4);
+assert.deepEqual(checkSafetyCoverage(core,safety.program,safety.bounds).result,checkSafety(core,safety.program,safety.bounds));
 const source=JSON.parse(await readFile('source.json','utf8'));
 const sourceProgram=compileTlaSource(core,source);assert.equal(sourceProgram.name,'PackageSafety');assert.equal(checkTlaSource(core,source,safety.bounds).violation.trace.length,4);
+const sharedProgram=compileTlaSource(core,{...source,irVersion:2});assert.equal(sharedProgram.version,2);assert.equal(checkSafety(core,sharedProgram,safety.bounds).violation.trace.length,4);
+for(const program of [safety.program,sharedProgram]){const prepared=prepareSafetyProgram(core,program);const expected=checkSafety(core,program,safety.bounds);assert.deepEqual(prepared.check(safety.bounds),expected);assert.deepEqual(prepared.checkBatch([{bounds:safety.bounds},{bounds:safety.bounds}]),[{kind:'safety',result:expected},{kind:'safety',result:expected}]);prepared.release();assert.throws(()=>prepared.check(safety.bounds),{code:'protocol'});}
+const reductions=JSON.parse(await readFile('reductions.json','utf8'));
+for(const [index,input] of reductions.entries()){const program=compileTlaSource(core,input);const result=checkSafety(core,program,{maxDepth:100,maxStates:10000,maxWork:10000000},index===0?{symmetryActions:true}:{partialOrder:true});assert.equal(result.status,'complete');assert.equal(result.states,index===0?56:7);assert.equal(result.generated,index===0?253:8);}
 const planned=planSchedule([{id:'safety',estimatedMs:1,memoryBytes:1}],[{id:'serial',workers:1,startupMs:0,costScale:1,fixedMemoryBytes:0}],{maxWorkers:1,durationMs:10000,memoryBytes:1024},{policy:'cost',batchTargetMs:4,maxBatchSize:16});
 const scheduled=await runSchedule(planned,[{execute:async ids=>ids.map(id=>({id,result:checkSafety(core,safety.program,safety.bounds)}))}]);
 assert.equal(scheduled.executionStatus,'complete');assert.equal(scheduled.completed[0].result.status,'invariant-violation');
@@ -238,7 +224,7 @@ import {createAlloyWasm,type AlloyInstance} from '@mizchi/idealis/alloy';
 const observed:AlloyInstance={signatures:{N:[]},fields:{edge:[]}};void observed;void createAlloyWasm;
 import {compileFiniteModel,createFiniteModel} from '@mizchi/idealis/finite';
 import {createSimulationHost} from '@mizchi/idealis/host';
-import {createPortableWasm,compileTlaSource,checkTlaSource} from '@mizchi/idealis/portable';
+import {createPortableWasm,compileTlaSource,checkTlaSource,checkSafetyCoverage,prepareSafetyProgram,type PreparedSafetyProgram,type SafetyCheck,type SafetyBatchResult,type SafetyCoverageReport} from '@mizchi/idealis/portable';
 import {createSafetyExpansionCache,checkSafetyIncremental,mergeSafetyExpansions,type SafetyExpansionCache} from '@mizchi/idealis/portable';
 const expansionTypes:SafetyExpansionCache=createSafetyExpansionCache();void expansionTypes;void checkSafetyIncremental;void mergeSafetyExpansions;
 import {planSchedule} from '@mizchi/idealis/scheduling';
@@ -248,7 +234,9 @@ const model:Model<number,'tick',number>={name:'typed',initial:()=>[{state:0,obse
 const compiled=compileFiniteModel(model,{maxDepth:1,maxStates:1});
 if(compiled.model){createFiniteModel(compiled.model);checkConcurrentHistory(compiled.model,createHistoryRecorder(model.name,{type:'int',value:'0'}).snapshot(),100);}
 createSimulationHost({seed:1});
-void createPortableWasm;void compileTlaSource;void checkTlaSource;
+void createPortableWasm;void compileTlaSource;void checkTlaSource;void checkSafetyCoverage;
+const preparedTypes=(prepared:PreparedSafetyProgram,jobs:readonly SafetyCheck[]):readonly SafetyBatchResult[]=>prepared.checkBatch(jobs);void preparedTypes;void prepareSafetyProgram;
+const coverageCount=(report:SafetyCoverageReport)=>report.coverage.next.reduce((total,row)=>total+row.generated,0);void coverageCount;
 void planSchedule;
 const backendTypes:(value:unknown)=>BackendResult=parseBackendResult;
 void backendTypes;void createRtlcBackend;void runBackend;
@@ -310,19 +298,34 @@ assert.equal(
   ]).status,
   2,
 );
+await writeFile(join(consumer, "PackageSafety.tla"), sourceInput.source);
+await writeFile(join(consumer, "PackageSafety.cfg"), sourceInput.config);
+for (const [args, status, diagnostic] of [
+  [["tlc", "-workers", "1", "PackageSafety"], 12, "Safe"],
+  [
+    ["tla", join(consumer, "PackageSafety.tla")],
+    0,
+    "Semantic processing of module PackageSafety",
+  ],
+] as const) {
+  const output = spawnSync(cli, [...args], { cwd: consumer, encoding: "utf8" });
+  assert.equal(output.status, status, output.stdout + output.stderr);
+  assert.ok(output.stdout.includes(diagnostic), output.stdout);
+}
 execFileSync("tar", ["-xzf", join(directory, crate), "-C", consumer]);
 execFileSync("tar", ["-xzf", join(directory, rtlcCrate), "-C", consumer]);
 execFileSync("tar", ["-xzf", join(directory, rtlaCrate), "-C", consumer]);
 execFileSync("tar", ["-xzf", join(directory, compilerCrate), "-C", consumer]);
-const version = JSON.parse(await readFile("package.json", "utf8")).version;
 for (const archive of [
   crate,
   rtlcCrate,
   rtlaCrate,
   compilerCrate,
-  rsmtCrate,
+  rusmtCrate,
   ralloyCrate,
-  testingCrate,
+  connectCrate,
+  cliCrate,
+  oracleCrate,
 ]) {
   const entries = execFileSync("tar", ["-tzf", join(directory, archive)])
     .toString()
@@ -339,7 +342,7 @@ await writeFile(
 await writeFile(
   join(consumer, "consumer.rs"),
   `use idealis_core::{Engine,Message,Status};
-fn main(){let source:serde_json::Value=serde_json::from_slice(&std::fs::read("source.json").unwrap()).unwrap();let program=idealis_core::compile_tla(source["source"].as_str().unwrap(),source["config"].as_str().unwrap()).unwrap();let checked=program.check(idealis_core::SafetyBounds{max_depth:10,max_states:100,max_work:10000,max_temporal_nodes:None}).unwrap();assert_eq!(checked.violation.unwrap().trace.len(),4);let bytes=std::fs::read("request.json").unwrap();let response=Engine::default().dispatch(&bytes);match response{Message::Results{results}=>assert_eq!(results[0].status,Status::Matched),_=>panic!("unexpected result")};let bytes=std::fs::read("safety-request.json").unwrap();match Engine::default().dispatch(&bytes){Message::Safety{result}=>{assert_eq!(result.status,"invariant-violation");assert_eq!(result.violation.unwrap().trace.len(),4)},_=>panic!("missing safety result")};let command: idealis_core::Command = serde_json::from_slice(&bytes).unwrap(); if let idealis_core::Request::CheckSafety { program, bounds } = command.request { let program: rtlc::SafetyProgram = program; assert_eq!(program.check(bounds).unwrap().status, "invariant-violation"); } else { panic!("missing typed program") }; println!("packaged Rust consumer matched");}
+fn main(){let source:serde_json::Value=serde_json::from_slice(&std::fs::read("source.json").unwrap()).unwrap();let program=idealis_core::compile_tla(source["source"].as_str().unwrap(),source["config"].as_str().unwrap()).unwrap();let checked=program.check(idealis_core::SafetyBounds{max_depth:10,max_states:100,max_work:10000,max_temporal_nodes:None}).unwrap();assert_eq!(checked.violation.unwrap().trace.len(),4);let bytes=std::fs::read("request.json").unwrap();let response=Engine::default().dispatch(&bytes);match response{Message::Results{results}=>assert_eq!(results[0].status,Status::Matched),_=>panic!("unexpected result")};let bytes=std::fs::read("safety-request.json").unwrap();match Engine::default().dispatch(&bytes){Message::Safety{result}=>{assert_eq!(result.status,"invariant-violation");assert_eq!(result.violation.unwrap().trace.len(),4)},_=>panic!("missing safety result")};let command: idealis_core::Command = serde_json::from_slice(&bytes).unwrap(); if let idealis_core::Request::CheckSafety { program, bounds, options } = command.request { let program: rtlc::SafetyProgram = program; assert_eq!(program.check_with_options(bounds, options.unwrap_or_default()).unwrap().status, "invariant-violation"); } else { panic!("missing typed program") }; let inputs:serde_json::Value=serde_json::from_slice(&std::fs::read("reductions.json").unwrap()).unwrap();for(index,input)in inputs.as_array().unwrap().iter().enumerate(){let program=idealis_core::compile_tla(input["source"].as_str().unwrap(),input["config"].as_str().unwrap()).unwrap();let result=program.check_with_options(rtlc::SafetyBounds{max_depth:100,max_states:10000,max_work:10000000,max_temporal_nodes:None},rtlc::SafetyOptions{symmetry_actions:index==0,partial_order:index==1,..Default::default()}).unwrap();assert_eq!(result.states,if index==0{56}else{7});assert_eq!(result.generated,if index==0{253}else{8});}let shared=idealis_core::compile_tla_with_options(source["source"].as_str().unwrap(),source["config"].as_str().unwrap(),idealis_core::CompileOptions{irVersion:idealis_core::IrVersion::V2}).unwrap();assert_eq!(shared.version,2);assert_eq!(shared.check(rtlc::SafetyBounds{max_depth:10,max_states:100,max_work:10000,max_temporal_nodes:None}).unwrap().violation.unwrap().trace.len(),4);println!("packaged Rust consumer matched");}
 `,
 );
 const rust = execFileSync(
@@ -363,7 +366,7 @@ await writeFile(
 );
 await writeFile(
   join(rtlcConsumer, "main.rs"),
-  `fn main(){let bytes=std::fs::read("safety-request.json").unwrap();let request:serde_json::Value=serde_json::from_slice(&bytes).unwrap();let program:rtlc::SafetyProgram=serde_json::from_value(request["request"]["program"].clone()).unwrap();let bounds:rtlc::SafetyBounds=serde_json::from_value(request["request"]["bounds"].clone()).unwrap();let result=program.check(bounds).unwrap();assert_eq!(result.status,"invariant-violation");assert_eq!(result.violation.unwrap().trace.len(),4);println!("standalone rtlc consumer checked");}`,
+  `fn main(){let bytes=std::fs::read("safety-request.json").unwrap();let request:serde_json::Value=serde_json::from_slice(&bytes).unwrap();let program:rtlc::SafetyProgram=serde_json::from_value(request["request"]["program"].clone()).unwrap();let bounds:rtlc::SafetyBounds=serde_json::from_value(request["request"]["bounds"].clone()).unwrap();let result=program.check(bounds).unwrap();let report:rtlc::SafetyCoverageReport=program.check_with_coverage(bounds).unwrap();assert_eq!(report.result,result);assert!(!report.coverage.initial.is_empty());assert_eq!(result.status,"invariant-violation");assert_eq!(result.violation.unwrap().trace.len(),4);for version in [1,2]{let mut next=program.clone();next.version=version;if version==2{next.definitions=Some(vec![]);}let prepared:rtlc::PreparedSafetyProgram=next.prepare().unwrap();assert_eq!(prepared.check(bounds).unwrap().violation.unwrap().trace.len(),4);}println!("standalone rtlc consumer checked");}`,
 );
 const rtlc = execFileSync(
   "cargo",
@@ -452,25 +455,23 @@ assert.ok(
       entry.name === "idealis-core" || entry.name === "rtlc",
   ),
 );
-const smtConsumer = await mkdtemp(join(tmpdir(), "idealis-smt-consumer-"));
-execFileSync("tar", ["-xzf", join(directory, rsmtCrate), "-C", smtConsumer]);
+const smtConsumer = await mkdtemp(join(tmpdir(), "rusmt-consumer-"));
+execFileSync("tar", ["-xzf", join(directory, rusmtCrate), "-C", smtConsumer]);
 await writeFile(
   join(smtConsumer, "Cargo.toml"),
-  `[package]\nname="idealis-smt-consumer"\nversion="0.0.0"\nedition="2024"\n[dependencies]\nidealis-smt={path="idealis-smt-${version}"}\n[[bin]]\nname="consumer"\npath="main.rs"\n`,
+  `[package]\nname="rusmt-consumer"\nversion="0.0.0"\nedition="2024"\n[dependencies]\nrusmt={path="rusmt-${version}"}\n[[bin]]\nname="consumer"\npath="main.rs"\n`,
 );
 await writeFile(
   join(smtConsumer, "main.rs"),
-  await readFile(
-    join(smtConsumer, `idealis-smt-${version}`, "examples", "ttl.rs"),
-  ),
+  await readFile(join(smtConsumer, `rusmt-${version}`, "examples", "ttl.rs")),
 );
-const rsmt = execFileSync("cargo", ["run", "--offline", "--quiet"], {
+const rusmt = execFileSync("cargo", ["run", "--offline", "--quiet"], {
   cwd: smtConsumer,
   stdio: "pipe",
 })
   .toString()
   .trim();
-assert.equal(rsmt, "standalone idealis-smt consumer checked");
+assert.equal(rusmt, "standalone rusmt consumer checked");
 const smtMetadata = JSON.parse(
   execFileSync("cargo", ["metadata", "--offline", "--format-version", "1"], {
     cwd: smtConsumer,
@@ -479,7 +480,7 @@ const smtMetadata = JSON.parse(
 );
 assert.ok(
   smtMetadata.packages.some(
-    (entry: { name: string }) => entry.name === "idealis-smt",
+    (entry: { name: string }) => entry.name === "rusmt",
   ),
 );
 assert.ok(
@@ -488,7 +489,7 @@ assert.ok(
       entry.name,
     ),
   ),
-  "idealis-smt must remain independent of idealis hosts, TLA frontends and Z3",
+  "rusmt must remain independent of idealis hosts, TLA frontends and Z3",
 );
 const alloyConsumer = await mkdtemp(join(tmpdir(), "ralloy-consumer-"));
 execFileSync("tar", [
@@ -529,7 +530,7 @@ assert.ok(
   !alloyMetadata.packages.some((entry: { name: string }) =>
     [
       "idealis-core",
-      "idealis-smt",
+      "rusmt",
       "rtla",
       "rtla-compiler",
       "rtlc",
@@ -543,28 +544,48 @@ const alloyModule = await WebAssembly.compile(
 );
 assert.deepEqual(WebAssembly.Module.imports(alloyModule), []);
 const testingConsumer = await mkdtemp(
-  join(tmpdir(), "idealis-testing-consumer-"),
+  join(tmpdir(), "idealis-connect-consumer-"),
 );
 execFileSync("tar", [
   "-xzf",
-  join(directory, testingCrate),
+  join(directory, connectCrate),
   "-C",
   testingConsumer,
 ]);
 await writeFile(
   join(testingConsumer, "Cargo.toml"),
-  `[package]\nname="testing-consumer"\nversion="0.0.0"\nedition="2024"\n[dependencies]\nidealis-testing={path="idealis-testing-${version}"}\n[[bin]]\nname="consumer"\npath="main.rs"\n`,
+  `[package]\nname="testing-consumer"\nversion="0.0.0"\nedition="2024"\n[dependencies]\nidealis-connect={path="idealis-connect-${version}"}\n[[bin]]\nname="consumer"\npath="main.rs"\n`,
 );
 await writeFile(
   join(testingConsumer, "main.rs"),
   await readFile(
     join(
       testingConsumer,
-      `idealis-testing-${version}`,
+      `idealis-connect-${version}`,
       "examples",
       "counter.rs",
     ),
   ),
+);
+execFileSync("tar", ["-xzf", join(directory, cliCrate), "-C", testingConsumer]);
+const cliManifest = join(
+  testingConsumer,
+  `idealis-cli-${version}`,
+  "Cargo.toml",
+);
+execFileSync(
+  "cargo",
+  [
+    "test",
+    "--offline",
+    "--manifest-path",
+    cliManifest,
+    ...["idealis-connect", "rtla", "rtlc", "rtla-compiler"].flatMap((name) => [
+      "--config",
+      `patch.crates-io.${name}.path=${JSON.stringify(join(name === "idealis-connect" ? testingConsumer : consumer, `${name}-${version}`))}`,
+    ]),
+  ],
+  { cwd: testingConsumer, stdio: "pipe" },
 );
 const testing = execFileSync("cargo", ["run", "--offline", "--quiet"], {
   cwd: testingConsumer,
@@ -572,13 +593,13 @@ const testing = execFileSync("cargo", ["run", "--offline", "--quiet"], {
 })
   .toString()
   .trim();
-assert.equal(testing, "standalone idealis-testing consumer checked");
+assert.equal(testing, "standalone idealis-connect consumer checked");
 await writeFile(
   join(testingConsumer, "main.rs"),
   await readFile(
     join(
       testingConsumer,
-      `idealis-testing-${version}`,
+      `idealis-connect-${version}`,
       "examples",
       "schedule.rs",
     ),
@@ -604,7 +625,7 @@ assert.ok(
       "rtlc",
       "rtla-compiler",
       "idealis-core",
-      "idealis-smt",
+      "rusmt",
       "ralloy",
       "loom",
       "z3",
@@ -615,20 +636,81 @@ assert.ok(
 assert.deepEqual(
   WebAssembly.Module.imports(
     await WebAssembly.compile(
-      new Uint8Array(await readFile(join(directory, "idealis-testing.wasm")))
+      new Uint8Array(await readFile(join(directory, "idealis-connect.wasm")))
         .buffer,
     ),
   ),
   [],
 );
+const oracleConsumer = await mkdtemp(join(tmpdir(), "roracle-consumer-"));
+execFileSync("tar", [
+  "-xzf",
+  join(directory, oracleCrate),
+  "-C",
+  oracleConsumer,
+]);
+await writeFile(
+  join(oracleConsumer, "Cargo.toml"),
+  `[package]\nname="oracle-consumer"\nversion="0.0.0"\nedition="2024"\n[dependencies]\nroracle={path="roracle-${version}"}\nserde_json="1.0"\n[[bin]]\nname="consumer"\npath="main.rs"\n`,
+);
+await writeFile(
+  join(oracleConsumer, "main.rs"),
+  await readFile(
+    join(oracleConsumer, `roracle-${version}`, "examples", "comparison.rs"),
+  ),
+);
+const oracle = execFileSync("cargo", ["run", "--offline", "--quiet"], {
+  cwd: oracleConsumer,
+  stdio: "pipe",
+})
+  .toString()
+  .trim();
+assert.equal(oracle, "standalone roracle consumer checked");
+await writeFile(
+  join(oracleConsumer, "main.rs"),
+  await readFile(
+    join(oracleConsumer, `roracle-${version}`, "examples", "observations.rs"),
+  ),
+);
+const oracleJson = execFileSync("cargo", ["run", "--offline", "--quiet"], {
+  cwd: oracleConsumer,
+  stdio: "pipe",
+})
+  .toString()
+  .trim();
+assert.equal(oracleJson, "standalone oracle JSON consumer checked");
+const oracleMetadata = JSON.parse(
+  execFileSync("cargo", ["metadata", "--offline", "--format-version", "1"], {
+    cwd: oracleConsumer,
+    stdio: "pipe",
+  }).toString(),
+);
+assert.ok(
+  !oracleMetadata.packages.some((entry: { name: string }) =>
+    [
+      "rtla",
+      "rtlc",
+      "rtla-compiler",
+      "idealis-core",
+      "idealis-connect",
+      "z3",
+      "z3-sys",
+    ].includes(entry.name),
+  ),
+);
 const result = {
   status: "complete",
+  oracle,
+  oracleJson,
+  oracleDependencies: oracleMetadata.packages
+    .map((entry: { name: string }) => entry.name)
+    .sort(),
   node,
   typecheck: "passed without solver declarations",
   rust,
   rtlc,
   rtla,
-  rsmt,
+  rusmt,
   ralloy,
   testing,
   testingSchedule,
@@ -638,7 +720,7 @@ const result = {
   ralloyDependencies: alloyMetadata.packages
     .map((entry: { name: string }) => entry.name)
     .sort(),
-  rsmtDependencies: smtMetadata.packages
+  rusmtDependencies: smtMetadata.packages
     .map((entry: { name: string }) => entry.name)
     .sort(),
   parserWasm: "packaged rtla Wasm parsed without solvers",
@@ -650,9 +732,11 @@ const result = {
     rtlcCrate,
     rtlaCrate,
     compilerCrate,
-    rsmtCrate,
+    rusmtCrate,
     ralloyCrate,
-    testingCrate,
+    connectCrate,
+    cliCrate,
+    oracleCrate,
   ],
 };
 await writeFile(

@@ -1,0 +1,24 @@
+{
+  "metadata": [
+    {
+      "binarySha256": "00ab01ee18bdc93ea70709ef0fbd57989743488c0c1b9d1967d907edf8557bbb",
+      "benchSha256": "f5788666f8f2029b55e38ec6fcad851498edd9a4460f90abeafd5b8d48dd5e19",
+      "scope": "baseline serialization wrapper, before borrow/direct writer optimization"
+    },
+    {
+      "binarySha256": "d0b216d347f35a50353bfa8fb1d58f1c8651257580d36b26bca21d96d66f2a90",
+      "benchSha256": "f5788666f8f2029b55e38ec6fcad851498edd9a4460f90abeafd5b8d48dd5e19",
+      "dispatchJson": "borrowed report directly serialized to bytes"
+    }
+  ],
+  "cpu": "Apple M5",
+  "sampleSize": 20,
+  "warmupMs": 500,
+  "measurementMs": 1000,
+  "order": [
+    "before",
+    "after",
+    "after",
+    "before"
+  ]
+}

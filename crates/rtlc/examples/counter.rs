@@ -14,6 +14,7 @@ fn read() -> Expression {
 }
 pub fn ring() -> SafetyProgram {
     SafetyProgram {
+        symmetry: None,
         format: "modelt.safety-program".into(),
         version: 1,
         definitions: None,

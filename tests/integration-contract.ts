@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { init, killThreads } from "z3-solver";
 import { counterModel, createCounter } from "../examples/durable-counter.js";
-import { checkConformance, checkTrace } from "../src/index.js";
-import { createSmtOracle } from "../src/smt.js";
-import { generateTlaOracle } from "../src/tla.js";
+import { checkConformance, checkTrace } from "../packages/idealis/src/index.js";
+import { createSmtOracle } from "../packages/idealis/src/smt.js";
+import { generateTlaOracle } from "../packages/idealis/src/tla.js";
 
 const source = `---- MODULE Counter ----
 EXTENDS Naturals

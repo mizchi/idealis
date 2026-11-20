@@ -1,19 +1,34 @@
+#[path = "safety_functions.rs"]
+mod functions;
 use crate::ir::{Definition, Expression, Scalar};
 use crate::safety_expressions::MembershipSet;
+use crate::safety_prepared::PreparedProgram;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::safety_work::WorkBudget;
 use crate::{CoreError, Value};
+use functions::{Function, FunctionDomain, FunctionUpdate, FunctionValues};
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::hash::{BuildHasherDefault, Hash, Hasher};
 use std::sync::Arc;
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq)]
 enum Cell {
     String(String),
     Set(Vec<Scalar>),
-    Function(Vec<(Scalar, Scalar)>),
+    Function(Function),
     ModelValue(String),
+}
+
+impl Hash for Cell {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        std::mem::discriminant(self).hash(state);
+        match self {
+            Self::String(value) | Self::ModelValue(value) => value.hash(state),
+            Self::Set(values) => values.hash(state),
+            Self::Function(function) => function.hash(state),
+        }
+    }
 }
 
 struct ValueHasher(u64);
@@ -48,30 +63,23 @@ impl Hasher for ValueHasher {
     }
 }
 
-fn get_position(values: &[(Scalar, Scalar)], key: Scalar) -> Option<usize> {
-    if let Scalar::Int(integer) = key
-        && integer > 0
-    {
-        let position = integer as usize - 1;
-        if values.get(position).is_some_and(|entry| entry.0 == key) {
-            return Some(position);
-        }
-    }
-    values.iter().position(|entry| entry.0 == key)
-}
-
 type RegisteredMembership = HashMap<usize, Option<Option<Arc<MembershipSet>>>>;
 
 type MembershipCache = HashMap<(u64, Scalar), Vec<(Arc<MembershipSet>, bool)>>;
 
 pub(crate) struct Arena<'a> {
     pub definitions: &'a [Definition],
-    pub metadata: Option<Arc<crate::safety_definitions::Metadata<'a>>>,
+    pub metadata: Option<Arc<crate::safety_definitions::Metadata>>,
     base: Option<&'a Arena<'a>>,
+    prepared: Option<&'a PreparedProgram>,
+    constants: Vec<Option<Scalar>>,
     offset: usize,
     #[cfg(not(target_arch = "wasm32"))]
     budget: Option<(&'a WorkBudget, usize)>,
     cells: Vec<Cell>,
+    domains: HashMap<u64, Vec<Arc<FunctionDomain>>>,
+    #[cfg(not(target_arch = "wasm32"))]
+    aliases: Vec<Arc<FunctionDomain>>,
     depths: Vec<u8>,
     index: HashMap<u64, u32, BuildHasherDefault<ValueHasher>>,
     links: Vec<Option<u32>>,
@@ -89,10 +97,15 @@ impl<'scope> Arena<'scope> {
             definitions: &[],
             metadata: None,
             base: None,
+            prepared: None,
+            constants: Vec::new(),
             offset: 0,
             #[cfg(not(target_arch = "wasm32"))]
             budget: None,
             cells: vec![],
+            domains: HashMap::new(),
+            #[cfg(not(target_arch = "wasm32"))]
+            aliases: Vec::new(),
             depths: vec![],
             index: HashMap::default(),
             links: vec![],
@@ -103,6 +116,34 @@ impl<'scope> Arena<'scope> {
             work: 0,
             maximum,
         }
+    }
+    pub fn with_prepared(maximum: u32, prepared: &'scope PreparedProgram) -> Self {
+        Self {
+            prepared: Some(prepared),
+            constants: vec![None; prepared.len()],
+            ..Self::new(maximum)
+        }
+    }
+    pub fn data_expression(
+        &mut self,
+        expression: &Expression,
+        value: &Value,
+    ) -> Result<Scalar, CoreError> {
+        match self.prepared.and_then(|prepared| prepared.slot(expression)) {
+            Some(slot) => self.constant(slot, value),
+            None => self.data(value),
+        }
+    }
+    fn cached_constant(&self, slot: usize) -> Option<Scalar> {
+        self.constants[slot].or_else(|| self.base.and_then(|base| base.cached_constant(slot)))
+    }
+    fn constant(&mut self, slot: usize, value: &Value) -> Result<Scalar, CoreError> {
+        if let Some(value) = self.cached_constant(slot) {
+            return Ok(value);
+        }
+        let value = self.data(value)?;
+        self.constants[slot] = Some(value);
+        Ok(value)
     }
     pub fn tick(&mut self) -> Result<(), CoreError> {
         self.consume(1)
@@ -127,19 +168,42 @@ impl<'scope> Arena<'scope> {
     }
     #[cfg(not(target_arch = "wasm32"))]
     pub fn fork<'a>(&'a self, budget: &'a WorkBudget, worker: usize) -> Arena<'a> {
-        Arena {
+        let mut worker = Arena {
             definitions: self.definitions,
             metadata: self.metadata.clone(),
             base: Some(self),
+            prepared: self.prepared,
+            constants: vec![None; self.constants.len()],
             offset: self.offset + self.cells.len(),
             budget: Some((budget, worker)),
             ..Arena::new(self.maximum)
+        };
+        let domains = self.domains.values().flatten();
+        if domains.clone().take(17).count() <= 16 {
+            for domain in domains.filter(|domain| domain.root_owned && domain.keys.len() <= 64) {
+                let root = domain.root.as_ref().unwrap_or(domain);
+                let alias = Arc::new(FunctionDomain {
+                    keys: domain.keys.clone(),
+                    hash: domain.hash,
+                    depth: domain.depth,
+                    root_owned: true,
+                    root: Some(Arc::clone(root)),
+                });
+                worker
+                    .domains
+                    .entry(alias.hash)
+                    .or_default()
+                    .push(Arc::clone(&alias));
+                worker.aliases.push(alias);
+            }
         }
+        worker
     }
     #[cfg(not(target_arch = "wasm32"))]
     pub fn into_delta(self) -> ValueDelta {
         ValueDelta {
             cells: self.cells,
+            constants: self.constants,
             data: self.data,
             types: self.types,
             registered: self.registered,
@@ -161,12 +225,21 @@ impl<'scope> Arena<'scope> {
                 Cell::Set(values) => {
                     Cell::Set(values.into_iter().map(|value| mapping.get(value)).collect())
                 }
-                Cell::Function(values) => Cell::Function(
-                    values
-                        .into_iter()
-                        .map(|(key, value)| (mapping.get(key), mapping.get(value)))
-                        .collect(),
-                ),
+                Cell::Function(values) => {
+                    let domain = if values.domain.root_owned {
+                        Arc::clone(values.domain.root.as_ref().unwrap_or(&values.domain))
+                    } else {
+                        self.function_domain(
+                            values
+                                .domain
+                                .keys
+                                .iter()
+                                .map(|key| mapping.get(*key))
+                                .collect(),
+                        )
+                    };
+                    Cell::Function(values.remap(domain, &mapping))
+                }
             };
             mapping.values.push(self.insert(cell, false)?);
         }
@@ -174,6 +247,11 @@ impl<'scope> Arena<'scope> {
             self.data
                 .entry(value)
                 .or_insert_with(|| mapping.get(scalar));
+        }
+        for (slot, value) in delta.constants.into_iter().enumerate() {
+            if self.constants[slot].is_none() {
+                self.constants[slot] = value.map(|value| mapping.get(value));
+            }
         }
         for (address, prepared) in delta.registered {
             let target = self.registered.entry(address).or_insert(None);
@@ -269,7 +347,10 @@ impl<'scope> Arena<'scope> {
         if entries.len() != keys.len() {
             return Ok(false);
         }
-        for ((actual, _), expected) in entries.iter().zip(keys) {
+        if &*entries.domain.keys == keys.as_slice() {
+            return Ok(true);
+        }
+        for (actual, expected) in entries.domain.keys.iter().zip(keys) {
             if !self.equal(*actual, *expected)? {
                 return Ok(false);
             }
@@ -328,6 +409,19 @@ impl<'scope> Arena<'scope> {
         }
         self.base.and_then(|base| base.find(hash, cell))
     }
+    fn find_updated(&self, hash: u64, update: &FunctionUpdate<'_>) -> Option<u32> {
+        let mut candidate = self.index.get(&hash).copied();
+        while let Some(index) = candidate {
+            let local = index as usize - self.offset;
+            if let Cell::Function(function) = &self.cells[local]
+                && update.matches(function)
+            {
+                return Some(index);
+            }
+            candidate = self.links[local];
+        }
+        self.base.and_then(|base| base.find_updated(hash, update))
+    }
     fn depth(&self, index: u32) -> u8 {
         if (index as usize) < self.offset {
             self.base.unwrap().depth(index)
@@ -342,6 +436,9 @@ impl<'scope> Arena<'scope> {
         if let Some(index) = self.find(hash, &cell) {
             return Ok(Scalar::Ref(index));
         }
+        self.insert_new(cell, hash, charge)
+    }
+    fn insert_new(&mut self, cell: Cell, hash: u64, charge: bool) -> Result<Scalar, CoreError> {
         let depth = |value: &Scalar| match value {
             Scalar::Ref(index) => self.depth(*index),
             _ => 0,
@@ -349,14 +446,7 @@ impl<'scope> Arena<'scope> {
         let depth = match &cell {
             Cell::String(_) | Cell::ModelValue(_) => 0,
             Cell::Set(values) => 1 + values.iter().map(depth).max().unwrap_or(0),
-            Cell::Function(values) => {
-                1 + values
-                    .iter()
-                    .flat_map(|(key, value)| [key, value])
-                    .map(depth)
-                    .max()
-                    .unwrap_or(0)
-            }
+            Cell::Function(values) => values.depth(|value| depth(&value)),
         };
         if depth > 64 {
             return Err(CoreError::protocol("TLA value nesting exceeds 64"));
@@ -460,11 +550,12 @@ impl<'scope> Arena<'scope> {
                     if size != Ordering::Equal {
                         return size;
                     }
-                    for ((left_key, left_value), (right_key, right_value)) in left.iter().zip(right)
+                    for ((left_key, left_value), (right_key, right_value)) in
+                        left.iter().zip(right.iter())
                     {
                         let comparison = self
-                            .total(*left_key, *right_key)
-                            .then_with(|| self.total(*left_value, *right_value));
+                            .total(left_key, right_key)
+                            .then_with(|| self.total(left_value, right_value));
                         if comparison != Ordering::Equal {
                             return comparison;
                         }
@@ -476,7 +567,7 @@ impl<'scope> Arena<'scope> {
         }
     }
     fn compare_lists(&self, left: &[Scalar], right: &[Scalar]) -> Ordering {
-        for (left, right) in left.iter().zip(right) {
+        for (left, right) in left.iter().zip(right.iter()) {
             let result = self.total(*left, *right);
             if result != Ordering::Equal {
                 return result;
@@ -551,7 +642,7 @@ impl<'scope> Arena<'scope> {
             }
             (Ok(Cell::Function(left)), Ok(Cell::Function(right))) if left.len() == right.len() => {
                 left.iter()
-                    .zip(right)
+                    .zip(right.iter())
                     .flat_map(|(left, right)| [(left.0, right.0), (left.1, right.1)])
                     .collect()
             }
@@ -589,7 +680,7 @@ impl<'scope> Arena<'scope> {
                 if left.len() != right.len() {
                     return Ok(false);
                 }
-                for (left, right) in left.iter().zip(right) {
+                for (left, right) in left.iter().zip(right.iter()) {
                     if !self.equal(left.0, right.0)? {
                         return Ok(false);
                     }
@@ -602,7 +693,7 @@ impl<'scope> Arena<'scope> {
                 if left.len() != right.len() {
                     return Ok(false);
                 }
-                for (left, right) in left.iter().zip(right) {
+                for (left, right) in left.iter().zip(right.iter()) {
                     if !self.equal(*left, *right)? {
                         return Ok(false);
                     }
@@ -641,6 +732,82 @@ impl<'scope> Arena<'scope> {
                 .collect::<Result<_, CoreError>>()?,
         )
     }
+    fn find_domain(&self, hash: u64, keys: &[Scalar]) -> Option<Arc<FunctionDomain>> {
+        self.domains
+            .get(&hash)
+            .and_then(|domains| domains.iter().find(|domain| &*domain.keys == keys))
+            .cloned()
+            .or_else(|| self.base.and_then(|base| base.find_domain(hash, keys)))
+    }
+    fn share_domain(&mut self, domain: Arc<FunctionDomain>) -> Arc<FunctionDomain> {
+        if let Some(existing) = self.find_domain(domain.hash, &domain.keys) {
+            return existing;
+        }
+        self.domains
+            .entry(domain.hash)
+            .or_default()
+            .push(Arc::clone(&domain));
+        domain
+    }
+    fn function_domain(&mut self, keys: Vec<Scalar>) -> Arc<FunctionDomain> {
+        let mut hasher = ValueHasher::default();
+        keys.hash(&mut hasher);
+        let hash = hasher.finish();
+        if let Some(existing) = self.find_domain(hash, &keys) {
+            return existing;
+        }
+        let depth = keys
+            .iter()
+            .map(|key| match key {
+                Scalar::Ref(index) => self.depth(*index),
+                _ => 0,
+            })
+            .max()
+            .unwrap_or(0);
+        self.share_domain(Arc::new(FunctionDomain {
+            keys: keys.into_boxed_slice(),
+            hash,
+            depth,
+            #[cfg(not(target_arch = "wasm32"))]
+            root_owned: self.base.is_none(),
+            #[cfg(not(target_arch = "wasm32"))]
+            root: None,
+        }))
+    }
+    fn find_entry_domain(
+        &self,
+        hash: u64,
+        entries: &[(Scalar, Scalar)],
+    ) -> Option<Arc<FunctionDomain>> {
+        self.domains
+            .get(&hash)
+            .and_then(|domains| {
+                domains.iter().find(|domain| {
+                    domain.keys.len() == entries.len()
+                        && domain
+                            .keys
+                            .iter()
+                            .zip(entries)
+                            .all(|(key, entry)| *key == entry.0)
+                })
+            })
+            .cloned()
+            .or_else(|| {
+                self.base
+                    .and_then(|base| base.find_entry_domain(hash, entries))
+            })
+    }
+    fn make_function(&mut self, entries: Vec<(Scalar, Scalar)>) -> Function {
+        let mut hash = ValueHasher::default();
+        entries.len().hash(&mut hash);
+        for entry in &entries {
+            entry.0.hash(&mut hash);
+        }
+        let domain = self
+            .find_entry_domain(hash.finish(), &entries)
+            .unwrap_or_else(|| self.function_domain(entries.iter().map(|entry| entry.0).collect()));
+        Function::from_entries(domain, entries)
+    }
     pub fn function(&mut self, mut values: Vec<(Scalar, Scalar)>) -> Result<Scalar, CoreError> {
         values.sort_by(|left, right| self.total(left.0, right.0));
         for pair in values.windows(2) {
@@ -649,7 +816,8 @@ impl<'scope> Arena<'scope> {
                 return Err(CoreError::protocol("Duplicate function key"));
             }
         }
-        self.intern(Cell::Function(values))
+        let function = self.make_function(values);
+        self.intern(Cell::Function(function))
     }
     pub fn members(&self, value: Scalar) -> Result<Vec<Scalar>, CoreError> {
         match self.cell(value)? {
@@ -707,8 +875,8 @@ impl<'scope> Arena<'scope> {
                             ));
                         }
                         for (key, value) in entries.iter().rev() {
-                            pending.push((*value, false));
-                            pending.push((*key, true));
+                            pending.push((value, false));
+                            pending.push((key, true));
                         }
                     }
                 }
@@ -738,7 +906,7 @@ impl<'scope> Arena<'scope> {
         let Cell::Function(values) = self.cell(function)? else {
             return Err(CoreError::protocol("Expected a function"));
         };
-        Ok(get_position(values, key).map(|position| values[position].1))
+        Ok(values.position(key).map(|position| values.value(position)))
     }
     pub fn at(&self, function: Scalar, key: Scalar) -> Result<Scalar, CoreError> {
         self.select(function, key)?
@@ -748,12 +916,58 @@ impl<'scope> Arena<'scope> {
         let Cell::Function(values) = self.cell(function)? else {
             return Err(CoreError::protocol("DOMAIN requires a function"));
         };
-        self.set(values.iter().map(|entry| entry.0).collect())
+        self.set(values.domain.keys.to_vec())
     }
     pub fn entries(&self, function: Scalar) -> Result<Vec<(Scalar, Scalar)>, CoreError> {
         match self.cell(function)? {
-            Cell::Function(values) => Ok(values.clone()),
+            Cell::Function(values) => Ok(values.iter().collect()),
             _ => Err(CoreError::protocol("Expected a function")),
+        }
+    }
+    pub fn scalar_record_shape(&self, value: Scalar) -> Result<Vec<(Scalar, bool)>, CoreError> {
+        let Cell::Function(function) = self.cell(value)? else {
+            return Err(CoreError::protocol(
+                "Unsupported symmetry: expected a flat scalar record",
+            ));
+        };
+        function
+            .iter()
+            .map(|(key, value)| {
+                if !matches!(self.cell(key)?, Cell::String(_)) {
+                    return Err(CoreError::protocol(
+                        "Unsupported symmetry: record fields must be strings",
+                    ));
+                }
+                match value {
+                    Scalar::Int(_) => Ok((key, false)),
+                    Scalar::Bool(_) => Ok((key, true)),
+                    Scalar::Ref(_) => Err(CoreError::protocol(
+                        "Unsupported symmetry: record fields must be Int/Bool",
+                    )),
+                }
+            })
+            .collect()
+    }
+    pub fn function_values(&self, function: Scalar) -> Result<FunctionValues, CoreError> {
+        match self.cell(function)? {
+            Cell::Function(function) => Ok(function.values()),
+            _ => Err(CoreError::protocol("Expected a function")),
+        }
+    }
+    pub fn binary_function_membership(&self, function: Scalar, range: Scalar) -> Option<usize> {
+        #[cfg(not(target_arch = "wasm32"))]
+        if self.budget.is_some() {
+            return None;
+        }
+        let (Ok(Cell::Function(function)), Ok(Cell::Set(range))) =
+            (self.cell(function), self.cell(range))
+        else {
+            return None;
+        };
+        match (function.binary_kind(), range.as_slice()) {
+            (Some(false), [Scalar::Bool(false), Scalar::Bool(true)])
+            | (Some(true), [Scalar::Int(0), Scalar::Int(1)]) => Some(function.len()),
+            _ => None,
         }
     }
     pub fn check_tuple(&self, value: Scalar, size: Option<usize>) -> Result<(), CoreError> {
@@ -777,6 +991,21 @@ impl<'scope> Arena<'scope> {
         }
         Ok(values.into_iter().map(|entry| entry.1).collect())
     }
+    fn update_domain(&self, domain: &Arc<FunctionDomain>) -> Arc<FunctionDomain> {
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let root = domain.root.as_ref().unwrap_or(domain);
+            if let Some(alias) = self.aliases.iter().find(|alias| {
+                alias
+                    .root
+                    .as_ref()
+                    .is_some_and(|owner| Arc::ptr_eq(owner, root))
+            }) {
+                return Arc::clone(alias);
+            }
+        }
+        Arc::clone(domain)
+    }
     pub fn replace(
         &mut self,
         function: Scalar,
@@ -789,17 +1018,30 @@ impl<'scope> Arena<'scope> {
         let Cell::Function(entries) = self.cell(function)? else {
             return Err(CoreError::protocol("Expected a function"));
         };
-        let Some(position) = get_position(entries, *first) else {
+        let Some(position) = entries.position(*first) else {
             return Ok(function);
         };
-        let previous = entries[position].1;
-        let mut entries = entries.clone();
+        let previous = entries.value(position);
         let updated = self.replace(previous, rest, value)?;
         if updated == previous {
             return Ok(function);
         }
-        entries[position].1 = updated;
-        self.intern(Cell::Function(entries))
+        let Cell::Function(entries) = self.cell(function)? else {
+            unreachable!()
+        };
+        if let Some(probe) = entries.scalar_update(position, updated) {
+            let mut hasher = ValueHasher::default();
+            std::mem::discriminant(self.cell(function)?).hash(&mut hasher);
+            probe.hash(&mut hasher);
+            let hash = hasher.finish();
+            if let Some(index) = self.find_updated(hash, &probe) {
+                return Ok(Scalar::Ref(index));
+            }
+            let updated = probe.materialize(self.update_domain(&entries.domain));
+            return self.insert_new(Cell::Function(updated), hash, true);
+        }
+        let updated = entries.updated(position, updated, self.update_domain(&entries.domain));
+        self.intern(Cell::Function(updated))
     }
     pub fn path(&self, mut function: Scalar, path: &[Scalar]) -> Result<Option<Scalar>, CoreError> {
         for key in path {
@@ -810,6 +1052,7 @@ impl<'scope> Arena<'scope> {
         }
         Ok(Some(function))
     }
+
     pub fn portable_bounded(
         &self,
         value: Scalar,
@@ -843,9 +1086,9 @@ impl<'scope> Arena<'scope> {
                         }
                     }
                     Cell::Function(values) => {
-                        for (key, child) in values {
-                            total = total.saturating_add(size(arena, *key, maximum, memo)?);
-                            total = total.saturating_add(size(arena, *child, maximum, memo)?);
+                        for (key, child) in values.iter() {
+                            total = total.saturating_add(size(arena, key, maximum, memo)?);
+                            total = total.saturating_add(size(arena, child, maximum, memo)?);
                             if total > maximum {
                                 break;
                             }
@@ -863,6 +1106,7 @@ impl<'scope> Arena<'scope> {
         *remaining -= cost;
         self.portable(value).map(Some)
     }
+
     pub fn portable(&self, value: Scalar) -> Result<Value, CoreError> {
         Ok(match value {
             Scalar::Int(value) => Value::Int(value.to_string()),
@@ -934,6 +1178,7 @@ fn work_exhausted() -> CoreError {
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) struct ValueDelta {
     cells: Vec<Cell>,
+    constants: Vec<Option<Scalar>>,
     data: HashMap<Value, Scalar>,
     types: HashMap<Expression, Option<Arc<MembershipSet>>>,
     registered: RegisteredMembership,
@@ -1031,7 +1276,7 @@ mod tests {
         ];
         let hash = |entries: Vec<(Scalar, Scalar)>| {
             let mut hasher = ValueHasher::default();
-            Cell::Function(entries).hash(&mut hasher);
+            Cell::Function(Arena::new(100).make_function(entries)).hash(&mut hasher);
             hasher.finish()
         };
         assert_eq!(hash(first.clone()), hash(second.clone()));
@@ -1106,6 +1351,68 @@ mod tests {
             original
         );
     }
+    #[test]
+    fn model_value_lookup_preserves_semantic_order_and_missing_keys() {
+        for names in [["a", "b", "c"], ["c", "b", "a"]] {
+            let mut arena = Arena::new(1000);
+            let keys: Vec<_> = names
+                .iter()
+                .map(|name| {
+                    arena
+                        .data(&crate::Value::ModelValue((*name).into()))
+                        .unwrap()
+                })
+                .collect();
+            let function = arena
+                .function(
+                    keys.iter()
+                        .enumerate()
+                        .map(|(index, key)| (*key, Scalar::Int(index as i32 + 10)))
+                        .collect(),
+                )
+                .unwrap();
+            for (index, key) in keys.into_iter().enumerate() {
+                assert_eq!(
+                    arena.at(function, key).unwrap(),
+                    Scalar::Int(index as i32 + 10)
+                );
+            }
+            let missing = arena
+                .data(&crate::Value::ModelValue("missing".into()))
+                .unwrap();
+            assert_eq!(arena.select(function, missing).unwrap(), None);
+            assert!(arena.at(function, missing).is_err());
+            let string = arena.string("a".into()).unwrap();
+            assert_eq!(arena.select(function, string).unwrap(), None);
+            assert_eq!(arena.select(function, Scalar::Int(1)).unwrap(), None);
+        }
+    }
+
+    #[test]
+    fn sparse_model_value_domains_preserve_updates_and_missing_keys() {
+        let mut arena = Arena::new(1000);
+        let first = arena.data(&crate::Value::ModelValue("a".into())).unwrap();
+        let missing = arena.data(&crate::Value::ModelValue("b".into())).unwrap();
+        let last = arena.data(&crate::Value::ModelValue("c".into())).unwrap();
+        let original = arena
+            .function(vec![(last, Scalar::Int(30)), (first, Scalar::Int(10))])
+            .unwrap();
+        assert_eq!(arena.at(original, first).unwrap(), Scalar::Int(10));
+        assert_eq!(arena.at(original, last).unwrap(), Scalar::Int(30));
+        assert_eq!(arena.select(original, missing).unwrap(), None);
+        assert!(arena.at(original, missing).is_err());
+        assert_eq!(
+            arena
+                .replace(original, &[missing], Scalar::Int(99))
+                .unwrap(),
+            original
+        );
+        let updated = arena.replace(original, &[last], Scalar::Int(99)).unwrap();
+        assert_eq!(arena.at(updated, last).unwrap(), Scalar::Int(99));
+        assert_eq!(arena.at(updated, first).unwrap(), Scalar::Int(10));
+        assert_eq!(arena.at(original, last).unwrap(), Scalar::Int(30));
+    }
+
     #[test]
     fn integer_positions_preserve_sparse_domains_and_missing_keys() {
         let mut arena = Arena::new(1000);
@@ -1182,5 +1489,568 @@ mod tests {
             Scalar::Int(4)
         );
         assert_eq!(arena.select(boolean, Scalar::Int(1)).unwrap(), None);
+    }
+}
+
+#[cfg(test)]
+mod compact_function_tests {
+    use super::{Arena, Cell};
+    use crate::ir::Scalar;
+    use std::sync::Arc;
+
+    #[test]
+    fn updates_share_immutable_domains_and_preserve_typed_canonical_values() {
+        let mut arena = Arena::new(100000);
+        for width in [1, 16, 32, 64, 65] {
+            for original in [Scalar::Bool(false), Scalar::Int(0)] {
+                let base = arena.tuple(vec![original; width]).unwrap();
+                let replacement = match original {
+                    Scalar::Bool(_) => Scalar::Bool(true),
+                    _ => Scalar::Int(1),
+                };
+                let changed = arena
+                    .replace(base, &[Scalar::Int(width as i32)], replacement)
+                    .unwrap();
+                let Cell::Function(before) = arena.cell(base).unwrap() else {
+                    panic!("function")
+                };
+                let Cell::Function(after) = arena.cell(changed).unwrap() else {
+                    panic!("function")
+                };
+                assert!(Arc::ptr_eq(&before.domain, &after.domain));
+                assert_eq!(arena.at(base, Scalar::Int(width as i32)).unwrap(), original);
+                assert_eq!(
+                    arena.at(changed, Scalar::Int(width as i32)).unwrap(),
+                    replacement
+                );
+                assert_eq!(
+                    arena
+                        .replace(changed, &[Scalar::Int(width as i32)], original)
+                        .unwrap(),
+                    base
+                );
+                let general = arena
+                    .replace(changed, &[Scalar::Int(1)], Scalar::Int(-17))
+                    .unwrap();
+                assert_eq!(arena.at(general, Scalar::Int(1)).unwrap(), Scalar::Int(-17));
+                let restored = arena
+                    .replace(
+                        general,
+                        &[Scalar::Int(1)],
+                        if width == 1 { replacement } else { original },
+                    )
+                    .unwrap();
+                assert_eq!(restored, changed);
+            }
+        }
+        let integer = arena.tuple(vec![Scalar::Int(0); 64]).unwrap();
+        let boolean = arena.tuple(vec![Scalar::Bool(false); 64]).unwrap();
+        assert_ne!(integer, boolean);
+        assert!(arena.equal(integer, boolean).is_err());
+    }
+}
+
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod compact_overlay_tests {
+    use super::Arena;
+    use crate::ir::Scalar;
+    use crate::safety_work::WorkBudget;
+
+    #[test]
+    fn overlays_remap_function_keys_and_payloads_without_mutating_the_base() {
+        let mut base = Arena::new(10000);
+        let original = base.tuple(vec![Scalar::Int(0); 64]).unwrap();
+        let budget = WorkBudget::new(9000, 2);
+        let mut first = base.fork(&budget, 0);
+        let mut second = base.fork(&budget, 1);
+        let left = first.string("left".into()).unwrap();
+        let right = second.string("right".into()).unwrap();
+        assert_eq!(left, right);
+        let changed = second
+            .replace(original, &[Scalar::Int(64)], Scalar::Int(1))
+            .unwrap();
+        let keyed = second.function(vec![(right, changed)]).unwrap();
+        let first = first.into_delta();
+        let second = second.into_delta();
+        let first_map = base.merge(first).unwrap();
+        let second_map = base.merge(second).unwrap();
+        assert_ne!(first_map.get(left), second_map.get(right));
+        let mapped = second_map.get(keyed);
+        let key = second_map.get(right);
+        assert_eq!(base.at(mapped, key).unwrap(), second_map.get(changed));
+        assert_eq!(base.at(original, Scalar::Int(64)).unwrap(), Scalar::Int(0));
+        assert_eq!(
+            base.at(second_map.get(changed), Scalar::Int(64)).unwrap(),
+            Scalar::Int(1)
+        );
+        assert_eq!(
+            base.function(vec![(key, second_map.get(changed))]).unwrap(),
+            mapped
+        );
+        assert!(base.portable(mapped).is_ok());
+    }
+}
+
+#[cfg(test)]
+mod compact_domain_collision_tests {
+    use super::{Arena, Cell};
+    use crate::ir::Scalar;
+
+    #[test]
+    fn packed_functions_compare_domains_after_a_domain_hash_collision() {
+        let mut arena = Arena::new(100);
+        let left = [30050, 14021977, 1972786496]
+            .map(|key| (Scalar::Int(key), Scalar::Bool(false)))
+            .to_vec();
+        let right = [3176, 1115303, 708440656]
+            .map(|key| (Scalar::Int(key), Scalar::Bool(false)))
+            .to_vec();
+        let first = arena.function(left.clone()).unwrap();
+        let second = arena.function(right.clone()).unwrap();
+        let Cell::Function(first_value) = arena.cell(first).unwrap() else {
+            panic!("function")
+        };
+        let Cell::Function(second_value) = arena.cell(second).unwrap() else {
+            panic!("function")
+        };
+        assert_eq!(first_value.domain.hash, second_value.domain.hash);
+        assert_ne!(first, second);
+        assert!(!arena.equal(first, second).unwrap());
+        assert_eq!(arena.function(left).unwrap(), first);
+        assert_eq!(arena.function(right).unwrap(), second);
+    }
+}
+
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod compact_domain_owner_tests {
+    use super::{Arena, Cell};
+    use crate::ir::Scalar;
+    use crate::safety_work::WorkBudget;
+    use std::sync::Arc;
+
+    #[test]
+    fn a_worker_created_domain_is_registered_in_the_root_and_reused() {
+        let mut root = Arena::new(1000);
+        let budget = WorkBudget::new(900, 1);
+        let mut worker = root.fork(&budget, 0);
+        let original = worker.tuple(vec![Scalar::Int(0); 32]).unwrap();
+        let Cell::Function(function) = worker.cell(original).unwrap() else {
+            panic!("function")
+        };
+        assert!(!function.domain.root_owned);
+        let delta = worker.into_delta();
+        let mapping = root.merge(delta).unwrap();
+        let value = mapping.get(original);
+        let Cell::Function(function) = root.cell(value).unwrap() else {
+            panic!("function")
+        };
+        assert!(function.domain.root_owned);
+        let domain = Arc::clone(&function.domain);
+        let changed = root
+            .replace(value, &[Scalar::Int(32)], Scalar::Int(1))
+            .unwrap();
+        let Cell::Function(function) = root.cell(changed).unwrap() else {
+            panic!("function")
+        };
+        assert!(Arc::ptr_eq(&domain, &function.domain));
+        assert_eq!(root.tuple(vec![Scalar::Int(0); 32]).unwrap(), value);
+    }
+}
+
+#[cfg(test)]
+mod binary_membership_tests {
+    use super::Arena;
+    use crate::ir::Scalar;
+
+    #[test]
+    fn bulk_membership_requires_the_exact_type_range_and_packed_width() {
+        let mut arena = Arena::new(1000);
+        let integers = arena.tuple(vec![Scalar::Int(0); 64]).unwrap();
+        let booleans = arena.tuple(vec![Scalar::Bool(false); 64]).unwrap();
+        let wide = arena.tuple(vec![Scalar::Int(0); 65]).unwrap();
+        let mixed = arena
+            .tuple(vec![Scalar::Bool(false), Scalar::Int(0)])
+            .unwrap();
+        let int_range = arena.set(vec![Scalar::Int(0), Scalar::Int(1)]).unwrap();
+        let bool_range = arena
+            .set(vec![Scalar::Bool(false), Scalar::Bool(true)])
+            .unwrap();
+        let narrow = arena.set(vec![Scalar::Int(0)]).unwrap();
+        assert_eq!(
+            arena.binary_function_membership(integers, int_range),
+            Some(64)
+        );
+        assert_eq!(
+            arena.binary_function_membership(booleans, bool_range),
+            Some(64)
+        );
+        for (function, range) in [
+            (integers, bool_range),
+            (booleans, int_range),
+            (integers, narrow),
+            (wide, int_range),
+            (mixed, int_range),
+        ] {
+            assert_eq!(arena.binary_function_membership(function, range), None);
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let budget = crate::safety_work::WorkBudget::new(900, 1);
+            let worker = arena.fork(&budget, 0);
+            assert_eq!(worker.binary_function_membership(integers, int_range), None);
+        }
+    }
+}
+
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod compact_worker_alias_tests {
+    use super::{Arena, Cell};
+    use crate::ir::Scalar;
+    use crate::safety_work::WorkBudget;
+    use std::sync::Arc;
+
+    #[test]
+    fn worker_updates_use_private_counters_and_merge_back_to_the_shared_root() {
+        let mut root = Arena::new(10000);
+        let original = root.tuple(vec![Scalar::Int(0); 64]).unwrap();
+        let Cell::Function(function) = root.cell(original).unwrap() else {
+            panic!("function")
+        };
+        let original_domain = Arc::clone(&function.domain);
+        let budget = WorkBudget::new(9000, 2);
+        let mut first = root.fork(&budget, 0);
+        let mut second = root.fork(&budget, 1);
+        let left = first
+            .replace(original, &[Scalar::Int(1)], Scalar::Int(1))
+            .unwrap();
+        let right = second
+            .replace(original, &[Scalar::Int(64)], Scalar::Int(1))
+            .unwrap();
+        let Cell::Function(left_value) = first.cell(left).unwrap() else {
+            panic!("function")
+        };
+        let Cell::Function(right_value) = second.cell(right).unwrap() else {
+            panic!("function")
+        };
+        assert!(!Arc::ptr_eq(&left_value.domain, &right_value.domain));
+        assert!(Arc::ptr_eq(
+            left_value.domain.root.as_ref().unwrap(),
+            &original_domain
+        ));
+        assert!(Arc::ptr_eq(
+            right_value.domain.root.as_ref().unwrap(),
+            &original_domain
+        ));
+        let first = first.into_delta();
+        let second = second.into_delta();
+        let left_map = root.merge(first).unwrap();
+        let right_map = root.merge(second).unwrap();
+        for value in [left_map.get(left), right_map.get(right)] {
+            let Cell::Function(function) = root.cell(value).unwrap() else {
+                panic!("function")
+            };
+            assert!(Arc::ptr_eq(&function.domain, &original_domain));
+            assert!(function.domain.root.is_none());
+        }
+        assert_eq!(root.at(original, Scalar::Int(1)).unwrap(), Scalar::Int(0));
+    }
+}
+
+#[cfg(test)]
+mod function_probe_tests {
+    use super::{Arena, Cell, ValueHasher};
+    use crate::ir::Scalar;
+    use std::hash::{Hash, Hasher};
+
+    #[test]
+    fn borrowed_updates_match_independently_constructed_values_and_hashes() {
+        let mut arena = Arena::new(1000);
+        let child = arena.set(vec![Scalar::Int(7)]).unwrap();
+        for (original, replacement, width) in [
+            (Scalar::Int(9), Scalar::Int(8), 1),
+            (Scalar::Int(9), Scalar::Int(8), 2),
+            (child, Scalar::Int(8), 7),
+            (child, Scalar::Int(8), 64),
+            (Scalar::Int(0), Scalar::Int(1), 65),
+        ] {
+            let base = arena.tuple(vec![original; width]).unwrap();
+            for position in 0..width {
+                let mut expected = vec![original; width];
+                expected[position] = replacement;
+                let expected = arena.tuple(expected).unwrap();
+                let before = arena.cell(base).unwrap();
+                let after = arena.cell(expected).unwrap();
+                let (Cell::Function(before_function), Cell::Function(after_function)) =
+                    (before, after)
+                else {
+                    panic!("function")
+                };
+                let probe = before_function
+                    .scalar_update(position, replacement)
+                    .unwrap();
+                assert!(probe.matches(after_function));
+                assert!(!probe.matches(before_function));
+                let mut borrowed_hash = ValueHasher::default();
+                std::mem::discriminant(before).hash(&mut borrowed_hash);
+                probe.hash(&mut borrowed_hash);
+                let mut stored_hash = ValueHasher::default();
+                after.hash(&mut stored_hash);
+                assert_eq!(borrowed_hash.finish(), stored_hash.finish());
+                assert_eq!(
+                    arena
+                        .replace(base, &[Scalar::Int(position as i32 + 1)], replacement)
+                        .unwrap(),
+                    expected
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn packed_values_and_repacking_keep_the_existing_canonical_path() {
+        let mut arena = Arena::new(100);
+        let values = arena.tuple(vec![Scalar::Int(9), Scalar::Int(0)]).unwrap();
+        let Cell::Function(function) = arena.cell(values).unwrap() else {
+            panic!("function")
+        };
+        assert!(function.scalar_update(0, Scalar::Int(1)).is_none());
+        let expected = arena.tuple(vec![Scalar::Int(1), Scalar::Int(0)]).unwrap();
+        assert_eq!(
+            arena
+                .replace(values, &[Scalar::Int(1)], Scalar::Int(1))
+                .unwrap(),
+            expected
+        );
+        let Cell::Function(function) = arena.cell(expected).unwrap() else {
+            panic!("function")
+        };
+        assert!(function.scalar_update(0, Scalar::Int(9)).is_none());
+        assert_eq!(
+            arena
+                .replace(expected, &[Scalar::Int(1)], Scalar::Int(9))
+                .unwrap(),
+            values
+        );
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[test]
+    fn an_update_collision_in_the_base_does_not_replace_the_local_value() {
+        use crate::safety_work::WorkBudget;
+        let mut root = Arena::new(1000);
+        let collision = root
+            .function(vec![
+                (Scalar::Int(0), Scalar::Int(803_057_848)),
+                (Scalar::Int(1_091_714_232), Scalar::Int(-1_935_938_920)),
+            ])
+            .unwrap();
+        let budget = WorkBudget::new(900, 1);
+        let mut worker = root.fork(&budget, 0);
+        let source = worker
+            .function(vec![
+                (Scalar::Int(0), Scalar::Int(2)),
+                (Scalar::Int(95_947_124), Scalar::Int(0)),
+            ])
+            .unwrap();
+        let updated = worker
+            .replace(source, &[Scalar::Int(0)], Scalar::Int(-1_370_170_012))
+            .unwrap();
+        assert_ne!(updated, collision);
+        assert_eq!(
+            worker.at(updated, Scalar::Int(0)).unwrap(),
+            Scalar::Int(-1_370_170_012)
+        );
+        assert_eq!(
+            worker
+                .replace(source, &[Scalar::Int(0)], Scalar::Int(-1_370_170_012))
+                .unwrap(),
+            updated
+        );
+        let delta = worker.into_delta();
+        let mapping = root.merge(delta).unwrap();
+        assert_ne!(mapping.get(updated), collision);
+        assert_eq!(
+            root.at(collision, Scalar::Int(0)).unwrap(),
+            Scalar::Int(803_057_848)
+        );
+    }
+}
+
+#[cfg(test)]
+mod packed_hash_tests {
+    use super::{Arena, ValueHasher};
+    use crate::ir::Scalar;
+    use std::collections::HashSet;
+    use std::hash::{Hash, Hasher};
+
+    #[test]
+    fn packed_cube_hashes_keep_all_values_and_spread_index_bits() {
+        let mut arena = Arena::new(10000);
+        let mut hashes = HashSet::new();
+        let mut buckets = [0_u16; 256];
+        for bits in 0..4096_u64 {
+            let value = arena
+                .tuple(
+                    (0..12)
+                        .map(|bit| Scalar::Int(((bits >> bit) & 1) as i32))
+                        .collect(),
+                )
+                .unwrap();
+            let mut hasher = ValueHasher::default();
+            arena.cell(value).unwrap().hash(&mut hasher);
+            let hash = hasher.finish();
+            assert!(hashes.insert(hash));
+            buckets[(hash & 255) as usize] += 1;
+        }
+        assert!(buckets.iter().all(|count| *count > 0 && *count <= 64));
+        let zero = arena.tuple(vec![Scalar::Int(0); 64]).unwrap();
+        let mut hashes = HashSet::new();
+        let mut hasher = ValueHasher::default();
+        arena.cell(zero).unwrap().hash(&mut hasher);
+        hashes.insert(hasher.finish());
+        for bit in 0..64 {
+            let changed = arena
+                .replace(zero, &[Scalar::Int(bit + 1)], Scalar::Int(1))
+                .unwrap();
+            let mut hasher = ValueHasher::default();
+            arena.cell(changed).unwrap().hash(&mut hasher);
+            assert!(hashes.insert(hasher.finish()));
+        }
+    }
+
+    #[test]
+    fn an_int_bool_hash_collision_preserves_type_and_canonical_identity() {
+        let mut arena = Arena::new(100);
+        let boolean = arena.tuple(vec![Scalar::Bool(false); 64]).unwrap();
+        let integers = (0..64)
+            .map(|bit| Scalar::Int(((0x9e37_79b9_7f4a_7c15_u64 >> bit) & 1) as i32))
+            .collect::<Vec<_>>();
+        let integer = arena.tuple(integers.clone()).unwrap();
+        let mut boolean_hash = ValueHasher::default();
+        arena.cell(boolean).unwrap().hash(&mut boolean_hash);
+        let mut integer_hash = ValueHasher::default();
+        arena.cell(integer).unwrap().hash(&mut integer_hash);
+        assert_eq!(boolean_hash.finish(), integer_hash.finish());
+        assert_ne!(boolean, integer);
+        assert!(arena.equal(boolean, integer).is_err());
+        assert_eq!(arena.tuple(vec![Scalar::Bool(false); 64]).unwrap(), boolean);
+        assert_eq!(arena.tuple(integers).unwrap(), integer);
+    }
+}
+
+#[cfg(test)]
+mod prepared_data_tests {
+    use super::Arena;
+    use crate::Value;
+    use crate::ir::{Expression, Scalar};
+    use crate::safety_expressions::EvalContext;
+    use crate::safety_prepared::PreparedProgram;
+
+    #[test]
+    fn constants_are_lazy_and_cached_only_after_success_in_each_arena() {
+        let invalid = Expression::Data {
+            value: Value::Int("invalid".into()),
+        };
+        let text = Expression::Data {
+            value: Value::String("constant".into()),
+        };
+        let program = PreparedProgram::from_roots(vec![&invalid, &text]);
+        let mut arena = Arena::with_prepared(100, &program);
+        assert_eq!(arena.work, 0);
+        for _ in 0..2 {
+            let error = invalid
+                .eval(EvalContext::new(&[], &[]), &mut arena)
+                .unwrap_err();
+            assert_eq!(error.code, "protocol");
+            assert_eq!(arena.work, 0);
+        }
+        let value = text.eval(EvalContext::new(&[], &[]), &mut arena).unwrap();
+        let work = arena.work;
+        for _ in 0..8 {
+            assert_eq!(
+                text.eval(EvalContext::new(&[], &[]), &mut arena).unwrap(),
+                value
+            );
+            assert_eq!(arena.work, work);
+        }
+        let mut other = Arena::with_prepared(100, &program);
+        other.string("different".into()).unwrap();
+        let other_value = text.eval(EvalContext::new(&[], &[]), &mut other).unwrap();
+        assert_ne!(value, other_value);
+        assert_eq!(
+            arena.portable(value).unwrap(),
+            other.portable(other_value).unwrap()
+        );
+    }
+
+    #[test]
+    fn untaken_data_and_unregistered_expressions_keep_interpreter_behavior() {
+        let expression = Expression::If {
+            condition: Box::new(Expression::Literal {
+                value: Scalar::Bool(false),
+            }),
+            consequent: Box::new(Expression::Data {
+                value: Value::Int("invalid".into()),
+            }),
+            alternative: Box::new(Expression::Data {
+                value: Value::String("ok".into()),
+            }),
+        };
+        let program = PreparedProgram::from_roots(vec![&expression]);
+        let mut prepared = Arena::with_prepared(100, &program);
+        let mut plain = Arena::new(100);
+        let expected = expression
+            .eval(EvalContext::new(&[], &[]), &mut plain)
+            .unwrap();
+        let actual = expression
+            .eval(EvalContext::new(&[], &[]), &mut prepared)
+            .unwrap();
+        assert_eq!(
+            plain.portable(expected).unwrap(),
+            prepared.portable(actual).unwrap()
+        );
+        assert_eq!(plain.work, prepared.work);
+        let dynamic = Expression::Data {
+            value: Value::String("dynamic".into()),
+        };
+        let actual = dynamic
+            .eval(EvalContext::new(&[], &[]), &mut prepared)
+            .unwrap();
+        assert_eq!(
+            prepared.portable(actual).unwrap(),
+            Value::String("dynamic".into())
+        );
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[test]
+    fn cached_worker_references_are_remapped_when_merged() {
+        use crate::safety_work::WorkBudget;
+        let expression = Expression::Data {
+            value: Value::String("right".into()),
+        };
+        let program = PreparedProgram::from_roots(vec![&expression]);
+        let mut root = Arena::with_prepared(1000, &program);
+        let budget = WorkBudget::new(900, 2);
+        let mut first = root.fork(&budget, 0);
+        let mut second = root.fork(&budget, 1);
+        let left = first.string("left".into()).unwrap();
+        let right = expression
+            .eval(EvalContext::new(&[], &[]), &mut second)
+            .unwrap();
+        assert_eq!(left, right);
+        let first = first.into_delta();
+        let second = second.into_delta();
+        let first_map = root.merge(first).unwrap();
+        let second_map = root.merge(second).unwrap();
+        let actual = expression
+            .eval(EvalContext::new(&[], &[]), &mut root)
+            .unwrap();
+        assert_eq!(actual, second_map.get(right));
+        assert_ne!(actual, first_map.get(left));
+        assert_eq!(
+            root.portable(actual).unwrap(),
+            Value::String("right".into())
+        );
     }
 }

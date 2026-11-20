@@ -1,0 +1,8 @@
+{
+  "name": "fair-forall",
+  "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (\\A p \\in {1,2}: WF_done(Step(p)))\nLive == <> (done = {1,2})\n====",
+  "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+  "modules": {},
+  "expected": "complete",
+  "tlc": "complete"
+}

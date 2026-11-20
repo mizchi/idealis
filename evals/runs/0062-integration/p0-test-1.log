@@ -1,0 +1,160 @@
+✖ Quint v2 preserves v1 behavior: Counter/safety (45.722458ms)
+✖ Quint v2 preserves v1 behavior: Counter/broken (3.683208ms)
+✖ Quint v2 preserves v1 behavior: SetFold/safety (4.930292ms)
+✖ Quint v2 preserves v1 behavior: SetFold/broken (2.661041ms)
+✖ Quint v2 preserves v1 behavior: SequenceFold/safety (2.06225ms)
+✖ Quint v2 preserves v1 behavior: SequenceFold/broken (0.98975ms)
+✖ Quint v2 preserves v1 behavior: Choice/safety (2.716792ms)
+✖ Quint v2 preserves v1 behavior: Choice/broken (1.701958ms)
+✖ Quint v2 preserves v1 behavior: Match/safety (10.753834ms)
+✖ Quint v2 preserves v1 behavior: Match/broken (4.380166ms)
+✖ Quint v2 preserves v1 behavior: NestedFold/safety (2.415125ms)
+✖ Quint v2 preserves v1 behavior: NestedFold/broken (1.697958ms)
+✔ v2 explicitly rejects SYMMETRY and preserves the v1 configuration (169.129ms)
+✔ v2 lexical frames make POR fall back to the complete graph (2.3065ms)
+✔ partial order is opt-in and portable with strict fallback and option validation (367.484084ms)
+✔ restricted symmetry preserves native/Wasm verdicts, concrete traces and narrow frontier fallback (154.789417ms)
+✔ symmetry rejects unsupported groups, runtime shapes, order-sensitive expressions and combinations (3.831709ms)
+✔ the 64-node boundary uses row reduction without permutation enumeration (202.906042ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 6
+ℹ fail 12
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 830.544375
+
+✖ failing tests:
+
+test at dist/evals/p0-checker/contract-test.js:18:9
+✖ Quint v2 preserves v1 behavior: Counter/safety (45.722458ms)
+  Error [PortableCoreError]: Unsupported TLA input: modules or EXTENDS
+      at unsupported (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:27:15)
+      at compileTlaSafety (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:40:9)
+      at TestContext.<anonymous> (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/p0-checker/contract-test.js:28:17)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    code: 'protocol'
+  }
+
+test at dist/evals/p0-checker/contract-test.js:18:9
+✖ Quint v2 preserves v1 behavior: Counter/broken (3.683208ms)
+  Error [PortableCoreError]: Unsupported TLA input: modules or EXTENDS
+      at unsupported (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:27:15)
+      at compileTlaSafety (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:40:9)
+      at TestContext.<anonymous> (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/p0-checker/contract-test.js:28:17)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    code: 'protocol'
+  }
+
+test at dist/evals/p0-checker/contract-test.js:18:9
+✖ Quint v2 preserves v1 behavior: SetFold/safety (4.930292ms)
+  Error [PortableCoreError]: Unsupported TLA input: modules or EXTENDS
+      at unsupported (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:27:15)
+      at compileTlaSafety (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:40:9)
+      at TestContext.<anonymous> (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/p0-checker/contract-test.js:28:17)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    code: 'protocol'
+  }
+
+test at dist/evals/p0-checker/contract-test.js:18:9
+✖ Quint v2 preserves v1 behavior: SetFold/broken (2.661041ms)
+  Error [PortableCoreError]: Unsupported TLA input: modules or EXTENDS
+      at unsupported (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:27:15)
+      at compileTlaSafety (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:40:9)
+      at TestContext.<anonymous> (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/p0-checker/contract-test.js:28:17)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    code: 'protocol'
+  }
+
+test at dist/evals/p0-checker/contract-test.js:18:9
+✖ Quint v2 preserves v1 behavior: SequenceFold/safety (2.06225ms)
+  Error [PortableCoreError]: Unsupported TLA input: modules or EXTENDS
+      at unsupported (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:27:15)
+      at compileTlaSafety (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:40:9)
+      at TestContext.<anonymous> (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/p0-checker/contract-test.js:28:17)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    code: 'protocol'
+  }
+
+test at dist/evals/p0-checker/contract-test.js:18:9
+✖ Quint v2 preserves v1 behavior: SequenceFold/broken (0.98975ms)
+  Error [PortableCoreError]: Unsupported TLA input: modules or EXTENDS
+      at unsupported (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:27:15)
+      at compileTlaSafety (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:40:9)
+      at TestContext.<anonymous> (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/p0-checker/contract-test.js:28:17)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    code: 'protocol'
+  }
+
+test at dist/evals/p0-checker/contract-test.js:18:9
+✖ Quint v2 preserves v1 behavior: Choice/safety (2.716792ms)
+  Error [PortableCoreError]: Unsupported TLA input: modules or EXTENDS
+      at unsupported (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:27:15)
+      at compileTlaSafety (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:40:9)
+      at TestContext.<anonymous> (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/p0-checker/contract-test.js:28:17)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    code: 'protocol'
+  }
+
+test at dist/evals/p0-checker/contract-test.js:18:9
+✖ Quint v2 preserves v1 behavior: Choice/broken (1.701958ms)
+  Error [PortableCoreError]: Unsupported TLA input: modules or EXTENDS
+      at unsupported (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:27:15)
+      at compileTlaSafety (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:40:9)
+      at TestContext.<anonymous> (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/p0-checker/contract-test.js:28:17)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    code: 'protocol'
+  }
+
+test at dist/evals/p0-checker/contract-test.js:18:9
+✖ Quint v2 preserves v1 behavior: Match/safety (10.753834ms)
+  Error [PortableCoreError]: Unsupported TLA input: modules or EXTENDS
+      at unsupported (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:27:15)
+      at compileTlaSafety (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:40:9)
+      at TestContext.<anonymous> (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/p0-checker/contract-test.js:28:17)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    code: 'protocol'
+  }
+
+test at dist/evals/p0-checker/contract-test.js:18:9
+✖ Quint v2 preserves v1 behavior: Match/broken (4.380166ms)
+  Error [PortableCoreError]: Unsupported TLA input: modules or EXTENDS
+      at unsupported (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:27:15)
+      at compileTlaSafety (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:40:9)
+      at TestContext.<anonymous> (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/p0-checker/contract-test.js:28:17)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    code: 'protocol'
+  }
+
+test at dist/evals/p0-checker/contract-test.js:18:9
+✖ Quint v2 preserves v1 behavior: NestedFold/safety (2.415125ms)
+  Error [PortableCoreError]: Unsupported TLA input: modules or EXTENDS
+      at unsupported (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:27:15)
+      at compileTlaSafety (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:40:9)
+      at TestContext.<anonymous> (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/p0-checker/contract-test.js:28:17)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    code: 'protocol'
+  }
+
+test at dist/evals/p0-checker/contract-test.js:18:9
+✖ Quint v2 preserves v1 behavior: NestedFold/broken (1.697958ms)
+  Error [PortableCoreError]: Unsupported TLA input: modules or EXTENDS
+      at unsupported (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:27:15)
+      at compileTlaSafety (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/src/tla-safety.js:40:9)
+      at TestContext.<anonymous> (file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/p0-checker/contract-test.js:28:17)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    code: 'protocol'
+  }

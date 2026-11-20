@@ -1,0 +1,13 @@
+import json,sys
+from pathlib import Path
+root=Path(sys.argv[1]); target=Path(sys.argv[2])
+items=[]
+for path in sorted((root/'0/criterion').rglob('new/estimates.json')):
+    relative=path.relative_to(root/'0/criterion')
+    means=[json.loads((root/str(i)/'criterion'/relative).read_text())['mean']['point_estimate']/1e6 for i in range(4)]
+    before=(means[0]+means[3])/2; after=(means[1]+means[2])/2
+    items.append(dict(name=str(relative).removesuffix('/new/estimates.json'), beforeMs=before, afterMs=after, ratio=before/after, allMeanMs=means))
+assert len(items)==14
+text=json.dumps(dict(order=['before','after','after','before'],kernels=items),indent=2)+'\n'
+with target.open('x') as file: file.write(text)
+for item in items: print(f"{item['name']}: {item['beforeMs']:.3f} -> {item['afterMs']:.3f} ms ({item['ratio']:.3f}x)")

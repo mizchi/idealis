@@ -4,7 +4,7 @@ use serde_json::Value;
 
 fn fixture(name: &str) -> Value {
     let golden: Value = serde_json::from_str(include_str!(
-        "../../../evals/fixtures/tlc-operator-sharing/expected-step3f-b20.json"
+        "../../../fixtures/tlc-operator-sharing/expected-step3f-b20.json"
     ))
     .unwrap();
     golden["cases"]
@@ -69,12 +69,12 @@ macro_rules! framed {
                 $case,
                 run(
                     include_str!(concat!(
-                        "../../../evals/fixtures/tlc-operator-sharing/",
+                        "../../../fixtures/tlc-operator-sharing/",
                         $case,
                         "/Differential.tla"
                     )),
                     include_str!(concat!(
-                        "../../../evals/fixtures/tlc-operator-sharing/",
+                        "../../../fixtures/tlc-operator-sharing/",
                         $case,
                         "/Differential.cfg"
                     )),
@@ -89,12 +89,12 @@ macro_rules! framed {
                 $case,
                 run(
                     include_str!(concat!(
-                        "../../../evals/fixtures/tlc-operator-sharing/",
+                        "../../../fixtures/tlc-operator-sharing/",
                         $case,
                         "/Differential.tla"
                     )),
                     include_str!(concat!(
-                        "../../../evals/fixtures/tlc-operator-sharing/",
+                        "../../../fixtures/tlc-operator-sharing/",
                         $case,
                         "/Differential.cfg"
                     )),

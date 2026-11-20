@@ -1,0 +1,153 @@
+{
+  "input": "Counter",
+  "route": "after-native-v2",
+  "iteration": 1,
+  "warmup": false,
+  "status": "complete",
+  "compileMs": 0.2975410000000238,
+  "checkMs": 0.12433399999997619,
+  "sourceMs": 0.12320799999997689,
+  "irBytes": 1121,
+  "definitions": 1,
+  "result": {
+    "status": "complete",
+    "reason": null,
+    "states": 4,
+    "generated": 5,
+    "depth": 3,
+    "work": 14,
+    "violation": null
+  },
+  "program": {
+    "format": "modelt.safety-program",
+    "version": 2,
+    "name": "Counter",
+    "variables": [
+      "count"
+    ],
+    "initial": [
+      {
+        "name": "init",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "literal",
+              "value": {
+                "type": "int",
+                "value": "0"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "next": [
+      {
+        "name": "step",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "if",
+              "condition": {
+                "op": "lt",
+                "left": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "right": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "3"
+                  }
+                }
+              },
+              "consequent": {
+                "op": "add",
+                "left": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "right": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "1"
+                  }
+                }
+              },
+              "alternative": {
+                "op": "literal",
+                "value": {
+                  "type": "int",
+                  "value": "0"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "invariants": [
+      {
+        "name": "safety",
+        "expression": {
+          "op": "call",
+          "definition": 0,
+          "arguments": [],
+          "captures": []
+        }
+      }
+    ],
+    "assumptions": [],
+    "checkDeadlock": true,
+    "definitions": [
+      {
+        "id": 0,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "and",
+          "left": {
+            "op": "ge",
+            "left": {
+              "op": "read",
+              "slot": 0,
+              "next": false
+            },
+            "right": {
+              "op": "literal",
+              "value": {
+                "type": "int",
+                "value": "0"
+              }
+            }
+          },
+          "right": {
+            "op": "le",
+            "left": {
+              "op": "read",
+              "slot": 0,
+              "next": false
+            },
+            "right": {
+              "op": "literal",
+              "value": {
+                "type": "int",
+                "value": "3"
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

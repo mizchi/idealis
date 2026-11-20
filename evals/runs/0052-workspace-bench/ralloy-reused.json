@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "name": "ralloy-reused",
+  "mode": "reused",
+  "baseline": {
+    "path": "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/0052-before/ralloy",
+    "args": []
+  },
+  "candidate": {
+    "path": "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/0052-after/ralloy",
+    "args": []
+  },
+  "cases": [
+    {
+      "id": "two-cycle",
+      "request": {
+        "version": 1,
+        "request": {
+          "kind": "analyze",
+          "source": "sig Node { edge: set Node }\nfact Assumptions { no iden & edge }\nassert Property { no iden & ^edge }\nQuery: check Property for 2 but exactly 2 Node, 0 Int\nFeasible: run {} for 2 but exactly 2 Node, 0 Int\n",
+          "command": 0,
+          "maxWork": 1000000
+        }
+      },
+      "requirements": [
+        {
+          "pointer": "/kind",
+          "value": "analysis"
+        },
+        {
+          "pointer": "/result/status",
+          "value": "counterexample"
+        }
+      ]
+    },
+    {
+      "id": "dag-control",
+      "request": {
+        "version": 1,
+        "request": {
+          "kind": "analyze",
+          "source": "sig Node { edge: set Node }\nfact Assumptions { no iden & ^edge }\nassert Property { all n: Node | n not in n.^edge }\nQuery: check Property for 2 but 0 Int\nFeasible: run {} for 2 but 0 Int\n",
+          "command": 0,
+          "maxWork": 1000000
+        }
+      },
+      "requirements": [
+        {
+          "pointer": "/kind",
+          "value": "analysis"
+        },
+        {
+          "pointer": "/result/status",
+          "value": "no-counterexample"
+        }
+      ]
+    }
+  ],
+  "config": {
+    "baseline": "baseline",
+    "scope": "reused independent JSONL processes, transport, request and response serialization",
+    "samples": 7,
+    "warmup": 1,
+    "iterations": 3,
+    "max_evaluations": 10000
+  }
+}

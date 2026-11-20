@@ -1,23 +1,16 @@
 import { readFile } from "node:fs/promises";
 import { createServer, type Server } from "node:http";
 import { expect, test } from "@playwright/test";
-import { build } from "esbuild";
+import { bundleModule } from "../scripts/bundle-module.js";
 
 let server: Server | undefined;
 let origin: string;
 test.beforeAll(async () => {
-  const bundle = await build({
-    entryPoints: ["tests/runtime-browser-entry.ts"],
-    bundle: true,
-    platform: "browser",
-    format: "iife",
+  const bundle = await bundleModule("tests/runtime-browser-entry.ts", {
     globalName: "runtimeBrowser",
-    write: false,
   });
-  const output = bundle.outputFiles[0];
-  if (!output) throw new Error("No browser runtime bundle");
   const wasm = await readFile(
-    "evals/rust-probe/target/wasm32-unknown-unknown/release/idealis_runtime_probe.wasm",
+    "evals/experiments/rust-probe/target/wasm32-unknown-unknown/release/idealis_runtime_probe.wasm",
   );
   server = createServer((request, response) => {
     response.setHeader(
@@ -25,14 +18,14 @@ test.beforeAll(async () => {
       request.url === "/runtime.wasm"
         ? "application/wasm"
         : request.url === "/bundle.js"
-          ? "text/javascript"
+          ? "text/javascript; charset=utf-8"
           : "text/html",
     );
     response.end(
       request.url === "/runtime.wasm"
         ? wasm
         : request.url === "/bundle.js"
-          ? output.contents
+          ? Buffer.from(bundle.code)
           : '<!doctype html><title>idealis Rust runtime</title><script src="/bundle.js"></script>',
     );
   });

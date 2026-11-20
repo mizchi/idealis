@@ -1,0 +1,13 @@
+{
+  "kind": "reference-only",
+  "input": {
+    "name": "counter",
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nInit == x = 0\nAdvance == x < 3 /\\ x' = x + 1\nStay == UNCHANGED x\nUnused == FALSE /\\ x' = 0\nNext == Advance \\/ Stay \\/ Unused\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE",
+    "expected": "complete",
+    "tlc": true
+  },
+  "coverage": true,
+  "java": ".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java",
+  "jar": ".artifacts/tlc/tla2tools.jar"
+}

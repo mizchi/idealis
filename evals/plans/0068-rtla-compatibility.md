@@ -1,0 +1,25 @@
+# 0068: rtlaとSANYの構文互換性
+
+基準はa242dcbc。rtlaの字句・構文・ASTを対象とし、rtla-compilerの名前解決/level/IR変換、rtlcの探索とは分ける。既存199 source/config組のtla-ts AST比較とSANY直接対照18件は、全TLA+互換の根拠にはならない。
+
+tlaplus/tlaplusのローカルclone d8fb231de4e4b5d02c1b2ed1ac759c086f694021の公式構文corpus（42 txt、355ケース）を全件読み、元の入力・期待AST・error/skip属性・出典とhashを保持する。参照は固定TLC 1.7.4 jar。corpusの世代とjarの世代を区別し、upstreamの期待ラベルと実際のSANY受理の差をrtlaの故障と混同しない。
+
+SANYのCompilationUnitを直接呼ぶ参照adapterをevals側だけで使う。CLIのmodule読込や意味解析により、純粋な構文検査が失敗したように見えることを防ぐ。外部JDK/JVMは任意の比較実行にだけ必要で、rtlaのnative/Wasmの依存には加えない。nativeとWasmの全応答を照合し、SANYのsyntax拒否、rtlaのsyntax/unsupported、process失敗を分ける。監査完了を互換性の全件合格へ置き換えない。
+
+初期の焦点はSUBSET/UNION/DOMAINのprefix優先順位。SANY Operators.javaの8/8、8/8、9/9と現実装10/13の差を、結合順と受理/拒否の両方で確認する。局所的な既存対応の不一致はRedを保存して修正する。LAMBDA、proof、RECURSIVEや全operator語彙を一度に実装しない。
+
+公式corpusは受理/拒否を比較し、ASTの正しさ全体の証明とは区別する。別にprefixの括弧あり/なし・曖昧な境界の固定対照を置き、構文木の結合とTLCで観測できる有限モデルを確認する。誤受理・正しい入力の拒否・ASTの誤結合・仕様上の未対応を分類する。
+
+raw runは上書きせず、before/afterのsource/binary、参照adapter、JDK/jar/corpusのhashと全出力を保存する。SUPPORTへ対応と残る穴をchecklistで反映し、Jevのlive/offline/stagedを同期する。終了前はcheck/browser、rtla native/Wasm/実ブラウザ、portable/compilerの回帰、fmt/clippy、runtime build/test、evaluate/replay、配布consumerを検査する。今回のsyntax監査にTLC config全体やSANYの意味解析の互換性を含めない。
+
+最初の参照adapterは1.7.4のoperator表の初期化を省いており、最初のprefix対照が失敗した。未初期化の出力をrtlaの不一致と数えず、失敗runを保存する。固定jarのfrontEndInitializeで組込表だけを初期化し、CompilationUnitを包むparseを呼ぶ。参照processのcwdを専用directoryへ固定し、ローカルconfig.srcの混入を避ける。
+
+次の対照で、1.7.4のConfigConstantsは3つとも10..13、現行Operatorsは8/8・8/8・9/9であることが分かった。rtlaのdefaultは固定1.7.4と一致しており、prefixを即座に変更する仮説は撤回する。公式release APIで1.7.4がstable、1.8.0がpre-releaseであることを確認した。1.8.0 assetも公開SHA-256へ照合し、同じcorpusと13 focusを両jarで別runにする。focusの期待を版ごとに固定し、1.8.0との差を1.7.4互換性の故障にしない。現段階ではpublic parserのversion切替APIを増やさない。
+
+1.7.4のparse wrapperは空ファイルのParseExceptionをmessageへ変換する途中でNullPointerExceptionを起こした。失敗をsyntaxへ置き換えず、rawを保持する。参照adapterは同じCompilationUnitを直接呼び、ParseException/TokenMgrErrorだけをsyntax拒否とする。PErrorsへ積まれた構文エラーも確認し、他の例外は引き続きinfrastructure失敗とする。例外のmessage formattingは呼ばない。
+
+直接CompilationUnitを呼ぶ方法は1.7.4固有のBracketStack初期化を省くため、その試行もinfrastructure失敗として保持する。内部の初期化処理を参照adapterへコピーせず、正規のparse wrapperへ戻す。wrapperのRuntimeExceptionはinfrastructure markerとstack traceを保存して他の入力の収集を続ける。markerが一つでもあるrunはpartial-referenceとし、syntax拒否や互換性一致に数えない。
+
+全件収集後、両版が拒否する公式labels.txtの`a * lab :: b + c`をrtlaが受理すると分かった。labelDoesNotChangeParseと同じく、周囲のoperatorの結合を変えるラベルを拒否する局所修正に絞る。括弧で囲ったlabel/label body、高い優先順位のbody、prefix/postfixと同順位の境界を両jarの13追加probeで確かめ、Redを先に残す。prefix表の既定1.7.4互換は維持する。
+
+初回修正後のコードレビューで、通常の論理積/論理和はApplyではなくAnd/Orであり、labelのprecedence検査から漏れると分かった。追加7対照を両jarで先に確認した。通常のinfix論理演算の4拒否と、低優先順位の外側operator・明示括弧・bulleted junctionの3受理を分け、Redを保存して修正を補う。初回の全件runと検証失敗は変更せず、最終版のnative/Wasm再生と検証を別runに記録する。

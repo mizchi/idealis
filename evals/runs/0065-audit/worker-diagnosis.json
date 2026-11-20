@@ -1,0 +1,145 @@
+{
+  "input": {
+    "name": "record-12-safe",
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals, TLC\nCONSTANT Nodes\nVARIABLE local\nSymm == Permutations(Nodes)\nInit == local = [n \\in Nodes |-> [term |-> 0, ready |-> FALSE]]\nNext == \\/ (\\E n \\in Nodes: local' = [local EXCEPT ![n].term = IF @ < 2 THEN @ + 1 ELSE 0])\n        \\/ (\\E n \\in Nodes: local' = [local EXCEPT ![n].ready = ~@])\nSafe == \\A n \\in Nodes: local[n].term <= 2\n====",
+    "config": "CONSTANT Nodes={p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11}\nINIT Init\nNEXT Next\nINVARIANT Safe\nSYMMETRY Symm"
+  },
+  "records": [
+    {
+      "root": ".artifacts/0065-before",
+      "workers": 1,
+      "symmetryActions": false,
+      "response": {
+        "kind": "safety",
+        "result": {
+          "status": "complete",
+          "reason": null,
+          "states": 6188,
+          "generated": 148513,
+          "depth": 36,
+          "work": 27743292,
+          "violation": null
+        }
+      }
+    },
+    {
+      "root": ".artifacts/0065-before",
+      "workers": 8,
+      "symmetryActions": false,
+      "response": {
+        "kind": "safety",
+        "result": {
+          "status": "complete",
+          "reason": null,
+          "states": 6188,
+          "generated": 148513,
+          "depth": 36,
+          "work": 27749563,
+          "violation": null
+        }
+      }
+    },
+    {
+      "root": ".artifacts/0065-before",
+      "workers": 1,
+      "symmetryActions": true,
+      "response": {
+        "kind": "safety",
+        "result": {
+          "status": "complete",
+          "reason": null,
+          "states": 6188,
+          "generated": 52417,
+          "depth": 36,
+          "work": 10447390,
+          "violation": null
+        }
+      }
+    },
+    {
+      "root": ".artifacts/0065-before",
+      "workers": 8,
+      "symmetryActions": true,
+      "response": {
+        "kind": "safety",
+        "result": {
+          "status": "complete",
+          "reason": null,
+          "states": 6188,
+          "generated": 52417,
+          "depth": 36,
+          "work": 10450131,
+          "violation": null
+        }
+      }
+    },
+    {
+      "root": ".artifacts/0065-after",
+      "workers": 1,
+      "symmetryActions": false,
+      "response": {
+        "kind": "safety",
+        "result": {
+          "status": "complete",
+          "reason": null,
+          "states": 6188,
+          "generated": 148513,
+          "depth": 36,
+          "work": 27743292,
+          "violation": null
+        }
+      }
+    },
+    {
+      "root": ".artifacts/0065-after",
+      "workers": 8,
+      "symmetryActions": false,
+      "response": {
+        "kind": "safety",
+        "result": {
+          "status": "complete",
+          "reason": null,
+          "states": 6188,
+          "generated": 148513,
+          "depth": 36,
+          "work": 27749563,
+          "violation": null
+        }
+      }
+    },
+    {
+      "root": ".artifacts/0065-after",
+      "workers": 1,
+      "symmetryActions": true,
+      "response": {
+        "kind": "safety",
+        "result": {
+          "status": "complete",
+          "reason": null,
+          "states": 6188,
+          "generated": 52417,
+          "depth": 36,
+          "work": 10447390,
+          "violation": null
+        }
+      }
+    },
+    {
+      "root": ".artifacts/0065-after",
+      "workers": 8,
+      "symmetryActions": true,
+      "response": {
+        "kind": "safety",
+        "result": {
+          "status": "complete",
+          "reason": null,
+          "states": 6188,
+          "generated": 52417,
+          "depth": 36,
+          "work": 10450131,
+          "violation": null
+        }
+      }
+    }
+  ]
+}

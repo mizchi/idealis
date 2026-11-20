@@ -1,0 +1,30 @@
+{
+  "input": {
+    "name": "packed-range-True-{0}",
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE f\nInit == f = [i \\in 1..2 |-> FALSE]\nNext == f' = [f EXCEPT ![1] = ~@]\nSafe == f \\in [1..2 -> {0}]\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+    "family": "graph"
+  },
+  "classification": "compared",
+  "ours": {
+    "error": {
+      "phase": "check",
+      "code": "protocol",
+      "message": "Incomparable TLA values"
+    }
+  },
+  "native": {
+    "error": {
+      "phase": "check",
+      "code": "protocol",
+      "message": "Incomparable TLA values"
+    }
+  },
+  "reference": {
+    "status": "model-error",
+    "states": 1,
+    "generated": 1,
+    "exit": 75
+  },
+  "differences": []
+}

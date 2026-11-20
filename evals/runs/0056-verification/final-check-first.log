@@ -1,0 +1,217 @@
+pnpm check
+
+> @mizchi/idealis@0.1.0-alpha.0 check /Users/mz/ghq/github.com/mizchi/idealis
+> biome check .
+
+evals/alloy-subset/run.ts:159:5 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    157 │   await appendFile(
+    158 │     "evals/runs/ledger.jsonl",
+  > 159 │     JSON.stringify({
+        │     ^^^^^^^^^^^^^^^^
+  > 160 │       runId: basename(directory),
+  > 161 │       kind: "ralloy-differential",
+  > 162 │       status: "complete",
+  > 163 │       sourceVersion: stamp.sourceVersion,
+  > 164 │     }) + "\n",
+        │     ^^^^^^^^^
+    165 │   );
+    166 │ } catch (error) {
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
+  i Unsafe fix: Use a template literal.
+  
+    157 157 │     await appendFile(
+    158 158 │       "evals/runs/ledger.jsonl",
+    159     │ - ····JSON.stringify({
+        159 │ + ····`${JSON.stringify({
+    160 160 │         runId: basename(directory),
+    161 161 │         kind: "ralloy-differential",
+    162 162 │         status: "complete",
+    163 163 │         sourceVersion: stamp.sourceVersion,
+    164     │ - ····})·+·"\n",
+        164 │ + ····})}\n`,
+    165 165 │     );
+    166 166 │   } catch (error) {
+  
+
+evals/alloy-subset/run.ts:178:5 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    176 │   await appendFile(
+    177 │     "evals/runs/ledger.jsonl",
+  > 178 │     JSON.stringify({
+        │     ^^^^^^^^^^^^^^^^
+  > 179 │       runId: basename(directory),
+  > 180 │       kind: "ralloy-differential",
+  > 181 │       status: "error",
+  > 182 │       sourceVersion: stamp.sourceVersion,
+  > 183 │     }) + "\n",
+        │     ^^^^^^^^^
+    184 │   );
+    185 │   throw error;
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
+  i Unsafe fix: Use a template literal.
+  
+    176 176 │     await appendFile(
+    177 177 │       "evals/runs/ledger.jsonl",
+    178     │ - ····JSON.stringify({
+        178 │ + ····`${JSON.stringify({
+    179 179 │         runId: basename(directory),
+    180 180 │         kind: "ralloy-differential",
+    181 181 │         status: "error",
+    182 182 │         sourceVersion: stamp.sourceVersion,
+    183     │ - ····})·+·"\n",
+        183 │ + ····})}\n`,
+    184 184 │     );
+    185 185 │     throw error;
+  
+
+evals/smt-subset/benchmark.ts:22:22 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+    20 │   wasmPath,
+    21 │ } from "./clients.js";
+  > 22 │ import { benchmarks, type Input } from "./corpus.js";
+       │                      ^^^^^^^^^^
+    23 │ import { digest, fingerprint } from "./provenance.js";
+    24 │ import { createWasm } from "./wasm.js";
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    22 │ import·{·benchmarks,·type·Input·}·from·"./corpus.js";
+       │                      -----------                     
+
+src/backend.ts:470:5 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    468 │   const first = obligations[0];
+    469 │   if (
+  > 470 │     !first ||
+        │     ^^^^^^^^^
+  > 471 │     first.query.kind !== "induction" ||
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    472 │     first.query.obligation === "all"
+    473 │   )
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    468 468 │     const first = obligations[0];
+    469 469 │     if (
+    470     │ - ····!first·||
+    471     │ - ····first.query.kind·!==·"induction"·||
+        470 │ + ····first?.query.kind·!==·"induction"·||
+    472 471 │       first.query.obligation === "all"
+    473 472 │     )
+  
+
+README.md format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    112 112 │   0056の同じrunで、tla-ts・TLC・変更後のidealisを完全探索した。起動と共通TS frontendを含む秒数で、1 warmup後3回の中央値。状態数・生成数は全経路で一致した。
+    113 113 │   
+    114     │ - |·モデル·|·tla-ts·1·|·TLC·1·|·TLC·8·|·idealis·Wasm·1·|·idealis·native·1·|·idealis·native·8·|
+    115     │ - |·---·|·---:·|·---:·|·---:·|·---:·|·---:·|·---:·|
+    116     │ - |·0/1整数関数·|·5.870·|·13.781·|·4.515·|·6.252·|·4.597·|·2.926·|
+    117     │ - |·チャネル群·|·17.238·|·24.725·|·6.507·|·21.879·|·16.037·|·5.999·|
+        114 │ + |·モデル······|·tla-ts·1·|··TLC·1·|·TLC·8·|·idealis·Wasm·1·|·idealis·native·1·|·idealis·native·8·|
+        115 │ + |·-----------·|·-------:·|·-----:·|·----:·|·-------------:·|·---------------:·|·---------------:·|
+        116 │ + |·0/1整数関数·|····5.870·|·13.781·|·4.515·|··········6.252·|············4.597·|············2.926·|
+        117 │ + |·チャネル群··|···17.238·|·24.725·|·6.507·|·········21.879·|···········16.037·|············5.999·|
+    118 118 │   
+    119 119 │   関数は変更前比でnative逐次1.67倍、8 workers 1.48倍、Wasm 1.87倍。native 8 workersはTLCの1.54倍だった。チャネルのnative並列版は変更前とほぼ同じ。Wasmはまだtla-tsより関数で約7%、チャネルで約27%遅い。
+  
+
+evals/iterations/0056-compact-functions.md format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    25 25 │   単位は秒、中央値（最小-最大）。各セルは同じDのrunの3 sampleから集計する。
+    26 26 │   
+    27    │ - |·実行経路·|·0/1整数関数·|·チャネル群·|
+    28    │ - |·---·|·---:·|·---:·|
+    29    │ - |·tla-ts·1·|·5.870·(5.578-6.907)·|·17.238·(15.987-17.949)·|
+    30    │ - |·TLC·1·|·13.781·(12.846-15.289)·|·24.725·(24.202-26.297)·|
+    31    │ - |·TLC·8·|·4.515·(4.499-4.694)·|·6.507·(6.245-7.210)·|
+    32    │ - |·変更前·native·1·|·7.660·(6.987-8.023)·|·17.111·(15.834-17.313)·|
+    33    │ - |·変更後·native·1·|·4.597·(4.023-5.035)·|·16.037·(15.552-16.148)·|
+    34    │ - |·変更前·native·8·|·4.322·(3.836-4.544)·|·6.032·(5.914-7.475)·|
+    35    │ - |·変更後·native·8·|·2.926·(2.733-3.500)·|·5.999·(5.682-6.789)·|
+    36    │ - |·変更前·Wasm·1·|·11.716·(11.537-11.777)·|·23.104·(22.273-23.946)·|
+    37    │ - |·変更後·Wasm·1·|·6.252·(5.981-6.292)·|·21.879·(21.872-25.976)·|
+       27 │ + |·実行経路········|············0/1整数関数·|·············チャネル群·|
+       28 │ + |·---------------·|·---------------------:·|·---------------------:·|
+       29 │ + |·tla-ts·1········|····5.870·(5.578-6.907)·|·17.238·(15.987-17.949)·|
+       30 │ + |·TLC·1···········|·13.781·(12.846-15.289)·|·24.725·(24.202-26.297)·|
+       31 │ + |·TLC·8···········|····4.515·(4.499-4.694)·|····6.507·(6.245-7.210)·|
+       32 │ + |·変更前·native·1·|····7.660·(6.987-8.023)·|·17.111·(15.834-17.313)·|
+       33 │ + |·変更後·native·1·|····4.597·(4.023-5.035)·|·16.037·(15.552-16.148)·|
+       34 │ + |·変更前·native·8·|····4.322·(3.836-4.544)·|····6.032·(5.914-7.475)·|
+       35 │ + |·変更後·native·8·|····2.926·(2.733-3.500)·|····5.999·(5.682-6.789)·|
+       36 │ + |·変更前·Wasm·1···|·11.716·(11.537-11.777)·|·23.104·(22.273-23.946)·|
+       37 │ + |·変更後·Wasm·1···|····6.252·(5.981-6.292)·|·21.879·(21.872-25.976)·|
+    38 38 │   
+    39 39 │   関数の変更前/変更後はnative 1が1.67倍、native 8が1.48倍、Wasmが1.87倍。TLCと同じ8 workersではnativeが1.54倍速かった。チャネルのnative 8は変更前比1.01倍で、改善を強く主張できる差ではない。TLC 8との差も1.08倍で、sampleの範囲は重なる。
+    ····· │ 
+    49 49 │   単位はms。各value/membership行は4096操作のbatch、search行は小さい固定fixtureの全探索で、大規模比較とは入力サイズが異なる。
+    50 50 │   
+    51    │ - |·kernel·|·変更前·|·変更後·|·前/後·|
+    52    │ - |·---·|·---:·|·---:·|·---:·|
+    53    │ - |·`membership/function-cube`·|·2.095·|·1.527·|·1.37·|
+    54    │ - |·`membership/parallel-channels`·|·0.969·|·0.885·|·1.09·|
+    55    │ - |·`search/counter-product/1`·|·9.556·|·9.448·|·1.01·|
+    56    │ - |·`search/counter-product/8`·|·9.579·|·9.444·|·1.01·|
+    57    │ - |·`search/function-cube/1`·|·9.699·|·6.257·|·1.55·|
+    58    │ - |·`search/function-cube/8`·|·8.065·|·6.142·|·1.31·|
+    59    │ - |·`search/linear-ring/1`·|·1.104·|·1.104·|·1.00·|
+    60    │ - |·`search/linear-ring/8`·|·1.135·|·1.097·|·1.03·|
+    61    │ - |·`search/parallel-channels/1`·|·13.186·|·12.867·|·1.02·|
+    62    │ - |·`search/parallel-channels/8`·|·7.138·|·6.932·|·1.03·|
+    63    │ - |·`values/except-function`·|·0.475·|·0.451·|·1.05·|
+    64    │ - |·`values/except-record`·|·4.052·|·3.971·|·1.02·|
+    65    │ - |·`values/intern-existing-functions`·|·0.450·|·0.380·|·1.18·|
+    66    │ - |·`values/intern-new-functions`·|·0.498·|·0.476·|·1.05·|
+       51 │ + |·kernel·····························|·変更前·|·変更後·|·前/後·|
+       52 │ + |·----------------------------------·|·-----:·|·-----:·|·----:·|
+       53 │ + |·`membership/function-cube`·········|··2.095·|··1.527·|··1.37·|
+       54 │ + |·`membership/parallel-channels`·····|··0.969·|··0.885·|··1.09·|
+       55 │ + |·`search/counter-product/1`·········|··9.556·|··9.448·|··1.01·|
+       56 │ + |·`search/counter-product/8`·········|··9.579·|··9.444·|··1.01·|
+       57 │ + |·`search/function-cube/1`···········|··9.699·|··6.257·|··1.55·|
+       58 │ + |·`search/function-cube/8`···········|··8.065·|··6.142·|··1.31·|
+       59 │ + |·`search/linear-ring/1`·············|··1.104·|··1.104·|··1.00·|
+       60 │ + |·`search/linear-ring/8`·············|··1.135·|··1.097·|··1.03·|
+       61 │ + |·`search/parallel-channels/1`·······|·13.186·|·12.867·|··1.02·|
+       62 │ + |·`search/parallel-channels/8`·······|··7.138·|··6.932·|··1.03·|
+       63 │ + |·`values/except-function`···········|··0.475·|··0.451·|··1.05·|
+       64 │ + |·`values/except-record`·············|··4.052·|··3.971·|··1.02·|
+       65 │ + |·`values/intern-existing-functions`·|··0.450·|··0.380·|··1.18·|
+       66 │ + |·`values/intern-new-functions`······|··0.498·|··0.476·|··1.05·|
+    67 67 │   
+    68 68 │   最終Dでは14本に10%以上の後退はなかった。関数のsearchは逐次1.55倍、8 workers 1.31倍、membershipは1.37倍。チャネルとringの小さい差を有意な改善とは主張しない。[raw推定値](../runs/0056-criterion-d/manifest.json)と[集計](../runs/0056-summary-d/result.json)を保存した。
+  
+
+Checked 626 files in 105ms. No fixes applied.
+Found 2 errors.
+Found 2 warnings.
+Found 2 infos.
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+ ELIFECYCLE  Command failed with exit code 1.
+error: Recipe `check` failed on line 291 with exit code 1

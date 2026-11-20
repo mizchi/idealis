@@ -1,0 +1,22 @@
+   Compiling rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+error[E0599]: no method named `scalar_update` found for reference `&Function` in the current scope
+    --> src/safety_values.rs:1557:41
+     |
+1557 |             let probe = before_function.scalar_update(width - 1, replacement).unwrap();
+     |                                         ^^^^^^^^^^^^^ method not found in `&Function`
+
+error[E0599]: no method named `scalar_update` found for reference `&Function` in the current scope
+    --> src/safety_values.rs:1580:26
+     |
+1580 |         assert!(function.scalar_update(0, Scalar::Int(1)).is_none());
+     |                          ^^^^^^^^^^^^^ method not found in `&Function`
+
+error[E0599]: no method named `scalar_update` found for reference `&Function` in the current scope
+    --> src/safety_values.rs:1586:26
+     |
+1586 |         assert!(function.scalar_update(0, Scalar::Int(9)).is_none());
+     |                          ^^^^^^^^^^^^^ method not found in `&Function`
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `rtlc` (lib test) due to 3 previous errors
+warning: build failed, waiting for other jobs to finish...

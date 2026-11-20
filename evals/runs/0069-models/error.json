@@ -1,0 +1,1746 @@
+{
+  "status": "error",
+  "message": "AssertionError [ERR_ASSERTION]: builtin-and",
+  "records": [
+    {
+      "name": "infix-safe",
+      "kind": "matched-model",
+      "irVersion": 1,
+      "report": {
+        "input": {
+          "name": "infix-safe",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft %% right == ~left\nInit == x = FALSE\nNext == x' = (x %% TRUE)\nSafe == x \\in BOOLEAN\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "complete",
+          "irVersion": 1
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 6,
+            "violation": null
+          }
+        },
+        "native": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 6,
+            "violation": null
+          }
+        },
+        "reference": {
+          "status": "complete",
+          "states": 2,
+          "generated": 3,
+          "exit": 0
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "infix-safe",
+      "kind": "matched-model",
+      "irVersion": 2,
+      "report": {
+        "input": {
+          "name": "infix-safe",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft %% right == ~left\nInit == x = FALSE\nNext == x' = (x %% TRUE)\nSafe == x \\in BOOLEAN\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "complete",
+          "irVersion": 2
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 12,
+            "violation": null
+          }
+        },
+        "native": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 12,
+            "violation": null
+          }
+        },
+        "reference": {
+          "status": "complete",
+          "states": 2,
+          "generated": 3,
+          "exit": 0
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "infix-fault",
+      "kind": "matched-model",
+      "irVersion": 1,
+      "report": {
+        "input": {
+          "name": "infix-fault",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft %% right == ~left\nInit == x = FALSE\nNext == x' = (x %% TRUE)\nSafe == x = FALSE\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "invariant-violation",
+          "irVersion": 1
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 4,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "native": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 4,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "reference": {
+          "status": "invariant-violation",
+          "states": 2,
+          "generated": 2,
+          "exit": 12
+        },
+        "witness": {
+          "input": {
+            "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft %% right == ~left\nInit == x = FALSE\nNext == x' = (x %% TRUE)\nSafe == x = FALSE\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (x = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (x' = TRUE)) \\/ (__position = 1 /\\ __position' = 1 /\\ (x' = TRUE))) /\\ (Next \\/ UNCHANGED <<x>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<x,__position>> /\\ WF_<<x,__position>>(__TraceNext)\n__Expected == <>(~(Safe))\n====",
+            "expected": "complete",
+            "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+          },
+          "status": "complete",
+          "states": 2
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "infix-fault",
+      "kind": "matched-model",
+      "irVersion": 2,
+      "report": {
+        "input": {
+          "name": "infix-fault",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft %% right == ~left\nInit == x = FALSE\nNext == x' = (x %% TRUE)\nSafe == x = FALSE\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "invariant-violation",
+          "irVersion": 2
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 8,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "native": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 8,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "reference": {
+          "status": "invariant-violation",
+          "states": 2,
+          "generated": 2,
+          "exit": 12
+        },
+        "witness": {
+          "input": {
+            "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft %% right == ~left\nInit == x = FALSE\nNext == x' = (x %% TRUE)\nSafe == x = FALSE\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (x = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (x' = TRUE)) \\/ (__position = 1 /\\ __position' = 1 /\\ (x' = TRUE))) /\\ (Next \\/ UNCHANGED <<x>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<x,__position>> /\\ WF_<<x,__position>>(__TraceNext)\n__Expected == <>(~(Safe))\n====",
+            "expected": "complete",
+            "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+          },
+          "status": "complete",
+          "states": 2
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "prefix-safe",
+      "kind": "matched-model",
+      "irVersion": 1,
+      "report": {
+        "input": {
+          "name": "prefix-safe",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\n-. value == ~value\nInit == x = FALSE\nNext == x' = (-x)\nSafe == x \\in BOOLEAN\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "complete",
+          "irVersion": 1
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 6,
+            "violation": null
+          }
+        },
+        "native": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 6,
+            "violation": null
+          }
+        },
+        "reference": {
+          "status": "complete",
+          "states": 2,
+          "generated": 3,
+          "exit": 0
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "prefix-safe",
+      "kind": "matched-model",
+      "irVersion": 2,
+      "report": {
+        "input": {
+          "name": "prefix-safe",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\n-. value == ~value\nInit == x = FALSE\nNext == x' = (-x)\nSafe == x \\in BOOLEAN\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "complete",
+          "irVersion": 2
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 12,
+            "violation": null
+          }
+        },
+        "native": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 12,
+            "violation": null
+          }
+        },
+        "reference": {
+          "status": "complete",
+          "states": 2,
+          "generated": 3,
+          "exit": 0
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "prefix-fault",
+      "kind": "matched-model",
+      "irVersion": 1,
+      "report": {
+        "input": {
+          "name": "prefix-fault",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\n-. value == ~value\nInit == x = FALSE\nNext == x' = (-x)\nSafe == x = FALSE\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "invariant-violation",
+          "irVersion": 1
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 4,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "native": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 4,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "reference": {
+          "status": "invariant-violation",
+          "states": 2,
+          "generated": 2,
+          "exit": 12
+        },
+        "witness": {
+          "input": {
+            "source": "---- MODULE Differential ----\n\nVARIABLE x\n-. value == ~value\nInit == x = FALSE\nNext == x' = (-x)\nSafe == x = FALSE\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (x = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (x' = TRUE)) \\/ (__position = 1 /\\ __position' = 1 /\\ (x' = TRUE))) /\\ (Next \\/ UNCHANGED <<x>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<x,__position>> /\\ WF_<<x,__position>>(__TraceNext)\n__Expected == <>(~(Safe))\n====",
+            "expected": "complete",
+            "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+          },
+          "status": "complete",
+          "states": 2
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "prefix-fault",
+      "kind": "matched-model",
+      "irVersion": 2,
+      "report": {
+        "input": {
+          "name": "prefix-fault",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\n-. value == ~value\nInit == x = FALSE\nNext == x' = (-x)\nSafe == x = FALSE\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "invariant-violation",
+          "irVersion": 2
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 8,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "native": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 8,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "reference": {
+          "status": "invariant-violation",
+          "states": 2,
+          "generated": 2,
+          "exit": 12
+        },
+        "witness": {
+          "input": {
+            "source": "---- MODULE Differential ----\n\nVARIABLE x\n-. value == ~value\nInit == x = FALSE\nNext == x' = (-x)\nSafe == x = FALSE\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (x = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (x' = TRUE)) \\/ (__position = 1 /\\ __position' = 1 /\\ (x' = TRUE))) /\\ (Next \\/ UNCHANGED <<x>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<x,__position>> /\\ WF_<<x,__position>>(__TraceNext)\n__Expected == <>(~(Safe))\n====",
+            "expected": "complete",
+            "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+          },
+          "status": "complete",
+          "states": 2
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "postfix-safe",
+      "kind": "matched-model",
+      "irVersion": 1,
+      "report": {
+        "input": {
+          "name": "postfix-safe",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\nvalue ^+ == ~value\nInit == x = FALSE\nNext == x' = (x^+)\nSafe == x \\in BOOLEAN\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "complete",
+          "irVersion": 1
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 6,
+            "violation": null
+          }
+        },
+        "native": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 6,
+            "violation": null
+          }
+        },
+        "reference": {
+          "status": "complete",
+          "states": 2,
+          "generated": 3,
+          "exit": 0
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "postfix-safe",
+      "kind": "matched-model",
+      "irVersion": 2,
+      "report": {
+        "input": {
+          "name": "postfix-safe",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\nvalue ^+ == ~value\nInit == x = FALSE\nNext == x' = (x^+)\nSafe == x \\in BOOLEAN\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "complete",
+          "irVersion": 2
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 12,
+            "violation": null
+          }
+        },
+        "native": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 12,
+            "violation": null
+          }
+        },
+        "reference": {
+          "status": "complete",
+          "states": 2,
+          "generated": 3,
+          "exit": 0
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "postfix-fault",
+      "kind": "matched-model",
+      "irVersion": 1,
+      "report": {
+        "input": {
+          "name": "postfix-fault",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\nvalue ^+ == ~value\nInit == x = FALSE\nNext == x' = (x^+)\nSafe == x = FALSE\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "invariant-violation",
+          "irVersion": 1
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 4,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "native": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 4,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "reference": {
+          "status": "invariant-violation",
+          "states": 2,
+          "generated": 2,
+          "exit": 12
+        },
+        "witness": {
+          "input": {
+            "source": "---- MODULE Differential ----\n\nVARIABLE x\nvalue ^+ == ~value\nInit == x = FALSE\nNext == x' = (x^+)\nSafe == x = FALSE\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (x = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (x' = TRUE)) \\/ (__position = 1 /\\ __position' = 1 /\\ (x' = TRUE))) /\\ (Next \\/ UNCHANGED <<x>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<x,__position>> /\\ WF_<<x,__position>>(__TraceNext)\n__Expected == <>(~(Safe))\n====",
+            "expected": "complete",
+            "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+          },
+          "status": "complete",
+          "states": 2
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "postfix-fault",
+      "kind": "matched-model",
+      "irVersion": 2,
+      "report": {
+        "input": {
+          "name": "postfix-fault",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\nvalue ^+ == ~value\nInit == x = FALSE\nNext == x' = (x^+)\nSafe == x = FALSE\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "invariant-violation",
+          "irVersion": 2
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 8,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "native": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 8,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "reference": {
+          "status": "invariant-violation",
+          "states": 2,
+          "generated": 2,
+          "exit": 12
+        },
+        "witness": {
+          "input": {
+            "source": "---- MODULE Differential ----\n\nVARIABLE x\nvalue ^+ == ~value\nInit == x = FALSE\nNext == x' = (x^+)\nSafe == x = FALSE\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (x = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (x' = TRUE)) \\/ (__position = 1 /\\ __position' = 1 /\\ (x' = TRUE))) /\\ (Next \\/ UNCHANGED <<x>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<x,__position>> /\\ WF_<<x,__position>>(__TraceNext)\n__Expected == <>(~(Safe))\n====",
+            "expected": "complete",
+            "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+          },
+          "status": "complete",
+          "states": 2
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "nonfix-safe",
+      "kind": "matched-model",
+      "irVersion": 1,
+      "report": {
+        "input": {
+          "name": "nonfix-safe",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft %% right == ~left\nInit == x = FALSE\nNext == x' = (%%(x, TRUE))\nSafe == x \\in BOOLEAN\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "complete",
+          "irVersion": 1
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 6,
+            "violation": null
+          }
+        },
+        "native": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 6,
+            "violation": null
+          }
+        },
+        "reference": {
+          "status": "complete",
+          "states": 2,
+          "generated": 3,
+          "exit": 0
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "nonfix-safe",
+      "kind": "matched-model",
+      "irVersion": 2,
+      "report": {
+        "input": {
+          "name": "nonfix-safe",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft %% right == ~left\nInit == x = FALSE\nNext == x' = (%%(x, TRUE))\nSafe == x \\in BOOLEAN\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "complete",
+          "irVersion": 2
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 12,
+            "violation": null
+          }
+        },
+        "native": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 12,
+            "violation": null
+          }
+        },
+        "reference": {
+          "status": "complete",
+          "states": 2,
+          "generated": 3,
+          "exit": 0
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "nonfix-fault",
+      "kind": "matched-model",
+      "irVersion": 1,
+      "report": {
+        "input": {
+          "name": "nonfix-fault",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft %% right == ~left\nInit == x = FALSE\nNext == x' = (%%(x, TRUE))\nSafe == x = FALSE\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "invariant-violation",
+          "irVersion": 1
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 4,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "native": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 4,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "reference": {
+          "status": "invariant-violation",
+          "states": 2,
+          "generated": 2,
+          "exit": 12
+        },
+        "witness": {
+          "input": {
+            "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft %% right == ~left\nInit == x = FALSE\nNext == x' = (%%(x, TRUE))\nSafe == x = FALSE\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (x = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (x' = TRUE)) \\/ (__position = 1 /\\ __position' = 1 /\\ (x' = TRUE))) /\\ (Next \\/ UNCHANGED <<x>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<x,__position>> /\\ WF_<<x,__position>>(__TraceNext)\n__Expected == <>(~(Safe))\n====",
+            "expected": "complete",
+            "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+          },
+          "status": "complete",
+          "states": 2
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "nonfix-fault",
+      "kind": "matched-model",
+      "irVersion": 2,
+      "report": {
+        "input": {
+          "name": "nonfix-fault",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft %% right == ~left\nInit == x = FALSE\nNext == x' = (%%(x, TRUE))\nSafe == x = FALSE\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "invariant-violation",
+          "irVersion": 2
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 8,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "native": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 8,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "reference": {
+          "status": "invariant-violation",
+          "states": 2,
+          "generated": 2,
+          "exit": 12
+        },
+        "witness": {
+          "input": {
+            "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft %% right == ~left\nInit == x = FALSE\nNext == x' = (%%(x, TRUE))\nSafe == x = FALSE\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (x = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (x' = TRUE)) \\/ (__position = 1 /\\ __position' = 1 /\\ (x' = TRUE))) /\\ (Next \\/ UNCHANGED <<x>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<x,__position>> /\\ WF_<<x,__position>>(__TraceNext)\n__Expected == <>(~(Safe))\n====",
+            "expected": "complete",
+            "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+          },
+          "status": "complete",
+          "states": 2
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "let-safe",
+      "kind": "matched-model",
+      "irVersion": 1,
+      "report": {
+        "input": {
+          "name": "let-safe",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\n\nInit == x = FALSE\nNext == x' = (LET left %% right == ~left IN x %% TRUE)\nSafe == x \\in BOOLEAN\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "complete",
+          "irVersion": 1
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 6,
+            "violation": null
+          }
+        },
+        "native": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 6,
+            "violation": null
+          }
+        },
+        "reference": {
+          "status": "complete",
+          "states": 2,
+          "generated": 3,
+          "exit": 0
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "let-safe",
+      "kind": "matched-model",
+      "irVersion": 2,
+      "report": {
+        "input": {
+          "name": "let-safe",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\n\nInit == x = FALSE\nNext == x' = (LET left %% right == ~left IN x %% TRUE)\nSafe == x \\in BOOLEAN\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "complete",
+          "irVersion": 2
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 12,
+            "violation": null
+          }
+        },
+        "native": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 12,
+            "violation": null
+          }
+        },
+        "reference": {
+          "status": "complete",
+          "states": 2,
+          "generated": 3,
+          "exit": 0
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "let-fault",
+      "kind": "matched-model",
+      "irVersion": 1,
+      "report": {
+        "input": {
+          "name": "let-fault",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\n\nInit == x = FALSE\nNext == x' = (LET left %% right == ~left IN x %% TRUE)\nSafe == x = FALSE\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "invariant-violation",
+          "irVersion": 1
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 4,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "native": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 4,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "reference": {
+          "status": "invariant-violation",
+          "states": 2,
+          "generated": 2,
+          "exit": 12
+        },
+        "witness": {
+          "input": {
+            "source": "---- MODULE Differential ----\n\nVARIABLE x\n\nInit == x = FALSE\nNext == x' = (LET left %% right == ~left IN x %% TRUE)\nSafe == x = FALSE\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (x = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (x' = TRUE)) \\/ (__position = 1 /\\ __position' = 1 /\\ (x' = TRUE))) /\\ (Next \\/ UNCHANGED <<x>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<x,__position>> /\\ WF_<<x,__position>>(__TraceNext)\n__Expected == <>(~(Safe))\n====",
+            "expected": "complete",
+            "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+          },
+          "status": "complete",
+          "states": 2
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "let-fault",
+      "kind": "matched-model",
+      "irVersion": 2,
+      "report": {
+        "input": {
+          "name": "let-fault",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\n\nVARIABLE x\n\nInit == x = FALSE\nNext == x' = (LET left %% right == ~left IN x %% TRUE)\nSafe == x = FALSE\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "invariant-violation",
+          "irVersion": 2
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 8,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "native": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 8,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "reference": {
+          "status": "invariant-violation",
+          "states": 2,
+          "generated": 2,
+          "exit": 12
+        },
+        "witness": {
+          "input": {
+            "source": "---- MODULE Differential ----\n\nVARIABLE x\n\nInit == x = FALSE\nNext == x' = (LET left %% right == ~left IN x %% TRUE)\nSafe == x = FALSE\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (x = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (x' = TRUE)) \\/ (__position = 1 /\\ __position' = 1 /\\ (x' = TRUE))) /\\ (Next \\/ UNCHANGED <<x>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<x,__position>> /\\ WF_<<x,__position>>(__TraceNext)\n__Expected == <>(~(Safe))\n====",
+            "expected": "complete",
+            "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+          },
+          "status": "complete",
+          "states": 2
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "local-import-safe",
+      "kind": "matched-model",
+      "irVersion": 1,
+      "report": {
+        "input": {
+          "name": "local-import-safe",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\nEXTENDS Sequences\nVARIABLE x\nleft + right == ~left\nInit == x = FALSE\nNext == x' = (x + TRUE)\nSafe == x \\in BOOLEAN\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "complete",
+          "irVersion": 1
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 6,
+            "violation": null
+          }
+        },
+        "native": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 6,
+            "violation": null
+          }
+        },
+        "reference": {
+          "status": "complete",
+          "states": 2,
+          "generated": 3,
+          "exit": 0
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "local-import-safe",
+      "kind": "matched-model",
+      "irVersion": 2,
+      "report": {
+        "input": {
+          "name": "local-import-safe",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\nEXTENDS Sequences\nVARIABLE x\nleft + right == ~left\nInit == x = FALSE\nNext == x' = (x + TRUE)\nSafe == x \\in BOOLEAN\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "complete",
+          "irVersion": 2
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 12,
+            "violation": null
+          }
+        },
+        "native": {
+          "result": {
+            "status": "complete",
+            "reason": null,
+            "states": 2,
+            "generated": 3,
+            "depth": 1,
+            "work": 12,
+            "violation": null
+          }
+        },
+        "reference": {
+          "status": "complete",
+          "states": 2,
+          "generated": 3,
+          "exit": 0
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "local-import-fault",
+      "kind": "matched-model",
+      "irVersion": 1,
+      "report": {
+        "input": {
+          "name": "local-import-fault",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\nEXTENDS Sequences\nVARIABLE x\nleft + right == ~left\nInit == x = FALSE\nNext == x' = (x + TRUE)\nSafe == x = FALSE\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "invariant-violation",
+          "irVersion": 1
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 4,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "native": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 4,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "reference": {
+          "status": "invariant-violation",
+          "states": 2,
+          "generated": 2,
+          "exit": 12
+        },
+        "witness": {
+          "input": {
+            "source": "---- MODULE Differential ----\nEXTENDS Sequences\nVARIABLE x\nleft + right == ~left\nInit == x = FALSE\nNext == x' = (x + TRUE)\nSafe == x = FALSE\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (x = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (x' = TRUE)) \\/ (__position = 1 /\\ __position' = 1 /\\ (x' = TRUE))) /\\ (Next \\/ UNCHANGED <<x>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<x,__position>> /\\ WF_<<x,__position>>(__TraceNext)\n__Expected == <>(~(Safe))\n====",
+            "expected": "complete",
+            "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+          },
+          "status": "complete",
+          "states": 2
+        },
+        "differences": []
+      }
+    },
+    {
+      "name": "local-import-fault",
+      "kind": "matched-model",
+      "irVersion": 2,
+      "report": {
+        "input": {
+          "name": "local-import-fault",
+          "family": "graph",
+          "source": "---- MODULE Differential ----\nEXTENDS Sequences\nVARIABLE x\nleft + right == ~left\nInit == x = FALSE\nNext == x' = (x + TRUE)\nSafe == x = FALSE\n====\n",
+          "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+          "expected": "invariant-violation",
+          "irVersion": 2
+        },
+        "comparison": {},
+        "classification": "compared",
+        "ours": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 8,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "native": {
+          "result": {
+            "status": "invariant-violation",
+            "reason": null,
+            "states": 2,
+            "generated": 2,
+            "depth": 1,
+            "work": 8,
+            "violation": {
+              "name": "Safe",
+              "trace": [
+                {
+                  "action": null,
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "action": "Next",
+                  "values": [
+                    {
+                      "type": "bool",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "reference": {
+          "status": "invariant-violation",
+          "states": 2,
+          "generated": 2,
+          "exit": 12
+        },
+        "witness": {
+          "input": {
+            "source": "---- MODULE Differential ----\nEXTENDS Sequences\nVARIABLE x\nleft + right == ~left\nInit == x = FALSE\nNext == x' = (x + TRUE)\nSafe == x = FALSE\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (x = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (x' = TRUE)) \\/ (__position = 1 /\\ __position' = 1 /\\ (x' = TRUE))) /\\ (Next \\/ UNCHANGED <<x>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<x,__position>> /\\ WF_<<x,__position>>(__TraceNext)\n__Expected == <>(~(Safe))\n====",
+            "expected": "complete",
+            "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+          },
+          "status": "complete",
+          "states": 2
+        },
+        "differences": []
+      }
+    }
+  ]
+}

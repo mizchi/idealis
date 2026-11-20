@@ -1,0 +1,36 @@
+
+> @mizchi/idealis@0.1.0-alpha.0 oracle:build /Users/mz/ghq/github.com/mizchi/idealis
+> cargo build --release --locked --manifest-path crates/oracle/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/oracle/Cargo.toml
+
+
+> @mizchi/idealis@0.1.0-alpha.0 portable:build /Users/mz/ghq/github.com/mizchi/idealis
+> pnpm oracle:build && cargo build --release --locked --manifest-path crates/idealis-core/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/idealis-core/Cargo.toml
+
+
+> @mizchi/idealis@0.1.0-alpha.0 oracle:build /Users/mz/ghq/github.com/mizchi/idealis
+> cargo build --release --locked --manifest-path crates/oracle/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/oracle/Cargo.toml
+
+
+> @mizchi/idealis@0.1.0-alpha.0 build /Users/mz/ghq/github.com/mizchi/idealis
+> tsc -p tsconfig.build.json
+
+{"name":"set-delivery-12","medians":[{"route":"frontend","milliseconds":0.18133299999999508},{"route":"tla-ts","milliseconds":16.094749999999976},{"route":"native-process","milliseconds":17.72095800000011},{"route":"wasm","milliseconds":20.95550000000003}]}
+{"name":"function-nodes-12","medians":[{"route":"frontend","milliseconds":0.11950000000024374},{"route":"tla-ts","milliseconds":11.600082999999813},{"route":"native-process","milliseconds":8.813290999999936},{"route":"wasm","milliseconds":9.58245799999986}]}
+{"name":"sequence-queue-10","medians":[{"route":"frontend","milliseconds":0.1573750000002292},{"route":"tla-ts","milliseconds":2.570708000000195},{"route":"native-process","milliseconds":4.29004199999963},{"route":"wasm","milliseconds":2.4942909999999756}]}
+{"name":"fair-ring-128","medians":[{"route":"frontend","milliseconds":0.1216669999998885},{"route":"tla-ts","milliseconds":1.1453749999996035},{"route":"native-process","milliseconds":3.564582999999857},{"route":"wasm","milliseconds":1.3836660000001757}]}
+{"name":"ring-10000","medians":[{"route":"frontend","milliseconds":0.09558400000014444},{"route":"tla-ts","milliseconds":3.302375000000211},{"route":"native-process","milliseconds":3.545458999999937},{"route":"wasm","milliseconds":1.7559580000001915}]}
+{"name":"ring-50000","medians":[{"route":"frontend","milliseconds":0.10929100000021208},{"route":"tla-ts","milliseconds":15.565375000000131},{"route":"native-process","milliseconds":8.075749999999971},{"route":"wasm","milliseconds":8.37033399999973}]}
+{"name":"ring-100000","medians":[{"route":"frontend","milliseconds":0.12170800000012605},{"route":"tla-ts","milliseconds":37.62087500000007},{"route":"native-process","milliseconds":13.585458000000017},{"route":"wasm","milliseconds":16.728500000000167}]}
+{"name":"grid-20","medians":[{"route":"frontend","milliseconds":0.1633750000000873},{"route":"tla-ts","milliseconds":0.8544170000000122},{"route":"native-process","milliseconds":2.0595000000002983},{"route":"wasm","milliseconds":0.21662500000002183}]}
+{"name":"grid-50","medians":[{"route":"frontend","milliseconds":0.15012499999966167},{"route":"tla-ts","milliseconds":1.6509579999997186},{"route":"native-process","milliseconds":2.515125000000353},{"route":"wasm","milliseconds":0.9162500000002183}]}
+{"name":"grid-100","medians":[{"route":"frontend","milliseconds":0.18337499999961437},{"route":"tla-ts","milliseconds":5.77495799999997},{"route":"native-process","milliseconds":4.276624999999967},{"route":"wasm","milliseconds":3.378791999999976}]}
+pnpm oracle:build
+    Finished `release` profile [optimized] target(s) in 0.09s
+    Finished `release` profile [optimized] target(s) in 0.02s
+pnpm portable:build
+    Finished `release` profile [optimized] target(s) in 0.02s
+    Finished `release` profile [optimized] target(s) in 0.02s
+    Finished `release` profile [optimized] target(s) in 0.03s
+    Finished `release` profile [optimized] target(s) in 0.02s
+pnpm build
+node dist/evals/rust-safety/evaluate.js 'evals/runs/0072-final-verification/safety' '0014-value-hash'

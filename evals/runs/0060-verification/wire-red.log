@@ -1,0 +1,33 @@
+
+> @mizchi/idealis@0.1.0-alpha.0 test:vitest /Users/mz/ghq/github.com/mizchi/idealis
+> vitest run
+
+
+ RUN  v5.1.0 /Users/mz/ghq/github.com/mizchi/idealis
+
+ ❯ tests/source.vitest.test.ts (2 tests | 1 failed) 10ms
+   × compiled symmetry metadata is optional and validates the finite model-value group 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/source.vitest.test.ts > compiled symmetry metadata is optional and validates the finite model-value group
+PortableCoreError: Invalid compiled program fields
+ ❯ fields src/safety-program.ts:17:11
+     15|     )
+     16|   )
+     17|     throw new PortableCoreError("protocol", "Invalid compiled program …
+       |           ^
+     18|   return input;
+     19| };
+ ❯ decodeSafetyProgram src/safety-program.ts:341:17
+ ❯ tests/source-contract.ts:15:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 13 passed (14)
+      Tests  1 failed | 78 passed (79)
+   Start at  13:43:56
+   Duration  1.25s (tests 63%, import 23%, transform 12%, worker 2%)
+
+ ELIFECYCLE  Command failed with exit code 1.

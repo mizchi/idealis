@@ -1,0 +1,1580 @@
+{
+  "version": 1,
+  "revision": "5daa9ac1ede255a075c5dcfe037ffd5ba3e2512b",
+  "sources": [
+    {
+      "path": "crates/oracle/examples/observations.rs",
+      "sha256": "f40f8f3b2bdba238b14ffedd28a6faddadb8d589a949c5124cc1576a7e0ae18b"
+    },
+    {
+      "path": "crates/oracle/src/main.rs",
+      "sha256": "3a4be858d89307e4d4178d92a3fd0ec53eddd4570f700b99aea66271a9884037"
+    },
+    {
+      "path": "crates/oracle/src/wasm.rs",
+      "sha256": "e5732a484b0b896a1ef44726159969e7153d77c8a904264ef83e2135cc087292"
+    },
+    {
+      "path": "crates/oracle/src/wire.rs",
+      "sha256": "f5c889c258b27a54f4b5b34b65321a1ca3a262bd541d879e51eb1e47c503ba59"
+    },
+    {
+      "path": "crates/oracle/tests/json.rs",
+      "sha256": "cf2ca954c75dff231c15fee79bcd88f6a63250a59cc3097075fa227af028ab67"
+    },
+    {
+      "path": "evals/workspace-oracle/README.md",
+      "sha256": "511a49ee2cd15bcc331109aee7d0a583e56ac814d8be35aec3d968ca55395711"
+    },
+    {
+      "path": "evals/workspace-oracle/browser-entry.ts",
+      "sha256": "5c167411395b387832960a321d8b9d701cb4323fb178d6ab9d4765e5cefad056"
+    },
+    {
+      "path": "evals/workspace-oracle/browser.spec.ts",
+      "sha256": "130674f2fffc2cf0926e9337cb17ace0e8ff3f176fdfe00b864ffc041b80191d"
+    },
+    {
+      "path": "evals/workspace-oracle/catalog-test.ts",
+      "sha256": "2d9e3301af697f933ca4636d1459e0e46dbec09afc9fae1d66096bd7bf7dba79"
+    },
+    {
+      "path": "evals/workspace-oracle/catalog.ts",
+      "sha256": "2eeb562a498ce85d6c97e948d5692deb6f6b9d93bc8f7e4e9ded3e60b27e80f2"
+    },
+    {
+      "path": "evals/workspace-oracle/contract-test.ts",
+      "sha256": "178353a54c21fb04300922cddf693ae5a0fbfa4cf0fa4ae7a2e511e7f79eacd0"
+    },
+    {
+      "path": "evals/workspace-oracle/cost-worker.ts",
+      "sha256": "7339af34fda79184e7199bddec42283e266ffae5332a5b4a993073a433dc201e"
+    },
+    {
+      "path": "evals/workspace-oracle/cost.ts",
+      "sha256": "011a9f11ccb0842a0a96814f3663d848e1cbbb271dabe09d46b8a9d99fd45031"
+    },
+    {
+      "path": "evals/workspace-oracle/legacy-parity.ts",
+      "sha256": "67e8d811ef8012e181db8ac4c196d038b52c279abcb35cd6e43527d42f64a186"
+    },
+    {
+      "path": "evals/workspace-oracle/migrations.json",
+      "sha256": "7287c7508b4cf0acb36de110bcc1ed45bfeadeaa601cc57810635a4622f02cfd"
+    },
+    {
+      "path": "evals/workspace-oracle/node.ts",
+      "sha256": "dd6aaa7a56725b45e8d1ebd84e6dbb63420dc600016f4499ae3ea041f6e0b788"
+    },
+    {
+      "path": "evals/workspace-oracle/rust/Cargo.lock",
+      "sha256": "388e33a5dcdb110ac481639e45b40d70aa5f9aaee43cb88a3f172ded9d0eccf7"
+    },
+    {
+      "path": "evals/workspace-oracle/rust/Cargo.toml",
+      "sha256": "39a3b1e5439b6e328fba6b3fd523e8185ef14bcbc1f40d389be79f2aa2a9ce8e"
+    },
+    {
+      "path": "evals/workspace-oracle/rust/src/main.rs",
+      "sha256": "e4e8b3e519bd0ee67ec245fd3af0e4d9f93bd204db13a7882429c58bea643481"
+    },
+    {
+      "path": "evals/workspace-oracle/rust/tests/process.rs",
+      "sha256": "a4fcd5d076f229264424f7e705a418a0dc4cfffc715d617206ad5862be2fb3a6"
+    },
+    {
+      "path": "evals/workspace-oracle/snapshot.ts",
+      "sha256": "b285e9ece0dee3969a3f6272953ddc6fcb1755b8cb18bd7ec3bf1d52b80ead8c"
+    },
+    {
+      "path": "evals/workspace-oracle/tune.ts",
+      "sha256": "50743726611b66661014236f916053a93dd470e916792ba94d472ef47118f4d2"
+    },
+    {
+      "path": "evals/workspace-oracle/wasm.ts",
+      "sha256": "07cf69822558b6c0664eb7e9e4d2e688f1a2a93dbf2245db9b438a96f809edcc"
+    },
+    {
+      "path": "crates/idealis-core/Cargo.lock",
+      "sha256": "4aff86ba1d4e9fd8183f912fc74ed2ae7bb0a5158d6cd770fd14a40e96cc812a"
+    },
+    {
+      "path": "crates/idealis-core/Cargo.toml",
+      "sha256": "ca36e245dc54e0dcf7944a8e9dffbfed5c08640189a0d8d4b2f1e884ece2e980"
+    },
+    {
+      "path": "crates/idealis-core/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/idealis-core/README.md",
+      "sha256": "f03acf0db882cd2f719f952c3ec6d514c47ff3e406e76b30e348460b3ddf8f97"
+    },
+    {
+      "path": "crates/idealis-core/SUPPORT.md",
+      "sha256": "6cde116b852feb2dcd957dddcd60e19798dc53e102b34ff045f95e7b0a48a261"
+    },
+    {
+      "path": "crates/idealis-core/examples/counter.rs",
+      "sha256": "3a49faef5fed05c7c5cf6c62d2d0dd36fa4f71bd80d967b15f890b3ff837ab13"
+    },
+    {
+      "path": "crates/idealis-core/src/finite.rs",
+      "sha256": "8049bd6677fa2a7d4c9b6192ebef47ecf50977ef14b967cbc8c4c4e4b99561b0"
+    },
+    {
+      "path": "crates/idealis-core/src/history.rs",
+      "sha256": "273f22b5c483922680bfc6281a3a46ba5bb1d3f2c911535431a8f5508fc1e032"
+    },
+    {
+      "path": "crates/idealis-core/src/host.rs",
+      "sha256": "0813f97b3518e7acffb9f48a5865d96b62d407b684ff110c6c73e83aa4933c6d"
+    },
+    {
+      "path": "crates/idealis-core/src/lib.rs",
+      "sha256": "6140dcbe13008caef9075f9053bb8750978a7c5294f1ab57ac7abcb3a977ac2a"
+    },
+    {
+      "path": "crates/idealis-core/src/main.rs",
+      "sha256": "e70db654b26ff96496f3214681ad1f5241e2d76bdea9e71821c63551ff8a41f2"
+    },
+    {
+      "path": "crates/idealis-core/src/shrink.rs",
+      "sha256": "f74c85b7261bf1e3cbd6400db3fe8712f68d32b9fbcaf129509dc790ab619b36"
+    },
+    {
+      "path": "crates/idealis-core/src/wasm.rs",
+      "sha256": "2300b01f5c8540c34dbc4b4d83ea167ae081dd5fcd01c523dac8679b991a0ffe"
+    },
+    {
+      "path": "crates/idealis-core/tests/collections.rs",
+      "sha256": "841a6ab5db87d920e96f9bcc251e0c34416ec76feb2d373c1d6c05591c415eda"
+    },
+    {
+      "path": "crates/idealis-core/tests/contract.rs",
+      "sha256": "6593f24d06a636ded76b8c768120b465ec71af3544602a4488949099706f5261"
+    },
+    {
+      "path": "crates/idealis-core/tests/finite.rs",
+      "sha256": "530a4d702600ea09be8cd2a238551cf84cbab33025694fa13f48bee61ef42416"
+    },
+    {
+      "path": "crates/idealis-core/tests/host.rs",
+      "sha256": "acb4e47c7dbdf54cf80665d8ab8af265f0016bbfda16fbc31143896ae873850e"
+    },
+    {
+      "path": "crates/idealis-core/tests/loaded.rs",
+      "sha256": "1703e51afe2ff3a2dfaa8657570632ebb5328ec68445f80e4b88847c47d0a0a8"
+    },
+    {
+      "path": "crates/idealis-core/tests/rtlc.rs",
+      "sha256": "476d60956cd8001ba31218d691222621912d5bc1f53ce9b50acb48e02b0e00eb"
+    },
+    {
+      "path": "crates/idealis-core/tests/safety.rs",
+      "sha256": "acf2362a0ee072b30b58a900785962d88ce27400dc9108a0bf5c545a8b9af62a"
+    },
+    {
+      "path": "crates/idealis-core/tests/shrink.rs",
+      "sha256": "ab339fa61fc36833ecbb41bd20b633d401921e83be29633e509ede0cb081f6ca"
+    },
+    {
+      "path": "crates/idealis-core/tests/tla.rs",
+      "sha256": "371fd8539b07f6fd5255eb51cef82d7dd32826eeaaea351da485cb3183b44f69"
+    },
+    {
+      "path": "crates/idealis-smt/Cargo.lock",
+      "sha256": "6901aec9fa13e308f316a8d2c5c950f391b2db9ebaa82fade554552c690d40e9"
+    },
+    {
+      "path": "crates/idealis-smt/Cargo.toml",
+      "sha256": "1a22501614aa81b4f2c1fef87d65dd9fb848d6cb4b28c30e6b5de384636dd1fa"
+    },
+    {
+      "path": "crates/idealis-smt/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/idealis-smt/README.md",
+      "sha256": "4bfcb5cae0b8089cbaacc2d98d6ae9d39a1f1b142fb01bebba0ccc74042fe78e"
+    },
+    {
+      "path": "crates/idealis-smt/SUPPORT.md",
+      "sha256": "46b94fe72bf4cbcba96c42837ebf4307ab4235080d3b371e3cc4715514b81a59"
+    },
+    {
+      "path": "crates/idealis-smt/benches/fixtures/integer-ite.smt2",
+      "sha256": "85251ab4f3e371c94f8711fe29a75cd5510cd2e895b21d08932965164aeffa88"
+    },
+    {
+      "path": "crates/idealis-smt/benches/fixtures/ite-64.smt2",
+      "sha256": "e657efa742cefaba0555cea0e3f5aab4bde884214da832a2519bb6f82d813c78"
+    },
+    {
+      "path": "crates/idealis-smt/benches/fixtures/repeat-64.smt2",
+      "sha256": "14d047b31ccf8608cbf3624ab51c52c385ce284b87b0d27c878c2e4517fd63a2"
+    },
+    {
+      "path": "crates/idealis-smt/benches/fixtures/scopes-32.smt2",
+      "sha256": "6a099a1f9b833483dd92494e2187880b2551139e5562d9c721a21795fa03254f"
+    },
+    {
+      "path": "crates/idealis-smt/benches/solver.rs",
+      "sha256": "0ea04ac5e0e829f61b5f8ffc691e730d9293104ea647d9ec2ebf2a2eef8c418f"
+    },
+    {
+      "path": "crates/idealis-smt/examples/ttl.rs",
+      "sha256": "010617ece0746281dc4cb0e344575d8096fa56995a6b6eef7304e12573d4b3fb"
+    },
+    {
+      "path": "crates/idealis-smt/src/lib.rs",
+      "sha256": "84c917c55fce5052bf69f9767bdbdf3e8bd98f87a7f5f1c8d4e799be0210db68"
+    },
+    {
+      "path": "crates/idealis-smt/src/main.rs",
+      "sha256": "55a2fba57e5cc16924fd34433b2086905653a63404519009f8f82f54b1e74ead"
+    },
+    {
+      "path": "crates/idealis-smt/src/parser.rs",
+      "sha256": "57ebf9be64751e16b858e7f8ff5ab7262cafcfa05098026fd0a485f0306d3052"
+    },
+    {
+      "path": "crates/idealis-smt/src/protocol.rs",
+      "sha256": "7e453fa03e0f81c3a534a211498a1f99c6b2e63359b7c3f02ea9dd2a71d7ed86"
+    },
+    {
+      "path": "crates/idealis-smt/src/script.rs",
+      "sha256": "46e136a6687a4047844c5199a0799935f7faf32c264ec2add11aab8125bfd57f"
+    },
+    {
+      "path": "crates/idealis-smt/src/solver.rs",
+      "sha256": "b7e51fcfa9c40da4de1a49b3a53363cabc632150fd4a10ea1db694b27c30141d"
+    },
+    {
+      "path": "crates/idealis-smt/src/wasm.rs",
+      "sha256": "942d755ec0342a5aff28bf7e25bbe48e601bb9631a57fd98d012c6873b8a172e"
+    },
+    {
+      "path": "crates/idealis-smt/tests/benchmark.rs",
+      "sha256": "b1e96de248276eaeded5ddfcf36c397ecaab9e45c46b3e949fad69f7da97ff96"
+    },
+    {
+      "path": "crates/idealis-smt/tests/expansion.rs",
+      "sha256": "bfa8123edf5acb3edcfad0c20328277df23cbf729395d6f3dfe2d1642c1c3aeb"
+    },
+    {
+      "path": "crates/idealis-smt/tests/scripts.rs",
+      "sha256": "8785381075cf1b5a72570deeebf212bf9051b360b1a95773a76ab90694cbd2d8"
+    },
+    {
+      "path": "crates/idealis-smt/tests/solver.rs",
+      "sha256": "191bb58302c2f2f295549c8e4f750f6691aedc9ba6b1a21fe1fb576e5b150b1d"
+    },
+    {
+      "path": "crates/idealis-testing/Cargo.lock",
+      "sha256": "54371340804e289bd3b9b2e43af6492e21015c8aae5c468715971d763334bb9a"
+    },
+    {
+      "path": "crates/idealis-testing/Cargo.toml",
+      "sha256": "ce902f034b670d1e740af4d64ac6652fc726a08763b4a79a34a34f7894b5b19d"
+    },
+    {
+      "path": "crates/idealis-testing/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/idealis-testing/README.md",
+      "sha256": "a58dab386abb9e6bba2e4025608fc4e5585bf28e6d8cb47517e75a421478cfef"
+    },
+    {
+      "path": "crates/idealis-testing/SUPPORT.md",
+      "sha256": "2eec125189aeacfba26165cd75f8c4ce1d8251709964fdc0466ee6180a1154da"
+    },
+    {
+      "path": "crates/idealis-testing/examples/counter.rs",
+      "sha256": "d66cd07c2d01d3a083678949719a2e6cb44e9520d5c566091e4f41636b009686"
+    },
+    {
+      "path": "crates/idealis-testing/examples/schedule.rs",
+      "sha256": "3efc72a263ca20c1aab07493050b68a72e8abdd964859e5feddf38f35275a61a"
+    },
+    {
+      "path": "crates/idealis-testing/src/compare.rs",
+      "sha256": "0655a4155cebec729340c939abaf367e41f826f461e1492c0fcb8cb469a81c42"
+    },
+    {
+      "path": "crates/idealis-testing/src/engine.rs",
+      "sha256": "23ea75e7a36e1fc0a1cb5249641463033ff86f634f40f47ea7d0cbafd0fd4abf"
+    },
+    {
+      "path": "crates/idealis-testing/src/generator.rs",
+      "sha256": "0a959323d312f3cf5241286e95661adb07eeafe58a948d805729e428f666b737"
+    },
+    {
+      "path": "crates/idealis-testing/src/lib.rs",
+      "sha256": "74c3ab65f91124da1108c586935ffeac04f023107e78ef70d1cde1680890c941"
+    },
+    {
+      "path": "crates/idealis-testing/src/main.rs",
+      "sha256": "e21ebd6e989ae76723c0d57a767a86dd62c6db206de2690e1a6e05f1cd576186"
+    },
+    {
+      "path": "crates/idealis-testing/src/schedule.rs",
+      "sha256": "f9d782257352901009bbc521d965469f1f227be64a8480913195d822b00b0c90"
+    },
+    {
+      "path": "crates/idealis-testing/src/session.rs",
+      "sha256": "34b6151b4625b8d7e016e6f03b44ba44c79f75d16069ef22a09b684dd9fde431"
+    },
+    {
+      "path": "crates/idealis-testing/src/shrink.rs",
+      "sha256": "a6814f9c4f9f16c51b810a140225cc8ee2eafd156ed987ffbdb3ba011c63166a"
+    },
+    {
+      "path": "crates/idealis-testing/src/wasm.rs",
+      "sha256": "71ad6555d5188f5335bad36197337afdf7fe8780940cce895f7e97a65ea5049e"
+    },
+    {
+      "path": "crates/idealis-testing/tests/compare.rs",
+      "sha256": "71009c89c87fc1a038e423f09a50868c0da73848a798d058ac9c2a44695840b1"
+    },
+    {
+      "path": "crates/idealis-testing/tests/protocol.rs",
+      "sha256": "20e91da97e714bb08353456cbb1e7b03d031158049be609afb56b770fc34c94e"
+    },
+    {
+      "path": "crates/idealis-testing/tests/schedule.rs",
+      "sha256": "5a9c2b29361ff73131407b7434e28d40b9b27e57aca9ec2864f0146401246fad"
+    },
+    {
+      "path": "crates/idealis-testing/tests/session.rs",
+      "sha256": "969fbf55edbbeea4dbd7ad853476233bcf36eb451ae575023db3c5dd1e4dff31"
+    },
+    {
+      "path": "crates/oracle/Cargo.lock",
+      "sha256": "2795793918105ddf2d1e17884ea4dcd582b965590a64001b6c5f8a11e85b5a9a"
+    },
+    {
+      "path": "crates/oracle/Cargo.toml",
+      "sha256": "143e1347b9f043f9c3158105e5a288afee9269f498319ab62ab701003ebaf12c"
+    },
+    {
+      "path": "crates/oracle/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/oracle/README.md",
+      "sha256": "4c241aca4c5c78fe0f3db484b340bb3596e8a76ebd206378520e9105d9ffea1e"
+    },
+    {
+      "path": "crates/oracle/SUPPORT.md",
+      "sha256": "37294465c6186fa508009cabcfa2ec4c1d17699f84c14dbd8fa57d158d9149b2"
+    },
+    {
+      "path": "crates/oracle/examples/comparison.rs",
+      "sha256": "d447168e0f29018ecf08faa557d32629473ab24def4b095dc34c366465d145d1"
+    },
+    {
+      "path": "crates/oracle/src/bench.rs",
+      "sha256": "a525cbb79d6027acc95c7c12e2ebd02b034fdcf2bb47819847a7ad0e017dba10"
+    },
+    {
+      "path": "crates/oracle/src/group.rs",
+      "sha256": "8b070ee278bfe88aebc945eca17ad2a53d10925495a77a8987e1f16f4bb1e21a"
+    },
+    {
+      "path": "crates/oracle/src/lib.rs",
+      "sha256": "19c05b2734c2c7884b34c6ee90850e98e0b7bcea67746609cdc3d73ab39c6838"
+    },
+    {
+      "path": "crates/oracle/src/report.rs",
+      "sha256": "49ce76a597b6f852f7c35606403b8ded3edcec324a9c565e4ab74cb05a734315"
+    },
+    {
+      "path": "crates/oracle/tests/oracle.rs",
+      "sha256": "333c808456f75d503d29d9b6d120b5406a65072fdc59611da41c0f4652153bca"
+    },
+    {
+      "path": "crates/ralloy/Cargo.lock",
+      "sha256": "8e1eb39c2b41fb531a487e40fa20c0f81a3435a283fef4b2104744de3afd9c0d"
+    },
+    {
+      "path": "crates/ralloy/Cargo.toml",
+      "sha256": "f4d6b25f0d966c6b5b5a6f037b14e1a0509fd6d59f8992040d37bb1b515d0fae"
+    },
+    {
+      "path": "crates/ralloy/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/ralloy/NOTICE",
+      "sha256": "33d1bcab61578168e40c53134efb63775afd3672e147d92b087d5523eb9fb89c"
+    },
+    {
+      "path": "crates/ralloy/README.md",
+      "sha256": "352cda1a527077e3d53c892697e1c0ca22a46af9d9743980f9c74ccdbb0bddec"
+    },
+    {
+      "path": "crates/ralloy/SUPPORT.md",
+      "sha256": "2978273b7673fc41fc618254ab6841e4824e6f6821a537c3582e70d620796bf9"
+    },
+    {
+      "path": "crates/ralloy/examples/graph.rs",
+      "sha256": "1f6cf7bd3ecd44b49443096fc041eb0f95c5556111fa9fbe0d7f13143b3f7c67"
+    },
+    {
+      "path": "crates/ralloy/src/check.rs",
+      "sha256": "71d8398e326afd0b7abe78c88cec19a6d4f85c17901ad2299ed8ff5c8e71e81a"
+    },
+    {
+      "path": "crates/ralloy/src/engine.rs",
+      "sha256": "f3833a74b6de89d6fbc7166177d473616f4f74e57a9b9024f0820167a88d89a6"
+    },
+    {
+      "path": "crates/ralloy/src/eval.rs",
+      "sha256": "70ca790a5ed3e869b4cb73ab098d71b51d7f0f7ed0ca8a26c2bfdd5982c5ee34"
+    },
+    {
+      "path": "crates/ralloy/src/instance.rs",
+      "sha256": "c7bc2c27dfffca62cc4a7467173622db86b7c47d19a700b4e4f210ce2b66a874"
+    },
+    {
+      "path": "crates/ralloy/src/lib.rs",
+      "sha256": "ca384e1544b1086d071eea57899b870d26a15ea7e381b7d2b8999a0c5ceda4f9"
+    },
+    {
+      "path": "crates/ralloy/src/main.rs",
+      "sha256": "8ecca8ad3a3050954b31c22637edc934b187245aef1db53bed2e0c6dc5527605"
+    },
+    {
+      "path": "crates/ralloy/src/parser.rs",
+      "sha256": "17533617118ea14136c7450ff8b2a5cdb29904fddeac8fee37d94239c54c7dd4"
+    },
+    {
+      "path": "crates/ralloy/src/search.rs",
+      "sha256": "70669fb38eaf7bfa7c354816a76cd4e3562769c5b8c2a34370d7b2e8f2c1494b"
+    },
+    {
+      "path": "crates/ralloy/src/syntax.rs",
+      "sha256": "50ec0cb0425f86bbe39ed82ff67c3c68c27389deac581337b899929b8523a0a3"
+    },
+    {
+      "path": "crates/ralloy/src/wasm.rs",
+      "sha256": "b62d894d47b8d11a9fec8cbc4005e745cfce3548311ada09274fd045d58bf1b0"
+    },
+    {
+      "path": "crates/ralloy/tests/instance.rs",
+      "sha256": "af470fb81a86503ad49859eecc776aac55425953795d9a0aa433cb581e552d18"
+    },
+    {
+      "path": "crates/ralloy/tests/semantics.rs",
+      "sha256": "b8d23b9359e2cbea3ef31068b7368111497b062eaa92cd35ee026b09a8f64b42"
+    },
+    {
+      "path": "crates/rtla-compiler/Cargo.lock",
+      "sha256": "ae19c5abc8d6a7c0578676f214ed0bdce9fd8d4117ae6d6b439c25a633ac1926"
+    },
+    {
+      "path": "crates/rtla-compiler/Cargo.toml",
+      "sha256": "ff35abd7398f8ae19de5a380b7cd6638f71e4554fceca773d9c62160e8025173"
+    },
+    {
+      "path": "crates/rtla-compiler/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/rtla-compiler/README.md",
+      "sha256": "1666864b6857a7c7e949eb8f54671fc17f1a8cca81b42ad11fe127ee84e534b0"
+    },
+    {
+      "path": "crates/rtla-compiler/SUPPORT.md",
+      "sha256": "72e91d9bf6a23c5f8d9da984e8a309a48d851b49e66c4d0114c28432ff14b4e6"
+    },
+    {
+      "path": "crates/rtla-compiler/benches/compatibility.rs",
+      "sha256": "f1a42c006fdd3b696630c49356085c5abda7715fa6f849888172276601389be3"
+    },
+    {
+      "path": "crates/rtla-compiler/examples/check.rs",
+      "sha256": "bdc06941d17708dc2332575b253e96f6115daa28532117514fbba34a4eccd119"
+    },
+    {
+      "path": "crates/rtla-compiler/examples/temporal-profile.rs",
+      "sha256": "27d4e418471ee457f1d15753a50170255304bdbf9bdfa30d353eccd69fd4e4f5"
+    },
+    {
+      "path": "crates/rtla-compiler/src/lib.rs",
+      "sha256": "750fe520baf9fcbc946f780dda9684bc03864c6be95162f7c3854220aa9b18ac"
+    },
+    {
+      "path": "crates/rtla-compiler/src/link.rs",
+      "sha256": "b22c624fa74a5b4a1918736070cfa6d1b9a2e4a1c032460d6546c5c7eae74552"
+    },
+    {
+      "path": "crates/rtla-compiler/src/rewrite.rs",
+      "sha256": "98b15fbe03bea78c0c01693d76b778cb35d79e50ec84d01352c949e301eeb907"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/compiler.rs",
+      "sha256": "d6c7bc5018f026e0791388fd3776318247f744a58d9827d41dae2bd86f44cbb5"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/finite-support.json",
+      "sha256": "4255c15f24e2fae6420dc15585cef35a48eb2e23b8ac7e1c92e3d00b4f8a2690"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/finite_support.rs",
+      "sha256": "a6247454985746c04f6209329fcf9a8a6f3544c2e3f7bbaad322ce0b1d5c165c"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/modules-support.json",
+      "sha256": "c08e6216640becfcdefbd94110282f714310f72f19c354a82bf1595721e1c564"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/modules.rs",
+      "sha256": "2ce495a5d403b6e6de887cd07443a27f2dbd7083d1aac91deb331471f610eb7d"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/operators-support.json",
+      "sha256": "24441593c1c2a5f6ef97ac8c294f32fe1b9e8b78ed81e282ba8b86c3b0d724dd"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/operators.rs",
+      "sha256": "123c4142730d8bc329033e0bf7725b04c06cb76d26445ad39b8fffee69e654d4"
+    },
+    {
+      "path": "crates/rtla/Cargo.lock",
+      "sha256": "9b35082c314f3682e4c3d20b6bef5e95b41387c4c70782c498af76f296f53858"
+    },
+    {
+      "path": "crates/rtla/Cargo.toml",
+      "sha256": "d0ee70339da2a568e2813ed6fd3c85f211148cf93b1b52484cbac06e7161a80c"
+    },
+    {
+      "path": "crates/rtla/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/rtla/NOTICE",
+      "sha256": "6f18428281839e8b8d7ae20477ddaae6c76cc7b5684eb8054fbdf01205ad9e9e"
+    },
+    {
+      "path": "crates/rtla/README.md",
+      "sha256": "95fba72dd05693cd024b69a848f4331c1a33ab7f8b150891bf22f668ff189a90"
+    },
+    {
+      "path": "crates/rtla/SUPPORT.md",
+      "sha256": "978ecaddac500a087be0028b4a49ae8c7ce41f9d14efa1540a2bd98d26dd56c6"
+    },
+    {
+      "path": "crates/rtla/examples/inspect.rs",
+      "sha256": "c2ddd0476818d2b5bec7c34d52f6f10d1270c86e671603cfa0788979917467b7"
+    },
+    {
+      "path": "crates/rtla/src/ast.rs",
+      "sha256": "d8929e28558bef691b8e84376e22f7ca23726fdb4650ca79d6007da0e1aa33af"
+    },
+    {
+      "path": "crates/rtla/src/config.rs",
+      "sha256": "f6824eb589df8e8b1d005dad9262cae02aac39568cdbffbdb0caf4c736d95c9c"
+    },
+    {
+      "path": "crates/rtla/src/error.rs",
+      "sha256": "3e1e4f360c44399e9c253f7697fb416f479564a5b6c61b2a9e67d74dd415b191"
+    },
+    {
+      "path": "crates/rtla/src/lexer.rs",
+      "sha256": "b705cadc17efe3df98c564e92afea8b080aad8af25bc4cceaee811a72450cfe5"
+    },
+    {
+      "path": "crates/rtla/src/lib.rs",
+      "sha256": "48e5e99cda0be623898b6c4743c28d0ca4044dc8ef82199533424cde28799903"
+    },
+    {
+      "path": "crates/rtla/src/main.rs",
+      "sha256": "8ba189d89ab92a002019441133a7aa2f86aed704ffca456d7c4094dead0d817c"
+    },
+    {
+      "path": "crates/rtla/src/parser.rs",
+      "sha256": "5d8ee681af7707294c994f0ebf2a4bc31978074be5d6c4ffb975290e3a489ec3"
+    },
+    {
+      "path": "crates/rtla/src/protocol.rs",
+      "sha256": "2c1e018da00062d8d2f6f2f20891ddad650f6cae12e772a84d81599782f385e0"
+    },
+    {
+      "path": "crates/rtla/src/wasm.rs",
+      "sha256": "e0487ce961fa75f57d34345c0b57674b1c925ad7af6b04bbda1176807cda6a5d"
+    },
+    {
+      "path": "crates/rtla/tests/fixtures/Channel.tla",
+      "sha256": "8b2cbd4533a157ae0760e3117e3c008fb9a31dc3673005fc8b537d3879de1bfc"
+    },
+    {
+      "path": "crates/rtla/tests/fixtures/DieHard.tla",
+      "sha256": "295495de6509d86a82b88757835b95e3f91fad8691d764ece4d98886dcf42b66"
+    },
+    {
+      "path": "crates/rtla/tests/fixtures/LICENSE.md",
+      "sha256": "9fce60dd2b6c2be72803e96fc67f0a34b91b073ead999cea21d00c33b8bce147"
+    },
+    {
+      "path": "crates/rtla/tests/instances.rs",
+      "sha256": "b7603946a520076ef80f68a46b4b0270b76c97cc68472c835937fa99980b0fb4"
+    },
+    {
+      "path": "crates/rtla/tests/parser.rs",
+      "sha256": "5603429e90338696652452ddc17fc026db23e67db52b94dff2314be4ec8a4c4b"
+    },
+    {
+      "path": "crates/rtlc/Cargo.lock",
+      "sha256": "fb3c4f324cd8400bcf2bbbe57301b64d8b9ea6f9664fc22437dc3b11b509fcc9"
+    },
+    {
+      "path": "crates/rtlc/Cargo.toml",
+      "sha256": "d92d2e69a3c43cb54a8e616585cff2be1ed16a3eb1d639fbed146df9dc73dd1f"
+    },
+    {
+      "path": "crates/rtlc/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/rtlc/README.md",
+      "sha256": "5dd7880c0d1c52a059203c11c8c12996beb8a7bfa37c4f5d7d53c7406a9fbdb5"
+    },
+    {
+      "path": "crates/rtlc/SUPPORT.md",
+      "sha256": "64666748cd837f1a0291b7baf4eb05f677ba429b7b46c625b5b9985e217ba0be"
+    },
+    {
+      "path": "crates/rtlc/examples/counter.rs",
+      "sha256": "3cca23e754b5177b2bf78feb3e47b06496da5272c17c5858d703ec8b5b0bb866"
+    },
+    {
+      "path": "crates/rtlc/src/bench-fixtures.json",
+      "sha256": "a9df6debe79bf441a8ff51b48f352077d3d6804d12e58afc962cb34365569f25"
+    },
+    {
+      "path": "crates/rtlc/src/benchmarks.rs",
+      "sha256": "2c98a88b5767c9ce73fc0e17c3622baf1c1925624e4b8ff1842a5f1513c79c7b"
+    },
+    {
+      "path": "crates/rtlc/src/coverage_benchmarks.rs",
+      "sha256": "4a97f85d300d8c4f5e13d171a1e1648b29be054451f66ab8f6563a90dabcd112"
+    },
+    {
+      "path": "crates/rtlc/src/ir.rs",
+      "sha256": "2da9ea3434f93b5629c905d1dfdd77f1e9283a455c2bafe690bda7a34cde187f"
+    },
+    {
+      "path": "crates/rtlc/src/lib.rs",
+      "sha256": "44994c166f4546c753ec69229ee2716664355f74fec21c337e5d24c71efdebf3"
+    },
+    {
+      "path": "crates/rtlc/src/safety.rs",
+      "sha256": "84fbaa0cb45e07dc10352b862924b69c49c84b695e73b7da09af63aadab31fa4"
+    },
+    {
+      "path": "crates/rtlc/src/safety_coverage.rs",
+      "sha256": "8b84d296370ecf9c987e4bc240bccee062be8c25aa6593d18bef6a8c02300684"
+    },
+    {
+      "path": "crates/rtlc/src/safety_expressions.rs",
+      "sha256": "6fcc1cbf6551092845f08e2a6e7904a867448fae1f77721321405c7135ac6d61"
+    },
+    {
+      "path": "crates/rtlc/src/safety_parallel.rs",
+      "sha256": "851bb3e3ff7c6825eb8847b60da4333212bf12b51e1cb397964430401d73be7e"
+    },
+    {
+      "path": "crates/rtlc/src/safety_values.rs",
+      "sha256": "16fc1449382a11eb5b2b0b8a75c5be95b56bf2883e5e65b689ffa434a247d564"
+    },
+    {
+      "path": "crates/rtlc/src/safety_work.rs",
+      "sha256": "74667c6064180bc3020acbb2b9d35bcf395e9275ff1af14f29c6eed31025ed38"
+    },
+    {
+      "path": "crates/rtlc/src/temporal.rs",
+      "sha256": "112fe88be9c0cc441b7fcf48e9fe95f750db78bdebf7bdafc1488be2c11f6708"
+    },
+    {
+      "path": "crates/rtlc/src/value.rs",
+      "sha256": "b2ab3eb74c2b234332c9723cf577c606932480222bda3f73ca39ab0bcbea48fa"
+    },
+    {
+      "path": "crates/rtlc/tests/coverage-bench.json",
+      "sha256": "5f4671877f78e0f984f1a725377fe974449823dc5cc10b6a6b2b0d04335d3798"
+    },
+    {
+      "path": "crates/rtlc/tests/coverage.rs",
+      "sha256": "7913aa019d170c21ea88d495f98d363d5934852ab996fd3f85d83ba046588b1a"
+    },
+    {
+      "path": "crates/rtlc/tests/operators.rs",
+      "sha256": "feccbfcfd9fadfc17e0f2ff58f39783e0e9550c264f3623ed64ae69c38a9a429"
+    },
+    {
+      "path": "crates/rtlc/tests/parallel_safety.rs",
+      "sha256": "24991d9904d73903397c8f9e090ef418e4eb395a7dfc19a09a3981ea93bf5771"
+    },
+    {
+      "path": "crates/rtlc/tests/standalone.rs",
+      "sha256": "0200847d1d9d48b4edabd0d37c8b59d858f1ed8d20c405386afb65137da8dc9c"
+    },
+    {
+      "path": "crates/rtlc/tests/temporal_sets.rs",
+      "sha256": "a0b590b35079abc14a5ea23d7c4616832fdfda6fb47046a6d45224b42d21b570"
+    },
+    {
+      "path": "evals/plans/0052-workspace-oracle.md",
+      "sha256": "331283cb3b78f4c76c0adea6a88b542c9b5fe4d5b07f1f04f14b627545c61f30"
+    }
+  ],
+  "binaries": [
+    {
+      "id": "rtla",
+      "sha256": "23772a6d2231f1d8d8af0b238815dd57ca484e0b06980979ee1332c4d77fea20",
+      "cases": [
+        {
+          "id": "linear-ring",
+          "request": {
+            "kind": "module",
+            "source": "---- MODULE LinearRing ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE x\nInit == x=0\nNext == x'=IF x<N-1 THEN x+1 ELSE 0\nSafe == x \\in 0..(N-1)\n===="
+          },
+          "requirements": [
+            {
+              "pointer": "/kind",
+              "value": "module"
+            }
+          ]
+        },
+        {
+          "id": "function-cube",
+          "request": {
+            "kind": "module",
+            "source": "---- MODULE FunctionCube ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE nodes\nInit == nodes = [node \\in 1..N |-> 0]\nNext == \\E node \\in 1..N: nodes' = [nodes EXCEPT ![node] = 1-@]\nSafe == nodes \\in [1..N -> 0..1]\n===="
+          },
+          "requirements": [
+            {
+              "pointer": "/kind",
+              "value": "module"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "idealis-core",
+      "sha256": "e60f0303b492c69d23d0a934929f5fb0b8214867533a7a748cd92054b3f4dee2",
+      "cases": [
+        {
+          "id": "linear-ring",
+          "request": {
+            "version": 1,
+            "request": {
+              "kind": "check-tla",
+              "source": "---- MODULE LinearRing ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE x\nInit == x=0\nNext == x'=IF x<N-1 THEN x+1 ELSE 0\nSafe == x \\in 0..(N-1)\n====",
+              "config": "CONSTANT N=1000\nINIT Init\nNEXT Next\nINVARIANT Safe",
+              "bounds": {
+                "maxDepth": 100000,
+                "maxStates": 100000,
+                "maxWork": 10000000
+              }
+            }
+          },
+          "requirements": [
+            {
+              "pointer": "/kind",
+              "value": "safety"
+            },
+            {
+              "pointer": "/result/status",
+              "value": "complete"
+            },
+            {
+              "pointer": "/result/states",
+              "value": 1000
+            },
+            {
+              "pointer": "/result/generated",
+              "value": 1001
+            }
+          ]
+        },
+        {
+          "id": "function-cube",
+          "request": {
+            "version": 1,
+            "request": {
+              "kind": "check-tla",
+              "source": "---- MODULE FunctionCube ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE nodes\nInit == nodes = [node \\in 1..N |-> 0]\nNext == \\E node \\in 1..N: nodes' = [nodes EXCEPT ![node] = 1-@]\nSafe == nodes \\in [1..N -> 0..1]\n====",
+              "config": "CONSTANT N=8\nINIT Init\nNEXT Next\nINVARIANT Safe",
+              "bounds": {
+                "maxDepth": 100000,
+                "maxStates": 100000,
+                "maxWork": 10000000
+              }
+            }
+          },
+          "requirements": [
+            {
+              "pointer": "/kind",
+              "value": "safety"
+            },
+            {
+              "pointer": "/result/status",
+              "value": "complete"
+            },
+            {
+              "pointer": "/result/states",
+              "value": 256
+            },
+            {
+              "pointer": "/result/generated",
+              "value": 2049
+            }
+          ]
+        },
+        {
+          "id": "compile-cube",
+          "request": {
+            "version": 1,
+            "request": {
+              "kind": "compile-tla",
+              "source": "---- MODULE FunctionCube ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE nodes\nInit == nodes = [node \\in 1..N |-> 0]\nNext == \\E node \\in 1..N: nodes' = [nodes EXCEPT ![node] = 1-@]\nSafe == nodes \\in [1..N -> 0..1]\n====",
+              "config": "CONSTANT N=8\nINIT Init\nNEXT Next\nINVARIANT Safe"
+            }
+          },
+          "requirements": [
+            {
+              "pointer": "/kind",
+              "value": "compiled"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "idealis-smt",
+      "sha256": "0a8078a8d4dd97f936df98a3a59c6958e2a573673d2fcf32d1cb24fbfa481597",
+      "cases": [
+        {
+          "id": "ttl",
+          "request": {
+            "version": 1,
+            "request": {
+              "kind": "solve",
+              "source": "(set-logic QF_LIA)(declare-const ttl Int)(declare-const elapsed Int)(assert (and (>= ttl 1)(<= ttl 10000)(>= elapsed 0)(<= elapsed 20000)(= elapsed ttl)))",
+              "maxWork": 10000000
+            }
+          },
+          "requirements": [
+            {
+              "pointer": "/kind",
+              "value": "solution"
+            },
+            {
+              "pointer": "/result/status",
+              "value": "sat"
+            }
+          ]
+        },
+        {
+          "id": "amount",
+          "request": {
+            "version": 1,
+            "request": {
+              "kind": "solve",
+              "source": "(set-logic QF_LIA)(declare-const amount Int)(declare-const other Int)(assert (and (> amount 0)(< amount 10)(= other 3)(= (+ amount other) 10)))",
+              "maxWork": 10000000
+            }
+          },
+          "requirements": [
+            {
+              "pointer": "/kind",
+              "value": "solution"
+            },
+            {
+              "pointer": "/result/status",
+              "value": "sat"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ralloy",
+      "sha256": "11b247d52f8a2839e1a30265d9b2869a94d769891b750d4a7634ac44e7055951",
+      "cases": [
+        {
+          "id": "two-cycle",
+          "request": {
+            "version": 1,
+            "request": {
+              "kind": "analyze",
+              "source": "sig Node { edge: set Node }\nfact Assumptions { no iden & edge }\nassert Property { no iden & ^edge }\nQuery: check Property for 2 but exactly 2 Node, 0 Int\nFeasible: run {} for 2 but exactly 2 Node, 0 Int\n",
+              "command": 0,
+              "maxWork": 1000000
+            }
+          },
+          "requirements": [
+            {
+              "pointer": "/kind",
+              "value": "analysis"
+            },
+            {
+              "pointer": "/result/status",
+              "value": "counterexample"
+            }
+          ]
+        },
+        {
+          "id": "dag-control",
+          "request": {
+            "version": 1,
+            "request": {
+              "kind": "analyze",
+              "source": "sig Node { edge: set Node }\nfact Assumptions { no iden & ^edge }\nassert Property { all n: Node | n not in n.^edge }\nQuery: check Property for 2 but 0 Int\nFeasible: run {} for 2 but 0 Int\n",
+              "command": 0,
+              "maxWork": 1000000
+            }
+          },
+          "requirements": [
+            {
+              "pointer": "/kind",
+              "value": "analysis"
+            },
+            {
+              "pointer": "/result/status",
+              "value": "no-counterexample"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "idealis-testing",
+      "sha256": "9f24ed866f54c478ba011a73ce34eb7c8b66b9133d493b6d1aee8dc6fec8726f",
+      "cases": [
+        {
+          "id": "allowed-1",
+          "request": {
+            "version": 1,
+            "request": {
+              "kind": "compare",
+              "oracle": {
+                "kind": "allowed",
+                "values": [
+                  0
+                ]
+              },
+              "targets": [
+                {
+                  "id": "target",
+                  "outcome": {
+                    "kind": "value",
+                    "value": 0
+                  }
+                }
+              ]
+            }
+          },
+          "requirements": [
+            {
+              "pointer": "/kind",
+              "value": "comparison"
+            },
+            {
+              "pointer": "/result/status",
+              "value": "matched"
+            }
+          ]
+        },
+        {
+          "id": "allowed-32",
+          "request": {
+            "version": 1,
+            "request": {
+              "kind": "compare",
+              "oracle": {
+                "kind": "allowed",
+                "values": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  9,
+                  10,
+                  11,
+                  12,
+                  13,
+                  14,
+                  15,
+                  16,
+                  17,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23,
+                  24,
+                  25,
+                  26,
+                  27,
+                  28,
+                  29,
+                  30,
+                  31
+                ]
+              },
+              "targets": [
+                {
+                  "id": "target",
+                  "outcome": {
+                    "kind": "value",
+                    "value": 31
+                  }
+                }
+              ]
+            }
+          },
+          "requirements": [
+            {
+              "pointer": "/kind",
+              "value": "comparison"
+            },
+            {
+              "pointer": "/result/status",
+              "value": "matched"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "idealis-oracle",
+      "sha256": "631bef35b9eb91e7ceef400bdcc4e15a2238150c542cc831d389f72e9c5120f9",
+      "cases": [
+        {
+          "id": "batch-1",
+          "request": {
+            "version": 1,
+            "group": "batch",
+            "reference": "reference",
+            "implementations": [
+              "candidate"
+            ],
+            "cases": [
+              {
+                "id": "case-0",
+                "input": 0,
+                "reference": {
+                  "kind": "value",
+                  "value": 0
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "requirements": [
+            {
+              "pointer": "/kind",
+              "value": "checked"
+            },
+            {
+              "pointer": "/report/status",
+              "value": "matched"
+            }
+          ]
+        },
+        {
+          "id": "batch-32",
+          "request": {
+            "version": 1,
+            "group": "batch",
+            "reference": "reference",
+            "implementations": [
+              "candidate"
+            ],
+            "cases": [
+              {
+                "id": "case-0",
+                "input": 0,
+                "reference": {
+                  "kind": "value",
+                  "value": 0
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "id": "case-1",
+                "input": 1,
+                "reference": {
+                  "kind": "value",
+                  "value": 1
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "id": "case-2",
+                "input": 2,
+                "reference": {
+                  "kind": "value",
+                  "value": 2
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 2
+                  }
+                ]
+              },
+              {
+                "id": "case-3",
+                "input": 3,
+                "reference": {
+                  "kind": "value",
+                  "value": 3
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 3
+                  }
+                ]
+              },
+              {
+                "id": "case-4",
+                "input": 4,
+                "reference": {
+                  "kind": "value",
+                  "value": 4
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 4
+                  }
+                ]
+              },
+              {
+                "id": "case-5",
+                "input": 5,
+                "reference": {
+                  "kind": "value",
+                  "value": 5
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 5
+                  }
+                ]
+              },
+              {
+                "id": "case-6",
+                "input": 6,
+                "reference": {
+                  "kind": "value",
+                  "value": 6
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 6
+                  }
+                ]
+              },
+              {
+                "id": "case-7",
+                "input": 7,
+                "reference": {
+                  "kind": "value",
+                  "value": 7
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 7
+                  }
+                ]
+              },
+              {
+                "id": "case-8",
+                "input": 8,
+                "reference": {
+                  "kind": "value",
+                  "value": 8
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 8
+                  }
+                ]
+              },
+              {
+                "id": "case-9",
+                "input": 9,
+                "reference": {
+                  "kind": "value",
+                  "value": 9
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 9
+                  }
+                ]
+              },
+              {
+                "id": "case-10",
+                "input": 10,
+                "reference": {
+                  "kind": "value",
+                  "value": 10
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 10
+                  }
+                ]
+              },
+              {
+                "id": "case-11",
+                "input": 11,
+                "reference": {
+                  "kind": "value",
+                  "value": 11
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 11
+                  }
+                ]
+              },
+              {
+                "id": "case-12",
+                "input": 12,
+                "reference": {
+                  "kind": "value",
+                  "value": 12
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 12
+                  }
+                ]
+              },
+              {
+                "id": "case-13",
+                "input": 13,
+                "reference": {
+                  "kind": "value",
+                  "value": 13
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 13
+                  }
+                ]
+              },
+              {
+                "id": "case-14",
+                "input": 14,
+                "reference": {
+                  "kind": "value",
+                  "value": 14
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 14
+                  }
+                ]
+              },
+              {
+                "id": "case-15",
+                "input": 15,
+                "reference": {
+                  "kind": "value",
+                  "value": 15
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 15
+                  }
+                ]
+              },
+              {
+                "id": "case-16",
+                "input": 16,
+                "reference": {
+                  "kind": "value",
+                  "value": 16
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 16
+                  }
+                ]
+              },
+              {
+                "id": "case-17",
+                "input": 17,
+                "reference": {
+                  "kind": "value",
+                  "value": 17
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 17
+                  }
+                ]
+              },
+              {
+                "id": "case-18",
+                "input": 18,
+                "reference": {
+                  "kind": "value",
+                  "value": 18
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 18
+                  }
+                ]
+              },
+              {
+                "id": "case-19",
+                "input": 19,
+                "reference": {
+                  "kind": "value",
+                  "value": 19
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 19
+                  }
+                ]
+              },
+              {
+                "id": "case-20",
+                "input": 20,
+                "reference": {
+                  "kind": "value",
+                  "value": 20
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 20
+                  }
+                ]
+              },
+              {
+                "id": "case-21",
+                "input": 21,
+                "reference": {
+                  "kind": "value",
+                  "value": 21
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 21
+                  }
+                ]
+              },
+              {
+                "id": "case-22",
+                "input": 22,
+                "reference": {
+                  "kind": "value",
+                  "value": 22
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 22
+                  }
+                ]
+              },
+              {
+                "id": "case-23",
+                "input": 23,
+                "reference": {
+                  "kind": "value",
+                  "value": 23
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 23
+                  }
+                ]
+              },
+              {
+                "id": "case-24",
+                "input": 24,
+                "reference": {
+                  "kind": "value",
+                  "value": 24
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 24
+                  }
+                ]
+              },
+              {
+                "id": "case-25",
+                "input": 25,
+                "reference": {
+                  "kind": "value",
+                  "value": 25
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 25
+                  }
+                ]
+              },
+              {
+                "id": "case-26",
+                "input": 26,
+                "reference": {
+                  "kind": "value",
+                  "value": 26
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 26
+                  }
+                ]
+              },
+              {
+                "id": "case-27",
+                "input": 27,
+                "reference": {
+                  "kind": "value",
+                  "value": 27
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 27
+                  }
+                ]
+              },
+              {
+                "id": "case-28",
+                "input": 28,
+                "reference": {
+                  "kind": "value",
+                  "value": 28
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 28
+                  }
+                ]
+              },
+              {
+                "id": "case-29",
+                "input": 29,
+                "reference": {
+                  "kind": "value",
+                  "value": 29
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 29
+                  }
+                ]
+              },
+              {
+                "id": "case-30",
+                "input": 30,
+                "reference": {
+                  "kind": "value",
+                  "value": 30
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 30
+                  }
+                ]
+              },
+              {
+                "id": "case-31",
+                "input": 31,
+                "reference": {
+                  "kind": "value",
+                  "value": 31
+                },
+                "actual": [
+                  {
+                    "kind": "value",
+                    "value": 31
+                  }
+                ]
+              }
+            ]
+          },
+          "requirements": [
+            {
+              "pointer": "/kind",
+              "value": "checked"
+            },
+            {
+              "pointer": "/report/status",
+              "value": "matched"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "cpu": "Apple M5",
+  "memoryBytes": 34359738368,
+  "node": "v24.22.2",
+  "rust": "rustc 1.98.0 (88d9e12ae 2026-08-18)"
+}

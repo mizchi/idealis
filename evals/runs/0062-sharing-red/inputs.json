@@ -1,0 +1,137 @@
+{
+  "input": {
+    "source": "---- MODULE SharingRed ----\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE"
+  },
+  "requests": [
+    {
+      "command": "check-safety",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "SharingRed",
+        "variables": [
+          "x"
+        ],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [
+          {
+            "name": "Safe",
+            "expression": {
+              "op": "literal",
+              "value": {
+                "type": "bool",
+                "value": true
+              }
+            }
+          }
+        ],
+        "assumptions": [],
+        "checkDeadlock": false
+      },
+      "bounds": {
+        "maxDepth": 64,
+        "maxStates": 10000,
+        "maxWork": 1000000
+      }
+    },
+    {
+      "command": "check-safety",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "SharingRed",
+        "variables": [
+          "x"
+        ],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [
+          {
+            "name": "Safe",
+            "expression": {
+              "op": "literal",
+              "value": {
+                "type": "bool",
+                "value": true
+              }
+            }
+          }
+        ],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": []
+      },
+      "bounds": {
+        "maxDepth": 64,
+        "maxStates": 10000,
+        "maxWork": 1000000
+      }
+    }
+  ]
+}

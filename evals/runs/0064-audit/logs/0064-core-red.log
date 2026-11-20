@@ -1,0 +1,24 @@
+   Compiling idealis-core v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/idealis-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.90s
+     Running tests/prepared_safety.rs (crates/idealis-core/target/debug/deps/prepared_safety-6bd47f7c12185e06)
+
+running 1 test
+test prepared_handles_and_batch_preserve_each_one_shot_result ... FAILED
+
+failures:
+
+---- prepared_handles_and_batch_preserve_each_one_shot_result stdout ----
+
+thread 'prepared_handles_and_batch_preserve_each_one_shot_result' (58210220) panicked at tests/prepared_safety.rs:17:9:
+assertion `left == right` failed: {"code":"protocol","kind":"error","message":"unknown variant `prepare-safety`, expected one of `compile-tla`, `check-tla`, `check-safety-parallel`, `check-safety`, `check-safety-coverage`, `load-model`, `release-model`, `start-loaded`, `check-loaded`, `check-history`, `replay-host`, `start-finite`, `check-finite`, `shrink-candidates`, `canonicalize`, `start`, `replay`, `resume`, `cancel` at line 1 column 35"}
+  left: String("error")
+ right: "safety-prepared"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    prepared_handles_and_batch_preserve_each_one_shot_result
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test prepared_safety`

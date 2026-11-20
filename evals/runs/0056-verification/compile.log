@@ -1,0 +1,187 @@
+    Checking rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+error[E0614]: type `Scalar` cannot be dereferenced
+   --> src/safety_values.rs:262:28
+    |
+262 |             if !self.equal(*actual, *expected)? {
+    |                            ^^^^^^^ can't be dereferenced
+
+error[E0614]: type `ir::Scalar` cannot be dereferenced
+   --> src/safety_values.rs:262:28
+    |
+262 |             if !self.equal(*actual, *expected)? {
+    |                            ^^^^^^^ can't be dereferenced
+
+error[E0277]: `&Function` is not an iterator
+   --> src/safety_values.rs:445:91
+    |
+445 |                     for ((left_key, left_value), (right_key, right_value)) in left.iter().zip(right)
+    |                                                                                           ^^^ `&Function` is not an iterator
+    |
+    = help: the trait `Iterator` is not implemented for `&Function`
+    = note: required for `&Function` to implement `IntoIterator`
+
+error[E0277]: `&Function` is not an iterator
+   --> src/safety_values.rs:445:79
+    |
+445 |                     for ((left_key, left_value), (right_key, right_value)) in left.iter().zip(right)
+    |                                                                               ^^^^^^^^^^^^^^^^^^^^^^ `&Function` is not an iterator
+    |
+    = help: the trait `Iterator` is not implemented for `&Function`
+    = note: required for `Zip<..., ...>` to implement `Iterator`
+    = note: required for `Zip<..., ...>` to implement `IntoIterator`
+    = note: the full name for the type has been written to '/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc/target/debug/deps/rtlc-4d5bb20a63ac545c.long-type-504006154512108399.txt'
+    = note: consider using `--verbose` to print the full type name to the console
+
+error[E0614]: type `Scalar` cannot be dereferenced
+   --> src/safety_values.rs:448:36
+    |
+448 | ...                   .total(*left_key, *right_key)
+    |                              ^^^^^^^^^ can't be dereferenced
+
+error[E0614]: type `Scalar` cannot be dereferenced
+   --> src/safety_values.rs:449:54
+    |
+449 | ...                   .then_with(|| self.total(*left_value, *right_value));
+    |                                                ^^^^^^^^^^^ can't be dereferenced
+
+error[E0277]: `&Function` is not an iterator
+   --> src/safety_values.rs:536:22
+    |
+536 |                     .zip(right)
+    |                      ^^^ `&Function` is not an iterator
+    |
+    = help: the trait `Iterator` is not implemented for `&Function`
+    = note: required for `&Function` to implement `IntoIterator`
+
+error[E0277]: `&Function` is not an iterator
+   --> src/safety_values.rs:445:79
+    |
+445 |                     for ((left_key, left_value), (right_key, right_value)) in left.iter().zip(right)
+    |                                                                               ^^^^^^^^^^^^^^^^^^^^^^ `&Function` is not an iterator
+    |
+    = help: the trait `Iterator` is not implemented for `&Function`
+    = note: required for `Zip<..., ...>` to implement `Iterator`
+    = note: required for `Zip<..., ...>` to implement `IntoIterator`
+    = note: the full name for the type has been written to '/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc/target/debug/deps/rtlc-278b277ceae7634f.long-type-801774158554993149.txt'
+    = note: consider using `--verbose` to print the full type name to the console
+
+error[E0614]: type `ir::Scalar` cannot be dereferenced
+   --> src/safety_values.rs:448:36
+    |
+448 | ...                   .total(*left_key, *right_key)
+    |                              ^^^^^^^^^ can't be dereferenced
+
+error[E0614]: type `ir::Scalar` cannot be dereferenced
+   --> src/safety_values.rs:449:54
+    |
+449 | ...                   .then_with(|| self.total(*left_value, *right_value));
+    |                                                ^^^^^^^^^^^ can't be dereferenced
+
+error[E0599]: `Zip<..., ...>` is not an iterator
+   --> src/safety_values.rs:537:22
+    |
+535 | /                 left.iter()
+536 | |                     .zip(right)
+537 | |                     .flat_map(|(left, right)| [(left.0, right.0), (left.1, right.1)])
+    | |                     -^^^^^^^^ `Zip<..., ...>` is not an iterator
+    | |_____________________|
+    |
+    |
+   ::: /Users/mz/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/iter/adapters/zip.rs:13:1
+    |
+ 13 |   pub struct Zip<A, B> {
+    |   -------------------- doesn't satisfy `_: Iterator`
+    |
+    = note: the following trait bounds were not satisfied:
+            `&Function: Iterator`
+            which is required by `std::iter::Zip<impl DoubleEndedIterator + Iterator<Item = (ir::Scalar, ir::Scalar)> + ExactSizeIterator + '_, &Function>: Iterator`
+            `std::iter::Zip<impl DoubleEndedIterator + Iterator<Item = (ir::Scalar, ir::Scalar)> + ExactSizeIterator + '_, &Function>: Iterator`
+            which is required by `&mut std::iter::Zip<impl DoubleEndedIterator + Iterator<Item = (ir::Scalar, ir::Scalar)> + ExactSizeIterator + '_, &Function>: Iterator`
+    = note: the full name for the type has been written to '/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc/target/debug/deps/rtlc-278b277ceae7634f.long-type-11470473611357391651.txt'
+    = note: consider using `--verbose` to print the full type name to the console
+
+error[E0599]: `Zip<..., ...>` is not an iterator
+   --> src/safety_values.rs:537:22
+    |
+535 | /                 left.iter()
+536 | |                     .zip(right)
+537 | |                     .flat_map(|(left, right)| [(left.0, right.0), (left.1, right.1)])
+    | |                     -^^^^^^^^ `Zip<..., ...>` is not an iterator
+    | |_____________________|
+    |
+    |
+   ::: /Users/mz/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/iter/adapters/zip.rs:13:1
+    |
+ 13 |   pub struct Zip<A, B> {
+    |   -------------------- doesn't satisfy `_: Iterator`
+    |
+    = note: the following trait bounds were not satisfied:
+            `&Function: Iterator`
+            which is required by `std::iter::Zip<impl DoubleEndedIterator + Iterator<Item = (Scalar, Scalar)> + ExactSizeIterator + '_, &Function>: Iterator`
+            `std::iter::Zip<impl DoubleEndedIterator + Iterator<Item = (Scalar, Scalar)> + ExactSizeIterator + '_, &Function>: Iterator`
+            which is required by `&mut std::iter::Zip<impl DoubleEndedIterator + Iterator<Item = (Scalar, Scalar)> + ExactSizeIterator + '_, &Function>: Iterator`
+    = note: the full name for the type has been written to '/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc/target/debug/deps/rtlc-4d5bb20a63ac545c.long-type-13500838967773036623.txt'
+    = note: consider using `--verbose` to print the full type name to the console
+
+error[E0277]: `&Function` is not an iterator
+   --> src/safety_values.rs:574:50
+    |
+574 |                 for (left, right) in left.iter().zip(right) {
+    |                                                  ^^^ `&Function` is not an iterator
+    |
+    = help: the trait `Iterator` is not implemented for `&Function`
+    = note: required for `&Function` to implement `IntoIterator`
+
+error[E0277]: `&Function` is not an iterator
+   --> src/safety_values.rs:574:38
+    |
+574 |                 for (left, right) in left.iter().zip(right) {
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^ `&Function` is not an iterator
+    |
+    = help: the trait `Iterator` is not implemented for `&Function`
+    = note: required for `Zip<..., ...>` to implement `Iterator`
+    = note: required for `Zip<..., ...>` to implement `IntoIterator`
+    = note: the full name for the type has been written to '/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc/target/debug/deps/rtlc-4d5bb20a63ac545c.long-type-6190097775495947067.txt'
+    = note: consider using `--verbose` to print the full type name to the console
+
+error[E0277]: `&Function` is not an iterator
+   --> src/safety_values.rs:574:38
+    |
+574 |                 for (left, right) in left.iter().zip(right) {
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^ `&Function` is not an iterator
+    |
+    = help: the trait `Iterator` is not implemented for `&Function`
+    = note: required for `Zip<..., ...>` to implement `Iterator`
+    = note: required for `Zip<..., ...>` to implement `IntoIterator`
+    = note: the full name for the type has been written to '/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc/target/debug/deps/rtlc-278b277ceae7634f.long-type-6464179166451385542.txt'
+    = note: consider using `--verbose` to print the full type name to the console
+
+error[E0614]: type `Scalar` cannot be dereferenced
+   --> src/safety_values.rs:712:43
+    |
+712 | ...                   pending.push((*value, false));
+    |                                     ^^^^^^ can't be dereferenced
+
+error[E0614]: type `ir::Scalar` cannot be dereferenced
+   --> src/safety_values.rs:712:43
+    |
+712 | ...                   pending.push((*value, false));
+    |                                     ^^^^^^ can't be dereferenced
+
+error[E0614]: type `ir::Scalar` cannot be dereferenced
+   --> src/safety_values.rs:713:43
+    |
+713 | ...                   pending.push((*key, true));
+    |                                     ^^^^ can't be dereferenced
+
+error[E0614]: type `Scalar` cannot be dereferenced
+   --> src/safety_values.rs:713:43
+    |
+713 | ...                   pending.push((*key, true));
+    |                                     ^^^^ can't be dereferenced
+
+Some errors have detailed explanations: E0277, E0599, E0614.
+For more information about an error, try `rustc --explain E0277`.
+error: could not compile `rtlc` (lib) due to 11 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `rtlc` (lib test) due to 11 previous errors

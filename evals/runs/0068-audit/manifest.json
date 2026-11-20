@@ -1,0 +1,41 @@
+{
+  "plan": "0068-rtla-compatibility",
+  "baseline": "a242dcbc",
+  "planCommit": "04d33781",
+  "corpusRevision": "d8fb231de4e4b5d02c1b2ed1ac759c086f694021",
+  "references": {
+    "stable": "v1.7.4",
+    "prerelease": "v1.8.0 (bc1b506)"
+  },
+  "archiveScope": "before.tar is git archive a242dcbc crates/rtla; after.tar is current rtla crate source including labels regression. Core parser/lexer/AST are checked against the fixed-run manifests below. SDK/jar/binaries are ignored local artifacts, not new runtime dependencies.",
+  "binaries": [
+    {
+      "path": ".artifacts/0068-before/rtla",
+      "sha256": "23772a6d2231f1d8d8af0b238815dd57ca484e0b06980979ee1332c4d77fea20"
+    },
+    {
+      "path": ".artifacts/0068-before/rtla.wasm",
+      "sha256": "19a7b65aea04fb96e8ddaf7534e4275e1b148eaa7cef4aebb34b747dff80aa16"
+    },
+    {
+      "path": ".artifacts/0068-after/rtla",
+      "sha256": "f860f40222098326ea889224ebfb78b827350fbcdd59b4a89cdba3287059f676"
+    },
+    {
+      "path": ".artifacts/0068-after/rtla.wasm",
+      "sha256": "ad20f34a404496a4ca47823aee91d5174099aa66a71e75359e06ddd7b68414d6"
+    },
+    {
+      "path": ".artifacts/tlc/tla2tools.jar",
+      "sha256": "936a262061c914694dfd669a543be24573c45d5aa0ff20a8b96b23d01e050e88"
+    },
+    {
+      "path": ".artifacts/0068-tlc-1.8.0.jar",
+      "sha256": "7e53aa636dac8a3cb0533f343115c0548e03fc0ce5edc7739becf58d3d0fb84f"
+    },
+    {
+      "path": ".artifacts/0068-jdk.tar.gz",
+      "sha256": "bf036b35b071bfb2f54f2c0af8ee8d88afa95ee6eb3dce02c0f94cfc2524d04a"
+    }
+  ]
+}

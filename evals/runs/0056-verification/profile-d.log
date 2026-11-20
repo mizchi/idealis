@@ -1,0 +1,24 @@
+Profiled native/counter-product
+Profiled native/function-cube
+Profiled native/parallel-channels
+Profiled native/linear-ring
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Sources changed while profiling
++ actual - expected
+
++ '106162bd73ebfc8e688e6894617017a41710dd52cb2a79eb833b89d4e43cc575'
+- 'f6159a7030e821f84a5439bc1ac013dccc1ad4728ef4eda074a3423aeb4b4b33'
+
+    at file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/profile-tuning/record.js:161:12 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: '106162bd73ebfc8e688e6894617017a41710dd52cb2a79eb833b89d4e43cc575',
+  expected: 'f6159a7030e821f84a5439bc1ac013dccc1ad4728ef4eda074a3423aeb4b4b33',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.22.2

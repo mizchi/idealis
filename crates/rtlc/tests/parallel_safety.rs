@@ -192,3 +192,99 @@ fn converging_workers_validate_each_canonical_state_once() {
         );
     }
 }
+
+fn wide_batch() -> SafetyProgram {
+    serde_json::from_value(json!({
+        "format":"modelt.safety-program","version":1,"name":"WideBatch","variables":["x"],
+        "initial":[{"name":"Init","steps":[
+            {"kind":"choose","slot":0,"domain":{"kind":"range","lower":integer(0),"upper":integer(127)}}
+        ]}],
+        "next":[{"name":"Step","steps":[
+            {"kind":"bind","slot":0,"domain":{"kind":"range","lower":integer(0),"upper":integer(31)}},
+            {"kind":"assign","slot":0,"value":{"op":"if","condition":{"op":"lt","left":{"op":"read","slot":0,"next":false},"right":integer(256)},"consequent":{"op":"add","left":{"op":"read","slot":0,"next":false},"right":integer(128)},"alternative":{"op":"read","slot":0,"next":false}}}
+        ]}],
+        "invariants":[],"assumptions":[],"checkDeadlock":true
+    })).unwrap()
+}
+
+#[test]
+fn wide_duplicate_batches_keep_results_constraints_and_shortest_traces() {
+    let limits = SafetyBounds {
+        max_states: 1000,
+        max_work: 1_000_000,
+        ..bounds()
+    };
+    let mut program = wide_batch();
+    let expected = program.check(limits).unwrap();
+    assert_eq!((expected.states, expected.generated), (384, 12416));
+    for workers in [2, 4, 8] {
+        assert_eq!(program.check_parallel(limits, workers).unwrap(), expected);
+    }
+    program.constraints = serde_json::from_value(json!([{"name":"Limit","expression":{"op":"le","left":{"op":"read","slot":0,"next":false},"right":integer(257)}}])).unwrap();
+    let expected = program.check(limits).unwrap();
+    assert_eq!(expected.states, 258);
+    for workers in [2, 4, 8] {
+        assert_eq!(program.check_parallel(limits, workers).unwrap(), expected);
+    }
+    program.invariants = serde_json::from_value(json!([{"name":"Safe","expression":{"op":"lt","left":{"op":"read","slot":0,"next":false},"right":integer(256)}}])).unwrap();
+    let expected = program.check(limits).unwrap();
+    assert_eq!(expected.violation.as_ref().unwrap().trace.len(), 3);
+    for workers in [2, 4, 8] {
+        let actual = program.check_parallel(limits, workers).unwrap();
+        assert_eq!(
+            (
+                actual.status,
+                actual.states,
+                actual.generated,
+                actual.violation
+            ),
+            (
+                expected.status.clone(),
+                expected.states,
+                expected.generated,
+                expected.violation.clone()
+            )
+        );
+    }
+}
+
+#[test]
+fn wide_batches_keep_budget_cuts_and_action_constraint_errors() {
+    let limits = SafetyBounds {
+        max_states: 1000,
+        max_work: 1_000_000,
+        ..bounds()
+    };
+    let mut program = wide_batch();
+    for workers in [2, 4, 8] {
+        for max_work in [1, 511, 4000, 10000] {
+            let result = program
+                .check_parallel(SafetyBounds { max_work, ..limits }, workers)
+                .unwrap();
+            assert_eq!(result.status, "bounded");
+            assert_eq!(result.reason.as_deref(), Some("work"));
+            assert!(result.work <= max_work);
+        }
+        let result = program
+            .check_parallel(
+                SafetyBounds {
+                    max_states: 130,
+                    ..limits
+                },
+                workers,
+            )
+            .unwrap();
+        assert_eq!(result.status, "bounded");
+        assert_eq!(result.reason.as_deref(), Some("states"));
+        assert_eq!(result.states, 130);
+    }
+    program.action_constraints = serde_json::from_value(json!([{"name":"Invalid","expression":{"op":"lt","left":{"op":"literal","value":{"type":"bool","value":true}},"right":integer(1)}}])).unwrap();
+    let expected = program.check(limits).unwrap_err();
+    for workers in [2, 4, 8] {
+        let actual = program.check_parallel(limits, workers).unwrap_err();
+        assert_eq!(
+            (actual.code, actual.message),
+            (expected.code, expected.message.clone())
+        );
+    }
+}

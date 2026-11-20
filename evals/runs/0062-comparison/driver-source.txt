@@ -1,0 +1,191 @@
+import assert from "node:assert/strict";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { loadavg } from "node:os";
+import { join, resolve } from "node:path";
+import { environment } from "../checker-benchmark/provenance.js";
+import { cases, fault } from "../single-model/cases.js";
+import { prepare, runTool, verify } from "../single-model/runner.js";
+import { digest } from "../usable/provenance.js";
+
+const before = process.argv[2];
+const after = process.argv[3];
+const java = process.argv[4];
+const jar = process.argv[5];
+const archive = process.argv[6];
+const output = process.argv[7];
+assert.ok(before && after && java && jar && archive && output);
+await mkdir(output);
+const files: string[] = [];
+await writeFile(
+  join(output, "driver-source.txt"),
+  await readFile("evals/compact-functions/compare.ts"),
+  { flag: "wx" },
+);
+files.push("driver-source.txt");
+const save = async (name: string, value: unknown) => {
+  await writeFile(join(output, name), `${JSON.stringify(value, null, 2)}\n`, {
+    flag: "wx",
+  });
+  files.push(name);
+};
+for (const root of [before, after]) {
+  const manifest = JSON.parse(
+    await readFile(join(root, "manifest.json"), "utf8"),
+  );
+  for (const file of manifest.files)
+    assert.equal(digest(await readFile(join(root, file.path))), file.sha256);
+}
+const routes = [
+  { name: "tla-ts", route: "tla-ts" },
+  { name: "tlc-1", route: "tlc-1" },
+  { name: "tlc-8", route: "tlc-8" },
+  {
+    name: "before-native-1",
+    route: "native",
+    workers: 1,
+    binary: resolve(before, "idealis-core"),
+  },
+  {
+    name: "after-native-1",
+    route: "native",
+    workers: 1,
+    binary: resolve(after, "idealis-core"),
+  },
+  {
+    name: "before-native-8",
+    route: "native",
+    workers: 8,
+    binary: resolve(before, "idealis-core"),
+  },
+  {
+    name: "after-native-8",
+    route: "native",
+    workers: 8,
+    binary: resolve(after, "idealis-core"),
+  },
+  {
+    name: "before-wasm",
+    route: "wasm",
+    binary: resolve(before, "idealis_core.wasm"),
+  },
+  {
+    name: "after-wasm",
+    route: "wasm",
+    binary: resolve(after, "idealis_core.wasm"),
+  },
+] as const;
+const largeInputs = cases("large").filter(
+  (input) =>
+    process.env.IDEALIS_COMPACT_ALL_MODELS === "1" ||
+    input.name === "function-cube" ||
+    input.name === "parallel-channels",
+);
+await save("manifest.json", {
+  plan: process.env.IDEALIS_COMPACT_PLAN ?? "0056",
+  environment: await environment(java, jar, archive),
+  routes,
+  bounds: { maxDepth: 10000000, maxStates: 10000000, maxWork: 4000000000 },
+  warmup: 1,
+  samples: 3,
+  models: largeInputs.map((input) => input.name),
+  scope: "fresh source-to-result process, same TLA/config and complete graph",
+  snapshots: await Promise.all(
+    [before, after].map(async (root) =>
+      JSON.parse(await readFile(join(root, "manifest.json"), "utf8")),
+    ),
+  ),
+  driverSha256: digest(await readFile("evals/compact-functions/compare.ts")),
+});
+const controls = [];
+const samples = [];
+try {
+  for (const input of cases("small"))
+    for (const broken of [false, true])
+      for (const route of routes) {
+        const selected = broken ? fault(input) : input;
+        const name = `control-${input.name}-${broken ? "fault" : "safe"}-${route.name}`;
+        const directory = join(output, name);
+        await prepare(directory, selected);
+        const actual = await runTool(
+          route.route,
+          directory,
+          selected,
+          java,
+          jar,
+          "workers" in route ? route.workers : undefined,
+          "binary" in route ? route.binary : undefined,
+        );
+        await save(`${name}.json`, actual);
+        verify(actual, selected, broken ? "invariant-violation" : "complete");
+        controls.push({
+          input: input.name,
+          broken,
+          route: route.name,
+          status: broken ? "invariant-violation" : "complete",
+        });
+      }
+  for (const input of largeInputs) {
+    for (let iteration = 0; iteration < 4; iteration++) {
+      const rotated = routes.map(
+        (_, index) => routes[(index + iteration) % routes.length],
+      );
+      const order = iteration % 2 === 0 ? rotated : [...rotated].reverse();
+      for (const route of order) {
+        assert.ok(route);
+        const name = `${input.name}-${iteration}-${route.name}`;
+        const directory = join(output, name);
+        await prepare(directory, input);
+        const hostLoadBefore = loadavg();
+        const actual = await runTool(
+          route.route,
+          directory,
+          input,
+          java,
+          jar,
+          "workers" in route ? route.workers : undefined,
+          "binary" in route ? route.binary : undefined,
+        );
+        await save(`${name}.json`, actual);
+        verify(actual, input, "complete");
+        samples.push({
+          input: input.name,
+          iteration,
+          warmup: iteration === 0,
+          route: route.name,
+          wallMs: actual.wallMs,
+          apiMs:
+            typeof actual.output === "object" &&
+            actual.output !== null &&
+            "apiMs" in actual.output
+              ? actual.output.apiMs
+              : null,
+          sampledMaxRssBytes: actual.sampledMaxRssBytes,
+          hostLoadBefore,
+          hostLoadAfter: loadavg(),
+        });
+        console.log(
+          `${input.name} ${iteration} ${route.name}: ${(actual.wallMs / 1000).toFixed(3)}s`,
+        );
+      }
+    }
+  }
+  await save("result.json", {
+    status: "complete",
+    controls,
+    samples,
+    files: await Promise.all(
+      files.map(async (path) => ({
+        path,
+        sha256: digest(await readFile(join(output, path))),
+      })),
+    ),
+  });
+} catch (error) {
+  await save("error.json", {
+    status: "error",
+    message: String(error),
+    controls,
+    samples,
+  });
+  throw error;
+}

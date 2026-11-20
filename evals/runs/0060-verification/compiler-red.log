@@ -1,0 +1,43 @@
+   Compiling rtla-compiler v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtla-compiler)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.96s
+     Running tests/symmetry.rs (crates/rtla-compiler/target/debug/deps/symmetry-1fd9e25521fe953b)
+
+running 4 tests
+test symmetry_keeps_concrete_shortest_counterexamples_and_budget_cuts ... FAILED
+test multiple_functions_preserve_same_node_correlations_and_global_scalars ... FAILED
+test full_node_permutations_reduce_counter_orbits_and_keep_plain_wire_unchanged ... FAILED
+test unsupported_symmetry_conditions_are_rejected_instead_of_ignored ... FAILED
+
+failures:
+
+---- symmetry_keeps_concrete_shortest_counterexamples_and_budget_cuts stdout ----
+
+thread 'symmetry_keeps_concrete_shortest_counterexamples_and_budget_cuts' (54129107) panicked at tests/symmetry.rs:64:45:
+called `Result::unwrap()` on an `Err` value: CompileError { message: "constrained configuration" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- multiple_functions_preserve_same_node_correlations_and_global_scalars stdout ----
+
+thread 'multiple_functions_preserve_same_node_correlations_and_global_scalars' (54129106) panicked at tests/symmetry.rs:54:43:
+called `Result::unwrap()` on an `Err` value: CompileError { message: "constrained configuration" }
+
+---- full_node_permutations_reduce_counter_orbits_and_keep_plain_wire_unchanged stdout ----
+
+thread 'full_node_permutations_reduce_counter_orbits_and_keep_plain_wire_unchanged' (54129105) panicked at tests/symmetry.rs:28:45:
+called `Result::unwrap()` on an `Err` value: CompileError { message: "constrained configuration" }
+
+---- unsupported_symmetry_conditions_are_rejected_instead_of_ignored stdout ----
+
+thread 'unsupported_symmetry_conditions_are_rejected_instead_of_ignored' (54129108) panicked at tests/symmetry.rs:97:45:
+called `Result::unwrap()` on an `Err` value: CompileError { message: "constrained configuration" }
+
+
+failures:
+    full_node_permutations_reduce_counter_orbits_and_keep_plain_wire_unchanged
+    multiple_functions_preserve_same_node_correlations_and_global_scalars
+    symmetry_keeps_concrete_shortest_counterexamples_and_budget_cuts
+    unsupported_symmetry_conditions_are_rejected_instead_of_ignored
+
+test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test symmetry`

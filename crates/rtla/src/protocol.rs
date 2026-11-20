@@ -1,13 +1,26 @@
 use crate::ast::{Config, Expression, Location, Module};
-use crate::{ErrorKind, ParseError, parse_config, parse_expression, parse_module};
+use crate::{
+    ErrorKind, ParseError, SyntaxVersion, parse_config, parse_expression_with_version,
+    parse_module_with_version,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize)]
 #[serde(tag = "kind", rename_all = "kebab-case", deny_unknown_fields)]
 pub enum Request {
-    Module { source: String },
-    Expression { source: String },
-    Config { source: String },
+    Module {
+        source: String,
+        #[serde(default, rename = "syntaxVersion")]
+        syntax_version: SyntaxVersion,
+    },
+    Expression {
+        source: String,
+        #[serde(default, rename = "syntaxVersion")]
+        syntax_version: SyntaxVersion,
+    },
+    Config {
+        source: String,
+    },
 }
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "kebab-case")]
@@ -19,12 +32,16 @@ pub enum Response {
 }
 pub fn dispatch(input: &[u8]) -> Vec<u8> {
     let response = match serde_json::from_slice::<Request>(input) {
-        Ok(Request::Module { source }) => {
-            parse_module(&source).map(|module| Response::Module { module })
-        }
-        Ok(Request::Expression { source }) => {
-            parse_expression(&source).map(|expression| Response::Expression { expression })
-        }
+        Ok(Request::Module {
+            source,
+            syntax_version,
+        }) => parse_module_with_version(&source, syntax_version)
+            .map(|module| Response::Module { module }),
+        Ok(Request::Expression {
+            source,
+            syntax_version,
+        }) => parse_expression_with_version(&source, syntax_version)
+            .map(|expression| Response::Expression { expression }),
         Ok(Request::Config { source }) => parse_config(&source).map(|config| Response::Config {
             config: Box::new(config),
         }),

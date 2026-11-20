@@ -1,0 +1,61 @@
+   Compiling idealis-oracle v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/oracle)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.20s
+     Running unittests src/lib.rs (crates/oracle/target/debug/deps/idealis_oracle-f1f8222ab459fbb5)
+
+running 1 test
+test wire::tests::reused_output_replaces_success_and_error_without_trailing_bytes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (crates/oracle/target/debug/deps/idealis_oracle-b51977c8c78d0874)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/bytes.rs (crates/oracle/target/debug/deps/bytes-6af81c244f0bc96b)
+
+running 2 tests
+test malformed_or_empty_batches_are_errors ... ok
+test byte_output_preserves_complete_reports_for_values_and_failure_observations ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/json.rs (crates/oracle/target/debug/deps/json-5abeb252fc1badc1)
+
+running 6 tests
+test json_batches_use_the_same_group_and_preserve_inputs_and_failures ... ok
+test observation_tag_may_follow_its_payload ... ok
+test duplicate_observation_fields_are_rejected ... ok
+test malformed_or_vacuous_batches_cannot_match ... ok
+test observations_require_exact_variant_fields_in_any_key_order ... ok
+test wire_observation_acceptance_matches_the_public_serde_contract ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/oracle.rs (crates/oracle/target/debug/deps/oracle-b2822aa6c9ea1837)
+
+running 14 tests
+test invalid_benchmark_options_and_evaluation_count_overflow_never_execute_callbacks ... ok
+test mismatching_preflight_never_reads_clock ... ok
+test rejects_bad_budget_before_calling_any_implementation ... ok
+test rejects_empty_duplicate_and_incomplete_suites ... ok
+test drift_during_timing_invalidates_all_ratios ... ok
+test nonuniform_samples_use_per_invocation_statistics_and_baseline_over_target_ratio ... ok
+test clock_regression_or_nonadvancing_interval_is_unknown ... ok
+test measures_targets_only_with_balanced_order_and_explicit_baseline ... ok
+test checks_and_replays_recorded_inputs_without_calling_reference ... ok
+test compares_values_and_allowed_sets_without_vacuous_success ... ok
+test rejects_zero_and_backwards_clocks_without_fast_results ... ok
+test replay_can_load_cases_and_preserves_a_failure_instead_of_recomputing_the_oracle ... ok
+test replay_validates_cases_ids_aggregate_and_version_before_running_targets ... ok
+test warmup_errors_remove_all_ratios_and_preserve_raw_observation ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests idealis_oracle
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

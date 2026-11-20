@@ -1,0 +1,594 @@
+{
+  "input": "Match",
+  "route": "after-native-v2",
+  "iteration": 3,
+  "warmup": false,
+  "status": "complete",
+  "compileMs": 0.5799169999999663,
+  "checkMs": 0.14616699999999128,
+  "sourceMs": 0.3113749999999982,
+  "irBytes": 5055,
+  "definitions": 11,
+  "result": {
+    "status": "complete",
+    "reason": null,
+    "states": 3,
+    "generated": 4,
+    "depth": 2,
+    "work": 38,
+    "violation": null
+  },
+  "program": {
+    "format": "modelt.safety-program",
+    "version": 2,
+    "name": "Match",
+    "variables": [
+      "phase"
+    ],
+    "initial": [
+      {
+        "name": "init",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "call",
+              "definition": 2,
+              "arguments": [],
+              "captures": []
+            }
+          }
+        ]
+      }
+    ],
+    "next": [
+      {
+        "name": "step",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "if",
+              "condition": {
+                "op": "eq",
+                "left": {
+                  "op": "variant-tag",
+                  "argument": {
+                    "op": "read",
+                    "slot": 0,
+                    "next": false
+                  }
+                },
+                "right": {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "Idle"
+                  }
+                }
+              },
+              "consequent": {
+                "op": "call",
+                "definition": 4,
+                "arguments": [
+                  {
+                    "op": "at",
+                    "target": {
+                      "op": "read",
+                      "slot": 0,
+                      "next": false
+                    },
+                    "key": {
+                      "op": "data",
+                      "value": {
+                        "type": "string",
+                        "value": "Idle"
+                      }
+                    }
+                  }
+                ],
+                "captures": []
+              },
+              "alternative": {
+                "op": "if",
+                "condition": {
+                  "op": "eq",
+                  "left": {
+                    "op": "variant-tag",
+                    "argument": {
+                      "op": "read",
+                      "slot": 0,
+                      "next": false
+                    }
+                  },
+                  "right": {
+                    "op": "data",
+                    "value": {
+                      "type": "string",
+                      "value": "Busy"
+                    }
+                  }
+                },
+                "consequent": {
+                  "op": "call",
+                  "definition": 5,
+                  "arguments": [
+                    {
+                      "op": "at",
+                      "target": {
+                        "op": "read",
+                        "slot": 0,
+                        "next": false
+                      },
+                      "key": {
+                        "op": "data",
+                        "value": {
+                          "type": "string",
+                          "value": "Busy"
+                        }
+                      }
+                    }
+                  ],
+                  "captures": []
+                },
+                "alternative": {
+                  "op": "if",
+                  "condition": {
+                    "op": "eq",
+                    "left": {
+                      "op": "variant-tag",
+                      "argument": {
+                        "op": "read",
+                        "slot": 0,
+                        "next": false
+                      }
+                    },
+                    "right": {
+                      "op": "data",
+                      "value": {
+                        "type": "string",
+                        "value": "Done"
+                      }
+                    }
+                  },
+                  "consequent": {
+                    "op": "call",
+                    "definition": 6,
+                    "arguments": [
+                      {
+                        "op": "at",
+                        "target": {
+                          "op": "read",
+                          "slot": 0,
+                          "next": false
+                        },
+                        "key": {
+                          "op": "data",
+                          "value": {
+                            "type": "string",
+                            "value": "Done"
+                          }
+                        }
+                      }
+                    ],
+                    "captures": []
+                  },
+                  "alternative": {
+                    "op": "unmatched-case",
+                    "location": "line 36, column 9"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "invariants": [
+      {
+        "name": "safety",
+        "expression": {
+          "op": "call",
+          "definition": 7,
+          "arguments": [],
+          "captures": []
+        }
+      }
+    ],
+    "assumptions": [],
+    "checkDeadlock": true,
+    "definitions": [
+      {
+        "id": 0,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 1,
+        "body": {
+          "op": "function",
+          "bounds": [
+            {
+              "slot": 0,
+              "domain": {
+                "kind": "set",
+                "values": [
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "string",
+                      "value": "Busy"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "body": {
+            "op": "record",
+            "fields": [
+              [
+                "tag",
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "UNIT"
+                  }
+                }
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "id": 1,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 1,
+        "body": {
+          "op": "function",
+          "bounds": [
+            {
+              "slot": 0,
+              "domain": {
+                "kind": "set",
+                "values": [
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "string",
+                      "value": "Done"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "body": {
+            "op": "record",
+            "fields": [
+              [
+                "tag",
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "UNIT"
+                  }
+                }
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "id": 2,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 1,
+        "body": {
+          "op": "function",
+          "bounds": [
+            {
+              "slot": 0,
+              "domain": {
+                "kind": "set",
+                "values": [
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "string",
+                      "value": "Idle"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "body": {
+            "op": "record",
+            "fields": [
+              [
+                "tag",
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "UNIT"
+                  }
+                }
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "id": 3,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 1,
+        "body": {
+          "op": "function",
+          "bounds": [
+            {
+              "slot": 0,
+              "domain": {
+                "kind": "set",
+                "values": [
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "string",
+                      "value": "Idle"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "body": {
+            "op": "record",
+            "fields": [
+              [
+                "tag",
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "UNIT"
+                  }
+                }
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "id": 4,
+        "parameterCount": 1,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "call",
+          "definition": 0,
+          "arguments": [],
+          "captures": []
+        }
+      },
+      {
+        "id": 5,
+        "parameterCount": 1,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "call",
+          "definition": 1,
+          "arguments": [],
+          "captures": []
+        }
+      },
+      {
+        "id": 6,
+        "parameterCount": 1,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "call",
+          "definition": 3,
+          "arguments": [],
+          "captures": []
+        }
+      },
+      {
+        "id": 7,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "if",
+          "condition": {
+            "op": "eq",
+            "left": {
+              "op": "variant-tag",
+              "argument": {
+                "op": "read",
+                "slot": 0,
+                "next": false
+              }
+            },
+            "right": {
+              "op": "data",
+              "value": {
+                "type": "string",
+                "value": "Idle"
+              }
+            }
+          },
+          "consequent": {
+            "op": "call",
+            "definition": 8,
+            "arguments": [
+              {
+                "op": "at",
+                "target": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "key": {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "Idle"
+                  }
+                }
+              }
+            ],
+            "captures": []
+          },
+          "alternative": {
+            "op": "if",
+            "condition": {
+              "op": "eq",
+              "left": {
+                "op": "variant-tag",
+                "argument": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                }
+              },
+              "right": {
+                "op": "data",
+                "value": {
+                  "type": "string",
+                  "value": "Busy"
+                }
+              }
+            },
+            "consequent": {
+              "op": "call",
+              "definition": 9,
+              "arguments": [
+                {
+                  "op": "at",
+                  "target": {
+                    "op": "read",
+                    "slot": 0,
+                    "next": false
+                  },
+                  "key": {
+                    "op": "data",
+                    "value": {
+                      "type": "string",
+                      "value": "Busy"
+                    }
+                  }
+                }
+              ],
+              "captures": []
+            },
+            "alternative": {
+              "op": "if",
+              "condition": {
+                "op": "eq",
+                "left": {
+                  "op": "variant-tag",
+                  "argument": {
+                    "op": "read",
+                    "slot": 0,
+                    "next": false
+                  }
+                },
+                "right": {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "Done"
+                  }
+                }
+              },
+              "consequent": {
+                "op": "call",
+                "definition": 10,
+                "arguments": [
+                  {
+                    "op": "at",
+                    "target": {
+                      "op": "read",
+                      "slot": 0,
+                      "next": false
+                    },
+                    "key": {
+                      "op": "data",
+                      "value": {
+                        "type": "string",
+                        "value": "Done"
+                      }
+                    }
+                  }
+                ],
+                "captures": []
+              },
+              "alternative": {
+                "op": "unmatched-case",
+                "location": "line 62, column 3"
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "parameterCount": 1,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "literal",
+          "value": {
+            "type": "bool",
+            "value": true
+          }
+        }
+      },
+      {
+        "id": 9,
+        "parameterCount": 1,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "literal",
+          "value": {
+            "type": "bool",
+            "value": true
+          }
+        }
+      },
+      {
+        "id": 10,
+        "parameterCount": 1,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "literal",
+          "value": {
+            "type": "bool",
+            "value": true
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "status": "complete",
+  "compatibility": "partial",
+  "verification": {
+    "passed": 21,
+    "total": 21,
+    "unchanged": true
+  },
+  "syntax": {
+    "fixedInputs": 33,
+    "references": [
+      "SANY 1.7.4",
+      "SANY 1.8.0"
+    ],
+    "mismatches": 0,
+    "officialCases": 355,
+    "prefixControls": 13,
+    "newAcceptedOfficialCases": {
+      "stable": 16,
+      "preview": 17
+    },
+    "stableReferenceInternalFailures": 1
+  },
+  "models": {
+    "inputs": 22,
+    "matchedModelRuns": 24,
+    "irVersions": [
+      1,
+      2
+    ],
+    "conflictInputs": 10,
+    "reference": "TLC 1.7.4"
+  },
+  "extraChecks": [
+    "native/Wasm exact response replay",
+    "Chromium symbolic heads and recovery",
+    "CI replay command: 5 tests passed locally",
+    "Jev live/offline; staged check follows before commit"
+  ],
+  "limitations": [
+    "Existing operator vocabulary only; full ASCII/Unicode grammar and symbolic WITH targets remain unsupported",
+    "No full SANY semantic/level validation or general higher-order execution guarantee",
+    "Bool toggle syntactic controls, not independent real-world bug discoveries or speed measurements"
+  ],
+  "preservedRuns": [
+    "0069-baseline",
+    "0069-before",
+    "0069-boundary-diagnostics",
+    "0069-boundary-review",
+    "0069-inventory",
+    "0069-models",
+    "0069-models-final",
+    "0069-models-fixed",
+    "0069-parser",
+    "0069-preview-audit",
+    "0069-stable",
+    "0069-stable-audit",
+    "0069-verification"
+  ],
+  "setupFailure": {
+    "run": "0069-stable",
+    "reason": "incorrect upstream path",
+    "log": "logs/0069-stable.log.gz"
+  }
+}

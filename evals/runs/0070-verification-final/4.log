@@ -1,0 +1,47 @@
+
+> @mizchi/idealis@0.1.0-alpha.0 oracle:build /Users/mz/ghq/github.com/mizchi/idealis
+> cargo build --release --locked --manifest-path crates/oracle/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/oracle/Cargo.toml
+
+
+> @mizchi/idealis@0.1.0-alpha.0 portable:build /Users/mz/ghq/github.com/mizchi/idealis
+> pnpm oracle:build && cargo build --release --locked --manifest-path crates/idealis-core/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/idealis-core/Cargo.toml
+
+
+> @mizchi/idealis@0.1.0-alpha.0 oracle:build /Users/mz/ghq/github.com/mizchi/idealis
+> cargo build --release --locked --manifest-path crates/oracle/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/oracle/Cargo.toml
+
+
+> @mizchi/idealis@0.1.0-alpha.0 build /Users/mz/ghq/github.com/mizchi/idealis
+> tsc -p tsconfig.build.json
+
+✔ Quint output is preserved byte for byte with its source provenance (6.19075ms)
+✔ Counter: generated TLA+ safety agrees in native and Wasm (359.396542ms)
+✔ Counter: generated TLA+ broken agrees in native and Wasm (2.663541ms)
+✔ SetFold: generated TLA+ safety agrees in native and Wasm (6.550417ms)
+✔ SetFold: generated TLA+ broken agrees in native and Wasm (1.729375ms)
+✔ SequenceFold: generated TLA+ safety agrees in native and Wasm (2.260875ms)
+✔ SequenceFold: generated TLA+ broken agrees in native and Wasm (1.668625ms)
+✔ Choice: generated TLA+ safety agrees in native and Wasm (3.242583ms)
+✔ Choice: generated TLA+ broken agrees in native and Wasm (0.906708ms)
+✔ Match: generated TLA+ safety agrees in native and Wasm (3.274541ms)
+✔ Match: generated TLA+ broken agrees in native and Wasm (2.329375ms)
+✔ NestedFold: generated TLA+ safety agrees in native and Wasm (0.736334ms)
+✔ NestedFold: generated TLA+ broken agrees in native and Wasm (0.554125ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 446.420125
+pnpm oracle:build
+    Finished `release` profile [optimized] target(s) in 0.07s
+    Finished `release` profile [optimized] target(s) in 0.02s
+pnpm portable:build
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.02s
+    Finished `release` profile [optimized] target(s) in 0.04s
+    Finished `release` profile [optimized] target(s) in 0.02s
+pnpm build
+node --test dist/evals/quint-generated/contract-test.js

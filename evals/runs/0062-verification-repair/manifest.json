@@ -1,0 +1,21 @@
+{
+  "plan": "0062-p0-checker",
+  "parent": "0062-verification",
+  "reason": "usable-eval takes no just argument; use pnpm script with an explicit run",
+  "commands": [
+    [
+      "pnpm",
+      [
+        "usable:eval",
+        "evals/runs/0062-usable"
+      ]
+    ],
+    [
+      "just",
+      [
+        "usable-replay",
+        "evals/runs/0062-usable"
+      ]
+    ]
+  ]
+}

@@ -1,0 +1,251 @@
+{
+  "status": "failed",
+  "unchanged": true,
+  "results": [
+    {
+      "command": "just",
+      "args": [
+        "check"
+      ],
+      "status": 0,
+      "signal": null,
+      "wallMs": 7655.716125,
+      "log": "0.log",
+      "sha256": "282b9499995bcf3c170f44c204a633f81762ac792acef0347a787e2952044412"
+    },
+    {
+      "command": "just",
+      "args": [
+        "analysis-test"
+      ],
+      "status": 0,
+      "signal": null,
+      "wallMs": 11550.910083,
+      "log": "1.log",
+      "sha256": "90c2111c0ac10c5e82ce34ad0fe8336efd48e428ddf0282df05b0d60a1f36f73"
+    },
+    {
+      "command": "just",
+      "args": [
+        "compiler-test"
+      ],
+      "status": 0,
+      "signal": null,
+      "wallMs": 26716.676832999998,
+      "log": "2.log",
+      "sha256": "12cd90c4cc48d230a44a3ab9ea405b2f20045ab5dc25232caba4533af0543d56"
+    },
+    {
+      "command": "just",
+      "args": [
+        "safety-test"
+      ],
+      "status": 1,
+      "signal": null,
+      "wallMs": 9780.108958000004,
+      "log": "3.log",
+      "sha256": "1cf488f0f2ddf6adb39969b0a238bf20ff9801dd15eefde10fa6df791217a513"
+    },
+    {
+      "command": "just",
+      "args": [
+        "quint-test"
+      ],
+      "status": 0,
+      "signal": null,
+      "wallMs": 1687.909249999997,
+      "log": "4.log",
+      "sha256": "0dacfb95fbea4134fee6ec36b2b1a9d4b92457664d3e010341618c8bb5c2c401"
+    },
+    {
+      "command": "just",
+      "args": [
+        "portable-test"
+      ],
+      "status": 0,
+      "signal": null,
+      "wallMs": 76681.02958300001,
+      "log": "5.log",
+      "sha256": "49b10295050caef357402a490cf8028870876f4814513038a721ae038f16bc72"
+    },
+    {
+      "command": "just",
+      "args": [
+        "browser"
+      ],
+      "status": 0,
+      "signal": null,
+      "wallMs": 2014.8406669999822,
+      "log": "6.log",
+      "sha256": "19d76c457b087c495bb374ec097524d62b85928aea3610ab109a31281304d0b7"
+    },
+    {
+      "command": "cargo",
+      "args": [
+        "fmt",
+        "--manifest-path",
+        "crates/idealis-core/Cargo.toml",
+        "--",
+        "--check"
+      ],
+      "status": 0,
+      "signal": null,
+      "wallMs": 85.09491600000183,
+      "log": "7.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "cargo",
+      "args": [
+        "clippy",
+        "--all-targets",
+        "--locked",
+        "--manifest-path",
+        "crates/idealis-core/Cargo.toml",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "status": 0,
+      "signal": null,
+      "wallMs": 3102.9619999999995,
+      "log": "8.log",
+      "sha256": "664becc8b38ca1665bd04b6b2b76c4ebaa722a8b322fd1cfcfa7038e88eb569d"
+    },
+    {
+      "command": "just",
+      "args": [
+        "runtime-build"
+      ],
+      "status": 0,
+      "signal": null,
+      "wallMs": 257.59766699999454,
+      "log": "9.log",
+      "sha256": "2d8653a9f7a8cf365e907b8b101fb7b52b73dd145b54e522f683dbc95e5c316d"
+    },
+    {
+      "command": "just",
+      "args": [
+        "runtime-test"
+      ],
+      "status": 0,
+      "signal": null,
+      "wallMs": 2356.8187920000055,
+      "log": "10.log",
+      "sha256": "50df113380ea9d1389db254fad81f03e4300ccb1d5f5170357afe9d39608c15c"
+    },
+    {
+      "command": "just",
+      "args": [
+        "mutation"
+      ],
+      "status": 0,
+      "signal": null,
+      "wallMs": 848.9375830000208,
+      "log": "11.log",
+      "sha256": "2457fb504a01164adb3c7511fc6e8bb9cab8d1b963dc9bdaa94ad6af383f238f"
+    },
+    {
+      "command": "just",
+      "args": [
+        "evaluate"
+      ],
+      "status": 0,
+      "signal": null,
+      "wallMs": 1351.4297079999815,
+      "log": "12.log",
+      "sha256": "bd9c5e711eed15bb540e1dbdb6bcaff1d22a82edbc3fe4b96ee8175e95287927"
+    },
+    {
+      "command": "just",
+      "args": [
+        "replay-evaluation"
+      ],
+      "status": 0,
+      "signal": null,
+      "wallMs": 672.1633330000041,
+      "log": "13.log",
+      "sha256": "b5754bd5ac341bff4b65cb92b0679241c8f95ba51ca8beaa1283bf9240e245fe"
+    },
+    {
+      "command": "just",
+      "args": [
+        "usable-test"
+      ],
+      "status": 0,
+      "signal": null,
+      "wallMs": 1209.5742500000051,
+      "log": "14.log",
+      "sha256": "db26214f852b871481976c330e23d138c91deb95d5b8b3b89f542a9554af68bf"
+    },
+    {
+      "command": "pnpm",
+      "args": [
+        "usable:eval",
+        "evals/runs/0072-verification/usable"
+      ],
+      "status": 0,
+      "signal": null,
+      "wallMs": 2813.9115830000082,
+      "log": "15.log",
+      "sha256": "e6bf5b51e0258c737572058f3b719033b07b2e75320de52ba32ae595e2dfbd4c"
+    },
+    {
+      "command": "just",
+      "args": [
+        "usable-replay",
+        "evals/runs/0072-verification/usable"
+      ],
+      "status": 0,
+      "signal": null,
+      "wallMs": 795.0784580000036,
+      "log": "16.log",
+      "sha256": "41d12f45a78fdaa73bab4f8aeb87cae8ffca7bd48e7b862d7f04465bd30ae9c7"
+    },
+    {
+      "command": "just",
+      "args": [
+        "cross-test"
+      ],
+      "status": 0,
+      "signal": null,
+      "wallMs": 26653.793917000003,
+      "log": "17.log",
+      "sha256": "50f83c53bb91c623b0e2ec0f8c49737b66746ba7f7dfa7df9ac751ab63f36e4d"
+    },
+    {
+      "command": "just",
+      "args": [
+        "package"
+      ],
+      "status": 0,
+      "signal": null,
+      "wallMs": 62670.09508299999,
+      "log": "18.log",
+      "sha256": "87e97dd80e69833ebd10863210ba75c0b01399cd6c11338756b5e78295aab33d"
+    },
+    {
+      "command": "node",
+      "args": [
+        "--test",
+        "dist/scripts/check-support-test.js"
+      ],
+      "status": 1,
+      "signal": null,
+      "wallMs": 8273.554084000003,
+      "log": "19.log",
+      "sha256": "73c25c464d8acf8d3bd952f1e7e38313da90b2dc21cca1a03b4ab421c806b64c"
+    },
+    {
+      "command": "just",
+      "args": [
+        "support-check"
+      ],
+      "status": 3,
+      "signal": null,
+      "wallMs": 1739.0085839999956,
+      "log": "20.log",
+      "sha256": "c54c9fc0d93747f397e72b64678cb179c575afd13ea056021084a04ae7b32dac"
+    }
+  ]
+}

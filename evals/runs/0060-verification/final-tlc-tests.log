@@ -1,0 +1,60 @@
+pnpm oracle:build
+
+> @mizchi/idealis@0.1.0-alpha.0 oracle:build /Users/mz/ghq/github.com/mizchi/idealis
+> cargo build --release --locked --manifest-path crates/oracle/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/oracle/Cargo.toml
+
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+pnpm portable:build
+
+> @mizchi/idealis@0.1.0-alpha.0 portable:build /Users/mz/ghq/github.com/mizchi/idealis
+> pnpm oracle:build && cargo build --release --locked --manifest-path crates/idealis-core/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/idealis-core/Cargo.toml
+
+
+> @mizchi/idealis@0.1.0-alpha.0 oracle:build /Users/mz/ghq/github.com/mizchi/idealis
+> cargo build --release --locked --manifest-path crates/oracle/Cargo.toml && cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/oracle/Cargo.toml
+
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.02s
+    Finished `release` profile [optimized] target(s) in 0.01s
+pnpm build
+
+> @mizchi/idealis@0.1.0-alpha.0 build /Users/mz/ghq/github.com/mizchi/idealis
+> tsc -p tsconfig.build.json
+
+pnpm build
+
+> @mizchi/idealis@0.1.0-alpha.0 build /Users/mz/ghq/github.com/mizchi/idealis
+> tsc -p tsconfig.build.json
+
+node dist/scripts/prepare-tlc-modules.js
+Verified TLC standard modules: /Users/mz/ghq/github.com/mizchi/idealis/.artifacts/tlc/standard-modules
+node --test dist/evals/tlc-differential/compare-test.js dist/evals/tlc-differential/standard-modules-test.js
+✔ TLC differences reject count mismatches and incomplete checking (6.3515ms)
+✔ JVM and syntax failures cannot count as matching model errors (0.093625ms)
+✔ development and confirmation graphs have distinct fixed inputs (1.273542ms)
+✔ initial invariant failures remain valid when TLC omits aggregate counts (0.134541ms)
+✔ a TLC parser crash is infrastructure failure, not rejected model input (0.05125ms)
+✔ a missing imported module is reference infrastructure failure (0.048291ms)
+✔ standard module loading verifies the existing fold fixture's exact digest (2.03ms)
+✔ missing and corrupted standard modules are rejected before checking (2.336292ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 44.2425
+TLC_JAVA='.artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java' TLC_JAR='.artifacts/tlc/tla2tools.jar' node --test dist/evals/tlc-differential/standard-modules-tlc-test.js
+✔ TLC uses the pinned library path including spaces and preserves local module precedence (1573.037792ms)
+✔ rendered signed 32-bit boundaries retain their values in nested trace data (574.770583ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2192.653792

@@ -1,0 +1,159 @@
+{
+  "name": "select-prime",
+  "compiled": {
+    "kind": "compiled",
+    "program": {
+      "format": "modelt.safety-program",
+      "version": 1,
+      "name": "Differential",
+      "variables": [
+        "x"
+      ],
+      "initial": [
+        {
+          "name": "Init",
+          "steps": [
+            {
+              "kind": "assign",
+              "slot": 0,
+              "value": {
+                "op": "literal",
+                "value": {
+                  "type": "int",
+                  "value": "2"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "next": [
+        {
+          "name": "Next",
+          "steps": [
+            {
+              "kind": "assign",
+              "slot": 0,
+              "value": {
+                "op": "literal",
+                "value": {
+                  "type": "int",
+                  "value": "1"
+                }
+              }
+            },
+            {
+              "kind": "guard",
+              "expression": {
+                "op": "eq",
+                "left": {
+                  "op": "prime",
+                  "argument": {
+                    "op": "select-seq",
+                    "slot": 0,
+                    "sequence": {
+                      "op": "tuple",
+                      "values": [
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "1"
+                          }
+                        },
+                        {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "2"
+                          }
+                        }
+                      ]
+                    },
+                    "body": {
+                      "op": "gt",
+                      "left": {
+                        "op": "bound",
+                        "slot": 0
+                      },
+                      "right": {
+                        "op": "read",
+                        "slot": 0,
+                        "next": false
+                      }
+                    }
+                  }
+                },
+                "right": {
+                  "op": "tuple",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "2"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "invariants": [
+        {
+          "name": "Safe",
+          "expression": {
+            "op": "in",
+            "value": {
+              "op": "read",
+              "slot": 0,
+              "next": false
+            },
+            "domain": {
+              "kind": "set",
+              "values": [
+                {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "1"
+                  }
+                },
+                {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "2"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "assumptions": [],
+      "checkDeadlock": false
+    }
+  },
+  "checked": {
+    "kind": "safety",
+    "result": {
+      "status": "complete",
+      "reason": null,
+      "states": 2,
+      "generated": 3,
+      "depth": 1,
+      "work": 24,
+      "violation": null
+    }
+  },
+  "reference": {
+    "status": "complete",
+    "states": 2,
+    "generated": 3,
+    "exit": 0
+  },
+  "witness": null
+}

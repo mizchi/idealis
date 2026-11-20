@@ -1,0 +1,495 @@
+{
+  "input": "sharing-10",
+  "route": "before-native-v2",
+  "iteration": 1,
+  "warmup": false,
+  "status": "complete",
+  "compileMs": 0.3468749999992724,
+  "checkMs": 0.11195799999950395,
+  "sourceMs": 0.21712500000103319,
+  "irBytes": 4707,
+  "definitions": 12,
+  "result": {
+    "status": "complete",
+    "reason": null,
+    "states": 1,
+    "generated": 2,
+    "depth": 0,
+    "work": 8,
+    "violation": null
+  },
+  "program": {
+    "format": "modelt.safety-program",
+    "version": 2,
+    "name": "Sharing",
+    "variables": [
+      "x"
+    ],
+    "initial": [
+      {
+        "name": "Init",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "literal",
+              "value": {
+                "type": "int",
+                "value": "0"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "next": [
+      {
+        "name": "Next",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "read",
+              "slot": 0,
+              "next": false
+            }
+          }
+        ]
+      }
+    ],
+    "invariants": [
+      {
+        "name": "Safe",
+        "expression": {
+          "op": "call",
+          "definition": 11,
+          "arguments": [],
+          "captures": []
+        }
+      }
+    ],
+    "assumptions": [],
+    "checkDeadlock": false,
+    "definitions": [
+      {
+        "id": 0,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "literal",
+          "value": {
+            "type": "bool",
+            "value": true
+          }
+        }
+      },
+      {
+        "id": 1,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "if",
+          "condition": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "consequent": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "alternative": {
+            "op": "and",
+            "left": {
+              "op": "call",
+              "definition": 0,
+              "arguments": [],
+              "captures": []
+            },
+            "right": {
+              "op": "call",
+              "definition": 0,
+              "arguments": [],
+              "captures": []
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "if",
+          "condition": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "consequent": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "alternative": {
+            "op": "and",
+            "left": {
+              "op": "call",
+              "definition": 1,
+              "arguments": [],
+              "captures": []
+            },
+            "right": {
+              "op": "call",
+              "definition": 1,
+              "arguments": [],
+              "captures": []
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "if",
+          "condition": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "consequent": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "alternative": {
+            "op": "and",
+            "left": {
+              "op": "call",
+              "definition": 2,
+              "arguments": [],
+              "captures": []
+            },
+            "right": {
+              "op": "call",
+              "definition": 2,
+              "arguments": [],
+              "captures": []
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "if",
+          "condition": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "consequent": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "alternative": {
+            "op": "and",
+            "left": {
+              "op": "call",
+              "definition": 3,
+              "arguments": [],
+              "captures": []
+            },
+            "right": {
+              "op": "call",
+              "definition": 3,
+              "arguments": [],
+              "captures": []
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "if",
+          "condition": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "consequent": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "alternative": {
+            "op": "and",
+            "left": {
+              "op": "call",
+              "definition": 4,
+              "arguments": [],
+              "captures": []
+            },
+            "right": {
+              "op": "call",
+              "definition": 4,
+              "arguments": [],
+              "captures": []
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "if",
+          "condition": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "consequent": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "alternative": {
+            "op": "and",
+            "left": {
+              "op": "call",
+              "definition": 5,
+              "arguments": [],
+              "captures": []
+            },
+            "right": {
+              "op": "call",
+              "definition": 5,
+              "arguments": [],
+              "captures": []
+            }
+          }
+        }
+      },
+      {
+        "id": 7,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "if",
+          "condition": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "consequent": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "alternative": {
+            "op": "and",
+            "left": {
+              "op": "call",
+              "definition": 6,
+              "arguments": [],
+              "captures": []
+            },
+            "right": {
+              "op": "call",
+              "definition": 6,
+              "arguments": [],
+              "captures": []
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "if",
+          "condition": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "consequent": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "alternative": {
+            "op": "and",
+            "left": {
+              "op": "call",
+              "definition": 7,
+              "arguments": [],
+              "captures": []
+            },
+            "right": {
+              "op": "call",
+              "definition": 7,
+              "arguments": [],
+              "captures": []
+            }
+          }
+        }
+      },
+      {
+        "id": 9,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "if",
+          "condition": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "consequent": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "alternative": {
+            "op": "and",
+            "left": {
+              "op": "call",
+              "definition": 8,
+              "arguments": [],
+              "captures": []
+            },
+            "right": {
+              "op": "call",
+              "definition": 8,
+              "arguments": [],
+              "captures": []
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "if",
+          "condition": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "consequent": {
+            "op": "literal",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          },
+          "alternative": {
+            "op": "and",
+            "left": {
+              "op": "call",
+              "definition": 9,
+              "arguments": [],
+              "captures": []
+            },
+            "right": {
+              "op": "call",
+              "definition": 9,
+              "arguments": [],
+              "captures": []
+            }
+          }
+        }
+      },
+      {
+        "id": 11,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "call",
+          "definition": 10,
+          "arguments": [],
+          "captures": []
+        }
+      }
+    ]
+  }
+}

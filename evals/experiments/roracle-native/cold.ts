@@ -1,0 +1,20 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { createClient, modes, type SavedFixture } from "./measure.js";
+
+const mode = modes.find((mode) => mode === process.argv[2]);
+assert.ok(mode);
+const wasmPath = process.argv[3];
+const nativePath = process.argv[4];
+const fixturePath = process.argv[5];
+assert.ok(wasmPath && nativePath && fixturePath);
+const fixture: SavedFixture[] = JSON.parse(await readFile(fixturePath, "utf8"));
+const first = fixture[0];
+assert.ok(first);
+const start = process.hrtime.bigint();
+const wasm = mode === "wasm" ? await readFile(wasmPath) : new Uint8Array();
+const client = createClient(mode, wasm, nativePath);
+const report = client.request(first.input);
+const initAndFirstUs = Number(process.hrtime.bigint() - start) / 1000;
+assert.deepEqual(report, first.expected);
+process.stdout.write(JSON.stringify({ initAndFirstUs, report }));

@@ -123,6 +123,20 @@ pub enum Expression {
         order: FoldOrder,
         body: Box<Self>,
     },
+    SelectSeq {
+        slot: usize,
+        sequence: Box<Self>,
+        body: Box<Self>,
+    },
+    SortSeq {
+        slot: usize,
+        sequence: Box<Self>,
+        body: Box<Self>,
+    },
+    Assert {
+        condition: Box<Self>,
+        message: Box<Self>,
+    },
     Domain {
         argument: Box<Self>,
     },
@@ -306,6 +320,12 @@ pub enum Domain {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
 #[serde(tag = "kind", rename_all = "kebab-case", deny_unknown_fields)]
 pub enum Step {
+    Call {
+        #[serde(deserialize_with = "deserialize_wire_index")]
+        definition: usize,
+        arguments: Vec<Expression>,
+        captures: Vec<Expression>,
+    },
     Frame {
         arguments: Vec<Expression>,
         captures: Vec<Expression>,
@@ -377,7 +397,33 @@ pub struct Predicate {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
+pub struct SafetySymmetry {
+    pub model_values: Vec<String>,
+}
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields, rename_all = "camelCase")]
+pub struct SafetyOptions {
+    pub workers: usize,
+    pub symmetry_actions: bool,
+    pub partial_order: bool,
+}
+
+impl Default for SafetyOptions {
+    fn default() -> Self {
+        Self {
+            workers: 1,
+            symmetry_actions: false,
+            partial_order: false,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(from = "DefinitionWire", rename_all = "camelCase")]
 pub struct Definition {
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub recursive: bool,
     #[serde(deserialize_with = "deserialize_wire_index")]
     pub id: usize,
     #[serde(deserialize_with = "deserialize_wire_index")]
@@ -387,13 +433,133 @@ pub struct Definition {
     pub body_kind: BodyKind,
     #[serde(deserialize_with = "deserialize_wire_index")]
     pub local_scope: usize,
-    pub body: Expression,
+    pub body: DefinitionBody,
 }
 
-#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize)]
+#[serde(untagged)]
+pub enum DefinitionBody {
+    Expression(Expression),
+    Action(Vec<Branch>),
+    Temporal(Box<TemporalFormula>),
+}
+
+impl From<Expression> for DefinitionBody {
+    fn from(value: Expression) -> Self {
+        Self::Expression(value)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[serde(rename_all = "kebab-case")]
 pub enum BodyKind {
     Expression,
+    Action,
+    Temporal,
+}
+
+#[derive(Deserialize)]
+#[serde(
+    tag = "bodyKind",
+    rename_all = "kebab-case",
+    rename_all_fields = "camelCase",
+    deny_unknown_fields
+)]
+enum DefinitionWire {
+    Expression {
+        #[serde(default)]
+        recursive: bool,
+        #[serde(deserialize_with = "deserialize_wire_index")]
+        id: usize,
+        #[serde(deserialize_with = "deserialize_wire_index")]
+        parameter_count: usize,
+        #[serde(deserialize_with = "deserialize_wire_index")]
+        capture_count: usize,
+        #[serde(deserialize_with = "deserialize_wire_index")]
+        local_scope: usize,
+        body: Expression,
+    },
+    Action {
+        #[serde(default)]
+        recursive: bool,
+        #[serde(deserialize_with = "deserialize_wire_index")]
+        id: usize,
+        #[serde(deserialize_with = "deserialize_wire_index")]
+        parameter_count: usize,
+        #[serde(deserialize_with = "deserialize_wire_index")]
+        capture_count: usize,
+        #[serde(deserialize_with = "deserialize_wire_index")]
+        local_scope: usize,
+        body: Vec<Branch>,
+    },
+    Temporal {
+        #[serde(default)]
+        recursive: bool,
+        #[serde(deserialize_with = "deserialize_wire_index")]
+        id: usize,
+        #[serde(deserialize_with = "deserialize_wire_index")]
+        parameter_count: usize,
+        #[serde(deserialize_with = "deserialize_wire_index")]
+        capture_count: usize,
+        #[serde(deserialize_with = "deserialize_wire_index")]
+        local_scope: usize,
+        body: Box<TemporalFormula>,
+    },
+}
+
+impl From<DefinitionWire> for Definition {
+    fn from(value: DefinitionWire) -> Self {
+        match value {
+            DefinitionWire::Expression {
+                recursive,
+                id,
+                parameter_count,
+                capture_count,
+                local_scope,
+                body,
+            } => Self {
+                recursive,
+                id,
+                parameter_count,
+                capture_count,
+                local_scope,
+                body_kind: BodyKind::Expression,
+                body: body.into(),
+            },
+            DefinitionWire::Action {
+                recursive,
+                id,
+                parameter_count,
+                capture_count,
+                local_scope,
+                body,
+            } => Self {
+                recursive,
+                id,
+                parameter_count,
+                capture_count,
+                local_scope,
+                body_kind: BodyKind::Action,
+                body: DefinitionBody::Action(body),
+            },
+            DefinitionWire::Temporal {
+                recursive,
+                id,
+                parameter_count,
+                capture_count,
+                local_scope,
+                body,
+            } => Self {
+                recursive,
+                id,
+                parameter_count,
+                capture_count,
+                local_scope,
+                body_kind: BodyKind::Temporal,
+                body: DefinitionBody::Temporal(body),
+            },
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -408,6 +574,8 @@ pub struct SafetyProgram {
     pub invariants: Vec<Predicate>,
     pub assumptions: Vec<Predicate>,
     pub check_deadlock: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub symmetry: Option<SafetySymmetry>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub initial_properties: Vec<Predicate>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -450,6 +618,8 @@ struct SafetyProgramWire {
     assumptions: Vec<Predicate>,
     check_deadlock: bool,
     #[serde(default)]
+    symmetry: Option<SafetySymmetry>,
+    #[serde(default)]
     initial_properties: Vec<Predicate>,
     #[serde(default)]
     action_properties: Vec<Predicate>,
@@ -488,6 +658,7 @@ impl TryFrom<SafetyProgramWire> for SafetyProgram {
             invariants: wire.invariants,
             assumptions: wire.assumptions,
             check_deadlock: wire.check_deadlock,
+            symmetry: wire.symmetry,
             initial_properties: wire.initial_properties,
             action_properties: wire.action_properties,
             properties: wire.properties,
@@ -511,7 +682,7 @@ impl SafetyProgram {
             for branch in branches {
                 for step in &branch.steps {
                     match step {
-                        Step::Frame { .. } => return true,
+                        Step::Frame { .. } | Step::Call { .. } => return true,
                         Step::Guard { expression }
                         | Step::Assign {
                             value: expression, ..
@@ -547,7 +718,7 @@ impl SafetyProgram {
             .collect();
         while let Some(formula) = formulas.pop() {
             match formula {
-                TemporalFormula::Frame { .. } => return true,
+                TemporalFormula::Frame { .. } | TemporalFormula::Call { .. } => return true,
                 TemporalFormula::Atom { expression } => pending.push(expression),
                 TemporalFormula::Not { formula }
                 | TemporalFormula::Always { formula }
@@ -630,6 +801,32 @@ pub struct SafetyResult {
     pub violation: Option<SafetyViolation>,
 }
 
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+pub struct SafetyActionCoverage {
+    pub name: String,
+    pub attempts: u32,
+    pub enabled: u32,
+    pub generated: u32,
+    pub distinct: usize,
+    pub work: u32,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+pub struct SafetyCoverage {
+    pub initial: Vec<SafetyActionCoverage>,
+    pub next: Vec<SafetyActionCoverage>,
+    pub unattributed_work: u32,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SafetyCoverageReport {
+    pub result: SafetyResult,
+    pub coverage: SafetyCoverage,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize)]
 #[serde(try_from = "Value")]
 pub enum Scalar {
@@ -691,6 +888,12 @@ impl Scalar {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "kebab-case", deny_unknown_fields)]
 pub enum TemporalFormula {
+    Call {
+        #[serde(deserialize_with = "deserialize_wire_index")]
+        definition: usize,
+        arguments: Vec<Expression>,
+        captures: Vec<Expression>,
+    },
     Frame {
         arguments: Vec<Expression>,
         captures: Vec<Expression>,

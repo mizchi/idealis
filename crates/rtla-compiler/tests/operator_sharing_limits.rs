@@ -204,7 +204,7 @@ refused!(
 
 fn recorded(name: &str) -> Value {
     let golden: Value = serde_json::from_str(include_str!(
-        "../../../evals/fixtures/tlc-operator-sharing/expected-step3f-b20.json"
+        "../../../fixtures/tlc-operator-sharing/expected-step3f-b20.json"
     ))
     .unwrap();
     golden["cases"]

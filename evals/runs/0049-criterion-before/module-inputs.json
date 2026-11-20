@@ -1,0 +1,385 @@
+[
+  {
+    "name": "extends-counter",
+    "source": "---- MODULE Differential ----\nEXTENDS Counter\nSafe == value <= Limit\n====",
+    "config": "CONSTANT Limit = 2\nINIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Counter": "---- MODULE Counter ----\nEXTENDS Naturals\nCONSTANT Limit\nVARIABLE value\nInit == value = 0\nNext == value < Limit /\\ value' = value + 1\n===="
+    },
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 3
+  },
+  {
+    "name": "extends-counter-fault",
+    "source": "---- MODULE Differential ----\nEXTENDS Counter\nSafe == value < Limit\n====",
+    "config": "CONSTANT Limit = 2\nINIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Counter": "---- MODULE Counter ----\nEXTENDS Naturals\nCONSTANT Limit\nVARIABLE value\nInit == value = 0\nNext == value < Limit /\\ value' = value + 1\n===="
+    },
+    "expected": "invariant-violation",
+    "tlc": "invariant-violation",
+    "states": 3
+  },
+  {
+    "name": "extends-diamond",
+    "source": "---- MODULE Differential ----\nEXTENDS Left, Right\nVARIABLE x\nInit == x = Answer\nNext == UNCHANGED x\nSafe == x = 42\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Base": "---- MODULE Base ----\nAnswer == 42\n====",
+      "Left": "---- MODULE Left ----\nEXTENDS Base\n\n====",
+      "Right": "---- MODULE Right ----\nEXTENDS Base\n\n===="
+    },
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 1
+  },
+  {
+    "name": "local-helper-scope",
+    "source": "---- MODULE Differential ----\nEXTENDS Values\nVARIABLE x\nHidden == 2\nInit == x = Value\nNext == UNCHANGED x\nSafe == x = 1\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Values": "---- MODULE Values ----\nLOCAL Hidden == 1\nValue == Hidden\n===="
+    },
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 1
+  },
+  {
+    "name": "local-not-exported",
+    "source": "---- MODULE Differential ----\nEXTENDS Values\nVARIABLE x\nInit == x = Hidden\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Values": "---- MODULE Values ----\nLOCAL Hidden == 1\nValue == Hidden\n===="
+    },
+    "expected": "unsupported",
+    "tlc": "input-error"
+  },
+  {
+    "name": "instance-twice",
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLES x, y\nA == INSTANCE Counter WITH value <- x, Limit <- 1\nB == INSTANCE Counter WITH value <- y, Limit <- 2\nInit == A!Init /\\ B!Init\nNext == (A!Next /\\ UNCHANGED y) \\/ (B!Next /\\ UNCHANGED x)\nSafe == x <= 1 /\\ y <= 2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Counter": "---- MODULE Counter ----\nEXTENDS Naturals\nCONSTANT Limit\nVARIABLE value\nInit == value = 0\nNext == value < Limit /\\ value' = value + 1\n===="
+    },
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 6
+  },
+  {
+    "name": "unnamed-implicit-variable",
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE value\nINSTANCE Counter WITH Limit <- 2\nSafe == value <= 2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Counter": "---- MODULE Counter ----\nEXTENDS Naturals\nCONSTANT Limit\nVARIABLE value\nInit == value = 0\nNext == value < Limit /\\ value' = value + 1\n===="
+    },
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 3
+  },
+  {
+    "name": "with-simultaneous",
+    "source": "---- MODULE Differential ----\nCONSTANTS A, B\nVARIABLE x\nI == INSTANCE Pair WITH A <- B, B <- A\nInit == x = I!Value\nNext == UNCHANGED x\nSafe == x = <<2,1>>\n====",
+    "config": "CONSTANTS A = 1 B = 2\nINIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Pair": "---- MODULE Pair ----\nCONSTANTS A, B\nValue == <<A,B>>\n===="
+    },
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 1
+  },
+  {
+    "name": "parameter-capture",
+    "source": "---- MODULE Differential ----\nVARIABLE x\nI == INSTANCE Params\nInit == x = I!Value(7)\nNext == UNCHANGED x\nSafe == x = 7\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Params": "---- MODULE Params ----\nValue(x) == LET Inner(y) == y IN Inner(x)\n===="
+    },
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 1
+  },
+  {
+    "name": "instance-local-helper",
+    "source": "---- MODULE Differential ----\nVARIABLE x\nHidden == 2\nI == INSTANCE Values\nInit == x = I!Value\nNext == UNCHANGED x\nSafe == x = 1\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Values": "---- MODULE Values ----\nLOCAL Hidden == 1\nValue == Hidden\n===="
+    },
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 1
+  },
+  {
+    "name": "local-instance-in-extends",
+    "source": "---- MODULE Differential ----\nEXTENDS Facade\nVARIABLE x\nInit == x = Value\nNext == UNCHANGED x\nSafe == x = 1\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Facade": "---- MODULE Facade ----\nLOCAL I == INSTANCE Values\nValue == I!Value\n====",
+      "Values": "---- MODULE Values ----\nValue == 1\n===="
+    },
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 1
+  },
+  {
+    "name": "local-instance-not-exported",
+    "source": "---- MODULE Differential ----\nEXTENDS Facade\nVARIABLE x\nInit == x = I!Value\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Facade": "---- MODULE Facade ----\nLOCAL I == INSTANCE Values\nValue == I!Value\n====",
+      "Values": "---- MODULE Values ----\nValue == 1\n===="
+    },
+    "expected": "unsupported",
+    "tlc": "input-error"
+  },
+  {
+    "name": "instance-assume-not-imported",
+    "source": "---- MODULE Differential ----\nVARIABLE x\nI == INSTANCE Values WITH N <- 1\nInit == x = I!Value\nNext == UNCHANGED x\nSafe == x = 1\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Values": "---- MODULE Values ----\nCONSTANT N\nASSUME N = 0\nValue == N\n===="
+    },
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 1
+  },
+  {
+    "name": "constant-operator-override",
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nCONSTANT Limit, Add(_)\nVARIABLE x\nBound == 2\nInc(v) == v + 1\nInit == x = 0\nNext == x < Limit /\\ x' = Add(x)\nSafe == x <= 2\n====",
+    "config": "CONSTANTS Limit <- Bound Add <- Inc\nINIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 3
+  },
+  {
+    "name": "constant-table",
+    "source": "---- MODULE Differential ----\nAdd(a, b) == 0\nVARIABLE x\nInit == x = Add(1,2)\nNext == UNCHANGED x\nSafe == x = 3\n====",
+    "config": "CONSTANTS Add(1,2) = 3 Add(2,3) = 5\nINIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 1
+  },
+  {
+    "name": "definition-override",
+    "source": "---- MODULE Differential ----\nVARIABLE x\nValue == 0\nReplacement == 2\nInit == x = Value\nNext == UNCHANGED x\nSafe == x = 2\n====",
+    "config": "CONSTANT Value <- Replacement\nINIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 1
+  },
+  {
+    "name": "module-definition-override",
+    "source": "---- MODULE Differential ----\nEXTENDS Numbers\nVARIABLE x\nReplacement == 4\nInit == x = Value\nNext == UNCHANGED x\nSafe == x = 5\n====",
+    "config": "CONSTANT Base <- [Numbers] Replacement\nINIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Numbers": "---- MODULE Numbers ----\nEXTENDS Naturals\nBase == 1\nValue == Base + 1\n===="
+    },
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 1
+  },
+  {
+    "name": "module-value-override",
+    "source": "---- MODULE Differential ----\nEXTENDS Numbers\nVARIABLE x\nReplacement == 4\nInit == x = Value\nNext == UNCHANGED x\nSafe == x = 5\n====",
+    "config": "CONSTANT Base = [Numbers] 4\nINIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Numbers": "---- MODULE Numbers ----\nEXTENDS Naturals\nBase == 1\nValue == Base + 1\n===="
+    },
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 1
+  },
+  {
+    "name": "module-table",
+    "source": "---- MODULE Differential ----\nEXTENDS Numbers\nVARIABLE x\nInit == x = Value\nNext == UNCHANGED x\nSafe == x = 7\n====",
+    "config": "CONSTANT Inc(2) = [Numbers] 7\nINIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Numbers": "---- MODULE Numbers ----\nEXTENDS Naturals\nInc(v) == v + 1\nValue == Inc(2)\n===="
+    },
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 1
+  },
+  {
+    "name": "wrong-override-arity",
+    "source": "---- MODULE Differential ----\nCONSTANT F(_)\nVARIABLE x\nValue == 0\nInit == x = F(1)\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "CONSTANT F <- Value\nINIT Init\nNEXT Next\nINVARIANT Safe",
+    "modules": {},
+    "expected": "unsupported",
+    "tlc": "model-error"
+  },
+  {
+    "name": "missing-module",
+    "source": "---- MODULE Differential ----\nEXTENDS Missing\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "expected": "unsupported",
+    "tlc": "input-error"
+  },
+  {
+    "name": "cyclic-import",
+    "source": "---- MODULE Differential ----\nEXTENDS Left\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Left": "---- MODULE Left ----\nEXTENDS Right\n\n====",
+      "Right": "---- MODULE Right ----\nEXTENDS Left\n\n===="
+    },
+    "expected": "unsupported",
+    "tlc": "input-error"
+  },
+  {
+    "name": "conflicting-import",
+    "source": "---- MODULE Differential ----\nEXTENDS Left, Right\nVARIABLE x\nInit == x = Value\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Left": "---- MODULE Left ----\nValue == 1\n====",
+      "Right": "---- MODULE Right ----\nValue == 2\n===="
+    },
+    "expected": "unsupported",
+    "tlc": "input-error"
+  },
+  {
+    "name": "unknown-instance-parameter",
+    "source": "---- MODULE Differential ----\nVARIABLE x\nI == INSTANCE Values WITH Missing <- 1\nInit == x = I!Value\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Values": "---- MODULE Values ----\nValue == 1\n===="
+    },
+    "expected": "unsupported",
+    "tlc": "input-error"
+  },
+  {
+    "name": "missing-implicit-substitution",
+    "source": "---- MODULE Differential ----\nVARIABLE x\nI == INSTANCE Values\nInit == x = I!Value\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Values": "---- MODULE Values ----\nCONSTANT N\nValue == N\n===="
+    },
+    "expected": "unsupported",
+    "tlc": "input-error"
+  },
+  {
+    "name": "override-chain",
+    "source": "---- MODULE Differential ----\nCONSTANT N\nVARIABLE x\nA == 1\nB == 2\nInit == x = N\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "CONSTANTS N <- A A <- B\nINIT Init\nNEXT Next\nINVARIANT Safe",
+    "modules": {},
+    "expected": "unsupported",
+    "tlc": "model-error"
+  },
+  {
+    "name": "missing-table-entry",
+    "source": "---- MODULE Differential ----\nF(a) == 0\nVARIABLE x\nInit == x = F(2)\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "CONSTANT F(1) = 1\nINIT Init\nNEXT Next\nINVARIANT Safe",
+    "modules": {},
+    "expected": "model-error",
+    "tlc": "model-error"
+  },
+  {
+    "name": "unknown-module-value",
+    "source": "---- MODULE Differential ----\nVARIABLE x\nValue == 1\nInit == x = Value\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "CONSTANT Value = [Missing] 2\nINIT Init\nNEXT Next\nINVARIANT Safe",
+    "modules": {},
+    "expected": "unsupported",
+    "tlc": "complete"
+  },
+  {
+    "name": "duplicate-lexical-parameter",
+    "source": "---- MODULE Differential ----\nVARIABLE x\nI == INSTANCE Params\nInit == x = I!Value(7)\nNext == UNCHANGED x\nSafe == x = 7\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Params": "---- MODULE Params ----\nValue(x) == LET Inner(x) == x IN Inner(x)\n===="
+    },
+    "expected": "unsupported",
+    "tlc": "input-error"
+  },
+  {
+    "name": "instance-does-not-import-builtin",
+    "source": "---- MODULE Differential ----\nVARIABLE x\nI == INSTANCE Helper\nInit == x = I!Value + 1\nNext == UNCHANGED x\nSafe == x = 2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Helper": "---- MODULE Helper ----\nEXTENDS Naturals\nValue == 1\n===="
+    },
+    "expected": "unsupported",
+    "tlc": "input-error"
+  },
+  {
+    "name": "dependency-does-not-see-root",
+    "source": "---- MODULE Differential ----\nVARIABLE x\nMissing == 1\nI == INSTANCE Helper\nInit == x = I!Value\nNext == UNCHANGED x\nSafe == x = 1\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Helper": "---- MODULE Helper ----\nValue == Missing\n===="
+    },
+    "expected": "unsupported",
+    "tlc": "input-error"
+  },
+  {
+    "name": "parameter-free-identity",
+    "source": "---- MODULE Differential ----\nEXTENDS Helper\nVARIABLE x\nINSTANCE Helper\nInit == x = Value\nNext == UNCHANGED x\nSafe == x = 1\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Helper": "---- MODULE Helper ----\nValue == 1\n===="
+    },
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 1
+  },
+  {
+    "name": "nested-instances",
+    "source": "---- MODULE Differential ----\nVARIABLE x\nI == INSTANCE Wrapper\nInit == x = I!J!Value\nNext == UNCHANGED x\nSafe == x = 3\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Wrapper": "---- MODULE Wrapper ----\nJ == INSTANCE Helper WITH N <- 3\n====",
+      "Helper": "---- MODULE Helper ----\nCONSTANT N\nValue == N\n===="
+    },
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 1
+  },
+  {
+    "name": "declared-operator-table",
+    "source": "---- MODULE Differential ----\nCONSTANT Add(_, _)\nVARIABLE x\nInit == x = Add(1,2)\nNext == UNCHANGED x\nSafe == x = 3\n====",
+    "config": "CONSTANTS Add(1,2) = 3 Add(2,3) = 5\nINIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {},
+    "expected": "unsupported",
+    "tlc": "model-error"
+  },
+  {
+    "name": "unnamed-local-instance",
+    "source": "---- MODULE Differential ----\nVARIABLE x\nLOCAL INSTANCE Helper\nInit == x = Value\nNext == UNCHANGED x\nSafe == x = 1\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Helper": "---- MODULE Helper ----\nValue == 1\n===="
+    },
+    "expected": "complete",
+    "tlc": "complete",
+    "states": 1
+  },
+  {
+    "name": "qualified-action-name",
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA == INSTANCE Actions WITH value <- x\nInit == A!Init\nNext == A!Advance\nSafe == x < 2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Actions": "---- MODULE Actions ----\nEXTENDS Naturals\nVARIABLE value\nInit == value = 0\nAdvance == value' = value + 1\n===="
+    },
+    "expected": "invariant-violation",
+    "tlc": "invariant-violation",
+    "states": 3,
+    "action": "A!Advance"
+  },
+  {
+    "name": "let-action-name",
+    "source": "---- MODULE Differential ----\nEXTENDS Helper\nVARIABLE x\nInit == x = 0\nNext == LET Advance == x' = x + 1 IN Advance\nSafe == x < 2\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "modules": {
+      "Helper": "---- MODULE Helper ----\nEXTENDS Naturals\nValue == 1\n===="
+    },
+    "expected": "invariant-violation",
+    "tlc": "invariant-violation",
+    "states": 3,
+    "action": "Advance"
+  }
+]

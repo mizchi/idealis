@@ -1,0 +1,1540 @@
+{
+  "plan": "0048-fairness-operators",
+  "sourceVersion": "d155273d9defb220ed3ace7a689053cdf9f0380e38fa857a0ef56b837b00a19d",
+  "sources": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "b439b78c7606a49c5b8088f858f81a4d17c2e9a50fa7ef52a89fca531d6661c2"
+    },
+    {
+      "path": "crates/idealis-core/Cargo.lock",
+      "sha256": "4aff86ba1d4e9fd8183f912fc74ed2ae7bb0a5158d6cd770fd14a40e96cc812a"
+    },
+    {
+      "path": "crates/idealis-core/Cargo.toml",
+      "sha256": "ca36e245dc54e0dcf7944a8e9dffbfed5c08640189a0d8d4b2f1e884ece2e980"
+    },
+    {
+      "path": "crates/idealis-core/examples/counter.rs",
+      "sha256": "3a49faef5fed05c7c5cf6c62d2d0dd36fa4f71bd80d967b15f890b3ff837ab13"
+    },
+    {
+      "path": "crates/idealis-core/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/idealis-core/README.md",
+      "sha256": "807d4796990684cde8b2ca739df900b40acdeb10752b1f92a507ed81af4232df"
+    },
+    {
+      "path": "crates/idealis-core/src/finite.rs",
+      "sha256": "8049bd6677fa2a7d4c9b6192ebef47ecf50977ef14b967cbc8c4c4e4b99561b0"
+    },
+    {
+      "path": "crates/idealis-core/src/history.rs",
+      "sha256": "273f22b5c483922680bfc6281a3a46ba5bb1d3f2c911535431a8f5508fc1e032"
+    },
+    {
+      "path": "crates/idealis-core/src/host.rs",
+      "sha256": "0813f97b3518e7acffb9f48a5865d96b62d407b684ff110c6c73e83aa4933c6d"
+    },
+    {
+      "path": "crates/idealis-core/src/lib.rs",
+      "sha256": "285ad32f56c79089a20cb5f8bf43c1bc72f88f99a77886a647b46a0b008c5ff2"
+    },
+    {
+      "path": "crates/idealis-core/src/main.rs",
+      "sha256": "e70db654b26ff96496f3214681ad1f5241e2d76bdea9e71821c63551ff8a41f2"
+    },
+    {
+      "path": "crates/idealis-core/src/shrink.rs",
+      "sha256": "f74c85b7261bf1e3cbd6400db3fe8712f68d32b9fbcaf129509dc790ab619b36"
+    },
+    {
+      "path": "crates/idealis-core/src/wasm.rs",
+      "sha256": "2300b01f5c8540c34dbc4b4d83ea167ae081dd5fcd01c523dac8679b991a0ffe"
+    },
+    {
+      "path": "crates/idealis-core/SUPPORT.md",
+      "sha256": "e919bc72a71feded2e768d904e55cdf98599c917e3bc7d33aea78ca2a5dc8619"
+    },
+    {
+      "path": "crates/idealis-core/tests/collections.rs",
+      "sha256": "841a6ab5db87d920e96f9bcc251e0c34416ec76feb2d373c1d6c05591c415eda"
+    },
+    {
+      "path": "crates/idealis-core/tests/contract.rs",
+      "sha256": "6593f24d06a636ded76b8c768120b465ec71af3544602a4488949099706f5261"
+    },
+    {
+      "path": "crates/idealis-core/tests/finite.rs",
+      "sha256": "530a4d702600ea09be8cd2a238551cf84cbab33025694fa13f48bee61ef42416"
+    },
+    {
+      "path": "crates/idealis-core/tests/host.rs",
+      "sha256": "acb4e47c7dbdf54cf80665d8ab8af265f0016bbfda16fbc31143896ae873850e"
+    },
+    {
+      "path": "crates/idealis-core/tests/loaded.rs",
+      "sha256": "1703e51afe2ff3a2dfaa8657570632ebb5328ec68445f80e4b88847c47d0a0a8"
+    },
+    {
+      "path": "crates/idealis-core/tests/rtlc.rs",
+      "sha256": "c71308b5ec970da4aec57810608ed33f68bf5a1a485aeefafb00c114a5c6e19c"
+    },
+    {
+      "path": "crates/idealis-core/tests/safety.rs",
+      "sha256": "acf2362a0ee072b30b58a900785962d88ce27400dc9108a0bf5c545a8b9af62a"
+    },
+    {
+      "path": "crates/idealis-core/tests/shrink.rs",
+      "sha256": "ab339fa61fc36833ecbb41bd20b633d401921e83be29633e509ede0cb081f6ca"
+    },
+    {
+      "path": "crates/idealis-core/tests/tla.rs",
+      "sha256": "371fd8539b07f6fd5255eb51cef82d7dd32826eeaaea351da485cb3183b44f69"
+    },
+    {
+      "path": "crates/rtla-compiler/benches/compatibility.rs",
+      "sha256": "f1a42c006fdd3b696630c49356085c5abda7715fa6f849888172276601389be3"
+    },
+    {
+      "path": "crates/rtla-compiler/Cargo.lock",
+      "sha256": "ae19c5abc8d6a7c0578676f214ed0bdce9fd8d4117ae6d6b439c25a633ac1926"
+    },
+    {
+      "path": "crates/rtla-compiler/Cargo.toml",
+      "sha256": "ff35abd7398f8ae19de5a380b7cd6638f71e4554fceca773d9c62160e8025173"
+    },
+    {
+      "path": "crates/rtla-compiler/examples/check.rs",
+      "sha256": "bdc06941d17708dc2332575b253e96f6115daa28532117514fbba34a4eccd119"
+    },
+    {
+      "path": "crates/rtla-compiler/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/rtla-compiler/README.md",
+      "sha256": "1666864b6857a7c7e949eb8f54671fc17f1a8cca81b42ad11fe127ee84e534b0"
+    },
+    {
+      "path": "crates/rtla-compiler/src/lib.rs",
+      "sha256": "750fe520baf9fcbc946f780dda9684bc03864c6be95162f7c3854220aa9b18ac"
+    },
+    {
+      "path": "crates/rtla-compiler/src/link.rs",
+      "sha256": "b22c624fa74a5b4a1918736070cfa6d1b9a2e4a1c032460d6546c5c7eae74552"
+    },
+    {
+      "path": "crates/rtla-compiler/src/rewrite.rs",
+      "sha256": "98b15fbe03bea78c0c01693d76b778cb35d79e50ec84d01352c949e301eeb907"
+    },
+    {
+      "path": "crates/rtla-compiler/SUPPORT.md",
+      "sha256": "72e91d9bf6a23c5f8d9da984e8a309a48d851b49e66c4d0114c28432ff14b4e6"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/compiler.rs",
+      "sha256": "d6c7bc5018f026e0791388fd3776318247f744a58d9827d41dae2bd86f44cbb5"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/finite_support.rs",
+      "sha256": "a6247454985746c04f6209329fcf9a8a6f3544c2e3f7bbaad322ce0b1d5c165c"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/finite-support.json",
+      "sha256": "4255c15f24e2fae6420dc15585cef35a48eb2e23b8ac7e1c92e3d00b4f8a2690"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/modules-support.json",
+      "sha256": "c08e6216640becfcdefbd94110282f714310f72f19c354a82bf1595721e1c564"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/modules.rs",
+      "sha256": "2ce495a5d403b6e6de887cd07443a27f2dbd7083d1aac91deb331471f610eb7d"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/operators-support.json",
+      "sha256": "24441593c1c2a5f6ef97ac8c294f32fe1b9e8b78ed81e282ba8b86c3b0d724dd"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/operators.rs",
+      "sha256": "123c4142730d8bc329033e0bf7725b04c06cb76d26445ad39b8fffee69e654d4"
+    },
+    {
+      "path": "crates/rtla/Cargo.lock",
+      "sha256": "9b35082c314f3682e4c3d20b6bef5e95b41387c4c70782c498af76f296f53858"
+    },
+    {
+      "path": "crates/rtla/Cargo.toml",
+      "sha256": "d0ee70339da2a568e2813ed6fd3c85f211148cf93b1b52484cbac06e7161a80c"
+    },
+    {
+      "path": "crates/rtla/examples/inspect.rs",
+      "sha256": "c2ddd0476818d2b5bec7c34d52f6f10d1270c86e671603cfa0788979917467b7"
+    },
+    {
+      "path": "crates/rtla/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/rtla/NOTICE",
+      "sha256": "6f18428281839e8b8d7ae20477ddaae6c76cc7b5684eb8054fbdf01205ad9e9e"
+    },
+    {
+      "path": "crates/rtla/README.md",
+      "sha256": "95fba72dd05693cd024b69a848f4331c1a33ab7f8b150891bf22f668ff189a90"
+    },
+    {
+      "path": "crates/rtla/src/ast.rs",
+      "sha256": "d8929e28558bef691b8e84376e22f7ca23726fdb4650ca79d6007da0e1aa33af"
+    },
+    {
+      "path": "crates/rtla/src/config.rs",
+      "sha256": "f6824eb589df8e8b1d005dad9262cae02aac39568cdbffbdb0caf4c736d95c9c"
+    },
+    {
+      "path": "crates/rtla/src/error.rs",
+      "sha256": "3e1e4f360c44399e9c253f7697fb416f479564a5b6c61b2a9e67d74dd415b191"
+    },
+    {
+      "path": "crates/rtla/src/lexer.rs",
+      "sha256": "b705cadc17efe3df98c564e92afea8b080aad8af25bc4cceaee811a72450cfe5"
+    },
+    {
+      "path": "crates/rtla/src/lib.rs",
+      "sha256": "48e5e99cda0be623898b6c4743c28d0ca4044dc8ef82199533424cde28799903"
+    },
+    {
+      "path": "crates/rtla/src/main.rs",
+      "sha256": "8ba189d89ab92a002019441133a7aa2f86aed704ffca456d7c4094dead0d817c"
+    },
+    {
+      "path": "crates/rtla/src/parser.rs",
+      "sha256": "5d8ee681af7707294c994f0ebf2a4bc31978074be5d6c4ffb975290e3a489ec3"
+    },
+    {
+      "path": "crates/rtla/src/protocol.rs",
+      "sha256": "2c1e018da00062d8d2f6f2f20891ddad650f6cae12e772a84d81599782f385e0"
+    },
+    {
+      "path": "crates/rtla/src/wasm.rs",
+      "sha256": "e0487ce961fa75f57d34345c0b57674b1c925ad7af6b04bbda1176807cda6a5d"
+    },
+    {
+      "path": "crates/rtla/SUPPORT.md",
+      "sha256": "978ecaddac500a087be0028b4a49ae8c7ce41f9d14efa1540a2bd98d26dd56c6"
+    },
+    {
+      "path": "crates/rtla/tests/fixtures/Channel.tla",
+      "sha256": "8b2cbd4533a157ae0760e3117e3c008fb9a31dc3673005fc8b537d3879de1bfc"
+    },
+    {
+      "path": "crates/rtla/tests/fixtures/DieHard.tla",
+      "sha256": "295495de6509d86a82b88757835b95e3f91fad8691d764ece4d98886dcf42b66"
+    },
+    {
+      "path": "crates/rtla/tests/fixtures/LICENSE.md",
+      "sha256": "9fce60dd2b6c2be72803e96fc67f0a34b91b073ead999cea21d00c33b8bce147"
+    },
+    {
+      "path": "crates/rtla/tests/instances.rs",
+      "sha256": "b7603946a520076ef80f68a46b4b0270b76c97cc68472c835937fa99980b0fb4"
+    },
+    {
+      "path": "crates/rtla/tests/parser.rs",
+      "sha256": "5603429e90338696652452ddc17fc026db23e67db52b94dff2314be4ec8a4c4b"
+    },
+    {
+      "path": "crates/rtlc/Cargo.lock",
+      "sha256": "fb3c4f324cd8400bcf2bbbe57301b64d8b9ea6f9664fc22437dc3b11b509fcc9"
+    },
+    {
+      "path": "crates/rtlc/Cargo.toml",
+      "sha256": "24f2431f47557fa575e0608895285ac9b99e38bbf2b84246f1333f827f2a426e"
+    },
+    {
+      "path": "crates/rtlc/examples/counter.rs",
+      "sha256": "3cca23e754b5177b2bf78feb3e47b06496da5272c17c5858d703ec8b5b0bb866"
+    },
+    {
+      "path": "crates/rtlc/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/rtlc/README.md",
+      "sha256": "7eb9960a0ff8ea6aaf11e6585598cef6396535bbabb5dfe7195d91f3f722d72f"
+    },
+    {
+      "path": "crates/rtlc/src/bench-fixtures.json",
+      "sha256": "a9df6debe79bf441a8ff51b48f352077d3d6804d12e58afc962cb34365569f25"
+    },
+    {
+      "path": "crates/rtlc/src/benchmarks.rs",
+      "sha256": "2c98a88b5767c9ce73fc0e17c3622baf1c1925624e4b8ff1842a5f1513c79c7b"
+    },
+    {
+      "path": "crates/rtlc/src/ir.rs",
+      "sha256": "6614dbd37df603ffb817b8daf9e1aa95829976799cbcf961bd047f54c64d626c"
+    },
+    {
+      "path": "crates/rtlc/src/lib.rs",
+      "sha256": "d49b7f5f43db0df3fa5c797b0b84910fac204726f1fbeaf3da858e2ec8b02f58"
+    },
+    {
+      "path": "crates/rtlc/src/safety_expressions.rs",
+      "sha256": "6fcc1cbf6551092845f08e2a6e7904a867448fae1f77721321405c7135ac6d61"
+    },
+    {
+      "path": "crates/rtlc/src/safety_parallel.rs",
+      "sha256": "0e3dc309a65fe1cc6cfb58ed4d208f9796a70f30ed0c5dcf8422b3c2d821d92e"
+    },
+    {
+      "path": "crates/rtlc/src/safety_values.rs",
+      "sha256": "16fc1449382a11eb5b2b0b8a75c5be95b56bf2883e5e65b689ffa434a247d564"
+    },
+    {
+      "path": "crates/rtlc/src/safety_work.rs",
+      "sha256": "74667c6064180bc3020acbb2b9d35bcf395e9275ff1af14f29c6eed31025ed38"
+    },
+    {
+      "path": "crates/rtlc/src/safety.rs",
+      "sha256": "427c5c2015aef51da0b22875f98dee8b1310406e6fa64601707aa488fdb46347"
+    },
+    {
+      "path": "crates/rtlc/src/temporal.rs",
+      "sha256": "2b274b282ba7900cac0377d438929139a0541638da8728c32eec89b3ce607f7c"
+    },
+    {
+      "path": "crates/rtlc/src/value.rs",
+      "sha256": "b2ab3eb74c2b234332c9723cf577c606932480222bda3f73ca39ab0bcbea48fa"
+    },
+    {
+      "path": "crates/rtlc/SUPPORT.md",
+      "sha256": "334ec95304903a6388151840ad3b85fc2442e47872c6e52de7767858a7bb436f"
+    },
+    {
+      "path": "crates/rtlc/tests/operators.rs",
+      "sha256": "feccbfcfd9fadfc17e0f2ff58f39783e0e9550c264f3623ed64ae69c38a9a429"
+    },
+    {
+      "path": "crates/rtlc/tests/parallel_safety.rs",
+      "sha256": "24991d9904d73903397c8f9e090ef418e4eb395a7dfc19a09a3981ea93bf5771"
+    },
+    {
+      "path": "crates/rtlc/tests/standalone.rs",
+      "sha256": "0200847d1d9d48b4edabd0d37c8b59d858f1ed8d20c405386afb65137da8dc9c"
+    },
+    {
+      "path": "evals/collections-temporal/benchmarks.ts",
+      "sha256": "57e33d74f51e70933d963107f74a5dce2b58f3c22510b5a42e263d8f9a523012"
+    },
+    {
+      "path": "evals/collections-temporal/cases.ts",
+      "sha256": "7ab53cd38e10fcc5ee7a3efaa5c1ea6431176b294a69d710c0bc5edae9ac41e1"
+    },
+    {
+      "path": "evals/collections-temporal/contract-test.ts",
+      "sha256": "0cee9271b17b72942c7a5bb0c4cde5e931b179e6a374ecf6a46a4ada37ef9a88"
+    },
+    {
+      "path": "evals/collections-temporal/evaluate.ts",
+      "sha256": "1a9937a2a7ea8f117206e8fb8f7b283ad9aa7980f358695d74d178e21dd01ca9"
+    },
+    {
+      "path": "evals/collections-temporal/evidence.ts",
+      "sha256": "ef7c8f09c28fd33edca99cc88080219b1b029c1888e5bb440cbb0f3b6c22ab52"
+    },
+    {
+      "path": "evals/collections-temporal/replay.ts",
+      "sha256": "72005d0d3f69742dec20feb1fe6ce3da9c9d3c1717dbec6fb470031e7e1f8f13"
+    },
+    {
+      "path": "evals/collections-temporal/tlc-check.ts",
+      "sha256": "ee187d8184d8cbeec56f502d6c15d99b61dcccc5f598ebb616c0c062d7eac58b"
+    },
+    {
+      "path": "evals/collections-temporal/tlc-replay.ts",
+      "sha256": "72f1186495e62855847f2439afb880935c0e6042caf47e3eb2ecfdb18813ad40"
+    },
+    {
+      "path": "evals/collections-temporal/tlc.ts",
+      "sha256": "4832c05e1dd51d93c3087a22d19b2208224458dbdb5d7631a86d19ac14f821c1"
+    },
+    {
+      "path": "evals/collections-temporal/verify.ts",
+      "sha256": "019e7d27c487096b37729fa743048d7b4a2e6ee824d50ea9b5bd8d27a81e7b28"
+    },
+    {
+      "path": "evals/fixtures/channel/Channel.tla",
+      "sha256": "8b2cbd4533a157ae0760e3117e3c008fb9a31dc3673005fc8b537d3879de1bfc"
+    },
+    {
+      "path": "evals/fixtures/channel/LICENSE.md",
+      "sha256": "9fce60dd2b6c2be72803e96fc67f0a34b91b073ead999cea21d00c33b8bce147"
+    },
+    {
+      "path": "evals/fixtures/channel/provenance.json",
+      "sha256": "0ae9e62cc05c77dacaa3fcbd0f35ffee89ae7d376eacad4372ddfc973baea4fc"
+    },
+    {
+      "path": "evals/fixtures/die-hard/DieHard.tla",
+      "sha256": "295495de6509d86a82b88757835b95e3f91fad8691d764ece4d98886dcf42b66"
+    },
+    {
+      "path": "evals/fixtures/die-hard/LICENSE.md",
+      "sha256": "9fce60dd2b6c2be72803e96fc67f0a34b91b073ead999cea21d00c33b8bce147"
+    },
+    {
+      "path": "evals/fixtures/die-hard/provenance.json",
+      "sha256": "0478a36c88a07105251e0a907b10a447d0438d6a610737ce07c988c9be893512"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/expected.json",
+      "sha256": "7c53fea497ad6f3f27754e3aaaea6f9f1b5cb2cde1eb52758b98697554ca16c8"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-bound-capture.log",
+      "sha256": "be4e56c7dfc25ebe892df1f9e1d364ab6de8c9475d0e562842d386c5e859c381"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-empty-sequence.log",
+      "sha256": "88983d53351b4ec27053749105457adbd44d671220c955a00cd6b1b1ad88167f"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-empty-set.log",
+      "sha256": "b22262a59aa704e191d93d4ca63ae55ee01c6c4b0aaea69077e123c724e07292"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-equality-entry-error.log",
+      "sha256": "cdeb96eec491cfbb8f11a82c1ada975e7fa71f3bea0c0a2fa14aa851fb4daccc"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-let-operator.log",
+      "sha256": "f277f120e04e86ce2007363a29e35fea051ef65c4f1eebff4f8b5d9f1ada665d"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-nested.log",
+      "sha256": "480ded0471c20772df32ed14aa6895fd329eddb4a3e674ec4451a754325992b6"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-next-action.log",
+      "sha256": "54b08d0c1aea9c1a0064599fabda5f7f874268f94b46105ce5e605ee5ee1f1f3"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-own-ApaFoldSeqLeft.log",
+      "sha256": "4d67e9133dad50a7153628c3efd24f12793f5e02e21f918d6227efc9c74a664b"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-own-ApaFoldSet.log",
+      "sha256": "a796f2af97b8a45be747088c36f6f7c7203092dbde75748e06661e50b0369906"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-arity.log",
+      "sha256": "e0cd83a694973cb784efb4a23acb690c33d58916ade80fef1b26fa3f544e0661"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-higher-arity.log",
+      "sha256": "c5190a074ace7be8995f18b05e25b7734e49dfe1dc2ae0e30eff89ceea0d7b1e"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-higher-order-body.log",
+      "sha256": "26af2a38eb429631ba48d7ba1f405332a200ac5e65d5dd90cc6502637be2fbde"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-lambda.log",
+      "sha256": "cf05eb278c1bf3a68c7dee8bf78687b5baa2584553d351b5e918ae4b0dbf62e6"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-mutual-recursion.log",
+      "sha256": "95ac5d57e0b6e975f214c21bdd2762601c1567dc0109a9cdc240f0eca4cd199c"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-no-extends.log",
+      "sha256": "50a815a49b4f88ac2b504e9b6eff55cc1e9515a7ac2a1e54a16b26a5fa958b8e"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-operator-parameter.log",
+      "sha256": "60a0879fc635ebf9ec8f00a6002af2309ea78773df39958ba761e65653812851"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-other-apalache.log",
+      "sha256": "69a0f3e24a57fce9b9a8d2b489cc5fb211ab97cd440b2b501696d28f09979c8b"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-recursive.log",
+      "sha256": "830f3c1bad78b84f7241fcdd494db5c79b0d3b008ed7995b2624f8018e4a76ab"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-unknown.log",
+      "sha256": "78a159524a11b2cae086ee0b7c3eb236f3e97586e35884b456dfe60cfa8ced69"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-value-argument.log",
+      "sha256": "d9ebd498c6e27f51e82ffc3f36502f49e7201b3d9bc7feffdd9b3b5f4373802b"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-sequence-functions.log",
+      "sha256": "2c636e365e2daf275eadd3aa4d4b5e785ebc1e426dcf22044d1e3c534b20e96d"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-sequence-left.log",
+      "sha256": "c9abc8c2d91a2a491a6c40288627a7b2e8074f33cdf51487781f92eb8bad0ceb"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-sequence-values.log",
+      "sha256": "2b58390949f47f2d133ac7ba868a6a706f1d522c10f8be47ea7739b7a1b1e204"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-boolean-function-keys.log",
+      "sha256": "ac3bb991a8f365e4369fba2a793fe8654635ee29a13e13ee3f1e14fd3a1ab0ca"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-booleans.log",
+      "sha256": "08dd75056b0987ed05152e152d5967cf08b4f34dc2f5c705b32fa5cf60b018ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-explicit-functions.log",
+      "sha256": "d386f2659d1ed9b676cfba967bcf3fcd544e7c5de631a161daf4985630df7cf1"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-functions-with-records.log",
+      "sha256": "ea0bba9a3cb99cf045d25ae67b88c8c4850d13dc1936225db007998f99d0b6cd"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-functions-with-strings.log",
+      "sha256": "8675b6a164b127189cd4839332e579294932a80e563717f14e9e6e2bca6db68f"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-functions.log",
+      "sha256": "ad0e9832d6a23b9f44246dac9b308ba76a45294b15372c20c28c628a4974c3b0"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-integers.log",
+      "sha256": "3f1af77fd121d1e7af58e259d8bdda66a587075f416cab8cf82e195c2fe7ab35"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-interval-functions-safe.log",
+      "sha256": "0e22fbf18522d65fc7c6b59146f87ac7e43c3ff3d8ba78ea9c543bffcc832da7"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-interval-functions.log",
+      "sha256": "25919efb49fea31b37b1f5a7e1e00c1e7da1cfe1e9ff0e6614ae5ac61a9052cd"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-mixed-kinds.log",
+      "sha256": "f181f385b89bb88ac3341cf4f0ae62674c3b420c520aeec53eed0f7e35ab3028"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-nested-strings.log",
+      "sha256": "04dfbc98b77c5ed4d7d7ea8ca759978767decee2af8629666fd500c31421f5ac"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-record-fields.log",
+      "sha256": "1804bb429afe4d7662345551fb7928adc99c55c640e8f6cbd3c8ae56eb858588"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-records.log",
+      "sha256": "5958be226c6ecd7bd9f05de6d0ff8c185e5d8851ec804ab49088f5c9a9ab92cd"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-recursive-functions.log",
+      "sha256": "d2c08f587848cc30f689e6e2b40d099eefab2969a23d7b59789ae2a51da0a99c"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-recursive-values.log",
+      "sha256": "51092036d564acaf8f37f22f51364f4fb0ce3c74462601b9444c67db425334ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-sets-of-strings.log",
+      "sha256": "101ea3b6c9f5091c1122bf515f6987ba3b8313dcf3c320970934593e554668d7"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-sets.log",
+      "sha256": "f27abcc432a00e66dfe6c2c97181c791876c7449e3cbc5d5e6eb43ff148f6fa9"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-strings-reversed.log",
+      "sha256": "fe7c8673d1c418575df46e42779d33a4f3869d64a07b155bb55707da3856491b"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-strings.log",
+      "sha256": "0a288f39d4575ddd4e6c377fd761ab94f118ad72cf561cbd3c0263e199d8d4e3"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-tuples.log",
+      "sha256": "60013ca548415a9cbaa6d07d92e8b548934e1bb9a28bb0ae611332ca077b4220"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-wide-function-values.log",
+      "sha256": "e53eb740bd0586210cd529144b88b85c2e9caf3161128ee0e9a1823792f21331"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-wide-integers.log",
+      "sha256": "091a2ef6b4f7f847b98b4a2a6e06521a0001d43272739a5288920ef19036fecb"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-wide-recursive-functions.log",
+      "sha256": "088203647fc3195e76386edc3821fe458a4d0acff5127a9e27420fefafd368eb"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-wide-single-function.log",
+      "sha256": "10925da200434ba5a6c76e8d42254112da83b2bbeeade347244df6ceaaca1924"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-wide-tuple-values.log",
+      "sha256": "b528dc543660285c1bccbe3e38c8c81eaa2be952ab76d2caea0f92c9df148eb1"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-unsupported-function-direct.log",
+      "sha256": "d8b38d949da095fb367a7371103b4d634a1fe144e84a0453ce23af5a88c1ed9f"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-unsupported-function-set.log",
+      "sha256": "33fc828683127deab6e654aa8d8372b17cc1cf81fbe3eb5806853ca7b41e04f3"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-unsupported-function-tuple.log",
+      "sha256": "8fcd81558e2cd9331536e99b527e0e91b105b7d37837079d3658f95d32303a03"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-unsupported-record-direct.log",
+      "sha256": "5357621043ee9189767fae02ab0ceaa3ea83c6a054ad9e2c4d4bd7461da879ce"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-unsupported-record-set.log",
+      "sha256": "0f214a6e09ebc4200e547b7ac932abdd41d9ee6151cfc27cdb7f096ecde3302e"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-unsupported-record-tuple.log",
+      "sha256": "8f58a95f2ac0cfc2222b8dea2c179e73ce3f68a0771b601966f7aaa4bc5034ee"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-unsupported-string-direct.log",
+      "sha256": "38e440ae87eb654964964695a90cb863fa40090427da6cdd37bbbb2669e4cb6c"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-unsupported-string-set.log",
+      "sha256": "24b3dd6685c1144bedaa0cd9bba712118605db9c4b441e087a588440c09257d2"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-unsupported-string-tuple.log",
+      "sha256": "ae45740f40d8fed768c3c77889348cc1e93f3084fd56040c237057865ed62890"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/function-comparison-error.log",
+      "sha256": "a7a4a420e8c39b85b9eac7e882a38be07e97bbf790031d8456aa611de76bc67a"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/function-equality-entry-error.log",
+      "sha256": "d343ba26bc183a555e23f5da943cf78f1a384d355041605eaa9a9882659d8004"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/function-initial-choice.log",
+      "sha256": "078fca827d7ef3593a2ac3c49c9b5a044f5383abc56d609b426aad2539bbcd0c"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/function-quantifier-order.log",
+      "sha256": "0f31645d41efd1b746a9e013020fdf85dad31f9d59d17b2ceb0881e5488fd90a"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/function-set-equality.log",
+      "sha256": "190a15a5affc397dc657ece48dfa747ed923c1f4334f856b3b18dd02f708855f"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/function-set-membership.log",
+      "sha256": "3044fe99ac043dea0d16ac3a50b1ed0a24c3b2d76785e9c9fdfb689df0e135ae"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/README.md",
+      "sha256": "f2c4df1093f1c468f72f18fa89e4ba978dcfb660ced4e0aa4a642fc3c2d7e696"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/case-action-no-match.log",
+      "sha256": "0f2c41760aa418811d0652d6bfb3db05eed783ab0b1cdad2036f4fae06d92b00"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/case-action-other.log",
+      "sha256": "9883690a034963dfd71b7db9a3405a1bde8fa94f95f65deaf23382d1e492733e"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/case-action-short-circuit.log",
+      "sha256": "480ae3e37cb9d3eb25e840884365655a6a47c441a4d511a39039c8f65def6439"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/case-action-unevaluated-branch.log",
+      "sha256": "1a6afb6a3963a44989e05891d2dacd2d39c32ecd92e71443e51b0c2d51b606e7"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/case-expression-no-match.log",
+      "sha256": "77042bac8b84369607348e56ea88f95760d188798a25c32b41a97908853a8e01"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/case-first-true.log",
+      "sha256": "2af47bd52e9e310daeaf10d7a293bc32500c7e0bc351321f44230a64ca7cfce9"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/case-invariant-empty-init.log",
+      "sha256": "8ebd62f7469b4e6f396611507ff6fb4691d52ef3af769b124d359e566d86e108"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/case-unevaluated-branch.log",
+      "sha256": "b39c4359cf60bcae85928e17ebb61fbc887065505c4dafe58885440a0d154a9f"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/expected.json",
+      "sha256": "1528232de174ef548c83fcb51ee1e9795a8a0b9e05436115964c1a8ebcfa4abb"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/README.md",
+      "sha256": "ff7a5fe857000f8b0c8b4ea470e658a03da926b6d8f37ebb451a15a9bb2177ad"
+    },
+    {
+      "path": "evals/fixtures/tlc-strings/expected.json",
+      "sha256": "93dcb0a5b4bf6e133f13b21590a539915cbc03c5387d6b7e9e68601e8b465594"
+    },
+    {
+      "path": "evals/fixtures/tlc-strings/string-append-error.log",
+      "sha256": "28f8a0035224962010bb2b11a100bddb29ef30267d07791f1d8736ffbbb895cc"
+    },
+    {
+      "path": "evals/fixtures/tlc-strings/string-head-error.log",
+      "sha256": "895d17f5bece8184af67d6fb02536dabe1fcd67ee6bc691c22899f799f2a25e4"
+    },
+    {
+      "path": "evals/module-linking/run.ts",
+      "sha256": "8e3c553fc84088bbbec54fd7facaf9d9de4e11cc3804d82aec80e95a74196fde"
+    },
+    {
+      "path": "evals/plans/0009-rust-safety.md",
+      "sha256": "9a4d9d6f46f7dd67344a688dc21c229ced8c543a5d6e2763d60e64f455bac352"
+    },
+    {
+      "path": "evals/plans/0010-rust-safety-storage.md",
+      "sha256": "77bf16ab7d396cf9d66f0d4a0f199bc1b85071e5cfbe084692435a171e81c31d"
+    },
+    {
+      "path": "evals/plans/0011-rust-safety-arena.md",
+      "sha256": "27d9fc1ded7e145ddc71c60eaf59ed882247d9f44aab8ea6262cc7ff7cc6ad70"
+    },
+    {
+      "path": "evals/plans/0012-collections-temporal.md",
+      "sha256": "497587ca3d4f866a673bd7e026f6e5decc265cb1c5560044aea7ecd95b845729"
+    },
+    {
+      "path": "evals/plans/0013-scalar-comparison.md",
+      "sha256": "b1f26c2a6aca259ccb0f6e6e3750d520f3eeb024cb26857ec56b55f221de6bfb"
+    },
+    {
+      "path": "evals/plans/0014-value-hash.md",
+      "sha256": "12b15d049e33065b70adda75d6ed25b31ebc1e9c1fcd02fec2a1c4161dd9f371"
+    },
+    {
+      "path": "evals/plans/0015-tlc-differential.md",
+      "sha256": "b16722bb96536401c00ec3e5a336f479d18c174f78463385e557f38f542c2e71"
+    },
+    {
+      "path": "evals/plans/0048-fairness-operators.md",
+      "sha256": "24a15fabee7f10f3f3b160205b9459c4badd1f1052bf9004b22d984bd8997387"
+    },
+    {
+      "path": "evals/rust-safety/cases.ts",
+      "sha256": "d208ae2df2b30f892498a826657dee2ec41d0a6d8a9732de91376a9a9a94c73e"
+    },
+    {
+      "path": "evals/rust-safety/contract-test.ts",
+      "sha256": "79c0f3cefe7922b806510d4540658dd21f111b73caf409cdf765784aeb045767"
+    },
+    {
+      "path": "evals/rust-safety/evaluate.ts",
+      "sha256": "72ac67e2dcf7d67e2a73ac07e0f290a64a4e018a8afe6dfde5917024ca5a6ca3"
+    },
+    {
+      "path": "evals/rust-safety/provenance.ts",
+      "sha256": "0a0a681143556656a37345ccf31622a9302bf05df00051158d05777763fd601e"
+    },
+    {
+      "path": "evals/rust-safety/replay.ts",
+      "sha256": "da239d4b9b0457a8b3ba3c7ddfcbc4ce31f5df48bc91466d821850d9ed35f4d9"
+    },
+    {
+      "path": "evals/rust-safety/tlc-check.ts",
+      "sha256": "3726c3b040c85e940046d72bfe1e0eefd0f04c2ad6fc93a20ed7d93f21be58d0"
+    },
+    {
+      "path": "evals/tlc-differential/compare-test.ts",
+      "sha256": "d32e18bd9c5476135c649739499d8025c9d0ec60a2b7ac186c7f25b3d9319fbe"
+    },
+    {
+      "path": "evals/tlc-differential/compare.ts",
+      "sha256": "5a3d9e2397cc24ba7d23dbe6a4b5ff14dcd2988ddaf77f718ee8214e75f9be97"
+    },
+    {
+      "path": "evals/tlc-differential/corpus.ts",
+      "sha256": "3ff1983415125970e8aa51486b94d472bf7e8450abb48969b486af0de2c7dffc"
+    },
+    {
+      "path": "evals/tlc-differential/differential.ts",
+      "sha256": "ca1a18684f3619df590292704709a59414bbc5a332200d4d01baca625ee5d1ce"
+    },
+    {
+      "path": "evals/tlc-differential/regression-test.ts",
+      "sha256": "7f68c9abdf0953adde5763701a125803edd188f90958ec81ce40f893031f7081"
+    },
+    {
+      "path": "evals/tlc-differential/run.ts",
+      "sha256": "4a7fc67fe242a06d44243e41d33bccb3061272ac3628ad66856b46eadaa77c3e"
+    },
+    {
+      "path": "justfile",
+      "sha256": "3cd8f03e8f810a4c05f729fae06a78c555fd8aecda7dd511db30747196dc4937"
+    },
+    {
+      "path": "package.json",
+      "sha256": "5979a0c8a2a076e6d59958b959084ec59c39eac253e8822277799f57e653f7e0"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "6fa7a6e5c4233f14a9171f53a031350dd7ff5a1f942eccc4a5ee986672e44e46"
+    },
+    {
+      "path": "scripts/check-support-test.ts",
+      "sha256": "8efeec596a21271c8ab864bb571ebb35c157e4e642d3ca94dd2ff42b60f6e10f"
+    },
+    {
+      "path": "scripts/check-support.ts",
+      "sha256": "4cce80e11e4aa7797fc3289e528a27c8d795eaa84046f4c68ae00a27a1c9d796"
+    },
+    {
+      "path": "scripts/go-consumer.ts",
+      "sha256": "73b6791c466b1a82306aba321c1ad1355227207106ad291b9720d4937372499f"
+    },
+    {
+      "path": "scripts/package-test.ts",
+      "sha256": "9abc71ae5d5c429abc4165ee538598c91421601295b19f483e312fc26a98f56a"
+    },
+    {
+      "path": "scripts/package.ts",
+      "sha256": "7a503fab5b1ee37e906c81bec33d5518085de3c264e871ed115b2a2001c039f4"
+    },
+    {
+      "path": "scripts/release.ts",
+      "sha256": "f9f5d402302e67c2515fa9d060cc0971988046f4c482d6a5181ddb77acbb0dde"
+    },
+    {
+      "path": "src/alloy.ts",
+      "sha256": "9d267f5b9b13aad4cc693b1c0d3d0960480d85ca84c4937b8bdcc7526c5116be"
+    },
+    {
+      "path": "src/backend.ts",
+      "sha256": "6dc14c671b2eb4c3e47554337c0818a6aeecebec782015219e135ae2eccd9b14"
+    },
+    {
+      "path": "src/budget.ts",
+      "sha256": "59239e0c17b0e6670d22c031de983434c9444cdc74f58dde3f4ed42f2e0d2ba8"
+    },
+    {
+      "path": "src/checker.ts",
+      "sha256": "0d3d22b03dddd84e9b523f298a1c111b2a61dc4cec8731b8969d640124692e4b"
+    },
+    {
+      "path": "src/compose.ts",
+      "sha256": "a3fd903ca6dce125b6efb8ac34d77fc92d91640994e14e1a86a313d30c11f4e6"
+    },
+    {
+      "path": "src/conformance.ts",
+      "sha256": "fde9957b697b171e252b9abc6fdbd765f283389212684d99b262617a3bb12326"
+    },
+    {
+      "path": "src/contracts.ts",
+      "sha256": "8017dc6d22aac545cee45b23b18b80c7444d0d04f0702de4acc4d20fd2bbf766"
+    },
+    {
+      "path": "src/finite.ts",
+      "sha256": "69c6c67e3ab8cc6ec33359c7668a8717a40d3f4c62367606a2afacb7ca936489"
+    },
+    {
+      "path": "src/history.ts",
+      "sha256": "78cfeda2537605446f7226fe3e6865acc047299105aca0273d90b9d1c09d8bd5"
+    },
+    {
+      "path": "src/host.ts",
+      "sha256": "c952e1da81a9c0a1a71a78b2c35a4441b156e087c96a6c1241c712647a0ca30b"
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "d8219cc54aabba15e4f04c604decdaf61d3f8dbcab9b01b721298e35f047867f"
+    },
+    {
+      "path": "src/portable-value.ts",
+      "sha256": "0c9391402f23a6b6ddc1995b09b582ea43d37f0abdf2726031932443dedf0643"
+    },
+    {
+      "path": "src/portable-wasm.ts",
+      "sha256": "17f164b4d505eca92e8560f2fb73ce1ee0b27217ab8a068fd30c53a74071a8e4"
+    },
+    {
+      "path": "src/portable.ts",
+      "sha256": "67bd14e26edea8c2264c841031f063205d5124b3981b66b5167cd8a59ac5c51c"
+    },
+    {
+      "path": "src/property.ts",
+      "sha256": "52b5afd86848a425e27423241de275dfe7c67f8bc812119eab8593bcf0f6e60a"
+    },
+    {
+      "path": "src/safety-program.ts",
+      "sha256": "f92dc8c488edd4fda3d22c26f238dda227b4022f730bc367a3bd8f212e87f4d7"
+    },
+    {
+      "path": "src/safety.ts",
+      "sha256": "fb3b9b366411ee31a16fccc92888ece3829d54683d130914440628c7e29359ec"
+    },
+    {
+      "path": "src/scheduling.ts",
+      "sha256": "b48010720d2641a8da84fb7146cae21214ccf77c8b79d9cd778a2f952b3dde0a"
+    },
+    {
+      "path": "src/sharding.ts",
+      "sha256": "ed7b6f23dd4f2ec86a732828990f38f12ee50151788de734b0fd6c3a19f73b19"
+    },
+    {
+      "path": "src/shrink.ts",
+      "sha256": "2b0cfe9a1586a1b52e106695df11378acbcd61c2e6e967349c2cc03dda5cf57c"
+    },
+    {
+      "path": "src/smt.ts",
+      "sha256": "702836572848046b6e91585cbb21f96b2cacff42a2180f06e04cfc27e05b94ac"
+    },
+    {
+      "path": "src/testing-wire.ts",
+      "sha256": "d7352b089bd96c2c9e4b1540983573d19b2a7b46af59b42b589071a535813e0a"
+    },
+    {
+      "path": "src/testing.ts",
+      "sha256": "475d5b3f99e32366d6ed0f0b5cd9d86fdaad1aa7b9453d13a5ed4ddae495be2a"
+    },
+    {
+      "path": "src/tla-safety.ts",
+      "sha256": "ff76de0bf7f4cca399ac24ed3379465dffda41acc61cb059aabb68910c407ef9"
+    },
+    {
+      "path": "src/tla-source.ts",
+      "sha256": "bc513d2d966d6b1e2652d9e4c00c54c0ddfbf819afa37bd4c0dc856d278c7330"
+    },
+    {
+      "path": "src/tla.ts",
+      "sha256": "ada3ca5acc8d08d4f964e9711b6058e16f6e90603815bf609fa1f6af93c7bdb3"
+    },
+    {
+      "path": "src/trace.ts",
+      "sha256": "0a20a45ba0d84841139bec2dd8178c40585276fffc75e536d33ea1ca2c077cf3"
+    },
+    {
+      "path": "tests/advanced-contract.ts",
+      "sha256": "1dfdfdf7c8d4b443d1f7faf3f87f535e9ab0e38bab53cb8c76f848f359c61299"
+    },
+    {
+      "path": "tests/async-contract.ts",
+      "sha256": "15800e0abf7c6a0911f4fb9bb4336e92e244a8137918322186cc0119f5ce95bc"
+    },
+    {
+      "path": "tests/async.vitest.test.ts",
+      "sha256": "5d211256073c7c8e433c5a9671409ca54da0585b42bc61151d4f08366aafd73c"
+    },
+    {
+      "path": "tests/backend-contract.ts",
+      "sha256": "e2c49d6eb8d921a0bd746f65fe7d54da1ef902fd83083fb8ab0b2f1878fc7d1e"
+    },
+    {
+      "path": "tests/backend.vitest.test.ts",
+      "sha256": "1898ff8a690bca5c77f26b1d89c0992c38a73cc70d7d0fabba7c87012abe2962"
+    },
+    {
+      "path": "tests/browser-entry.ts",
+      "sha256": "24d9b7b487e9a871f41e4491c4827dde0aaec9be4384a60f86b337ece4f7f6a8"
+    },
+    {
+      "path": "tests/browser.spec.ts",
+      "sha256": "1a92a352ca6d4d4ba7837e9209c2088b769490e0de0234a80b1a01802b512d0a"
+    },
+    {
+      "path": "tests/budget-contract.ts",
+      "sha256": "5cb46382dba85718b7f668346a3785b40084659688b48f6789d39f36efc88d16"
+    },
+    {
+      "path": "tests/budget.vitest.test.ts",
+      "sha256": "e10039dacf4a580a35a58365b66f81401f3bbfa0afa2ec72ec7f0cad14e93ed3"
+    },
+    {
+      "path": "tests/contract.ts",
+      "sha256": "8449009ea948cb626ebbab14b7fbdd482e5b66da6fbcb3f6046f544027247294"
+    },
+    {
+      "path": "tests/core.vitest.test.ts",
+      "sha256": "fdfc2b6dfec2215074e9baf91dac37d173c2cefd2a6e062676394a0898d78d54"
+    },
+    {
+      "path": "tests/eval-loop-contract.ts",
+      "sha256": "f040dcbfd8331c5858460cbe9feb9148b314b7487fd66b62af1863bad27d636b"
+    },
+    {
+      "path": "tests/eval-loop.vitest.test.ts",
+      "sha256": "dfb3dd54ba2b2dcc729413349646d622cd099fe671239d1c9fbfb91987a5f280"
+    },
+    {
+      "path": "tests/evaluation-contract.ts",
+      "sha256": "22d4da800b571334d805ec90c7708764a7e846666e51f8617c81bf24563c16a4"
+    },
+    {
+      "path": "tests/evaluation.vitest.test.ts",
+      "sha256": "12a1d6f1775991385685bb9c503bfcfcc8b89157b797252692c0729ddd582ab0"
+    },
+    {
+      "path": "tests/integration-contract.ts",
+      "sha256": "7bdd1718a5ff8192444a53774d2c53e632544af90bf4ec8271063eaa0393bb84"
+    },
+    {
+      "path": "tests/integration.vitest.test.ts",
+      "sha256": "6f8451ad66fcce7cc93b952a2c1cab3de535039e2d04458104cf06d91790a0c8"
+    },
+    {
+      "path": "tests/node.test.ts",
+      "sha256": "53adefcdbee02c4ddf3e7af865be99a7409c7d70a9054eec22b0c51124d9a9d5"
+    },
+    {
+      "path": "tests/portable-browser-entry.ts",
+      "sha256": "01370797d51ccae1afd0b210e97ed0ee1556c1050d26ad97fb066cbd1d2b232f"
+    },
+    {
+      "path": "tests/portable-contract.ts",
+      "sha256": "384429fbda7b71b70000bd03db27242a063cbec667421be248e870ddec8a08b3"
+    },
+    {
+      "path": "tests/portable.browser.spec.ts",
+      "sha256": "84cf02f4ddd5a6feaadf6433fb8017870449a1797b33341177e6f5bb72e87d8f"
+    },
+    {
+      "path": "tests/portable.vitest.test.ts",
+      "sha256": "5f26c1b97eea68da21d665c05a153e9e9db7ba0775730163fbb0fb3933c9992f"
+    },
+    {
+      "path": "tests/property-contract.ts",
+      "sha256": "3e201ec866114524fd5be554fff530a6ab1e090339dd38657b4bab8d73bfb61d"
+    },
+    {
+      "path": "tests/property.vitest.test.ts",
+      "sha256": "711606a5daebbf4cb962e3b6dd0d9d138fb6338984cac7c257450932af955702"
+    },
+    {
+      "path": "tests/rtla-browser-entry.ts",
+      "sha256": "e024f92b100f4af579d76b63595b588759796fab1b284e360cf088820a2dffa6"
+    },
+    {
+      "path": "tests/rtla.browser.spec.ts",
+      "sha256": "1ae7eb59a1e8ec5cc48dddea7d46f859f8a879218cc6a533a34e6d5af060ccad"
+    },
+    {
+      "path": "tests/runtime-browser-entry.ts",
+      "sha256": "392e555573fba1b26f1c2a722b3ad99ae2a5ff1f3ca40131b6834674a4a653aa"
+    },
+    {
+      "path": "tests/runtime.browser.spec.ts",
+      "sha256": "25cc60a1ec40e1fc16a449ac73f88256e0640575680a58dd008e17bece5cfc7e"
+    },
+    {
+      "path": "tests/safety-contract.ts",
+      "sha256": "80de2bb12ea5981e185a027cebcfe6a0f88c9a24307507420b80aa1d9baed9a2"
+    },
+    {
+      "path": "tests/safety.vitest.test.ts",
+      "sha256": "9e0f7268da0a1d74526cee2f51b45c8497161edff321df8671a51dc5a99bb136"
+    },
+    {
+      "path": "tests/scheduling-browser.spec.ts",
+      "sha256": "093a3e9f117ec706a022e2cb961df6463b21f375c2c3d054cc65a75b0dad91df"
+    },
+    {
+      "path": "tests/scheduling-contract.ts",
+      "sha256": "d8b22c09350e71a066a43c9f08f7f59fb6148141b8ce42892e4d06f0c3c4ff54"
+    },
+    {
+      "path": "tests/scheduling.vitest.test.ts",
+      "sha256": "b3f67a5d2608021b0c025c18db9bd00890733bbff85aefb7fc5c1c9a826ea288"
+    },
+    {
+      "path": "tests/sharding-contract.ts",
+      "sha256": "0c4bb6e2944c420a49f28960f880b6be0c597ba9770fea8ef2373bcec9d14f3f"
+    },
+    {
+      "path": "tests/sharding.vitest.test.ts",
+      "sha256": "5ff4ff9a0eea0395332c990a6af22aa47109fe68526d2728009dd821be6561a2"
+    },
+    {
+      "path": "tests/source-contract.ts",
+      "sha256": "d6626a9e682c48e5268356b04dd38248fb28d86cc0945f3b3b9f511867bd2bf0"
+    },
+    {
+      "path": "tests/source.vitest.test.ts",
+      "sha256": "eecc0df8d0956123faf89e7a44bdcddf8d9e47fafa6afd9b504b0e6f083c423e"
+    },
+    {
+      "path": "tests/usable-contract.ts",
+      "sha256": "96f10348affdb981388fba4d812c87aa629322f5842186ccdd7f617d3a128781"
+    },
+    {
+      "path": "tests/usable.vitest.test.ts",
+      "sha256": "ef72bb12048422462911cc6755804932d82e8df0ecf5dd431bd9430bad2f89c2"
+    },
+    {
+      "path": "tsconfig.build.json",
+      "sha256": "d4e5348b7e9c8685110feabc9d2ff878d8bf235e0f778a5b230adbffcb7b520f"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "002e2f5c7e99896b3a6853d651b4ee4b3c5a92d5cce156a60ef0c371dd5a6410"
+    }
+  ],
+  "binaries": [
+    {
+      "path": ".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java",
+      "sha256": "0f642542ea1f0be6957557c0db96653ec128113bb5a4aaa7c2534d1d72ddb51f"
+    },
+    {
+      "path": ".artifacts/tlc/tla2tools.jar",
+      "sha256": "936a262061c914694dfd669a543be24573c45d5aa0ff20a8b96b23d01e050e88"
+    },
+    {
+      "path": "crates/idealis-core/target/release/idealis-core",
+      "sha256": "ef468e2399db10343cb1d13e300c476a93b3d0dbf24b8c31035743b35d559ab5"
+    },
+    {
+      "path": "crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm",
+      "sha256": "a13f346a6751c5d9fb3aaabf910b44c8d267c20b8ab968c8bfa5065c3bb65e3b"
+    }
+  ],
+  "inputs": [
+    {
+      "name": "select-order",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == v > 1\nInit == x = (SelectSeq(<<3,1,2,3>>, Keep))\nNext == UNCHANGED x\nSafe == x = (<<3,2,3>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "select-empty",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == 1 \\div 0 = 0\nInit == x = (SelectSeq(<<>>, Keep))\nNext == UNCHANGED x\nSafe == x = (<<>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "select-duplicates",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == v = 2\nInit == x = (SelectSeq(<<2,2,1,2>>, Keep))\nNext == UNCHANGED x\nSafe == x = (<<2,2,2>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "select-none",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == FALSE\nInit == x = (SelectSeq(<<1,2>>, Keep))\nNext == UNCHANGED x\nSafe == x = (<<>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "select-all",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == TRUE\nInit == x = (SelectSeq(<<1,2>>, Keep))\nNext == UNCHANGED x\nSafe == x = (<<1,2>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "select-function",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == v > 1\nInit == x = (SelectSeq([i \\in 1..3 |-> i], Keep))\nNext == UNCHANGED x\nSafe == x = (<<2,3>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "select-scope",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nMake(limit) == LET Keep(v) == v > limit IN SelectSeq(<<1,2,3>>, Keep)\nInit == x = (Make(1))\nNext == UNCHANGED x\nSafe == x = (<<2,3>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "select-nested",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nInner(v) == v > 1\nKeep(v) == Len(SelectSeq(<<v>>, Inner)) = 1\nInit == x = (SelectSeq(<<1,2>>, Keep))\nNext == UNCHANGED x\nSafe == x = (<<2>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "select-bool-error",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == 1\nInit == x = (SelectSeq(<<1>>, Keep))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "model-error",
+      "tlc": "model-error"
+    },
+    {
+      "name": "select-string-error",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == TRUE\nInit == x = (SelectSeq(\"abc\", Keep))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "model-error",
+      "tlc": "model-error"
+    },
+    {
+      "name": "select-missing-import",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE x\nKeep(v) == TRUE\nInit == x = (SelectSeq(<<1>>, Keep))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "unsupported",
+      "tlc": "input-error"
+    },
+    {
+      "name": "select-wrong-arity",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(a,b) == TRUE\nInit == x = (SelectSeq(<<1>>, Keep))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "unsupported",
+      "tlc": "input-error"
+    },
+    {
+      "name": "sort-ascending",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == a < b\nInit == x = (SortSeq(<<3,1,2,1>>, Less))\nNext == UNCHANGED x\nSafe == x = (<<1,1,2,3>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-descending",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == a > b\nInit == x = (SortSeq(<<3,1,2,1>>, Less))\nNext == UNCHANGED x\nSafe == x = (<<3,2,1,1>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-false",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == FALSE\nInit == x = (SortSeq(<<3,1,2>>, Less))\nNext == UNCHANGED x\nSafe == x = (<<3,1,2>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-true",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == TRUE\nInit == x = (SortSeq(<<3,1,2>>, Less))\nNext == UNCHANGED x\nSafe == x = (<<2,1,3>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-stable",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == a.rank < b.rank\nInit == x = (SortSeq(<<[rank |-> 0, id |-> 1],[rank |-> 0, id |-> 2]>>, Less))\nNext == UNCHANGED x\nSafe == x = (<<[rank |-> 0, id |-> 1],[rank |-> 0, id |-> 2]>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-nonstrict",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == a.rank <= b.rank\nInit == x = (SortSeq(<<[rank |-> 0, id |-> 1],[rank |-> 0, id |-> 2]>>, Less))\nNext == UNCHANGED x\nSafe == x = (<<[rank |-> 0, id |-> 2],[rank |-> 0, id |-> 1]>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-empty",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == 1 \\div 0 = 0\nInit == x = (SortSeq(<<>>, Less))\nNext == UNCHANGED x\nSafe == x = (<<>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-singleton",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == 1 \\div 0 = 0\nInit == x = (SortSeq(<<9>>, Less))\nNext == UNCHANGED x\nSafe == x = (<<9>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-function",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == a < b\nInit == x = (SortSeq([i \\in 1..3 |-> 4-i], Less))\nNext == UNCHANGED x\nSafe == x = (<<1,2,3>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-scope",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nMake(offset) == LET Less(a,b) == a+offset < b+offset IN SortSeq(<<3,1,2>>, Less)\nInit == x = (Make(0))\nNext == UNCHANGED x\nSafe == x = (<<1,2,3>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-bool-error",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == 1\nInit == x = (SortSeq(<<1,2>>, Less))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "model-error",
+      "tlc": "model-error"
+    },
+    {
+      "name": "sort-string-error",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == TRUE\nInit == x = (SortSeq(\"abc\", Less))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "model-error",
+      "tlc": "model-error"
+    },
+    {
+      "name": "sort-missing-import",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences\nVARIABLE x\nLess(a,b) == TRUE\nInit == x = (SortSeq(<<1>>, Less))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "unsupported",
+      "tlc": "input-error"
+    },
+    {
+      "name": "sort-wrong-arity",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a) == TRUE\nInit == x = (SortSeq(<<1>>, Less))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "unsupported",
+      "tlc": "input-error"
+    },
+    {
+      "name": "assert-true",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\n\nInit == x = (Assert(TRUE, \"ok\"))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "assert-value-message",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\n\nInit == x = (Assert(TRUE, [tag |-> 2]))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "assert-false",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\n\nInit == x = (Assert(FALSE, \"expected failure\"))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "model-error",
+      "tlc": "model-error"
+    },
+    {
+      "name": "assert-nonbool",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\n\nInit == x = (Assert(1, \"not Boolean\"))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "model-error",
+      "tlc": "model-error"
+    },
+    {
+      "name": "assert-eager-message",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\n\nInit == x = (Assert(TRUE, 1 \\div 0))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "model-error",
+      "tlc": "model-error"
+    },
+    {
+      "name": "assert-lazy-branch",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\n\nInit == x = (IF TRUE THEN 7 ELSE Assert(FALSE, \"unused\"))\nNext == UNCHANGED x\nSafe == x = (7)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "assert-missing-import",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE x\n\nInit == x = (Assert(TRUE, \"ok\"))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "unsupported",
+      "tlc": "input-error"
+    },
+    {
+      "name": "fair-forall",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (\\A p \\in {1,2}: WF_done(Step(p)))\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "fair-exists",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (\\E p \\in {1,2}: WF_done(Step(p)))\nLive == <> (done # {})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "fair-exists-fault",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (\\E p \\in {1,2}: WF_done(Step(p)))\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "liveness-violation",
+      "tlc": "liveness-violation"
+    },
+    {
+      "name": "fair-no-control",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (TRUE)\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "liveness-violation",
+      "tlc": "liveness-violation"
+    },
+    {
+      "name": "fair-tuple",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (\\A <<p,q>> \\in {<<1,0>>,<<2,0>>}: WF_done(Step(p+q)))\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "fair-nested",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (\\A p \\in {1,2}: \\A q \\in {0}: WF_done(Step(p+q)))\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "fair-empty-forall",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (\\A p \\in {}: WF_done(Step(p)))\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "liveness-violation",
+      "tlc": "liveness-violation"
+    },
+    {
+      "name": "fair-empty-exists",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (\\E p \\in {}: WF_done(Step(p)))\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "model-error",
+      "tlc": "model-error"
+    },
+    {
+      "name": "fair-wrapper",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (Fair({1,2}))\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "fair-intermittent-WF",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLES turn, done\nvars == <<turn,done>>\nInit == turn = 0 /\\ done = {}\nTick == turn' = 1-turn /\\ UNCHANGED done\nStep(p) == turn = 1 /\\ p \\notin done /\\ turn' = 0 /\\ done' = done \\cup {p}\nNext == Tick \\/ (\\E p \\in {1,2}: Step(p))\nFairTick == WF_vars(Tick)\nSpec == Init /\\ [][Next]_vars /\\ FairTick /\\ (\\A p \\in {1,2}: WF_vars(Step(p)))\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "liveness-violation",
+      "tlc": "liveness-violation"
+    },
+    {
+      "name": "fair-intermittent-SF",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLES turn, done\nvars == <<turn,done>>\nInit == turn = 0 /\\ done = {}\nTick == turn' = 1-turn /\\ UNCHANGED done\nStep(p) == turn = 1 /\\ p \\notin done /\\ turn' = 0 /\\ done' = done \\cup {p}\nNext == Tick \\/ (\\E p \\in {1,2}: Step(p))\nFairTick == WF_vars(Tick)\nSpec == Init /\\ [][Next]_vars /\\ FairTick /\\ (\\A p \\in {1,2}: SF_vars(Step(p)))\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "select-prime",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == v > x\nInit == x = 2\nNext == x' = 1 /\\ SelectSeq(<<1,2>>, Keep)' = <<2>>\nSafe == x \\in {1,2}\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-comparison-order",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, TLC\nVARIABLE x\nBefore(new, old) == IF <<new, old>> \\in {<<2,3>>, <<1,3>>, <<1,2>>} THEN TRUE ELSE 1 \\div 0 = 0\nInit == x = SortSeq(<<3,2,1>>, Before)\nNext == UNCHANGED x\nSafe == x = <<1,2,3>>\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "operators-module",
+      "source": "---- MODULE Differential ----\nEXTENDS Operators\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {
+        "Operators": "---- MODULE Operators ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == v > 1\nBefore(left,right) == left < right\nInit == x = SortSeq(SelectSeq(<<3,1,2,2>>, Keep), Before)\nNext == UNCHANGED x\nSafe == Assert(x = <<2,2,3>>, \"module\")\n===="
+      },
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "operators-instance",
+      "source": "---- MODULE Differential ----\nVARIABLE x\nA == INSTANCE Operators WITH state <- x, Limit <- 1\nInit == A!Init\nNext == A!Next\nSafe == A!Safe\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {
+        "Operators": "---- MODULE Operators ----\nEXTENDS Integers, Sequences, TLC\nCONSTANT Limit\nVARIABLE state\nKeep(v) == v > Limit\nBefore(left,right) == left < right\nInit == state = SortSeq(SelectSeq(<<3,1,2,2>>, Keep), Before)\nNext == UNCHANGED state\nSafe == Assert(state = <<2,2,3>>, \"instance\")\n===="
+      },
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "fair-state-domain",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (\\A p \\in done: WF_done(Step(p)))\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "unsupported",
+      "tlc": "model-error"
+    },
+    {
+      "name": "select-higher-order",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences\nVARIABLE x\nKeep(v) == v > 1\nFilter(op(_)) == SelectSeq(<<1,2>>, op)\nInit == x = Filter(Keep)\nNext == UNCHANGED x\nSafe == x = <<2>>\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "unsupported",
+      "tlc": "complete"
+    },
+    {
+      "name": "fair-renamed-spec",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSystem == Init /\\ [][Next]_done /\\ (\\A p \\in {1,2}: WF_done(Step(p)))\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION System\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "assert-shadow",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, TLC\nVARIABLE x\nInit == x = 0\nNext == UNCHANGED x\nSafe == LET Assert(condition, message) == condition IN Assert(TRUE, 1 \\div 0)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "unsupported",
+      "tlc": "input-error"
+    }
+  ],
+  "parent": "evals/runs/0048-operators-final2",
+  "performanceMeasurement": false
+}

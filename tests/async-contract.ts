@@ -1,13 +1,16 @@
 import assert from "node:assert/strict";
-import { checkConformance, checkTrace } from "../src/conformance.js";
-import { compileFiniteModel } from "../src/finite.js";
+import {
+  checkConformance,
+  checkTrace,
+} from "../packages/idealis/src/conformance.js";
+import { compileFiniteModel } from "../packages/idealis/src/finite.js";
 import {
   checkConcurrentHistory,
   createHistoryRecorder,
   parseConcurrentHistory,
-} from "../src/history.js";
-import { toPortableValue } from "../src/portable.js";
-import { shrinkCounterexample } from "../src/shrink.js";
+} from "../packages/idealis/src/history.js";
+import { toPortableValue } from "../packages/idealis/src/portable.js";
+import { shrinkCounterexample } from "../packages/idealis/src/shrink.js";
 
 const model = compileFiniteModel<number, string, number | string>(
   {

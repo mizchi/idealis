@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {createPortableWasm} from '../dist/src/portable-wasm.js';
+import {startNative} from '../dist/evals/usable/native.js';
+import {differential} from '../dist/evals/tlc-differential/differential.js';
+const directory='evals/runs/0056-boundary-tlc';
+await mkdir(directory);
+const java='.artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java';
+const jar='.artifacts/tlc/tla2tools.jar';
+const wasm='crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm';
+const nativePath='crates/idealis-core/target/release/idealis-core';
+const inputs=JSON.parse(await readFile('evals/compact-functions/boundaries.json','utf8')).map(input=>({...input,family:'graph',source:input.source.replace('MODULE Packed','MODULE Differential')}));
+const save=(path,value)=>writeFile(`${directory}/${path}`,`${JSON.stringify(value,null,2)}\n`,{flag:'wx'});
+const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
+await writeFile(`${directory}/driver-source.txt`,await readFile('.artifacts/0056-boundary-tlc.mjs'),{flag:'wx'});
+await save('manifest.json',{plan:'0056',inputs,artifacts:await Promise.all([java,jar,wasm,nativePath,'evals/compact-functions/boundaries.json'].map(async path=>({path,sha256:hash(await readFile(path))}))) });
+const core=await createPortableWasm(await readFile(wasm));
+const native=startNative();
+const reports=[];
+try {
+ for(const input of inputs){
+  await mkdir(`${directory}/${input.name}`);
+  const report=await differential(input,core,native,java,jar,`${directory}/${input.name}`);
+  await save(`${input.name}.json`,report);
+  reports.push(report);
+  console.log(input.name,report.reference.status,report.differences);
+ }
+ await save('result.json',{status:reports.every(report=>report.differences.length===0)?'complete':'mismatch',cases:reports.length,mismatches:reports.filter(report=>report.differences.length),reports});
+ assert.ok(reports.every(report=>report.differences.length===0));
+} finally {await native.close();}

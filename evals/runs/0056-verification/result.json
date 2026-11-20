@@ -1,0 +1,524 @@
+{
+  "status": "complete",
+  "plan": "0056",
+  "checks": [
+    {
+      "command": "just check",
+      "status": "passed"
+    },
+    {
+      "command": "just browser",
+      "status": "passed"
+    },
+    {
+      "command": "just portable-test",
+      "status": "passed"
+    },
+    {
+      "command": "just safety-test",
+      "status": "passed"
+    },
+    {
+      "command": "just criterion-test",
+      "status": "passed"
+    },
+    {
+      "command": "node --test dist/evals/*/contract-test.js",
+      "status": "passed"
+    },
+    {
+      "command": "just runtime-build",
+      "status": "passed"
+    },
+    {
+      "command": "just runtime-test",
+      "status": "passed"
+    },
+    {
+      "command": "just evaluate",
+      "status": "passed"
+    },
+    {
+      "command": "just replay-evaluation",
+      "status": "passed"
+    },
+    {
+      "command": "just cross-test",
+      "status": "passed"
+    },
+    {
+      "command": "just async-test",
+      "status": "passed"
+    },
+    {
+      "command": "just mutation",
+      "status": "passed"
+    },
+    {
+      "command": "just package",
+      "status": "passed"
+    },
+    {
+      "command": "just tlc-diff-test <java> <jar>",
+      "status": "passed"
+    },
+    {
+      "command": "just tlc-diff <java> <jar> development evals/runs/0056-tlc",
+      "status": "passed"
+    },
+    {
+      "command": "just tlc-diff <java> <jar> confirmation evals/runs/0056-tlc-confirmation",
+      "status": "passed"
+    },
+    {
+      "command": "just tlc-diff-replay <java> <jar> evals/runs/0056-tlc evals/runs/0056-tlc-replay",
+      "status": "passed"
+    },
+    {
+      "command": "just support-plan",
+      "status": "passed"
+    },
+    {
+      "command": "just support-sync",
+      "status": "passed"
+    },
+    {
+      "command": "just support-check",
+      "status": "passed"
+    },
+    {
+      "command": "just support-test",
+      "status": "passed"
+    },
+    {
+      "command": "just support-check-staged",
+      "status": "passed"
+    },
+    {
+      "command": "pnpm check (final docs)",
+      "status": "passed"
+    }
+  ],
+  "priorFailures": {
+    "domain-red.log": "Red: old Vec has no shared domain",
+    "final-check-first.log": "documentation formatting, fixed before final check",
+    "support-plan.log": "combined comparison exceeded Jev excerpt budget",
+    "support-plan-retry.log": "full value implementation plus context exceeded Jev excerpt budget",
+    "profile-d.log": "invalid profile: README/SUPPORT edited during capture; used retry instead"
+  },
+  "mutation": "109 cached results reused, 104 killed / 5 survived / 133 compile errors, 95.4%; not Rust mutation coverage",
+  "tlc": {
+    "0056-tlc": {
+      "cases": 155,
+      "matched": 153,
+      "rejectedInputs": 2,
+      "modelErrors": 30,
+      "witnesses": 105,
+      "infrastructureErrors": 0,
+      "incomplete": 0,
+      "mismatches": []
+    },
+    "0056-tlc-confirmation": {
+      "cases": 32,
+      "matched": 32,
+      "rejectedInputs": 0,
+      "modelErrors": 0,
+      "witnesses": 19,
+      "infrastructureErrors": 0,
+      "incomplete": 0,
+      "mismatches": []
+    },
+    "0056-tlc-replay": {
+      "cases": 155,
+      "matched": 153,
+      "rejectedInputs": 2,
+      "modelErrors": 30,
+      "witnesses": 105,
+      "infrastructureErrors": 0,
+      "incomplete": 0,
+      "mismatches": []
+    }
+  },
+  "files": [
+    {
+      "path": "b-build.log",
+      "sha256": "2314b81d4d347188fca7c2dc0a9a55c5c4cebf456b57b51ab73e63dab0ebd2f8"
+    },
+    {
+      "path": "b-clippy.log",
+      "sha256": "eaa7e8344d9c784913b784efc0b9cfcc1c8d9a9c2981ccc57bb75f2bd2018991"
+    },
+    {
+      "path": "b-criterion-build.log",
+      "sha256": "fe520893823773b4e97e24aa31aa929688488725408e197c55f4cb9fd6fd532e"
+    },
+    {
+      "path": "b-parity.log",
+      "sha256": "9e96e3a845d9f4ae82ecf640dac8da21ecbce9d67f436fcd43dd0c0a2da867c0"
+    },
+    {
+      "path": "b-tests.log",
+      "sha256": "9dcd4b945d6e9805162259306d45a803935a74076cd475b306b11533a069520e"
+    },
+    {
+      "path": "boundary-tlc.log",
+      "sha256": "040309b0331cf3ff100acef7d8f5c6fda9d56652717b54720e309c746e3b06f8"
+    },
+    {
+      "path": "build-after.log",
+      "sha256": "736eaac683ce28075e4b7cfc7f39fdc966f8ffbfc5b4e33918a267dc37e0816a"
+    },
+    {
+      "path": "build-before.log",
+      "sha256": "29e76497634457f6da756916a87fb4363c77644041e6ab3aff0843e1772fe4ad"
+    },
+    {
+      "path": "c-build.log",
+      "sha256": "774245ea582a279cf4b636b6e908f8b85fdadd310d2683c933ce687ff3bbd883"
+    },
+    {
+      "path": "c-clippy.log",
+      "sha256": "f7445d46973380474b031569d740ce7b51d8d540226c941f9662a4a090756f94"
+    },
+    {
+      "path": "c-criterion-build.log",
+      "sha256": "bc87585a3b1502a0f2d4af443b3fa1bd570881ecf40504f3d18093d3cfc354ed"
+    },
+    {
+      "path": "c-format.log",
+      "sha256": "7e5fc1f64c33b32ba403a657f872f48c793cce4fe317bb247eacbb12114e6193"
+    },
+    {
+      "path": "c-parity.log",
+      "sha256": "08d0d69d535e6fb0f58d6ea6f14558791fb794b9257fcf1dd1b6aca4cbd55e74"
+    },
+    {
+      "path": "c-plan-commit.log",
+      "sha256": "f0b42579ff29d9b47ff77c78d0027925c755c34599b98a1a99a493a8da6ef34c"
+    },
+    {
+      "path": "c-tests.log",
+      "sha256": "5de9413fdcdfcbef3e3f9a31ceb0d2fc8ced67b6d28dc39623bf55d3173ecf5d"
+    },
+    {
+      "path": "c-ts-build.log",
+      "sha256": "80a1a5a215e40ab2060bf2ee500b157a39e8264b45d5cb8f1910ab1dbe3b20be"
+    },
+    {
+      "path": "check-complete.log",
+      "sha256": "2bc442537703e78f9507cdcbaed150986fcc21db6244c0d0444fb25b7d2925f2"
+    },
+    {
+      "path": "clippy.log",
+      "sha256": "ae2743d91e7980e75ba561a13f968078b640ee98c8292c47b5ee68c8b2fa214b"
+    },
+    {
+      "path": "collision-green.log",
+      "sha256": "ca109eb0c8700e870b1aa383f2137f1633e2e6488814ded31a761d02eb5f0e50"
+    },
+    {
+      "path": "commands.sh",
+      "sha256": "562c5206294bafd844f9e1223e61f66b2d81eb126e8c8bb6445e54bd9d81ea41"
+    },
+    {
+      "path": "comparison-d.log",
+      "sha256": "dd58243ed2269a498a0ab57765a4bc43b31c0627474ce1dd8a9e1f1be47ab7ce"
+    },
+    {
+      "path": "comparison-final.log",
+      "sha256": "ac061c73265268f3b0c8f3453f67bd0eed6cc403e9f2579f1c97fbaf033684ee"
+    },
+    {
+      "path": "comparison.log",
+      "sha256": "09476caedfca51921e45bd920bc27bccff4df48f5d96b735572ce3106f322922"
+    },
+    {
+      "path": "compile.log",
+      "sha256": "4aa7fcb44ea5f4e5b422e29d90203f769a08af7b0582272f88fdfe7f54c840b0"
+    },
+    {
+      "path": "criterion-build-after.log",
+      "sha256": "a6be473087e676e65d05f5094607d040c89bc0d7733990ca673f75617f3368e0"
+    },
+    {
+      "path": "criterion-build-before.log",
+      "sha256": "29eb886d98891540481fc108bd02954324f3949f02334bf75935fb233f09106f"
+    },
+    {
+      "path": "criterion-d.log",
+      "sha256": "c22a5e3beb498613c7051852ee4e4b31d2eebb71c0330bb5a2f5c7059c02632e"
+    },
+    {
+      "path": "criterion-final.log",
+      "sha256": "7a833cba42e146f23dc3d301b6bd915b244238744fe7bd28d2042702066c7661"
+    },
+    {
+      "path": "criterion-inputs.json",
+      "sha256": "d9a95e8abff4900e74ca918a9fbd9ae6d1b9fcb39d00a9759ef114044a85b835"
+    },
+    {
+      "path": "criterion.log",
+      "sha256": "ad45799e61891733668b2d28ecf4e727e65187ffeda898c7fbf05b16603b9dfe"
+    },
+    {
+      "path": "d-build.log",
+      "sha256": "43df35162c939ec4a86d2170b8f2a8c21e6ce9bbe07308904e1acb50b51c8a1f"
+    },
+    {
+      "path": "d-clippy.log",
+      "sha256": "22b59bb487d02b7e90f01e24cb10dc3c8312ca90d54e209eed3dc35ad4de1095"
+    },
+    {
+      "path": "d-criterion-build.log",
+      "sha256": "9e4948f8cdf7db87c09ca08821276272da0c8c7b1954b4f2622b98755cf267a2"
+    },
+    {
+      "path": "d-format.log",
+      "sha256": "f132e5ff1c0cba5d78d093f731d50aacc929b11d46e2882c29f41989507becc1"
+    },
+    {
+      "path": "d-parity.log",
+      "sha256": "08d0d69d535e6fb0f58d6ea6f14558791fb794b9257fcf1dd1b6aca4cbd55e74"
+    },
+    {
+      "path": "d-plan-commit.log",
+      "sha256": "e1e465866b2a632dbea2ec4143e961f7f3c1b953ac201e98d0d3d1dc165c5f45"
+    },
+    {
+      "path": "d-tests.log",
+      "sha256": "3465af11b9399a1e3e6dee0ed78a385dde6018b18ec2a673bcd1d5cffe0817ae"
+    },
+    {
+      "path": "d-ts-build.log",
+      "sha256": "80a1a5a215e40ab2060bf2ee500b157a39e8264b45d5cb8f1910ab1dbe3b20be"
+    },
+    {
+      "path": "domain-red.log",
+      "sha256": "d857a72d4e2d4cd7dc3dfd6db7da3e8ff69a29c6a766b53e324c5821f0f0543b"
+    },
+    {
+      "path": "driver-build.log",
+      "sha256": "80a1a5a215e40ab2060bf2ee500b157a39e8264b45d5cb8f1910ab1dbe3b20be"
+    },
+    {
+      "path": "driver-build2.log",
+      "sha256": "80a1a5a215e40ab2060bf2ee500b157a39e8264b45d5cb8f1910ab1dbe3b20be"
+    },
+    {
+      "path": "driver-format.log",
+      "sha256": "40937d2322895b06fb9817c4a7fa09892d9acb7332ac586530757519e36e98ad"
+    },
+    {
+      "path": "final-async.log",
+      "sha256": "15464acdcaf7a0479693582933f316a2e6dc812bf03be4b09393740c3143843d"
+    },
+    {
+      "path": "final-browser.log",
+      "sha256": "79d99666f556a2a6f180bdbbce22efe14b4c0576cb63bbc5f979f9c74ea69c0c"
+    },
+    {
+      "path": "final-build.log",
+      "sha256": "80a1a5a215e40ab2060bf2ee500b157a39e8264b45d5cb8f1910ab1dbe3b20be"
+    },
+    {
+      "path": "final-check-first.log",
+      "sha256": "b4c3f778433645f5c816d7a7d0f002098f0015bb5d5cf1718d8a59ac25bb142c"
+    },
+    {
+      "path": "final-check.log",
+      "sha256": "2573dc42222f3d39057f2fb76d0d000f7c16524b44e305249a5e46a2b38906b3"
+    },
+    {
+      "path": "final-criterion-test.log",
+      "sha256": "14745a8c1278a6b4135e9c9f19a9d66849bf2b780f7bc64582d0a5cbad660824"
+    },
+    {
+      "path": "final-cross.log",
+      "sha256": "d6053856fad272a6f764a8b40e8be7af25a4d2613d61d13cdb6aafea95bea178"
+    },
+    {
+      "path": "final-eval-contracts.log",
+      "sha256": "7e868841ef9aa131d603458e92d16151acfae5ed79c24e50cb6457c3f33411a8"
+    },
+    {
+      "path": "final-evaluate.log",
+      "sha256": "d91d16b2c521396a552cab36032ea180f9a74e2308fd78ea638c8a1e7b86f9fd"
+    },
+    {
+      "path": "final-lint.log",
+      "sha256": "7d759d565c2747e9f8990c4665940641825ec7a6aacab94a154716809a6909a2"
+    },
+    {
+      "path": "final-mutation.log",
+      "sha256": "ac926531760ee723999ad5c48d64d133057b011f2b20ea6c5673f771383c2b8c"
+    },
+    {
+      "path": "final-package.log",
+      "sha256": "56ec71750464d95320f845fac62dc48402a0599b4ea9c4fe0811be8f2264c7df"
+    },
+    {
+      "path": "final-portable.log",
+      "sha256": "76ba27adc0ee0dda9db74f51826157d58b0b5fb917cdfa1a84e4268222c0f142"
+    },
+    {
+      "path": "final-replay-evaluation.log",
+      "sha256": "726981d4697b24e2a613fba5f4379f0e2dfa82348043181862831a63053d077d"
+    },
+    {
+      "path": "final-runtime-build.log",
+      "sha256": "9f642287e8cb7824693b93eaf36e3598563916b596f94c93b0f72734704ca69f"
+    },
+    {
+      "path": "final-runtime-test.log",
+      "sha256": "6cf4bc98f67185ff9eb99be0b14c4d7bef45e8a73b376c3e61fc8427634c2579"
+    },
+    {
+      "path": "final-safety.log",
+      "sha256": "b1069eff400a3b1762f790f8e227d258231b0cc68ab594b768637e1d4a4f9ccd"
+    },
+    {
+      "path": "final-tlc-confirmation.log",
+      "sha256": "3c84c807da6820d87fe61182de7315f6415e1bd5b425a27e55fe054fe3a257bf"
+    },
+    {
+      "path": "final-tlc-replay.log",
+      "sha256": "c8ac5f4542bdef65147f7bdaf8833b22f4ac8c5f5c7caf98499e47459f86b66b"
+    },
+    {
+      "path": "final-tlc-tests.log",
+      "sha256": "b02f766fcb3ae6806740802560a84607375c3f38f31ab7ab0fbe6fa225ffaa74"
+    },
+    {
+      "path": "final-tlc.log",
+      "sha256": "b3f8d86440facc54fc29f7c89bc54dd51b739e90ff0eab07411388574c2ea634"
+    },
+    {
+      "path": "format-drivers.log",
+      "sha256": "6bff7358016d292e308dd37bc9435649aa3bfe15a864f9094f652770c4725346"
+    },
+    {
+      "path": "green.log",
+      "sha256": "c37f503c667b3e65c2415ec66d8890ee09d72f7a87522188f218f4cdd8e60261"
+    },
+    {
+      "path": "overlay-green.log",
+      "sha256": "234963a7d2948d1e3c694c57b4616edb78d05695812f8babd30a82e551b131d9"
+    },
+    {
+      "path": "overlay-green2.log",
+      "sha256": "c9e21d95a743d59f2459b2c95355fe79f5d53e55fa1384906ac9670093b86c73"
+    },
+    {
+      "path": "parity-proof.json",
+      "sha256": "0390e2a76ef58450fc46f57ca1cd6960d4fcf615d34a8d7ffbc70e593c9a0076"
+    },
+    {
+      "path": "parity.log",
+      "sha256": "9e96e3a845d9f4ae82ecf640dac8da21ecbce9d67f436fcd43dd0c0a2da867c0"
+    },
+    {
+      "path": "plan-b-commit.log",
+      "sha256": "908fe8d9f2d07d140e726fed7004ef877603d8a5a6eba1604be5c33e3f96d576"
+    },
+    {
+      "path": "plan-b-format.log",
+      "sha256": "e7dc15a552a267b51a158f8c80dd894b6f6bf56d42e5e83b95f14fa8f7505d4d"
+    },
+    {
+      "path": "plan-commit.log",
+      "sha256": "8ccadb2130e9bb70565aadb952e7c65f05ccc8d1e22af81c01e1bd489da6aafe"
+    },
+    {
+      "path": "plan-format.log",
+      "sha256": "c09468b79a681cf7262b33a862d3dd6dddd4214940d467e089f475ab3f26ca5d"
+    },
+    {
+      "path": "plan-format2.log",
+      "sha256": "33cc5a7d153d1cbdca3a7b6561731939e40d07542ba9eb038a57c07023adc0fc"
+    },
+    {
+      "path": "plan2-commit.log",
+      "sha256": "f025a767d0db7846ef07412ee1621b8fe424c4589c129a4b12fa5cf1b493ecc9"
+    },
+    {
+      "path": "profile-after-summary.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "profile-after.log",
+      "sha256": "e38d319020f89b263141cf8bfbbc92bd7ae3adee7a844fde2ab96ebaf87e20d2"
+    },
+    {
+      "path": "profile-before.log",
+      "sha256": "e38d319020f89b263141cf8bfbbc92bd7ae3adee7a844fde2ab96ebaf87e20d2"
+    },
+    {
+      "path": "profile-build-after.log",
+      "sha256": "cd122f2b9e86aad3e04574d6986718c330a6dbcd83a527dedeac3a44fd262102"
+    },
+    {
+      "path": "profile-build-before.log",
+      "sha256": "995504089613faf2941b1fe0a53ab93d57876c3e524dc92e16ef327bcedfe9b5"
+    },
+    {
+      "path": "profile-d-build.log",
+      "sha256": "ebdc93340d6c7f28205b9bdecf3e5409a290ad3e52de923cf5181d479851c628"
+    },
+    {
+      "path": "profile-d-retry-summary.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "profile-d-retry.log",
+      "sha256": "e38d319020f89b263141cf8bfbbc92bd7ae3adee7a844fde2ab96ebaf87e20d2"
+    },
+    {
+      "path": "profile-d.log",
+      "sha256": "12b6b06b4ade97b3c2da746ccaaf36670f5aff7d4b116d2df75d6c80704c94fe"
+    },
+    {
+      "path": "profile-summary.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "proof-source.txt",
+      "sha256": "8e5270549b34a3845b0a67f8871a612c18f2f7e640e6dd4e1a8fe54489475843"
+    },
+    {
+      "path": "proof.log",
+      "sha256": "b99266f2c27413ab2d1d9faaf3a0093746315a1ff54f4578611176e255e9338a"
+    },
+    {
+      "path": "support-check-staged.log",
+      "sha256": "ba6e0230004998016f16d87fb5f3dce877014f9c3d7ca322b653f541b13c93f1"
+    },
+    {
+      "path": "support-check.log",
+      "sha256": "3896821505071af23fd92ea2e24d350d4c95bcccbf8c03b7ae148d78c0a4b062"
+    },
+    {
+      "path": "support-plan-final.log",
+      "sha256": "d62a1e74f9e0d3029cd430ca18575993511765738e906f3420f0c3ad5393a3f0"
+    },
+    {
+      "path": "support-plan-retry.log",
+      "sha256": "8748d753cc3118bb353193ef6deeeecf968f117b38b25c0939a4e5d23d6fa52d"
+    },
+    {
+      "path": "support-plan.log",
+      "sha256": "27c1b6f2e1b45f0b5facc2d9bfea7c2dc0f8f785af11d3a07b054f77a63e00e7"
+    },
+    {
+      "path": "support-sync.log",
+      "sha256": "41e6527a5e55e523c37b201e492742e0dbad0083a1b788790de8c73c013da0c6"
+    },
+    {
+      "path": "support-test.log",
+      "sha256": "3f0c4d1257fc01badb5a6f2e358c7f3126fb54a94d6cd5eb2abee52905c572a2"
+    },
+    {
+      "path": "ts-before.log",
+      "sha256": "80a1a5a215e40ab2060bf2ee500b157a39e8264b45d5cb8f1910ab1dbe3b20be"
+    }
+  ]
+}

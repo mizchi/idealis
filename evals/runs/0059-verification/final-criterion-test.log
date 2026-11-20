@@ -1,0 +1,50 @@
+pnpm build
+
+> @mizchi/idealis@0.1.0-alpha.0 build /Users/mz/ghq/github.com/mizchi/idealis
+> tsc -p tsconfig.build.json
+
+node dist/evals/criterion-safety/prepare.js
+cargo test --locked --manifest-path crates/rtlc/Cargo.toml --bench safety
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running src/benchmarks.rs (crates/rtlc/target/debug/deps/safety-6ff2a72f4132f42b)
+Testing values/intern-new-functions
+Success
+Testing values/intern-existing-functions
+Success
+Testing values/except-function
+Success
+Testing values/except-record
+Success
+
+Testing membership/function-cube
+Success
+Testing membership/parallel-channels
+Success
+
+Testing search/counter-product/1
+Success
+Testing search/counter-product/8
+Success
+Testing search/function-cube/1
+Success
+Testing search/function-cube/8
+Success
+Testing search/parallel-channels/1
+Success
+Testing search/parallel-channels/8
+Success
+Testing search/linear-ring/1
+Success
+Testing search/linear-ring/8
+Success
+
+node --test dist/evals/criterion-safety/contract-test.js
+✔ comparison uses the requested binary and never falls back (134.054583ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 166.078917

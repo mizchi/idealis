@@ -1,0 +1,113 @@
+{
+  "status": "complete",
+  "phase": "regression",
+  "sourceVersion": "9dc108876fda3cfd5bafa29ced54ade9a930f89510cb94a57427e7063c97ffbb",
+  "summary": [
+    {
+      "method": "alternating",
+      "generationMs": 14.096752000000379,
+      "normalCases": 800,
+      "faults": [
+        {
+          "fault": "persistence",
+          "detectedSeeds": 20,
+          "seeds": 20
+        },
+        {
+          "fault": "deduplication",
+          "detectedSeeds": 20,
+          "seeds": 20
+        },
+        {
+          "fault": "late-retry",
+          "detectedSeeds": 20,
+          "seeds": 20
+        },
+        {
+          "fault": "fifo-only",
+          "detectedSeeds": 15,
+          "seeds": 20
+        },
+        {
+          "fault": "drop-ignored",
+          "detectedSeeds": 14,
+          "seeds": 20
+        }
+      ]
+    },
+    {
+      "method": "feedback",
+      "generationMs": 50.48387399999956,
+      "normalCases": 800,
+      "faults": [
+        {
+          "fault": "persistence",
+          "detectedSeeds": 20,
+          "seeds": 20
+        },
+        {
+          "fault": "deduplication",
+          "detectedSeeds": 20,
+          "seeds": 20
+        },
+        {
+          "fault": "late-retry",
+          "detectedSeeds": 20,
+          "seeds": 20
+        },
+        {
+          "fault": "fifo-only",
+          "detectedSeeds": 14,
+          "seeds": 20
+        },
+        {
+          "fault": "drop-ignored",
+          "detectedSeeds": 19,
+          "seeds": 20
+        }
+      ]
+    }
+  ],
+  "witnesses": 182,
+  "replayedFaults": 5,
+  "concurrentHistories": 42,
+  "concurrentComparisons": 126,
+  "files": [
+    {
+      "path": "manifest.json",
+      "sha256": "254c2bcc554f9dd846ae7de722bbcf4c7d51c70338e1c2f095bbc896c896df78"
+    },
+    {
+      "path": "histories.json",
+      "sha256": "15909b2e6c2e8c54649fbf0b7679dad96e8f7f6f051e344e6decff6c6e4428d4"
+    },
+    {
+      "path": "patterns.json",
+      "sha256": "08b05dba40e152677e4368bc175f589600979925d4d0fce7f77253431ff05c00"
+    },
+    {
+      "path": "corpora.json",
+      "sha256": "71651369d19a41a3dca6ff47d5df970a872e86dd9807f77ff9c9f0dec5b5407d"
+    },
+    {
+      "path": "trials.json",
+      "sha256": "143a823e4cf962acfc7374df1d827a957a81362f00323a8dbc5c07155579cf5f"
+    },
+    {
+      "path": "witnesses.json",
+      "sha256": "f4a093b922aed04d647ab8fc6e4b7fa7c59d1f96b7c3cfa9f2c08b13f77c1cac"
+    },
+    {
+      "path": "replay-suite.json",
+      "sha256": "6e888822a67881550d7dea08c5cc4a1e06079711fdd1b3a9b35761d341040765"
+    },
+    {
+      "path": "shrink.json",
+      "sha256": "b97e99ed3a0cae779a1ea0f1b68c5c071eab37676cac4eb7985b9ce9f01c92f9"
+    },
+    {
+      "path": "benchmark.json",
+      "sha256": "1df57b5a8f9d81be6c1cbdffa36379b47ded13368a7a59ce7485671cfe831ffa"
+    }
+  ]
+}

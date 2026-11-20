@@ -1,4 +1,4 @@
-import type { Driver } from "../src/index.js";
+import type { Driver } from "../packages/idealis/src/index.js";
 import type {
   CounterAction,
   CounterObservation,

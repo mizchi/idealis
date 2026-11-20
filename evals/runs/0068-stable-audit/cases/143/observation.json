@@ -1,0 +1,229 @@
+{
+  "actual": {
+    "kind": "module",
+    "module": {
+      "name": "LocalInLetIn",
+      "extends": [],
+      "constants": [],
+      "variables": [],
+      "definitions": [
+        {
+          "name": "foo",
+          "kind": "Operator",
+          "params": [],
+          "body": {
+            "kind": "Let",
+            "definitions": [
+              {
+                "name": "bar",
+                "kind": "Operator",
+                "params": [],
+                "body": {
+                  "kind": "Number",
+                  "value": 5,
+                  "location": {
+                    "start": 55,
+                    "end": 56,
+                    "line": 3,
+                    "column": 25
+                  }
+                },
+                "isLocal": true,
+                "isRecursive": false,
+                "location": {
+                  "start": 48,
+                  "end": 51,
+                  "line": 3,
+                  "column": 18
+                }
+              }
+            ],
+            "body": {
+              "kind": "Identifier",
+              "name": "TRUE",
+              "location": {
+                "start": 60,
+                "end": 64,
+                "line": 3,
+                "column": 30
+              }
+            },
+            "location": {
+              "start": 38,
+              "end": 41,
+              "line": 3,
+              "column": 8
+            }
+          },
+          "isLocal": false,
+          "isRecursive": false,
+          "location": {
+            "start": 31,
+            "end": 34,
+            "line": 3,
+            "column": 1
+          }
+        }
+      ],
+      "assumptions": [],
+      "theorems": [],
+      "location": {
+        "start": 1,
+        "end": 5,
+        "line": 2,
+        "column": 1
+      }
+    }
+  },
+  "reference": {
+    "kind": "accepted",
+    "tree": {
+      "kind": 382,
+      "image": "N_Module",
+      "children": [
+        {
+          "kind": 333,
+          "image": "N_BeginModule",
+          "children": [
+            {
+              "kind": 3,
+              "image": "---- MODULE",
+              "children": []
+            },
+            {
+              "kind": 231,
+              "image": "LocalInLetIn",
+              "children": []
+            },
+            {
+              "kind": 35,
+              "image": "----",
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": 350,
+          "image": "N_Extends",
+          "children": []
+        },
+        {
+          "kind": 334,
+          "image": "N_Body",
+          "children": [
+            {
+              "kind": 389,
+              "image": "N_OperatorDefinition",
+              "children": [
+                {
+                  "kind": 366,
+                  "image": "N_IdentLHS",
+                  "children": [
+                    {
+                      "kind": 231,
+                      "image": "foo",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "kind": 92,
+                  "image": "==",
+                  "children": []
+                },
+                {
+                  "kind": 380,
+                  "image": "N_LetIn",
+                  "children": [
+                    {
+                      "kind": 51,
+                      "image": "LET",
+                      "children": []
+                    },
+                    {
+                      "kind": 379,
+                      "image": "N_LetDefinitions",
+                      "children": [
+                        {
+                          "kind": 389,
+                          "image": "N_OperatorDefinition",
+                          "children": [
+                            {
+                              "kind": 53,
+                              "image": "LOCAL",
+                              "children": []
+                            },
+                            {
+                              "kind": 366,
+                              "image": "N_IdentLHS",
+                              "children": [
+                                {
+                                  "kind": 231,
+                                  "image": "bar",
+                                  "children": []
+                                }
+                              ]
+                            },
+                            {
+                              "kind": 92,
+                              "image": "==",
+                              "children": []
+                            },
+                            {
+                              "kind": 385,
+                              "image": "N_Number",
+                              "children": [
+                                {
+                                  "kind": 110,
+                                  "image": "5",
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "kind": 52,
+                      "image": "IN",
+                      "children": []
+                    },
+                    {
+                      "kind": 358,
+                      "image": "N_GeneralId",
+                      "children": [
+                        {
+                          "kind": 367,
+                          "image": "N_IdPrefix",
+                          "children": []
+                        },
+                        {
+                          "kind": 231,
+                          "image": "TRUE",
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": 345,
+          "image": "N_EndModule",
+          "children": [
+            {
+              "kind": 36,
+              "image": "====",
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "tlaTs": "accepted"
+}

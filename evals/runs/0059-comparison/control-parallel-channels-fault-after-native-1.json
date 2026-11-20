@@ -1,0 +1,163 @@
+{
+  "route": "native",
+  "command": "/Users/mz/.local/share/mise/installs/node/24.22.2/bin/node",
+  "args": [
+    "--max-old-space-size=8192",
+    "/Users/mz/ghq/github.com/mizchi/idealis/dist/evals/single-model/worker.js",
+    "native",
+    "/Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0059-comparison/control-parallel-channels-fault-after-native-1/input.json",
+    "1",
+    "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/0059-after/idealis-core"
+  ],
+  "exit": 0,
+  "wallMs": 77.3182080000006,
+  "stdout": "{\"frontendMs\":3.7347079999999977,\"engineStartupMs\":2.8320839999999947,\"apiMs\":0.5835419999999942,\"result\":{\"status\":\"invariant-violation\",\"reason\":null,\"states\":3,\"generated\":3,\"depth\":1,\"work\":67,\"violation\":{\"name\":\"Safe\",\"trace\":[{\"action\":null,\"values\":[{\"type\":\"list\",\"value\":[{\"type\":\"record\",\"value\":[[\"ack\",{\"type\":\"int\",\"value\":\"0\"}],[\"rdy\",{\"type\":\"int\",\"value\":\"0\"}],[\"val\",{\"type\":\"int\",\"value\":\"0\"}]]},{\"type\":\"record\",\"value\":[[\"ack\",{\"type\":\"int\",\"value\":\"0\"}],[\"rdy\",{\"type\":\"int\",\"value\":\"0\"}],[\"val\",{\"type\":\"int\",\"value\":\"0\"}]]}]}]},{\"action\":\"Send\",\"values\":[{\"type\":\"list\",\"value\":[{\"type\":\"record\",\"value\":[[\"ack\",{\"type\":\"int\",\"value\":\"0\"}],[\"rdy\",{\"type\":\"int\",\"value\":\"1\"}],[\"val\",{\"type\":\"int\",\"value\":\"1\"}]]},{\"type\":\"record\",\"value\":[[\"ack\",{\"type\":\"int\",\"value\":\"0\"}],[\"rdy\",{\"type\":\"int\",\"value\":\"0\"}],[\"val\",{\"type\":\"int\",\"value\":\"0\"}]]}]}]}]}}}\n",
+  "stderr": "",
+  "output": {
+    "frontendMs": 3.7347079999999977,
+    "engineStartupMs": 2.8320839999999947,
+    "apiMs": 0.5835419999999942,
+    "result": {
+      "status": "invariant-violation",
+      "reason": null,
+      "states": 3,
+      "generated": 3,
+      "depth": 1,
+      "work": 67,
+      "violation": {
+        "name": "Safe",
+        "trace": [
+          {
+            "action": null,
+            "values": [
+              {
+                "type": "list",
+                "value": [
+                  {
+                    "type": "record",
+                    "value": [
+                      [
+                        "ack",
+                        {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      ],
+                      [
+                        "rdy",
+                        {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      ],
+                      [
+                        "val",
+                        {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      ]
+                    ]
+                  },
+                  {
+                    "type": "record",
+                    "value": [
+                      [
+                        "ack",
+                        {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      ],
+                      [
+                        "rdy",
+                        {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      ],
+                      [
+                        "val",
+                        {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "action": "Send",
+            "values": [
+              {
+                "type": "list",
+                "value": [
+                  {
+                    "type": "record",
+                    "value": [
+                      [
+                        "ack",
+                        {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      ],
+                      [
+                        "rdy",
+                        {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      ],
+                      [
+                        "val",
+                        {
+                          "type": "int",
+                          "value": "1"
+                        }
+                      ]
+                    ]
+                  },
+                  {
+                    "type": "record",
+                    "value": [
+                      [
+                        "ack",
+                        {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      ],
+                      [
+                        "rdy",
+                        {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      ],
+                      [
+                        "val",
+                        {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "decodeError": null,
+  "memory": [],
+  "sampledMaxRssBytes": null,
+  "phases": null,
+  "phaseError": null
+}

@@ -1,0 +1,2252 @@
+{
+  "status": "complete",
+  "plan": "0067-record-schema",
+  "input": "evals/runs/0067-symmetry-kernel",
+  "manifest": {
+    "metadata": [
+      {
+        "binarySha256": "75c020b6f6d05a92cc223b9c14220a69d61f8630f5dd2cef85782f09d261b96e",
+        "benchSha256": "ad0a2bf76fdc9d3c1390640749611831d0345d5f3b9fb9d0cdc4e0f822ab8a56",
+        "sources": [
+          {
+            "path": "crates/idealis-core/Cargo.lock",
+            "sha256": "4aff86ba1d4e9fd8183f912fc74ed2ae7bb0a5158d6cd770fd14a40e96cc812a"
+          },
+          {
+            "path": "crates/idealis-core/Cargo.toml",
+            "sha256": "ca36e245dc54e0dcf7944a8e9dffbfed5c08640189a0d8d4b2f1e884ece2e980"
+          },
+          {
+            "path": "crates/idealis-core/LICENSE",
+            "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+          },
+          {
+            "path": "crates/idealis-core/README.md",
+            "sha256": "8024f60c6e20976d1f2ed76b69b5059a4ec8309d08c44761eb03ea390a5bc2f9"
+          },
+          {
+            "path": "crates/idealis-core/SUPPORT.md",
+            "sha256": "4d142c57b7670789c5076d933a670c00a44a2b682044ad2a448014c66ee8e781"
+          },
+          {
+            "path": "crates/idealis-core/examples/counter.rs",
+            "sha256": "af5c6c8c8cd358deb283006a572a016dcb67adc72fecfa5d581dd18d8a92c371"
+          },
+          {
+            "path": "crates/idealis-core/src/finite.rs",
+            "sha256": "8049bd6677fa2a7d4c9b6192ebef47ecf50977ef14b967cbc8c4c4e4b99561b0"
+          },
+          {
+            "path": "crates/idealis-core/src/history.rs",
+            "sha256": "273f22b5c483922680bfc6281a3a46ba5bb1d3f2c911535431a8f5508fc1e032"
+          },
+          {
+            "path": "crates/idealis-core/src/host.rs",
+            "sha256": "0813f97b3518e7acffb9f48a5865d96b62d407b684ff110c6c73e83aa4933c6d"
+          },
+          {
+            "path": "crates/idealis-core/src/lib.rs",
+            "sha256": "e2cf30939adaf14474ddb45b25eee3ecdfffb696c3fec608af92effd031cb03b"
+          },
+          {
+            "path": "crates/idealis-core/src/main.rs",
+            "sha256": "e70db654b26ff96496f3214681ad1f5241e2d76bdea9e71821c63551ff8a41f2"
+          },
+          {
+            "path": "crates/idealis-core/src/shrink.rs",
+            "sha256": "f74c85b7261bf1e3cbd6400db3fe8712f68d32b9fbcaf129509dc790ab619b36"
+          },
+          {
+            "path": "crates/idealis-core/src/wasm.rs",
+            "sha256": "2300b01f5c8540c34dbc4b4d83ea167ae081dd5fcd01c523dac8679b991a0ffe"
+          },
+          {
+            "path": "crates/idealis-core/tests/collections.rs",
+            "sha256": "841a6ab5db87d920e96f9bcc251e0c34416ec76feb2d373c1d6c05591c415eda"
+          },
+          {
+            "path": "crates/idealis-core/tests/contract.rs",
+            "sha256": "6593f24d06a636ded76b8c768120b465ec71af3544602a4488949099706f5261"
+          },
+          {
+            "path": "crates/idealis-core/tests/deep_request_drop.rs",
+            "sha256": "7e73ad7802df9af506f107185a4a92f83d6b31fd5e30bbc316302cc9d304a3d4"
+          },
+          {
+            "path": "crates/idealis-core/tests/deep_value_drop.rs",
+            "sha256": "8731ccbec7d506a5a714a802f1dc192e24b6f092476b208b8122c3672fda89f4"
+          },
+          {
+            "path": "crates/idealis-core/tests/finite.rs",
+            "sha256": "530a4d702600ea09be8cd2a238551cf84cbab33025694fa13f48bee61ef42416"
+          },
+          {
+            "path": "crates/idealis-core/tests/host.rs",
+            "sha256": "f284cdcb5f5db0da7f0067c09c2ffae872af09d33bdfcda0b5bbb897e56e8013"
+          },
+          {
+            "path": "crates/idealis-core/tests/loaded.rs",
+            "sha256": "1703e51afe2ff3a2dfaa8657570632ebb5328ec68445f80e4b88847c47d0a0a8"
+          },
+          {
+            "path": "crates/idealis-core/tests/prepared_safety.rs",
+            "sha256": "a3d91efd5fe45a9013b7d54fd609bac75b4e0e42555989050032d6bfe3872eec"
+          },
+          {
+            "path": "crates/idealis-core/tests/rtlc.rs",
+            "sha256": "b5ffb4233006dd74b210d623a438c2e499130b7451c83d7e9b6a15631c3d6781"
+          },
+          {
+            "path": "crates/idealis-core/tests/safety.rs",
+            "sha256": "acf2362a0ee072b30b58a900785962d88ce27400dc9108a0bf5c545a8b9af62a"
+          },
+          {
+            "path": "crates/idealis-core/tests/shrink.rs",
+            "sha256": "ab339fa61fc36833ecbb41bd20b633d401921e83be29633e509ede0cb081f6ca"
+          },
+          {
+            "path": "crates/idealis-core/tests/tla.rs",
+            "sha256": "9c2ba2230b1a8f0cbeb25a13f375f5e287a841f8390a061af8f807b3cb756706"
+          },
+          {
+            "path": "crates/rtla-compiler/Cargo.lock",
+            "sha256": "ae19c5abc8d6a7c0578676f214ed0bdce9fd8d4117ae6d6b439c25a633ac1926"
+          },
+          {
+            "path": "crates/rtla-compiler/Cargo.toml",
+            "sha256": "ff35abd7398f8ae19de5a380b7cd6638f71e4554fceca773d9c62160e8025173"
+          },
+          {
+            "path": "crates/rtla-compiler/LICENSE",
+            "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+          },
+          {
+            "path": "crates/rtla-compiler/README.md",
+            "sha256": "9fe488c25c3043c87b26176e6c1d31e0085b4fbc778102a701340d4773631dcf"
+          },
+          {
+            "path": "crates/rtla-compiler/SUPPORT.md",
+            "sha256": "7d0e0c5ffeb6a6542c7aa58a6100c098fc3f279e365d9349379df919fef1cede"
+          },
+          {
+            "path": "crates/rtla-compiler/benches/compatibility.rs",
+            "sha256": "f1a42c006fdd3b696630c49356085c5abda7715fa6f849888172276601389be3"
+          },
+          {
+            "path": "crates/rtla-compiler/examples/analysis_roles.rs",
+            "sha256": "3bb02ee05cebde964a531145dd2cbf3229bdc1a8d12fa8ac4c498e0ca2e72875"
+          },
+          {
+            "path": "crates/rtla-compiler/examples/check.rs",
+            "sha256": "bdc06941d17708dc2332575b253e96f6115daa28532117514fbba34a4eccd119"
+          },
+          {
+            "path": "crates/rtla-compiler/examples/temporal-profile.rs",
+            "sha256": "27d4e418471ee457f1d15753a50170255304bdbf9bdfa30d353eccd69fd4e4f5"
+          },
+          {
+            "path": "crates/rtla-compiler/src/analysis.rs",
+            "sha256": "e466ebb7698f320f7d5250fb7f2488ae9b7bd8311f40994ebdffb3be2958fb6d"
+          },
+          {
+            "path": "crates/rtla-compiler/src/lib.rs",
+            "sha256": "3c4ecb701e5310840361f97c1b17cdde7dc186a2190d2e25010299acf734c30e"
+          },
+          {
+            "path": "crates/rtla-compiler/src/link.rs",
+            "sha256": "d3dd957a37ce37d3f1a7a64f51bc57afcdf07d089b989ef9e5e03fa6a4aec1aa"
+          },
+          {
+            "path": "crates/rtla-compiler/src/rewrite.rs",
+            "sha256": "98b15fbe03bea78c0c01693d76b778cb35d79e50ec84d01352c949e301eeb907"
+          },
+          {
+            "path": "crates/rtla-compiler/src/symmetry.rs",
+            "sha256": "ecf438b158b2c31422ff4ae7a8c79bb43d7311dce736a68ab3b03fc947e877c6"
+          },
+          {
+            "path": "crates/rtla-compiler/src/typed.rs",
+            "sha256": "787b2c12dcbdb34e4d79aa2a854225c2f11a9ecc3517334331f2fcba6947fd95"
+          },
+          {
+            "path": "crates/rtla-compiler/src/typed_expr.rs",
+            "sha256": "672ca09772d95a93d44c585415724b23789b1819350042ab71ab7ebaeb40adca"
+          },
+          {
+            "path": "crates/rtla-compiler/src/typed_lower.rs",
+            "sha256": "76fc992f2524eba4aa09026180eaf7d300ba4a13968f30b9a43fad9954a8effc"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/analysis_parity.rs",
+            "sha256": "9e847466e9b937035fcafa87befb9f0751aed6db39d5d50c29466c3ab20e236a"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/compiler.rs",
+            "sha256": "d6c7bc5018f026e0791388fd3776318247f744a58d9827d41dae2bd86f44cbb5"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/finite-support.json",
+            "sha256": "4255c15f24e2fae6420dc15585cef35a48eb2e23b8ac7e1c92e3d00b4f8a2690"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/finite_support.rs",
+            "sha256": "a6247454985746c04f6209329fcf9a8a6f3544c2e3f7bbaad322ce0b1d5c165c"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/modules-support.json",
+            "sha256": "c08e6216640becfcdefbd94110282f714310f72f19c354a82bf1595721e1c564"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/modules.rs",
+            "sha256": "2ce495a5d403b6e6de887cd07443a27f2dbd7083d1aac91deb331471f610eb7d"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/operator_sharing.rs",
+            "sha256": "e34c7f92f59e8924326c3ab584b71cc4694240a5a701822389a4441b9a8523be"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/operator_sharing_bundle.rs",
+            "sha256": "bd9642aa237da5cb6ca9390d4d3cd185ce1fc265debabe97523f073089ead012"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/operators-support.json",
+            "sha256": "24441593c1c2a5f6ef97ac8c294f32fe1b9e8b78ed81e282ba8b86c3b0d724dd"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/operators.rs",
+            "sha256": "123c4142730d8bc329033e0bf7725b04c06cb76d26445ad39b8fffee69e654d4"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/partial_order.rs",
+            "sha256": "513fe3f631a1cce6651eb76f6d010d5e51a51d2048aad312c1fe3b9223f67c59"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/symmetry.rs",
+            "sha256": "19f34d6ebd0d681f7e6a4ee1b58269dbbb02c5bc2e5a84ffef5b67aae26de3a2"
+          },
+          {
+            "path": "crates/rtla/Cargo.lock",
+            "sha256": "9b35082c314f3682e4c3d20b6bef5e95b41387c4c70782c498af76f296f53858"
+          },
+          {
+            "path": "crates/rtla/Cargo.toml",
+            "sha256": "d0ee70339da2a568e2813ed6fd3c85f211148cf93b1b52484cbac06e7161a80c"
+          },
+          {
+            "path": "crates/rtla/LICENSE",
+            "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+          },
+          {
+            "path": "crates/rtla/NOTICE",
+            "sha256": "6f18428281839e8b8d7ae20477ddaae6c76cc7b5684eb8054fbdf01205ad9e9e"
+          },
+          {
+            "path": "crates/rtla/README.md",
+            "sha256": "95fba72dd05693cd024b69a848f4331c1a33ab7f8b150891bf22f668ff189a90"
+          },
+          {
+            "path": "crates/rtla/SUPPORT.md",
+            "sha256": "978ecaddac500a087be0028b4a49ae8c7ce41f9d14efa1540a2bd98d26dd56c6"
+          },
+          {
+            "path": "crates/rtla/examples/inspect.rs",
+            "sha256": "c2ddd0476818d2b5bec7c34d52f6f10d1270c86e671603cfa0788979917467b7"
+          },
+          {
+            "path": "crates/rtla/src/ast.rs",
+            "sha256": "d8929e28558bef691b8e84376e22f7ca23726fdb4650ca79d6007da0e1aa33af"
+          },
+          {
+            "path": "crates/rtla/src/config.rs",
+            "sha256": "f6824eb589df8e8b1d005dad9262cae02aac39568cdbffbdb0caf4c736d95c9c"
+          },
+          {
+            "path": "crates/rtla/src/error.rs",
+            "sha256": "3e1e4f360c44399e9c253f7697fb416f479564a5b6c61b2a9e67d74dd415b191"
+          },
+          {
+            "path": "crates/rtla/src/lexer.rs",
+            "sha256": "b705cadc17efe3df98c564e92afea8b080aad8af25bc4cceaee811a72450cfe5"
+          },
+          {
+            "path": "crates/rtla/src/lib.rs",
+            "sha256": "48e5e99cda0be623898b6c4743c28d0ca4044dc8ef82199533424cde28799903"
+          },
+          {
+            "path": "crates/rtla/src/main.rs",
+            "sha256": "8ba189d89ab92a002019441133a7aa2f86aed704ffca456d7c4094dead0d817c"
+          },
+          {
+            "path": "crates/rtla/src/parser.rs",
+            "sha256": "5d8ee681af7707294c994f0ebf2a4bc31978074be5d6c4ffb975290e3a489ec3"
+          },
+          {
+            "path": "crates/rtla/src/protocol.rs",
+            "sha256": "2c1e018da00062d8d2f6f2f20891ddad650f6cae12e772a84d81599782f385e0"
+          },
+          {
+            "path": "crates/rtla/src/wasm.rs",
+            "sha256": "e0487ce961fa75f57d34345c0b57674b1c925ad7af6b04bbda1176807cda6a5d"
+          },
+          {
+            "path": "crates/rtla/tests/fixtures/Channel.tla",
+            "sha256": "8b2cbd4533a157ae0760e3117e3c008fb9a31dc3673005fc8b537d3879de1bfc"
+          },
+          {
+            "path": "crates/rtla/tests/fixtures/DieHard.tla",
+            "sha256": "295495de6509d86a82b88757835b95e3f91fad8691d764ece4d98886dcf42b66"
+          },
+          {
+            "path": "crates/rtla/tests/fixtures/LICENSE.md",
+            "sha256": "9fce60dd2b6c2be72803e96fc67f0a34b91b073ead999cea21d00c33b8bce147"
+          },
+          {
+            "path": "crates/rtla/tests/instances.rs",
+            "sha256": "b7603946a520076ef80f68a46b4b0270b76c97cc68472c835937fa99980b0fb4"
+          },
+          {
+            "path": "crates/rtla/tests/parser.rs",
+            "sha256": "5603429e90338696652452ddc17fc026db23e67db52b94dff2314be4ec8a4c4b"
+          },
+          {
+            "path": "crates/rtlc/Cargo.lock",
+            "sha256": "fb3c4f324cd8400bcf2bbbe57301b64d8b9ea6f9664fc22437dc3b11b509fcc9"
+          },
+          {
+            "path": "crates/rtlc/Cargo.toml",
+            "sha256": "4848f00da58b1f0b3fb3c91ab99e673ba4a88b544abb582c08a8d4ee33158c29"
+          },
+          {
+            "path": "crates/rtlc/LICENSE",
+            "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+          },
+          {
+            "path": "crates/rtlc/README.md",
+            "sha256": "5868ff77daa8ac0bfd21dbae566eaf1590231ecd58fcd8d9cec0120bbf1892b0"
+          },
+          {
+            "path": "crates/rtlc/SUPPORT.md",
+            "sha256": "e3cf782253cb9f5e1caad6bb2195c792485d61c63a9309bbefd30cabedeb2bff"
+          },
+          {
+            "path": "crates/rtlc/examples/counter.rs",
+            "sha256": "734d2c9561564aa78d801d051e44e5c3d81b064b9222684ddb446ea9b062038d"
+          },
+          {
+            "path": "crates/rtlc/src/bench-fixtures.json",
+            "sha256": "a9df6debe79bf441a8ff51b48f352077d3d6804d12e58afc962cb34365569f25"
+          },
+          {
+            "path": "crates/rtlc/src/benchmarks.rs",
+            "sha256": "2c98a88b5767c9ce73fc0e17c3622baf1c1925624e4b8ff1842a5f1513c79c7b"
+          },
+          {
+            "path": "crates/rtlc/src/bounded_drop.rs",
+            "sha256": "42944b8c0b793209c47490f59b2e0b4cbd9751f2319d720039714d3ff14e763a"
+          },
+          {
+            "path": "crates/rtlc/src/coverage_benchmarks.rs",
+            "sha256": "4a97f85d300d8c4f5e13d171a1e1648b29be054451f66ab8f6563a90dabcd112"
+          },
+          {
+            "path": "crates/rtlc/src/ir.rs",
+            "sha256": "9ae100b21fbf38522f6414981b54d3688a685629ffa1e75c01b961012d54667f"
+          },
+          {
+            "path": "crates/rtlc/src/lib.rs",
+            "sha256": "f69ca1dfd56fa0d42a634099bf1d0f1dbf0281aaaf2edd53ab382709adb992d1"
+          },
+          {
+            "path": "crates/rtlc/src/reduction-fixtures.json",
+            "sha256": "738bee026f0e6dcff2e1c6fa75bdc45d3e847b4af79707b5f75eb5d85405b29c"
+          },
+          {
+            "path": "crates/rtlc/src/safety.rs",
+            "sha256": "0a3abed1ce6d7b54618d9b7fc6ff22a8860cb2f42f90257935a8a437a274b6ac"
+          },
+          {
+            "path": "crates/rtlc/src/safety_coverage.rs",
+            "sha256": "8b84d296370ecf9c987e4bc240bccee062be8c25aa6593d18bef6a8c02300684"
+          },
+          {
+            "path": "crates/rtlc/src/safety_definition_tests.rs",
+            "sha256": "c51f85c9092a16ec80704d654301a91d3cfe5300d0789db22f0d02f6ca5ff129"
+          },
+          {
+            "path": "crates/rtlc/src/safety_definitions.rs",
+            "sha256": "046e24a83eddb47f4752e7011a759fd1869861df6b01fc720303a3cebb28cf52"
+          },
+          {
+            "path": "crates/rtlc/src/safety_expressions.rs",
+            "sha256": "b32bd6d1cff2383c668163f79dc9ed451626fd6e1f9893589d8de150d584d7e6"
+          },
+          {
+            "path": "crates/rtlc/src/safety_functions.rs",
+            "sha256": "e5b5cbde433c948fab21e7927741b4a4f1102d72786fb7299bf3bed61f8b7281"
+          },
+          {
+            "path": "crates/rtlc/src/safety_parallel.rs",
+            "sha256": "5ad002501711430a041aecda0034fd056961ae387915d7bbfdedede47f024c23"
+          },
+          {
+            "path": "crates/rtlc/src/safety_partial_order.rs",
+            "sha256": "e0296f9dbb88e176774d55ea41139e0055fa83b21726ab657a7fe4bed836c20e"
+          },
+          {
+            "path": "crates/rtlc/src/safety_prepared.rs",
+            "sha256": "f5ba95c6008a1a53626a812a2c9303dec960f624e9c860344aae75a3633f120b"
+          },
+          {
+            "path": "crates/rtlc/src/safety_symmetry.rs",
+            "sha256": "26df1543200c24fc46fddcee462382177fe6eb97195eea3ed0e8a15a2698a509"
+          },
+          {
+            "path": "crates/rtlc/src/safety_values.rs",
+            "sha256": "3541db7b15eb9df9aaa81bbd3bd9aac54ddaffedb650dbbcbd657fa7cbc1f05b"
+          },
+          {
+            "path": "crates/rtlc/src/safety_work.rs",
+            "sha256": "74667c6064180bc3020acbb2b9d35bcf395e9275ff1af14f29c6eed31025ed38"
+          },
+          {
+            "path": "crates/rtlc/src/symmetry-fixtures.json",
+            "sha256": "0f13798cec1d88de86e2a4a6be59025156c7d7322e4d7e707497db66ed306da4"
+          },
+          {
+            "path": "crates/rtlc/src/symmetry_benchmarks.rs",
+            "sha256": "64a83f5af2bd9cbc91939953e3434710c21d994c99aa20343d90980d9147c7a9"
+          },
+          {
+            "path": "crates/rtlc/src/temporal.rs",
+            "sha256": "58d76abf5909ec76e6154e430b4935ed22e13facb21832651bc3ff8db651ae54"
+          },
+          {
+            "path": "crates/rtlc/src/value.rs",
+            "sha256": "dd9fad8e4c8a688bec6bf4555326184bf5c4b10528e581eeb5edad3133059743"
+          },
+          {
+            "path": "crates/rtlc/tests/coverage-bench.json",
+            "sha256": "5f4671877f78e0f984f1a725377fe974449823dc5cc10b6a6b2b0d04335d3798"
+          },
+          {
+            "path": "crates/rtlc/tests/coverage.rs",
+            "sha256": "7913aa019d170c21ea88d495f98d363d5934852ab996fd3f85d83ba046588b1a"
+          },
+          {
+            "path": "crates/rtlc/tests/deep_drop.rs",
+            "sha256": "d32df9dc0f6d5d2eb3b0e07bad08742aba16930f95aca59e75560b8a7e473e87"
+          },
+          {
+            "path": "crates/rtlc/tests/deep_drop_paths.rs",
+            "sha256": "e2b5107c38cb383af2a8113090a1c315a655c71c09060da455bea52e50af9991"
+          },
+          {
+            "path": "crates/rtlc/tests/drop_allocations.rs",
+            "sha256": "eaea5e4d50bba78248315c9a7450b6faf0c1c3f65c0b6be054edea2c9ca6a2ac"
+          },
+          {
+            "path": "crates/rtlc/tests/drop_budget.rs",
+            "sha256": "8e39d9fef2b8291c36813e1203c27fde223e9bc15da6a8e266fce11024db872a"
+          },
+          {
+            "path": "crates/rtlc/tests/operators.rs",
+            "sha256": "f88290d0dbe21c5419aa2500b09089f49daed8b995ec9cd3f9d521149ab6fff0"
+          },
+          {
+            "path": "crates/rtlc/tests/parallel_safety.rs",
+            "sha256": "ec81fdeb26b9e0ecbce3670bd38d2d628d42380a35668f8408e86ae7cf84b519"
+          },
+          {
+            "path": "crates/rtlc/tests/prepared_safety.rs",
+            "sha256": "da0e97bba64e8aa25f2dfe059b2c0d04e84bb9175d536d847aee6ac1ac20992d"
+          },
+          {
+            "path": "crates/rtlc/tests/standalone.rs",
+            "sha256": "0200847d1d9d48b4edabd0d37c8b59d858f1ed8d20c405386afb65137da8dc9c"
+          },
+          {
+            "path": "crates/rtlc/tests/symmetry_parallel.rs",
+            "sha256": "efda6a4cc9853d5e8d76bf9271870547f6ff3d57a90edf4f9de0da7a23828443"
+          },
+          {
+            "path": "crates/rtlc/tests/temporal_sets.rs",
+            "sha256": "a0b590b35079abc14a5ea23d7c4616832fdfda6fb47046a6d45224b42d21b570"
+          },
+          {
+            "path": "crates/rtlc/tests/value_normalize_errors.rs",
+            "sha256": "a84fac621208804181a4d92dbc0c8d9486538af8fe14fccd1f6e62778a22648b"
+          }
+        ]
+      },
+      {
+        "binarySha256": "020c73ef3173b553601d682ec40475928919f39e31d81a07b4d0af02ac5aad3c",
+        "benchSha256": "ad0a2bf76fdc9d3c1390640749611831d0345d5f3b9fb9d0cdc4e0f822ab8a56",
+        "sources": [
+          {
+            "path": "crates/idealis-core/Cargo.lock",
+            "sha256": "4aff86ba1d4e9fd8183f912fc74ed2ae7bb0a5158d6cd770fd14a40e96cc812a"
+          },
+          {
+            "path": "crates/idealis-core/Cargo.toml",
+            "sha256": "ca36e245dc54e0dcf7944a8e9dffbfed5c08640189a0d8d4b2f1e884ece2e980"
+          },
+          {
+            "path": "crates/idealis-core/LICENSE",
+            "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+          },
+          {
+            "path": "crates/idealis-core/README.md",
+            "sha256": "8024f60c6e20976d1f2ed76b69b5059a4ec8309d08c44761eb03ea390a5bc2f9"
+          },
+          {
+            "path": "crates/idealis-core/SUPPORT.md",
+            "sha256": "4d142c57b7670789c5076d933a670c00a44a2b682044ad2a448014c66ee8e781"
+          },
+          {
+            "path": "crates/idealis-core/examples/counter.rs",
+            "sha256": "af5c6c8c8cd358deb283006a572a016dcb67adc72fecfa5d581dd18d8a92c371"
+          },
+          {
+            "path": "crates/idealis-core/src/finite.rs",
+            "sha256": "8049bd6677fa2a7d4c9b6192ebef47ecf50977ef14b967cbc8c4c4e4b99561b0"
+          },
+          {
+            "path": "crates/idealis-core/src/history.rs",
+            "sha256": "273f22b5c483922680bfc6281a3a46ba5bb1d3f2c911535431a8f5508fc1e032"
+          },
+          {
+            "path": "crates/idealis-core/src/host.rs",
+            "sha256": "0813f97b3518e7acffb9f48a5865d96b62d407b684ff110c6c73e83aa4933c6d"
+          },
+          {
+            "path": "crates/idealis-core/src/lib.rs",
+            "sha256": "e2cf30939adaf14474ddb45b25eee3ecdfffb696c3fec608af92effd031cb03b"
+          },
+          {
+            "path": "crates/idealis-core/src/main.rs",
+            "sha256": "e70db654b26ff96496f3214681ad1f5241e2d76bdea9e71821c63551ff8a41f2"
+          },
+          {
+            "path": "crates/idealis-core/src/shrink.rs",
+            "sha256": "f74c85b7261bf1e3cbd6400db3fe8712f68d32b9fbcaf129509dc790ab619b36"
+          },
+          {
+            "path": "crates/idealis-core/src/wasm.rs",
+            "sha256": "2300b01f5c8540c34dbc4b4d83ea167ae081dd5fcd01c523dac8679b991a0ffe"
+          },
+          {
+            "path": "crates/idealis-core/tests/collections.rs",
+            "sha256": "841a6ab5db87d920e96f9bcc251e0c34416ec76feb2d373c1d6c05591c415eda"
+          },
+          {
+            "path": "crates/idealis-core/tests/contract.rs",
+            "sha256": "6593f24d06a636ded76b8c768120b465ec71af3544602a4488949099706f5261"
+          },
+          {
+            "path": "crates/idealis-core/tests/deep_request_drop.rs",
+            "sha256": "7e73ad7802df9af506f107185a4a92f83d6b31fd5e30bbc316302cc9d304a3d4"
+          },
+          {
+            "path": "crates/idealis-core/tests/deep_value_drop.rs",
+            "sha256": "8731ccbec7d506a5a714a802f1dc192e24b6f092476b208b8122c3672fda89f4"
+          },
+          {
+            "path": "crates/idealis-core/tests/finite.rs",
+            "sha256": "530a4d702600ea09be8cd2a238551cf84cbab33025694fa13f48bee61ef42416"
+          },
+          {
+            "path": "crates/idealis-core/tests/host.rs",
+            "sha256": "f284cdcb5f5db0da7f0067c09c2ffae872af09d33bdfcda0b5bbb897e56e8013"
+          },
+          {
+            "path": "crates/idealis-core/tests/loaded.rs",
+            "sha256": "1703e51afe2ff3a2dfaa8657570632ebb5328ec68445f80e4b88847c47d0a0a8"
+          },
+          {
+            "path": "crates/idealis-core/tests/prepared_safety.rs",
+            "sha256": "a3d91efd5fe45a9013b7d54fd609bac75b4e0e42555989050032d6bfe3872eec"
+          },
+          {
+            "path": "crates/idealis-core/tests/rtlc.rs",
+            "sha256": "b5ffb4233006dd74b210d623a438c2e499130b7451c83d7e9b6a15631c3d6781"
+          },
+          {
+            "path": "crates/idealis-core/tests/safety.rs",
+            "sha256": "acf2362a0ee072b30b58a900785962d88ce27400dc9108a0bf5c545a8b9af62a"
+          },
+          {
+            "path": "crates/idealis-core/tests/shrink.rs",
+            "sha256": "ab339fa61fc36833ecbb41bd20b633d401921e83be29633e509ede0cb081f6ca"
+          },
+          {
+            "path": "crates/idealis-core/tests/tla.rs",
+            "sha256": "9c2ba2230b1a8f0cbeb25a13f375f5e287a841f8390a061af8f807b3cb756706"
+          },
+          {
+            "path": "crates/rtla-compiler/Cargo.lock",
+            "sha256": "ae19c5abc8d6a7c0578676f214ed0bdce9fd8d4117ae6d6b439c25a633ac1926"
+          },
+          {
+            "path": "crates/rtla-compiler/Cargo.toml",
+            "sha256": "ff35abd7398f8ae19de5a380b7cd6638f71e4554fceca773d9c62160e8025173"
+          },
+          {
+            "path": "crates/rtla-compiler/LICENSE",
+            "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+          },
+          {
+            "path": "crates/rtla-compiler/README.md",
+            "sha256": "9fe488c25c3043c87b26176e6c1d31e0085b4fbc778102a701340d4773631dcf"
+          },
+          {
+            "path": "crates/rtla-compiler/SUPPORT.md",
+            "sha256": "7d0e0c5ffeb6a6542c7aa58a6100c098fc3f279e365d9349379df919fef1cede"
+          },
+          {
+            "path": "crates/rtla-compiler/benches/compatibility.rs",
+            "sha256": "f1a42c006fdd3b696630c49356085c5abda7715fa6f849888172276601389be3"
+          },
+          {
+            "path": "crates/rtla-compiler/examples/analysis_roles.rs",
+            "sha256": "3bb02ee05cebde964a531145dd2cbf3229bdc1a8d12fa8ac4c498e0ca2e72875"
+          },
+          {
+            "path": "crates/rtla-compiler/examples/check.rs",
+            "sha256": "bdc06941d17708dc2332575b253e96f6115daa28532117514fbba34a4eccd119"
+          },
+          {
+            "path": "crates/rtla-compiler/examples/temporal-profile.rs",
+            "sha256": "27d4e418471ee457f1d15753a50170255304bdbf9bdfa30d353eccd69fd4e4f5"
+          },
+          {
+            "path": "crates/rtla-compiler/src/analysis.rs",
+            "sha256": "e466ebb7698f320f7d5250fb7f2488ae9b7bd8311f40994ebdffb3be2958fb6d"
+          },
+          {
+            "path": "crates/rtla-compiler/src/lib.rs",
+            "sha256": "3c4ecb701e5310840361f97c1b17cdde7dc186a2190d2e25010299acf734c30e"
+          },
+          {
+            "path": "crates/rtla-compiler/src/link.rs",
+            "sha256": "d3dd957a37ce37d3f1a7a64f51bc57afcdf07d089b989ef9e5e03fa6a4aec1aa"
+          },
+          {
+            "path": "crates/rtla-compiler/src/rewrite.rs",
+            "sha256": "98b15fbe03bea78c0c01693d76b778cb35d79e50ec84d01352c949e301eeb907"
+          },
+          {
+            "path": "crates/rtla-compiler/src/symmetry.rs",
+            "sha256": "ecf438b158b2c31422ff4ae7a8c79bb43d7311dce736a68ab3b03fc947e877c6"
+          },
+          {
+            "path": "crates/rtla-compiler/src/typed.rs",
+            "sha256": "787b2c12dcbdb34e4d79aa2a854225c2f11a9ecc3517334331f2fcba6947fd95"
+          },
+          {
+            "path": "crates/rtla-compiler/src/typed_expr.rs",
+            "sha256": "672ca09772d95a93d44c585415724b23789b1819350042ab71ab7ebaeb40adca"
+          },
+          {
+            "path": "crates/rtla-compiler/src/typed_lower.rs",
+            "sha256": "76fc992f2524eba4aa09026180eaf7d300ba4a13968f30b9a43fad9954a8effc"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/analysis_parity.rs",
+            "sha256": "9e847466e9b937035fcafa87befb9f0751aed6db39d5d50c29466c3ab20e236a"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/compiler.rs",
+            "sha256": "d6c7bc5018f026e0791388fd3776318247f744a58d9827d41dae2bd86f44cbb5"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/finite-support.json",
+            "sha256": "4255c15f24e2fae6420dc15585cef35a48eb2e23b8ac7e1c92e3d00b4f8a2690"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/finite_support.rs",
+            "sha256": "a6247454985746c04f6209329fcf9a8a6f3544c2e3f7bbaad322ce0b1d5c165c"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/modules-support.json",
+            "sha256": "c08e6216640becfcdefbd94110282f714310f72f19c354a82bf1595721e1c564"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/modules.rs",
+            "sha256": "2ce495a5d403b6e6de887cd07443a27f2dbd7083d1aac91deb331471f610eb7d"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/operator_sharing.rs",
+            "sha256": "e34c7f92f59e8924326c3ab584b71cc4694240a5a701822389a4441b9a8523be"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/operator_sharing_bundle.rs",
+            "sha256": "bd9642aa237da5cb6ca9390d4d3cd185ce1fc265debabe97523f073089ead012"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/operators-support.json",
+            "sha256": "24441593c1c2a5f6ef97ac8c294f32fe1b9e8b78ed81e282ba8b86c3b0d724dd"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/operators.rs",
+            "sha256": "123c4142730d8bc329033e0bf7725b04c06cb76d26445ad39b8fffee69e654d4"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/partial_order.rs",
+            "sha256": "513fe3f631a1cce6651eb76f6d010d5e51a51d2048aad312c1fe3b9223f67c59"
+          },
+          {
+            "path": "crates/rtla-compiler/tests/symmetry.rs",
+            "sha256": "19f34d6ebd0d681f7e6a4ee1b58269dbbb02c5bc2e5a84ffef5b67aae26de3a2"
+          },
+          {
+            "path": "crates/rtla/Cargo.lock",
+            "sha256": "9b35082c314f3682e4c3d20b6bef5e95b41387c4c70782c498af76f296f53858"
+          },
+          {
+            "path": "crates/rtla/Cargo.toml",
+            "sha256": "d0ee70339da2a568e2813ed6fd3c85f211148cf93b1b52484cbac06e7161a80c"
+          },
+          {
+            "path": "crates/rtla/LICENSE",
+            "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+          },
+          {
+            "path": "crates/rtla/NOTICE",
+            "sha256": "6f18428281839e8b8d7ae20477ddaae6c76cc7b5684eb8054fbdf01205ad9e9e"
+          },
+          {
+            "path": "crates/rtla/README.md",
+            "sha256": "95fba72dd05693cd024b69a848f4331c1a33ab7f8b150891bf22f668ff189a90"
+          },
+          {
+            "path": "crates/rtla/SUPPORT.md",
+            "sha256": "978ecaddac500a087be0028b4a49ae8c7ce41f9d14efa1540a2bd98d26dd56c6"
+          },
+          {
+            "path": "crates/rtla/examples/inspect.rs",
+            "sha256": "c2ddd0476818d2b5bec7c34d52f6f10d1270c86e671603cfa0788979917467b7"
+          },
+          {
+            "path": "crates/rtla/src/ast.rs",
+            "sha256": "d8929e28558bef691b8e84376e22f7ca23726fdb4650ca79d6007da0e1aa33af"
+          },
+          {
+            "path": "crates/rtla/src/config.rs",
+            "sha256": "f6824eb589df8e8b1d005dad9262cae02aac39568cdbffbdb0caf4c736d95c9c"
+          },
+          {
+            "path": "crates/rtla/src/error.rs",
+            "sha256": "3e1e4f360c44399e9c253f7697fb416f479564a5b6c61b2a9e67d74dd415b191"
+          },
+          {
+            "path": "crates/rtla/src/lexer.rs",
+            "sha256": "b705cadc17efe3df98c564e92afea8b080aad8af25bc4cceaee811a72450cfe5"
+          },
+          {
+            "path": "crates/rtla/src/lib.rs",
+            "sha256": "48e5e99cda0be623898b6c4743c28d0ca4044dc8ef82199533424cde28799903"
+          },
+          {
+            "path": "crates/rtla/src/main.rs",
+            "sha256": "8ba189d89ab92a002019441133a7aa2f86aed704ffca456d7c4094dead0d817c"
+          },
+          {
+            "path": "crates/rtla/src/parser.rs",
+            "sha256": "5d8ee681af7707294c994f0ebf2a4bc31978074be5d6c4ffb975290e3a489ec3"
+          },
+          {
+            "path": "crates/rtla/src/protocol.rs",
+            "sha256": "2c1e018da00062d8d2f6f2f20891ddad650f6cae12e772a84d81599782f385e0"
+          },
+          {
+            "path": "crates/rtla/src/wasm.rs",
+            "sha256": "e0487ce961fa75f57d34345c0b57674b1c925ad7af6b04bbda1176807cda6a5d"
+          },
+          {
+            "path": "crates/rtla/tests/fixtures/Channel.tla",
+            "sha256": "8b2cbd4533a157ae0760e3117e3c008fb9a31dc3673005fc8b537d3879de1bfc"
+          },
+          {
+            "path": "crates/rtla/tests/fixtures/DieHard.tla",
+            "sha256": "295495de6509d86a82b88757835b95e3f91fad8691d764ece4d98886dcf42b66"
+          },
+          {
+            "path": "crates/rtla/tests/fixtures/LICENSE.md",
+            "sha256": "9fce60dd2b6c2be72803e96fc67f0a34b91b073ead999cea21d00c33b8bce147"
+          },
+          {
+            "path": "crates/rtla/tests/instances.rs",
+            "sha256": "b7603946a520076ef80f68a46b4b0270b76c97cc68472c835937fa99980b0fb4"
+          },
+          {
+            "path": "crates/rtla/tests/parser.rs",
+            "sha256": "5603429e90338696652452ddc17fc026db23e67db52b94dff2314be4ec8a4c4b"
+          },
+          {
+            "path": "crates/rtlc/Cargo.lock",
+            "sha256": "fb3c4f324cd8400bcf2bbbe57301b64d8b9ea6f9664fc22437dc3b11b509fcc9"
+          },
+          {
+            "path": "crates/rtlc/Cargo.toml",
+            "sha256": "4848f00da58b1f0b3fb3c91ab99e673ba4a88b544abb582c08a8d4ee33158c29"
+          },
+          {
+            "path": "crates/rtlc/LICENSE",
+            "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+          },
+          {
+            "path": "crates/rtlc/README.md",
+            "sha256": "5868ff77daa8ac0bfd21dbae566eaf1590231ecd58fcd8d9cec0120bbf1892b0"
+          },
+          {
+            "path": "crates/rtlc/SUPPORT.md",
+            "sha256": "e3cf782253cb9f5e1caad6bb2195c792485d61c63a9309bbefd30cabedeb2bff"
+          },
+          {
+            "path": "crates/rtlc/examples/counter.rs",
+            "sha256": "734d2c9561564aa78d801d051e44e5c3d81b064b9222684ddb446ea9b062038d"
+          },
+          {
+            "path": "crates/rtlc/src/bench-fixtures.json",
+            "sha256": "a9df6debe79bf441a8ff51b48f352077d3d6804d12e58afc962cb34365569f25"
+          },
+          {
+            "path": "crates/rtlc/src/benchmarks.rs",
+            "sha256": "2c98a88b5767c9ce73fc0e17c3622baf1c1925624e4b8ff1842a5f1513c79c7b"
+          },
+          {
+            "path": "crates/rtlc/src/bounded_drop.rs",
+            "sha256": "42944b8c0b793209c47490f59b2e0b4cbd9751f2319d720039714d3ff14e763a"
+          },
+          {
+            "path": "crates/rtlc/src/coverage_benchmarks.rs",
+            "sha256": "4a97f85d300d8c4f5e13d171a1e1648b29be054451f66ab8f6563a90dabcd112"
+          },
+          {
+            "path": "crates/rtlc/src/ir.rs",
+            "sha256": "9ae100b21fbf38522f6414981b54d3688a685629ffa1e75c01b961012d54667f"
+          },
+          {
+            "path": "crates/rtlc/src/lib.rs",
+            "sha256": "f69ca1dfd56fa0d42a634099bf1d0f1dbf0281aaaf2edd53ab382709adb992d1"
+          },
+          {
+            "path": "crates/rtlc/src/reduction-fixtures.json",
+            "sha256": "738bee026f0e6dcff2e1c6fa75bdc45d3e847b4af79707b5f75eb5d85405b29c"
+          },
+          {
+            "path": "crates/rtlc/src/safety.rs",
+            "sha256": "0a3abed1ce6d7b54618d9b7fc6ff22a8860cb2f42f90257935a8a437a274b6ac"
+          },
+          {
+            "path": "crates/rtlc/src/safety_coverage.rs",
+            "sha256": "8b84d296370ecf9c987e4bc240bccee062be8c25aa6593d18bef6a8c02300684"
+          },
+          {
+            "path": "crates/rtlc/src/safety_definition_tests.rs",
+            "sha256": "c51f85c9092a16ec80704d654301a91d3cfe5300d0789db22f0d02f6ca5ff129"
+          },
+          {
+            "path": "crates/rtlc/src/safety_definitions.rs",
+            "sha256": "046e24a83eddb47f4752e7011a759fd1869861df6b01fc720303a3cebb28cf52"
+          },
+          {
+            "path": "crates/rtlc/src/safety_expressions.rs",
+            "sha256": "b32bd6d1cff2383c668163f79dc9ed451626fd6e1f9893589d8de150d584d7e6"
+          },
+          {
+            "path": "crates/rtlc/src/safety_functions.rs",
+            "sha256": "e5b5cbde433c948fab21e7927741b4a4f1102d72786fb7299bf3bed61f8b7281"
+          },
+          {
+            "path": "crates/rtlc/src/safety_parallel.rs",
+            "sha256": "5ad002501711430a041aecda0034fd056961ae387915d7bbfdedede47f024c23"
+          },
+          {
+            "path": "crates/rtlc/src/safety_partial_order.rs",
+            "sha256": "e0296f9dbb88e176774d55ea41139e0055fa83b21726ab657a7fe4bed836c20e"
+          },
+          {
+            "path": "crates/rtlc/src/safety_prepared.rs",
+            "sha256": "f5ba95c6008a1a53626a812a2c9303dec960f624e9c860344aae75a3633f120b"
+          },
+          {
+            "path": "crates/rtlc/src/safety_symmetry.rs",
+            "sha256": "42b48fdf2064e214a4d3f08de01e4d4c0577c246109b6079e44edcd567448f0a"
+          },
+          {
+            "path": "crates/rtlc/src/safety_values.rs",
+            "sha256": "3541db7b15eb9df9aaa81bbd3bd9aac54ddaffedb650dbbcbd657fa7cbc1f05b"
+          },
+          {
+            "path": "crates/rtlc/src/safety_work.rs",
+            "sha256": "74667c6064180bc3020acbb2b9d35bcf395e9275ff1af14f29c6eed31025ed38"
+          },
+          {
+            "path": "crates/rtlc/src/symmetry-fixtures.json",
+            "sha256": "0f13798cec1d88de86e2a4a6be59025156c7d7322e4d7e707497db66ed306da4"
+          },
+          {
+            "path": "crates/rtlc/src/symmetry_benchmarks.rs",
+            "sha256": "64a83f5af2bd9cbc91939953e3434710c21d994c99aa20343d90980d9147c7a9"
+          },
+          {
+            "path": "crates/rtlc/src/temporal.rs",
+            "sha256": "58d76abf5909ec76e6154e430b4935ed22e13facb21832651bc3ff8db651ae54"
+          },
+          {
+            "path": "crates/rtlc/src/value.rs",
+            "sha256": "dd9fad8e4c8a688bec6bf4555326184bf5c4b10528e581eeb5edad3133059743"
+          },
+          {
+            "path": "crates/rtlc/tests/coverage-bench.json",
+            "sha256": "5f4671877f78e0f984f1a725377fe974449823dc5cc10b6a6b2b0d04335d3798"
+          },
+          {
+            "path": "crates/rtlc/tests/coverage.rs",
+            "sha256": "7913aa019d170c21ea88d495f98d363d5934852ab996fd3f85d83ba046588b1a"
+          },
+          {
+            "path": "crates/rtlc/tests/deep_drop.rs",
+            "sha256": "d32df9dc0f6d5d2eb3b0e07bad08742aba16930f95aca59e75560b8a7e473e87"
+          },
+          {
+            "path": "crates/rtlc/tests/deep_drop_paths.rs",
+            "sha256": "e2b5107c38cb383af2a8113090a1c315a655c71c09060da455bea52e50af9991"
+          },
+          {
+            "path": "crates/rtlc/tests/drop_allocations.rs",
+            "sha256": "eaea5e4d50bba78248315c9a7450b6faf0c1c3f65c0b6be054edea2c9ca6a2ac"
+          },
+          {
+            "path": "crates/rtlc/tests/drop_budget.rs",
+            "sha256": "8e39d9fef2b8291c36813e1203c27fde223e9bc15da6a8e266fce11024db872a"
+          },
+          {
+            "path": "crates/rtlc/tests/operators.rs",
+            "sha256": "f88290d0dbe21c5419aa2500b09089f49daed8b995ec9cd3f9d521149ab6fff0"
+          },
+          {
+            "path": "crates/rtlc/tests/parallel_safety.rs",
+            "sha256": "ec81fdeb26b9e0ecbce3670bd38d2d628d42380a35668f8408e86ae7cf84b519"
+          },
+          {
+            "path": "crates/rtlc/tests/prepared_safety.rs",
+            "sha256": "da0e97bba64e8aa25f2dfe059b2c0d04e84bb9175d536d847aee6ac1ac20992d"
+          },
+          {
+            "path": "crates/rtlc/tests/standalone.rs",
+            "sha256": "0200847d1d9d48b4edabd0d37c8b59d858f1ed8d20c405386afb65137da8dc9c"
+          },
+          {
+            "path": "crates/rtlc/tests/symmetry_parallel.rs",
+            "sha256": "efda6a4cc9853d5e8d76bf9271870547f6ff3d57a90edf4f9de0da7a23828443"
+          },
+          {
+            "path": "crates/rtlc/tests/temporal_sets.rs",
+            "sha256": "a0b590b35079abc14a5ea23d7c4616832fdfda6fb47046a6d45224b42d21b570"
+          },
+          {
+            "path": "crates/rtlc/tests/value_normalize_errors.rs",
+            "sha256": "a84fac621208804181a4d92dbc0c8d9486538af8fe14fccd1f6e62778a22648b"
+          }
+        ]
+      }
+    ],
+    "cpu": "Apple M5",
+    "sampleSize": 20,
+    "warmupMs": 500,
+    "measurementMs": 1000,
+    "order": [
+      "before",
+      "after",
+      "after",
+      "before"
+    ]
+  },
+  "manifestSha256": "9480b79950bbb521b9afda724963f33a0858237fb25f194cad657f5dd4f257bc",
+  "method": "Arithmetic mean of two Criterion mean estimates per side in ABBA order. Intervals are per repetition, not pooled.",
+  "records": [
+    {
+      "name": "symmetry/counter-5-3-safe_actions",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/counter-5-3-safe_actions/new/estimates.json",
+          "sha256": "d30fdd6d093e7ab757db762012c4a8b1df7c02e9361f2b207789fc574fc58495",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 108719.47923075031,
+              "upper_bound": 109389.03027364874
+            },
+            "point_estimate": 109049.07301707283,
+            "standard_error": 171.26975858564376
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/counter-5-3-safe_actions/new/estimates.json",
+          "sha256": "20a5cd21300fa3472e47970637a1c417dee1e3405ef11073e1edbee55621c716",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 107873.68732175959,
+              "upper_bound": 108436.8298528694
+            },
+            "point_estimate": 108134.56220044362,
+            "standard_error": 144.37031126759976
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/counter-5-3-safe_actions/new/estimates.json",
+          "sha256": "0a93a43128b5e2b35e96a12b360a3d4fe69667e653b3fb59c1516ebaea2e5e82",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 106236.39901980854,
+              "upper_bound": 106708.78548500339
+            },
+            "point_estimate": 106470.51496402256,
+            "standard_error": 120.75421323342103
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/counter-5-3-safe_actions/new/estimates.json",
+          "sha256": "5dab23ca9addab058e373e1c6bce596f75ba6a2b1149826d6c1e712333c94e84",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 110156.22930337393,
+              "upper_bound": 111402.74942411734
+            },
+            "point_estimate": 110703.28032676634,
+            "standard_error": 321.177787661744
+          }
+        }
+      ],
+      "beforeNs": 109876.17667191959,
+      "afterNs": 107302.53858223309,
+      "ratio": 0.9765769235184516,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/counter-5-3-safe_plain",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/counter-5-3-safe_plain/new/estimates.json",
+          "sha256": "2501cbf9b6127183dcb6273dfaf290b7a666aed254e49ca107b18d253d5058c3",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1412682.1877287102,
+              "upper_bound": 1420204.5666787196
+            },
+            "point_estimate": 1416187.836582108,
+            "standard_error": 1925.1905878490022
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/counter-5-3-safe_plain/new/estimates.json",
+          "sha256": "b24830ec7d523754cc4b495eee81733523a4eefabb560aa293f14a10302dbb96",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1397488.8686368903,
+              "upper_bound": 1408439.6350741526
+            },
+            "point_estimate": 1402892.9806566797,
+            "standard_error": 2782.9445761502357
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/counter-5-3-safe_plain/new/estimates.json",
+          "sha256": "3180d4fe800c5e648ff4548a00589bd6aedc0977bf0b20f2b1231f55f439a99c",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1401419.8250248604,
+              "upper_bound": 1418365.44900805
+            },
+            "point_estimate": 1408691.2646570287,
+            "standard_error": 4412.016839991516
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/counter-5-3-safe_plain/new/estimates.json",
+          "sha256": "16ee7209993f308b63ef6ead5ee980210f5877fcf3d7df40ee43f0498bda3937",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1430738.8435627834,
+              "upper_bound": 1437140.9967238551
+            },
+            "point_estimate": 1433785.066289348,
+            "standard_error": 1639.0575349681474
+          }
+        }
+      ],
+      "beforeNs": 1424986.451435728,
+      "afterNs": 1405792.1226568543,
+      "ratio": 0.9865301675257792,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/counter-5-3-safe_symmetry",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/counter-5-3-safe_symmetry/new/estimates.json",
+          "sha256": "1fcd067cc0aa513282a96aa6b9be8b9d3686abe357019955702c14566e2ce43b",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 152511.09799151396,
+              "upper_bound": 153569.43835681072
+            },
+            "point_estimate": 153039.6137941188,
+            "standard_error": 270.84724027386886
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/counter-5-3-safe_symmetry/new/estimates.json",
+          "sha256": "e30a571f8c7fc232193de67d7a1332a17fd55a7d8270503eeb64c7578f9625cb",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 152293.7447991167,
+              "upper_bound": 153541.669249015
+            },
+            "point_estimate": 152871.86355362774,
+            "standard_error": 320.65241035734783
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/counter-5-3-safe_symmetry/new/estimates.json",
+          "sha256": "2a5055af5e4b4f387b0fe0d06cbf1efd18c28fcc1ebf5690cebf2f683965bc19",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 152366.93532982556,
+              "upper_bound": 153606.00891174265
+            },
+            "point_estimate": 152954.0474696748,
+            "standard_error": 315.8528125847842
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/counter-5-3-safe_symmetry/new/estimates.json",
+          "sha256": "5e4525db0c6bd32db4a10d85eff1fe69f02c52a47f227d59cc17df42f70c459a",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 153424.7554841774,
+              "upper_bound": 154415.51989688774
+            },
+            "point_estimate": 153886.62697263202,
+            "standard_error": 253.6785651120225
+          }
+        }
+      ],
+      "beforeNs": 153463.1203833754,
+      "afterNs": 152912.9555116513,
+      "ratio": 0.9964150027032572,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/counter-7-5-safe_actions",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/counter-7-5-safe_actions/new/estimates.json",
+          "sha256": "240786f17c6f5695fffe1b7e6db126dac3d08d006ff660af2f76c8ad24823e86",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 2108702.7667371924,
+              "upper_bound": 2147949.9269350437
+            },
+            "point_estimate": 2126506.5107762474,
+            "standard_error": 10074.758777474706
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/counter-7-5-safe_actions/new/estimates.json",
+          "sha256": "ebe7027a578cc84ce8095f1e9f67465432e8d32c886d15e5740da4cd22abaa0c",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 2122034.900217209,
+              "upper_bound": 2134965.9991778927
+            },
+            "point_estimate": 2128965.5365645406,
+            "standard_error": 3292.669569797974
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/counter-7-5-safe_actions/new/estimates.json",
+          "sha256": "01082752beba51b5c7f8d2e54b204ddfee20edb983f8b43770bc91faca99838b",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 2119347.372254634,
+              "upper_bound": 2129508.530363275
+            },
+            "point_estimate": 2123755.147821992,
+            "standard_error": 2611.430859862512
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/counter-7-5-safe_actions/new/estimates.json",
+          "sha256": "4938b7b9eeb2e1598569f947e2046e20c03242fa54cbbff67efd4438925d903c",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 2145203.575599116,
+              "upper_bound": 2157012.940945749
+            },
+            "point_estimate": 2150946.431256666,
+            "standard_error": 3021.0408893973145
+          }
+        }
+      ],
+      "beforeNs": 2138726.4710164564,
+      "afterNs": 2126360.3421932664,
+      "ratio": 0.9942179942172256,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/counter-7-5-safe_plain",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/counter-7-5-safe_plain/new/estimates.json",
+          "sha256": "7d91b8c0921363d63c8bc53d5d50c6ae9f4fb020d963bf4141193890cac34013",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 556307136.20875,
+              "upper_bound": 559531906.70375
+            },
+            "point_estimate": 557822295.75,
+            "standard_error": 826592.3276549525
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/counter-7-5-safe_plain/new/estimates.json",
+          "sha256": "7f35abd9c16e331e66c6a377596c5d7723406a71559ee1157f76cc3f84a0bcb7",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 553061056.63375,
+              "upper_bound": 555851961.46125
+            },
+            "point_estimate": 554382589.6,
+            "standard_error": 713187.5082589672
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/counter-7-5-safe_plain/new/estimates.json",
+          "sha256": "56cf9b87d726e5a9337a9f8b796fa59868899e7d00c60079b803128df7a31fb0",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 553922499.6325,
+              "upper_bound": 556022181.25375
+            },
+            "point_estimate": 554943204.3,
+            "standard_error": 537340.5339461872
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/counter-7-5-safe_plain/new/estimates.json",
+          "sha256": "4a61441ef79e0436ffa542c24c6544cf08f7783e6b20d50e74d3672331cc7cf2",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 564425242.30875,
+              "upper_bound": 572457680.19
+            },
+            "point_estimate": 567756535.45,
+            "standard_error": 2096742.2890931906
+          }
+        }
+      ],
+      "beforeNs": 562789415.6,
+      "afterNs": 554662896.95,
+      "ratio": 0.9855602852066148,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/counter-7-5-safe_symmetry",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/counter-7-5-safe_symmetry/new/estimates.json",
+          "sha256": "eff97a0138e63351dd3eeb6bedfdda00c787faadbda66d4f7c256a9306fdfd64",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 3071146.389666133,
+              "upper_bound": 3096524.7620985326
+            },
+            "point_estimate": 3082530.7408622904,
+            "standard_error": 6541.333482867411
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/counter-7-5-safe_symmetry/new/estimates.json",
+          "sha256": "78ab6469f863fadd8124de2ba93131fac7a2aab830cb2f1cd786c3c19e4d8535",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 3135076.105956369,
+              "upper_bound": 3170113.878593949
+            },
+            "point_estimate": 3152131.546194409,
+            "standard_error": 8936.501092593247
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/counter-7-5-safe_symmetry/new/estimates.json",
+          "sha256": "c703aef7cd9e165c275f37b919bf4c0766bc184c5739020a3a3c5a615955b44b",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 3080542.297521936,
+              "upper_bound": 3090765.0957628256
+            },
+            "point_estimate": 3085814.156680138,
+            "standard_error": 2610.318692631442
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/counter-7-5-safe_symmetry/new/estimates.json",
+          "sha256": "2d4419c04d589a3f0229f95037c7cbfc05b4360e8d7bd573e0d13fa5039cce4a",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 3117474.025847543,
+              "upper_bound": 3138488.6658167937
+            },
+            "point_estimate": 3128074.050826137,
+            "standard_error": 5378.75284548931
+          }
+        }
+      ],
+      "beforeNs": 3105302.3958442137,
+      "afterNs": 3118972.8514372734,
+      "ratio": 1.0044022944790674,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/joint-5_actions",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/joint-5_actions/new/estimates.json",
+          "sha256": "eb9a43f42226f48740b391dbbf7b47fc76d28b91e6db1c79a728d79d6bd145fb",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 190630.721078298,
+              "upper_bound": 191265.3832476864
+            },
+            "point_estimate": 190960.88274915318,
+            "standard_error": 162.55991646260173
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/joint-5_actions/new/estimates.json",
+          "sha256": "d5b757483361e7ba10c4416ba43e91702bffed80ed7b84e7853393963bc37bfb",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 189947.22575927994,
+              "upper_bound": 191106.30845343476
+            },
+            "point_estimate": 190537.0204791315,
+            "standard_error": 296.0742660448726
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/joint-5_actions/new/estimates.json",
+          "sha256": "bfc915e826f8f35b2d06bc3eb5d3783af74a57f14c19dc51e3ac356ec2ebacdb",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 190367.70968453362,
+              "upper_bound": 190773.76888487104
+            },
+            "point_estimate": 190560.87112020975,
+            "standard_error": 103.80490758276493
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/joint-5_actions/new/estimates.json",
+          "sha256": "fb2934d44777c5c3395a291d7661eabddca9bff77596420b43d645d4b6ed09b6",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 196458.4657996176,
+              "upper_bound": 197665.2639258737
+            },
+            "point_estimate": 197054.57201895455,
+            "standard_error": 306.23118748551354
+          }
+        }
+      ],
+      "beforeNs": 194007.72738405387,
+      "afterNs": 190548.94579967062,
+      "ratio": 0.9821719390716004,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/joint-5_plain",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/joint-5_plain/new/estimates.json",
+          "sha256": "f69c174ea669d6b126d68d49cc16ec559f50c183823cc44016432ce53414be2c",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1425027.3462684501,
+              "upper_bound": 1441730.6610389098
+            },
+            "point_estimate": 1432012.2069118973,
+            "standard_error": 4370.435330720303
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/joint-5_plain/new/estimates.json",
+          "sha256": "27b588a73f34a16030fb85f0e07d138b6a663c48c479b3c33495e76717d4bc5a",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1419905.4671074476,
+              "upper_bound": 1426316.5919701387
+            },
+            "point_estimate": 1423125.661023234,
+            "standard_error": 1640.365994729878
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/joint-5_plain/new/estimates.json",
+          "sha256": "f4aa969ffcf7f5ce32f3b20ae42476c73581a3491561ca5d67843326e78d24e1",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1416600.1446536046,
+              "upper_bound": 1420439.5692149773
+            },
+            "point_estimate": 1418537.2756738374,
+            "standard_error": 980.0375995850956
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/joint-5_plain/new/estimates.json",
+          "sha256": "90e75ffbc34ed51c093c1e6b435158cd3c6fdc61a85ed3ce6fb9b6359f71b343",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1505747.2425556055,
+              "upper_bound": 1510249.1387449591
+            },
+            "point_estimate": 1507981.6865403021,
+            "standard_error": 1149.105543735022
+          }
+        }
+      ],
+      "beforeNs": 1469996.9467260996,
+      "afterNs": 1420831.4683485357,
+      "ratio": 0.9665540268725982,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/joint-5_symmetry",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/joint-5_symmetry/new/estimates.json",
+          "sha256": "339c55bc8ca092a145e4c9634e9f83609ca9aff67afbcdffc2ff2916cf2adf4a",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 268505.17191261245,
+              "upper_bound": 270268.13521128526
+            },
+            "point_estimate": 269389.0574181563,
+            "standard_error": 450.2585196821053
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/joint-5_symmetry/new/estimates.json",
+          "sha256": "f7630a7e44d0aba29d927c2d34135b853f628509e3b97794d4b0813cefc83600",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 274434.9192462627,
+              "upper_bound": 283404.5307358452
+            },
+            "point_estimate": 277889.2928649649,
+            "standard_error": 2464.8594099069064
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/joint-5_symmetry/new/estimates.json",
+          "sha256": "0d1496505d7fc108eedae87faef55a5f17c3ac1ec09f39edcb8c6403f1c0e31c",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 272092.97899914975,
+              "upper_bound": 273241.84376113623
+            },
+            "point_estimate": 272652.26913736656,
+            "standard_error": 292.91529796517233
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/joint-5_symmetry/new/estimates.json",
+          "sha256": "b03bd17de8685cb206e8fae4330682c7e5c302a73189f4007b58d4fa63104d59",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 271715.8371687855,
+              "upper_bound": 275005.4253723521
+            },
+            "point_estimate": 273144.55208977417,
+            "standard_error": 852.7589235401812
+          }
+        }
+      ],
+      "beforeNs": 271266.80475396523,
+      "afterNs": 275270.78100116574,
+      "ratio": 1.0147602883103668,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/monotone-10_plain",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/monotone-10_plain/new/estimates.json",
+          "sha256": "fa564ee0a092ff18d792bcb7b3d9469231b6b74042d052bb0fbd1a015b6e52cc",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 3997357.6718770377,
+              "upper_bound": 4026379.681395216
+            },
+            "point_estimate": 4011737.0632623,
+            "standard_error": 7422.098132946486
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/monotone-10_plain/new/estimates.json",
+          "sha256": "5c8cfda62c634935c209c77a26d5360292620bbb5eb2e8eb7921b93d3a660818",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 4025843.542607708,
+              "upper_bound": 4044643.8900493532
+            },
+            "point_estimate": 4034371.587077203,
+            "standard_error": 4838.594588493926
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/monotone-10_plain/new/estimates.json",
+          "sha256": "9e7a846690f44f846944df897682f22edba5771423c78a36797638a59018a3b9",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 3967135.589227533,
+              "upper_bound": 3986621.8607578427
+            },
+            "point_estimate": 3976998.5812065466,
+            "standard_error": 4975.441943739403
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/monotone-10_plain/new/estimates.json",
+          "sha256": "addce9df35a836f5138f1034a530e25f92a9757f046d4ae91e233284eaed366b",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 4209509.387920819,
+              "upper_bound": 4232384.625628757
+            },
+            "point_estimate": 4219277.03996947,
+            "standard_error": 5923.148530272307
+          }
+        }
+      ],
+      "beforeNs": 4115507.0516158855,
+      "afterNs": 4005685.0841418747,
+      "ratio": 0.9733150821765957,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/monotone-10_por",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/monotone-10_por/new/estimates.json",
+          "sha256": "191db45fa22ff20e326017ad767b409bc2d2b42fa8f63343af6db7e01b147241",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 9664.191369219092,
+              "upper_bound": 9689.176503492903
+            },
+            "point_estimate": 9677.034371094798,
+            "standard_error": 6.387336994591702
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/monotone-10_por/new/estimates.json",
+          "sha256": "2895c39ffb8f3faea701220f0d8c3014cbaba37854c86a1a83073d1c32b9f64b",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 9729.955886050635,
+              "upper_bound": 9838.998863693487
+            },
+            "point_estimate": 9781.024464930055,
+            "standard_error": 27.7767791653823
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/monotone-10_por/new/estimates.json",
+          "sha256": "067165c2b627a1aeef248ecc2a0d354806048468d644dd06ab7f3721020b4978",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 9676.835462875382,
+              "upper_bound": 9723.096172406254
+            },
+            "point_estimate": 9700.883199438456,
+            "standard_error": 11.843477583093442
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/monotone-10_por/new/estimates.json",
+          "sha256": "4a77613591178b2f0fa7484d428ab157d7f575eb4d5eeae24d41f651a27bfb7a",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 10138.193628219253,
+              "upper_bound": 10173.410140179847
+            },
+            "point_estimate": 10155.432148807304,
+            "standard_error": 8.99354937321
+          }
+        }
+      ],
+      "beforeNs": 9916.233259951052,
+      "afterNs": 9740.953832184256,
+      "ratio": 0.9823239910587116,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/record-12-safe_actions-1",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/record-12-safe_actions-1/new/estimates.json",
+          "sha256": "5058e8c9586d7d62b907355b98b84c342f9254a320a76c680fa098684b3fb99f",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 71013036.36375,
+              "upper_bound": 71958465.02
+            },
+            "point_estimate": 71462131.15,
+            "standard_error": 242679.8812211141
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/record-12-safe_actions-1/new/estimates.json",
+          "sha256": "7fa85656b25d9c9023c269e3e81c59b90490180284baa1f6925d54b1c6e12576",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 68032114.58375001,
+              "upper_bound": 68838359.29625
+            },
+            "point_estimate": 68402470.6,
+            "standard_error": 206466.80343956003
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/record-12-safe_actions-1/new/estimates.json",
+          "sha256": "a578fae7d004cba20413860f759cde5d9be7676732e3fe07a638a72f5d2c4137",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 67436680.94749999,
+              "upper_bound": 67542448.00500001
+            },
+            "point_estimate": 67488175.05,
+            "standard_error": 27037.593342125267
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/record-12-safe_actions-1/new/estimates.json",
+          "sha256": "04b9552c000e68dd57f5cf22d6ca012a5379698c788cf56b13afb5cf8f991c4a",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 74895356.04124999,
+              "upper_bound": 75961163.05875
+            },
+            "point_estimate": 75343000.15,
+            "standard_error": 275860.3570108904
+          }
+        }
+      ],
+      "beforeNs": 73402565.65,
+      "afterNs": 67945322.82499999,
+      "ratio": 0.9256532414545101,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/record-12-safe_actions-8",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/record-12-safe_actions-8/new/estimates.json",
+          "sha256": "da8ea342a447e1392c163a4d23ed67e9572e3463cdb27f70e90fbe0c55f2d69b",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 61836672.73875,
+              "upper_bound": 61970462.70125
+            },
+            "point_estimate": 61903720.9,
+            "standard_error": 34251.88699470001
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/record-12-safe_actions-8/new/estimates.json",
+          "sha256": "fabd9e80a094d96bfe99bdfafbb315c15c0892c8bcacda9c0dacaecab6c69fd1",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 59174158.1875,
+              "upper_bound": 59466409.2275
+            },
+            "point_estimate": 59313689.75,
+            "standard_error": 74707.76588356585
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/record-12-safe_actions-8/new/estimates.json",
+          "sha256": "08897fb0f69ff75b272469eb5c37d44eaeb131145c27401b2a346eaf8a0ba913",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 59313166.441250004,
+              "upper_bound": 60114426.06875
+            },
+            "point_estimate": 59658291.8,
+            "standard_error": 207686.72777555272
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/record-12-safe_actions-8/new/estimates.json",
+          "sha256": "42ba08bc933f32fbfb98206c4b1a859cf59586e614c81808bdb7100eafe60c54",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 65505591.69125,
+              "upper_bound": 66258745.19125
+            },
+            "point_estimate": 65868839.75,
+            "standard_error": 191801.78364769052
+          }
+        }
+      ],
+      "beforeNs": 63886280.325,
+      "afterNs": 59485990.775,
+      "ratio": 0.9311230904723986,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/record-12-safe_symmetry-1",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/record-12-safe_symmetry-1/new/estimates.json",
+          "sha256": "72a66e8612f3481958ca7ac6f03c09df024e6292751c29968cae58bc291d6160",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 147657468.54875,
+              "upper_bound": 148470828.91375002
+            },
+            "point_estimate": 148052291.75,
+            "standard_error": 207294.6556782963
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/record-12-safe_symmetry-1/new/estimates.json",
+          "sha256": "83a004db6045064cca5204d937db47a4af5854a112e57a781670305f286fd4a0",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 140123826.94375002,
+              "upper_bound": 140909543.60125
+            },
+            "point_estimate": 140534616.6,
+            "standard_error": 200618.31423017915
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/record-12-safe_symmetry-1/new/estimates.json",
+          "sha256": "510839416ef9f9a8b29808875cb09fad1d18ba86d5fff5c2028413901eccefe5",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 139349853.895,
+              "upper_bound": 140044761.70624998
+            },
+            "point_estimate": 139698179.1,
+            "standard_error": 177422.80499074855
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/record-12-safe_symmetry-1/new/estimates.json",
+          "sha256": "6270b222e9d47667f63fa4b97bdab3b76fb9e0d5909b37580318b4150f9ad902",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 156683833.19625,
+              "upper_bound": 158383023.9025
+            },
+            "point_estimate": 157433962.35,
+            "standard_error": 437784.6830195231
+          }
+        }
+      ],
+      "beforeNs": 152743127.05,
+      "afterNs": 140116397.85,
+      "ratio": 0.9173335688232526,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/record-12-safe_symmetry-8",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/record-12-safe_symmetry-8/new/estimates.json",
+          "sha256": "fb21596f8828986f4378eb1c55f53dbe621e254e467ca14ffcb2fe89490ed74f",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 137714078.9975,
+              "upper_bound": 138549202.92749998
+            },
+            "point_estimate": 138096314.55,
+            "standard_error": 213708.5658522946
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/record-12-safe_symmetry-8/new/estimates.json",
+          "sha256": "853569700247963db92b6805b697b36be8a3383cd35479ac42110c42a1bb0a63",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 128837528.105,
+              "upper_bound": 129647432.07875
+            },
+            "point_estimate": 129207033.3,
+            "standard_error": 207981.8610664846
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/record-12-safe_symmetry-8/new/estimates.json",
+          "sha256": "2940df3ff4bf3f80dbda25f7c739abfd424f99f2df2832155a6bbe9c1966680e",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 128510455.42,
+              "upper_bound": 129043579.2875
+            },
+            "point_estimate": 128799899.95,
+            "standard_error": 136124.9575707873
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/record-12-safe_symmetry-8/new/estimates.json",
+          "sha256": "7b17fe22da7bc481c50be046ab3889d412a35616274781ad13d9533fb5684a1e",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 145289763.32250002,
+              "upper_bound": 146295556.23749998
+            },
+            "point_estimate": 145733583.35,
+            "standard_error": 259174.3142366172
+          }
+        }
+      ],
+      "beforeNs": 141914948.95,
+      "afterNs": 129003466.625,
+      "ratio": 0.9090195753123301,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/record-5-safe_actions",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/record-5-safe_actions/new/estimates.json",
+          "sha256": "c244787f76a74361b4f0dd69007d2919d9bb73f4f6243390292bd8d749fc9b48",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1333634.3646889522,
+              "upper_bound": 1339557.7154164705
+            },
+            "point_estimate": 1336485.6908237985,
+            "standard_error": 1512.4993597510113
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/record-5-safe_actions/new/estimates.json",
+          "sha256": "b30005265f8f6b4d7eaa14ae13cb90001ef17017d6a2db209afec0912380659d",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1257279.6549462206,
+              "upper_bound": 1265749.0337972182
+            },
+            "point_estimate": 1261359.0160171043,
+            "standard_error": 2169.3533681148033
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/record-5-safe_actions/new/estimates.json",
+          "sha256": "480c104058e493bdae29d0ea1e3f30a470967d78c8ffaa46d49a8c0ef8f5818f",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1243789.10813017,
+              "upper_bound": 1248615.5502049997
+            },
+            "point_estimate": 1246222.4827371151,
+            "standard_error": 1237.5626609367089
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/record-5-safe_actions/new/estimates.json",
+          "sha256": "bf2285b50da2673ba7819c2382950d127e292285c7e0f395ff49f83fd6efc906",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1351337.1956169258,
+              "upper_bound": 1358094.3696797132
+            },
+            "point_estimate": 1354626.878805854,
+            "standard_error": 1712.8253104493797
+          }
+        }
+      ],
+      "beforeNs": 1345556.2848148262,
+      "afterNs": 1253790.7493771096,
+      "ratio": 0.9318010428301442,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/record-5-safe_plain",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/record-5-safe_plain/new/estimates.json",
+          "sha256": "669d746166b093f79febcb0ff72e38498c7d8f00941e7dc5b4e99f0420d0eac8",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 18693206.996666666,
+              "upper_bound": 18765006.50583333
+            },
+            "point_estimate": 18725747.283333328,
+            "standard_error": 18327.695493302377
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/record-5-safe_plain/new/estimates.json",
+          "sha256": "7fa618909ac95accc8610a17d2ab88825e43b91ce1669ca95f19ebc12827612b",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 18794247.72625,
+              "upper_bound": 18912531.44
+            },
+            "point_estimate": 18847677.766666666,
+            "standard_error": 30269.969581270005
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/record-5-safe_plain/new/estimates.json",
+          "sha256": "0c0091ddf0f7a3936cf483c7369b13b2367e95173c3091e149cc6c982daf7022",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 18514486.645,
+              "upper_bound": 18564710.41958333
+            },
+            "point_estimate": 18540647.916666668,
+            "standard_error": 12834.227205225223
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/record-5-safe_plain/new/estimates.json",
+          "sha256": "119056355d8354c4dc1ce6c43d525b5f764bdaede3e92557d0686977d30f4cbe",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 18935204.15083333,
+              "upper_bound": 18981343.1
+            },
+            "point_estimate": 18958357.68333333,
+            "standard_error": 11752.406425718427
+          }
+        }
+      ],
+      "beforeNs": 18842052.483333327,
+      "afterNs": 18694162.84166667,
+      "ratio": 0.9921510864170731,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/record-5-safe_symmetry",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/record-5-safe_symmetry/new/estimates.json",
+          "sha256": "2de6ce0e4e438d974a82eb7b138b5274e03186d8627d8a1d61ea226d399b4ace",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1686038.6863310232,
+              "upper_bound": 1690961.220336012
+            },
+            "point_estimate": 1688105.65643319,
+            "standard_error": 1283.5363262645997
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/record-5-safe_symmetry/new/estimates.json",
+          "sha256": "69fdf8f54f0481bab8d3cab3bdb512e5d6c5de50ad1d6300a0768cc3129908fc",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1581136.36152041,
+              "upper_bound": 1598597.5648713934
+            },
+            "point_estimate": 1589389.6556080556,
+            "standard_error": 4447.81426009694
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/record-5-safe_symmetry/new/estimates.json",
+          "sha256": "79ffbe752502a54ae90d6262ae3f65a3deb695f499513464f79f6b65920fc8fe",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1556211.1599388805,
+              "upper_bound": 1568930.5323967468
+            },
+            "point_estimate": 1562673.7038078145,
+            "standard_error": 3251.5780308153985
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/record-5-safe_symmetry/new/estimates.json",
+          "sha256": "54f3862a41dd5c3432acc89bee64c7f6b1c94f0eb9776a659034cdc2ef82ec30",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 1680171.5502469472,
+              "upper_bound": 1687928.327930501
+            },
+            "point_estimate": 1684006.0937049747,
+            "standard_error": 1976.3279049699388
+          }
+        }
+      ],
+      "beforeNs": 1686055.8750690822,
+      "afterNs": 1576031.679707935,
+      "ratio": 0.9347446327325071,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/sets-5-safe_actions",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/sets-5-safe_actions/new/estimates.json",
+          "sha256": "6f95d119657f9a41fbabe9076bd005cae8025e54a8c84bf4e43280d210b294ed",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 229561.8247704051,
+              "upper_bound": 230138.667444511
+            },
+            "point_estimate": 229839.06611076026,
+            "standard_error": 147.38169749223405
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/sets-5-safe_actions/new/estimates.json",
+          "sha256": "e2ff0f6c5741443fe71adf82a7db5b9cd122e8695e7380bc5acb317ad7899d1d",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 229621.1338132031,
+              "upper_bound": 231356.54635744964
+            },
+            "point_estimate": 230575.25430634324,
+            "standard_error": 446.87673817636255
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/sets-5-safe_actions/new/estimates.json",
+          "sha256": "138a91d59ee8219b654abee75b4967b06f4d8a499b075f599d3ed6653c7b53ed",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 227987.94869778972,
+              "upper_bound": 229541.6154208411
+            },
+            "point_estimate": 228699.13578425246,
+            "standard_error": 397.95563108507463
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/sets-5-safe_actions/new/estimates.json",
+          "sha256": "0dde3c96f495f0f0fd230157973c1c212d77f09fabef09e6df6d393e091d87d2",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 243951.69054684788,
+              "upper_bound": 249559.32134373812
+            },
+            "point_estimate": 246481.23128287602,
+            "standard_error": 1439.0715387026466
+          }
+        }
+      ],
+      "beforeNs": 238160.14869681816,
+      "afterNs": 229637.19504529785,
+      "ratio": 0.9642133509818632,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/sets-5-safe_plain",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/sets-5-safe_plain/new/estimates.json",
+          "sha256": "adc0e726815219e2609bd537a7c5728537cbb8c50ded7fc65fb1e4520473d107",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 2993715.8048195797,
+              "upper_bound": 3009493.896218999
+            },
+            "point_estimate": 3001222.2615328915,
+            "standard_error": 4049.613662655493
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/sets-5-safe_plain/new/estimates.json",
+          "sha256": "cd390edf1e8d089e90ff15e56de95eda982cd5aa2efbaaa39721101913ace235",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 3010772.844753165,
+              "upper_bound": 3036464.397664345
+            },
+            "point_estimate": 3022665.6620464176,
+            "standard_error": 6601.839188863186
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/sets-5-safe_plain/new/estimates.json",
+          "sha256": "a723a3f6b8e40001734ca9038f2b20155fd97f85788628bd5ea832a912d46bdc",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 2958527.7419429636,
+              "upper_bound": 3143661.3653932367
+            },
+            "point_estimate": 3027059.5288065644,
+            "standard_error": 52813.65193803852
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/sets-5-safe_plain/new/estimates.json",
+          "sha256": "482a79d378fda8f9d80161905cf004fc6af0d67c90da4928c4d4f8cc6ddfdfbd",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 2970289.450446336,
+              "upper_bound": 2998344.403919567
+            },
+            "point_estimate": 2982338.68502915,
+            "standard_error": 7268.754981257641
+          }
+        }
+      ],
+      "beforeNs": 2991780.4732810208,
+      "afterNs": 3024862.595426491,
+      "ratio": 1.011057670320707,
+      "regressionOver10Percent": false
+    },
+    {
+      "name": "symmetry/sets-5-safe_symmetry",
+      "estimates": [
+        {
+          "path": "evals/runs/0067-symmetry-kernel/0/criterion/symmetry/sets-5-safe_symmetry/new/estimates.json",
+          "sha256": "e601f3ce6565efb11ac36c4100870c68b4be6bb09aa38cf47eb19085d0515e71",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 334684.2832809334,
+              "upper_bound": 336187.09728841984
+            },
+            "point_estimate": 335457.39507956564,
+            "standard_error": 383.7257268100044
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/1/criterion/symmetry/sets-5-safe_symmetry/new/estimates.json",
+          "sha256": "a56ee0dfedb044c7f2c2180c82aaecdafe6b174d24c0d04a4e6a2627ebeb6957",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 343849.7738367646,
+              "upper_bound": 357209.06251264404
+            },
+            "point_estimate": 349104.1342710941,
+            "standard_error": 3606.4766708301677
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/2/criterion/symmetry/sets-5-safe_symmetry/new/estimates.json",
+          "sha256": "9d7e4b794a430a0d06fdc169b8a9ea500a31ac7647e88928aefecef75de59f99",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 341529.5604554376,
+              "upper_bound": 345869.0480653943
+            },
+            "point_estimate": 343610.8053197733,
+            "standard_error": 1110.4724296243644
+          }
+        },
+        {
+          "path": "evals/runs/0067-symmetry-kernel/3/criterion/symmetry/sets-5-safe_symmetry/new/estimates.json",
+          "sha256": "bd41a50fc4378f23eafe8efec4c160e4f092e4486aaeab683fffefff96113628",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 337903.0439091129,
+              "upper_bound": 341783.7158954017
+            },
+            "point_estimate": 339876.3988531344,
+            "standard_error": 986.1663138568885
+          }
+        }
+      ],
+      "beforeNs": 337666.89696635003,
+      "afterNs": 346357.4697954337,
+      "ratio": 1.0257371181692996,
+      "regressionOver10Percent": false
+    }
+  ]
+}

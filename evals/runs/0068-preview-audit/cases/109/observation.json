@@ -1,0 +1,184 @@
+{
+  "actual": {
+    "kind": "module",
+    "module": {
+      "name": "Test",
+      "extends": [],
+      "constants": [],
+      "variables": [],
+      "definitions": [
+        {
+          "name": "op",
+          "kind": "Operator",
+          "params": [],
+          "body": {
+            "kind": "If",
+            "condition": {
+              "kind": "String",
+              "value": "A",
+              "location": {
+                "start": 32,
+                "end": 35,
+                "line": 3,
+                "column": 10
+              }
+            },
+            "consequent": {
+              "kind": "String",
+              "value": "B",
+              "location": {
+                "start": 41,
+                "end": 44,
+                "line": 3,
+                "column": 19
+              }
+            },
+            "alternative": {
+              "kind": "String",
+              "value": "C",
+              "location": {
+                "start": 50,
+                "end": 53,
+                "line": 3,
+                "column": 28
+              }
+            },
+            "location": {
+              "start": 29,
+              "end": 31,
+              "line": 3,
+              "column": 7
+            }
+          },
+          "isLocal": false,
+          "isRecursive": false,
+          "location": {
+            "start": 23,
+            "end": 25,
+            "line": 3,
+            "column": 1
+          }
+        }
+      ],
+      "assumptions": [],
+      "theorems": [],
+      "location": {
+        "start": 1,
+        "end": 5,
+        "line": 2,
+        "column": 1
+      }
+    }
+  },
+  "reference": {
+    "kind": "accepted",
+    "tree": {
+      "kind": 382,
+      "image": "N_Module",
+      "children": [
+        {
+          "kind": 333,
+          "image": "N_BeginModule",
+          "children": [
+            {
+              "kind": 3,
+              "image": "---- MODULE",
+              "children": []
+            },
+            {
+              "kind": 289,
+              "image": "Test",
+              "children": []
+            },
+            {
+              "kind": 36,
+              "image": "----",
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": 350,
+          "image": "N_Extends",
+          "children": []
+        },
+        {
+          "kind": 334,
+          "image": "N_Body",
+          "children": [
+            {
+              "kind": 389,
+              "image": "N_OperatorDefinition",
+              "children": [
+                {
+                  "kind": 366,
+                  "image": "N_IdentLHS",
+                  "children": [
+                    {
+                      "kind": 289,
+                      "image": "op",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "kind": 93,
+                  "image": "==",
+                  "children": []
+                },
+                {
+                  "kind": 369,
+                  "image": "N_IfThenElse",
+                  "children": [
+                    {
+                      "kind": 50,
+                      "image": "IF",
+                      "children": []
+                    },
+                    {
+                      "kind": 418,
+                      "image": "\"A\"",
+                      "children": []
+                    },
+                    {
+                      "kind": 62,
+                      "image": "THEN",
+                      "children": []
+                    },
+                    {
+                      "kind": 418,
+                      "image": "\"B\"",
+                      "children": []
+                    },
+                    {
+                      "kind": 45,
+                      "image": "ELSE",
+                      "children": []
+                    },
+                    {
+                      "kind": 418,
+                      "image": "\"C\"",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": 345,
+          "image": "N_EndModule",
+          "children": [
+            {
+              "kind": 37,
+              "image": "====",
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "tlaTs": "accepted"
+}

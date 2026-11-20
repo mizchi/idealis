@@ -1,0 +1,91 @@
+{
+  "route": "wasm",
+  "command": "/Users/mz/.local/share/mise/installs/node/24.22.2/bin/node",
+  "args": [
+    "--max-old-space-size=8192",
+    "/Users/mz/ghq/github.com/mizchi/idealis/dist/evals/single-model/worker.js",
+    "wasm",
+    "/Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0056-comparison/control-function-cube-fault-before-wasm/input.json",
+    "",
+    "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/0056-before/idealis_core.wasm"
+  ],
+  "exit": 0,
+  "wallMs": 70.51704100000006,
+  "stdout": "{\"frontendMs\":2.8843749999999986,\"engineStartupMs\":2.467624999999998,\"apiMs\":5.994750000000003,\"result\":{\"status\":\"invariant-violation\",\"reason\":null,\"states\":2,\"generated\":2,\"depth\":1,\"work\":34,\"violation\":{\"name\":\"Safe\",\"trace\":[{\"action\":null,\"values\":[{\"type\":\"list\",\"value\":[{\"type\":\"int\",\"value\":\"0\"},{\"type\":\"int\",\"value\":\"0\"},{\"type\":\"int\",\"value\":\"0\"},{\"type\":\"int\",\"value\":\"0\"}]}]},{\"action\":\"Next\",\"values\":[{\"type\":\"list\",\"value\":[{\"type\":\"int\",\"value\":\"1\"},{\"type\":\"int\",\"value\":\"0\"},{\"type\":\"int\",\"value\":\"0\"},{\"type\":\"int\",\"value\":\"0\"}]}]}]}}}\n",
+  "stderr": "",
+  "output": {
+    "frontendMs": 2.8843749999999986,
+    "engineStartupMs": 2.467624999999998,
+    "apiMs": 5.994750000000003,
+    "result": {
+      "status": "invariant-violation",
+      "reason": null,
+      "states": 2,
+      "generated": 2,
+      "depth": 1,
+      "work": 34,
+      "violation": {
+        "name": "Safe",
+        "trace": [
+          {
+            "action": null,
+            "values": [
+              {
+                "type": "list",
+                "value": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "int",
+                    "value": "0"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "list",
+                "value": [
+                  {
+                    "type": "int",
+                    "value": "1"
+                  },
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "int",
+                    "value": "0"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "decodeError": null,
+  "memory": [],
+  "sampledMaxRssBytes": null,
+  "phases": null,
+  "phaseError": null
+}

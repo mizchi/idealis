@@ -1,0 +1,58 @@
+[
+  {
+    "name": "action-repeat-4",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nA3(v) == A2(v) \\/ A2(v)\nA4(v) == A3(v) \\/ A3(v)\nInit == x=0\nNext == A4((x+1)%4)\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "action-repeat-6",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nA0(v) == x'=v\nA1(v) == A0(v) \\/ A0(v)\nA2(v) == A1(v) \\/ A1(v)\nA3(v) == A2(v) \\/ A2(v)\nA4(v) == A3(v) \\/ A3(v)\nA5(v) == A4(v) \\/ A4(v)\nA6(v) == A5(v) \\/ A5(v)\nInit == x=0\nNext == A6((x+1)%4)\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "action-capture",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nInit == x=0\nNext == \\E delta \\in {1,2}: LET Step(v) == x'=(x+delta+v)%4 IN Step(0) \\/ Step(0) \\/ Step(0) \\/ Step(0)\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "temporal-repeat-3",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nT0(limit) == [](x<limit)\nT1(limit) == T0(limit) /\\ T0(limit)\nT2(limit) == T1(limit) /\\ T1(limit)\nT3(limit) == T2(limit) /\\ T2(limit)\nInit == x=0\nNext == x'=(x+1)%4\nLive == T3(4)\n====",
+    "config": "INIT Init\nNEXT Next\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "temporal-repeat-5",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nT0(limit) == [](x<limit)\nT1(limit) == T0(limit) /\\ T0(limit)\nT2(limit) == T1(limit) /\\ T1(limit)\nT3(limit) == T2(limit) /\\ T2(limit)\nT4(limit) == T3(limit) /\\ T3(limit)\nT5(limit) == T4(limit) /\\ T4(limit)\nInit == x=0\nNext == x'=(x+1)%4\nLive == T5(4)\n====",
+    "config": "INIT Init\nNEXT Next\nPROPERTY Live\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "scalar-control",
+    "family": "template",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nInit == x=0\nNext == x'=(x+1)%4\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  },
+  {
+    "name": "lazy-control",
+    "family": "lazy",
+    "expected": "complete",
+    "irVersion": 2,
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nF[i \\in 0..15] == IF i=0 THEN 1 ELSE IF i=1 THEN 1 \\div 0 ELSE F[0]\nAlias == F\nId(f) == f\nInit == x=0\nNext == x'=(x+Id(Alias)[0])%4\n====",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE"
+  }
+]

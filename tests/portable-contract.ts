@@ -7,7 +7,7 @@ import {
   normalizePortableValue,
   PortableCoreError,
   toPortableValue,
-} from "../src/portable.js";
+} from "../packages/idealis/src/portable.js";
 
 export const registerPortableContract = (
   test: (name: string, run: () => void | Promise<void>) => unknown,

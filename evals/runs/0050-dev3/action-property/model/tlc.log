@@ -1,0 +1,37 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 11 and seed 4462529802984376328 with 1 worker on 10 cores with 7282MB heap and 64MB offheap memory [pid: 18274] (Mac OS X 26.6.2 aarch64, Eclipse Adoptium 21.0.13 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file /Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0050-dev3/action-property/model/Differential.tla
+Parsing file /private/var/folders/_h/_rf455xj4h3_3g6z86pg244c0000gn/T/idealis-tlc-OkmDu2/Naturals.tla
+Semantic processing of module Naturals
+Semantic processing of module Differential
+Starting... (2026-11-17 17:14:16)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-11-17 17:14:16.
+Error: Action property Progress is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+x = 0
+
+State 2: <Advance line 5, col 12 to line 5, col 30 of module Differential>
+x = 1
+
+State 3: <Advance line 5, col 12 to line 5, col 30 of module Differential>
+x = 2
+
+The coverage statistics at 2026-11-17 17:14:16
+<Init line 4, col 1 to line 4, col 4 of module Differential>: 2:2
+  line 4, col 9 to line 4, col 13 of module Differential: 2
+<Advance line 5, col 1 to line 5, col 7 of module Differential>: 2:4
+  line 5, col 12 to line 5, col 16 of module Differential: 3
+  |line 5, col 12 to line 5, col 12 of module Differential: 4
+  line 5, col 21 to line 5, col 30 of module Differential: 3
+  |line 5, col 26 to line 5, col 30 of module Differential: 4
+<Stay line 6, col 1 to line 6, col 4 of module Differential>: 0:1
+  line 6, col 9 to line 6, col 19 of module Differential: 1
+<Unused line 7, col 1 to line 7, col 6 of module Differential>: 0:0
+  line 7, col 20 to line 7, col 25 of module Differential: 0
+End of statistics.
+4 states generated, 3 distinct states found, 0 states left on queue.
+The depth of the complete state graph search is 3.
+The average outdegree of the complete state graph is 1 (minimum is 1, the maximum 1 and the 95th percentile is 1).
+Finished in 00s at (2026-11-17 17:14:16)

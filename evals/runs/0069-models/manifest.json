@@ -1,0 +1,416 @@
+{
+  "plan": "0069-symbolic-operators",
+  "sources": [
+    {
+      "path": "crates/rtla-compiler/Cargo.lock",
+      "sha256": "ae19c5abc8d6a7c0578676f214ed0bdce9fd8d4117ae6d6b439c25a633ac1926"
+    },
+    {
+      "path": "crates/rtla-compiler/Cargo.toml",
+      "sha256": "ff35abd7398f8ae19de5a380b7cd6638f71e4554fceca773d9c62160e8025173"
+    },
+    {
+      "path": "crates/rtla-compiler/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/rtla-compiler/README.md",
+      "sha256": "9fe488c25c3043c87b26176e6c1d31e0085b4fbc778102a701340d4773631dcf"
+    },
+    {
+      "path": "crates/rtla-compiler/SUPPORT.md",
+      "sha256": "7d0e0c5ffeb6a6542c7aa58a6100c098fc3f279e365d9349379df919fef1cede"
+    },
+    {
+      "path": "crates/rtla-compiler/benches/compatibility.rs",
+      "sha256": "f1a42c006fdd3b696630c49356085c5abda7715fa6f849888172276601389be3"
+    },
+    {
+      "path": "crates/rtla-compiler/examples/analysis_roles.rs",
+      "sha256": "3bb02ee05cebde964a531145dd2cbf3229bdc1a8d12fa8ac4c498e0ca2e72875"
+    },
+    {
+      "path": "crates/rtla-compiler/examples/check.rs",
+      "sha256": "bdc06941d17708dc2332575b253e96f6115daa28532117514fbba34a4eccd119"
+    },
+    {
+      "path": "crates/rtla-compiler/examples/temporal-profile.rs",
+      "sha256": "27d4e418471ee457f1d15753a50170255304bdbf9bdfa30d353eccd69fd4e4f5"
+    },
+    {
+      "path": "crates/rtla-compiler/src/analysis.rs",
+      "sha256": "e466ebb7698f320f7d5250fb7f2488ae9b7bd8311f40994ebdffb3be2958fb6d"
+    },
+    {
+      "path": "crates/rtla-compiler/src/lib.rs",
+      "sha256": "1ef5df019b79c1a8379a34b01867698596fdafa78fd46a0b88e3e72acc32048d"
+    },
+    {
+      "path": "crates/rtla-compiler/src/link.rs",
+      "sha256": "d3dd957a37ce37d3f1a7a64f51bc57afcdf07d089b989ef9e5e03fa6a4aec1aa"
+    },
+    {
+      "path": "crates/rtla-compiler/src/rewrite.rs",
+      "sha256": "98b15fbe03bea78c0c01693d76b778cb35d79e50ec84d01352c949e301eeb907"
+    },
+    {
+      "path": "crates/rtla-compiler/src/symbols.rs",
+      "sha256": "17b80333f1bb6e4f2b44ae6a8a3b6c5c777488b1e61c3a5d3db47f078ea716fc"
+    },
+    {
+      "path": "crates/rtla-compiler/src/symmetry.rs",
+      "sha256": "ecf438b158b2c31422ff4ae7a8c79bb43d7311dce736a68ab3b03fc947e877c6"
+    },
+    {
+      "path": "crates/rtla-compiler/src/typed.rs",
+      "sha256": "787b2c12dcbdb34e4d79aa2a854225c2f11a9ecc3517334331f2fcba6947fd95"
+    },
+    {
+      "path": "crates/rtla-compiler/src/typed_expr.rs",
+      "sha256": "672ca09772d95a93d44c585415724b23789b1819350042ab71ab7ebaeb40adca"
+    },
+    {
+      "path": "crates/rtla-compiler/src/typed_lower.rs",
+      "sha256": "76fc992f2524eba4aa09026180eaf7d300ba4a13968f30b9a43fad9954a8effc"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/analysis_parity.rs",
+      "sha256": "9e847466e9b937035fcafa87befb9f0751aed6db39d5d50c29466c3ab20e236a"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/compiler.rs",
+      "sha256": "d6c7bc5018f026e0791388fd3776318247f744a58d9827d41dae2bd86f44cbb5"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/finite-support.json",
+      "sha256": "4255c15f24e2fae6420dc15585cef35a48eb2e23b8ac7e1c92e3d00b4f8a2690"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/finite_support.rs",
+      "sha256": "a6247454985746c04f6209329fcf9a8a6f3544c2e3f7bbaad322ce0b1d5c165c"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/modules-support.json",
+      "sha256": "c08e6216640becfcdefbd94110282f714310f72f19c354a82bf1595721e1c564"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/modules.rs",
+      "sha256": "2ce495a5d403b6e6de887cd07443a27f2dbd7083d1aac91deb331471f610eb7d"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/operator_sharing.rs",
+      "sha256": "e34c7f92f59e8924326c3ab584b71cc4694240a5a701822389a4441b9a8523be"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/operator_sharing_bundle.rs",
+      "sha256": "bd9642aa237da5cb6ca9390d4d3cd185ce1fc265debabe97523f073089ead012"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/operators-support.json",
+      "sha256": "24441593c1c2a5f6ef97ac8c294f32fe1b9e8b78ed81e282ba8b86c3b0d724dd"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/operators.rs",
+      "sha256": "123c4142730d8bc329033e0bf7725b04c06cb76d26445ad39b8fffee69e654d4"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/partial_order.rs",
+      "sha256": "513fe3f631a1cce6651eb76f6d010d5e51a51d2048aad312c1fe3b9223f67c59"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/symbolic.rs",
+      "sha256": "316a400fdcdf600b170f0ee9c2137e3c49f2540fc2a4787702abed7193cf5901"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/symmetry.rs",
+      "sha256": "19f34d6ebd0d681f7e6a4ee1b58269dbbb02c5bc2e5a84ffef5b67aae26de3a2"
+    },
+    {
+      "path": "crates/rtla/Cargo.lock",
+      "sha256": "9b35082c314f3682e4c3d20b6bef5e95b41387c4c70782c498af76f296f53858"
+    },
+    {
+      "path": "crates/rtla/Cargo.toml",
+      "sha256": "d0ee70339da2a568e2813ed6fd3c85f211148cf93b1b52484cbac06e7161a80c"
+    },
+    {
+      "path": "crates/rtla/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/rtla/NOTICE",
+      "sha256": "6f18428281839e8b8d7ae20477ddaae6c76cc7b5684eb8054fbdf01205ad9e9e"
+    },
+    {
+      "path": "crates/rtla/README.md",
+      "sha256": "2724f90ca5274fdf7539430f5df0c54d4a08ab6326ce5d89ac4ca257ec1c9242"
+    },
+    {
+      "path": "crates/rtla/SUPPORT.md",
+      "sha256": "8d2d6b2ae5dcbbf76a80172eb935416fc1cb8cb992f4f4e64ad39c3b163698ad"
+    },
+    {
+      "path": "crates/rtla/examples/inspect.rs",
+      "sha256": "c2ddd0476818d2b5bec7c34d52f6f10d1270c86e671603cfa0788979917467b7"
+    },
+    {
+      "path": "crates/rtla/src/ast.rs",
+      "sha256": "d8929e28558bef691b8e84376e22f7ca23726fdb4650ca79d6007da0e1aa33af"
+    },
+    {
+      "path": "crates/rtla/src/config.rs",
+      "sha256": "f6824eb589df8e8b1d005dad9262cae02aac39568cdbffbdb0caf4c736d95c9c"
+    },
+    {
+      "path": "crates/rtla/src/error.rs",
+      "sha256": "3e1e4f360c44399e9c253f7697fb416f479564a5b6c61b2a9e67d74dd415b191"
+    },
+    {
+      "path": "crates/rtla/src/lexer.rs",
+      "sha256": "cb47b4f5a6ffcf93fcfd931fd0a745da509e1f072933c6939b4c3f6c08fe6cd5"
+    },
+    {
+      "path": "crates/rtla/src/lib.rs",
+      "sha256": "48e5e99cda0be623898b6c4743c28d0ca4044dc8ef82199533424cde28799903"
+    },
+    {
+      "path": "crates/rtla/src/main.rs",
+      "sha256": "8ba189d89ab92a002019441133a7aa2f86aed704ffca456d7c4094dead0d817c"
+    },
+    {
+      "path": "crates/rtla/src/parser.rs",
+      "sha256": "c14cd3383441c29e8b351b3251791b0ee5f5ed6cf0c3fa21becffc4ce4ba75c7"
+    },
+    {
+      "path": "crates/rtla/src/protocol.rs",
+      "sha256": "2c1e018da00062d8d2f6f2f20891ddad650f6cae12e772a84d81599782f385e0"
+    },
+    {
+      "path": "crates/rtla/src/wasm.rs",
+      "sha256": "e0487ce961fa75f57d34345c0b57674b1c925ad7af6b04bbda1176807cda6a5d"
+    },
+    {
+      "path": "crates/rtla/tests/fixtures/Channel.tla",
+      "sha256": "8b2cbd4533a157ae0760e3117e3c008fb9a31dc3673005fc8b537d3879de1bfc"
+    },
+    {
+      "path": "crates/rtla/tests/fixtures/DieHard.tla",
+      "sha256": "295495de6509d86a82b88757835b95e3f91fad8691d764ece4d98886dcf42b66"
+    },
+    {
+      "path": "crates/rtla/tests/fixtures/LICENSE.md",
+      "sha256": "9fce60dd2b6c2be72803e96fc67f0a34b91b073ead999cea21d00c33b8bce147"
+    },
+    {
+      "path": "crates/rtla/tests/fixtures/symbolic.json",
+      "sha256": "a6c635df34ebd6916cbf22faec76101fbb891ccf5e800e41be73d5eb89d23595"
+    },
+    {
+      "path": "crates/rtla/tests/instances.rs",
+      "sha256": "b7603946a520076ef80f68a46b4b0270b76c97cc68472c835937fa99980b0fb4"
+    },
+    {
+      "path": "crates/rtla/tests/labels.rs",
+      "sha256": "0ca77406375417f23cf7653d622bbb853fbce933303ccfee7c764295bf8f2bdd"
+    },
+    {
+      "path": "crates/rtla/tests/parser.rs",
+      "sha256": "5603429e90338696652452ddc17fc026db23e67db52b94dff2314be4ec8a4c4b"
+    },
+    {
+      "path": "crates/rtla/tests/symbolic.rs",
+      "sha256": "9467364df10f9bbe282370dac6dc14ae2a899cf6cf738213d3aa826e65fde0a6"
+    },
+    {
+      "path": "evals/plans/0069-symbolic-operators.md",
+      "sha256": "986b5455b5c3cf7612f90f8cb874dd10bfc91864a79c46dad145b51a71937c22"
+    },
+    {
+      "path": "evals/symbolic-operators/corpus.ts",
+      "sha256": "a1e5a58e31898e052508aeadcf5b417f4a8947b83c59218bbefb9d4e3b40c8b8"
+    },
+    {
+      "path": "evals/symbolic-operators/models.ts",
+      "sha256": "346d2bb55d02039edd4c7b7789fda06d58fb781dcc0fa871fcea829ff8795853"
+    },
+    {
+      "path": "evals/symbolic-operators/run.ts",
+      "sha256": "d0de5f4343cae2b6c795bed6e53343c2eaad40437c61a9d7abb0da7df4758206"
+    },
+    {
+      "path": "evals/symbolic-operators/tlc.ts",
+      "sha256": "b4e1fae118f5d558d5ef6a4f0d1936e5b4422c692c4863aef2f53ea470037610"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "crates/idealis-core/target/release/idealis-core",
+      "sha256": "9f726aa2b6ccd8d641ab8941aa5983ad6226e13c260b5cba1adbebea4d10fe6e"
+    },
+    {
+      "path": "crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm",
+      "sha256": "9d2082389573f145bc575c16ede326b481b3a3cf4d593ddc14b034353bc15054"
+    },
+    {
+      "path": ".artifacts/tlc/tla2tools.jar",
+      "sha256": "936a262061c914694dfd669a543be24573c45d5aa0ff20a8b96b23d01e050e88"
+    }
+  ],
+  "inputs": [
+    {
+      "name": "infix-safe",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft %% right == ~left\nInit == x = FALSE\nNext == x' = (x %% TRUE)\nSafe == x \\in BOOLEAN\n====\n",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "expected": "complete"
+    },
+    {
+      "name": "infix-fault",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft %% right == ~left\nInit == x = FALSE\nNext == x' = (x %% TRUE)\nSafe == x = FALSE\n====\n",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "expected": "invariant-violation"
+    },
+    {
+      "name": "prefix-safe",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\n\nVARIABLE x\n-. value == ~value\nInit == x = FALSE\nNext == x' = (-x)\nSafe == x \\in BOOLEAN\n====\n",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "expected": "complete"
+    },
+    {
+      "name": "prefix-fault",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\n\nVARIABLE x\n-. value == ~value\nInit == x = FALSE\nNext == x' = (-x)\nSafe == x = FALSE\n====\n",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "expected": "invariant-violation"
+    },
+    {
+      "name": "postfix-safe",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\n\nVARIABLE x\nvalue ^+ == ~value\nInit == x = FALSE\nNext == x' = (x^+)\nSafe == x \\in BOOLEAN\n====\n",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "expected": "complete"
+    },
+    {
+      "name": "postfix-fault",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\n\nVARIABLE x\nvalue ^+ == ~value\nInit == x = FALSE\nNext == x' = (x^+)\nSafe == x = FALSE\n====\n",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "expected": "invariant-violation"
+    },
+    {
+      "name": "nonfix-safe",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft %% right == ~left\nInit == x = FALSE\nNext == x' = (%%(x, TRUE))\nSafe == x \\in BOOLEAN\n====\n",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "expected": "complete"
+    },
+    {
+      "name": "nonfix-fault",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft %% right == ~left\nInit == x = FALSE\nNext == x' = (%%(x, TRUE))\nSafe == x = FALSE\n====\n",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "expected": "invariant-violation"
+    },
+    {
+      "name": "let-safe",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\n\nVARIABLE x\n\nInit == x = FALSE\nNext == x' = (LET left %% right == ~left IN x %% TRUE)\nSafe == x \\in BOOLEAN\n====\n",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "expected": "complete"
+    },
+    {
+      "name": "let-fault",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\n\nVARIABLE x\n\nInit == x = FALSE\nNext == x' = (LET left %% right == ~left IN x %% TRUE)\nSafe == x = FALSE\n====\n",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "expected": "invariant-violation"
+    },
+    {
+      "name": "local-import-safe",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\nEXTENDS Sequences\nVARIABLE x\nleft + right == ~left\nInit == x = FALSE\nNext == x' = (x + TRUE)\nSafe == x \\in BOOLEAN\n====\n",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "expected": "complete"
+    },
+    {
+      "name": "local-import-fault",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\nEXTENDS Sequences\nVARIABLE x\nleft + right == ~left\nInit == x = FALSE\nNext == x' = (x + TRUE)\nSafe == x = FALSE\n====\n",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "expected": "invariant-violation"
+    },
+    {
+      "name": "builtin-and",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft /\\ right == FALSE\nInit == x = 0\nNext == UNCHANGED x\n====\n",
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE",
+      "expected": "builtin-conflict"
+    },
+    {
+      "name": "builtin-domain",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\n\nVARIABLE x\nDOMAIN value == value\nInit == x = 0\nNext == UNCHANGED x\n====\n",
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE",
+      "expected": "builtin-conflict"
+    },
+    {
+      "name": "builtin-prime",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\n\nVARIABLE x\nvalue' == value\nInit == x = 0\nNext == UNCHANGED x\n====\n",
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE",
+      "expected": "builtin-conflict"
+    },
+    {
+      "name": "builtin-product",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\n\nVARIABLE x\nleft \\X right == left\nInit == x = 0\nNext == UNCHANGED x\n====\n",
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE",
+      "expected": "builtin-conflict"
+    },
+    {
+      "name": "unused-nested-builtin",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\n\nVARIABLE x\nUnused == LET left /\\ right == FALSE IN TRUE\nInit == x = 0\nNext == UNCHANGED x\n====\n",
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE",
+      "expected": "builtin-conflict"
+    },
+    {
+      "name": "builtin-formal",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\n\nVARIABLE x\nUnused(_ /\\ _) == TRUE\nInit == x = 0\nNext == UNCHANGED x\n====\n",
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE",
+      "expected": "builtin-conflict"
+    },
+    {
+      "name": "import-plus",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nleft + right == left\nInit == x = 0\nNext == UNCHANGED x\n====\n",
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE",
+      "expected": "import-ambiguity"
+    },
+    {
+      "name": "import-negative",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE x\n-. value == value\nInit == x = 0\nNext == UNCHANGED x\n====\n",
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE",
+      "expected": "import-ambiguity"
+    },
+    {
+      "name": "import-concat",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\nEXTENDS Sequences\nVARIABLE x\nleft \\o right == left\nInit == x = 0\nNext == UNCHANGED x\n====\n",
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE",
+      "expected": "import-ambiguity"
+    },
+    {
+      "name": "import-override",
+      "family": "graph",
+      "source": "---- MODULE Differential ----\nEXTENDS TLC\nVARIABLE x\nleft @@ right == left\nInit == x = 0\nNext == UNCHANGED x\n====\n",
+      "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE",
+      "expected": "import-ambiguity"
+    }
+  ],
+  "comparison": "Valid finite models use the existing TLC differential and trace replay. Builtin conflicts and imported ambiguities are recorded separately from matched model checks."
+}

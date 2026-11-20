@@ -1,0 +1,13 @@
+# 0069: 記号operatorの定義と参照
+
+基準は6bdf0029。rtlaの既存operator語彙を対象に、prefix/infix/postfixの定義、定数とformal parameterでの記号宣言、引数としてのoperator参照、修飾したnonfix呼出しを実装する。全ASCII/Unicode語彙、引数付きINSTANCE、高階引数の一般的な実行は別とする。TLC 1.7.4の文法を基準とし、prefixの既定表は変更しない。
+
+ローカルtlaplus/tlaplusのOperatorOrFunctionDefinition、PrefixLHS/InfixLHS/PostfixLHS、SomeFixDecl、OpOrExpr、ConfigConstantsを読む。公式prefix_op/infix_op/postfix_opのcaseと、対応語彙へ絞った正常/異常対照を結果を見る前に固定する。SANY 1.7.4と1.8.0の構文結果を記録し、完全なoperator語彙との差を隠さない。SyntaxOracleの内部例外はsyntaxや一致に数えない。
+
+DefinitionKind::Operator.params、Declaration.name/arity、Apply.operator/argsとIdentifierを使い、新しいpublic AST型は増やさない。unary minusは既存の-.を保持する。文字列、括弧付きの通常式、bulleted junction、既存のoffsideと演算子結合を壊さない。記号の参照を式全体や集合要素へ無条件に許さず、OpOrExprの文脈とCartesian productの制限を参照へ照合する。関数や通常のoperator定義の先頭を、前の式へ吸い込まないようにする。
+
+モデル検査の可否はparserの構文受理と分ける。custom infix/postfix/prefixが既存compilerで名前解決できるか検証する。builtinの記号やimport済みの定義を上書きする入力は、SANY/TLCの意味解析へ照合して明示的に拒否する。compilerの対応を推測で広げない。有限の正常/故障モデルをIR v1/v2とTLCで比較する。
+
+TDDでRedを保存し、native/Wasm/Chromium、旧corpusと0068の二版対照を別runへ記録する。source inventoryは再抽出し、追加された語彙・文脈とhashをレビューして更新する。raw runは上書きせず、source/binary/reference hashと失敗も保持する。最終的にSUPPORT/README/evalsへ範囲を記録し、Jev live/offline/staged、check/browser、rtla/portable/compiler/safety/analysis、runtime build/test、evaluate/replay、配布consumerを確認する。
+
+33対照を両SANYで実行したところ、infix記号単独のbody・集合要素・index、括弧で囲ったinfix参照、修飾したCartesian productは構文として受理された。これら5件をsyntax拒否と想定した初期対照はcontrols-failedとして保持する。PrimitiveExp/BangExtを確認し、前者の4件は記号の値としての適否を意味解析へ委ねること、修飾したCartesian productもsemanticエラーになることを確認した。構文の期待だけを修正し、OpOrExprが拒否する引数の裸の\\Xとは分ける。

@@ -1,4 +1,4 @@
-import { test } from "vitest";
+import { test } from "vite-plus/test";
 import { registerEvalLoopContract } from "./eval-loop-contract.js";
 
 registerEvalLoopContract(test);

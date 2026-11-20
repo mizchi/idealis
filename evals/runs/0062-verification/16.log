@@ -1,0 +1,26 @@
+
+> @mizchi/idealis@0.1.0-alpha.0 usable:replay /Users/mz/ghq/github.com/mizchi/idealis
+> pnpm build && node dist/evals/usable/replay.js evals/runs/0062-verification/usable
+
+
+> @mizchi/idealis@0.1.0-alpha.0 build /Users/mz/ghq/github.com/mizchi/idealis
+> tsc -p tsconfig.build.json
+
+ ELIFECYCLE  Command failed with exit code 1.
+pnpm usable:replay 'evals/runs/0062-verification/usable'
+node:internal/fs/promises:1345
+  return new FileHandle(await PromisePrototypeThen(
+                        ^
+
+Error: ENOENT: no such file or directory, open 'evals/runs/0062-verification/usable/manifest.json'
+    at async open (node:internal/fs/promises:1345:25)
+    at async readFile (node:internal/fs/promises:2003:14)
+    at async file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/usable/replay.js:14:29 {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'evals/runs/0062-verification/usable/manifest.json'
+}
+
+Node.js v24.22.2
+error: Recipe `usable-replay` failed on line 406 with exit code 1

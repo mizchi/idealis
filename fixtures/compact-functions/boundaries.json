@@ -1,0 +1,82 @@
+[
+  {
+    "name": "packed-int-0",
+    "source": "---- MODULE Packed ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> 0]\nNext == f' = [f EXCEPT ![1] = 1-@]\nSafe == f \\in [1..N -> 0..1]\n====",
+    "config": "CONSTANT N=0\nINIT Init\nNEXT Next\nINVARIANT Safe"
+  },
+  {
+    "name": "packed-int-1",
+    "source": "---- MODULE Packed ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> 0]\nNext == f' = [f EXCEPT ![1] = 1-@]\nSafe == f \\in [1..N -> 0..1]\n====",
+    "config": "CONSTANT N=1\nINIT Init\nNEXT Next\nINVARIANT Safe"
+  },
+  {
+    "name": "packed-int-16",
+    "source": "---- MODULE Packed ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> 0]\nNext == f' = [f EXCEPT ![1] = 1-@]\nSafe == f \\in [1..N -> 0..1]\n====",
+    "config": "CONSTANT N=16\nINIT Init\nNEXT Next\nINVARIANT Safe"
+  },
+  {
+    "name": "packed-int-32",
+    "source": "---- MODULE Packed ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> 0]\nNext == f' = [f EXCEPT ![1] = 1-@]\nSafe == f \\in [1..N -> 0..1]\n====",
+    "config": "CONSTANT N=32\nINIT Init\nNEXT Next\nINVARIANT Safe"
+  },
+  {
+    "name": "packed-int-64",
+    "source": "---- MODULE Packed ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> 0]\nNext == f' = [f EXCEPT ![1] = 1-@]\nSafe == f \\in [1..N -> 0..1]\n====",
+    "config": "CONSTANT N=64\nINIT Init\nNEXT Next\nINVARIANT Safe"
+  },
+  {
+    "name": "packed-int-65",
+    "source": "---- MODULE Packed ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> 0]\nNext == f' = [f EXCEPT ![1] = 1-@]\nSafe == f \\in [1..N -> 0..1]\n====",
+    "config": "CONSTANT N=65\nINIT Init\nNEXT Next\nINVARIANT Safe"
+  },
+  {
+    "name": "packed-bool-0",
+    "source": "---- MODULE Packed ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> FALSE]\nNext == f' = [f EXCEPT ![1] = ~@]\nSafe == f \\in [1..N -> BOOLEAN]\n====",
+    "config": "CONSTANT N=0\nINIT Init\nNEXT Next\nINVARIANT Safe"
+  },
+  {
+    "name": "packed-bool-1",
+    "source": "---- MODULE Packed ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> FALSE]\nNext == f' = [f EXCEPT ![1] = ~@]\nSafe == f \\in [1..N -> BOOLEAN]\n====",
+    "config": "CONSTANT N=1\nINIT Init\nNEXT Next\nINVARIANT Safe"
+  },
+  {
+    "name": "packed-bool-16",
+    "source": "---- MODULE Packed ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> FALSE]\nNext == f' = [f EXCEPT ![1] = ~@]\nSafe == f \\in [1..N -> BOOLEAN]\n====",
+    "config": "CONSTANT N=16\nINIT Init\nNEXT Next\nINVARIANT Safe"
+  },
+  {
+    "name": "packed-bool-32",
+    "source": "---- MODULE Packed ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> FALSE]\nNext == f' = [f EXCEPT ![1] = ~@]\nSafe == f \\in [1..N -> BOOLEAN]\n====",
+    "config": "CONSTANT N=32\nINIT Init\nNEXT Next\nINVARIANT Safe"
+  },
+  {
+    "name": "packed-bool-64",
+    "source": "---- MODULE Packed ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> FALSE]\nNext == f' = [f EXCEPT ![1] = ~@]\nSafe == f \\in [1..N -> BOOLEAN]\n====",
+    "config": "CONSTANT N=64\nINIT Init\nNEXT Next\nINVARIANT Safe"
+  },
+  {
+    "name": "packed-bool-65",
+    "source": "---- MODULE Packed ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> FALSE]\nNext == f' = [f EXCEPT ![1] = ~@]\nSafe == f \\in [1..N -> BOOLEAN]\n====",
+    "config": "CONSTANT N=65\nINIT Init\nNEXT Next\nINVARIANT Safe"
+  },
+  {
+    "name": "packed-range-False-{0}",
+    "source": "---- MODULE Packed ----\nEXTENDS Naturals\nVARIABLE f\nInit == f = [i \\in 1..2 |-> 0]\nNext == f' = [f EXCEPT ![1] = 1-@]\nSafe == f \\in [1..2 -> {0}]\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe"
+  },
+  {
+    "name": "packed-range-False-BOOLEAN",
+    "source": "---- MODULE Packed ----\nEXTENDS Naturals\nVARIABLE f\nInit == f = [i \\in 1..2 |-> 0]\nNext == f' = [f EXCEPT ![1] = 1-@]\nSafe == f \\in [1..2 -> BOOLEAN]\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe"
+  },
+  {
+    "name": "packed-range-True-{0}",
+    "source": "---- MODULE Packed ----\nEXTENDS Naturals\nVARIABLE f\nInit == f = [i \\in 1..2 |-> FALSE]\nNext == f' = [f EXCEPT ![1] = ~@]\nSafe == f \\in [1..2 -> {0}]\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe"
+  },
+  {
+    "name": "packed-range-True-0..1",
+    "source": "---- MODULE Packed ----\nEXTENDS Naturals\nVARIABLE f\nInit == f = [i \\in 1..2 |-> FALSE]\nNext == f' = [f EXCEPT ![1] = ~@]\nSafe == f \\in [1..2 -> 0..1]\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe"
+  }
+]

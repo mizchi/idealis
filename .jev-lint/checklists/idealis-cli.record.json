@@ -1,0 +1,198 @@
+{
+  "schema": "jev-lint-documents-1",
+  "snapshotDigest": "c58a9fbe761c80e6810bc9028fdf973aacaa5fcdc190e9630c6359622ad9372a",
+  "questionDigest": "209d6df378ccb747fcb0e821998fcd6105bc76638a88d22488d3b398d6a21595",
+  "model": "jev-1.14.0",
+  "snapshotChanged": false,
+  "status": "complete",
+  "qualityVerdict": "UNREVIEWED",
+  "candidates": [
+    {
+      "id": "idealis-cli-readme",
+      "topic": "記載条件内の対応機能、未対応・対象外、数値や結果の制約",
+      "mode": "semantic",
+      "reference": {
+        "source": "source2",
+        "path": "crates/idealis-cli/README.md",
+        "startLine": 1,
+        "endLine": 28,
+        "quote": "# idealis-cli\n\nモデルの許容観測と実装の観測を比較する Rust CLI。標準入力から1行ずつ JSON を読み、同じ `idealis_connect::Engine` に渡して応答を標準出力へ返す。各言語のホストは実装を駆動し、観測を CLI に渡す。\n\n```sh\necho '{\"version\":1,\"request\":{\"kind\":\"compare\",\"oracle\":{\"kind\":\"allowed\",\"values\":[1,2]},\"targets\":[{\"id\":\"counter\",\"outcome\":{\"kind\":\"value\",\"value\":3}}]}}' | cargo run --quiet --manifest-path crates/idealis-cli/Cargo.toml\n```\n\nこの例では counter の観測値 3 が許容集合から外れるため、応答の `result.status` は `mismatch` になる。生成・縮小・再生ではプロセスを開いたままにし、各 `Evaluate` に対応する ID と判定を `resume` で返す。\n\n[ライブラリとプロトコル](../idealis-connect/README.md) · [対応範囲](SUPPORT.md)\n\n## TLA+ ファイルを検査する\n\n`idealis` は Rust の単独バイナリとしてビルドできる。npm の `@mizchi/idealis` には同じバイナリの WASI 版を同梱する。どちらも Java は不要。\n\n```sh\ncargo install --path crates/idealis-cli --bin idealis --locked\nidealis tla Counter.tla\nidealis tlc -workers 1 -config Counter.cfg Counter.tla\n```\n\n- `tlc` はモジュール名に `.tla`、設定名に `.cfg` を補う。設定を省略するとモジュールと同じ場所の同名の設定を読む。`-deadlock` はデッドロック検査を無効にする。`-modelcheck` でモデル検査を明示でき、`-h` で対応オプションを表示する。native の `-workers` は 1〜256 または `auto`（利用可能な並列数、最大256）、npm 版は 1 または `auto`（1 worker）を受け付ける。\n- 終了コードは探索完了が 0、ASSUME 違反が 10、デッドロックが 11、invariant 違反が 12、property 違反が 13。設定で指定した invariant / property 自体が定数 FALSE の場合は設定エラー 151。反例は既定で JSON 表示。`--fulltrace` は各状態の action と変数名・値を全表示する。idealis 独自の `--expect-violation` はデッドロック・invariant/property 違反で 0、違反なしで 1。入力エラーや予算切れは引き続き非ゼロになる。完了時の要約には状態数・深さ・検査時間を表示する。`-difftrace` は初期値と各ステップで変化した変数を表示する。v1.7.4 と同様に、深さ2以上の安全性違反では末尾の状態を全表示する。探索は深さ 1,000、状態 100,000、work 10,000,000、temporal node 100,000 を上限とし、打ち切りと初期状態なしは 255 で終了する。\n- `tla` はファイルごとに構文を解析し、実行可能な言語部分の名前解決と level 検査を行う。`-s` は構文解析のみ、`-l` は level 検査を省く。公式 v1.7.4 に合わせ、未解決の識別子と検出した式の level 違反は標準出力の `Semantic errors:` で診断する。この診断が出ても終了コードは 0。`-stat` / `-STAT` は同版の空の統計フックに合わせ、追加出力を行わない。\n- ローカルの直接の `EXTENDS` とモジュール直下の `INSTANCE` はルートファイルと同じディレクトリから読み込む。探索結果と一部の終了コードを公式 TLC/SANY v1.7.4 と比較している。定理・proof を含む入力は既定の意味解析と有限検査で対象外として拒否する。全オプション、全意味解析、診断文やトレース書式の完全互換は対象外。`-simulate`、`-dfid`、`-tool` など未対応のオプションはエラーになる。\n\n開発時は `rustup target add wasm32-wasip1 wasm32-unknown-unknown` で npm ビルド用ターゲットを用意する。公式版との比較は `just cli-compare java /path/to/tla2tools.jar` で別途実行する。",
+        "contentHash": "c1a5a3da57454f0b579968fb34a944638e27d14e0d1c8682d4041d2bcf846fde"
+      },
+      "target": {
+        "source": "source3",
+        "path": "crates/idealis-cli/SUPPORT.md",
+        "startLine": 1,
+        "endLine": 10,
+        "quote": "# idealis-cli の対応範囲\n\n- [x] 標準入力の各行を同一の idealis-connect Engine へ渡し、各応答を JSON と改行で標準出力へ書き、毎回 flush する。\n- [x] モデルの許容値と各実装の観測を渡し、応答から対象ごとの照合結果を取得できる。\n- [x] `idealis tlc` は .tla と .cfg を読み、有限検査を実行する。`-workers auto` と明示の `-modelcheck`、反例の変数差分表示 `-difftrace`、`-h` を扱う。探索完了は0、違反は種類別に10〜13。定数 FALSE の invariant / property は設定エラー151。予算切れと空の初期状態はそれぞれ bounded / empty と出力して255で終了する。--fulltrace は変数名と値を全状態について表示する。--expect-violation は通常完了を1、デッドロックと invariant/property 違反を0にする。\n- [x] `idealis tla` は構文解析と限定した名前・level の検査を行う。検出した式の level 違反を診断し、`-s`、`-l` と v1.7.4 の `-stat` を受け、未対応オプションを拒否する。\n- [ ] TLC/SANY の全オプション・全意味解析・出力形式との完全互換、Java へのフォールバック。\n- [ ] SUT プロセスの起動、観測の自動収集。\n\n[実行口](src/main.rs)と[差分の入出力テスト](tests/jsonl.rs)を参照。",
+        "contentHash": "1e1c286de2137150c3d2a92bb0a16254a3e7d55e44dbb52a6763bcab9e5ed534"
+      },
+      "context": [],
+      "candidateId": "e0e73389afb9895d8644ec12b43484534764fccaf132c7cead5e1f43c0625c2e",
+      "contextHash": "c89d2607e722a6cd1e2c379f5b0a4ec3644469d30e414ed574b36f3b79ccfe32",
+      "judgment": {
+        "choice": "supports",
+        "confidence": 0.64,
+        "probabilities": {
+          "supports": 0.73,
+          "contradicts": 0.25,
+          "unrelated": 0,
+          "insufficient_context": 0.02
+        }
+      }
+    },
+    {
+      "id": "idealis-cli-implementation-0",
+      "topic": "有限TLCの引数、終了値、予算切れと検査完了の区別",
+      "mode": "semantic",
+      "reference": {
+        "source": "source7",
+        "path": "crates/idealis-cli/src/bin/idealis/tlc.rs",
+        "startLine": 1,
+        "endLine": 186,
+        "quote": "use super::{\n    Result,\n    modules::{Bundle, from_cwd, with_suffix},\n};\nuse rtlc::{SafetyBounds, SafetyOptions};\nuse std::path::Path;\n\npub fn run(mut args: impl Iterator<Item = String>) -> Result<u8> {\n    let mut spec = None;\n    let mut config = None;\n    let mut workers = 1;\n    let mut difftrace = false;\n    let mut fulltrace = false;\n    let mut expect_violation = false;\n    let mut no_deadlock = false;\n    while let Some(arg) = args.next() {\n        match arg.as_str() {\n            \"-h\" | \"-help\" => {\n                println!(\n                    \"Usage: idealis tlc [-config file] [-workers N|auto] [-modelcheck] [-deadlock] [-difftrace|--fulltrace] [--expect-violation] spec\"\n                );\n                return Ok(1);\n            }\n            \"--fulltrace\" => fulltrace = true,\n            \"--expect-violation\" => expect_violation = true,\n            \"-modelcheck\" => {}\n            \"-difftrace\" => difftrace = true,\n            \"-deadlock\" => no_deadlock = true,\n            \"-config\" => {\n                config = Some(\n                    args.next()\n                        .filter(|s| !s.starts_with('-'))\n                        .ok_or((1, \"-config requires a file\".into()))?,\n                )\n            }\n            \"-workers\" => {\n                let value = args.next().ok_or((1, \"-workers requires a count\".into()))?;\n                workers = if value.trim().eq_ignore_ascii_case(\"auto\") {\n                    if cfg!(target_arch = \"wasm32\") {\n                        1\n                    } else {\n                        std::thread::available_parallelism().map_or(1, |n| n.get().min(256))\n                    }\n                } else {\n                    value\n                        .parse()\n                        .ok()\n                        .filter(|n| (1..=256).contains(n))\n                        .ok_or((1, format!(\"Unsupported worker count: {value}\")))?\n                };\n                if cfg!(target_arch = \"wasm32\") && workers != 1 {\n                    return Err((1, \"The npm Wasm build supports -workers 1 or auto\".into()));\n                }\n            }\n            flag if flag.starts_with('-') => {\n                return Err((1, format!(\"Unsupported TLC option: {flag}\")));\n            }\n            _ if spec.is_some() => return Err((1, \"Expected one root module\".into())),\n            _ => spec = Some(from_cwd(&with_suffix(&arg, \".tla\"))),\n        }\n    }\n    let path = spec.ok_or((1, \"Usage: idealis tlc [options] spec\".into()))?;\n\n    let config_path = match config {\n        None => path.with_extension(\"cfg\"),\n        Some(file) => {\n            let cfg = with_suffix(&file, \".cfg\");\n            if from_cwd(&cfg).is_file() {\n                from_cwd(&cfg)\n            } else {\n                path.parent().unwrap_or(Path::new(\".\")).join(cfg)\n            }\n        }\n    };\n    let text = std::fs::read_to_string(&config_path)\n        .map_err(|e| (255, format!(\"{}: {e}\", config_path.display())))?;\n    let mut config =\n        rtla::parse_config(&text).map_err(|e| (151, format!(\"{}: {e}\", config_path.display())))?;\n    if no_deadlock {\n        config.check_deadlock = false;\n    }\n    let bundle = Bundle::load(&path, false).map_err(|msg| (150, msg))?;\n    // Check the source before lowering: the executable IR omits proof declarations.\n    rtla_compiler::analyze_modules(&bundle.root, &bundle.dependencies, true)\n        .map_err(|e| (150, e.to_string()))?;\n    let program = rtla_compiler::compile_modules(&bundle.root, &config, &bundle.dependencies)\n        .map_err(|e| (150, e.to_string()))?;\n    let started = std::time::Instant::now();\n    let check = program.check_with_options(\n        SafetyBounds {\n            max_depth: 1000,\n            max_states: 100000,\n            max_work: 10000000,\n            max_temporal_nodes: Some(100000),\n        },\n        SafetyOptions {\n            workers,\n            ..Default::default()\n        },\n    );\n    let result = match check {\n        Ok(result) => result,\n        // rtlc exposes this configuration diagnostic through its portable protocol.\n        Err(error)\n            if error.code == \"protocol\"\n                && error.message == \"Constant invariant or property is false\" =>\n        {\n            println!(\"Error: Constant invariant or property is equal to FALSE\");\n            return Ok(151);\n        }\n        Err(error) => {\n            if let Some((module, at)) = rtla_compiler::incomplete_state_location(\n                &error,\n                std::iter::once(&bundle.root).chain(&bundle.dependencies),\n            ) {\n                return Err((\n                    255,\n                    format!(\"{error} ({module}.tla:{}:{})\", at.line, at.column),\n                ));\n            }\n            return Err((255, error.to_string()));\n        }\n    };\n    let code = match result.status.as_str() {\n        \"complete\" => {\n            println!(\"Model checking completed. No error has been found.\");\n            0\n        }\n        \"assumption-violation\" => 10,\n        \"deadlock\" => 11,\n        \"invariant-violation\" => 12,\n        \"property-violation\" | \"liveness-violation\" => 13,\n        _ => {\n            return Err((\n                255,\n                format!(\n                    \"Model checking incomplete: {} ({})\",\n                    result.status,\n                    result.reason.as_deref().unwrap_or(\"no result\")\n                ),\n            ));\n        }\n    };\n    if let Some(violation) = result.violation {\n        match result.status.as_str() {\n            \"invariant-violation\" if difftrace && violation.trace.len() == 1 => println!(\n                \"Error: Invariant {} is violated by the initial state:\",\n                violation.name\n            ),\n            \"liveness-violation\" if difftrace => {\n                println!(\"Error: Temporal properties were violated.\")\n            }\n            \"invariant-violation\" => println!(\"Error: Invariant {} is violated.\", violation.name),\n            \"deadlock\" => println!(\"Error: Deadlock reached.\"),\n            _ => println!(\"Error: {}: {}\", result.status, violation.name),\n        }\n        if fulltrace || difftrace {\n            print!(\n                \"{}\",\n                violation.format_trace(&program.variables, &result.status, !fulltrace)\n            );\n        } else {\n            println!(\n                \"{}\",\n                serde_json::to_string(&violation).expect(\"serializable counterexample\")\n            );\n        }\n    }\n    println!(\n        \"{} distinct states found. depth {}, {} ms\",\n        result.states,\n        result.depth,\n        started.elapsed().as_millis()\n    );\n    if expect_violation && code == 0 {\n        return Err((\n            1,\n            \"Expected a violation; model checking completed without one\".into(),\n        ));\n    }\n    Ok(if expect_violation && (11..=13).contains(&code) {\n        0\n    } else {\n        code\n    })\n}",
+        "contentHash": "4c12b20830de73745fc8fea8d3299c8e62db857e5bcbbf40c44bd480d3559b1e"
+      },
+      "target": {
+        "source": "source3",
+        "path": "crates/idealis-cli/SUPPORT.md",
+        "startLine": 3,
+        "endLine": 8,
+        "quote": "- [x] 標準入力の各行を同一の idealis-connect Engine へ渡し、各応答を JSON と改行で標準出力へ書き、毎回 flush する。\n- [x] モデルの許容値と各実装の観測を渡し、応答から対象ごとの照合結果を取得できる。\n- [x] `idealis tlc` は .tla と .cfg を読み、有限検査を実行する。`-workers auto` と明示の `-modelcheck`、反例の変数差分表示 `-difftrace`、`-h` を扱う。探索完了は0、違反は種類別に10〜13。定数 FALSE の invariant / property は設定エラー151。予算切れと空の初期状態はそれぞれ bounded / empty と出力して255で終了する。--fulltrace は変数名と値を全状態について表示する。--expect-violation は通常完了を1、デッドロックと invariant/property 違反を0にする。\n- [x] `idealis tla` は構文解析と限定した名前・level の検査を行う。検出した式の level 違反を診断し、`-s`、`-l` と v1.7.4 の `-stat` を受け、未対応オプションを拒否する。\n- [ ] TLC/SANY の全オプション・全意味解析・出力形式との完全互換、Java へのフォールバック。\n- [ ] SUT プロセスの起動、観測の自動収集。",
+        "contentHash": "663991cad784149161abb4133b9a3a631d9e48c3300a1776cec8da8a3a4a378a"
+      },
+      "context": [
+        {
+          "source": "source5",
+          "path": "crates/idealis-cli/src/bin/idealis/modules.rs",
+          "startLine": 1,
+          "endLine": 103,
+          "quote": "use rtla::ast::Module;\nuse std::collections::HashSet;\nuse std::path::{Path, PathBuf};\n\npub fn with_suffix(file: &str, suffix: &str) -> PathBuf {\n    if file.ends_with(suffix) {\n        file.into()\n    } else {\n        format!(\"{file}{suffix}\").into()\n    }\n}\n\n// WASI starts without a host working directory. The npm launcher supplies its guest path.\npub fn from_cwd(path: &Path) -> PathBuf {\n    #[cfg(target_os = \"wasi\")]\n    if let Some(cwd) = std::env::var_os(\"IDEALIS_CWD\") {\n        return PathBuf::from(cwd).join(path);\n    }\n    path.to_owned()\n}\n\nfn read_module(path: &Path, verbose: bool) -> Result<Module, String> {\n    if verbose {\n        println!(\"Parsing file {}\", path.display());\n    }\n    let source = std::fs::read_to_string(path).map_err(|e| format!(\"{}: {e}\", path.display()))?;\n    let module = rtla::parse_module(&source).map_err(|e| format!(\"{}: {e}\", path.display()))?;\n    if path.file_stem() != Some(module.name.as_ref()) {\n        return Err(format!(\n            \"{}: module name {} differs from file name\",\n            path.display(),\n            module.name\n        ));\n    }\n    Ok(module)\n}\n\npub struct Bundle {\n    pub root: Module,\n    pub dependencies: Vec<Module>,\n}\n\nimpl Bundle {\n    pub fn load(path: &Path, verbose: bool) -> Result<Self, String> {\n        let root = read_module(path, verbose)?;\n        let dir = path.parent().unwrap_or(Path::new(\".\"));\n        let mut dependencies = Vec::new();\n        let mut loaded = HashSet::new();\n        let mut visiting = HashSet::new();\n        visit(\n            &root,\n            dir,\n            verbose,\n            &mut visiting,\n            &mut loaded,\n            &mut dependencies,\n        )?;\n        Ok(Self { root, dependencies })\n    }\n}\n\nfn visit(\n    module: &Module,\n    dir: &Path,\n    verbose: bool,\n    visiting: &mut HashSet<String>,\n    loaded: &mut HashSet<String>,\n    dependencies: &mut Vec<Module>,\n) -> Result<(), String> {\n    if !visiting.insert(module.name.clone()) {\n        return Err(format!(\"Cyclic module import: {}\", module.name));\n    }\n    if visiting.len() > 40 || loaded.len() >= 256 {\n        return Err(\"Module bundle exceeds the frontend limit\".into());\n    }\n    for name in module\n        .extends\n        .iter()\n        .chain(module.instances.iter().map(|instance| &instance.module))\n    {\n        if loaded.contains(name) {\n            continue;\n        }\n        let path = dir.join(format!(\"{name}.tla\"));\n        if matches!(\n            name.as_str(),\n            \"Naturals\" | \"Integers\" | \"Sequences\" | \"FiniteSets\" | \"TLC\"\n        ) {\n            if path.exists() {\n                return Err(format!(\n                    \"Unsupported local override of standard module {name}\"\n                ));\n            }\n            continue;\n        }\n        let child = read_module(&path, verbose)?;\n        visit(&child, dir, verbose, visiting, loaded, dependencies)?;\n        dependencies.push(child);\n    }\n    visiting.remove(&module.name);\n    loaded.insert(module.name.clone());\n    Ok(())\n}",
+          "contentHash": "ef94c97598e0a35c0eee29b9128e57513e536bcb6c85228e708b7b4f9b80decd"
+        },
+        {
+          "source": "source32",
+          "path": "crates/idealis-cli/tests/tla_cli.rs",
+          "startLine": 1,
+          "endLine": 143,
+          "quote": "use std::process::Command;\n\nfn run(args: &[&str], code: i32, message: &str) -> String {\n    let output = Command::new(env!(\"CARGO_BIN_EXE_idealis\"))\n        .current_dir(concat!(env!(\"CARGO_MANIFEST_DIR\"), \"/tests/specs\"))\n        .args(args)\n        .output()\n        .unwrap();\n    let text = format!(\n        \"{}{}\",\n        String::from_utf8_lossy(&output.stdout),\n        String::from_utf8_lossy(&output.stderr)\n    );\n    assert_eq!(output.status.code(), Some(code), \"{text}\");\n    assert!(text.contains(message), \"{text}\");\n    text\n}\n#[test]\nfn finite_tlc_checks_the_selected_configuration() {\n    run(\n        &[\"tlc\", \"-workers\", \"1\", \"Counter\"],\n        0,\n        \"No error has been found\",\n    );\n    run(&[\"tlc\", \"Counter.tla\", \"-config\", \"Bad\"], 12, \"Broken\");\n    run(&[\"tlc\", \"-simulate\", \"Counter\"], 1, \"-simulate\");\n}\n#[test]\nfn sany_distinguishes_parsing_and_semantics() {\n    run(\n        &[\"tla\", \"Counter\"],\n        0,\n        \"Semantic processing of module Counter\",\n    );\n    run(&[\"tla\", \"Unknown.tla\"], 0, \"Unknown operator: `Missing'.\");\n    run(&[\"tla\", \"-s\", \"Unknown.tla\"], 0, \"Parsing file\");\n    run(&[\"tla\", \"-d\", \"Counter\"], 255, \"-d\");\n}\n\n#[test]\nfn checks_local_imports_and_deadlock_switch() {\n    run(&[\"tlc\", \"Stop\"], 11, \"Deadlock reached.\");\n    run(&[\"tlc\", \"-deadlock\", \"Stop\"], 0, \"No error has been found\");\n    run(&[\"tla\", \"Stop\"], 0, \"Semantic processing of module Stop\");\n}\n\n#[test]\nfn incomplete_search_never_reports_success() {\n    run(\n        &[\"tlc\", \"-config\", \"Bound\", \"Counter\"],\n        255,\n        \"bounded (depth)\",\n    );\n    run(&[\"tlc\", \"-config\", \"Empty\", \"Counter\"], 255, \"empty\");\n    run(&[\"tlc\", \"MissingModel\"], 255, \"MissingModel.cfg\");\n}\n\n#[test]\nfn lowering_cannot_discard_an_unchecked_theorem() {\n    run(&[\"tlc\", \"-config\", \"Stop\", \"Proof\"], 150, \"proofs\");\n    run(&[\"tla\", \"Proof\"], 255, \"proofs\");\n    run(&[\"tla\", \"-s\", \"Proof\"], 0, \"Parsing file\");\n}\n\n#[test]\nfn tlc_prints_difftrace_with_full_error_state() {\n    let report = run(\n        &[\n            \"tlc\",\n            \"-modelcheck\",\n            \"-workers\",\n            \"auto\",\n            \"-difftrace\",\n            \"Diff\",\n        ],\n        12,\n        \"State 3:\",\n    );\n    assert_eq!(report.matches(\"stable = \\\"constant\\\"\").count(), 2);\n    let middle = report\n        .split_once(\"State 2:\")\n        .unwrap()\n        .1\n        .split_once(\"State 3:\")\n        .unwrap()\n        .0;\n    assert!(middle.contains(\"x = 1\"));\n    assert!(!middle.contains(\"stable\"));\n    run(&[\"tlc\", \"-h\"], 1, \"-difftrace\");\n}\n\n#[test]\nfn sany_reports_level_diagnostics_and_honors_the_level_switch() {\n    run(&[\"tla\", \"-stat\", \"Level\"], 0, \"Semantic errors:\");\n    let output = run(&[\"tla\", \"-l\", \"Level\"], 0, \"Semantic processing\");\n    assert!(!output.contains(\"Semantic errors:\"));\n}\n\n#[test]\nfn false_constant_checks_are_configuration_errors() {\n    for cfg in [\"Rejected\", \"Property\"] {\n        run(&[\"tlc\", \"-config\", cfg, \"Values\"], 151, \"is equal to FALSE\");\n    }\n}\n\n#[test]\nfn standard_name_collision_identifies_both_modules() {\n    let text = run(&[\"tla\", \"Shadow3\"], 0, \"Multiply-defined symbol 'Len'\");\n    assert!(\n        text.contains(\"Sequences\") && text.contains(\"line 3, column 1\"),\n        \"{text}\"\n    );\n}\n\n#[test]\nfn incomplete_successor_identifies_action_missing_variable_and_source() {\n    let text = run(&[\"tlc\", \"Missing\"], 255, \"action A\");\n    assert!(\n        text.contains(\"unassigned: y\") && text.contains(\"Missing.tla:5:1\"),\n        \"{text}\"\n    );\n}\n\n#[test]\nfn ci_can_expect_a_violation_and_read_the_whole_trace() {\n    let text = run(\n        &[\"tlc\", \"--expect-violation\", \"--fulltrace\", \"Diff\"],\n        0,\n        \"State 3:\",\n    );\n    assert_eq!(text.matches(\"stable = \\\"constant\\\"\").count(), 3);\n    assert!(text.contains(\"depth\") && text.contains(\" ms\"));\n    run(\n        &[\"tlc\", \"--expect-violation\", \"Counter\"],\n        1,\n        \"Expected a violation\",\n    );\n    run(\n        &[\"tlc\", \"--expect-violation\", \"-config\", \"Bound\", \"Counter\"],\n        255,\n        \"bounded\",\n    );\n}",
+          "contentHash": "6d64fb667040c6d6475857922570e0c2f823bb293db975641db83f163a2ee818"
+        }
+      ],
+      "candidateId": "57d562f3e159e6b57cb60a3f7991c42440496d05b9302cf8c22418be9b7a3f85",
+      "contextHash": "dfb27f93af052fa64bdf9719329c5d0bba895a1673c6d401ccc47e6aca5ac5d0",
+      "judgment": {
+        "choice": "supports",
+        "confidence": 0.75,
+        "probabilities": {
+          "supports": 0.81,
+          "contradicts": 0.16,
+          "unrelated": 0,
+          "insufficient_context": 0.03
+        }
+      }
+    },
+    {
+      "id": "idealis-cli-implementation-1",
+      "topic": "SANY互換の限定した解析オプションと診断",
+      "mode": "semantic",
+      "reference": {
+        "source": "source6",
+        "path": "crates/idealis-cli/src/bin/idealis/tla.rs",
+        "startLine": 1,
+        "endLine": 50,
+        "quote": "use super::{\n    Result,\n    modules::{Bundle, from_cwd, with_suffix},\n};\npub fn run(args: impl Iterator<Item = String>) -> Result<u8> {\n    let mut args = args.peekable();\n    let mut semantics = true;\n    let mut levels = true;\n    while args.peek().is_some_and(|s| s.starts_with('-')) {\n        match args.next().unwrap().as_str() {\n            \"-s\" | \"-S\" => semantics = !semantics,\n            // The v1.7.4 frontEndStatistics hook has an empty implementation.\n            \"-stat\" | \"-STAT\" => {}\n            \"-l\" | \"-L\" => levels = !levels,\n            flag => return Err((255, format!(\"Unsupported SANY option: {flag}\"))),\n        }\n    }\n    if args.peek().is_none() {\n        return Err((255, \"Usage: idealis tla [-s] [-l] [-stat] spec...\".into()));\n    }\n    for file in args {\n        let bundle =\n            Bundle::load(&from_cwd(&with_suffix(&file, \".tla\")), true).map_err(|msg| (255, msg))?;\n        if semantics {\n            println!(\"Semantic processing of module {}\", bundle.root.name);\n            if let Err(error) =\n                rtla_compiler::analyze_modules(&bundle.root, &bundle.dependencies, levels)\n            {\n                if let Some(name) = error\n                    .message\n                    .strip_prefix(\"unresolved module identifier \")\n                    .or_else(|| error.message.strip_prefix(\"unresolved module operator \"))\n                {\n                    // SANY v1.7.4 reports semantic diagnostics on stdout and exits 0.\n                    println!(\"Semantic errors:\\nUnknown operator: `{name}'.\");\n                } else if error.message.starts_with(\"Multiply-defined symbol\")\n                    || error.message.starts_with(\"level error at line \")\n                    || error\n                        .message\n                        .starts_with(\"level error: recursive operator parameters\")\n                {\n                    println!(\"Semantic errors:\\n{}\", error.message);\n                } else {\n                    return Err((255, error.to_string()));\n                }\n            }\n        }\n    }\n    Ok(0)\n}",
+        "contentHash": "63a2174b64c694fc5bad6343dcb8e89f978a31f2ae4e42e791a0def24879f8ce"
+      },
+      "target": {
+        "source": "source3",
+        "path": "crates/idealis-cli/SUPPORT.md",
+        "startLine": 3,
+        "endLine": 8,
+        "quote": "- [x] 標準入力の各行を同一の idealis-connect Engine へ渡し、各応答を JSON と改行で標準出力へ書き、毎回 flush する。\n- [x] モデルの許容値と各実装の観測を渡し、応答から対象ごとの照合結果を取得できる。\n- [x] `idealis tlc` は .tla と .cfg を読み、有限検査を実行する。`-workers auto` と明示の `-modelcheck`、反例の変数差分表示 `-difftrace`、`-h` を扱う。探索完了は0、違反は種類別に10〜13。定数 FALSE の invariant / property は設定エラー151。予算切れと空の初期状態はそれぞれ bounded / empty と出力して255で終了する。--fulltrace は変数名と値を全状態について表示する。--expect-violation は通常完了を1、デッドロックと invariant/property 違反を0にする。\n- [x] `idealis tla` は構文解析と限定した名前・level の検査を行う。検出した式の level 違反を診断し、`-s`、`-l` と v1.7.4 の `-stat` を受け、未対応オプションを拒否する。\n- [ ] TLC/SANY の全オプション・全意味解析・出力形式との完全互換、Java へのフォールバック。\n- [ ] SUT プロセスの起動、観測の自動収集。",
+        "contentHash": "663991cad784149161abb4133b9a3a631d9e48c3300a1776cec8da8a3a4a378a"
+      },
+      "context": [
+        {
+          "source": "source5",
+          "path": "crates/idealis-cli/src/bin/idealis/modules.rs",
+          "startLine": 1,
+          "endLine": 103,
+          "quote": "use rtla::ast::Module;\nuse std::collections::HashSet;\nuse std::path::{Path, PathBuf};\n\npub fn with_suffix(file: &str, suffix: &str) -> PathBuf {\n    if file.ends_with(suffix) {\n        file.into()\n    } else {\n        format!(\"{file}{suffix}\").into()\n    }\n}\n\n// WASI starts without a host working directory. The npm launcher supplies its guest path.\npub fn from_cwd(path: &Path) -> PathBuf {\n    #[cfg(target_os = \"wasi\")]\n    if let Some(cwd) = std::env::var_os(\"IDEALIS_CWD\") {\n        return PathBuf::from(cwd).join(path);\n    }\n    path.to_owned()\n}\n\nfn read_module(path: &Path, verbose: bool) -> Result<Module, String> {\n    if verbose {\n        println!(\"Parsing file {}\", path.display());\n    }\n    let source = std::fs::read_to_string(path).map_err(|e| format!(\"{}: {e}\", path.display()))?;\n    let module = rtla::parse_module(&source).map_err(|e| format!(\"{}: {e}\", path.display()))?;\n    if path.file_stem() != Some(module.name.as_ref()) {\n        return Err(format!(\n            \"{}: module name {} differs from file name\",\n            path.display(),\n            module.name\n        ));\n    }\n    Ok(module)\n}\n\npub struct Bundle {\n    pub root: Module,\n    pub dependencies: Vec<Module>,\n}\n\nimpl Bundle {\n    pub fn load(path: &Path, verbose: bool) -> Result<Self, String> {\n        let root = read_module(path, verbose)?;\n        let dir = path.parent().unwrap_or(Path::new(\".\"));\n        let mut dependencies = Vec::new();\n        let mut loaded = HashSet::new();\n        let mut visiting = HashSet::new();\n        visit(\n            &root,\n            dir,\n            verbose,\n            &mut visiting,\n            &mut loaded,\n            &mut dependencies,\n        )?;\n        Ok(Self { root, dependencies })\n    }\n}\n\nfn visit(\n    module: &Module,\n    dir: &Path,\n    verbose: bool,\n    visiting: &mut HashSet<String>,\n    loaded: &mut HashSet<String>,\n    dependencies: &mut Vec<Module>,\n) -> Result<(), String> {\n    if !visiting.insert(module.name.clone()) {\n        return Err(format!(\"Cyclic module import: {}\", module.name));\n    }\n    if visiting.len() > 40 || loaded.len() >= 256 {\n        return Err(\"Module bundle exceeds the frontend limit\".into());\n    }\n    for name in module\n        .extends\n        .iter()\n        .chain(module.instances.iter().map(|instance| &instance.module))\n    {\n        if loaded.contains(name) {\n            continue;\n        }\n        let path = dir.join(format!(\"{name}.tla\"));\n        if matches!(\n            name.as_str(),\n            \"Naturals\" | \"Integers\" | \"Sequences\" | \"FiniteSets\" | \"TLC\"\n        ) {\n            if path.exists() {\n                return Err(format!(\n                    \"Unsupported local override of standard module {name}\"\n                ));\n            }\n            continue;\n        }\n        let child = read_module(&path, verbose)?;\n        visit(&child, dir, verbose, visiting, loaded, dependencies)?;\n        dependencies.push(child);\n    }\n    visiting.remove(&module.name);\n    loaded.insert(module.name.clone());\n    Ok(())\n}",
+          "contentHash": "ef94c97598e0a35c0eee29b9128e57513e536bcb6c85228e708b7b4f9b80decd"
+        },
+        {
+          "source": "source32",
+          "path": "crates/idealis-cli/tests/tla_cli.rs",
+          "startLine": 1,
+          "endLine": 143,
+          "quote": "use std::process::Command;\n\nfn run(args: &[&str], code: i32, message: &str) -> String {\n    let output = Command::new(env!(\"CARGO_BIN_EXE_idealis\"))\n        .current_dir(concat!(env!(\"CARGO_MANIFEST_DIR\"), \"/tests/specs\"))\n        .args(args)\n        .output()\n        .unwrap();\n    let text = format!(\n        \"{}{}\",\n        String::from_utf8_lossy(&output.stdout),\n        String::from_utf8_lossy(&output.stderr)\n    );\n    assert_eq!(output.status.code(), Some(code), \"{text}\");\n    assert!(text.contains(message), \"{text}\");\n    text\n}\n#[test]\nfn finite_tlc_checks_the_selected_configuration() {\n    run(\n        &[\"tlc\", \"-workers\", \"1\", \"Counter\"],\n        0,\n        \"No error has been found\",\n    );\n    run(&[\"tlc\", \"Counter.tla\", \"-config\", \"Bad\"], 12, \"Broken\");\n    run(&[\"tlc\", \"-simulate\", \"Counter\"], 1, \"-simulate\");\n}\n#[test]\nfn sany_distinguishes_parsing_and_semantics() {\n    run(\n        &[\"tla\", \"Counter\"],\n        0,\n        \"Semantic processing of module Counter\",\n    );\n    run(&[\"tla\", \"Unknown.tla\"], 0, \"Unknown operator: `Missing'.\");\n    run(&[\"tla\", \"-s\", \"Unknown.tla\"], 0, \"Parsing file\");\n    run(&[\"tla\", \"-d\", \"Counter\"], 255, \"-d\");\n}\n\n#[test]\nfn checks_local_imports_and_deadlock_switch() {\n    run(&[\"tlc\", \"Stop\"], 11, \"Deadlock reached.\");\n    run(&[\"tlc\", \"-deadlock\", \"Stop\"], 0, \"No error has been found\");\n    run(&[\"tla\", \"Stop\"], 0, \"Semantic processing of module Stop\");\n}\n\n#[test]\nfn incomplete_search_never_reports_success() {\n    run(\n        &[\"tlc\", \"-config\", \"Bound\", \"Counter\"],\n        255,\n        \"bounded (depth)\",\n    );\n    run(&[\"tlc\", \"-config\", \"Empty\", \"Counter\"], 255, \"empty\");\n    run(&[\"tlc\", \"MissingModel\"], 255, \"MissingModel.cfg\");\n}\n\n#[test]\nfn lowering_cannot_discard_an_unchecked_theorem() {\n    run(&[\"tlc\", \"-config\", \"Stop\", \"Proof\"], 150, \"proofs\");\n    run(&[\"tla\", \"Proof\"], 255, \"proofs\");\n    run(&[\"tla\", \"-s\", \"Proof\"], 0, \"Parsing file\");\n}\n\n#[test]\nfn tlc_prints_difftrace_with_full_error_state() {\n    let report = run(\n        &[\n            \"tlc\",\n            \"-modelcheck\",\n            \"-workers\",\n            \"auto\",\n            \"-difftrace\",\n            \"Diff\",\n        ],\n        12,\n        \"State 3:\",\n    );\n    assert_eq!(report.matches(\"stable = \\\"constant\\\"\").count(), 2);\n    let middle = report\n        .split_once(\"State 2:\")\n        .unwrap()\n        .1\n        .split_once(\"State 3:\")\n        .unwrap()\n        .0;\n    assert!(middle.contains(\"x = 1\"));\n    assert!(!middle.contains(\"stable\"));\n    run(&[\"tlc\", \"-h\"], 1, \"-difftrace\");\n}\n\n#[test]\nfn sany_reports_level_diagnostics_and_honors_the_level_switch() {\n    run(&[\"tla\", \"-stat\", \"Level\"], 0, \"Semantic errors:\");\n    let output = run(&[\"tla\", \"-l\", \"Level\"], 0, \"Semantic processing\");\n    assert!(!output.contains(\"Semantic errors:\"));\n}\n\n#[test]\nfn false_constant_checks_are_configuration_errors() {\n    for cfg in [\"Rejected\", \"Property\"] {\n        run(&[\"tlc\", \"-config\", cfg, \"Values\"], 151, \"is equal to FALSE\");\n    }\n}\n\n#[test]\nfn standard_name_collision_identifies_both_modules() {\n    let text = run(&[\"tla\", \"Shadow3\"], 0, \"Multiply-defined symbol 'Len'\");\n    assert!(\n        text.contains(\"Sequences\") && text.contains(\"line 3, column 1\"),\n        \"{text}\"\n    );\n}\n\n#[test]\nfn incomplete_successor_identifies_action_missing_variable_and_source() {\n    let text = run(&[\"tlc\", \"Missing\"], 255, \"action A\");\n    assert!(\n        text.contains(\"unassigned: y\") && text.contains(\"Missing.tla:5:1\"),\n        \"{text}\"\n    );\n}\n\n#[test]\nfn ci_can_expect_a_violation_and_read_the_whole_trace() {\n    let text = run(\n        &[\"tlc\", \"--expect-violation\", \"--fulltrace\", \"Diff\"],\n        0,\n        \"State 3:\",\n    );\n    assert_eq!(text.matches(\"stable = \\\"constant\\\"\").count(), 3);\n    assert!(text.contains(\"depth\") && text.contains(\" ms\"));\n    run(\n        &[\"tlc\", \"--expect-violation\", \"Counter\"],\n        1,\n        \"Expected a violation\",\n    );\n    run(\n        &[\"tlc\", \"--expect-violation\", \"-config\", \"Bound\", \"Counter\"],\n        255,\n        \"bounded\",\n    );\n}",
+          "contentHash": "6d64fb667040c6d6475857922570e0c2f823bb293db975641db83f163a2ee818"
+        }
+      ],
+      "candidateId": "d3ee950832e1fd873c94a6fda2793ead75a3dc08c2c9fb65593228ae312fa6e6",
+      "contextHash": "3794905c8ad8a7e71d4937d8c1c918b423788957842c2b7b6a73c123e4adf862",
+      "judgment": {
+        "choice": "supports",
+        "confidence": 0.91,
+        "probabilities": {
+          "supports": 0.93,
+          "contradicts": 0.06,
+          "unrelated": 0,
+          "insufficient_context": 0.01
+        }
+      }
+    },
+    {
+      "id": "idealis-cli-implementation-2",
+      "topic": "JSONLの各行を同じEngineへ渡し、応答を行単位でflushするnative実行口",
+      "mode": "semantic",
+      "reference": {
+        "source": "source8",
+        "path": "crates/idealis-cli/src/main.rs",
+        "startLine": 1,
+        "endLine": 12,
+        "quote": "use std::io::{self, BufRead, Write};\nfn main() {\n    let mut engine = idealis_connect::Engine::default();\n    let mut output = io::BufWriter::new(io::stdout().lock());\n    for input in io::stdin().lock().lines() {\n        let input = input.expect(\"read request\");\n        let reply = engine.dispatch(input.as_bytes());\n        serde_json::to_writer(&mut output, &reply).expect(\"serialize response\");\n        output.write_all(b\"\\n\").expect(\"write newline\");\n        output.flush().expect(\"flush response\");\n    }\n}",
+        "contentHash": "83da21a5632cf5f856e108ae131d843091b2e1d51107f617b7c52e5a0f63226a"
+      },
+      "target": {
+        "source": "source3",
+        "path": "crates/idealis-cli/SUPPORT.md",
+        "startLine": 1,
+        "endLine": 10,
+        "quote": "# idealis-cli の対応範囲\n\n- [x] 標準入力の各行を同一の idealis-connect Engine へ渡し、各応答を JSON と改行で標準出力へ書き、毎回 flush する。\n- [x] モデルの許容値と各実装の観測を渡し、応答から対象ごとの照合結果を取得できる。\n- [x] `idealis tlc` は .tla と .cfg を読み、有限検査を実行する。`-workers auto` と明示の `-modelcheck`、反例の変数差分表示 `-difftrace`、`-h` を扱う。探索完了は0、違反は種類別に10〜13。定数 FALSE の invariant / property は設定エラー151。予算切れと空の初期状態はそれぞれ bounded / empty と出力して255で終了する。--fulltrace は変数名と値を全状態について表示する。--expect-violation は通常完了を1、デッドロックと invariant/property 違反を0にする。\n- [x] `idealis tla` は構文解析と限定した名前・level の検査を行う。検出した式の level 違反を診断し、`-s`、`-l` と v1.7.4 の `-stat` を受け、未対応オプションを拒否する。\n- [ ] TLC/SANY の全オプション・全意味解析・出力形式との完全互換、Java へのフォールバック。\n- [ ] SUT プロセスの起動、観測の自動収集。\n\n[実行口](src/main.rs)と[差分の入出力テスト](tests/jsonl.rs)を参照。",
+        "contentHash": "1e1c286de2137150c3d2a92bb0a16254a3e7d55e44dbb52a6763bcab9e5ed534"
+      },
+      "context": [],
+      "candidateId": "ef604025d276e5dc96da317206ecb118dc748bff2c7261a1712e2f0b493cfdf7",
+      "contextHash": "ced9760d2143893437cde36835e575c24729c91393bd5c863c5e2533a1bf20b2",
+      "judgment": {
+        "choice": "supports",
+        "confidence": 1,
+        "probabilities": {
+          "supports": 1,
+          "contradicts": 0,
+          "unrelated": 0,
+          "insufficient_context": 0
+        }
+      }
+    }
+  ],
+  "coverage": {
+    "expected": 4,
+    "selected": 4,
+    "answered": 4,
+    "missing": 0,
+    "contradictions": 0,
+    "unassessed": 0,
+    "deferred": 0,
+    "issues": 0,
+    "unboundDocuments": 0
+  },
+  "usage": {
+    "requests": 4,
+    "inputTokens": 13727,
+    "usd": 0.000576534
+  },
+  "errors": []
+}

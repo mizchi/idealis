@@ -6,10 +6,10 @@ import {
   checkModel,
   checkTrace,
   encodeTrace,
-} from "../src/index.js";
-import { checkProperty } from "../src/property.js";
-import { createSmtOracle } from "../src/smt.js";
-import { generateTlaOracle } from "../src/tla.js";
+} from "../packages/idealis/src/index.js";
+import { checkProperty } from "../packages/idealis/src/property.js";
+import { createSmtOracle } from "../packages/idealis/src/smt.js";
+import { generateTlaOracle } from "../packages/idealis/src/tla.js";
 import {
   type CounterAction,
   counterModel,

@@ -1,0 +1,122 @@
+{
+  "status": "complete",
+  "commands": [
+    {
+      "command": "just check",
+      "status": "passed",
+      "log": "check.log",
+      "sha256": "72e29263731810ecb0bc7e0739872ffd52103f8e06da8dadef4b86cec00f4673"
+    },
+    {
+      "command": "pnpm check (final docs and records)",
+      "status": "passed",
+      "log": "final-check.log",
+      "sha256": "a01a5ca071888aada199416116906afbabd742010d65bb5e752282d186dc74f5"
+    },
+    {
+      "command": "just browser",
+      "status": "passed",
+      "log": "browser.log",
+      "sha256": "c7c5f0d5678e00d77402a86712060341c5f94a4284a12750f051aecebf3ce6cd"
+    },
+    {
+      "command": "just oracle-test",
+      "status": "passed",
+      "log": "oracle-test.log",
+      "sha256": "d676c899c6b41d474f167baff1fa5c446148ab0c52afcef2ea3ac43a368bd82e"
+    },
+    {
+      "command": "node --test dist/evals/*/contract-test.js",
+      "status": "passed",
+      "log": "eval-contracts.log",
+      "sha256": "acff72df391be9e5563109c3f87e102ae1d432149cb925f5cf90296a11c138c8"
+    },
+    {
+      "command": "just runtime-build",
+      "status": "passed",
+      "log": "runtime-build.log",
+      "sha256": "9f642287e8cb7824693b93eaf36e3598563916b596f94c93b0f72734704ca69f"
+    },
+    {
+      "command": "just runtime-test",
+      "status": "passed",
+      "log": "runtime-test.log",
+      "sha256": "9b8cc1d16d65630c1f90ff98e85e89d8033613ed0d09b09fe73e13ad9ed3d3d4"
+    },
+    {
+      "command": "just evaluate",
+      "status": "passed",
+      "log": "evaluate.log",
+      "sha256": "d061193ecd7b23058f1eaa850bd7e930be77bb668010de538a4cff093abbeade"
+    },
+    {
+      "command": "just replay-evaluation",
+      "status": "passed",
+      "log": "replay-evaluation.log",
+      "sha256": "726981d4697b24e2a613fba5f4379f0e2dfa82348043181862831a63053d077d"
+    },
+    {
+      "command": "just mutation",
+      "status": "passed",
+      "log": "mutation.log",
+      "sha256": "3d356830da1e8a048c5f3cb34d74c40daa878f892a146dfb1d58794320dcfa3a"
+    },
+    {
+      "command": "just cross-test",
+      "status": "passed",
+      "log": "cross.log",
+      "sha256": "5d236aabac1b2e750e7843b862f358b0727abe8bf4acdb6171fd879a32742eaf"
+    },
+    {
+      "command": "just async-test",
+      "status": "passed",
+      "log": "async.log",
+      "sha256": "fa892bf2c24d80811b6df6099fbe4123c9c7b7c729c183ddab8e3f2f49880af6"
+    },
+    {
+      "command": "just package",
+      "status": "passed",
+      "log": "package.log",
+      "sha256": "696718841013c6eccf0a414f2b490a6ff609b463c3528450f5f0573f268a86bb"
+    },
+    {
+      "command": "cargo test --locked --manifest-path crates/oracle/Cargo.toml (final extended corpus)",
+      "status": "passed",
+      "log": "final-wire-test.log",
+      "sha256": "b0480af22054801faa412217e5c26f35aa84b1ac0e0d99559a8b74bbd54a7d33"
+    },
+    {
+      "command": "cargo clippy --all-targets --locked --manifest-path crates/oracle/Cargo.toml -- -D warnings",
+      "status": "passed",
+      "log": "final-clippy.log",
+      "sha256": "6021b39f7fbef0654be4d6a2633c136091d904cba008d84cfc9358577fab0c72"
+    },
+    {
+      "command": "just support-sync (live, profile loaded)",
+      "status": "passed",
+      "log": "support-sync.log",
+      "sha256": "859afd1b49185309ab5205837ab0169cd13835c7ad9574e2749b1d0f3a5bbebf"
+    },
+    {
+      "command": "just support-test",
+      "status": "passed",
+      "log": "support-test.log",
+      "sha256": "636c0e222345bc024eb50d4e93cb4348c591865b4cececd390002763df734afa"
+    },
+    {
+      "command": "just support-check",
+      "status": "passed",
+      "log": "support-check.log",
+      "sha256": "88b0a030432c632715cd1de9b4225ce5d807a0301c109e24ec127c563bb13be3"
+    }
+  ],
+  "notes": [
+    "23 Rust oracle tests, including 1128 observation forms against the unchanged public serde decoder.",
+    "8 Criterion smoke cases and 146 eval contract tests passed.",
+    "Mutation reused 109 cached evaluations: 104 killed, 5 survived, 133 compile errors.",
+    "contract-before.log records a wrong assumption that positional observation sequences were rejected. The baseline accepts them; the independent contract matrix preserves that behavior.",
+    "contract-reference.log and snapshot-reference.log verify new regression cases against the baseline before optimization.",
+    "pnpm check retains two existing warnings in untouched src/backend.ts and evals/smt-subset/benchmark.ts, plus two pre-existing style infos.",
+    "All validation is local. No remote CI, PR, publishing or merge."
+  ]
+}

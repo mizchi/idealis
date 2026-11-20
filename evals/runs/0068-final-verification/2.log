@@ -1,0 +1,292 @@
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 28 tests
+test analysis_parity_call_actual_free_old_demanded_free ... ok
+test analysis_parity_call_actual_free_old_unused_free ... ok
+test analysis_parity_call_actual_generative_unused_actual ... ok
+test analysis_parity_call_actual_target_demanded_literal_refusal ... ok
+test analysis_parity_call_actual_membership_unused_nat ... ok
+test analysis_parity_call_actual_generative_demanded_literal_refusal ... ok
+test analysis_parity_call_actual_free_old_unused_bound ... ok
+test analysis_parity_call_actual_membership_literal_control ... ok
+test analysis_parity_call_actual_free_old_demanded_bound ... ok
+test analysis_parity_call_actual_membership_demanded_nat ... ok
+test analysis_parity_call_actual_membership_unused_finite ... ok
+test analysis_parity_call_actual_generative_demanded_state ... ok
+test analysis_parity_case_condition_is_value_position ... ok
+test analysis_parity_choose_domain_free_old_is_rejected_when_used ... ok
+test analysis_parity_choose_domain_free_old_is_rejected_when_unused ... ok
+test analysis_parity_call_actual_target_demanded_state ... ok
+test analysis_parity_call_actual_target_unused_literal ... ok
+test analysis_parity_choose_predicate_free_old_remains_rejected ... ok
+test analysis_parity_choose_caller_binder_controls ... ok
+test analysis_parity_choose_empty_and_no_witness_are_evaluation_errors ... ok
+test analysis_parity_function_domain_free_old_remains_rejected ... ok
+test analysis_parity_notin_formal_membership_is_preserved ... ok
+test analysis_parity_choose_lazy_and_unused_actual_are_not_evaluated ... ok
+test analysis_parity_choose_caller_old_actual_controls ... ok
+test analysis_parity_notin_capture_membership_is_preserved ... ok
+test analysis_parity_notin_function_construction_membership_is_preserved ... ok
+test analysis_parity_notin_function_head_membership_is_preserved ... ok
+test analysis_parity_role_table_matches_independent_expectation ... ok
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 8 tests
+test fold_rejects_a_recursive_operator_in_the_ast ... ok
+test unsupported_inputs_do_not_become_a_successful_model ... ok
+test empty_initial_domain_stays_empty ... ok
+test lexical_bindings_are_captured_at_definition ... ok
+test source_produces_a_reachable_counterexample ... ok
+test apalache_assignment_requires_the_module_and_preserves_guards ... ok
+test fairness_and_temporal_properties_survive_lowering ... ok
+test variants_preserve_payload_scope_and_reject_ambiguous_tags ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 8 tests
+test temporal_domains_must_be_constant_and_ir_slots_remain_scoped ... ok
+test choice_and_temporal_expansion_consume_the_work_budget ... ok
+test excluded_constraint_candidates_stay_within_the_depth_budget ... ok
+test integer_operations_match_tlc ... ok
+test bounded_choose_matches_tlc ... ok
+test constraints_preserve_boundary_checks ... ok
+test model_values_preserve_identity_and_types ... ok
+test constant_temporal_quantifiers_match_tlc ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 6 tests
+test manually_constructed_ast_depth_is_bounded_before_linking ... ok
+test module_bundles_reject_duplicate_names_and_bound_expansion ... ok
+test separate_instances_substitute_variables_and_constants ... ok
+test external_definitions_keep_their_scope_and_local_helpers ... ok
+test config_replacements_preserve_arity_and_definition_scope ... ok
+test fixed_module_corpus_preserves_results_and_rejections ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 58 tests
+test v1_compiles_configuration_operator_substitution ... ok
+test explicit_v1_preserves_serialization_and_v2_is_accepted ... ok
+test v2_action_capture_target_resolves_original_source_actual ... ok
+test v1_compiles_instances_with_substitutions ... ok
+test v2_action_frame_shadow ... ok
+test v2_action_frame_exists ... ok
+test v2_action_frame_except ... ok
+test v2_action_frame_except_control ... ok
+test v2_action_frame_enabled ... ok
+test v2_action_frame_binder_actual ... ok
+test v2_binder_filter ... ok
+test v2_action_frame_two_variables ... ok
+test v2_binder_fold_sequence ... ok
+test v2_binder_fold_set ... ok
+test v2_binder_function ... ok
+test v2_binder_quantifier ... ok
+test v2_binder_tuple_pattern ... ok
+test v2_binder_map_set ... ok
+test v2_chain_10 ... ok
+test v2_enabled_subscript_target_specialization ... ok
+test v2_frame_dependent_action_actual_keeps_caller_binder ... ok
+test v2_enabled ... ok
+test v2_enabled_variable_target_keeps_actual_and_captured_parameters ... ok
+test v2_chain_20 ... ok
+test v2_generative_binder_control ... ok
+test v2_generative_binder_exact_control ... ok
+test v2_generative_binder ... ok
+test v2_generative_binder_exact ... ok
+test v2_function_definition_domains_refuse_free_except_old ... ok
+test v2_handwritten_capture_survives_binder_shadowing ... ok
+test v2_generative_except ... ok
+test v2_generative_membership ... ok
+test v2_generative_except_control ... ok
+test v2_generative_membership_alias ... ok
+test v2_handwritten_sibling_captures_outer_binder ... ok
+test v2_chain_30 ... ok
+test v2_function_definition_domains_propagate_target_and_membership_requirements ... ok
+test v2_handwritten_transitive_siblings_retain_declaring_frame ... ok
+test v2_handwritten_sibling_parameters_retain_declaring_frame ... ok
+test v2_let_with_free_old_is_refused ... ok
+test v2_handwritten_nested_actuals_keep_nesting_limit_40 ... ok
+test v2_refuses_configuration_operator_substitution ... ok
+test v2_prime ... ok
+test v2_lexical_capture ... ok
+test v2_target_alias_actual_restores_caller_ancestry ... ok
+test v2_refuses_instances_with_substitutions ... ok
+test v2_membership_purpose_reaches_formals_aliases_and_captures ... ok
+test v2_unchanged_alias ... ok
+test v2_unchanged_nested ... ok
+test v2_unchanged_parameter ... ok
+test v2_unused_argument ... ok
+test v2_used_argument ... ok
+test v2_chain_60 ... ok
+test v2_work_60 ... ok
+test v2_handwritten_deep_expression_guard_in_inlined_action ... ok
+test v2_handwritten_deep_expression_guard_in_next ... ok
+test v2_refuses_every_module_corpus_case_that_v1_compiles_and_repeats_every_v1_refusal ... ok
+test v2_forward_chain_5000_compiles_without_evaluation ... ok
+
+test result: ok. 58 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.99s
+
+
+running 3 tests
+test v2_bundle_route_repeats_every_v1_refusal_for_inputs_that_need_no_linking ... ok
+test v1_bundle_route_still_compiles_every_row_that_needs_no_linking ... ok
+test v2_bundle_route_emits_the_ir_of_the_flat_route_when_no_linking_is_needed ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 2 tests
+test quantified_fairness_expansion_does_not_hide_work_exhaustion ... ok
+test standard_operators_and_quantified_fairness_match_the_fixed_corpus ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+
+running 4 tests
+test partial_order_validates_ir_before_preparing_reductions ... ok
+test partial_order_preserves_type_errors_and_temporal_fallback ... ok
+test visible_dependent_and_cyclic_actions_fall_back_without_changing_results ... ok
+test invisible_monotone_actions_reduce_interleavings_and_keep_real_faults ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 7 tests
+test symmetry_keeps_concrete_shortest_counterexamples_and_budget_cuts ... ok
+test symmetry_does_not_treat_shadowed_permutations_as_the_tlc_builtin ... ok
+test full_node_permutations_reduce_counter_orbits_and_keep_plain_wire_unchanged ... ok
+test unsupported_symmetry_conditions_are_rejected_instead_of_ignored ... ok
+test action_orbits_are_opt_in_and_keep_shortest_concrete_fault_traces ... ok
+test multiple_functions_preserve_same_node_correlations_and_global_scalars ... ok
+test node_records_and_sets_reduce_joint_orbits_without_losing_correlations ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+Testing operators-compile/select-order
+Success
+
+Testing operators-check/select-order
+Success
+
+Testing operators-compile/sort-ascending
+Success
+
+Testing operators-check/sort-ascending
+Success
+
+Testing operators-compile/assert-true
+Success
+
+Testing operators-check/assert-true
+Success
+
+Testing operators-compile/fair-forall
+Success
+
+Testing operators-check/fair-forall
+Success
+
+Testing operators-compile/fair-intermittent-SF
+Success
+
+Testing operators-check/fair-intermittent-SF
+Success
+
+Testing compile/model-untyped
+Success
+
+Testing check/model-untyped
+Success
+
+Testing compile/state-constraint
+Success
+
+Testing check/state-constraint
+Success
+
+Testing compile/action-constraint
+Success
+
+Testing check/action-constraint
+Success
+
+Testing compile/choose-order
+Success
+
+Testing check/choose-order
+Success
+
+Testing compile/power-min
+Success
+
+Testing check/power-min
+Success
+
+Testing compile/temporal-fair
+Success
+
+Testing check/temporal-fair
+Success
+
+Testing modules/extends-counter
+Success
+
+Testing modules/extends-diamond
+Success
+
+Testing modules/instance-twice
+Success
+
+Testing modules/module-definition-override
+Success
+
+Testing modules/flat-counter
+Success
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+cargo fmt --manifest-path crates/rtla-compiler/Cargo.toml -- --check
+cargo clippy --all-targets --locked --manifest-path crates/rtla-compiler/Cargo.toml -- -D warnings
+    Checking rtla v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtla)
+    Checking rtla-compiler v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtla-compiler)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.82s
+cargo test --all-targets --locked --manifest-path crates/rtla-compiler/Cargo.toml
+   Compiling rtla-compiler v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtla-compiler)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.10s
+     Running unittests src/lib.rs (crates/rtla-compiler/target/debug/deps/rtla_compiler-05275f5ff9d6e9b2)
+     Running tests/analysis_parity.rs (crates/rtla-compiler/target/debug/deps/analysis_parity-49179ef0a34a8bae)
+     Running tests/compiler.rs (crates/rtla-compiler/target/debug/deps/compiler-e011e2d109745ece)
+     Running tests/finite_support.rs (crates/rtla-compiler/target/debug/deps/finite_support-ee92d3e6cfa6f58e)
+     Running tests/modules.rs (crates/rtla-compiler/target/debug/deps/modules-48ab503b4c7ffc00)
+     Running tests/operator_sharing.rs (crates/rtla-compiler/target/debug/deps/operator_sharing-8d0470e922e7aa8c)
+     Running tests/operator_sharing_bundle.rs (crates/rtla-compiler/target/debug/deps/operator_sharing_bundle-810460c90d24c781)
+     Running tests/operators.rs (crates/rtla-compiler/target/debug/deps/operators-bab25285a078b51f)
+     Running tests/partial_order.rs (crates/rtla-compiler/target/debug/deps/partial_order-5f2b1fc324f4fad8)
+     Running tests/symmetry.rs (crates/rtla-compiler/target/debug/deps/symmetry-1fd9e25521fe953b)
+     Running benches/compatibility.rs (crates/rtla-compiler/target/debug/deps/compatibility-598aeea241e5bce1)
+     Running unittests examples/analysis_roles.rs (crates/rtla-compiler/target/debug/examples/analysis_roles-bfdaff979e71c617)
+     Running unittests examples/check.rs (crates/rtla-compiler/target/debug/examples/check-cb74082ad70f27d1)
+     Running unittests examples/temporal-profile.rs (crates/rtla-compiler/target/debug/examples/temporal_profile-e821671416613e0f)

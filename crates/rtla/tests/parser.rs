@@ -83,9 +83,9 @@ fn parses_config_and_diagnoses_incomplete_input() {
     ] {
         assert_eq!(parse_config(source).unwrap_err().kind, ErrorKind::Syntax);
     }
-    let error = parse_module("---- MODULE M ----\nRECURSIVE Op(_)\n====").unwrap_err();
-    assert_eq!(error.kind, ErrorKind::Unsupported);
-    assert_eq!((error.location.line, error.location.column), (2, 1));
+    let error = parse_module("---- MODULE M ----\nRECURSIVE Op(\n====").unwrap_err();
+    assert_eq!(error.kind, ErrorKind::Syntax);
+    assert_eq!((error.location.line, error.location.column), (3, 1));
 }
 
 #[test]
@@ -142,6 +142,22 @@ fn reports_resource_limits_without_claiming_the_tla_syntax_is_invalid() {
         parse_expression("unresolved").unwrap().node,
         ExpressionKind::Identifier { .. }
     ));
+}
+
+#[test]
+fn deeply_nested_calls_and_containers_return_resource_errors() {
+    for (opening, closing) in [
+        ("F(", ")"),
+        ("<<", ">>"),
+        ("{", "}"),
+        ("F(LAMBDA value:", ")"),
+    ] {
+        let source = format!("{}TRUE{}", opening.repeat(130), closing.repeat(130));
+        assert_eq!(
+            parse_expression(&source).unwrap_err().kind,
+            ErrorKind::Unsupported
+        );
+    }
 }
 
 #[test]

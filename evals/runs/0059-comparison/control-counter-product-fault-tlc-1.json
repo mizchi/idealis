@@ -1,0 +1,42 @@
+{
+  "route": "tlc-1",
+  "command": "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java",
+  "args": [
+    "-Xmx8g",
+    "-XX:+UseParallelGC",
+    "-XX:ActiveProcessorCount=8",
+    "-Djava.io.tmpdir=/Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0059-comparison/control-counter-product-fault-tlc-1/tmp",
+    "-jar",
+    "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/tlc/tla2tools.jar",
+    "-workers",
+    "1",
+    "-seed",
+    "16",
+    "-lncheck",
+    "final",
+    "-tool",
+    "-cleanup",
+    "-config",
+    "CounterProduct.cfg",
+    "CounterProduct.tla"
+  ],
+  "exit": 12,
+  "wallMs": 590.3500839999997,
+  "stdout": "@!@!@STARTMSG 2262:0 @!@!@\nTLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)\n@!@!@ENDMSG 2262 @!@!@\n@!@!@STARTMSG 2187:0 @!@!@\nRunning breadth-first search Model-Checking with fp 56 and seed 16 with 1 worker on 8 cores with 7282MB heap and 64MB offheap memory [pid: 19763] (Mac OS X 26.6.2 aarch64, Eclipse Adoptium 21.0.13 x86_64, MSBDiskFPSet, DiskStateQueue).\n@!@!@ENDMSG 2187 @!@!@\n@!@!@STARTMSG 2220:0 @!@!@\nStarting SANY...\n@!@!@ENDMSG 2220 @!@!@\nParsing file /Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0059-comparison/control-counter-product-fault-tlc-1/CounterProduct.tla\nParsing file /Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0059-comparison/control-counter-product-fault-tlc-1/tmp/Naturals.tla\nSemantic processing of module Naturals\nSemantic processing of module CounterProduct\n@!@!@STARTMSG 2219:0 @!@!@\nSANY finished.\n@!@!@ENDMSG 2219 @!@!@\n@!@!@STARTMSG 2185:0 @!@!@\nStarting... (2026-11-18 12:25:42)\n@!@!@ENDMSG 2185 @!@!@\n@!@!@STARTMSG 2189:0 @!@!@\nComputing initial states...\n@!@!@ENDMSG 2189 @!@!@\n@!@!@STARTMSG 2190:0 @!@!@\nFinished computing initial states: 1 distinct state generated at 2026-11-18 12:25:42.\n@!@!@ENDMSG 2190 @!@!@\n@!@!@STARTMSG 2110:1 @!@!@\nInvariant Safe is violated.\n@!@!@ENDMSG 2110 @!@!@\n@!@!@STARTMSG 2121:1 @!@!@\nThe behavior up to this point is:\n@!@!@ENDMSG 2121 @!@!@\n@!@!@STARTMSG 2217:4 @!@!@\n1: <Initial predicate>\n/\\ a = 0\n/\\ b = 0\n/\\ c = 0\n/\\ d = 0\n\n@!@!@ENDMSG 2217 @!@!@\n@!@!@STARTMSG 2217:4 @!@!@\n2: <Stepa line 6, col 10 to line 6, col 63 of module CounterProduct>\n/\\ a = 1\n/\\ b = 0\n/\\ c = 0\n/\\ d = 0\n\n@!@!@ENDMSG 2217 @!@!@\n@!@!@STARTMSG 2217:4 @!@!@\n3: <Stepa line 6, col 10 to line 6, col 63 of module CounterProduct>\n/\\ a = 2\n/\\ b = 0\n/\\ c = 0\n/\\ d = 0\n\n@!@!@ENDMSG 2217 @!@!@\n@!@!@STARTMSG 2217:4 @!@!@\n4: <Stepb line 7, col 10 to line 7, col 63 of module CounterProduct>\n/\\ a = 2\n/\\ b = 1\n/\\ c = 0\n/\\ d = 0\n\n@!@!@ENDMSG 2217 @!@!@\n@!@!@STARTMSG 2217:4 @!@!@\n5: <Stepb line 7, col 10 to line 7, col 63 of module CounterProduct>\n/\\ a = 2\n/\\ b = 2\n/\\ c = 0\n/\\ d = 0\n\n@!@!@ENDMSG 2217 @!@!@\n@!@!@STARTMSG 2217:4 @!@!@\n6: <Stepc line 8, col 10 to line 8, col 63 of module CounterProduct>\n/\\ a = 2\n/\\ b = 2\n/\\ c = 1\n/\\ d = 0\n\n@!@!@ENDMSG 2217 @!@!@\n@!@!@STARTMSG 2217:4 @!@!@\n7: <Stepc line 8, col 10 to line 8, col 63 of module CounterProduct>\n/\\ a = 2\n/\\ b = 2\n/\\ c = 2\n/\\ d = 0\n\n@!@!@ENDMSG 2217 @!@!@\n@!@!@STARTMSG 2217:4 @!@!@\n8: <Stepd line 9, col 10 to line 9, col 63 of module CounterProduct>\n/\\ a = 2\n/\\ b = 2\n/\\ c = 2\n/\\ d = 1\n\n@!@!@ENDMSG 2217 @!@!@\n@!@!@STARTMSG 2217:4 @!@!@\n9: <Stepd line 9, col 10 to line 9, col 63 of module CounterProduct>\n/\\ a = 2\n/\\ b = 2\n/\\ c = 2\n/\\ d = 2\n\n@!@!@ENDMSG 2217 @!@!@\n@!@!@STARTMSG 2200:0 @!@!@\nProgress(9) at 2026-11-18 12:25:42: 309 states generated (104,745 s/min), 81 distinct states found (27,457 ds/min), 3 states left on queue.\n@!@!@ENDMSG 2200 @!@!@\n@!@!@STARTMSG 2199:0 @!@!@\n309 states generated, 81 distinct states found, 3 states left on queue.\n@!@!@ENDMSG 2199 @!@!@\n@!@!@STARTMSG 2194:0 @!@!@\nThe depth of the complete state graph search is 9.\n@!@!@ENDMSG 2194 @!@!@\n@!@!@STARTMSG 2268:0 @!@!@\nThe average outdegree of the complete state graph is 1 (minimum is 0, the maximum 4 and the 95th percentile is 3).\n@!@!@ENDMSG 2268 @!@!@\n@!@!@STARTMSG 2186:0 @!@!@\nFinished in 179ms at (2026-11-18 12:25:42)\n@!@!@ENDMSG 2186 @!@!@\n",
+  "stderr": "",
+  "output": null,
+  "decodeError": null,
+  "memory": [
+    {
+      "milliseconds": 226.70962499999996,
+      "bytes": 132022272
+    },
+    {
+      "milliseconds": 428.41883400000006,
+      "bytes": 132890624
+    }
+  ],
+  "sampledMaxRssBytes": 132890624,
+  "phases": null,
+  "phaseError": null
+}

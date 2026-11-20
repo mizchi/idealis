@@ -1,0 +1,427 @@
+{
+  "schema": 1,
+  "baseRevision": "ce30a09b2860a9b66aecdd15bf82f5007bea83e1",
+  "plan": "evals/plans/native-object-profile.md",
+  "report": "evals/iterations/native-object-profile.md",
+  "archive": {
+    "path": "evidence.tar.gz",
+    "sha256": "ab38cda72f9c940dbb153c4429bc5e3f4f52d58cbb4fc36c16c3972259b9ea6d",
+    "bytes": 2951022
+  },
+  "before": "before",
+  "phaseMeasurement": "phases-before-02",
+  "profiles": {
+    "js": "js-before",
+    "native": "native-before",
+    "tools": "profile-tools.json"
+  },
+  "comparisons": {
+    "identity": {
+      "rows": [
+        {
+          "fixture": "single",
+          "beforeObject": 9.689975500000001,
+          "afterObject": 9.7124905,
+          "beforeJson": 3.1309989999999996,
+          "afterJson": 3.1326859999999996,
+          "objectSpeedup": 0.9976818510144233,
+          "jsonSpeedup": 0.999461484489668
+        },
+        {
+          "fixture": "single-copied",
+          "beforeObject": 9.694547,
+          "afterObject": 9.6984615,
+          "beforeJson": 3.1080225,
+          "afterJson": 3.1063265,
+          "objectSpeedup": 0.9995963792813942,
+          "jsonSpeedup": 1.0005459825295249
+        },
+        {
+          "fixture": "batch-32",
+          "beforeObject": 278.44316499999996,
+          "afterObject": 278.40205000000003,
+          "beforeJson": 76.28169,
+          "afterJson": 76.37123,
+          "objectSpeedup": 1.0001476821021968,
+          "jsonSpeedup": 0.9988275689680525
+        },
+        {
+          "fixture": "batch-32-copied",
+          "beforeObject": 277.33397499999995,
+          "afterObject": 278.34349,
+          "beforeJson": 76.04921499999999,
+          "afterJson": 76.18585,
+          "objectSpeedup": 0.9963731323480925,
+          "jsonSpeedup": 0.9982065567293662
+        },
+        {
+          "fixture": "nested-256",
+          "beforeObject": 818.05776,
+          "afterObject": 816.83813,
+          "beforeJson": 201.01942,
+          "afterJson": 200.770865,
+          "objectSpeedup": 1.0014931110035228,
+          "jsonSpeedup": 1.0012380033328043
+        },
+        {
+          "fixture": "nested-256-copied",
+          "beforeObject": 811.93711,
+          "afterObject": 812.781885,
+          "beforeJson": 197.987045,
+          "afterJson": 198.676255,
+          "objectSpeedup": 0.9989606375147004,
+          "jsonSpeedup": 0.9965309895739679
+        },
+        {
+          "fixture": "unicode",
+          "beforeObject": 14.067887500000001,
+          "afterObject": 14.074378000000001,
+          "beforeJson": 5.047923,
+          "afterJson": 5.015764999999999,
+          "objectSpeedup": 0.9995388428533041,
+          "jsonSpeedup": 1.0064113849033998
+        },
+        {
+          "fixture": "unicode-copied",
+          "beforeObject": 14.044360000000001,
+          "afterObject": 14.0533235,
+          "beforeJson": 5.0368105,
+          "afterJson": 5.0549285,
+          "objectSpeedup": 0.9993621793449785,
+          "jsonSpeedup": 0.9964157752181855
+        },
+        {
+          "fixture": "mismatch",
+          "beforeObject": 10.402053,
+          "afterObject": 10.439648000000002,
+          "beforeJson": 3.3132105000000003,
+          "afterJson": 3.3027349999999998,
+          "objectSpeedup": 0.9963988249412239,
+          "jsonSpeedup": 1.0031717652188263
+        },
+        {
+          "fixture": "mismatch-copied",
+          "beforeObject": 10.491181000000001,
+          "afterObject": 10.5185835,
+          "beforeJson": 3.320931,
+          "afterJson": 3.3076624999999997,
+          "objectSpeedup": 0.9973948488406258,
+          "jsonSpeedup": 1.0040114431263771
+        },
+        {
+          "fixture": "unknown",
+          "beforeObject": 9.675608,
+          "afterObject": 9.682021,
+          "beforeJson": 3.1742905,
+          "afterJson": 3.1810945,
+          "objectSpeedup": 0.999337638288535,
+          "jsonSpeedup": 0.9978611135255492
+        },
+        {
+          "fixture": "unknown-copied",
+          "beforeObject": 9.738574499999999,
+          "afterObject": 9.7261,
+          "beforeJson": 3.1715595000000003,
+          "afterJson": 3.171036,
+          "objectSpeedup": 1.0012825798624319,
+          "jsonSpeedup": 1.0001650880027853
+        }
+      ],
+      "geometricMean": 0.9989626572915368,
+      "eligible": false
+    },
+    "comparison-01": {
+      "rows": [
+        {
+          "fixture": "single",
+          "beforeObject": 9.774833500000002,
+          "afterObject": 8.586232,
+          "beforeJson": 3.1805839999999996,
+          "afterJson": 3.1999239999999998,
+          "objectSpeedup": 1.1384310952697296,
+          "jsonSpeedup": 0.9939561064575283
+        },
+        {
+          "fixture": "single-copied",
+          "beforeObject": 9.7462295,
+          "afterObject": 8.542805499999998,
+          "beforeJson": 3.1575010000000003,
+          "afterJson": 3.1385675,
+          "objectSpeedup": 1.1408698816799705,
+          "jsonSpeedup": 1.0060325291713497
+        },
+        {
+          "fixture": "batch-32",
+          "beforeObject": 284.02168000000006,
+          "afterObject": 254.86541999999997,
+          "beforeJson": 76.29775500000001,
+          "afterJson": 76.18703500000001,
+          "objectSpeedup": 1.114398650079717,
+          "jsonSpeedup": 1.001453265637651
+        },
+        {
+          "fixture": "batch-32-copied",
+          "beforeObject": 283.476035,
+          "afterObject": 253.48085500000002,
+          "beforeJson": 76.40063500000001,
+          "afterJson": 76.13727,
+          "objectSpeedup": 1.1183331182940819,
+          "jsonSpeedup": 1.003459081209505
+        },
+        {
+          "fixture": "nested-256",
+          "beforeObject": 840.82104,
+          "afterObject": 755.2962949999999,
+          "beforeJson": 199.186,
+          "afterJson": 198.603555,
+          "objectSpeedup": 1.1132333702232713,
+          "jsonSpeedup": 1.0029327017837117
+        },
+        {
+          "fixture": "nested-256-copied",
+          "beforeObject": 841.1820749999999,
+          "afterObject": 754.3564749999999,
+          "beforeJson": 197.82476,
+          "afterJson": 197.60997999999998,
+          "objectSpeedup": 1.1150988993631956,
+          "jsonSpeedup": 1.001086888425372
+        },
+        {
+          "fixture": "unicode",
+          "beforeObject": 14.0320605,
+          "afterObject": 12.453246,
+          "beforeJson": 5.091428,
+          "afterJson": 5.066315,
+          "objectSpeedup": 1.1267793553584342,
+          "jsonSpeedup": 1.0049568572029175
+        },
+        {
+          "fixture": "unicode-copied",
+          "beforeObject": 13.9509315,
+          "afterObject": 12.391906,
+          "beforeJson": 5.0750265,
+          "afterJson": 5.0248265000000005,
+          "objectSpeedup": 1.1258099843559173,
+          "jsonSpeedup": 1.0099903946932296
+        },
+        {
+          "fixture": "mismatch",
+          "beforeObject": 10.5536125,
+          "afterObject": 9.240152,
+          "beforeJson": 3.3420820000000004,
+          "afterJson": 3.3463625,
+          "objectSpeedup": 1.1421470664118945,
+          "jsonSpeedup": 0.9987208498780393
+        },
+        {
+          "fixture": "mismatch-copied",
+          "beforeObject": 10.545838999999999,
+          "afterObject": 9.2343605,
+          "beforeJson": 3.3465775,
+          "afterJson": 3.3457274999999997,
+          "objectSpeedup": 1.1420215834112173,
+          "jsonSpeedup": 1.0002540553586627
+        },
+        {
+          "fixture": "unknown",
+          "beforeObject": 9.845342,
+          "afterObject": 8.6185825,
+          "beforeJson": 3.2074805,
+          "afterJson": 3.1894735,
+          "objectSpeedup": 1.142338893895835,
+          "jsonSpeedup": 1.0056457594019828
+        },
+        {
+          "fixture": "unknown-copied",
+          "beforeObject": 9.844989000000002,
+          "afterObject": 8.6279905,
+          "beforeJson": 3.19713,
+          "afterJson": 3.1799764999999995,
+          "objectSpeedup": 1.1410523690307728,
+          "jsonSpeedup": 1.0053942222529004
+        }
+      ],
+      "geometricMean": 1.1299813028399632,
+      "eligible": false
+    },
+    "comparison-02": {
+      "rows": [
+        {
+          "fixture": "single",
+          "beforeObject": 9.8787775,
+          "afterObject": 8.553248,
+          "beforeJson": 3.2136044999999998,
+          "afterJson": 3.2589795000000006,
+          "objectSpeedup": 1.1549738181331817,
+          "jsonSpeedup": 0.9860769299101142
+        },
+        {
+          "fixture": "single-copied",
+          "beforeObject": 9.696247500000002,
+          "afterObject": 8.3336255,
+          "beforeJson": 3.1188474999999998,
+          "afterJson": 3.1175855,
+          "objectSpeedup": 1.1635089073777076,
+          "jsonSpeedup": 1.0004048004457295
+        },
+        {
+          "fixture": "batch-32",
+          "beforeObject": 279.347065,
+          "afterObject": 246.73832000000002,
+          "beforeJson": 76.308965,
+          "afterJson": 75.95209,
+          "objectSpeedup": 1.1321592243961132,
+          "jsonSpeedup": 1.0046986857109528
+        },
+        {
+          "fixture": "batch-32-copied",
+          "beforeObject": 278.26329,
+          "afterObject": 245.574355,
+          "beforeJson": 75.609985,
+          "afterJson": 75.554365,
+          "objectSpeedup": 1.1331121688174646,
+          "jsonSpeedup": 1.000736158658735
+        },
+        {
+          "fixture": "nested-256",
+          "beforeObject": 837.1358049999999,
+          "afterObject": 738.935615,
+          "beforeJson": 200.130265,
+          "afterJson": 199.82064000000003,
+          "objectSpeedup": 1.1328941087783404,
+          "jsonSpeedup": 1.0015495146046973
+        },
+        {
+          "fixture": "nested-256-copied",
+          "beforeObject": 855.756465,
+          "afterObject": 767.9405899999999,
+          "beforeJson": 203.194155,
+          "afterJson": 204.55165,
+          "objectSpeedup": 1.114352433174551,
+          "jsonSpeedup": 0.9933635587882083
+        },
+        {
+          "fixture": "unicode",
+          "beforeObject": 16.2324735,
+          "afterObject": 13.458875,
+          "beforeJson": 5.566228999999999,
+          "afterJson": 5.678165,
+          "objectSpeedup": 1.2060795200193182,
+          "jsonSpeedup": 0.9802865890653053
+        },
+        {
+          "fixture": "unicode-copied",
+          "beforeObject": 14.225628,
+          "afterObject": 12.6368855,
+          "beforeJson": 5.1934225,
+          "afterJson": 5.1636265,
+          "objectSpeedup": 1.1257226315772189,
+          "jsonSpeedup": 1.0057703631352886
+        },
+        {
+          "fixture": "mismatch",
+          "beforeObject": 10.638966,
+          "afterObject": 9.219785,
+          "beforeJson": 3.366358,
+          "afterJson": 3.378797,
+          "objectSpeedup": 1.153927775973084,
+          "jsonSpeedup": 0.9963185121805187
+        },
+        {
+          "fixture": "mismatch-copied",
+          "beforeObject": 10.746038500000001,
+          "afterObject": 9.4152565,
+          "beforeJson": 3.414877,
+          "afterJson": 3.3695389999999996,
+          "objectSpeedup": 1.1413431487501164,
+          "jsonSpeedup": 1.0134552530776466
+        },
+        {
+          "fixture": "unknown",
+          "beforeObject": 10.228766499999999,
+          "afterObject": 8.8728815,
+          "beforeJson": 3.4332435,
+          "afterJson": 3.413879,
+          "objectSpeedup": 1.1528122515780244,
+          "jsonSpeedup": 1.005672286569032
+        },
+        {
+          "fixture": "unknown-copied",
+          "beforeObject": 10.023828,
+          "afterObject": 8.6980615,
+          "beforeJson": 3.2206710000000003,
+          "afterJson": 3.2298625000000003,
+          "objectSpeedup": 1.1524209158557916,
+          "jsonSpeedup": 0.997154213221151
+        }
+      ],
+      "geometricMean": 1.146723833514898,
+      "eligible": false
+    }
+  },
+  "decision": {
+    "guardCandidates": "not adopted; both below 1.15 speedup guideline",
+    "currentGuard": "original validation, moved to canonical.ts",
+    "wit": "design candidate only; not implemented or benchmarked",
+    "default": "wasm"
+  },
+  "replays": [
+    "identity-replay",
+    "replay-01",
+    "replay-02"
+  ],
+  "negativeControls": [
+    {
+      "path": "corrupt-samples.log",
+      "expectedExit": 1
+    },
+    {
+      "path": "corrupt-report.log",
+      "expectedExit": 1
+    },
+    {
+      "path": "red-empty-summary.log",
+      "expectedExit": 1
+    }
+  ],
+  "checks": {
+    "basicNode": 79,
+    "basicVitest": 79,
+    "wasmNode": 23,
+    "wasmVitest": 23,
+    "nativeNode": 13,
+    "nativeVitest": 13,
+    "workspaceNativePerMode": 8,
+    "mutation": {
+      "killed": 104,
+      "scored": 109,
+      "compileErrors": 133,
+      "reused": 109
+    },
+    "checklist": {
+      "answered": 68,
+      "live": "skipped; no API key",
+      "offlineAndStaged": "passed"
+    }
+  },
+  "logs": [
+    "native-final.log",
+    "check.log",
+    "wasm.log",
+    "mutation.log",
+    "evaluate.log",
+    "evaluate-replay.log",
+    "support-plan.log",
+    "support-sync.log",
+    "support-check.log",
+    "support-staged.log",
+    "lint-final.log"
+  ],
+  "limitations": [
+    "Timing is specific to darwin arm64 / Node v24.22.2",
+    "Phase medians are not an additive decomposition",
+    "Profiles count samples, not wall-clock fractions",
+    "First phase run had TS type errors; fixed run is phases-before-02",
+    "Native bytecode and Rust checker unchanged"
+  ]
+}

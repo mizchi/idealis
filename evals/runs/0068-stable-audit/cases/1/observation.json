@@ -1,0 +1,229 @@
+{
+  "actual": {
+    "kind": "module",
+    "module": {
+      "name": "Test",
+      "extends": [],
+      "constants": [],
+      "variables": [],
+      "definitions": [
+        {
+          "name": "Expr",
+          "kind": "Operator",
+          "params": [],
+          "body": {
+            "kind": "Apply",
+            "operator": "..",
+            "args": [
+              {
+                "kind": "Apply",
+                "operator": "UNION",
+                "args": [
+                  {
+                    "kind": "Identifier",
+                    "name": "a",
+                    "location": {
+                      "start": 36,
+                      "end": 37,
+                      "line": 2,
+                      "column": 15
+                    }
+                  }
+                ],
+                "location": {
+                  "start": 30,
+                  "end": 35,
+                  "line": 2,
+                  "column": 9
+                }
+              },
+              {
+                "kind": "Identifier",
+                "name": "b",
+                "location": {
+                  "start": 39,
+                  "end": 40,
+                  "line": 2,
+                  "column": 18
+                }
+              }
+            ],
+            "location": {
+              "start": 37,
+              "end": 39,
+              "line": 2,
+              "column": 16
+            }
+          },
+          "isLocal": false,
+          "isRecursive": false,
+          "location": {
+            "start": 22,
+            "end": 26,
+            "line": 2,
+            "column": 1
+          }
+        }
+      ],
+      "assumptions": [],
+      "theorems": [],
+      "location": {
+        "start": 0,
+        "end": 4,
+        "line": 1,
+        "column": 1
+      }
+    }
+  },
+  "reference": {
+    "kind": "accepted",
+    "tree": {
+      "kind": 382,
+      "image": "N_Module",
+      "children": [
+        {
+          "kind": 333,
+          "image": "N_BeginModule",
+          "children": [
+            {
+              "kind": 3,
+              "image": "---- MODULE",
+              "children": []
+            },
+            {
+              "kind": 231,
+              "image": "Test",
+              "children": []
+            },
+            {
+              "kind": 35,
+              "image": "----",
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": 350,
+          "image": "N_Extends",
+          "children": []
+        },
+        {
+          "kind": 334,
+          "image": "N_Body",
+          "children": [
+            {
+              "kind": 389,
+              "image": "N_OperatorDefinition",
+              "children": [
+                {
+                  "kind": 366,
+                  "image": "N_IdentLHS",
+                  "children": [
+                    {
+                      "kind": 231,
+                      "image": "Expr",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "kind": 92,
+                  "image": "==",
+                  "children": []
+                },
+                {
+                  "kind": 371,
+                  "image": "N_InfixExpr",
+                  "children": [
+                    {
+                      "kind": 399,
+                      "image": "N_PrefixExpr",
+                      "children": [
+                        {
+                          "kind": 362,
+                          "image": "N_GenPrefixOp",
+                          "children": [
+                            {
+                              "kind": 367,
+                              "image": "N_IdPrefix",
+                              "children": []
+                            },
+                            {
+                              "kind": 401,
+                              "image": "UNION",
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "kind": 358,
+                          "image": "N_GeneralId",
+                          "children": [
+                            {
+                              "kind": 367,
+                              "image": "N_IdPrefix",
+                              "children": []
+                            },
+                            {
+                              "kind": 231,
+                              "image": "a",
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "kind": 359,
+                      "image": "N_GenInfixOp",
+                      "children": [
+                        {
+                          "kind": 367,
+                          "image": "N_IdPrefix",
+                          "children": []
+                        },
+                        {
+                          "kind": 373,
+                          "image": "..",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "kind": 358,
+                      "image": "N_GeneralId",
+                      "children": [
+                        {
+                          "kind": 367,
+                          "image": "N_IdPrefix",
+                          "children": []
+                        },
+                        {
+                          "kind": 231,
+                          "image": "b",
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": 345,
+          "image": "N_EndModule",
+          "children": [
+            {
+              "kind": 36,
+              "image": "====",
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "tlaTs": "accepted"
+}

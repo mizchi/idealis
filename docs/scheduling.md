@@ -58,7 +58,7 @@ plannerは各候補のbatchをworkerへ配置し、全件完了時間を推定�
 
 ## TLA adapterの試作を動かす
 
-`evals/parallel-safety/`にNodeとブラウザのadapterを置いた。共通の計画・配布APIだけをpackageの独立entryとして公開し、adapterは評価用の試作として扱う。
+`evals/experiments/parallel-safety/`にNodeとブラウザのadapterを置いた。共通の計画・配布APIだけをpackageの独立entryとして公開し、adapterは評価用の試作として扱う。
 
 - Nodeはworker_threadsごとにWasm instance、または常駐Rust native子プロセスを持つ。nativeのworker数はRust thread数ではなく、子プロセス数を表す。
 - ブラウザはWeb Workerごとに独立Wasm instanceを持ち、message passingで通信する。SharedArrayBufferとcross-origin isolationは不要。

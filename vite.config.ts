@@ -1,0 +1,67 @@
+import { defineConfig } from "vite-plus";
+
+const ignorePatterns = [
+  "**/target/**",
+  ".artifacts/**",
+  ".mutator/**",
+  "**/assets/**",
+  "**/dist/**",
+  "test-results/**",
+  "playwright-report/**",
+  "evals/runs/**",
+  "fixtures/**",
+  "evals/experiments/structured-fuzz/fuzz/artifacts/**",
+  "evals/experiments/structured-fuzz/fuzz/corpus/**",
+];
+
+const project = (name: string, ...include: string[]) => ({
+  test: { name, include },
+});
+
+export const mutationConfig = defineConfig({
+  test: { include: ["tests/core.vitest.test.ts"] },
+});
+
+export default defineConfig({
+  test: {
+    projects: [
+      project("core", "tests/**/*.vitest.test.ts"),
+      project("cache", "tests/verified-cache/runner.vitest.ts"),
+      project("expansions", "tests/cached-expansions/runner.vitest.ts"),
+      project("wasm", "tests/wasm-host/runner.vitest.ts"),
+      project("native-oracle", "tests/roracle-native/runner.vitest.ts"),
+      project("typed-oracle", "tests/roracle-wit/runner.vitest.ts"),
+      project("testing", "tests/testing-core/runner.vitest.ts"),
+      project("schedules", "tests/controlled-schedules/runner.vitest.ts"),
+      project("fuzz", "tests/structured-fuzz/runner.vitest.ts"),
+      project("alloy", "tests/alloy-instance/runner.vitest.ts"),
+      project(
+        "smt",
+        "tests/smt-expansion/runner.vitest.ts",
+        "tests/smt-scripts/runner.vitest.ts",
+        "tests/smt-tuning/runner.vitest.ts",
+      ),
+    ],
+  },
+  fmt: {
+    printWidth: 80,
+    sortPackageJson: false,
+    sortImports: { newlinesBetween: false },
+    embeddedLanguageFormatting: "off",
+    ignorePatterns: [
+      ...ignorePatterns,
+      "**/pnpm-lock.yaml",
+      "**/Cargo.toml",
+      "crates/rtla/tests/fixtures/LICENSE.md",
+      "evals/experiments/roracle-wit/generated/*.js",
+    ],
+  },
+  lint: {
+    categories: { correctness: "error" },
+    rules: { "no-unused-vars": "warn", "unicorn/no-new-array": "warn" },
+    ignorePatterns: [
+      ...ignorePatterns,
+      "evals/experiments/roracle-wit/generated/**",
+    ],
+  },
+});

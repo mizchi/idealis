@@ -14,24 +14,18 @@ jobs:
         with:
           registry-url: https://registry.npmjs.org
       - run: node dist/scripts/release.js "$GITHUB_REF_NAME"
-      - run: rustup target add wasm32-unknown-unknown
-      - run: pnpm check
-      - run: pnpm typecheck
-      - run: pnpm test
-      - run: pnpm package:prepare
-      - run: node --test dist/evals/alloy-subset/contract-test.js
-      - run: node --test dist/evals/alloy-instance/contract-test.js
-      - run: pnpm exec vitest run --config alloy-vitest.config.ts
-      - run: node --test dist/evals/testing-core/contract-test.js
-      - run: pnpm exec vitest run --config testing-vitest.config.ts
-      - run: pnpm portable:test
-      - run: pnpm usable:test
-      - run: pnpm package:test
-      - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm exec playwright test --config alloy-playwright.config.ts
-      - run: pnpm exec playwright test --config alloy-instance-playwright.config.ts
-      - run: pnpm exec playwright test --config testing-playwright.config.ts
-      - run: pnpm portable:browser
+      - run: rustup target add wasm32-unknown-unknown wasm32-wasip1
+      - run: just check
+      - run: just package-prepare
+      - run: node --test dist/tests/alloy-subset/contract-test.js
+      - run: node --test dist/tests/alloy-instance/contract-test.js
+      - run: just vitest --project=alloy
+      - run: node --test dist/tests/testing-core/contract-test.js
+      - run: just vitest --project=testing
+      - run: just portable-test
+      - run: just usable-test
+      - run: just package-test
+      - run: just wasm-test
       - run: npm install --global npm@11
       - run: node dist/scripts/release.js "$GITHUB_REF_NAME" --publish
         env:

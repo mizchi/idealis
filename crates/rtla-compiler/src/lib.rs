@@ -9,8 +9,17 @@ use std::rc::Rc;
 const TARGET_EXPANSION_LIMIT: usize = 524_288;
 
 mod analysis;
+mod elaborate;
+mod functions;
+mod labels;
+mod levels;
 mod link;
+mod old;
 mod rewrite;
+mod select;
+mod source;
+mod symbols;
+mod symmetry;
 mod typed;
 mod typed_expr;
 mod typed_lower;
@@ -50,8 +59,6 @@ pub struct CompileOptions {
     pub irVersion: IrVersion,
 }
 type Result<T> = std::result::Result<T, CompileError>;
-const V2_LINKING: &str =
-    "safety IR v2 does not support module linking or configuration operator substitution";
 fn unsupported<T>(message: impl Into<String>) -> Result<T> {
     Err(CompileError {
         message: message.into(),
@@ -78,6 +85,7 @@ enum Phase {
 }
 #[derive(Clone)]
 struct Context {
+    origin: usize,
     phase: Phase,
     locals: BTreeMap<String, ir::Expression>,
     calls: Vec<String>,
@@ -115,6 +123,7 @@ struct AnonymousFrame {
 }
 #[derive(Clone)]
 struct Entry {
+    id: usize,
     definition: Rc<Definition>,
     locals: BTreeMap<String, ir::Expression>,
     scope: usize,
@@ -141,19 +150,23 @@ fn target_leaves(target: &Target) -> usize {
 }
 #[derive(Clone)]
 struct Shared {
-    key: (usize, u8, bool, Vec<Target>),
+    recursive: bool,
+    key: (usize, u8, bool, Vec<Target>, ir::BodyKind),
     captures: Vec<usize>,
     definition: Option<ir::Definition>,
     parameter_count: usize,
     pending: Option<(Expression, Context, bool)>,
 }
-#[derive(Clone, Default)]
+#[derive(Clone, Default, PartialEq, Eq)]
 struct LevelSummary {
     base: u8,
     parameters: HashSet<usize>,
     captures: HashSet<usize>,
 }
 struct Compiler<'a> {
+    recursive_ids: HashSet<usize>,
+    temporal_ids: HashSet<usize>,
+    declaration_ids: BTreeMap<(usize, String), usize>,
     module: &'a Module,
     config: &'a Config,
     slots: BTreeMap<String, usize>,
@@ -166,7 +179,7 @@ struct Compiler<'a> {
     target_requirements: HashMap<(usize, bool), Vec<usize>>,
     membership_requirements: HashMap<(usize, bool), Vec<usize>>,
     next_binding: usize,
-    binding_keys: HashMap<(usize, u8, usize), usize>,
+    binding_keys: HashMap<(usize, usize, u8, usize, String), usize>,
     generative_cache: HashMap<(usize, u8), bool>,
     level_cache: std::cell::RefCell<HashMap<usize, LevelSummary>>,
 }
@@ -304,6 +317,27 @@ fn unchanged(value: Json) -> Result<Vec<Json>> {
     ])
 }
 
+/// Locate a uniquely named incomplete action in the original source modules.
+/// Raw IR can omit source information or reuse an action label.
+pub fn incomplete_state_location<'a>(
+    error: &rtlc::CoreError,
+    modules: impl IntoIterator<Item = &'a Module>,
+) -> Option<(&'a str, rtla::ast::Location)> {
+    let (action, _) = error
+        .message
+        .strip_prefix("Incomplete safety state in action ")?
+        .split_once("; unassigned: ")?;
+    let mut definitions = modules.into_iter().flat_map(|module| {
+        module
+            .definitions
+            .iter()
+            .filter(move |d| d.name == action)
+            .map(move |d| (module.name.as_str(), d.location))
+    });
+    let location = definitions.next()?;
+    definitions.next().is_none().then_some(location)
+}
+
 /// Compile the selected finite TLA+ fragment. Parsing and execution remain separate.
 pub fn compile(module: &Module, config: &Config) -> Result<rtlc::SafetyProgram> {
     compile_with_options(module, config, CompileOptions::default())
@@ -314,10 +348,26 @@ pub fn compile_with_options(
     config: &Config,
     options: CompileOptions,
 ) -> Result<rtlc::SafetyProgram> {
-    if link::declares_instances_or_overrides(module, config) {
+    if link::declares_instances_or_overrides(module, config) || elaborate::needed(module) {
         return compile_modules_with_options(module, config, &[], options);
     }
+    symbols::validate(module)?;
     compile_flat(module, config, options, false)
+}
+
+/// Check names and, optionally, expression levels in an executable module bundle.
+pub fn analyze_modules(root: &Module, modules: &[Module], check_levels: bool) -> Result<()> {
+    if std::iter::once(root).chain(modules).any(|module| {
+        !module.theorems.is_empty() || !module.directives.is_empty() || !module.modules.is_empty()
+    }) {
+        return unsupported("standalone analysis of proofs or nested modules");
+    }
+    let config = rtla::parse_config("").expect("empty configuration");
+    let (linked, _, _) = link::resolve(root, &config, modules)?;
+    if check_levels {
+        levels::validate(&linked)?;
+    }
+    Ok(())
 }
 
 /// Compile an explicit in-memory module bundle without filesystem access.
@@ -335,12 +385,37 @@ pub fn compile_modules_with_options(
     modules: &[Module],
     options: CompileOptions,
 ) -> Result<rtlc::SafetyProgram> {
-    let linking = link::needs_linking(module, config);
-    let (linked_module, linked_config, action_names) = link::resolve(module, config, modules)?;
-    if options.irVersion == IrVersion::V2 && !linking {
+    symbols::validate(module)?;
+    for dependency in modules {
+        symbols::validate(dependency)?;
+    }
+    if config.symmetry.is_some() {
+        if !modules.is_empty()
+            || !module.instances.is_empty()
+            || !config.substitutions.is_empty()
+            || config
+                .constants
+                .iter()
+                .any(|assignment| assignment.module.is_some() || assignment.args.is_some())
+        {
+            return unsupported("SYMMETRY requires a flat module and direct constants");
+        }
         return compile_flat(module, config, options, false);
     }
-    let mut program = compile_flat(&linked_module, &linked_config, options, linking)?;
+    let linking = link::needs_linking(module, config);
+    let (linked_module, linked_config, mut action_names) = link::resolve(module, config, modules)?;
+    if options.irVersion == IrVersion::V2 && !linking && !elaborate::needed(module) {
+        return compile_flat(module, config, options, false);
+    }
+    let expanded = elaborate::needed(&linked_module)
+        .then(|| elaborate::module(&linked_module, &mut action_names))
+        .transpose()?;
+    let mut program = compile_flat(
+        expanded.as_ref().unwrap_or(&linked_module),
+        &linked_config,
+        options,
+        linking,
+    )?;
     for branch in program.initial.iter_mut().chain(program.next.iter_mut()) {
         if let Some(name) = action_names.get(&branch.name) {
             branch.name = name.clone();
@@ -353,8 +428,12 @@ fn compile_flat(
     module: &Module,
     config: &Config,
     options: CompileOptions,
-    linking: bool,
+    _linking: bool,
 ) -> Result<rtlc::SafetyProgram> {
+    let source_levels = levels::validate(module)?;
+    if options.irVersion == IrVersion::V2 && config.symmetry.is_some() {
+        return unsupported("safety IR v2 does not support SYMMETRY");
+    }
     if module.extends.iter().any(|name| {
         ![
             "Naturals",
@@ -370,7 +449,6 @@ fn compile_flat(
         return unsupported("EXTENDS");
     }
     if !config.substitutions.is_empty()
-        || config.symmetry.is_some()
         || config.view.is_some()
         || config.alias.is_some()
         || !config.postconditions.is_empty()
@@ -440,9 +518,43 @@ fn compile_flat(
     {
         return unsupported("missing or extra constants");
     }
-    if linking && options.irVersion == IrVersion::V2 {
-        return unsupported(V2_LINKING);
+    let mut declarations = std::collections::BTreeSet::new();
+    let mut recursive_declarations = HashSet::new();
+    let mut pending: Vec<_> = module
+        .definitions
+        .iter()
+        .map(Node::SourceDefinition)
+        .chain(
+            module
+                .assumptions
+                .iter()
+                .map(|value| Node::Source(&value.expression)),
+        )
+        .chain(
+            module
+                .theorems
+                .iter()
+                .map(|value| Node::Source(&value.statement)),
+        )
+        .collect();
+    while let Some(node) = pending.pop() {
+        if let Node::SourceDefinition(definition) = node {
+            declarations.insert((definition.location.start, definition.name.clone()));
+            if definition.is_recursive {
+                recursive_declarations.insert((definition.location.start, definition.name.clone()));
+            }
+        }
+        pending.extend(
+            analysis::analysis_children(node)
+                .into_iter()
+                .map(|edge| edge.node),
+        );
     }
+    let declaration_ids: BTreeMap<_, _> = declarations
+        .into_iter()
+        .enumerate()
+        .map(|(index, key)| (key, index + 1))
+        .collect();
     let entries = module
         .definitions
         .iter()
@@ -450,6 +562,7 @@ fn compile_flat(
             (
                 definition.name.clone(),
                 Rc::new(Entry {
+                    id: declaration_ids[&(definition.location.start, definition.name.clone())],
                     definition: Rc::new(definition.clone()),
                     locals: BTreeMap::new(),
                     scope: 0,
@@ -463,6 +576,16 @@ fn compile_flat(
         })
         .collect();
     let mut compiler = Compiler {
+        temporal_ids: source_levels
+            .iter()
+            .filter(|(_, level)| **level == 3)
+            .filter_map(|(key, _)| declaration_ids.get(key).copied())
+            .collect(),
+        recursive_ids: recursive_declarations
+            .iter()
+            .map(|key| declaration_ids[key])
+            .collect(),
+        declaration_ids,
         module,
         config,
         constants,
@@ -490,6 +613,7 @@ fn compile_flat(
 impl Compiler<'_> {
     fn target_context(&mut self, entry: &Entry) -> Context {
         let mut context = self.root(Phase::Next);
+        context.origin = entry.id;
         context.scope = entry.scope;
         context.locals = entry.locals.clone();
         context.order = entry.order.clone();
@@ -637,7 +761,7 @@ impl Compiler<'_> {
                             .ok_or_else(|| CompileError {
                                 message: "generative UNCHANGED requires state variables".into(),
                             })?;
-                    let position = entry.definition.location.start;
+                    let position = entry.id;
                     if entry.definition.is_recursive || active.contains(&position) {
                         return unsupported("recursive operator definitions");
                     }
@@ -705,6 +829,29 @@ impl Compiler<'_> {
         }
     }
     fn requirements(&mut self, name: &str, context: &Context, action: bool) -> Result<Vec<usize>> {
+        let position = self.scopes[context.scope][name].id;
+        if let Some(result) = self.target_requirements.get(&(position, action)) {
+            return Ok(result.clone());
+        }
+        let (mut result, recursive) = self.requirements_pass(name, context, action, false)?;
+        if recursive {
+            loop {
+                let before = self.target_requirements.clone();
+                result = self.requirements_pass(name, context, action, true)?.0;
+                if before == self.target_requirements {
+                    break;
+                }
+            }
+        }
+        Ok(result)
+    }
+    fn requirements_pass(
+        &mut self,
+        name: &str,
+        context: &Context,
+        action: bool,
+        refresh: bool,
+    ) -> Result<(Vec<usize>, bool)> {
         enum Task {
             Expression(Expression, Context, bool, (usize, bool)),
             Call(
@@ -731,6 +878,8 @@ impl Compiler<'_> {
         )];
         let mut working: HashMap<(usize, bool), Vec<usize>> = HashMap::new();
         let mut active = HashSet::new();
+        let mut visited = HashSet::new();
+        let mut recursive = false;
         let mut result = vec![];
         while let Some(task) = tasks.pop() {
             match task {
@@ -742,12 +891,16 @@ impl Compiler<'_> {
                 Task::Compose(key, args, context, owner) => {
                     let entry = self.scopes[context.scope]
                         .values()
-                        .find(|entry| entry.definition.location.start == key.0)
+                        .find(|entry| entry.id == key.0)
                         .cloned()
                         .ok_or_else(|| CompileError {
                             message: "lexical capture".into(),
                         })?;
-                    let requirements = self.target_requirements[&key].clone();
+                    let requirements = working
+                        .get(&key)
+                        .or_else(|| self.target_requirements.get(&key))
+                        .cloned()
+                        .unwrap_or_default();
                     let mut mapped = vec![];
                     for binding in requirements {
                         let parameter =
@@ -759,6 +912,11 @@ impl Compiler<'_> {
                                 None
                             };
                         if let Some(slot) = parameter {
+                            if key.1 && entry.definition.is_recursive {
+                                return unsupported(
+                                    "recursive operator parameters cannot be primed",
+                                );
+                            }
                             if let Some(actual) = args.get(slot) {
                                 let target = self.resolve_target(actual, &context)?;
                                 Self::target_bindings(&target, &mut mapped);
@@ -792,16 +950,38 @@ impl Compiler<'_> {
                             .ok_or_else(|| CompileError {
                                 message: format!("operator {name}"),
                             })?;
-                    let key = (entry.definition.location.start, action);
-                    if entry.definition.is_recursive || active.contains(&key) {
-                        return unsupported("recursive operator definitions");
+                    let key = (entry.id, action);
+                    if entry.definition.is_recursive && !action {
+                        self.target_requirements.entry(key).or_default();
+                        tasks.push(Task::Compose(key, args, context.clone(), owner));
+                        continue;
+                    }
+                    recursive |= entry.definition.is_recursive;
+                    if active.contains(&key) {
+                        if !entry.definition.is_recursive {
+                            return unsupported(
+                                "recursive operator definitions require RECURSIVE declarations",
+                            );
+                        }
+                        tasks.push(Task::Compose(key, args, context, owner));
+                        continue;
                     }
                     tasks.push(Task::Compose(key, args, context.clone(), owner));
-                    if self.target_requirements.contains_key(&key) {
+                    if refresh {
+                        if !visited.insert(key) {
+                            continue;
+                        }
+                    } else if self.target_requirements.contains_key(&key) {
                         continue;
                     }
                     active.insert(key);
-                    working.insert(key, vec![]);
+                    working.insert(
+                        key,
+                        self.target_requirements
+                            .get(&key)
+                            .cloned()
+                            .unwrap_or_default(),
+                    );
                     let mut inner = self.target_context(&entry);
                     inner.static_targets.clear();
                     inner.target_actuals.clear();
@@ -925,7 +1105,7 @@ impl Compiler<'_> {
                 }
             }
         }
-        Ok(result)
+        Ok((result, recursive))
     }
     fn membership_demands(
         &mut self,
@@ -972,7 +1152,7 @@ impl Compiler<'_> {
                     if let Some(owner) = owner {
                         let entry = self.scopes[context.scope]
                             .values()
-                            .find(|entry| entry.definition.location.start == key.0)
+                            .find(|entry| entry.id == key.0)
                             .cloned()
                             .ok_or_else(|| CompileError {
                                 message: "lexical capture".into(),
@@ -1022,9 +1202,16 @@ impl Compiler<'_> {
                             .ok_or_else(|| CompileError {
                                 message: format!("operator {name}"),
                             })?;
-                    let key = (entry.definition.location.start, purpose);
-                    if entry.definition.is_recursive || active.contains(&key) {
-                        return unsupported("recursive operator definitions");
+                    let key = (entry.id, purpose);
+                    if entry.definition.is_recursive {
+                        self.membership_requirements.entry(key).or_default();
+                        tasks.push(Task::Compose(key, args, context, owner));
+                        continue;
+                    }
+                    if active.contains(&key) {
+                        return unsupported(
+                            "recursive operator definitions require RECURSIVE declarations",
+                        );
                     }
                     tasks.push(Task::Compose(key, args, context, owner));
                     if self.membership_requirements.contains_key(&key) {
@@ -1186,7 +1373,8 @@ impl Compiler<'_> {
                 Pattern::Tuple { names } => names.iter().collect(),
             };
             for (slot, name) in names.iter().enumerate() {
-                let binding = self.binding_id(bound.set.location.start, 1, slot);
+                let binding =
+                    self.named_binding_at(context.origin, bound.set.location.start, 1, slot, name);
                 inner.binding_ids.insert((*name).clone(), binding);
                 inner
                     .locals
@@ -1197,7 +1385,20 @@ impl Compiler<'_> {
     }
 
     fn binding_id(&mut self, position: usize, kind: u8, slot: usize) -> usize {
-        let key = (position, kind, slot);
+        self.binding_at(0, position, kind, slot)
+    }
+    fn binding_at(&mut self, origin: usize, position: usize, kind: u8, slot: usize) -> usize {
+        self.named_binding_at(origin, position, kind, slot, "")
+    }
+    fn named_binding_at(
+        &mut self,
+        origin: usize,
+        position: usize,
+        kind: u8,
+        slot: usize,
+        name: &str,
+    ) -> usize {
+        let key = (origin, position, kind, slot, name.into());
         if let Some(id) = self.binding_keys.get(&key) {
             return *id;
         }
@@ -1211,12 +1412,30 @@ impl Compiler<'_> {
     }
     fn prepare_levels(&self, order: &[usize]) {
         self.level_cache.borrow_mut().clear();
-        for id in order {
-            let body = &self.shared[*id].definition.as_ref().unwrap().body;
-            let summary = typed::level_summary(Node::Expression(body), &self.level_cache.borrow());
-            self.level_cache.borrow_mut().insert(*id, summary);
+        loop {
+            let mut changed = false;
+            for id in order {
+                let body = &self.shared[*id].definition.as_ref().unwrap().body;
+                let mut summary =
+                    typed::level_summary(Node::Body(body), &self.level_cache.borrow());
+                if self.shared[*id].key.4 == ir::BodyKind::Action {
+                    summary.base =
+                        summary
+                            .base
+                            .max(if self.shared[*id].key.1 == 1 { 1 } else { 2 });
+                }
+                if self.shared[*id].key.4 == ir::BodyKind::Temporal {
+                    summary.base = 3;
+                }
+                changed |= self.level_cache.borrow().get(id) != Some(&summary);
+                self.level_cache.borrow_mut().insert(*id, summary);
+            }
+            if !changed || !self.shared.iter().any(|entry| entry.recursive) {
+                break;
+            }
         }
     }
+
     fn prime(&mut self, value: Json) -> Result<Json> {
         prime(value)
     }
@@ -1232,7 +1451,7 @@ impl Compiler<'_> {
     ) -> Result<Json> {
         let child = context.nested()?;
         let demanded = self.membership_demands(name, context, membership)?;
-        let position = self.scopes[context.scope][name].definition.location.start;
+        let position = self.scopes[context.scope][name].id;
         let arguments = args
             .iter()
             .enumerate()
@@ -1253,14 +1472,23 @@ impl Compiler<'_> {
         args: &[Expression],
         context: &Context,
     ) -> Result<BTreeMap<usize, Target>> {
+        self.call_targets_purpose(name, args, context, false)
+    }
+    fn call_targets_purpose(
+        &mut self,
+        name: &str,
+        args: &[Expression],
+        context: &Context,
+        action: bool,
+    ) -> Result<BTreeMap<usize, Target>> {
         let entry = self.scopes[context.scope]
             .get(name)
             .cloned()
             .ok_or_else(|| CompileError {
                 message: format!("operator {name}"),
             })?;
-        let position = entry.definition.location.start;
-        let required = self.requirements(name, context, false)?;
+        let position = entry.id;
+        let required = self.requirements(name, context, action)?;
         let mut targets = BTreeMap::new();
         for binding in required {
             let parameter = if let DefinitionKind::Operator { params } = &entry.definition.head {
@@ -1325,7 +1553,25 @@ impl Compiler<'_> {
         arguments: Vec<ir::Expression>,
         context: &Context,
         membership: bool,
+        targets: BTreeMap<usize, Target>,
+    ) -> Result<ir::Expression> {
+        self.shared_body_ir(
+            name,
+            arguments,
+            context,
+            membership,
+            targets,
+            ir::BodyKind::Expression,
+        )
+    }
+    fn shared_body_ir(
+        &mut self,
+        name: &str,
+        arguments: Vec<ir::Expression>,
+        context: &Context,
+        membership: bool,
         mut targets: BTreeMap<usize, Target>,
+        kind: ir::BodyKind,
     ) -> Result<ir::Expression> {
         let entry = self.scopes[context.scope]
             .get(name)
@@ -1333,10 +1579,7 @@ impl Compiler<'_> {
             .ok_or_else(|| CompileError {
                 message: format!("operator {name}"),
             })?;
-        let position = entry.definition.location.start;
-        if entry.definition.is_recursive {
-            return unsupported(format!("operator {name}"));
-        }
+        let position = entry.id;
         let (body, params) = match &entry.definition.head {
             DefinitionKind::Operator { params } => {
                 if params.len() != arguments.len()
@@ -1374,7 +1617,7 @@ impl Compiler<'_> {
             Phase::State => 2,
             Phase::Next => 3,
         };
-        let required = self.requirements(name, context, false)?;
+        let required = self.requirements(name, context, kind == ir::BodyKind::Action)?;
         for binding in &required {
             if !targets.contains_key(binding)
                 && let Some(target) = context
@@ -1393,13 +1636,14 @@ impl Compiler<'_> {
                 })
             })
             .collect::<Result<Vec<_>>>()?;
-        let key = (position, phase, membership, signature);
+        let key = (position, phase, membership, signature, kind);
         let id = if let Some(id) = self.shared.iter().position(|shared| shared.key == key) {
             id
         } else {
             let id = self.shared.len();
             let candidates: Vec<_> = entry.projection.keys().copied().collect();
             let mut inner = self.root(context.phase);
+            inner.origin = entry.id;
             inner.scope = entry.scope;
             inner.static_targets = targets;
             for (slot, binding) in candidates.iter().enumerate() {
@@ -1425,6 +1669,7 @@ impl Compiler<'_> {
                 inner.projection.insert(binding, value);
             }
             self.shared.push(Shared {
+                recursive: entry.definition.is_recursive,
                 key,
                 captures: candidates.clone(),
                 definition: None,
@@ -1454,18 +1699,23 @@ impl Compiler<'_> {
     }
     fn lower_definition(&mut self, id: usize) -> Result<()> {
         if let Some((body, context, membership)) = self.shared[id].pending.take() {
-            let lowered = if membership {
-                self.membership_ir(&body, &context)?
+            let body = if self.shared[id].key.4 == ir::BodyKind::Temporal {
+                ir::DefinitionBody::Temporal(Box::new(self.temporal_ir(&body, &context)?))
+            } else if self.shared[id].key.4 == ir::BodyKind::Action {
+                ir::DefinitionBody::Action(self.action_ir(&body, &context, "<action>")?)
+            } else if membership {
+                self.membership_ir(&body, &context)?.into()
             } else {
-                self.expression_ir(&body, &context)?
+                self.expression_ir(&body, &context)?.into()
             };
-            let body = lowered;
+            typed::check_depth(Node::Body(&body))?;
             self.shared[id].definition = Some(ir::Definition {
+                recursive: self.shared[id].recursive,
                 id,
                 parameter_count: self.shared[id].parameter_count,
                 capture_count: self.shared[id].captures.len(),
-                body_kind: ir::BodyKind::Expression,
-                local_scope: typed::local_scope(Node::Expression(&body)),
+                body_kind: self.shared[id].key.4,
+                local_scope: typed::local_scope(Node::Body(&body)),
                 body,
             });
         }
@@ -1490,17 +1740,12 @@ impl Compiler<'_> {
     fn finish_shared(&mut self, mut program: ir::SafetyProgram) -> Result<ir::SafetyProgram> {
         self.lower_pending()?;
         typed::check_depth(Node::Program(&program))?;
-        for entry in &self.shared {
-            if let Some(definition) = &entry.definition {
-                typed::check_depth(Node::Expression(&definition.body))?;
-            }
-        }
         let order = self.definition_order()?;
         self.prepare_levels(&order);
         loop {
             let mut anonymous_changed = typed::compact_anonymous(NodeMut::Program(&mut program));
             for entry in &mut self.shared {
-                anonymous_changed |= typed::compact_anonymous(NodeMut::Expression(
+                anonymous_changed |= typed::compact_anonymous(NodeMut::Body(
                     &mut entry.definition.as_mut().unwrap().body,
                 ));
             }
@@ -1508,9 +1753,8 @@ impl Compiler<'_> {
                 .shared
                 .iter()
                 .map(|entry| {
-                    let used = typed::capture_slots(Node::Expression(
-                        &entry.definition.as_ref().unwrap().body,
-                    ));
+                    let used =
+                        typed::capture_slots(Node::Body(&entry.definition.as_ref().unwrap().body));
                     (0..entry.captures.len())
                         .filter(|slot| used.contains(slot))
                         .enumerate()
@@ -1535,21 +1779,43 @@ impl Compiler<'_> {
                     keep
                 });
                 let definition = entry.definition.as_mut().unwrap();
-                typed::remap_captures(NodeMut::Expression(&mut definition.body), &mappings[id]);
+                typed::remap_captures(NodeMut::Body(&mut definition.body), &mappings[id]);
                 definition.capture_count = entry.captures.len();
-                typed::trim_call_captures(NodeMut::Expression(&mut definition.body), &mappings);
+                typed::trim_call_captures(NodeMut::Body(&mut definition.body), &mappings);
             }
             typed::trim_call_captures(NodeMut::Program(&mut program), &mappings);
         }
         self.prepare_levels(&order);
         for entry in &self.shared {
             typed::check_primes(
-                Node::Expression(&entry.definition.as_ref().unwrap().body),
+                Node::Body(&entry.definition.as_ref().unwrap().body),
                 &self.level_cache.borrow(),
             )?;
         }
         typed::check_primes(Node::Program(&program), &self.level_cache.borrow())?;
-        let mut order: Vec<_> = (0..self.shared.len()).collect();
+        typed::check_shared_expansion(
+            &program,
+            &self
+                .shared
+                .iter()
+                .map(|entry| entry.definition.as_ref().unwrap())
+                .collect::<Vec<_>>(),
+            &order,
+        )?;
+        let mut reached = HashSet::new();
+        let mut pending: Vec<_> = typed::call_ids(Node::Program(&program))
+            .into_iter()
+            .collect();
+        while let Some(id) = pending.pop() {
+            if reached.insert(id) {
+                pending.extend(typed::call_ids(Node::Body(
+                    &self.shared[id].definition.as_ref().unwrap().body,
+                )));
+            }
+        }
+        let mut order: Vec<_> = (0..self.shared.len())
+            .filter(|id| self.shared[*id].key.4 != ir::BodyKind::Temporal || reached.contains(id))
+            .collect();
         order.sort_by(|left, right| self.shared[*left].key.cmp(&self.shared[*right].key));
         let mapping: HashMap<_, _> = order
             .iter()
@@ -1578,7 +1844,7 @@ impl Compiler<'_> {
             .iter()
             .map(|entry| {
                 let mut calls = HashSet::new();
-                calls.extend(typed::call_ids(Node::Expression(
+                calls.extend(typed::call_ids(Node::Body(
                     &entry.definition.as_ref().unwrap().body,
                 )));
                 calls.into_iter().collect()
@@ -1600,7 +1866,17 @@ impl Compiler<'_> {
                             states[callee] = 1;
                             pending.push((callee, 0));
                         }
-                        1 => return unsupported("recursive operator definitions"),
+                        1 => {
+                            let start = pending.iter().position(|(id, _)| *id == callee).unwrap();
+                            if pending[start..]
+                                .iter()
+                                .any(|(id, _)| !self.shared[*id].recursive)
+                            {
+                                return unsupported(
+                                    "recursive operator definitions require RECURSIVE declarations",
+                                );
+                            }
+                        }
                         _ => {}
                     }
                 } else {
@@ -1614,6 +1890,7 @@ impl Compiler<'_> {
     }
     fn root(&self, phase: Phase) -> Context {
         Context {
+            origin: 0,
             phase,
             locals: BTreeMap::new(),
             calls: vec![],
@@ -1653,16 +1930,19 @@ impl Compiler<'_> {
             .ok_or_else(|| CompileError {
                 message: format!("operator {name}"),
             })?;
+        if self.version == IrVersion::V1 && args.iter().any(free_old) && self.rebinds_old(&entry) {
+            return unsupported("EXCEPT @ arguments across a nested EXCEPT require safety IR v2");
+        }
         if entry.definition.is_recursive
             || if self.version == IrVersion::V1 {
                 context.calls.iter().any(|item| item == name)
             } else {
-                context.call_ids.contains(&entry.definition.location.start)
+                context.call_ids.contains(&entry.id)
             }
         {
             return unsupported(format!("operator {name}"));
         }
-        let position = entry.definition.location.start;
+        let position = entry.id;
         if self.version == IrVersion::V2 {
             let mut inner = self.target_context(&entry);
             inner.phase = context.phase;
@@ -1818,6 +2098,7 @@ impl Compiler<'_> {
             }
         };
         let mut child = context.nested()?;
+        child.origin = entry.id;
         child.locals = locals;
         child.order = order;
         child.binding_ids = binding_ids;
@@ -1827,7 +2108,47 @@ impl Compiler<'_> {
         child.call_ids.push(position);
         Ok((body, child))
     }
+    fn rebinds_old(&self, entry: &Entry) -> bool {
+        let mut visited = HashSet::new();
+        let mut pending = vec![(Node::SourceDefinition(&entry.definition), entry.scope)];
+        while let Some((node, scope)) = pending.pop() {
+            if matches!(
+                node,
+                Node::Source(Expression {
+                    node: E::Except { .. },
+                    ..
+                })
+            ) {
+                return true;
+            }
+            if let Node::Source(Expression {
+                node: E::Identifier { name } | E::Apply { operator: name, .. },
+                ..
+            }) = node
+                && let Some(callee) = self.scopes[scope].get(name)
+                && visited.insert(callee.id)
+            {
+                pending.push((Node::SourceDefinition(&callee.definition), callee.scope));
+            }
+            pending.extend(
+                analysis::analysis_children(node)
+                    .into_iter()
+                    .map(|edge| (edge.node, scope)),
+            );
+        }
+        false
+    }
     fn let_context(&mut self, definitions: &[Definition], context: &Context) -> Result<Context> {
+        for definition in definitions {
+            let imported = match definition.name.as_str() {
+                "SelectSeq" => self.extends("Sequences"),
+                "SortSeq" | "Assert" => self.extends("TLC"),
+                _ => false,
+            };
+            if imported {
+                return unsupported(format!("duplicate LET definition {}", definition.name));
+            }
+        }
         if definitions
             .iter()
             .map(|definition| &definition.name)
@@ -1837,19 +2158,13 @@ impl Compiler<'_> {
         {
             return unsupported("duplicate LET definitions");
         }
-        if self.version == IrVersion::V2
-            && definitions
-                .iter()
-                .any(|definition| free_old(&definition_body(definition)))
-        {
-            return unsupported("LET definitions with free EXCEPT @");
-        }
         let scope = self.scopes.len();
         let mut entries = self.scopes[context.scope].clone();
         for definition in definitions {
             entries.insert(
                 definition.name.clone(),
                 Rc::new(Entry {
+                    id: self.declaration_ids[&(definition.location.start, definition.name.clone())],
                     definition: Rc::new(definition.clone()),
                     locals: context.locals.clone(),
                     scope,
@@ -1880,7 +2195,8 @@ impl Compiler<'_> {
                 Pattern::Name { name } => {
                     child.order.retain(|item| item != name);
                     child.order.push(name.clone());
-                    let binding_id = self.binding_id(bound.set.location.start, 1, 0);
+                    let binding_id =
+                        self.named_binding_at(context.origin, bound.set.location.start, 1, 0, name);
                     child.binding_ids.insert(name.clone(), binding_id);
                     child
                         .projection
@@ -1894,7 +2210,13 @@ impl Compiler<'_> {
                     for (index, name) in names.iter().enumerate() {
                         child.order.retain(|item| item != name);
                         child.order.push(name.clone());
-                        let binding_id = self.binding_id(bound.set.location.start, 1, index);
+                        let binding_id = self.named_binding_at(
+                            context.origin,
+                            bound.set.location.start,
+                            1,
+                            index,
+                            name,
+                        );
                         child.binding_ids.insert(name.clone(), binding_id);
                         child.projection.insert(
                             binding_id,
@@ -2152,7 +2474,8 @@ impl Compiler<'_> {
                         old.locals.insert("@".into(), ir::Expression::Old);
                         old.order.retain(|name| name != "@");
                         old.order.push("@".into());
-                        let binding = self.binding_id(update.value.location.start, 2, 0);
+                        let binding =
+                            self.binding_at(context.origin, update.value.location.start, 2, 0);
                         old.binding_ids.insert("@".into(), binding);
                         old.projection.insert(binding, ir::Expression::Old);
                     }
@@ -2259,11 +2582,25 @@ impl Compiler<'_> {
         context: &Context,
         child: &Context,
     ) -> Result<Json> {
-        let E::Identifier { name } = &args[0].node else {
-            return unsupported("fold operator argument");
+        let initial = self.expression(&args[1], child)?;
+        let collection = self.expression(&args[2], child)?;
+        let body = self.callback(&args[0], 2, context, child)?;
+        Ok(
+            json!({"op":"fold", "accumulator":context.bound,"initial":initial,"collection":collection,"order":if sequence { "sequence-left" } else { "set-members" },"body":body}),
+        )
+    }
+    fn callback(
+        &mut self,
+        argument: &Expression,
+        arity: usize,
+        context: &Context,
+        child: &Context,
+    ) -> Result<Json> {
+        let E::Identifier { name } = &argument.node else {
+            return unsupported("callback operator argument");
         };
         if context.locals.contains_key(name) {
-            return unsupported(format!("fold operator {name}"));
+            return unsupported(format!("callback operator {name}"));
         }
         let entry = self.scopes[context.scope]
             .get(name)
@@ -2275,63 +2612,37 @@ impl Compiler<'_> {
             || if self.version == IrVersion::V1 {
                 context.calls.iter().any(|item| item == name)
             } else {
-                context.call_ids.contains(&entry.definition.location.start)
+                context.call_ids.contains(&entry.id)
             }
         {
             return unsupported(format!("operator {name}"));
         }
         let DefinitionKind::Operator { params } = &entry.definition.head else {
-            return unsupported(format!("fold operator {name}"));
+            return unsupported(format!("callback operator {name}"));
         };
-        if params.len() != 2 || params.iter().any(|param| param.arity != 0) {
-            return unsupported(format!("fold operator {name}"));
+        if params.len() != arity || params.iter().any(|param| param.arity != 0) {
+            return unsupported(format!("callback operator {name}"));
         }
         let accumulator = context.bound;
-        if accumulator + 2 > 40 {
+        if accumulator + arity > 40 {
             return unsupported("more than 40 bound variables");
         }
-        let initial = self.expression(&args[1], child)?;
-        let collection = self.expression(&args[2], child)?;
-        if self.version == IrVersion::V2 {
-            let body = self.shared_arguments(
-                name,
-                vec![
-                    json!({"op":"bound","slot":accumulator}),
-                    json!({"op":"bound","slot":accumulator + 1}),
-                ],
-                context,
-                false,
-                BTreeMap::new(),
-            )?;
-            return Ok(
-                json!({"op":"fold","accumulator":accumulator,"initial":initial,"collection":collection,"order":if sequence {"sequence-left"} else {"set-members"},"body":body}),
+        let mut locals = entry.locals;
+        for (index, param) in params.iter().enumerate() {
+            locals.insert(
+                param.name.clone(),
+                ir::Expression::Bound {
+                    slot: accumulator + index,
+                },
             );
         }
-        let mut locals = entry.locals;
-        locals.insert(
-            params[0].name.clone(),
-            ir::Expression::Bound { slot: accumulator },
-        );
-        locals.insert(
-            params[1].name.clone(),
-            ir::Expression::Bound {
-                slot: accumulator + 1,
-            },
-        );
         let mut inner = child.nested()?;
+        inner.origin = entry.id;
         inner.locals = locals;
         inner.scope = entry.scope;
         inner.calls.push(name.clone());
-        inner.bound = accumulator + 2;
-        let body = self.expression(&entry.definition.body, &inner)?;
-        Ok(json!({
-            "op": "fold",
-            "accumulator": accumulator,
-            "initial": initial,
-            "collection": collection,
-            "order": if sequence { "sequence-left" } else { "set-members" },
-            "body": body,
-        }))
+        inner.bound = accumulator + arity;
+        self.expression(&entry.definition.body, &inner)
     }
     fn key(&mut self, args: &[Expression], context: &Context) -> Result<Json> {
         if args.len() == 1 {
@@ -2340,6 +2651,7 @@ impl Compiler<'_> {
             Ok(json!({"op":"tuple","values":self.expressions(args,context)?}))
         }
     }
+
     fn apply(
         &mut self,
         operator: &str,
@@ -2353,6 +2665,31 @@ impl Compiler<'_> {
             }
             let (body, expanded) = self.call(operator, args, context)?;
             return self.expression(&body, &expanded);
+        }
+        if (operator == "SelectSeq" && self.extends("Sequences"))
+            || (operator == "SortSeq" && self.extends("TLC"))
+        {
+            if args.len() != 2 {
+                return unsupported(format!("operator arity {operator}"));
+            }
+            let sequence = self.expression(&args[0], child)?;
+            let body = self.callback(
+                &args[1],
+                if operator == "SortSeq" { 2 } else { 1 },
+                context,
+                child,
+            )?;
+            return Ok(
+                json!({"op":if operator == "SelectSeq" { "select-seq" } else { "sort-seq" },"slot":context.bound,"sequence":sequence,"body":body}),
+            );
+        }
+        if operator == "Assert" && self.extends("TLC") {
+            if args.len() != 2 {
+                return unsupported("operator arity Assert");
+            }
+            return Ok(
+                json!({"op":"assert","condition":self.expression(&args[0],child)?,"message":self.expression(&args[1],child)?}),
+            );
         }
         if self.extends("Apalache") && ["ApaFoldSet", "ApaFoldSeqLeft"].contains(&operator) {
             if args.len() != 3 {
@@ -2501,6 +2838,7 @@ impl Compiler<'_> {
             json!({"op":op,"left":self.expression(&args[0],child)?,"right":self.expression(&args[1],child)?}),
         )
     }
+
     fn membership_set(&mut self, value: &Expression, context: &Context) -> Result<Json> {
         if self.version == IrVersion::V2 {
             return Ok(json!(self.membership_ir(value, context)?));
@@ -2666,7 +3004,9 @@ impl Compiler<'_> {
                     let result = results.drain(results.len() - count..).any(|value| value);
                     if let Some((position, phase)) = key {
                         active.remove(&position);
-                        self.generative_cache.insert((position, phase), result);
+                        if result || !self.recursive_ids.contains(&position) {
+                            self.generative_cache.insert((position, phase), result);
+                        }
                     }
                     results.push(result);
                 }
@@ -2678,14 +3018,18 @@ impl Compiler<'_> {
                             .ok_or_else(|| CompileError {
                                 message: format!("operator {name}"),
                             })?;
-                    let position = entry.definition.location.start;
+                    let position = entry.id;
                     let phase = match context.phase {
                         Phase::Constant => 0,
                         Phase::Initial => 1,
                         Phase::State => 2,
                         Phase::Next => 3,
                     };
-                    if entry.definition.is_recursive || active.contains(&position) {
+                    if active.contains(&position) {
+                        if entry.definition.is_recursive {
+                            results.push(false);
+                            continue;
+                        }
                         return unsupported(format!("operator {name}"));
                     }
                     if let Some(result) = self.generative_cache.get(&(position, phase)) {
@@ -3139,17 +3483,34 @@ impl Compiler<'_> {
         next: &mut Option<Vec<Json>>,
         fairness: &mut Vec<Json>,
     ) -> Result<()> {
+        if matches!(value.node, E::Forall { .. } | E::Exists { .. }) {
+            let formula = self.temporal(value, context)?;
+            if formula["kind"] != "atom" {
+                fairness.push(formula);
+                return Ok(());
+            }
+        }
         match &value.node {
             E::Identifier { name } if self.has(context, name) => {
                 let (body, expanded) = self.call(name, &[], context)?;
                 self.parts(&body, &expanded, initial, next, fairness)
             }
-            E::And {
-                operands: _,
-                is_bulleted: _,
-            } => {
-                for operand in source_children(value) {
-                    self.parts(&operand, &context.nested()?, initial, next, fairness)?;
+            E::Apply { operator, args } if self.has(context, operator) => {
+                for argument in args {
+                    if level(&self.expression(argument, context)?) > 0 {
+                        return unsupported("SPECIFICATION operator arguments must be constant");
+                    }
+                }
+                let (body, expanded) = self.call(operator, args, context)?;
+                self.parts(&body, &expanded, initial, next, fairness)
+            }
+            E::Let { definitions, body } => {
+                let expanded = self.let_context(definitions, context)?;
+                self.parts(body, &expanded, initial, next, fairness)
+            }
+            E::And { operands, .. } => {
+                for operand in operands {
+                    self.parts(operand, &context.nested()?, initial, next, fairness)?;
                 }
                 Ok(())
             }
@@ -3319,6 +3680,9 @@ impl Compiler<'_> {
             assumptions.push(json!({"name":assumption.name.clone().unwrap_or_else(||format!("ASSUME {}",index+1)),"expression":self.expression(&assumption.expression,&self.root(Phase::Constant))?}));
         }
         let mut result = json!({"format":"modelt.safety-program","version":1,"name":self.module.name,"variables":self.module.variables.iter().map(|value|&value.name).collect::<Vec<_>>(),"initial":initial,"next":next,"invariants":invariants,"assumptions":assumptions,"checkDeadlock":self.config.check_deadlock});
+        if let Some(symmetry) = self.node_symmetry()? {
+            result["symmetry"] = symmetry;
+        }
         for (key, names, phase) in [
             ("constraints", self.config.constraints.clone(), Phase::State),
             (

@@ -1,40 +1,21 @@
 import { readFile } from "node:fs/promises";
 import { createServer, type Server } from "node:http";
 import { expect, test } from "@playwright/test";
-import { build } from "esbuild";
-import { cases } from "../evals/rust-safety/cases.js";
-import { compileTlaSafety } from "../src/tla-safety.js";
+import { cases } from "../evals/experiments/rust-safety/cases.js";
+import { compileTlaSafety } from "../packages/idealis/src/tla-safety.js";
+import { bundleModule } from "../scripts/bundle-module.js";
 
 let server: Server;
 let origin: string;
 test.beforeAll(async () => {
   const outputs = await Promise.all([
-    build({
-      entryPoints: ["evals/parallel-safety/browser-test-entry.ts"],
-      bundle: true,
-      platform: "browser",
-      format: "iife",
+    bundleModule("tests/parallel-safety/browser-test-entry.ts", {
       globalName: "parallelSafety",
-      write: false,
     }),
-    build({
-      entryPoints: ["evals/parallel-safety/browser-worker.ts"],
-      bundle: true,
-      platform: "browser",
-      format: "esm",
-      write: false,
-    }),
-    build({
-      entryPoints: ["src/scheduling.ts"],
-      bundle: true,
-      platform: "browser",
-      write: false,
-      metafile: true,
-    }),
+    bundleModule("evals/experiments/parallel-safety/browser-worker.ts"),
+    bundleModule("packages/idealis/src/scheduling.ts"),
   ]);
-  expect(Object.keys(outputs[2]?.metafile?.inputs ?? {})).toEqual([
-    "src/scheduling.ts",
-  ]);
+  expect(outputs[2].inputs).toEqual(["packages/idealis/src/scheduling.ts"]);
   const programs = cases
     .filter((input) =>
       ["cycle", "violation", "empty", "depth-cut"].includes(input.name),
@@ -55,15 +36,15 @@ test.beforeAll(async () => {
     [
       "/bundle.js",
       {
-        body: outputs[0]?.outputFiles[0]?.contents ?? new Uint8Array(),
-        type: "text/javascript",
+        body: Buffer.from(outputs[0].code),
+        type: "text/javascript; charset=utf-8",
       },
     ],
     [
       "/worker.js",
       {
-        body: outputs[1]?.outputFiles[0]?.contents ?? new Uint8Array(),
-        type: "text/javascript",
+        body: Buffer.from(outputs[1].code),
+        type: "text/javascript; charset=utf-8",
       },
     ],
     [

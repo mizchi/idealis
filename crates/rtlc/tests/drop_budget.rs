@@ -424,12 +424,13 @@ fn not_chain(depth: usize) -> Expression {
 
 fn definition(id: usize, body: Expression) -> Definition {
     Definition {
+        recursive: false,
         id,
         parameter_count: 0,
         capture_count: 0,
         body_kind: BodyKind::Expression,
         local_scope: 0,
-        body,
+        body: body.into(),
     }
 }
 
@@ -444,6 +445,7 @@ fn program_with_deep_fields(depth: usize) -> SafetyProgram {
         invariants: vec![],
         assumptions: vec![],
         check_deadlock: false,
+        symmetry: None,
         initial_properties: vec![],
         action_properties: vec![],
         properties: vec![TemporalProperty {

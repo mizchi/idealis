@@ -17,6 +17,11 @@ path = "src/benchmarks.rs"
 harness = false
 
 [[bench]]
+name = "coverage"
+path = "src/coverage_benchmarks.rs"
+harness = false
+
+[[bench]]
 name = "expansions"
 path = "src/expansion_benchmarks.rs"
 harness = false
@@ -38,3 +43,8 @@ lto = true
 codegen-units = 1
 panic = "abort"
 strip = true
+
+[[bench]]
+name = "symmetry"
+path = "src/symmetry_benchmarks.rs"
+harness = false

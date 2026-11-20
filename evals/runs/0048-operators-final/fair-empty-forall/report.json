@@ -1,0 +1,349 @@
+{
+  "name": "fair-empty-forall",
+  "compiled": {
+    "kind": "compiled",
+    "program": {
+      "format": "modelt.safety-program",
+      "version": 1,
+      "name": "Differential",
+      "variables": [
+        "done"
+      ],
+      "initial": [
+        {
+          "name": "Init",
+          "steps": [
+            {
+              "kind": "assign",
+              "slot": 0,
+              "value": {
+                "op": "set",
+                "values": []
+              }
+            }
+          ]
+        }
+      ],
+      "next": [
+        {
+          "name": "Step",
+          "steps": [
+            {
+              "kind": "bind",
+              "slot": 0,
+              "domain": {
+                "kind": "set",
+                "values": [
+                  {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "guard",
+              "expression": {
+                "op": "not",
+                "argument": {
+                  "op": "in",
+                  "value": {
+                    "op": "bound",
+                    "slot": 0
+                  },
+                  "domain": {
+                    "kind": "value",
+                    "value": {
+                      "op": "read",
+                      "slot": 0,
+                      "next": false
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "slot": 0,
+              "value": {
+                "op": "cup",
+                "left": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "right": {
+                  "op": "set",
+                  "values": [
+                    {
+                      "op": "bound",
+                      "slot": 0
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "invariants": [],
+      "assumptions": [],
+      "checkDeadlock": false,
+      "properties": [
+        {
+          "name": "Live",
+          "formula": {
+            "kind": "eventually",
+            "formula": {
+              "kind": "atom",
+              "expression": {
+                "op": "eq",
+                "left": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "right": {
+                  "op": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "1"
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "2"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ],
+      "fairness": [
+        {
+          "kind": "forall",
+          "bounds": [
+            {
+              "slot": 0,
+              "domain": {
+                "kind": "set",
+                "values": []
+              }
+            }
+          ],
+          "formula": {
+            "kind": "always",
+            "formula": {
+              "kind": "eventually",
+              "formula": {
+                "kind": "or",
+                "left": {
+                  "kind": "not",
+                  "formula": {
+                    "kind": "atom",
+                    "expression": {
+                      "op": "enabled",
+                      "branches": [
+                        {
+                          "name": "Step",
+                          "steps": [
+                            {
+                              "kind": "guard",
+                              "expression": {
+                                "op": "not",
+                                "argument": {
+                                  "op": "in",
+                                  "value": {
+                                    "op": "bound",
+                                    "slot": 0
+                                  },
+                                  "domain": {
+                                    "kind": "value",
+                                    "value": {
+                                      "op": "read",
+                                      "slot": 0,
+                                      "next": false
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "assign",
+                              "slot": 0,
+                              "value": {
+                                "op": "cup",
+                                "left": {
+                                  "op": "read",
+                                  "slot": 0,
+                                  "next": false
+                                },
+                                "right": {
+                                  "op": "set",
+                                  "values": [
+                                    {
+                                      "op": "bound",
+                                      "slot": 0
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      "subscript": {
+                        "op": "read",
+                        "slot": 0,
+                        "next": false
+                      }
+                    }
+                  }
+                },
+                "right": {
+                  "kind": "atom",
+                  "expression": {
+                    "op": "and",
+                    "left": {
+                      "op": "and",
+                      "left": {
+                        "op": "and",
+                        "left": {
+                          "op": "literal",
+                          "value": {
+                            "type": "bool",
+                            "value": true
+                          }
+                        },
+                        "right": {
+                          "op": "not",
+                          "argument": {
+                            "op": "in",
+                            "value": {
+                              "op": "bound",
+                              "slot": 0
+                            },
+                            "domain": {
+                              "kind": "value",
+                              "value": {
+                                "op": "read",
+                                "slot": 0,
+                                "next": false
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "right": {
+                        "op": "eq",
+                        "left": {
+                          "op": "read",
+                          "slot": 0,
+                          "next": true
+                        },
+                        "right": {
+                          "op": "cup",
+                          "left": {
+                            "op": "read",
+                            "slot": 0,
+                            "next": false
+                          },
+                          "right": {
+                            "op": "set",
+                            "values": [
+                              {
+                                "op": "bound",
+                                "slot": 0
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "right": {
+                      "op": "ne",
+                      "left": {
+                        "op": "read",
+                        "slot": 0,
+                        "next": false
+                      },
+                      "right": {
+                        "op": "prime",
+                        "argument": {
+                          "op": "read",
+                          "slot": 0,
+                          "next": false
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "checked": {
+    "kind": "safety",
+    "result": {
+      "status": "liveness-violation",
+      "reason": null,
+      "states": 4,
+      "generated": 5,
+      "depth": 2,
+      "work": 108,
+      "violation": {
+        "name": "Live",
+        "trace": [
+          {
+            "action": null,
+            "values": [
+              {
+                "type": "set",
+                "value": []
+              }
+            ]
+          }
+        ],
+        "loopStart": 0,
+        "loopAction": "<stuttering>"
+      }
+    }
+  },
+  "reference": {
+    "status": "liveness-violation",
+    "states": 4,
+    "generated": 5,
+    "exit": 13
+  },
+  "witness": {
+    "input": {
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (\\A p \\in {}: WF_done(Step(p)))\nLive == <> (done = {1,2})\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (done = {})\n__TraceNext == ((__position = 0 /\\ __position' = 0 /\\ (done' = {}))) /\\ (Next \\/ UNCHANGED <<done>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<done,__position>> /\\ WF_<<done,__position>>(__TraceNext)\n__Expected == (Spec) /\\ ~(Live)\n====",
+      "modules": {},
+      "expected": "complete",
+      "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+    },
+    "status": "complete",
+    "states": 1
+  }
+}

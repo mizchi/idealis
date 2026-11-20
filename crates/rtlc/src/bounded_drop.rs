@@ -200,6 +200,14 @@ fn detach_bindings(bounds: &mut Vec<Binding>, budget: usize, worklist: &mut Work
 
 fn detach_step(step: &mut Step, budget: usize, worklist: &mut Worklist) {
     match step {
+        Step::Call {
+            arguments,
+            captures,
+            ..
+        } => {
+            dispose_expressions(mem::take(arguments), budget, worklist);
+            dispose_expressions(mem::take(captures), budget, worklist);
+        }
         Step::Frame {
             arguments,
             captures,
@@ -323,6 +331,15 @@ fn detach_expression(node: &mut Expression, budget: usize, worklist: &mut Workli
             detach_boxed(collection, budget, worklist);
             detach_boxed(body, budget, worklist);
         }
+        Expression::SelectSeq { sequence, body, .. }
+        | Expression::SortSeq { sequence, body, .. } => {
+            detach_boxed(sequence, budget, worklist);
+            detach_boxed(body, budget, worklist);
+        }
+        Expression::Assert { condition, message } => {
+            detach_boxed(condition, budget, worklist);
+            detach_boxed(message, budget, worklist);
+        }
         Expression::Domain { argument }
         | Expression::VariantTag { argument }
         | Expression::Cardinality { argument }
@@ -394,6 +411,14 @@ fn detach_expression(node: &mut Expression, budget: usize, worklist: &mut Workli
 
 fn detach_formula(node: &mut TemporalFormula, budget: usize, worklist: &mut Worklist) {
     match node {
+        TemporalFormula::Call {
+            arguments,
+            captures,
+            ..
+        } => {
+            dispose_expressions(mem::take(arguments), budget, worklist);
+            dispose_expressions(mem::take(captures), budget, worklist);
+        }
         TemporalFormula::Frame {
             arguments,
             captures,

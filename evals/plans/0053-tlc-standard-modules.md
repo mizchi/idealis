@@ -1,0 +1,15 @@
+# 0053: TLCのApalache参照環境を固定する
+
+0052のdevelopment 155ケースは24件不一致だった。Apalacheをimportする24仕様で参照TLCが標準moduleを見つけられずinput-errorになった。式・期待値・判定を変更せず、公式moduleを既存fixtureと同じSHA-256 a9115b404e72c58fd085f81bc59cc918f8adac49feabfb57f8e285bc7ab5cfacへ固定して準備する。ローカルApalache 0.63.0 jarのmoduleもこのdigestと一致した。
+
+Nodeの準備コマンドが公式v0.56.1のsourceを検証して.artifacts以下へ保存する。実行中のnetwork取得やmoduleの推測実装、元jarの改変はしない。TLC 5a47802のSimpleFilenameToStreamが実装するTLA-Library system propertyで検索pathを渡す。各仕様directoryの明示moduleが優先される既存の挙動を維持する。標準module原本はリポジトリへ追加しない。
+
+differentialの本体と全witness再実行で同じ検索pathを使う。moduleのURL・SHA・pathをrun manifestへ記録し、前後とreplayで検証する。module不足はモデルのinput-errorと区別してinfrastructure-errorへ分類する。差分を消す目的の期待値変更は行わない。
+
+TDDでmissing/corrupt cache、固定digest、引数の検索pathと空白、明示module優先、missing module分類を検査する。TLC実行でfold/empty/評価エラー/Nextと反例を確認し、developmentとconfirmationを新規実行する。同じ入力の回帰であり新しい検出力の主張はしない。保存runを上書きせず、replayも新directoryへ保存する。
+
+just check/browser、専用TLCテスト、evaluate/replay-evaluation、共有検証のmutation、supportのoffline/staged gateを実行する。実装とチェックリストの変更があればJevのlive比較も更新する。条件と残差はiterationへ記録する。PR/push/mergeは行わない。
+
+## 最初の参照環境修正後
+
+0053-tlc-developmentは155件の元のモデル判定が揃い、24不一致のうち21件はwitnessも一致した。残った3件はwitnessにint32の最小値を直接出力すると、TLCが正の整数token 2147483648を拒否する問題だった。TLCのSpecProcessorとNaturals.Minus/Integers.Minusを確認し、最小値だけを(-2147483647 - 1)として出力する。元のモデルと期待値は変えず、direct/list/set/mapの境界値を実TLCで検査する。最初のrunを保存し、修正後のdevelopment/confirmation/replayは新directoryで実行する。

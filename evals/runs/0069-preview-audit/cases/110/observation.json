@@ -1,0 +1,263 @@
+{
+  "actual": {
+    "kind": "module",
+    "module": {
+      "name": "Test",
+      "extends": [],
+      "constants": [],
+      "variables": [],
+      "definitions": [
+        {
+          "name": "op",
+          "kind": "Operator",
+          "params": [],
+          "body": {
+            "kind": "And",
+            "operands": [
+              {
+                "kind": "If",
+                "condition": {
+                  "kind": "Number",
+                  "value": 1,
+                  "location": {
+                    "start": 38,
+                    "end": 39,
+                    "line": 4,
+                    "column": 10
+                  }
+                },
+                "consequent": {
+                  "kind": "Number",
+                  "value": 2,
+                  "location": {
+                    "start": 51,
+                    "end": 52,
+                    "line": 5,
+                    "column": 12
+                  }
+                },
+                "alternative": {
+                  "kind": "Number",
+                  "value": 3,
+                  "location": {
+                    "start": 64,
+                    "end": 65,
+                    "line": 6,
+                    "column": 12
+                  }
+                },
+                "location": {
+                  "start": 35,
+                  "end": 37,
+                  "line": 4,
+                  "column": 7
+                }
+              },
+              {
+                "kind": "Number",
+                "value": 4,
+                "location": {
+                  "start": 71,
+                  "end": 72,
+                  "line": 7,
+                  "column": 6
+                }
+              }
+            ],
+            "isBulleted": true,
+            "location": {
+              "start": 31,
+              "end": 33,
+              "line": 4,
+              "column": 3
+            }
+          },
+          "isLocal": false,
+          "isRecursive": false,
+          "location": {
+            "start": 23,
+            "end": 25,
+            "line": 3,
+            "column": 1
+          }
+        }
+      ],
+      "assumptions": [],
+      "theorems": [],
+      "location": {
+        "start": 1,
+        "end": 5,
+        "line": 2,
+        "column": 1
+      }
+    }
+  },
+  "reference": {
+    "kind": "accepted",
+    "tree": {
+      "kind": 382,
+      "image": "N_Module",
+      "children": [
+        {
+          "kind": 333,
+          "image": "N_BeginModule",
+          "children": [
+            {
+              "kind": 3,
+              "image": "---- MODULE",
+              "children": []
+            },
+            {
+              "kind": 289,
+              "image": "Test",
+              "children": []
+            },
+            {
+              "kind": 36,
+              "image": "----",
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": 350,
+          "image": "N_Extends",
+          "children": []
+        },
+        {
+          "kind": 334,
+          "image": "N_Body",
+          "children": [
+            {
+              "kind": 389,
+              "image": "N_OperatorDefinition",
+              "children": [
+                {
+                  "kind": 366,
+                  "image": "N_IdentLHS",
+                  "children": [
+                    {
+                      "kind": 289,
+                      "image": "op",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "kind": 93,
+                  "image": "==",
+                  "children": []
+                },
+                {
+                  "kind": 341,
+                  "image": "N_ConjList",
+                  "children": [
+                    {
+                      "kind": 340,
+                      "image": "N_ConjItem",
+                      "children": [
+                        {
+                          "kind": 129,
+                          "image": "/\\",
+                          "children": []
+                        },
+                        {
+                          "kind": 369,
+                          "image": "N_IfThenElse",
+                          "children": [
+                            {
+                              "kind": 50,
+                              "image": "IF",
+                              "children": []
+                            },
+                            {
+                              "kind": 385,
+                              "image": "N_Number",
+                              "children": [
+                                {
+                                  "kind": 109,
+                                  "image": "1",
+                                  "children": []
+                                }
+                              ]
+                            },
+                            {
+                              "kind": 62,
+                              "image": "THEN",
+                              "children": []
+                            },
+                            {
+                              "kind": 385,
+                              "image": "N_Number",
+                              "children": [
+                                {
+                                  "kind": 109,
+                                  "image": "2",
+                                  "children": []
+                                }
+                              ]
+                            },
+                            {
+                              "kind": 45,
+                              "image": "ELSE",
+                              "children": []
+                            },
+                            {
+                              "kind": 385,
+                              "image": "N_Number",
+                              "children": [
+                                {
+                                  "kind": 109,
+                                  "image": "3",
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "kind": 340,
+                      "image": "N_ConjItem",
+                      "children": [
+                        {
+                          "kind": 129,
+                          "image": "/\\",
+                          "children": []
+                        },
+                        {
+                          "kind": 385,
+                          "image": "N_Number",
+                          "children": [
+                            {
+                              "kind": 109,
+                              "image": "4",
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": 345,
+          "image": "N_EndModule",
+          "children": [
+            {
+              "kind": 37,
+              "image": "====",
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "tlaTs": "accepted"
+}

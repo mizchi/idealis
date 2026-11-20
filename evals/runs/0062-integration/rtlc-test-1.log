@@ -1,0 +1,430 @@
+   Compiling rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 17.03s
+     Running unittests src/lib.rs (crates/rtlc/target/debug/deps/rtlc-4755f7e95d4686b7)
+
+running 123 tests
+test safety::parallel::schedule_tests::batch_tracks_fanout_and_stays_bounded ... ok
+test safety::parallel::tests::candidates_keep_snapshots_and_order_when_buffers_are_reused ... ok
+test safety::tests::colliding_hashes_keep_distinct_typed_states ... ok
+test safety_definition_tests::analysis_parity_wire_direct_definition_id ... ok
+test safety_definition_tests::analysis_parity_wire_direct_definition_capturecount ... ok
+test safety_definition_tests::analysis_parity_wire_direct_definition_parametercount ... ok
+test safety_definition_tests::all_anonymous_frame_kinds_are_rejected_by_v1 ... ok
+test safety_definition_tests::analysis_parity_wire_direct_expression_bound_slot ... ok
+test safety_definition_tests::analysis_parity_wire_direct_binding_tuplesize ... ok
+test safety_definition_tests::analysis_parity_wire_direct_expression_call_definition ... ok
+test safety_definition_tests::analysis_parity_wire_direct_expression_capture_slot ... ok
+test safety_definition_tests::analysis_parity_wire_direct_expression_fold_accumulator ... ok
+test safety_definition_tests::analysis_parity_wire_direct_expression_frame_capturecount ... ok
+test safety_definition_tests::analysis_parity_wire_direct_expression_frame_localscope ... ok
+test safety_definition_tests::analysis_parity_wire_arity_and_slot_controls_remain_distinct_from_range_checks ... ok
+test safety_definition_tests::analysis_parity_wire_direct_expression_frame_parametercount ... ok
+test safety_definition_tests::analysis_parity_wire_direct_expression_parameter_slot ... ok
+test safety_definition_tests::analysis_parity_wire_direct_expression_read_slot ... ok
+test safety_definition_tests::analysis_parity_wire_direct_binding_slot ... ok
+test safety_definition_tests::analysis_parity_wire_direct_step_assign_slot ... ok
+test safety_definition_tests::analysis_parity_wire_direct_step_bind_tuplesize ... ok
+test safety_definition_tests::analysis_parity_wire_direct_step_bind_slot ... ok
+test safety_definition_tests::analysis_parity_wire_direct_step_choose_slot ... ok
+test safety_definition_tests::analysis_parity_wire_direct_step_frame_capturecount ... ok
+test safety_definition_tests::analysis_parity_wire_direct_step_frame_localscope ... ok
+test safety_definition_tests::analysis_parity_wire_direct_step_frame_parametercount ... ok
+test safety_definition_tests::analysis_parity_wire_direct_temporal_frame_capturecount ... ok
+test safety_definition_tests::analysis_parity_wire_direct_definition_localscope ... ok
+test safety_definition_tests::analysis_parity_wire_range_binding_slot ... ok
+test safety_definition_tests::analysis_parity_wire_direct_temporal_frame_localscope ... ok
+test safety_definition_tests::analysis_parity_wire_direct_temporal_frame_parametercount ... ok
+test safety_definition_tests::analysis_parity_wire_range_binding_tuplesize ... ok
+test safety_definition_tests::analysis_parity_wire_range_definition_id ... ok
+test safety_definition_tests::analysis_parity_wire_range_definition_localscope ... ok
+test safety_definition_tests::analysis_parity_wire_range_definition_parametercount ... ok
+test safety_definition_tests::analysis_parity_wire_range_expression_call_definition ... ok
+test safety_definition_tests::analysis_parity_wire_range_definition_capturecount ... ok
+test safety_definition_tests::analysis_parity_wire_range_expression_capture_slot ... ok
+test safety_definition_tests::analysis_parity_wire_range_expression_bound_slot ... ok
+test safety_definition_tests::analysis_parity_wire_range_expression_fold_accumulator ... ok
+test safety_definition_tests::analysis_parity_wire_range_expression_frame_capturecount ... ok
+test safety_definition_tests::analysis_parity_wire_range_expression_frame_localscope ... ok
+test safety_definition_tests::analysis_parity_wire_range_expression_frame_parametercount ... ok
+test safety_definition_tests::analysis_parity_wire_range_expression_parameter_slot ... ok
+test safety_definition_tests::analysis_parity_wire_range_expression_read_slot ... ok
+test safety_definition_tests::analysis_parity_wire_range_step_assign_slot ... ok
+test safety_definition_tests::analysis_parity_wire_range_step_bind_slot ... ok
+test safety_definition_tests::analysis_parity_wire_range_step_bind_tuplesize ... ok
+test safety_definition_tests::analysis_parity_wire_range_step_choose_slot ... ok
+test safety_definition_tests::analysis_parity_wire_range_step_frame_capturecount ... ok
+test safety_definition_tests::analysis_parity_wire_range_step_frame_localscope ... ok
+test safety_definition_tests::analysis_parity_wire_range_step_frame_parametercount ... ok
+test safety_definition_tests::analysis_parity_wire_range_temporal_frame_capturecount ... ok
+test safety_definition_tests::analysis_parity_wire_range_temporal_frame_localscope ... ok
+test safety_definition_tests::analysis_parity_wire_range_temporal_frame_parametercount ... ok
+test safety_definition_tests::anonymous_action_continuation_restores_caller_binder_and_keeps_next_assignments ... ok
+test safety_definition_tests::anonymous_bodies_cannot_implicitly_read_caller_locals_or_old ... ok
+test safety_definition_tests::anonymous_nested_identity_has_four_work_without_eager_argument_evaluation ... ok
+test safety_definition_tests::anonymous_frames_validate_counts_and_every_unused_actual ... ok
+test safety_definition_tests::anonymous_temporal_frame_actuals_follow_prime_at_each_state_edge ... ok
+test safety_definition_tests::anonymous_prime_uses_requested_next_state_and_enabled_uses_fresh_candidates ... ok
+test safety_definition_tests::anonymous_temporal_frames_own_outer_binders_across_state_evaluations ... ok
+test safety_definition_tests::v2_call_arity_and_capture_count_are_checked_before_evaluation ... ok
+test safety_definition_tests::v2_callee_and_argument_binders_both_start_at_frame_local_slot_zero ... ok
+test safety_definition_tests::v2_definition_acceptance_is_paired_with_self_cycle_refusal ... ok
+test safety_definition_tests::v2_definition_ids_are_dense_and_follow_table_order ... ok
+test safety_definition_tests::v2_membership_branch_keeps_descriptor_purpose_and_short_circuiting ... ok
+test safety_definition_tests::v2_decoding_is_versioned_and_rejects_unknown_fields ... ok
+test safety_definition_tests::anonymous_frame_bodies_cannot_hide_cycles_or_bypass_aggregate_limits ... ok
+test safety_definition_tests::v2_definition_local_depth_keeps_the_existing_48_boundary ... ok
+test safety_definition_tests::v2_mutual_cycle_is_refused_even_in_an_unreached_branch ... ok
+test safety_definition_tests::public_program_deep_action_frames_are_checked_before_recursive_analysis ... ok
+test safety_definition_tests::v2_except_old_requires_explicit_capture_and_keeps_its_lexical_value ... ok
+test safety_definition_tests::v2_local_scope_does_not_raise_the_existing_binder_limit ... ok
+test safety_definition_tests::v2_nested_identity_has_exactly_four_units_of_work ... ok
+test safety_definition_tests::v2_parameter_and_capture_slots_cannot_escape_the_lexical_frame ... ok
+test safety_definition_tests::v2_repeated_parameter_reads_reexecute_the_argument_without_a_value_cache ... ok
+test safety_definition_tests::v2_range_descriptor_does_not_change_value_enumeration_or_v1_membership ... ok
+test safety_definition_tests::v2_shared_range_membership_avoids_enumeration_and_preserves_call_charges ... ok
+test safety_definition_tests::v2_dynamic_call_depth_is_checked_before_exhausting_the_native_stack ... ok
+test safety_definition_tests::v2_phase_validation_follows_calls_and_primed_parameters ... ok
+test safety_definition_tests::v2_phase_summary_validation_does_not_expand_nested_actuals_exponentially ... ok
+test safety_expressions::tests::cached_membership_values_and_descriptors_remap_with_worker_references ... ok
+test safety_expressions::tests::cached_type_results_compare_descriptors_after_hash_collisions ... ok
+test safety_expressions::tests::fold_charges_each_iteration_and_exhaustion_is_an_error ... ok
+test safety_definition_tests::v2_unknown_definition_ids_are_refused_at_roots_and_in_definitions ... ok
+test safety_definition_tests::v2_unused_arguments_still_require_valid_references_and_local_slots ... ok
+test safety_definition_tests::v2_range_descriptor_keeps_integer_errors_and_empty_range_order ... ok
+test safety_expressions::tests::leaf_evaluation_preserves_context_errors_and_lazy_branches ... ok
+test safety_expressions::tests::preparing_types_does_not_evaluate_an_unreached_branch_or_cache_an_error ... ok
+test safety_expressions::tests::record_types_depending_on_bound_variables_are_not_reused ... ok
+test safety_expressions::tests::fold_reserves_two_slots_without_raising_the_bound_limit ... ok
+test safety_expressions::tests::fold_slots_are_scoped_and_collection_uses_outer_scope ... ok
+test safety_symmetry::tests::colliding_canonical_hashes_use_the_complete_key ... ok
+test safety_symmetry::tests::joint_rows_preserve_correlations_global_values_and_variable_positions ... ok
+test safety_expressions::tests::successful_record_type_checks_reuse_their_work ... ok
+test safety_values::compact_domain_collision_tests::packed_functions_compare_domains_after_a_domain_hash_collision ... ok
+test safety_symmetry::tests::unsupported_shapes_and_incomplete_keys_are_errors ... ok
+test safety_values::binary_membership_tests::bulk_membership_requires_the_exact_type_range_and_packed_width ... ok
+test safety_symmetry::tests::records_and_node_sets_preserve_joint_membership_and_schema ... ok
+test safety_values::compact_domain_owner_tests::a_worker_created_domain_is_registered_in_the_root_and_reused ... ok
+test safety_values::compact_worker_alias_tests::worker_updates_use_private_counters_and_merge_back_to_the_shared_root ... ok
+test safety_values::compact_overlay_tests::overlays_remap_function_keys_and_payloads_without_mutating_the_base ... ok
+test safety_values::function_probe_tests::an_update_collision_in_the_base_does_not_replace_the_local_value ... ok
+test safety_values::compact_function_tests::updates_share_immutable_domains_and_preserve_typed_canonical_values ... ok
+test safety_definition_tests::v2_enabled_subscripts_keep_the_depth_of_live_branch_steps ... ok
+test safety_values::function_probe_tests::packed_values_and_repacking_keep_the_existing_canonical_path ... ok
+test safety_values::functions::packed_hash_tests::finalizer_matches_upstream_cpp_vectors ... ok
+test safety_values::packed_hash_tests::an_int_bool_hash_collision_preserves_type_and_canonical_identity ... ok
+test safety_values::prepared_data_tests::cached_worker_references_are_remapped_when_merged ... ok
+test safety_values::prepared_data_tests::constants_are_lazy_and_cached_only_after_success_in_each_arena ... ok
+test safety_values::prepared_data_tests::untaken_data_and_unregistered_expressions_keep_interpreter_behavior ... ok
+test safety_values::tests::colliding_function_hashes_keep_distinct_values ... ok
+test safety_values::tests::collisions_in_an_overlay_keep_base_and_local_values_distinct ... ok
+test safety_values::tests::integer_positions_preserve_sparse_domains_and_missing_keys ... ok
+test safety_values::function_probe_tests::borrowed_updates_match_independently_constructed_values_and_hashes ... ok
+test safety_values::tests::replacement_keeps_the_normalized_domain_and_canonical_identity ... ok
+test safety_work::tests::another_worker_can_spend_unused_credit_below_the_reservation_size ... ok
+test safety_work::tests::oversized_consumption_returns_the_actual_remaining_work ... ok
+test safety_values::tests::worker_values_share_the_base_and_remap_conflicting_local_references ... ok
+test safety_values::tests::fold_order_visits_shared_cells_once_per_call_and_obeys_the_work_budget ... ok
+test safety_work::tests::concurrent_workers_consume_exactly_the_global_budget ... ok
+test safety_values::packed_hash_tests::packed_cube_hashes_keep_all_values_and_spread_index_bits ... ok
+
+test result: ok. 123 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/coverage.rs (crates/rtlc/target/debug/deps/coverage-922158a4a9120168)
+
+running 6 tests
+test evaluation_errors_are_not_partial_success_reports ... ok
+test unreachable_and_same_name_branches_remain_separate ... ok
+test action_rows_distinguish_attempts_candidates_and_new_states ... ok
+test partial_work_is_accounted_when_a_branch_exhausts_the_budget ... ok
+test repeated_initial_candidates_are_not_new_states ... ok
+test temporal_work_is_not_attributed_to_the_last_action ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/deep_drop.rs (crates/rtlc/target/debug/deps/deep_drop-377f247997a205b0)
+
+running 54 tests
+test deep_drop_expression_at_key ... ok
+test deep_drop_expression_choose_body ... ok
+test deep_drop_expression_binary_right ... ok
+test deep_drop_expression_binary_left ... ok
+test deep_drop_expression_at_target ... ok
+test deep_drop_expression_choose_binding_domain ... ok
+test deep_drop_expression_call_captures ... ok
+test deep_drop_expression_enabled_subscript ... ok
+test deep_drop_expression_enabled_guard ... ok
+test deep_drop_expression_fold_body ... ok
+test deep_drop_expression_fold_collection ... ok
+test deep_drop_expression_fold_initial ... ok
+test deep_drop_expression_enabled_assign ... ok
+test deep_drop_expression_call_arguments ... ok
+test deep_drop_expression_enabled_bind_domain ... ok
+test deep_drop_expression_frame_arguments ... ok
+test deep_drop_expression_enabled_choose_domain ... ok
+test deep_drop_expression_in_invariant_predicate ... ok
+test deep_drop_expression_if_condition ... ok
+test deep_drop_expression_frame_body ... ok
+test deep_drop_expression_if_alternative ... ok
+test deep_drop_expression_quantifier_body ... ok
+test deep_drop_expression_in_value ... ok
+test deep_drop_expression_record_fields ... ok
+test deep_drop_expression_in_domain_value ... ok
+test deep_drop_expression_frame_captures ... ok
+test deep_drop_expression_set_values ... ok
+test deep_drop_expression_enabled_frame_captures ... ok
+test deep_drop_expression_record_set_fields ... ok
+test deep_drop_expression_enabled_frame_arguments ... ok
+test deep_drop_expression_quantifier_domain_set_values ... ok
+test deep_drop_expression_unary_argument ... ok
+test deep_drop_expression_quantifier_domain_range_lower ... ok
+test deep_drop_expression_subseq_to ... ok
+test deep_drop_expression_tuple_values ... ok
+test deep_drop_expression_update_target ... ok
+test deep_drop_expression_subseq_sequence ... ok
+test deep_drop_expression_update_path ... ok
+test deep_drop_expression_quantifier_domain_range_upper ... ok
+test deep_drop_temporal_binary_left ... ok
+test deep_drop_temporal_binary_right ... ok
+test deep_drop_step_frame_branches_in_enabled ... ok
+test deep_drop_temporal_frame_formula ... ok
+test deep_drop_value_list ... ok
+test deep_drop_step_frame_branches_in_initial ... ok
+test deep_drop_expression_quantifier_domain_value ... ok
+test deep_drop_temporal_unary_formula ... ok
+test deep_drop_value_map_key ... ok
+test deep_drop_value_set ... ok
+test deep_drop_expression_update_value ... ok
+test deep_drop_value_map_value ... ok
+test deep_drop_step_frame_branches_in_next ... ok
+test deep_drop_temporal_quantifier_formula ... ok
+test deep_drop_value_record ... ok
+
+test result: ok. 54 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.52s
+
+     Running tests/deep_drop_paths.rs (crates/rtlc/target/debug/deps/deep_drop_paths-f828bab79c7b4923)
+
+running 32 tests
+test data_list_clear::shallow ... ok
+test data_value_assignment::shallow ... ok
+test definition_body_assignment::shallow ... ok
+test next_branches_clear::shallow ... ok
+test property_formula_replacement::shallow ... ok
+test safety_result_trace_values::shallow ... ok
+test scalar_refusal::shallow ... ok
+test standalone_branch::shallow ... ok
+test standalone_expression::shallow ... ok
+test definition_body_assignment::deep ... ok
+test scalar_refusal::deep ... ok
+test data_value_assignment::deep ... ok
+test safety_result_trace_values::deep ... ok
+test standalone_step_frame::shallow ... ok
+test standalone_temporal_formula::shallow ... ok
+test property_formula_replacement::deep ... ok
+test standalone_value_list::shallow ... ok
+test data_list_clear::deep ... ok
+test standalone_expression::deep ... ok
+test standalone_value_map_key::shallow ... ok
+test standalone_value_record::shallow ... ok
+test standalone_value_map_value::shallow ... ok
+test standalone_value_set::shallow ... ok
+test standalone_value_list::deep ... ok
+test standalone_temporal_formula::deep ... ok
+test standalone_value_map_value::deep ... ok
+test standalone_value_set::deep ... ok
+test next_branches_clear::deep ... ok
+test standalone_value_map_key::deep ... ok
+test standalone_value_record::deep ... ok
+test standalone_branch::deep ... ok
+test standalone_step_frame::deep ... ok
+
+test result: ok. 32 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+
+     Running tests/drop_allocations.rs (crates/rtlc/target/debug/deps/drop_allocations-9ae025c69e8a8d40)
+
+running 8 tests
+test nodes_whose_children_are_all_leaves_drop_without_allocation ... ok
+test leaked_value_chain_is_reported_by_the_counter ... ok
+test leaked_expression_chain_is_reported_by_the_counter ... ok
+test value_chain_through_every_container_is_freed_without_per_node_allocation ... ok
+test temporal_formula_chain_through_every_rule_is_freed_without_per_node_allocation ... ok
+test expression_chain_through_every_rule_is_freed_without_per_node_allocation ... ok
+test step_frame_branch_chain_is_freed_without_per_node_allocation ... ok
+test program_with_deep_fields_is_freed_without_per_node_allocation ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.47s
+
+     Running tests/drop_budget.rs (crates/rtlc/target/debug/deps/drop_budget-e65f675a3d19f067)
+
+running 10 tests
+test expression_chain_up_to_the_depth_budget_drops_without_allocation ... ok
+test shallow_quantifier_with_a_non_leaf_value_domain_drops_without_allocation ... ok
+test expression_chain_one_level_past_the_depth_budget_allocates_one_worklist ... ok
+test value_chain_up_to_the_depth_budget_drops_without_allocation ... ok
+test value_chain_one_level_past_the_depth_budget_allocates_one_worklist ... ok
+test every_value_container_over_a_non_flat_child_drops_without_allocation ... ok
+test ordinary_values_and_programs_drop_without_allocation ... ok
+test every_formula_owner_edge_over_a_shallow_non_leaf_child_drops_without_allocation ... ok
+test every_other_expression_owner_edge_over_a_shallow_non_leaf_child_drops_without_allocation ... ok
+test every_expression_rule_over_a_shallow_non_leaf_child_drops_without_allocation ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/operators.rs (crates/rtlc/target/debug/deps/operators-824135d98635e99d)
+
+running 4 tests
+test assert_evaluates_its_message_before_testing_the_condition ... ok
+test callbacks_reject_invalid_slots_even_in_unexecuted_branches ... ok
+test callback_arity_counts_towards_the_bound_variable_limit ... ok
+test selection_and_every_insertion_comparison_are_bounded ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/parallel_safety.rs (crates/rtlc/target/debug/deps/parallel_safety-25fbc92e25737a6f)
+
+running 7 tests
+test parallel_diamond_deduplicates_and_keeps_bfs_counts ... ok
+test parallel_trace_is_the_same_shortest_trace ... ok
+test global_cuts_remain_bounded_and_worker_zero_is_rejected ... ok
+test parallel_constraints_keep_boundary_violations_and_counts ... ok
+test wide_batches_keep_budget_cuts_and_action_constraint_errors ... ok
+test converging_workers_validate_each_canonical_state_once ... ok
+test wide_duplicate_batches_keep_results_constraints_and_shortest_traces ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+     Running tests/standalone.rs (crates/rtlc/target/debug/deps/standalone-a6c5535d99ea86b8)
+
+running 4 tests
+test typed_ir_checks_without_idealis ... ok
+test wire_contract_roundtrips_and_rejects_internal_references ... ok
+test shortest_violation_and_empty_initial_states_remain_distinct ... ok
+test unmatched_case_wire_contract_requires_a_nonempty_location ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/symmetry_parallel.rs (crates/rtlc/target/debug/deps/symmetry_parallel-1f2586bd002131cf)
+
+running 1 test
+test parallel_record_orbits_preserve_counts_and_never_exceed_work_bounds ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.99s
+
+     Running tests/temporal_sets.rs (crates/rtlc/target/debug/deps/temporal_sets-6c7f2c1ff61f7b90)
+
+running 1 test
+test quantified_obligations_cross_word_and_storage_boundaries ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/value_normalize_errors.rs (crates/rtlc/target/debug/deps/value_normalize_errors-f87ddf2681f4713e)
+
+running 11 tests
+test list_reports_an_error_nested_in_an_earlier_element ... ok
+test map_reports_a_key_error_before_a_duplicate_key ... ok
+test map_reports_a_key_error_before_its_value_error ... ok
+test map_reports_a_value_error_before_a_duplicate_key ... ok
+test map_reports_a_duplicate_key_before_a_later_entry_error ... ok
+test record_reports_a_duplicate_name_before_a_later_field_value_error ... ok
+test record_reports_a_field_value_error_before_a_duplicate_name ... ok
+test record_reports_the_first_failing_field_in_input_order ... ok
+test list_reports_its_first_failing_element ... ok
+test set_reports_an_element_error_after_an_equal_earlier_element ... ok
+test set_reports_its_first_failing_element ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running src/coverage_benchmarks.rs (crates/rtlc/target/debug/deps/coverage-0ed0e99ea6db7158)
+Testing coverage/ring-4/off
+Success
+
+Testing coverage/ring-4/on
+Success
+
+Testing coverage/ring-1000/off
+Success
+
+Testing coverage/ring-1000/on
+Success
+
+     Running src/benchmarks.rs (crates/rtlc/target/debug/deps/safety-6ff2a72f4132f42b)
+Testing values/intern-new-functions
+Success
+Testing values/intern-existing-functions
+Success
+Testing values/except-function
+Success
+Testing values/except-record
+Success
+
+Testing membership/function-cube
+Success
+Testing membership/parallel-channels
+Success
+
+Testing search/counter-product/1
+Success
+Testing search/counter-product/8
+Success
+Testing search/function-cube/1
+Success
+Testing search/function-cube/8
+Success
+Testing search/parallel-channels/1
+Success
+Testing search/parallel-channels/8
+Success
+Testing search/linear-ring/1
+Success
+Testing search/linear-ring/8
+Success
+
+     Running src/symmetry_benchmarks.rs (crates/rtlc/target/debug/deps/symmetry-12b34f6a17ea5c0b)
+Testing symmetry/counter-5-3-safe/plain
+Success
+Testing symmetry/counter-5-3-safe/symmetry
+Success
+Testing symmetry/counter-5-3-safe/actions
+Success
+Testing symmetry/counter-7-5-safe/plain
+Success
+Testing symmetry/counter-7-5-safe/symmetry
+Success
+Testing symmetry/counter-7-5-safe/actions
+Success
+Testing symmetry/joint-5/plain
+Success
+Testing symmetry/joint-5/symmetry
+Success
+Testing symmetry/joint-5/actions
+Success
+Testing symmetry/record-5-safe/plain
+Success
+Testing symmetry/record-5-safe/symmetry
+Success
+Testing symmetry/record-5-safe/actions
+Success
+Testing symmetry/sets-5-safe/plain
+Success
+Testing symmetry/sets-5-safe/symmetry
+Success
+Testing symmetry/sets-5-safe/actions
+Success
+Testing symmetry/record-12-safe/symmetry-1
+Success
+Testing symmetry/record-12-safe/symmetry-8
+Success
+Testing symmetry/record-12-safe/actions-1
+Success
+Testing symmetry/record-12-safe/actions-8
+Success
+Testing symmetry/monotone-10/plain
+Success
+Testing symmetry/monotone-10/por
+Success
+
+     Running unittests examples/counter.rs (crates/rtlc/target/debug/examples/counter-e28a761874087ac6)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

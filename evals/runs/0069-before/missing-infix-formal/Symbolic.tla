@@ -1,0 +1,3 @@
+---- MODULE Symbolic ----
+left %% == left
+====

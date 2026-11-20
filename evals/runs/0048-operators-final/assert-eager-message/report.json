@@ -1,0 +1,102 @@
+{
+  "name": "assert-eager-message",
+  "compiled": {
+    "kind": "compiled",
+    "program": {
+      "format": "modelt.safety-program",
+      "version": 1,
+      "name": "Differential",
+      "variables": [
+        "x"
+      ],
+      "initial": [
+        {
+          "name": "Init",
+          "steps": [
+            {
+              "kind": "assign",
+              "slot": 0,
+              "value": {
+                "op": "assert",
+                "condition": {
+                  "op": "literal",
+                  "value": {
+                    "type": "bool",
+                    "value": true
+                  }
+                },
+                "message": {
+                  "op": "div",
+                  "left": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "next": [
+        {
+          "name": "Next",
+          "steps": [
+            {
+              "kind": "assign",
+              "slot": 0,
+              "value": {
+                "op": "read",
+                "slot": 0,
+                "next": false
+              }
+            }
+          ]
+        }
+      ],
+      "invariants": [
+        {
+          "name": "Safe",
+          "expression": {
+            "op": "eq",
+            "left": {
+              "op": "read",
+              "slot": 0,
+              "next": false
+            },
+            "right": {
+              "op": "literal",
+              "value": {
+                "type": "bool",
+                "value": true
+              }
+            }
+          }
+        }
+      ],
+      "assumptions": [],
+      "checkDeadlock": false
+    }
+  },
+  "checked": {
+    "kind": "error",
+    "code": "protocol",
+    "message": "Integer division by zero"
+  },
+  "reference": {
+    "status": "model-error",
+    "states": 0,
+    "generated": 0,
+    "exit": 75
+  },
+  "witness": null
+}

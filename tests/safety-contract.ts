@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
-import { decodeSafetyResult } from "../src/safety.js";
-import { compileTlaSafety } from "../src/tla-safety.js";
+import { PortableCoreError } from "../packages/idealis/src/portable-value.js";
+import { decodeSafetyCoverageReport } from "../packages/idealis/src/safety-coverage.js";
+import { decodeSafetyResult } from "../packages/idealis/src/safety.js";
+import { compileTlaSafety } from "../packages/idealis/src/tla-safety.js";
 
 export const registerSafetyContract = (
   test: (name: string, run: () => void | Promise<void>) => unknown,
@@ -8,6 +10,64 @@ export const registerSafetyContract = (
   const source =
     "---- MODULE Counter ----\nEXTENDS Naturals\nVARIABLE x\nInit == x = 0\nNext == x' = x + 1\nSafe == x < 3\n====";
   const config = "INIT Init\nNEXT Next\nINVARIANT Safe";
+  test("coverage validates counts, exact fields and conservation of totals", () => {
+    const row = {
+      name: "Init",
+      attempts: 1,
+      enabled: 1,
+      generated: 1,
+      distinct: 1,
+      work: 4,
+    };
+    const report = {
+      result: {
+        status: "complete",
+        reason: null,
+        states: 1,
+        generated: 2,
+        depth: 0,
+        work: 9,
+        violation: null,
+      },
+      coverage: {
+        initial: [row],
+        next: [{ ...row, name: "Next", distinct: 0, work: 3 }],
+        unattributedWork: 2,
+      },
+    };
+    assert.deepEqual(decodeSafetyCoverageReport(report), report);
+    for (const coverage of [
+      { ...report.coverage, extra: 1 },
+      { ...report.coverage, unattributedWork: -1 },
+      { ...report.coverage, unattributedWork: 1.5 },
+      { ...report.coverage, unattributedWork: 0 },
+      { ...report.coverage, initial: null },
+      ...[
+        { ...row, extra: true },
+        { ...row, name: 1 },
+        { ...row, attempts: 0 },
+        { ...row, enabled: 2 },
+        { ...row, enabled: 0 },
+        { ...row, distinct: 2 },
+        { ...row, work: 0xffff_ffff + 1 },
+        { ...row, work: 0 },
+        { ...row, generated: 0 },
+        null,
+      ].map((inner) => ({ ...report.coverage, initial: [inner] })),
+    ])
+      assert.throws(
+        () => decodeSafetyCoverageReport({ ...report, coverage }),
+        PortableCoreError,
+      );
+    assert.throws(
+      () => decodeSafetyCoverageReport({ ...report, extra: 1 }),
+      PortableCoreError,
+    );
+    assert.throws(
+      () => decodeSafetyCoverageReport({ coverage: report.coverage }),
+      PortableCoreError,
+    );
+  });
   test("safety compilation produces a portable program without enumerating reachable states", () => {
     const program = compileTlaSafety({ source, config });
     assert.deepEqual(program.variables, ["x"]);

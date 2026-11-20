@@ -12,8 +12,8 @@ import {
   counterModel,
   createCounter,
 } from "../examples/durable-counter.js";
-import { checkDifferential } from "../src/index.js";
-import { checkProperty } from "../src/property.js";
+import { checkDifferential } from "../packages/idealis/src/index.js";
+import { checkProperty } from "../packages/idealis/src/property.js";
 
 export const counterActions = array(
   constantFrom<CounterAction>(

@@ -1,0 +1,28 @@
+src/tla-safety.ts:2335:13 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    2333 │             edge.role === "frame-body" && edge.node.space === "ir-expression",
+    2334 │         );
+  > 2335 │         if (!body || body.node.space !== "ir-expression")
+         │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2336 │           return unsupported(message);
+    2337 │         pending.push({ value: body.node.value, frame: next });
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    2333 2333 │               edge.role === "frame-body" && edge.node.space === "ir-expression",
+    2334 2334 │           );
+    2335      │ - ········if·(!body·||·body.node.space·!==·"ir-expression")
+         2335 │ + ········if·(body?.node.space·!==·"ir-expression")
+    2336 2336 │             return unsupported(message);
+    2337 2337 │           pending.push({ value: body.node.value, frame: next });
+  
+
+Skipped 1 suggested fixes.
+If you wish to apply the suggested (unsafe) fixes, use the command biome check --write --unsafe
+
+Checked 13 files in 64ms. No fixes applied.
+Found 1 warning.

@@ -1,0 +1,36 @@
+   Compiling rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.11s
+     Running tests/prepared_safety.rs (crates/rtlc/target/debug/deps/prepared_safety-9d882929dc754b28)
+
+running 3 tests
+test preparation_does_not_evaluate_constant_predicates_and_recovers_after_errors ... FAILED
+test preparation_rejects_invalid_static_ir_without_running_a_search ... FAILED
+test each_prepared_check_has_independent_state_budget_and_coverage ... FAILED
+
+failures:
+
+---- preparation_does_not_evaluate_constant_predicates_and_recovers_after_errors stdout ----
+
+thread 'preparation_does_not_evaluate_constant_predicates_and_recovers_after_errors' (58214375) panicked at tests/prepared_safety.rs:15:34:
+called `Result::unwrap()` on an `Err` value: Error("missing field `assumptions`", line: 0, column: 0)
+
+---- preparation_rejects_invalid_static_ir_without_running_a_search stdout ----
+
+thread 'preparation_rejects_invalid_static_ir_without_running_a_search' (58214376) panicked at tests/prepared_safety.rs:15:34:
+called `Result::unwrap()` on an `Err` value: Error("missing field `assumptions`", line: 0, column: 0)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- each_prepared_check_has_independent_state_budget_and_coverage stdout ----
+
+thread 'each_prepared_check_has_independent_state_budget_and_coverage' (58214374) panicked at tests/prepared_safety.rs:15:34:
+called `Result::unwrap()` on an `Err` value: Error("missing field `assumptions`", line: 0, column: 0)
+
+
+failures:
+    each_prepared_check_has_independent_state_budget_and_coverage
+    preparation_does_not_evaluate_constant_predicates_and_recovers_after_errors
+    preparation_rejects_invalid_static_ir_without_running_a_search
+
+test result: FAILED. 0 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test prepared_safety`

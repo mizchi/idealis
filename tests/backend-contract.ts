@@ -3,13 +3,13 @@ import {
   BackendContractError,
   completeInduction,
   parseBackendResult,
-} from "../src/backend.js";
+} from "../packages/idealis/src/backend.js";
 import type {
   BackendOutcome,
   BackendQuery,
   BackendResult,
   BackendScope,
-} from "../src/contracts.js";
+} from "../packages/idealis/src/contracts.js";
 
 const scope: BackendScope = {
   modelId: "ring:v1",

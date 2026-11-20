@@ -1,0 +1,21 @@
+{
+  "args": [
+    "record",
+    "--save-only",
+    "--unstable-presymbolicate",
+    "--rate",
+    "1000",
+    "--output",
+    "/Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0049-profile-before/fair-intermittent-WF.json.gz",
+    "/Users/mz/ghq/github.com/mizchi/idealis/crates/rtla-compiler/target/release/examples/temporal-profile",
+    "fair-intermittent-WF",
+    "10000"
+  ],
+  "environment": {
+    "DYLD_LIBRARY_PATH": "/usr/lib"
+  },
+  "exit": 0,
+  "stdout": "{\"case\":\"fair-intermittent-WF\",\"repetitions\":10000,\"result\":{\"depth\":5,\"generated\":13,\"reason\":null,\"states\":8,\"status\":\"liveness-violation\",\"violation\":{\"loopAction\":\"Tick\",\"loopStart\":1,\"name\":\"Live\",\"trace\":[{\"action\":null,\"values\":[{\"type\":\"int\",\"value\":\"0\"},{\"type\":\"set\",\"value\":[]}]},{\"action\":\"Tick\",\"values\":[{\"type\":\"int\",\"value\":\"1\"},{\"type\":\"set\",\"value\":[]}]},{\"action\":\"Tick\",\"values\":[{\"type\":\"int\",\"value\":\"0\"},{\"type\":\"set\",\"value\":[]}]},{\"action\":\"<stuttering>\",\"values\":[{\"type\":\"int\",\"value\":\"0\"},{\"type\":\"set\",\"value\":[]}]},{\"action\":\"Tick\",\"values\":[{\"type\":\"int\",\"value\":\"1\"},{\"type\":\"set\",\"value\":[]}]},{\"action\":\"Tick\",\"values\":[{\"type\":\"int\",\"value\":\"0\"},{\"type\":\"set\",\"value\":[]}]},{\"action\":\"<stuttering>\",\"values\":[{\"type\":\"int\",\"value\":\"0\"},{\"type\":\"set\",\"value\":[]}]}]},\"work\":14500}}\n",
+  "stderr": "Stopping profile.\n",
+  "error": null
+}

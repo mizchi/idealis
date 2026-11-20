@@ -1,11 +1,11 @@
-import { createParserWasm } from "../evals/rtla-parser/wasm.js";
-import { isRecord } from "../src/trace.js";
+import { createParserWasm } from "../evals/experiments/rtla-parser/wasm.js";
+import { isRecord } from "../packages/idealis/src/trace.js";
 
-export const run = async () => {
+export const run = async (assetBase = "") => {
   const parser = await createParserWasm(
-    new Uint8Array(await (await fetch("/rtla.wasm")).arrayBuffer()),
+    new Uint8Array(await (await fetch(`${assetBase}/rtla.wasm`)).arrayBuffer()),
   );
-  const source = await (await fetch("/module.tla")).text();
+  const source = await (await fetch(`${assetBase}/module.tla`)).text();
   const module = parser.request({ kind: "module", source });
   const unicode = parser.request({
     kind: "expression",
@@ -24,6 +24,15 @@ export const run = async () => {
     kind: "config",
     source: "CONSTANT Data={a,b}\nSPECIFICATION Spec\nINVARIANT TypeInvariant",
   });
+  const label = parser.request({
+    kind: "expression",
+    source: "a * lab :: b + c",
+  });
+  const symbolic = parser.request({
+    kind: "module",
+    source:
+      "---- MODULE Symbolic ----\nleft %% right == left\n-. value == value\nvalue ^+ == value\nMain == M!%%(1, 2)\n====",
+  });
   const repeated = parser.request({ kind: "module", source });
   if (
     !isRecord(module) ||
@@ -36,7 +45,12 @@ export const run = async () => {
     !isRecord(invalid.error) ||
     !isRecord(limit) ||
     !isRecord(limit.error) ||
-    !isRecord(config)
+    !isRecord(config) ||
+    !isRecord(label) ||
+    !isRecord(label.error) ||
+    !isRecord(symbolic) ||
+    !isRecord(symbolic.module) ||
+    !Array.isArray(symbolic.module.definitions)
   )
     throw new Error("Invalid rtla response");
   return {
@@ -47,9 +61,14 @@ export const run = async () => {
         ? large.expression.name.length
         : 0,
     invalid: invalid.error.kind,
+    label: label.error.kind,
+    symbols: symbolic.module.definitions.map((definition) => {
+      if (!isRecord(definition)) throw new Error("Invalid symbolic definition");
+      return definition.name;
+    }),
     limit: limit.error.kind,
     config: config.kind,
     repeat: JSON.stringify(module) === JSON.stringify(repeated),
-    isolated: crossOriginIsolated,
+    isolated: globalThis.crossOriginIsolated ?? false,
   };
 };

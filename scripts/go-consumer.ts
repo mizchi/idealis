@@ -10,7 +10,7 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { compileFiniteModel } from "../src/finite.js";
+import { compileFiniteModel } from "../packages/idealis/src/finite.js";
 
 const consumer = await mkdtemp(join(tmpdir(), "idealis-go-consumer-"));
 await mkdir(join(consumer, "sdk"));

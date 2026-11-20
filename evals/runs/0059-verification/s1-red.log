@@ -1,0 +1,70 @@
+   Compiling rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+error[E0432]: unresolved import `crate::safety_prepared`
+    --> src/safety_values.rs:1757:16
+     |
+1757 |     use crate::safety_prepared::PreparedProgram;
+     |                ^^^^^^^^^^^^^^^ could not find `safety_prepared` in the crate root
+
+error[E0599]: no associated function or constant named `with_prepared` found for struct `Arena<'a>` in the current scope
+    --> src/safety_values.rs:1765:32
+     |
+  69 | pub(crate) struct Arena<'a> {
+     | --------------------------- associated function or constant `with_prepared` not found for this struct
+...
+1765 |         let mut arena = Arena::with_prepared(100, &program);
+     |                                ^^^^^^^^^^^^^ associated function or constant not found in `Arena<'_>`
+     |
+note: if you're trying to build a new `Arena<'_>`, consider using `Arena::<'scope>::new` which returns `Arena<'_>`
+    --> src/safety_values.rs:90:5
+     |
+  90 |     pub fn new(maximum: u32) -> Self {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0599]: no associated function or constant named `with_prepared` found for struct `Arena<'a>` in the current scope
+    --> src/safety_values.rs:1778:32
+     |
+  69 | pub(crate) struct Arena<'a> {
+     | --------------------------- associated function or constant `with_prepared` not found for this struct
+...
+1778 |         let mut other = Arena::with_prepared(100, &program);
+     |                                ^^^^^^^^^^^^^ associated function or constant not found in `Arena<'_>`
+     |
+note: if you're trying to build a new `Arena<'_>`, consider using `Arena::<'scope>::new` which returns `Arena<'_>`
+    --> src/safety_values.rs:90:5
+     |
+  90 |     pub fn new(maximum: u32) -> Self {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0599]: no associated function or constant named `with_prepared` found for struct `Arena<'a>` in the current scope
+    --> src/safety_values.rs:1793:35
+     |
+  69 | pub(crate) struct Arena<'a> {
+     | --------------------------- associated function or constant `with_prepared` not found for this struct
+...
+1793 |         let mut prepared = Arena::with_prepared(100, &program);
+     |                                   ^^^^^^^^^^^^^ associated function or constant not found in `Arena<'_>`
+     |
+note: if you're trying to build a new `Arena<'_>`, consider using `Arena::<'scope>::new` which returns `Arena<'_>`
+    --> src/safety_values.rs:90:5
+     |
+  90 |     pub fn new(maximum: u32) -> Self {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0599]: no associated function or constant named `with_prepared` found for struct `Arena<'a>` in the current scope
+    --> src/safety_values.rs:1810:31
+     |
+  69 | pub(crate) struct Arena<'a> {
+     | --------------------------- associated function or constant `with_prepared` not found for this struct
+...
+1810 |         let mut root = Arena::with_prepared(1000, &program);
+     |                               ^^^^^^^^^^^^^ associated function or constant not found in `Arena<'_>`
+     |
+note: if you're trying to build a new `Arena<'_>`, consider using `Arena::<'scope>::new` which returns `Arena<'_>`
+    --> src/safety_values.rs:90:5
+     |
+  90 |     pub fn new(maximum: u32) -> Self {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Some errors have detailed explanations: E0432, E0599.
+For more information about an error, try `rustc --explain E0432`.
+error: could not compile `rtlc` (lib test) due to 5 previous errors

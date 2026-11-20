@@ -1,0 +1,869 @@
+{
+  "status": "complete",
+  "method": "median of two run medians, descriptive ratios without significance claim",
+  "roundtrip": "evals/runs/0054-roundtrip",
+  "kernel": "evals/runs/0054-kernel",
+  "roundtrips": [
+    {
+      "id": "rtla",
+      "stages": [
+        {
+          "stage": "before",
+          "measurements": [
+            {
+              "implementation": "baseline",
+              "runsMedianNs": [
+                1215555,
+                1208585
+              ],
+              "medianNs": 1212070
+            },
+            {
+              "implementation": "candidate",
+              "runsMedianNs": [
+                1775802.52,
+                1719241.58
+              ],
+              "medianNs": 1747522.05
+            }
+          ]
+        },
+        {
+          "stage": "transport",
+          "measurements": [
+            {
+              "implementation": "baseline",
+              "runsMedianNs": [
+                51472.520000000004,
+                52800
+              ],
+              "medianNs": 52136.26
+            },
+            {
+              "implementation": "candidate",
+              "runsMedianNs": [
+                551779.1799999999,
+                555519.98
+              ],
+              "medianNs": 553649.58
+            }
+          ]
+        },
+        {
+          "stage": "bridge",
+          "measurements": [
+            {
+              "implementation": "baseline",
+              "runsMedianNs": [
+                48234.16,
+                47781.72
+              ],
+              "medianNs": 48007.94
+            },
+            {
+              "implementation": "candidate",
+              "runsMedianNs": [
+                424140,
+                417514.92
+              ],
+              "medianNs": 420827.45999999996
+            }
+          ]
+        }
+      ],
+      "transportSpeedup": 3.156368419894765,
+      "bridgeSpeedup": 1.315621323760574,
+      "totalSpeedup": 4.152585598858022
+    },
+    {
+      "id": "idealis-core",
+      "stages": [
+        {
+          "stage": "before",
+          "measurements": [
+            {
+              "implementation": "baseline",
+              "runsMedianNs": [
+                56554.16,
+                55632.479999999996
+              ],
+              "medianNs": 56093.32
+            },
+            {
+              "implementation": "candidate",
+              "runsMedianNs": [
+                80514.94,
+                82313.36
+              ],
+              "medianNs": 81414.15
+            }
+          ]
+        },
+        {
+          "stage": "transport",
+          "measurements": [
+            {
+              "implementation": "baseline",
+              "runsMedianNs": [
+                11715.82,
+                10205.880000000001
+              ],
+              "medianNs": 10960.85
+            },
+            {
+              "implementation": "candidate",
+              "runsMedianNs": [
+                39744.92,
+                35782.380000000005
+              ],
+              "medianNs": 37763.65
+            }
+          ]
+        },
+        {
+          "stage": "bridge",
+          "measurements": [
+            {
+              "implementation": "baseline",
+              "runsMedianNs": [
+                10306.619999999999,
+                10166.7
+              ],
+              "medianNs": 10236.66
+            },
+            {
+              "implementation": "candidate",
+              "runsMedianNs": [
+                28160.800000000003,
+                28436.58
+              ],
+              "medianNs": 28298.690000000002
+            }
+          ]
+        }
+      ],
+      "transportSpeedup": 2.155886679386129,
+      "bridgeSpeedup": 1.3344663657575668,
+      "totalSpeedup": 2.876958262025556
+    }
+  ],
+  "kernels": [
+    {
+      "mode": "wire-value",
+      "name": "single",
+      "runsMedianNs": [
+        3919.2239475051974,
+        3260.25189469046,
+        3433.178827751196,
+        4159.367532467533
+      ],
+      "beforeNs": 4039.2957399863653,
+      "afterNs": 3346.715361220828,
+      "speedup": 1.2069433172568627
+    },
+    {
+      "mode": "wire-value",
+      "name": "batch-32",
+      "runsMedianNs": [
+        394393.7684210526,
+        298193.1735042735,
+        357499.60052083334,
+        416432.49
+      ],
+      "beforeNs": 405413.1292105263,
+      "afterNs": 327846.3870125534,
+      "speedup": 1.2365947750859394
+    },
+    {
+      "mode": "wire-value",
+      "name": "nested-256",
+      "runsMedianNs": [
+        356304.76573426573,
+        258416.6986607143,
+        257806.18980263156,
+        368209.53679653676
+      ],
+      "beforeNs": 362257.1512654013,
+      "afterNs": 258111.4442316729,
+      "speedup": 1.4034912413269456
+    },
+    {
+      "mode": "wire-value",
+      "name": "unknown",
+      "runsMedianNs": [
+        7690.273350021533,
+        5723.203830760434,
+        5745.061615724721,
+        7554.645338244613
+      ],
+      "beforeNs": 7622.459344133073,
+      "afterNs": 5734.132723242577,
+      "speedup": 1.3293133786799882
+    },
+    {
+      "mode": "wire-bytes",
+      "name": "single",
+      "runsMedianNs": [
+        4625.942967032966,
+        2541.3319896651683,
+        2664.9087278008847,
+        4640.7212995337995
+      ],
+      "beforeNs": 4633.332133283383,
+      "afterNs": 2603.1203587330265,
+      "speedup": 1.7799146772984742
+    },
+    {
+      "mode": "wire-bytes",
+      "name": "batch-32",
+      "runsMedianNs": [
+        494136.20875,
+        262069.81018518517,
+        283777.5,
+        512065.83499999996
+      ],
+      "beforeNs": 503101.021875,
+      "afterNs": 272923.6550925926,
+      "speedup": 1.843376389284824
+    },
+    {
+      "mode": "wire-bytes",
+      "name": "nested-256",
+      "runsMedianNs": [
+        414980.73690476187,
+        244089.07303974222,
+        230925.3781512605,
+        429302.9960714286
+      ],
+      "beforeNs": 422141.86648809526,
+      "afterNs": 237507.22559550137,
+      "speedup": 1.7773853634543533
+    },
+    {
+      "mode": "wire-bytes",
+      "name": "unknown",
+      "runsMedianNs": [
+        9840.614558736717,
+        4558.593992033375,
+        4506.249240219851,
+        10655.225473172424
+      ],
+      "beforeNs": 10247.92001595457,
+      "afterNs": 4532.421616126613,
+      "speedup": 2.2610253158029012
+    }
+  ],
+  "snapshots": [
+    {
+      "plan": "0054",
+      "files": [
+        {
+          "path": "dist/evals/workspace-oracle/node.js",
+          "sha256": "118ab22ea875735fab917a372d316f932206fd22075c6bc162144478bddae9f0"
+        },
+        {
+          "path": "dist/evals/workspace-oracle/snapshot.js",
+          "sha256": "ddab894f43eebceccc098d6e774fb6a55a8b5257222ca818a0de2543903b99a6"
+        },
+        {
+          "path": "dist/evals/workspace-oracle/wasm.js",
+          "sha256": "9c0b5a61f1df4c812761b185033e2084105abf726a67bab245e305352bb9853a"
+        },
+        {
+          "path": "dist/evals/workspace-oracle/cost-worker.js",
+          "sha256": "b56b0d19a1b0ac1ef1378cc24f9c1a97f11b725c70522c498802dc8d40e058e2"
+        },
+        {
+          "path": "dist/src/trace.js",
+          "sha256": "740f95cdbc235b6c8e00121d6be88391171317c750530fb6494ea509bc8097f6"
+        },
+        {
+          "path": "crates/oracle/target/wasm32-unknown-unknown/release/idealis_oracle.wasm",
+          "sha256": "127e4260ff1ac3666bdb2fd351146aaea94a2c41255cde455eace97db365f20d"
+        },
+        {
+          "path": "runner",
+          "sha256": "126f93086e9f3ea20e773b82e1125722dfad6ceb35d0fe38f45c836f3536c9a3"
+        },
+        {
+          "path": "oracle",
+          "sha256": "631bef35b9eb91e7ceef400bdcc4e15a2238150c542cc831d389f72e9c5120f9"
+        },
+        {
+          "path": "worker.mjs",
+          "sha256": "775a4ef37198d468b64db775c2cfdd307ca7679aedced2e254b246d880edb084"
+        },
+        {
+          "path": "cases.json",
+          "sha256": "3b9cd972fc203698ddc87513b7c3727b76e10487e1daedfb55947b492d90f83a"
+        }
+      ],
+      "sources": [
+        {
+          "path": "crates/oracle/Cargo.lock",
+          "sha256": "2795793918105ddf2d1e17884ea4dcd582b965590a64001b6c5f8a11e85b5a9a"
+        },
+        {
+          "path": "crates/oracle/Cargo.toml",
+          "sha256": "143e1347b9f043f9c3158105e5a288afee9269f498319ab62ab701003ebaf12c"
+        },
+        {
+          "path": "crates/oracle/LICENSE",
+          "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+        },
+        {
+          "path": "crates/oracle/README.md",
+          "sha256": "4c241aca4c5c78fe0f3db484b340bb3596e8a76ebd206378520e9105d9ffea1e"
+        },
+        {
+          "path": "crates/oracle/SUPPORT.md",
+          "sha256": "37294465c6186fa508009cabcfa2ec4c1d17699f84c14dbd8fa57d158d9149b2"
+        },
+        {
+          "path": "crates/oracle/examples/comparison.rs",
+          "sha256": "d447168e0f29018ecf08faa557d32629473ab24def4b095dc34c366465d145d1"
+        },
+        {
+          "path": "crates/oracle/examples/observations.rs",
+          "sha256": "f40f8f3b2bdba238b14ffedd28a6faddadb8d589a949c5124cc1576a7e0ae18b"
+        },
+        {
+          "path": "crates/oracle/src/bench.rs",
+          "sha256": "a525cbb79d6027acc95c7c12e2ebd02b034fdcf2bb47819847a7ad0e017dba10"
+        },
+        {
+          "path": "crates/oracle/src/group.rs",
+          "sha256": "8b070ee278bfe88aebc945eca17ad2a53d10925495a77a8987e1f16f4bb1e21a"
+        },
+        {
+          "path": "crates/oracle/src/lib.rs",
+          "sha256": "19c05b2734c2c7884b34c6ee90850e98e0b7bcea67746609cdc3d73ab39c6838"
+        },
+        {
+          "path": "crates/oracle/src/main.rs",
+          "sha256": "3a4be858d89307e4d4178d92a3fd0ec53eddd4570f700b99aea66271a9884037"
+        },
+        {
+          "path": "crates/oracle/src/report.rs",
+          "sha256": "49ce76a597b6f852f7c35606403b8ded3edcec324a9c565e4ab74cb05a734315"
+        },
+        {
+          "path": "crates/oracle/src/wasm.rs",
+          "sha256": "e5732a484b0b896a1ef44726159969e7153d77c8a904264ef83e2135cc087292"
+        },
+        {
+          "path": "crates/oracle/src/wire.rs",
+          "sha256": "f5c889c258b27a54f4b5b34b65321a1ca3a262bd541d879e51eb1e47c503ba59"
+        },
+        {
+          "path": "crates/oracle/tests/json.rs",
+          "sha256": "cf2ca954c75dff231c15fee79bcd88f6a63250a59cc3097075fa227af028ab67"
+        },
+        {
+          "path": "crates/oracle/tests/oracle.rs",
+          "sha256": "333c808456f75d503d29d9b6d120b5406a65072fdc59611da41c0f4652153bca"
+        },
+        {
+          "path": "evals/oracle-tuning/run.ts",
+          "sha256": "417b7cd3a4707c220e23a7556367d4c71c84c75e90753135e5ab20656ee34316"
+        },
+        {
+          "path": "evals/plans/0054-oracle-bench-tuning.md",
+          "sha256": "8a27f7ea5a66dc3069a3104d4ff73e91fa521c16bea49532219c125161c3bea5"
+        },
+        {
+          "path": "evals/workspace-oracle/README.md",
+          "sha256": "511a49ee2cd15bcc331109aee7d0a583e56ac814d8be35aec3d968ca55395711"
+        },
+        {
+          "path": "evals/workspace-oracle/browser-entry.ts",
+          "sha256": "5c167411395b387832960a321d8b9d701cb4323fb178d6ab9d4765e5cefad056"
+        },
+        {
+          "path": "evals/workspace-oracle/browser.spec.ts",
+          "sha256": "130674f2fffc2cf0926e9337cb17ace0e8ff3f176fdfe00b864ffc041b80191d"
+        },
+        {
+          "path": "evals/workspace-oracle/catalog-test.ts",
+          "sha256": "b8804d84b9c8fbc2eedbc4a61444a3c0bc6e05fcfd9761cb92f217af4bf44053"
+        },
+        {
+          "path": "evals/workspace-oracle/catalog.ts",
+          "sha256": "2eeb562a498ce85d6c97e948d5692deb6f6b9d93bc8f7e4e9ded3e60b27e80f2"
+        },
+        {
+          "path": "evals/workspace-oracle/contract-test.ts",
+          "sha256": "178353a54c21fb04300922cddf693ae5a0fbfa4cf0fa4ae7a2e511e7f79eacd0"
+        },
+        {
+          "path": "evals/workspace-oracle/cost-worker.ts",
+          "sha256": "7339af34fda79184e7199bddec42283e266ffae5332a5b4a993073a433dc201e"
+        },
+        {
+          "path": "evals/workspace-oracle/cost.ts",
+          "sha256": "c564f889d16da5277851275c3f1e45006f0050f10f0668e026a59379edcb6e2e"
+        },
+        {
+          "path": "evals/workspace-oracle/legacy-parity.ts",
+          "sha256": "67e8d811ef8012e181db8ac4c196d038b52c279abcb35cd6e43527d42f64a186"
+        },
+        {
+          "path": "evals/workspace-oracle/migrations.json",
+          "sha256": "7287c7508b4cf0acb36de110bcc1ed45bfeadeaa601cc57810635a4622f02cfd"
+        },
+        {
+          "path": "evals/workspace-oracle/node.ts",
+          "sha256": "dd6aaa7a56725b45e8d1ebd84e6dbb63420dc600016f4499ae3ea041f6e0b788"
+        },
+        {
+          "path": "evals/workspace-oracle/rust/Cargo.lock",
+          "sha256": "388e33a5dcdb110ac481639e45b40d70aa5f9aaee43cb88a3f172ded9d0eccf7"
+        },
+        {
+          "path": "evals/workspace-oracle/rust/Cargo.toml",
+          "sha256": "39a3b1e5439b6e328fba6b3fd523e8185ef14bcbc1f40d389be79f2aa2a9ce8e"
+        },
+        {
+          "path": "evals/workspace-oracle/rust/src/main.rs",
+          "sha256": "e4e8b3e519bd0ee67ec245fd3af0e4d9f93bd204db13a7882429c58bea643481"
+        },
+        {
+          "path": "evals/workspace-oracle/rust/tests/process.rs",
+          "sha256": "a4fcd5d076f229264424f7e705a418a0dc4cfffc715d617206ad5862be2fb3a6"
+        },
+        {
+          "path": "evals/workspace-oracle/snapshot.ts",
+          "sha256": "b285e9ece0dee3969a3f6272953ddc6fcb1755b8cb18bd7ec3bf1d52b80ead8c"
+        },
+        {
+          "path": "evals/workspace-oracle/tune.ts",
+          "sha256": "e65ab736e085919bc27cb2b1a90b659795312fe44987008f2866d0344feccc06"
+        },
+        {
+          "path": "evals/workspace-oracle/wasm.ts",
+          "sha256": "07cf69822558b6c0664eb7e9e4d2e688f1a2a93dbf2245db9b438a96f809edcc"
+        }
+      ],
+      "revision": "fd3894a76d36663e0812ad7ea61b69188f96aeb6",
+      "node": "v24.22.2",
+      "nodePath": "/Users/mz/.local/share/mise/installs/node/24.22.2/bin/node",
+      "nodeSha256": "b6fb419f0f43bb2fbca273700294dd2f3b685a64b60e8417c295f47646a70e4a",
+      "cpu": "Apple M5",
+      "memoryBytes": 34359738368
+    },
+    {
+      "plan": "0054",
+      "files": [
+        {
+          "path": "dist/evals/workspace-oracle/node.js",
+          "sha256": "118ab22ea875735fab917a372d316f932206fd22075c6bc162144478bddae9f0"
+        },
+        {
+          "path": "dist/evals/workspace-oracle/snapshot.js",
+          "sha256": "ddab894f43eebceccc098d6e774fb6a55a8b5257222ca818a0de2543903b99a6"
+        },
+        {
+          "path": "dist/evals/workspace-oracle/wasm.js",
+          "sha256": "9c0b5a61f1df4c812761b185033e2084105abf726a67bab245e305352bb9853a"
+        },
+        {
+          "path": "dist/evals/workspace-oracle/cost-worker.js",
+          "sha256": "b56b0d19a1b0ac1ef1378cc24f9c1a97f11b725c70522c498802dc8d40e058e2"
+        },
+        {
+          "path": "dist/src/trace.js",
+          "sha256": "740f95cdbc235b6c8e00121d6be88391171317c750530fb6494ea509bc8097f6"
+        },
+        {
+          "path": "crates/oracle/target/wasm32-unknown-unknown/release/idealis_oracle.wasm",
+          "sha256": "127e4260ff1ac3666bdb2fd351146aaea94a2c41255cde455eace97db365f20d"
+        },
+        {
+          "path": "runner",
+          "sha256": "4aefd9f0c1183fa44a2b24a1fcbc413af1a53831d80dd9f9f2b5d17480b6cefb"
+        },
+        {
+          "path": "oracle",
+          "sha256": "0befdd6e61106b805fbe5b8db6e16ea29357ed99b4f508d34f703ecc1f7bdbda"
+        },
+        {
+          "path": "worker.mjs",
+          "sha256": "775a4ef37198d468b64db775c2cfdd307ca7679aedced2e254b246d880edb084"
+        },
+        {
+          "path": "cases.json",
+          "sha256": "3b9cd972fc203698ddc87513b7c3727b76e10487e1daedfb55947b492d90f83a"
+        }
+      ],
+      "sources": [
+        {
+          "path": "crates/oracle/Cargo.lock",
+          "sha256": "8263eaec871fef774b4c28446e9a9b855d2fae6732c01112064178dd8b00a314"
+        },
+        {
+          "path": "crates/oracle/Cargo.toml",
+          "sha256": "51f55dee8bb55b0a4406ea3ee8fc706f86ce7983a7de399c93ac92079b7e76c9"
+        },
+        {
+          "path": "crates/oracle/LICENSE",
+          "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+        },
+        {
+          "path": "crates/oracle/README.md",
+          "sha256": "4c241aca4c5c78fe0f3db484b340bb3596e8a76ebd206378520e9105d9ffea1e"
+        },
+        {
+          "path": "crates/oracle/SUPPORT.md",
+          "sha256": "37294465c6186fa508009cabcfa2ec4c1d17699f84c14dbd8fa57d158d9149b2"
+        },
+        {
+          "path": "crates/oracle/benches/wire.rs",
+          "sha256": "f5788666f8f2029b55e38ec6fcad851498edd9a4460f90abeafd5b8d48dd5e19"
+        },
+        {
+          "path": "crates/oracle/examples/comparison.rs",
+          "sha256": "d447168e0f29018ecf08faa557d32629473ab24def4b095dc34c366465d145d1"
+        },
+        {
+          "path": "crates/oracle/examples/observations.rs",
+          "sha256": "f40f8f3b2bdba238b14ffedd28a6faddadb8d589a949c5124cc1576a7e0ae18b"
+        },
+        {
+          "path": "crates/oracle/src/bench.rs",
+          "sha256": "a525cbb79d6027acc95c7c12e2ebd02b034fdcf2bb47819847a7ad0e017dba10"
+        },
+        {
+          "path": "crates/oracle/src/group.rs",
+          "sha256": "8b070ee278bfe88aebc945eca17ad2a53d10925495a77a8987e1f16f4bb1e21a"
+        },
+        {
+          "path": "crates/oracle/src/lib.rs",
+          "sha256": "8664a63a178b8c0272867e3144b0eb3fad7afd60246b3931a57ed6d12e427a05"
+        },
+        {
+          "path": "crates/oracle/src/main.rs",
+          "sha256": "3a4be858d89307e4d4178d92a3fd0ec53eddd4570f700b99aea66271a9884037"
+        },
+        {
+          "path": "crates/oracle/src/report.rs",
+          "sha256": "49ce76a597b6f852f7c35606403b8ded3edcec324a9c565e4ab74cb05a734315"
+        },
+        {
+          "path": "crates/oracle/src/wasm.rs",
+          "sha256": "e5732a484b0b896a1ef44726159969e7153d77c8a904264ef83e2135cc087292"
+        },
+        {
+          "path": "crates/oracle/src/wire.rs",
+          "sha256": "bcc0a8c85724c37fb30bcc6bd4a2e6bdcf271f46eaa128686b147baf11d52f45"
+        },
+        {
+          "path": "crates/oracle/tests/bytes.rs",
+          "sha256": "d5b36cd4fd2e6b1defcb78d6d34cb4d9be1fea37df0e94e8e96a2c94a8b5bda2"
+        },
+        {
+          "path": "crates/oracle/tests/json.rs",
+          "sha256": "cf2ca954c75dff231c15fee79bcd88f6a63250a59cc3097075fa227af028ab67"
+        },
+        {
+          "path": "crates/oracle/tests/oracle.rs",
+          "sha256": "333c808456f75d503d29d9b6d120b5406a65072fdc59611da41c0f4652153bca"
+        },
+        {
+          "path": "evals/oracle-tuning/run.ts",
+          "sha256": "29c80bce79ff9a4ec4adcb40979662594400f760d1461b4592d22d469ef4d139"
+        },
+        {
+          "path": "evals/plans/0054-oracle-bench-tuning.md",
+          "sha256": "3c6b22f425217053e10a3185ebf9cec2383aa3359ed6176c4b3818725fa36a88"
+        },
+        {
+          "path": "evals/workspace-oracle/README.md",
+          "sha256": "511a49ee2cd15bcc331109aee7d0a583e56ac814d8be35aec3d968ca55395711"
+        },
+        {
+          "path": "evals/workspace-oracle/browser-entry.ts",
+          "sha256": "5c167411395b387832960a321d8b9d701cb4323fb178d6ab9d4765e5cefad056"
+        },
+        {
+          "path": "evals/workspace-oracle/browser.spec.ts",
+          "sha256": "130674f2fffc2cf0926e9337cb17ace0e8ff3f176fdfe00b864ffc041b80191d"
+        },
+        {
+          "path": "evals/workspace-oracle/catalog-test.ts",
+          "sha256": "b8804d84b9c8fbc2eedbc4a61444a3c0bc6e05fcfd9761cb92f217af4bf44053"
+        },
+        {
+          "path": "evals/workspace-oracle/catalog.ts",
+          "sha256": "2eeb562a498ce85d6c97e948d5692deb6f6b9d93bc8f7e4e9ded3e60b27e80f2"
+        },
+        {
+          "path": "evals/workspace-oracle/contract-test.ts",
+          "sha256": "178353a54c21fb04300922cddf693ae5a0fbfa4cf0fa4ae7a2e511e7f79eacd0"
+        },
+        {
+          "path": "evals/workspace-oracle/cost-worker.ts",
+          "sha256": "7339af34fda79184e7199bddec42283e266ffae5332a5b4a993073a433dc201e"
+        },
+        {
+          "path": "evals/workspace-oracle/cost.ts",
+          "sha256": "c564f889d16da5277851275c3f1e45006f0050f10f0668e026a59379edcb6e2e"
+        },
+        {
+          "path": "evals/workspace-oracle/legacy-parity.ts",
+          "sha256": "67e8d811ef8012e181db8ac4c196d038b52c279abcb35cd6e43527d42f64a186"
+        },
+        {
+          "path": "evals/workspace-oracle/migrations.json",
+          "sha256": "7287c7508b4cf0acb36de110bcc1ed45bfeadeaa601cc57810635a4622f02cfd"
+        },
+        {
+          "path": "evals/workspace-oracle/node.ts",
+          "sha256": "dd6aaa7a56725b45e8d1ebd84e6dbb63420dc600016f4499ae3ea041f6e0b788"
+        },
+        {
+          "path": "evals/workspace-oracle/rust/Cargo.lock",
+          "sha256": "388e33a5dcdb110ac481639e45b40d70aa5f9aaee43cb88a3f172ded9d0eccf7"
+        },
+        {
+          "path": "evals/workspace-oracle/rust/Cargo.toml",
+          "sha256": "39a3b1e5439b6e328fba6b3fd523e8185ef14bcbc1f40d389be79f2aa2a9ce8e"
+        },
+        {
+          "path": "evals/workspace-oracle/rust/src/main.rs",
+          "sha256": "51bfbcb5c10ad148958c6238d5d9f4db04455b7fe3a87dd4f81abc00c3757370"
+        },
+        {
+          "path": "evals/workspace-oracle/rust/tests/process.rs",
+          "sha256": "a6213bc5c83dd10caa466a78db17f7cfd0070efc1654119d8e61fcaf0bf2131e"
+        },
+        {
+          "path": "evals/workspace-oracle/snapshot.ts",
+          "sha256": "b285e9ece0dee3969a3f6272953ddc6fcb1755b8cb18bd7ec3bf1d52b80ead8c"
+        },
+        {
+          "path": "evals/workspace-oracle/tune.ts",
+          "sha256": "e65ab736e085919bc27cb2b1a90b659795312fe44987008f2866d0344feccc06"
+        },
+        {
+          "path": "evals/workspace-oracle/wasm.ts",
+          "sha256": "07cf69822558b6c0664eb7e9e4d2e688f1a2a93dbf2245db9b438a96f809edcc"
+        }
+      ],
+      "revision": "0fa7ac55189ec0ff393edc522c63ad58f17ab28a",
+      "node": "v24.22.2",
+      "nodePath": "/Users/mz/.local/share/mise/installs/node/24.22.2/bin/node",
+      "nodeSha256": "b6fb419f0f43bb2fbca273700294dd2f3b685a64b60e8417c295f47646a70e4a",
+      "cpu": "Apple M5",
+      "memoryBytes": 34359738368
+    },
+    {
+      "plan": "0054",
+      "files": [
+        {
+          "path": "dist/evals/workspace-oracle/node.js",
+          "sha256": "118ab22ea875735fab917a372d316f932206fd22075c6bc162144478bddae9f0"
+        },
+        {
+          "path": "dist/evals/workspace-oracle/snapshot.js",
+          "sha256": "ddab894f43eebceccc098d6e774fb6a55a8b5257222ca818a0de2543903b99a6"
+        },
+        {
+          "path": "dist/evals/workspace-oracle/wasm.js",
+          "sha256": "7ac898fd55011c0515d844bc8da8f16bc30bbe91ebbb61b736764c8e5451f435"
+        },
+        {
+          "path": "dist/evals/workspace-oracle/cost-worker.js",
+          "sha256": "b56b0d19a1b0ac1ef1378cc24f9c1a97f11b725c70522c498802dc8d40e058e2"
+        },
+        {
+          "path": "dist/src/trace.js",
+          "sha256": "740f95cdbc235b6c8e00121d6be88391171317c750530fb6494ea509bc8097f6"
+        },
+        {
+          "path": "crates/oracle/target/wasm32-unknown-unknown/release/idealis_oracle.wasm",
+          "sha256": "71a098c6b3918dc8fd818b37f9fe022aa18a30ba67f3fe56a7fd425d3db019ac"
+        },
+        {
+          "path": "runner",
+          "sha256": "4aefd9f0c1183fa44a2b24a1fcbc413af1a53831d80dd9f9f2b5d17480b6cefb"
+        },
+        {
+          "path": "oracle",
+          "sha256": "f93f917ab1f3996c732d73cd8812bf823f46a88c999d83184dd11af7a296088d"
+        },
+        {
+          "path": "worker.mjs",
+          "sha256": "775a4ef37198d468b64db775c2cfdd307ca7679aedced2e254b246d880edb084"
+        },
+        {
+          "path": "cases.json",
+          "sha256": "3b9cd972fc203698ddc87513b7c3727b76e10487e1daedfb55947b492d90f83a"
+        }
+      ],
+      "sources": [
+        {
+          "path": "crates/oracle/Cargo.lock",
+          "sha256": "8263eaec871fef774b4c28446e9a9b855d2fae6732c01112064178dd8b00a314"
+        },
+        {
+          "path": "crates/oracle/Cargo.toml",
+          "sha256": "51f55dee8bb55b0a4406ea3ee8fc706f86ce7983a7de399c93ac92079b7e76c9"
+        },
+        {
+          "path": "crates/oracle/LICENSE",
+          "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+        },
+        {
+          "path": "crates/oracle/README.md",
+          "sha256": "4c241aca4c5c78fe0f3db484b340bb3596e8a76ebd206378520e9105d9ffea1e"
+        },
+        {
+          "path": "crates/oracle/SUPPORT.md",
+          "sha256": "37294465c6186fa508009cabcfa2ec4c1d17699f84c14dbd8fa57d158d9149b2"
+        },
+        {
+          "path": "crates/oracle/benches/wire.rs",
+          "sha256": "f5788666f8f2029b55e38ec6fcad851498edd9a4460f90abeafd5b8d48dd5e19"
+        },
+        {
+          "path": "crates/oracle/examples/comparison.rs",
+          "sha256": "d447168e0f29018ecf08faa557d32629473ab24def4b095dc34c366465d145d1"
+        },
+        {
+          "path": "crates/oracle/examples/observations.rs",
+          "sha256": "811a46b0fad7bf415f0ae7027868f1c5617e4cbf10c5d8ff3b83cec5f2b6fe95"
+        },
+        {
+          "path": "crates/oracle/src/bench.rs",
+          "sha256": "a525cbb79d6027acc95c7c12e2ebd02b034fdcf2bb47819847a7ad0e017dba10"
+        },
+        {
+          "path": "crates/oracle/src/group.rs",
+          "sha256": "8b070ee278bfe88aebc945eca17ad2a53d10925495a77a8987e1f16f4bb1e21a"
+        },
+        {
+          "path": "crates/oracle/src/lib.rs",
+          "sha256": "8664a63a178b8c0272867e3144b0eb3fad7afd60246b3931a57ed6d12e427a05"
+        },
+        {
+          "path": "crates/oracle/src/main.rs",
+          "sha256": "812be70f9c5a427d6b0809fb9ccad17301eb454daa778f39ecf7e02d81b26b4b"
+        },
+        {
+          "path": "crates/oracle/src/report.rs",
+          "sha256": "49ce76a597b6f852f7c35606403b8ded3edcec324a9c565e4ab74cb05a734315"
+        },
+        {
+          "path": "crates/oracle/src/wasm.rs",
+          "sha256": "14d26f23c729fcbc848967640cb124474db9555a0556c9bb590c4771b3b15dc6"
+        },
+        {
+          "path": "crates/oracle/src/wire.rs",
+          "sha256": "a63c9fc66b3210c6d521ed473b2d994e8d34322247177621b967042a8b775ee7"
+        },
+        {
+          "path": "crates/oracle/tests/bytes.rs",
+          "sha256": "d5b36cd4fd2e6b1defcb78d6d34cb4d9be1fea37df0e94e8e96a2c94a8b5bda2"
+        },
+        {
+          "path": "crates/oracle/tests/json.rs",
+          "sha256": "cf2ca954c75dff231c15fee79bcd88f6a63250a59cc3097075fa227af028ab67"
+        },
+        {
+          "path": "crates/oracle/tests/oracle.rs",
+          "sha256": "333c808456f75d503d29d9b6d120b5406a65072fdc59611da41c0f4652153bca"
+        },
+        {
+          "path": "evals/oracle-tuning/compat.ts",
+          "sha256": "be487b7d0fb6394c90c1bce5667864d31e4a462df527b271989485d86923c320"
+        },
+        {
+          "path": "evals/oracle-tuning/run.ts",
+          "sha256": "29c80bce79ff9a4ec4adcb40979662594400f760d1461b4592d22d469ef4d139"
+        },
+        {
+          "path": "evals/plans/0054-oracle-bench-tuning.md",
+          "sha256": "3c6b22f425217053e10a3185ebf9cec2383aa3359ed6176c4b3818725fa36a88"
+        },
+        {
+          "path": "evals/workspace-oracle/README.md",
+          "sha256": "511a49ee2cd15bcc331109aee7d0a583e56ac814d8be35aec3d968ca55395711"
+        },
+        {
+          "path": "evals/workspace-oracle/browser-entry.ts",
+          "sha256": "5c167411395b387832960a321d8b9d701cb4323fb178d6ab9d4765e5cefad056"
+        },
+        {
+          "path": "evals/workspace-oracle/browser.spec.ts",
+          "sha256": "130674f2fffc2cf0926e9337cb17ace0e8ff3f176fdfe00b864ffc041b80191d"
+        },
+        {
+          "path": "evals/workspace-oracle/catalog-test.ts",
+          "sha256": "b8804d84b9c8fbc2eedbc4a61444a3c0bc6e05fcfd9761cb92f217af4bf44053"
+        },
+        {
+          "path": "evals/workspace-oracle/catalog.ts",
+          "sha256": "2eeb562a498ce85d6c97e948d5692deb6f6b9d93bc8f7e4e9ded3e60b27e80f2"
+        },
+        {
+          "path": "evals/workspace-oracle/contract-test.ts",
+          "sha256": "39f5403f25ec52312add3c0e023275a80b29f942c9a3aec76d7c0cc7c4544a26"
+        },
+        {
+          "path": "evals/workspace-oracle/cost-worker.ts",
+          "sha256": "7339af34fda79184e7199bddec42283e266ffae5332a5b4a993073a433dc201e"
+        },
+        {
+          "path": "evals/workspace-oracle/cost.ts",
+          "sha256": "dcbfd7a1f312eb4e8d9df559fa8f1d6dad036961772c9fd52d07dc413f6dbddc"
+        },
+        {
+          "path": "evals/workspace-oracle/legacy-parity.ts",
+          "sha256": "67e8d811ef8012e181db8ac4c196d038b52c279abcb35cd6e43527d42f64a186"
+        },
+        {
+          "path": "evals/workspace-oracle/migrations.json",
+          "sha256": "7287c7508b4cf0acb36de110bcc1ed45bfeadeaa601cc57810635a4622f02cfd"
+        },
+        {
+          "path": "evals/workspace-oracle/node.ts",
+          "sha256": "dd6aaa7a56725b45e8d1ebd84e6dbb63420dc600016f4499ae3ea041f6e0b788"
+        },
+        {
+          "path": "evals/workspace-oracle/rust/Cargo.lock",
+          "sha256": "388e33a5dcdb110ac481639e45b40d70aa5f9aaee43cb88a3f172ded9d0eccf7"
+        },
+        {
+          "path": "evals/workspace-oracle/rust/Cargo.toml",
+          "sha256": "39a3b1e5439b6e328fba6b3fd523e8185ef14bcbc1f40d389be79f2aa2a9ce8e"
+        },
+        {
+          "path": "evals/workspace-oracle/rust/src/main.rs",
+          "sha256": "51bfbcb5c10ad148958c6238d5d9f4db04455b7fe3a87dd4f81abc00c3757370"
+        },
+        {
+          "path": "evals/workspace-oracle/rust/tests/process.rs",
+          "sha256": "a6213bc5c83dd10caa466a78db17f7cfd0070efc1654119d8e61fcaf0bf2131e"
+        },
+        {
+          "path": "evals/workspace-oracle/snapshot.ts",
+          "sha256": "b285e9ece0dee3969a3f6272953ddc6fcb1755b8cb18bd7ec3bf1d52b80ead8c"
+        },
+        {
+          "path": "evals/workspace-oracle/tune.ts",
+          "sha256": "6909ba1f9927632a0025e683959bc16fa35b60858e5cf27b5fd3b1861ea64092"
+        },
+        {
+          "path": "evals/workspace-oracle/wasm.ts",
+          "sha256": "fb3290ffc2b7207246c5b5a23568427d0fbd58f2d1c36d35654d339cf7a44be1"
+        }
+      ],
+      "revision": "0fa7ac55189ec0ff393edc522c63ad58f17ab28a",
+      "node": "v24.22.2",
+      "nodePath": "/Users/mz/.local/share/mise/installs/node/24.22.2/bin/node",
+      "nodeSha256": "b6fb419f0f43bb2fbca273700294dd2f3b685a64b60e8417c295f47646a70e4a",
+      "cpu": "Apple M5",
+      "memoryBytes": 34359738368
+    }
+  ]
+}

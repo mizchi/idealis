@@ -1,0 +1,470 @@
+{
+  "warmupBatches": 3,
+  "measuredBatches": 9,
+  "profiledHistory": {
+    "format": "modelt.portable-trace",
+    "version": 1,
+    "model": "fifo-mutex",
+    "initial": {
+      "type": "record",
+      "value": [
+        [
+          "granted",
+          {
+            "type": "list",
+            "value": []
+          }
+        ],
+        [
+          "locked",
+          {
+            "type": "bool",
+            "value": false
+          }
+        ]
+      ]
+    },
+    "steps": [
+      {
+        "action": {
+          "type": "record",
+          "value": [
+            [
+              "id",
+              {
+                "type": "string",
+                "value": "a"
+              }
+            ],
+            [
+              "type",
+              {
+                "type": "string",
+                "value": "acquire"
+              }
+            ]
+          ]
+        },
+        "observation": {
+          "type": "record",
+          "value": [
+            [
+              "granted",
+              {
+                "type": "list",
+                "value": [
+                  {
+                    "type": "string",
+                    "value": "a"
+                  }
+                ]
+              }
+            ],
+            [
+              "locked",
+              {
+                "type": "bool",
+                "value": true
+              }
+            ]
+          ]
+        }
+      },
+      {
+        "action": {
+          "type": "record",
+          "value": [
+            [
+              "id",
+              {
+                "type": "string",
+                "value": "b"
+              }
+            ],
+            [
+              "type",
+              {
+                "type": "string",
+                "value": "acquire"
+              }
+            ]
+          ]
+        },
+        "observation": {
+          "type": "record",
+          "value": [
+            [
+              "granted",
+              {
+                "type": "list",
+                "value": [
+                  {
+                    "type": "string",
+                    "value": "a"
+                  }
+                ]
+              }
+            ],
+            [
+              "locked",
+              {
+                "type": "bool",
+                "value": true
+              }
+            ]
+          ]
+        }
+      },
+      {
+        "action": {
+          "type": "record",
+          "value": [
+            [
+              "id",
+              {
+                "type": "string",
+                "value": "c"
+              }
+            ],
+            [
+              "type",
+              {
+                "type": "string",
+                "value": "acquire"
+              }
+            ]
+          ]
+        },
+        "observation": {
+          "type": "record",
+          "value": [
+            [
+              "granted",
+              {
+                "type": "list",
+                "value": [
+                  {
+                    "type": "string",
+                    "value": "a"
+                  }
+                ]
+              }
+            ],
+            [
+              "locked",
+              {
+                "type": "bool",
+                "value": true
+              }
+            ]
+          ]
+        }
+      },
+      {
+        "action": {
+          "type": "record",
+          "value": [
+            [
+              "type",
+              {
+                "type": "string",
+                "value": "release"
+              }
+            ]
+          ]
+        },
+        "observation": {
+          "type": "record",
+          "value": [
+            [
+              "granted",
+              {
+                "type": "list",
+                "value": [
+                  {
+                    "type": "string",
+                    "value": "a"
+                  },
+                  {
+                    "type": "string",
+                    "value": "b"
+                  }
+                ]
+              }
+            ],
+            [
+              "locked",
+              {
+                "type": "bool",
+                "value": true
+              }
+            ]
+          ]
+        }
+      },
+      {
+        "action": {
+          "type": "record",
+          "value": [
+            [
+              "type",
+              {
+                "type": "string",
+                "value": "release"
+              }
+            ]
+          ]
+        },
+        "observation": {
+          "type": "record",
+          "value": [
+            [
+              "granted",
+              {
+                "type": "list",
+                "value": [
+                  {
+                    "type": "string",
+                    "value": "a"
+                  },
+                  {
+                    "type": "string",
+                    "value": "b"
+                  },
+                  {
+                    "type": "string",
+                    "value": "c"
+                  }
+                ]
+              }
+            ],
+            [
+              "locked",
+              {
+                "type": "bool",
+                "value": true
+              }
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  "correctnessControls": 3,
+  "tsSetupMs": 0.2553330000000642,
+  "nativeStartupMs": 1.94462499999986,
+  "batches": [
+    {
+      "size": 1,
+      "inputBytes": 39024,
+      "targets": [
+        {
+          "name": "ts-prepared",
+          "samplesMs": [
+            0.04833299999995688,
+            0.0390420000001086,
+            0.04329099999995378,
+            0.03999999999996362,
+            0.04549999999994725,
+            0.041875000000118234,
+            0.0418329999999969,
+            0.04083400000013171,
+            0.04087500000014188
+          ],
+          "medianMs": 0.0418329999999969,
+          "perHistoryMs": 0.0418329999999969
+        },
+        {
+          "name": "ts-wire",
+          "samplesMs": [
+            0.5557499999999891,
+            0.5111249999999927,
+            0.49987499999997453,
+            0.4940409999999247,
+            0.49695900000006077,
+            0.531208000000106,
+            0.464917000000014,
+            0.46629200000006676,
+            0.47433299999988776
+          ],
+          "medianMs": 0.49695900000006077,
+          "perHistoryMs": 0.49695900000006077
+        },
+        {
+          "name": "wasm-wire",
+          "samplesMs": [
+            0.4640839999999571,
+            0.4437500000001364,
+            0.42600000000015825,
+            0.4415830000000369,
+            0.4092080000000351,
+            0.42841699999985394,
+            0.3892080000000533,
+            0.4082500000001801,
+            0.4020419999999376
+          ],
+          "medianMs": 0.42600000000015825,
+          "perHistoryMs": 0.42600000000015825
+        },
+        {
+          "name": "native-jsonl",
+          "samplesMs": [
+            0.42583399999989524,
+            0.38200000000006185,
+            0.36095799999998235,
+            0.4300419999999576,
+            0.42570800000021336,
+            0.452167000000145,
+            0.3660829999998896,
+            0.399208999999928,
+            0.37175000000002
+          ],
+          "medianMs": 0.399208999999928,
+          "perHistoryMs": 0.399208999999928
+        }
+      ]
+    },
+    {
+      "size": 16,
+      "inputBytes": 62529,
+      "targets": [
+        {
+          "name": "ts-prepared",
+          "samplesMs": [
+            0.6933340000000499,
+            0.7123340000000553,
+            0.9083749999999782,
+            0.7028749999999491,
+            0.6243330000002061,
+            0.6158339999999498,
+            0.6197080000001733,
+            0.6045420000000377,
+            0.5595419999999649
+          ],
+          "medianMs": 0.6243330000002061,
+          "perHistoryMs": 0.03902081250001288
+        },
+        {
+          "name": "ts-wire",
+          "samplesMs": [
+            1.7424590000000535,
+            1.5587920000000395,
+            1.5678749999999582,
+            1.535082999999986,
+            1.4850830000000315,
+            1.931957999999895,
+            1.4796250000001692,
+            1.5267499999999927,
+            1.7174999999999727
+          ],
+          "medianMs": 1.5587920000000395,
+          "perHistoryMs": 0.09742450000000247
+        },
+        {
+          "name": "wasm-wire",
+          "samplesMs": [
+            1.1481249999999363,
+            1.1972920000000613,
+            1.1453750000000582,
+            1.2158750000000964,
+            1.1416670000000977,
+            1.13799999999992,
+            1.1746249999998781,
+            1.2113750000000891,
+            1.118874999999889
+          ],
+          "medianMs": 1.1481249999999363,
+          "perHistoryMs": 0.07175781249999602
+        },
+        {
+          "name": "native-jsonl",
+          "samplesMs": [
+            1.1249589999999898,
+            1.0292920000001686,
+            1.0423749999999927,
+            1.0548749999998108,
+            0.9607499999999618,
+            1.0117499999998927,
+            0.9420420000001286,
+            1.0918329999999514,
+            1.012124999999969
+          ],
+          "medianMs": 1.0292920000001686,
+          "perHistoryMs": 0.06433075000001054
+        }
+      ]
+    },
+    {
+      "size": 64,
+      "inputBytes": 137745,
+      "targets": [
+        {
+          "name": "ts-prepared",
+          "samplesMs": [
+            2.399167000000034,
+            2.3589170000000195,
+            3.577792000000045,
+            3.2942920000000413,
+            2.924417000000176,
+            2.932416000000103,
+            2.5605419999999413,
+            2.3149579999999332,
+            2.3185000000000855
+          ],
+          "medianMs": 2.5605419999999413,
+          "perHistoryMs": 0.04000846874999908
+        },
+        {
+          "name": "ts-wire",
+          "samplesMs": [
+            5.300666999999976,
+            6.870834000000059,
+            5.871417000000065,
+            5.649290999999948,
+            5.718417000000045,
+            4.567374999999856,
+            4.918333000000075,
+            4.780958000000055,
+            4.995458000000099
+          ],
+          "medianMs": 5.300666999999976,
+          "perHistoryMs": 0.08282292187499962
+        },
+        {
+          "name": "wasm-wire",
+          "samplesMs": [
+            3.4429999999999836,
+            3.4887079999998605,
+            3.8189159999999447,
+            3.4758750000000873,
+            3.3964169999999285,
+            3.4421250000000327,
+            3.4075000000000273,
+            3.486750000000029,
+            3.435999999999922
+          ],
+          "medianMs": 3.4429999999999836,
+          "perHistoryMs": 0.053796874999999744
+        },
+        {
+          "name": "native-jsonl",
+          "samplesMs": [
+            3.0814589999999953,
+            4.55862500000012,
+            3.4848749999998745,
+            3.1310000000000855,
+            3.04491599999983,
+            3.0667919999998503,
+            2.9712919999999485,
+            3.007417000000032,
+            3.1074160000000575
+          ],
+          "medianMs": 3.0814589999999953,
+          "perHistoryMs": 0.048147796874999926
+        }
+      ]
+    }
+  ],
+  "scope": "Every batch size repeats the same first history. Other histories are correctness controls outside timing. Recording disabled. ts-prepared excludes loading; wire profiles include JSON/model loading, validation and full results. Native uses one persistent process; IPC is included and process startup is separate. Wall times are use costs, not CPU language ratios.",
+  "wasmStartupMs": 2.7909159999999247
+}

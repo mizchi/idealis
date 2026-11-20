@@ -1,0 +1,162 @@
+{
+  "input": "NestedFold",
+  "route": "after-wasm-v1",
+  "iteration": 1,
+  "warmup": false,
+  "status": "complete",
+  "compileMs": 0.18808399999994663,
+  "checkMs": 0.05004199999996217,
+  "sourceMs": 0.10849999999999227,
+  "irBytes": 1146,
+  "definitions": null,
+  "result": {
+    "status": "complete",
+    "reason": null,
+    "states": 1,
+    "generated": 2,
+    "depth": 0,
+    "work": 19,
+    "violation": null
+  },
+  "program": {
+    "format": "modelt.safety-program",
+    "version": 1,
+    "name": "NestedFold",
+    "variables": [
+      "total"
+    ],
+    "initial": [
+      {
+        "name": "init",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "fold",
+              "accumulator": 0,
+              "initial": {
+                "op": "literal",
+                "value": {
+                  "type": "int",
+                  "value": "0"
+                }
+              },
+              "collection": {
+                "op": "tuple",
+                "values": [
+                  {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                ]
+              },
+              "order": "sequence-left",
+              "body": {
+                "op": "add",
+                "left": {
+                  "op": "bound",
+                  "slot": 0
+                },
+                "right": {
+                  "op": "fold",
+                  "accumulator": 2,
+                  "initial": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "0"
+                    }
+                  },
+                  "collection": {
+                    "op": "set",
+                    "values": [
+                      {
+                        "op": "bound",
+                        "slot": 1
+                      },
+                      {
+                        "op": "add",
+                        "left": {
+                          "op": "bound",
+                          "slot": 1
+                        },
+                        "right": {
+                          "op": "literal",
+                          "value": {
+                            "type": "int",
+                            "value": "1"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "order": "set-members",
+                  "body": {
+                    "op": "add",
+                    "left": {
+                      "op": "bound",
+                      "slot": 2
+                    },
+                    "right": {
+                      "op": "bound",
+                      "slot": 3
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "next": [
+      {
+        "name": "step",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "read",
+              "slot": 0,
+              "next": false
+            }
+          }
+        ]
+      }
+    ],
+    "invariants": [
+      {
+        "name": "safety",
+        "expression": {
+          "op": "eq",
+          "left": {
+            "op": "read",
+            "slot": 0,
+            "next": false
+          },
+          "right": {
+            "op": "literal",
+            "value": {
+              "type": "int",
+              "value": "8"
+            }
+          }
+        }
+      }
+    ],
+    "assumptions": [],
+    "checkDeadlock": true
+  }
+}

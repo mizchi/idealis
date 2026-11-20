@@ -1,0 +1,148 @@
+{
+  "input": "Counter",
+  "route": "after-native-v1",
+  "iteration": 2,
+  "warmup": false,
+  "status": "complete",
+  "compileMs": 0.25216599999998834,
+  "checkMs": 0.10325000000000273,
+  "sourceMs": 0.21629200000000992,
+  "irBytes": 1038,
+  "definitions": null,
+  "result": {
+    "status": "complete",
+    "reason": null,
+    "states": 4,
+    "generated": 5,
+    "depth": 3,
+    "work": 10,
+    "violation": null
+  },
+  "program": {
+    "format": "modelt.safety-program",
+    "version": 1,
+    "name": "Counter",
+    "variables": [
+      "count"
+    ],
+    "initial": [
+      {
+        "name": "init",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "literal",
+              "value": {
+                "type": "int",
+                "value": "0"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "next": [
+      {
+        "name": "step",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "if",
+              "condition": {
+                "op": "lt",
+                "left": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "right": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "3"
+                  }
+                }
+              },
+              "consequent": {
+                "op": "add",
+                "left": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "right": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "1"
+                  }
+                }
+              },
+              "alternative": {
+                "op": "literal",
+                "value": {
+                  "type": "int",
+                  "value": "0"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "invariants": [
+      {
+        "name": "safety",
+        "expression": {
+          "op": "and",
+          "left": {
+            "op": "and",
+            "left": {
+              "op": "literal",
+              "value": {
+                "type": "bool",
+                "value": true
+              }
+            },
+            "right": {
+              "op": "ge",
+              "left": {
+                "op": "read",
+                "slot": 0,
+                "next": false
+              },
+              "right": {
+                "op": "literal",
+                "value": {
+                  "type": "int",
+                  "value": "0"
+                }
+              }
+            }
+          },
+          "right": {
+            "op": "le",
+            "left": {
+              "op": "read",
+              "slot": 0,
+              "next": false
+            },
+            "right": {
+              "op": "literal",
+              "value": {
+                "type": "int",
+                "value": "3"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "assumptions": [],
+    "checkDeadlock": true
+  }
+}

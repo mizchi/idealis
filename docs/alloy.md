@@ -66,4 +66,4 @@ just alloy-browser
 just package
 ```
 
-`alloy-test`は同じ契約をnode:testとVitestで実行し、3ノードの全512グラフをTSの独立した循環判定、native、Wasmで照合する。公式Alloy Analyzerへの構造固定比較は[0035の計画](../evals/plans/0035-alloy-instance.md)と[評価ハーネス](../evals/alloy-instance/README.md)を参照。
+`alloy-test`は同じ契約をnode:testとVitestで実行し、3ノードの全512グラフをTSの独立した循環判定、native、Wasmで照合する。公式Alloy Analyzerへの構造固定比較は[0035の計画](../evals/plans/0035-alloy-instance.md)と[評価ハーネス](../evals/experiments/alloy-instance/README.md)を参照。

@@ -28,12 +28,13 @@ fn definition(
     body: Expression,
 ) -> Definition {
     Definition {
+        recursive: false,
         id,
         parameter_count,
         capture_count,
         body_kind: BodyKind::Expression,
         local_scope: 0,
-        body,
+        body: body.into(),
     }
 }
 
@@ -48,6 +49,7 @@ fn program(body: Expression) -> SafetyProgram {
         invariants: vec![],
         assumptions: vec![],
         check_deadlock: false,
+        symmetry: None,
         initial_properties: vec![],
         action_properties: vec![],
         properties: vec![],

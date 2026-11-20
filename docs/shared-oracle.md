@@ -1,6 +1,6 @@
 # 同じオラクルで TS / Rust / Go を検査する
 
-`evals/cross-language` は、共通の finite model と portable trace を各言語の実装へ渡す評価ハーネス。記録済みの観測を Driver から返す0006の互換性テストに加え、各実装を操作して新しい観測を得る。
+`evals/experiments/cross-language` は、共通の finite model と portable trace を各言語の実装へ渡す評価ハーネス。記録済みの観測を Driver から返す0006の互換性テストに加え、各実装を操作して新しい観測を得る。
 
 ```sh
 just cross-test
@@ -31,14 +31,14 @@ TS は既存の checker、Rust は native `Session`、Go は Go adapter と Rust
 
 実装の場所:
 
-- TS: `examples/durable-counter.ts`、`evals/harness/counter-faults.ts`
-- Rust: `evals/shared-oracle-rust/src/lib.rs`
+- TS: `examples/durable-counter.ts`、`evals/experiments/harness/counter-faults.ts`
+- Rust: `evals/experiments/shared-oracle-rust/src/lib.rs`
 - Go: `adapters/go/internal/counter/counter.go`
 
 Rust / Go の runner は stdin の同じ suite を読む。Go command は実験用で、SDK の public API ではない。
 
 ```sh
-evals/shared-oracle-rust/target/release/idealis-shared-oracle < .artifacts/shared-confirm/suite.json
+evals/experiments/shared-oracle-rust/target/release/idealis-shared-oracle < .artifacts/shared-confirm/suite.json
 .artifacts/go/counter-replay crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm < .artifacts/shared-confirm/suite.json
 ```
 

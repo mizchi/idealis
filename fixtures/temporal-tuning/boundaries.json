@@ -1,0 +1,50 @@
+[
+  {
+    "name": "temporal-16-complete",
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nInit == x = 0\nNext == x' = (x + 1) % 4\nLive == \\A p \\in 1..16: [] (x < 4)\n====",
+    "config": "INIT Init\nNEXT Next\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+    "expected": "complete"
+  },
+  {
+    "name": "temporal-16-violation",
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nInit == x = 0\nNext == x' = (x + 1) % 4\nLive == \\A p \\in 1..16: [] (x < 2)\n====",
+    "config": "INIT Init\nNEXT Next\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+    "expected": "liveness-violation"
+  },
+  {
+    "name": "temporal-17-complete",
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nInit == x = 0\nNext == x' = (x + 1) % 4\nLive == \\A p \\in 1..17: [] (x < 4)\n====",
+    "config": "INIT Init\nNEXT Next\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+    "expected": "complete"
+  },
+  {
+    "name": "temporal-17-violation",
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nInit == x = 0\nNext == x' = (x + 1) % 4\nLive == \\A p \\in 1..17: [] (x < 2)\n====",
+    "config": "INIT Init\nNEXT Next\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+    "expected": "liveness-violation"
+  },
+  {
+    "name": "temporal-64-complete",
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nInit == x = 0\nNext == x' = (x + 1) % 4\nLive == \\A p \\in 1..64: [] (x < 4)\n====",
+    "config": "INIT Init\nNEXT Next\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+    "expected": "complete"
+  },
+  {
+    "name": "temporal-64-violation",
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nInit == x = 0\nNext == x' = (x + 1) % 4\nLive == \\A p \\in 1..64: [] (x < 2)\n====",
+    "config": "INIT Init\nNEXT Next\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+    "expected": "liveness-violation"
+  },
+  {
+    "name": "temporal-65-complete",
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nInit == x = 0\nNext == x' = (x + 1) % 4\nLive == \\A p \\in 1..65: [] (x < 4)\n====",
+    "config": "INIT Init\nNEXT Next\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+    "expected": "complete"
+  },
+  {
+    "name": "temporal-65-violation",
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE x\nInit == x = 0\nNext == x' = (x + 1) % 4\nLive == \\A p \\in 1..65: [] (x < 2)\n====",
+    "config": "INIT Init\nNEXT Next\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+    "expected": "liveness-violation"
+  }
+]

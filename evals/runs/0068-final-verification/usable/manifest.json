@@ -1,0 +1,2390 @@
+{
+  "version": 1,
+  "plan": "0005-usable-core",
+  "sources": [
+    {
+      "path": ".github/actions/setup/action.yml",
+      "sha256": "8b5b50c3fac6eda2acb96f6f9356f3f5706ad2ac5756468362db0ea0227c99ac"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "42884a57569286878c279584d4d871d42326fbc6a6dc46ba6130c7c40e3992db"
+    },
+    {
+      "path": ".github/workflows/fuzz.yml",
+      "sha256": "b28389105b7500cf3ea6dac75220b668dab7bc8bf86b26f7a65b971fa249b2ac"
+    },
+    {
+      "path": ".github/workflows/portable.yml",
+      "sha256": "d1264db7e79af2148947a40e600d94a9426339eaf3d07f22d9927f9d904139ac"
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "sha256": "d24d7b8d492905b49ae9bce63d25e3a9afc43499140c770901e77c251f7c191f"
+    },
+    {
+      "path": ".github/workflows/runtime.yml",
+      "sha256": "f678bb0d64f9a5ad2fc97c61015bf33060c60db9c99f8e9ae152832ada34b4d9"
+    },
+    {
+      "path": ".github/workflows/sharding.yml",
+      "sha256": "5f8fb7ec50bc2519c43456c2b1f40315123cbca2ea092ab426aac0d9c2f0a9df"
+    },
+    {
+      "path": "cli/idealis.ts",
+      "sha256": "854d323b9fe37986bc441dea204cc75e88be81be2e1af2f6d92443f18fb03673"
+    },
+    {
+      "path": "crates/idealis-core/Cargo.lock",
+      "sha256": "4aff86ba1d4e9fd8183f912fc74ed2ae7bb0a5158d6cd770fd14a40e96cc812a"
+    },
+    {
+      "path": "crates/idealis-core/Cargo.toml",
+      "sha256": "ca36e245dc54e0dcf7944a8e9dffbfed5c08640189a0d8d4b2f1e884ece2e980"
+    },
+    {
+      "path": "crates/idealis-core/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/idealis-core/README.md",
+      "sha256": "8024f60c6e20976d1f2ed76b69b5059a4ec8309d08c44761eb03ea390a5bc2f9"
+    },
+    {
+      "path": "crates/idealis-core/SUPPORT.md",
+      "sha256": "4d142c57b7670789c5076d933a670c00a44a2b682044ad2a448014c66ee8e781"
+    },
+    {
+      "path": "crates/idealis-core/examples/counter.rs",
+      "sha256": "af5c6c8c8cd358deb283006a572a016dcb67adc72fecfa5d581dd18d8a92c371"
+    },
+    {
+      "path": "crates/idealis-core/src/finite.rs",
+      "sha256": "8049bd6677fa2a7d4c9b6192ebef47ecf50977ef14b967cbc8c4c4e4b99561b0"
+    },
+    {
+      "path": "crates/idealis-core/src/history.rs",
+      "sha256": "273f22b5c483922680bfc6281a3a46ba5bb1d3f2c911535431a8f5508fc1e032"
+    },
+    {
+      "path": "crates/idealis-core/src/host.rs",
+      "sha256": "0813f97b3518e7acffb9f48a5865d96b62d407b684ff110c6c73e83aa4933c6d"
+    },
+    {
+      "path": "crates/idealis-core/src/lib.rs",
+      "sha256": "e2cf30939adaf14474ddb45b25eee3ecdfffb696c3fec608af92effd031cb03b"
+    },
+    {
+      "path": "crates/idealis-core/src/main.rs",
+      "sha256": "e70db654b26ff96496f3214681ad1f5241e2d76bdea9e71821c63551ff8a41f2"
+    },
+    {
+      "path": "crates/idealis-core/src/shrink.rs",
+      "sha256": "f74c85b7261bf1e3cbd6400db3fe8712f68d32b9fbcaf129509dc790ab619b36"
+    },
+    {
+      "path": "crates/idealis-core/src/wasm.rs",
+      "sha256": "2300b01f5c8540c34dbc4b4d83ea167ae081dd5fcd01c523dac8679b991a0ffe"
+    },
+    {
+      "path": "crates/idealis-core/tests/collections.rs",
+      "sha256": "841a6ab5db87d920e96f9bcc251e0c34416ec76feb2d373c1d6c05591c415eda"
+    },
+    {
+      "path": "crates/idealis-core/tests/contract.rs",
+      "sha256": "6593f24d06a636ded76b8c768120b465ec71af3544602a4488949099706f5261"
+    },
+    {
+      "path": "crates/idealis-core/tests/deep_request_drop.rs",
+      "sha256": "7e73ad7802df9af506f107185a4a92f83d6b31fd5e30bbc316302cc9d304a3d4"
+    },
+    {
+      "path": "crates/idealis-core/tests/deep_value_drop.rs",
+      "sha256": "8731ccbec7d506a5a714a802f1dc192e24b6f092476b208b8122c3672fda89f4"
+    },
+    {
+      "path": "crates/idealis-core/tests/finite.rs",
+      "sha256": "530a4d702600ea09be8cd2a238551cf84cbab33025694fa13f48bee61ef42416"
+    },
+    {
+      "path": "crates/idealis-core/tests/host.rs",
+      "sha256": "f284cdcb5f5db0da7f0067c09c2ffae872af09d33bdfcda0b5bbb897e56e8013"
+    },
+    {
+      "path": "crates/idealis-core/tests/loaded.rs",
+      "sha256": "1703e51afe2ff3a2dfaa8657570632ebb5328ec68445f80e4b88847c47d0a0a8"
+    },
+    {
+      "path": "crates/idealis-core/tests/prepared_safety.rs",
+      "sha256": "a3d91efd5fe45a9013b7d54fd609bac75b4e0e42555989050032d6bfe3872eec"
+    },
+    {
+      "path": "crates/idealis-core/tests/rtlc.rs",
+      "sha256": "b5ffb4233006dd74b210d623a438c2e499130b7451c83d7e9b6a15631c3d6781"
+    },
+    {
+      "path": "crates/idealis-core/tests/safety.rs",
+      "sha256": "acf2362a0ee072b30b58a900785962d88ce27400dc9108a0bf5c545a8b9af62a"
+    },
+    {
+      "path": "crates/idealis-core/tests/shrink.rs",
+      "sha256": "ab339fa61fc36833ecbb41bd20b633d401921e83be29633e509ede0cb081f6ca"
+    },
+    {
+      "path": "crates/idealis-core/tests/tla.rs",
+      "sha256": "9c2ba2230b1a8f0cbeb25a13f375f5e287a841f8390a061af8f807b3cb756706"
+    },
+    {
+      "path": "crates/rtla-compiler/Cargo.lock",
+      "sha256": "ae19c5abc8d6a7c0578676f214ed0bdce9fd8d4117ae6d6b439c25a633ac1926"
+    },
+    {
+      "path": "crates/rtla-compiler/Cargo.toml",
+      "sha256": "ff35abd7398f8ae19de5a380b7cd6638f71e4554fceca773d9c62160e8025173"
+    },
+    {
+      "path": "crates/rtla-compiler/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/rtla-compiler/README.md",
+      "sha256": "9fe488c25c3043c87b26176e6c1d31e0085b4fbc778102a701340d4773631dcf"
+    },
+    {
+      "path": "crates/rtla-compiler/SUPPORT.md",
+      "sha256": "7d0e0c5ffeb6a6542c7aa58a6100c098fc3f279e365d9349379df919fef1cede"
+    },
+    {
+      "path": "crates/rtla-compiler/benches/compatibility.rs",
+      "sha256": "f1a42c006fdd3b696630c49356085c5abda7715fa6f849888172276601389be3"
+    },
+    {
+      "path": "crates/rtla-compiler/examples/analysis_roles.rs",
+      "sha256": "3bb02ee05cebde964a531145dd2cbf3229bdc1a8d12fa8ac4c498e0ca2e72875"
+    },
+    {
+      "path": "crates/rtla-compiler/examples/check.rs",
+      "sha256": "bdc06941d17708dc2332575b253e96f6115daa28532117514fbba34a4eccd119"
+    },
+    {
+      "path": "crates/rtla-compiler/examples/temporal-profile.rs",
+      "sha256": "27d4e418471ee457f1d15753a50170255304bdbf9bdfa30d353eccd69fd4e4f5"
+    },
+    {
+      "path": "crates/rtla-compiler/src/analysis.rs",
+      "sha256": "e466ebb7698f320f7d5250fb7f2488ae9b7bd8311f40994ebdffb3be2958fb6d"
+    },
+    {
+      "path": "crates/rtla-compiler/src/lib.rs",
+      "sha256": "3c4ecb701e5310840361f97c1b17cdde7dc186a2190d2e25010299acf734c30e"
+    },
+    {
+      "path": "crates/rtla-compiler/src/link.rs",
+      "sha256": "d3dd957a37ce37d3f1a7a64f51bc57afcdf07d089b989ef9e5e03fa6a4aec1aa"
+    },
+    {
+      "path": "crates/rtla-compiler/src/rewrite.rs",
+      "sha256": "98b15fbe03bea78c0c01693d76b778cb35d79e50ec84d01352c949e301eeb907"
+    },
+    {
+      "path": "crates/rtla-compiler/src/symmetry.rs",
+      "sha256": "ecf438b158b2c31422ff4ae7a8c79bb43d7311dce736a68ab3b03fc947e877c6"
+    },
+    {
+      "path": "crates/rtla-compiler/src/typed.rs",
+      "sha256": "787b2c12dcbdb34e4d79aa2a854225c2f11a9ecc3517334331f2fcba6947fd95"
+    },
+    {
+      "path": "crates/rtla-compiler/src/typed_expr.rs",
+      "sha256": "672ca09772d95a93d44c585415724b23789b1819350042ab71ab7ebaeb40adca"
+    },
+    {
+      "path": "crates/rtla-compiler/src/typed_lower.rs",
+      "sha256": "76fc992f2524eba4aa09026180eaf7d300ba4a13968f30b9a43fad9954a8effc"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/analysis_parity.rs",
+      "sha256": "9e847466e9b937035fcafa87befb9f0751aed6db39d5d50c29466c3ab20e236a"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/compiler.rs",
+      "sha256": "d6c7bc5018f026e0791388fd3776318247f744a58d9827d41dae2bd86f44cbb5"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/finite-support.json",
+      "sha256": "4255c15f24e2fae6420dc15585cef35a48eb2e23b8ac7e1c92e3d00b4f8a2690"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/finite_support.rs",
+      "sha256": "a6247454985746c04f6209329fcf9a8a6f3544c2e3f7bbaad322ce0b1d5c165c"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/modules-support.json",
+      "sha256": "c08e6216640becfcdefbd94110282f714310f72f19c354a82bf1595721e1c564"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/modules.rs",
+      "sha256": "2ce495a5d403b6e6de887cd07443a27f2dbd7083d1aac91deb331471f610eb7d"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/operator_sharing.rs",
+      "sha256": "e34c7f92f59e8924326c3ab584b71cc4694240a5a701822389a4441b9a8523be"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/operator_sharing_bundle.rs",
+      "sha256": "bd9642aa237da5cb6ca9390d4d3cd185ce1fc265debabe97523f073089ead012"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/operators-support.json",
+      "sha256": "24441593c1c2a5f6ef97ac8c294f32fe1b9e8b78ed81e282ba8b86c3b0d724dd"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/operators.rs",
+      "sha256": "123c4142730d8bc329033e0bf7725b04c06cb76d26445ad39b8fffee69e654d4"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/partial_order.rs",
+      "sha256": "513fe3f631a1cce6651eb76f6d010d5e51a51d2048aad312c1fe3b9223f67c59"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/symmetry.rs",
+      "sha256": "19f34d6ebd0d681f7e6a4ee1b58269dbbb02c5bc2e5a84ffef5b67aae26de3a2"
+    },
+    {
+      "path": "crates/rtla/Cargo.lock",
+      "sha256": "9b35082c314f3682e4c3d20b6bef5e95b41387c4c70782c498af76f296f53858"
+    },
+    {
+      "path": "crates/rtla/Cargo.toml",
+      "sha256": "d0ee70339da2a568e2813ed6fd3c85f211148cf93b1b52484cbac06e7161a80c"
+    },
+    {
+      "path": "crates/rtla/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/rtla/NOTICE",
+      "sha256": "6f18428281839e8b8d7ae20477ddaae6c76cc7b5684eb8054fbdf01205ad9e9e"
+    },
+    {
+      "path": "crates/rtla/README.md",
+      "sha256": "2724f90ca5274fdf7539430f5df0c54d4a08ab6326ce5d89ac4ca257ec1c9242"
+    },
+    {
+      "path": "crates/rtla/SUPPORT.md",
+      "sha256": "8d2d6b2ae5dcbbf76a80172eb935416fc1cb8cb992f4f4e64ad39c3b163698ad"
+    },
+    {
+      "path": "crates/rtla/examples/inspect.rs",
+      "sha256": "c2ddd0476818d2b5bec7c34d52f6f10d1270c86e671603cfa0788979917467b7"
+    },
+    {
+      "path": "crates/rtla/src/ast.rs",
+      "sha256": "d8929e28558bef691b8e84376e22f7ca23726fdb4650ca79d6007da0e1aa33af"
+    },
+    {
+      "path": "crates/rtla/src/config.rs",
+      "sha256": "f6824eb589df8e8b1d005dad9262cae02aac39568cdbffbdb0caf4c736d95c9c"
+    },
+    {
+      "path": "crates/rtla/src/error.rs",
+      "sha256": "3e1e4f360c44399e9c253f7697fb416f479564a5b6c61b2a9e67d74dd415b191"
+    },
+    {
+      "path": "crates/rtla/src/lexer.rs",
+      "sha256": "b705cadc17efe3df98c564e92afea8b080aad8af25bc4cceaee811a72450cfe5"
+    },
+    {
+      "path": "crates/rtla/src/lib.rs",
+      "sha256": "48e5e99cda0be623898b6c4743c28d0ca4044dc8ef82199533424cde28799903"
+    },
+    {
+      "path": "crates/rtla/src/main.rs",
+      "sha256": "8ba189d89ab92a002019441133a7aa2f86aed704ffca456d7c4094dead0d817c"
+    },
+    {
+      "path": "crates/rtla/src/parser.rs",
+      "sha256": "2343e41c8ff6a4070572f0758f9d5d7665b734870bda69a86a8d36d85f827b75"
+    },
+    {
+      "path": "crates/rtla/src/protocol.rs",
+      "sha256": "2c1e018da00062d8d2f6f2f20891ddad650f6cae12e772a84d81599782f385e0"
+    },
+    {
+      "path": "crates/rtla/src/wasm.rs",
+      "sha256": "e0487ce961fa75f57d34345c0b57674b1c925ad7af6b04bbda1176807cda6a5d"
+    },
+    {
+      "path": "crates/rtla/tests/fixtures/Channel.tla",
+      "sha256": "8b2cbd4533a157ae0760e3117e3c008fb9a31dc3673005fc8b537d3879de1bfc"
+    },
+    {
+      "path": "crates/rtla/tests/fixtures/DieHard.tla",
+      "sha256": "295495de6509d86a82b88757835b95e3f91fad8691d764ece4d98886dcf42b66"
+    },
+    {
+      "path": "crates/rtla/tests/fixtures/LICENSE.md",
+      "sha256": "9fce60dd2b6c2be72803e96fc67f0a34b91b073ead999cea21d00c33b8bce147"
+    },
+    {
+      "path": "crates/rtla/tests/instances.rs",
+      "sha256": "b7603946a520076ef80f68a46b4b0270b76c97cc68472c835937fa99980b0fb4"
+    },
+    {
+      "path": "crates/rtla/tests/labels.rs",
+      "sha256": "0ca77406375417f23cf7653d622bbb853fbce933303ccfee7c764295bf8f2bdd"
+    },
+    {
+      "path": "crates/rtla/tests/parser.rs",
+      "sha256": "5603429e90338696652452ddc17fc026db23e67db52b94dff2314be4ec8a4c4b"
+    },
+    {
+      "path": "crates/rtlc/Cargo.lock",
+      "sha256": "fb3c4f324cd8400bcf2bbbe57301b64d8b9ea6f9664fc22437dc3b11b509fcc9"
+    },
+    {
+      "path": "crates/rtlc/Cargo.toml",
+      "sha256": "4848f00da58b1f0b3fb3c91ab99e673ba4a88b544abb582c08a8d4ee33158c29"
+    },
+    {
+      "path": "crates/rtlc/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/rtlc/README.md",
+      "sha256": "5868ff77daa8ac0bfd21dbae566eaf1590231ecd58fcd8d9cec0120bbf1892b0"
+    },
+    {
+      "path": "crates/rtlc/SUPPORT.md",
+      "sha256": "5fd2b84e4a5657a01b8ebc295522acdaf36854d4fce1c89ac8a6680fde4c0791"
+    },
+    {
+      "path": "crates/rtlc/examples/counter.rs",
+      "sha256": "734d2c9561564aa78d801d051e44e5c3d81b064b9222684ddb446ea9b062038d"
+    },
+    {
+      "path": "crates/rtlc/src/bench-fixtures.json",
+      "sha256": "a9df6debe79bf441a8ff51b48f352077d3d6804d12e58afc962cb34365569f25"
+    },
+    {
+      "path": "crates/rtlc/src/benchmarks.rs",
+      "sha256": "2c98a88b5767c9ce73fc0e17c3622baf1c1925624e4b8ff1842a5f1513c79c7b"
+    },
+    {
+      "path": "crates/rtlc/src/bounded_drop.rs",
+      "sha256": "42944b8c0b793209c47490f59b2e0b4cbd9751f2319d720039714d3ff14e763a"
+    },
+    {
+      "path": "crates/rtlc/src/coverage_benchmarks.rs",
+      "sha256": "4a97f85d300d8c4f5e13d171a1e1648b29be054451f66ab8f6563a90dabcd112"
+    },
+    {
+      "path": "crates/rtlc/src/ir.rs",
+      "sha256": "9ae100b21fbf38522f6414981b54d3688a685629ffa1e75c01b961012d54667f"
+    },
+    {
+      "path": "crates/rtlc/src/lib.rs",
+      "sha256": "f69ca1dfd56fa0d42a634099bf1d0f1dbf0281aaaf2edd53ab382709adb992d1"
+    },
+    {
+      "path": "crates/rtlc/src/reduction-fixtures.json",
+      "sha256": "738bee026f0e6dcff2e1c6fa75bdc45d3e847b4af79707b5f75eb5d85405b29c"
+    },
+    {
+      "path": "crates/rtlc/src/safety.rs",
+      "sha256": "0a3abed1ce6d7b54618d9b7fc6ff22a8860cb2f42f90257935a8a437a274b6ac"
+    },
+    {
+      "path": "crates/rtlc/src/safety_coverage.rs",
+      "sha256": "8b84d296370ecf9c987e4bc240bccee062be8c25aa6593d18bef6a8c02300684"
+    },
+    {
+      "path": "crates/rtlc/src/safety_definition_tests.rs",
+      "sha256": "c51f85c9092a16ec80704d654301a91d3cfe5300d0789db22f0d02f6ca5ff129"
+    },
+    {
+      "path": "crates/rtlc/src/safety_definitions.rs",
+      "sha256": "046e24a83eddb47f4752e7011a759fd1869861df6b01fc720303a3cebb28cf52"
+    },
+    {
+      "path": "crates/rtlc/src/safety_expressions.rs",
+      "sha256": "b32bd6d1cff2383c668163f79dc9ed451626fd6e1f9893589d8de150d584d7e6"
+    },
+    {
+      "path": "crates/rtlc/src/safety_functions.rs",
+      "sha256": "e5b5cbde433c948fab21e7927741b4a4f1102d72786fb7299bf3bed61f8b7281"
+    },
+    {
+      "path": "crates/rtlc/src/safety_parallel.rs",
+      "sha256": "5ad002501711430a041aecda0034fd056961ae387915d7bbfdedede47f024c23"
+    },
+    {
+      "path": "crates/rtlc/src/safety_partial_order.rs",
+      "sha256": "e0296f9dbb88e176774d55ea41139e0055fa83b21726ab657a7fe4bed836c20e"
+    },
+    {
+      "path": "crates/rtlc/src/safety_prepared.rs",
+      "sha256": "f5ba95c6008a1a53626a812a2c9303dec960f624e9c860344aae75a3633f120b"
+    },
+    {
+      "path": "crates/rtlc/src/safety_symmetry.rs",
+      "sha256": "42b48fdf2064e214a4d3f08de01e4d4c0577c246109b6079e44edcd567448f0a"
+    },
+    {
+      "path": "crates/rtlc/src/safety_values.rs",
+      "sha256": "3541db7b15eb9df9aaa81bbd3bd9aac54ddaffedb650dbbcbd657fa7cbc1f05b"
+    },
+    {
+      "path": "crates/rtlc/src/safety_work.rs",
+      "sha256": "74667c6064180bc3020acbb2b9d35bcf395e9275ff1af14f29c6eed31025ed38"
+    },
+    {
+      "path": "crates/rtlc/src/symmetry-fixtures.json",
+      "sha256": "0f13798cec1d88de86e2a4a6be59025156c7d7322e4d7e707497db66ed306da4"
+    },
+    {
+      "path": "crates/rtlc/src/symmetry_benchmarks.rs",
+      "sha256": "64a83f5af2bd9cbc91939953e3434710c21d994c99aa20343d90980d9147c7a9"
+    },
+    {
+      "path": "crates/rtlc/src/temporal.rs",
+      "sha256": "58d76abf5909ec76e6154e430b4935ed22e13facb21832651bc3ff8db651ae54"
+    },
+    {
+      "path": "crates/rtlc/src/value.rs",
+      "sha256": "dd9fad8e4c8a688bec6bf4555326184bf5c4b10528e581eeb5edad3133059743"
+    },
+    {
+      "path": "crates/rtlc/tests/coverage-bench.json",
+      "sha256": "5f4671877f78e0f984f1a725377fe974449823dc5cc10b6a6b2b0d04335d3798"
+    },
+    {
+      "path": "crates/rtlc/tests/coverage.rs",
+      "sha256": "7913aa019d170c21ea88d495f98d363d5934852ab996fd3f85d83ba046588b1a"
+    },
+    {
+      "path": "crates/rtlc/tests/deep_drop.rs",
+      "sha256": "d32df9dc0f6d5d2eb3b0e07bad08742aba16930f95aca59e75560b8a7e473e87"
+    },
+    {
+      "path": "crates/rtlc/tests/deep_drop_paths.rs",
+      "sha256": "e2b5107c38cb383af2a8113090a1c315a655c71c09060da455bea52e50af9991"
+    },
+    {
+      "path": "crates/rtlc/tests/drop_allocations.rs",
+      "sha256": "eaea5e4d50bba78248315c9a7450b6faf0c1c3f65c0b6be054edea2c9ca6a2ac"
+    },
+    {
+      "path": "crates/rtlc/tests/drop_budget.rs",
+      "sha256": "8e39d9fef2b8291c36813e1203c27fde223e9bc15da6a8e266fce11024db872a"
+    },
+    {
+      "path": "crates/rtlc/tests/operators.rs",
+      "sha256": "f88290d0dbe21c5419aa2500b09089f49daed8b995ec9cd3f9d521149ab6fff0"
+    },
+    {
+      "path": "crates/rtlc/tests/parallel_safety.rs",
+      "sha256": "ec81fdeb26b9e0ecbce3670bd38d2d628d42380a35668f8408e86ae7cf84b519"
+    },
+    {
+      "path": "crates/rtlc/tests/prepared_safety.rs",
+      "sha256": "da0e97bba64e8aa25f2dfe059b2c0d04e84bb9175d536d847aee6ac1ac20992d"
+    },
+    {
+      "path": "crates/rtlc/tests/standalone.rs",
+      "sha256": "0200847d1d9d48b4edabd0d37c8b59d858f1ed8d20c405386afb65137da8dc9c"
+    },
+    {
+      "path": "crates/rtlc/tests/symmetry_parallel.rs",
+      "sha256": "efda6a4cc9853d5e8d76bf9271870547f6ff3d57a90edf4f9de0da7a23828443"
+    },
+    {
+      "path": "crates/rtlc/tests/temporal_sets.rs",
+      "sha256": "a0b590b35079abc14a5ea23d7c4616832fdfda6fb47046a6d45224b42d21b570"
+    },
+    {
+      "path": "crates/rtlc/tests/value_normalize_errors.rs",
+      "sha256": "a84fac621208804181a4d92dbc0c8d9486538af8fe14fccd1f6e62778a22648b"
+    },
+    {
+      "path": "evals/fixtures/async-mutex/LICENSE",
+      "sha256": "afdf40d8e1d2478ab7ee49dfa0e75847033d59ed70c4368ddd4846f1eab2ff9e"
+    },
+    {
+      "path": "evals/fixtures/async-mutex/after/Mutex.ts",
+      "sha256": "14a3e3ff1b66fedb99694cd7c5031329871c4b7cb81b09512ecb730a0cfccf81"
+    },
+    {
+      "path": "evals/fixtures/async-mutex/after/MutexInterface.ts",
+      "sha256": "261e07fd68edfb1152964e328b57a2988fd060bb5c43b9dca393d454607c3e37"
+    },
+    {
+      "path": "evals/fixtures/async-mutex/after/Semaphore.ts",
+      "sha256": "b014c003e2971744ec20dcc00a0b01fe60e4e5ea359abb8a68ea5ff69cbfa1c3"
+    },
+    {
+      "path": "evals/fixtures/async-mutex/after/SemaphoreInterface.ts",
+      "sha256": "945145928f162a08080846fbebcc83cd3d1b98f6ed3198fa0df597abe05815a9"
+    },
+    {
+      "path": "evals/fixtures/async-mutex/before/Mutex.ts",
+      "sha256": "14a3e3ff1b66fedb99694cd7c5031329871c4b7cb81b09512ecb730a0cfccf81"
+    },
+    {
+      "path": "evals/fixtures/async-mutex/before/MutexInterface.ts",
+      "sha256": "261e07fd68edfb1152964e328b57a2988fd060bb5c43b9dca393d454607c3e37"
+    },
+    {
+      "path": "evals/fixtures/async-mutex/before/Semaphore.ts",
+      "sha256": "5f5a201615518ec346bbdb05afbf6c11105bd2461a032ddfa7cdfc983a28543c"
+    },
+    {
+      "path": "evals/fixtures/async-mutex/before/SemaphoreInterface.ts",
+      "sha256": "945145928f162a08080846fbebcc83cd3d1b98f6ed3198fa0df597abe05815a9"
+    },
+    {
+      "path": "evals/fixtures/async-mutex/provenance.json",
+      "sha256": "14e3d6e36182168c6569b4c2ee9e61f582991c652c8fa4d79abd5a1875d21a9a"
+    },
+    {
+      "path": "evals/fixtures/channel/Channel.tla",
+      "sha256": "8b2cbd4533a157ae0760e3117e3c008fb9a31dc3673005fc8b537d3879de1bfc"
+    },
+    {
+      "path": "evals/fixtures/channel/LICENSE.md",
+      "sha256": "9fce60dd2b6c2be72803e96fc67f0a34b91b073ead999cea21d00c33b8bce147"
+    },
+    {
+      "path": "evals/fixtures/channel/provenance.json",
+      "sha256": "0ae9e62cc05c77dacaa3fcbd0f35ffee89ae7d376eacad4372ddfc973baea4fc"
+    },
+    {
+      "path": "evals/fixtures/die-hard/DieHard.tla",
+      "sha256": "295495de6509d86a82b88757835b95e3f91fad8691d764ece4d98886dcf42b66"
+    },
+    {
+      "path": "evals/fixtures/die-hard/LICENSE.md",
+      "sha256": "9fce60dd2b6c2be72803e96fc67f0a34b91b073ead999cea21d00c33b8bce147"
+    },
+    {
+      "path": "evals/fixtures/die-hard/provenance.json",
+      "sha256": "0478a36c88a07105251e0a907b10a447d0438d6a610737ce07c988c9be893512"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/Choice.qnt",
+      "sha256": "d8a5ee644cc34dfa7745aefc9771e00572d8c9be195cb559cb2c821aada432c9"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/Counter.qnt",
+      "sha256": "ddcdfa0adbacb2004ee74bc3caea0af0112dec0fe3b95d340264cec01d5140af"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/Match.qnt",
+      "sha256": "afa5eb38e983a206d09095fa6b2ff182eabd26cef42a9ea8750019dca41d3721"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/NestedFold.qnt",
+      "sha256": "5dcc44a2e5047618710df292cd2f08c8c06a07f7f459d41beed54dfd2216697d"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/SequenceFold.qnt",
+      "sha256": "b9d27ab68724e142cd747b0e8539dc6e9be0554bc8ae978b7ebcc7cd5c2a270a"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/SetFold.qnt",
+      "sha256": "f565a2f304287846bb6abcf5647f0c38c21e14cb415f4780462add1c250f4dbf"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/Choice-broken.cfg",
+      "sha256": "6fa71bc35b6afc74ffb1676fab1d3502fb9d209721aaf9fe2ece7c9da6583195"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/Choice-safety.cfg",
+      "sha256": "d5a8dccd3561e04d25e0aace190e7e27a65cb105e2bb87b3aef8b56bf37071c9"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/Choice.qnt",
+      "sha256": "d8a5ee644cc34dfa7745aefc9771e00572d8c9be195cb559cb2c821aada432c9"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/Choice.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/Choice.stdout",
+      "sha256": "47025cc4b360930a733b388b58f3571357c952308dace2b435a444654dec0a98"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/Choice.tla",
+      "sha256": "47025cc4b360930a733b388b58f3571357c952308dace2b435a444654dec0a98"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/Counter-broken.cfg",
+      "sha256": "6fa71bc35b6afc74ffb1676fab1d3502fb9d209721aaf9fe2ece7c9da6583195"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/Counter-safety.cfg",
+      "sha256": "d5a8dccd3561e04d25e0aace190e7e27a65cb105e2bb87b3aef8b56bf37071c9"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/Counter.qnt",
+      "sha256": "ddcdfa0adbacb2004ee74bc3caea0af0112dec0fe3b95d340264cec01d5140af"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/Counter.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/Counter.stdout",
+      "sha256": "f615abfb93666871e27956e77ac3f9d761b3c6564a0dd024e96b9cd0596eebeb"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/Counter.tla",
+      "sha256": "f615abfb93666871e27956e77ac3f9d761b3c6564a0dd024e96b9cd0596eebeb"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/Match-broken.cfg",
+      "sha256": "6fa71bc35b6afc74ffb1676fab1d3502fb9d209721aaf9fe2ece7c9da6583195"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/Match-safety.cfg",
+      "sha256": "d5a8dccd3561e04d25e0aace190e7e27a65cb105e2bb87b3aef8b56bf37071c9"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/Match.qnt",
+      "sha256": "afa5eb38e983a206d09095fa6b2ff182eabd26cef42a9ea8750019dca41d3721"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/Match.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/Match.stdout",
+      "sha256": "aedb9b150b488da14f487e77ce39de0db0964e992d2e648d47e793220c97197f"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/Match.tla",
+      "sha256": "aedb9b150b488da14f487e77ce39de0db0964e992d2e648d47e793220c97197f"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/NestedFold-broken.cfg",
+      "sha256": "6fa71bc35b6afc74ffb1676fab1d3502fb9d209721aaf9fe2ece7c9da6583195"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/NestedFold-safety.cfg",
+      "sha256": "d5a8dccd3561e04d25e0aace190e7e27a65cb105e2bb87b3aef8b56bf37071c9"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/NestedFold.qnt",
+      "sha256": "5dcc44a2e5047618710df292cd2f08c8c06a07f7f459d41beed54dfd2216697d"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/NestedFold.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/NestedFold.stdout",
+      "sha256": "e8dbe4e7720ce8da38d4196e8aa0ae7f52c89aa2ababb0db31dc696a8ab93199"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/NestedFold.tla",
+      "sha256": "e8dbe4e7720ce8da38d4196e8aa0ae7f52c89aa2ababb0db31dc696a8ab93199"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/SequenceFold-broken.cfg",
+      "sha256": "6fa71bc35b6afc74ffb1676fab1d3502fb9d209721aaf9fe2ece7c9da6583195"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/SequenceFold-safety.cfg",
+      "sha256": "d5a8dccd3561e04d25e0aace190e7e27a65cb105e2bb87b3aef8b56bf37071c9"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/SequenceFold.qnt",
+      "sha256": "b9d27ab68724e142cd747b0e8539dc6e9be0554bc8ae978b7ebcc7cd5c2a270a"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/SequenceFold.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/SequenceFold.stdout",
+      "sha256": "bf36b83c1dcbb09ecb92db48670a20c57bbed8854e5b0e8d4f650ac30bfbe3f3"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/SequenceFold.tla",
+      "sha256": "bf36b83c1dcbb09ecb92db48670a20c57bbed8854e5b0e8d4f650ac30bfbe3f3"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/SetFold-broken.cfg",
+      "sha256": "6fa71bc35b6afc74ffb1676fab1d3502fb9d209721aaf9fe2ece7c9da6583195"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/SetFold-safety.cfg",
+      "sha256": "d5a8dccd3561e04d25e0aace190e7e27a65cb105e2bb87b3aef8b56bf37071c9"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/SetFold.qnt",
+      "sha256": "f565a2f304287846bb6abcf5647f0c38c21e14cb415f4780462add1c250f4dbf"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/SetFold.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/SetFold.stdout",
+      "sha256": "c478e170660b4827b0562dac8f1f6df30b1a5609eb852459b39ddcc94101cd12"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/SetFold.tla",
+      "sha256": "c478e170660b4827b0562dac8f1f6df30b1a5609eb852459b39ddcc94101cd12"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/generated/manifest.json",
+      "sha256": "f26bd8cc0ab4a8904234c9db3a859b51661fd2b2713e3264eb55ca6a7456b808"
+    },
+    {
+      "path": "evals/fixtures/quint-generated/tlc-oracle.json",
+      "sha256": "c4f869b3912cb2b233fcd7f44da8211f0d2db50ffa89580d80ae7f029f4b5890"
+    },
+    {
+      "path": "evals/fixtures/tcommit/LICENSE",
+      "sha256": "3fa3a845ce5eb7b9b3508701dc1aa4d084b6b2c27cbae8cd44d277d10ee411bf"
+    },
+    {
+      "path": "evals/fixtures/tcommit/TCommit.cfg",
+      "sha256": "1da7f3b981ccaf1179065f765da0986c4305769ffbceb2a0d566473bd0cd9f3b"
+    },
+    {
+      "path": "evals/fixtures/tcommit/TCommit.tla",
+      "sha256": "c0f69aefca5c5d707d431b4faa32086849c983874a5581cabe16d63c715aafc4"
+    },
+    {
+      "path": "evals/fixtures/tcommit/provenance.json",
+      "sha256": "17f673e87ab5a50f1d59913660b87f8505f57f309bfa0f80f7096304bdc0e2d6"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/README.md",
+      "sha256": "f2c4df1093f1c468f72f18fa89e4ba978dcfb660ced4e0aa4a642fc3c2d7e696"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/expected.json",
+      "sha256": "7c53fea497ad6f3f27754e3aaaea6f9f1b5cb2cde1eb52758b98697554ca16c8"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-bound-capture.log",
+      "sha256": "be4e56c7dfc25ebe892df1f9e1d364ab6de8c9475d0e562842d386c5e859c381"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-empty-sequence.log",
+      "sha256": "88983d53351b4ec27053749105457adbd44d671220c955a00cd6b1b1ad88167f"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-empty-set.log",
+      "sha256": "b22262a59aa704e191d93d4ca63ae55ee01c6c4b0aaea69077e123c724e07292"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-equality-entry-error.log",
+      "sha256": "cdeb96eec491cfbb8f11a82c1ada975e7fa71f3bea0c0a2fa14aa851fb4daccc"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-let-operator.log",
+      "sha256": "f277f120e04e86ce2007363a29e35fea051ef65c4f1eebff4f8b5d9f1ada665d"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-nested.log",
+      "sha256": "480ded0471c20772df32ed14aa6895fd329eddb4a3e674ec4451a754325992b6"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-next-action.log",
+      "sha256": "54b08d0c1aea9c1a0064599fabda5f7f874268f94b46105ce5e605ee5ee1f1f3"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-own-ApaFoldSeqLeft.log",
+      "sha256": "4d67e9133dad50a7153628c3efd24f12793f5e02e21f918d6227efc9c74a664b"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-own-ApaFoldSet.log",
+      "sha256": "a796f2af97b8a45be747088c36f6f7c7203092dbde75748e06661e50b0369906"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-arity.log",
+      "sha256": "e0cd83a694973cb784efb4a23acb690c33d58916ade80fef1b26fa3f544e0661"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-higher-arity.log",
+      "sha256": "c5190a074ace7be8995f18b05e25b7734e49dfe1dc2ae0e30eff89ceea0d7b1e"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-higher-order-body.log",
+      "sha256": "26af2a38eb429631ba48d7ba1f405332a200ac5e65d5dd90cc6502637be2fbde"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-lambda.log",
+      "sha256": "cf05eb278c1bf3a68c7dee8bf78687b5baa2584553d351b5e918ae4b0dbf62e6"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-mutual-recursion.log",
+      "sha256": "95ac5d57e0b6e975f214c21bdd2762601c1567dc0109a9cdc240f0eca4cd199c"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-no-extends.log",
+      "sha256": "50a815a49b4f88ac2b504e9b6eff55cc1e9515a7ac2a1e54a16b26a5fa958b8e"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-operator-parameter.log",
+      "sha256": "60a0879fc635ebf9ec8f00a6002af2309ea78773df39958ba761e65653812851"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-other-apalache.log",
+      "sha256": "69a0f3e24a57fce9b9a8d2b489cc5fb211ab97cd440b2b501696d28f09979c8b"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-recursive.log",
+      "sha256": "830f3c1bad78b84f7241fcdd494db5c79b0d3b008ed7995b2624f8018e4a76ab"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-unknown.log",
+      "sha256": "78a159524a11b2cae086ee0b7c3eb236f3e97586e35884b456dfe60cfa8ced69"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-reject-value-argument.log",
+      "sha256": "d9ebd498c6e27f51e82ffc3f36502f49e7201b3d9bc7feffdd9b3b5f4373802b"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-sequence-functions.log",
+      "sha256": "2c636e365e2daf275eadd3aa4d4b5e785ebc1e426dcf22044d1e3c534b20e96d"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-sequence-left.log",
+      "sha256": "c9abc8c2d91a2a491a6c40288627a7b2e8074f33cdf51487781f92eb8bad0ceb"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-sequence-values.log",
+      "sha256": "2b58390949f47f2d133ac7ba868a6a706f1d522c10f8be47ea7739b7a1b1e204"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-boolean-function-keys.log",
+      "sha256": "ac3bb991a8f365e4369fba2a793fe8654635ee29a13e13ee3f1e14fd3a1ab0ca"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-booleans.log",
+      "sha256": "08dd75056b0987ed05152e152d5967cf08b4f34dc2f5c705b32fa5cf60b018ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-explicit-functions.log",
+      "sha256": "d386f2659d1ed9b676cfba967bcf3fcd544e7c5de631a161daf4985630df7cf1"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-functions-with-records.log",
+      "sha256": "ea0bba9a3cb99cf045d25ae67b88c8c4850d13dc1936225db007998f99d0b6cd"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-functions-with-strings.log",
+      "sha256": "8675b6a164b127189cd4839332e579294932a80e563717f14e9e6e2bca6db68f"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-functions.log",
+      "sha256": "ad0e9832d6a23b9f44246dac9b308ba76a45294b15372c20c28c628a4974c3b0"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-integers.log",
+      "sha256": "3f1af77fd121d1e7af58e259d8bdda66a587075f416cab8cf82e195c2fe7ab35"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-interval-functions-safe.log",
+      "sha256": "0e22fbf18522d65fc7c6b59146f87ac7e43c3ff3d8ba78ea9c543bffcc832da7"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-interval-functions.log",
+      "sha256": "25919efb49fea31b37b1f5a7e1e00c1e7da1cfe1e9ff0e6614ae5ac61a9052cd"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-mixed-kinds.log",
+      "sha256": "f181f385b89bb88ac3341cf4f0ae62674c3b420c520aeec53eed0f7e35ab3028"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-nested-strings.log",
+      "sha256": "04dfbc98b77c5ed4d7d7ea8ca759978767decee2af8629666fd500c31421f5ac"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-record-fields.log",
+      "sha256": "1804bb429afe4d7662345551fb7928adc99c55c640e8f6cbd3c8ae56eb858588"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-records.log",
+      "sha256": "5958be226c6ecd7bd9f05de6d0ff8c185e5d8851ec804ab49088f5c9a9ab92cd"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-recursive-functions.log",
+      "sha256": "d2c08f587848cc30f689e6e2b40d099eefab2969a23d7b59789ae2a51da0a99c"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-recursive-values.log",
+      "sha256": "51092036d564acaf8f37f22f51364f4fb0ce3c74462601b9444c67db425334ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-sets-of-strings.log",
+      "sha256": "101ea3b6c9f5091c1122bf515f6987ba3b8313dcf3c320970934593e554668d7"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-sets.log",
+      "sha256": "f27abcc432a00e66dfe6c2c97181c791876c7449e3cbc5d5e6eb43ff148f6fa9"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-strings-reversed.log",
+      "sha256": "fe7c8673d1c418575df46e42779d33a4f3869d64a07b155bb55707da3856491b"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-strings.log",
+      "sha256": "0a288f39d4575ddd4e6c377fd761ab94f118ad72cf561cbd3c0263e199d8d4e3"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-tuples.log",
+      "sha256": "60013ca548415a9cbaa6d07d92e8b548934e1bb9a28bb0ae611332ca077b4220"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-wide-function-values.log",
+      "sha256": "e53eb740bd0586210cd529144b88b85c2e9caf3161128ee0e9a1823792f21331"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-wide-integers.log",
+      "sha256": "091a2ef6b4f7f847b98b4a2a6e06521a0001d43272739a5288920ef19036fecb"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-wide-recursive-functions.log",
+      "sha256": "088203647fc3195e76386edc3821fe458a4d0acff5127a9e27420fefafd368eb"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-wide-single-function.log",
+      "sha256": "10925da200434ba5a6c76e8d42254112da83b2bbeeade347244df6ceaaca1924"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-set-wide-tuple-values.log",
+      "sha256": "b528dc543660285c1bccbe3e38c8c81eaa2be952ab76d2caea0f92c9df148eb1"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-unsupported-function-direct.log",
+      "sha256": "d8b38d949da095fb367a7371103b4d634a1fe144e84a0453ce23af5a88c1ed9f"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-unsupported-function-set.log",
+      "sha256": "33fc828683127deab6e654aa8d8372b17cc1cf81fbe3eb5806853ca7b41e04f3"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-unsupported-function-tuple.log",
+      "sha256": "8fcd81558e2cd9331536e99b527e0e91b105b7d37837079d3658f95d32303a03"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-unsupported-record-direct.log",
+      "sha256": "5357621043ee9189767fae02ab0ceaa3ea83c6a054ad9e2c4d4bd7461da879ce"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-unsupported-record-set.log",
+      "sha256": "0f214a6e09ebc4200e547b7ac932abdd41d9ee6151cfc27cdb7f096ecde3302e"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-unsupported-record-tuple.log",
+      "sha256": "8f58a95f2ac0cfc2222b8dea2c179e73ce3f68a0771b601966f7aaa4bc5034ee"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-unsupported-string-direct.log",
+      "sha256": "38e440ae87eb654964964695a90cb863fa40090427da6cdd37bbbb2669e4cb6c"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-unsupported-string-set.log",
+      "sha256": "24b3dd6685c1144bedaa0cd9bba712118605db9c4b441e087a588440c09257d2"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/fold-unsupported-string-tuple.log",
+      "sha256": "ae45740f40d8fed768c3c77889348cc1e93f3084fd56040c237057865ed62890"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/function-comparison-error.log",
+      "sha256": "a7a4a420e8c39b85b9eac7e882a38be07e97bbf790031d8456aa611de76bc67a"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/function-equality-entry-error.log",
+      "sha256": "d343ba26bc183a555e23f5da943cf78f1a384d355041605eaa9a9882659d8004"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/function-initial-choice.log",
+      "sha256": "078fca827d7ef3593a2ac3c49c9b5a044f5383abc56d609b426aad2539bbcd0c"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/function-quantifier-order.log",
+      "sha256": "0f31645d41efd1b746a9e013020fdf85dad31f9d59d17b2ceb0881e5488fd90a"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/function-set-equality.log",
+      "sha256": "190a15a5affc397dc657ece48dfa747ed923c1f4334f856b3b18dd02f708855f"
+    },
+    {
+      "path": "evals/fixtures/tlc-apalache-folds/function-set-membership.log",
+      "sha256": "3044fe99ac043dea0d16ac3a50b1ed0a24c3b2d76785e9c9fdfb689df0e135ae"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/README.md",
+      "sha256": "ff7a5fe857000f8b0c8b4ea470e658a03da926b6d8f37ebb451a15a9bb2177ad"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/case-action-no-match.log",
+      "sha256": "0f2c41760aa418811d0652d6bfb3db05eed783ab0b1cdad2036f4fae06d92b00"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/case-action-other.log",
+      "sha256": "9883690a034963dfd71b7db9a3405a1bde8fa94f95f65deaf23382d1e492733e"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/case-action-short-circuit.log",
+      "sha256": "480ae3e37cb9d3eb25e840884365655a6a47c441a4d511a39039c8f65def6439"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/case-action-unevaluated-branch.log",
+      "sha256": "1a6afb6a3963a44989e05891d2dacd2d39c32ecd92e71443e51b0c2d51b606e7"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/case-expression-no-match.log",
+      "sha256": "77042bac8b84369607348e56ea88f95760d188798a25c32b41a97908853a8e01"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/case-first-true.log",
+      "sha256": "2af47bd52e9e310daeaf10d7a293bc32500c7e0bc351321f44230a64ca7cfce9"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/case-invariant-empty-init.log",
+      "sha256": "8ebd62f7469b4e6f396611507ff6fb4691d52ef3af769b124d359e566d86e108"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/case-unevaluated-branch.log",
+      "sha256": "b39c4359cf60bcae85928e17ebb61fbc887065505c4dafe58885440a0d154a9f"
+    },
+    {
+      "path": "evals/fixtures/tlc-case/expected.json",
+      "sha256": "1528232de174ef548c83fcb51ee1e9795a8a0b9e05436115964c1a8ebcfa4abb"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/README.md",
+      "sha256": "dad6d1e11b714d5c9188eae957d1f64abf50f6444a33077bc1d8097c9519cd0c"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/analysis-boundary-manifest.json",
+      "sha256": "4b6aeef0dba28956415c4573445aad43d5d748c33c1ef8c23e779b313f458c95"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/analysis-call-actual-cases.json",
+      "sha256": "995bca9db87dd84bb2b16f2b66628869d6deeb2dfe96ac6a5639cddde94d9e4b"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/analysis-controls-manifest.json",
+      "sha256": "66edcc4d368177efa16daade68291d5118a81fd1c7732c6782bf778dacd74afd"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/analysis-corpus-manifest.json",
+      "sha256": "6a8f00fc933abb2b189a63ce5cfccd3f81dd91c581850951799acc109b81618c"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/analysis-inventory.json",
+      "sha256": "f6f06acb99a4825780c4bc7806ef3aef7e7f0c49b6699f58e741242a9c002a27"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/analysis-ir-manifest.json",
+      "sha256": "3b7e204449b3a413cc1ada24b616f6ed66186fa0965b7756a061fb7343494021"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/analysis-roles.json",
+      "sha256": "14c2942df924bc12d66832ed27ac92da3f1cee1672c876fc24bc3c2e6dfe4224"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/divergences.json",
+      "sha256": "0853cfc3291ef85e4b26bc6d1833f8e2e24bac337582188861827aaafef1e31b"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/expected-step3c.json",
+      "sha256": "0740ea004595380818fc282b117165a14b924f0bb383a61e572abdc78aa67e3f"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/expected-step3d-a.json",
+      "sha256": "2ca6938fdf1453bfe96e488724b61a6f018605bcf9650a414ba929de04edd17d"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/expected-step3e-a.json",
+      "sha256": "8374f51f35fc2acc7b93c99df39d22f47599149a0e05b3cea06eb297845d28c2"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/expected-step3e-b.json",
+      "sha256": "3ea33fc23568265067d72f789259cef21e244d401679639b25beca319b96f260"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/expected-step3f.json",
+      "sha256": "f1b3a0606cdd17d3da253a048e0a72c655d2797c1c089447ec7ee9de401b9424"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/expected.json",
+      "sha256": "0a1dee3fd61e3838ba303737d1db3345501089893157a2abf0ab2756104f618d"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-binder-actual.log",
+      "sha256": "819f1a92ad8a0e694b3bcca4c8e418c1838d5868ed43fe75c0d5cb6854685bf8"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-binder-actual/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-binder-actual/Differential.tla",
+      "sha256": "4028ae0f71016b89f5b3754a8e46b6ec40fb6887e6987acf78ae0526dd6c8e4d"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-enabled-value.log",
+      "sha256": "33edb6af0a9b44caa6579abad80d3b6c920345eba6e5583a761ca75a041845f1"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-enabled-value/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-enabled-value/Differential.tla",
+      "sha256": "c7cd4b25ce45e89f1639803c0241eb4ea993e707bbfc59d71b6a898cbd20c2c6"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-enabled.log",
+      "sha256": "e1bcac4df7f1c279bc250fc509adb07fb557753fa210164dab27184ed9415e79"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-enabled/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-enabled/Differential.tla",
+      "sha256": "de2b2e7996afc209e75a00c3ab233e8535de504ad92558eab2635916605850c3"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-except-control.log",
+      "sha256": "2bcddb6540e3ef58965cec52b0fd8d47d2211b469df14d0076a84534928b373a"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-except-control/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-except-control/Differential.tla",
+      "sha256": "8d54efcda7c5f0c448e50397eeb49b3975b48e7e2ba919516417c9b66c3db6df"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-except.log",
+      "sha256": "dac8b0d34d35b5b32e439d7b304dba4cddec356e850e7831e1ceb3816ce0e2a3"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-except/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-except/Differential.tla",
+      "sha256": "61c63b88b420a32d13ffd4e41c109fb95c017e1dc221f14c49b756309c645bf3"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-exists.log",
+      "sha256": "b48112b90236b2e2889fa14d85749926d113345aacc7a1c2ff58761f27062ae9"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-exists/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-exists/Differential.tla",
+      "sha256": "ee0d1c66c53753489f44d9ad548b25e4a84b444b1fa8c87d8538f6b21eec5c9c"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-generative.log",
+      "sha256": "40365f3ec63d9696bab0c83846ff63b7f41a8db4c1e64532b17e75dd39929885"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-generative/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-generative/Differential.tla",
+      "sha256": "d74f5d372895845d0c906b5967eb1b295152e0627e5f78b8bbb6512f37b1e49a"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-prime.log",
+      "sha256": "70d9bd6e36911daf9fc991a080950d879a2ae0dc50a87282a2d2c42e9c2c7675"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-prime/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-prime/Differential.tla",
+      "sha256": "f376d40610160ba0cb7f649f704f5f9e374759b4e618dbc1cabe7e2fc1716a79"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-shadow.log",
+      "sha256": "e06378fd5925405b22ecc4c302495d0cca784b86edeb5a4dcd2dbe38b9502130"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-shadow/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-shadow/Differential.tla",
+      "sha256": "b5c85481bf0f0ece69d4f423bfb4b18b824a1927e835b2db744d18a4726bcaf2"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-temporal-state.log",
+      "sha256": "3ffc2d8ee8992317b72d2e719a075660c81ed5b156f1d3f001444444c7ccd918"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-temporal-state/Differential.cfg",
+      "sha256": "ea1efc087945ad1d01bb697c389b9fdee410fff61a8974f984d25ee4c25899b6"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-temporal-state/Differential.tla",
+      "sha256": "74284f8c9c245e9041d261fc79c3cca48d4286dd83b3dfa581128f1d5636c41f"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-temporal.log",
+      "sha256": "ead581d1de898735f760c27d4874c866b0614787ea73be0ee27b6305fb0d1acd"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-temporal/Differential.cfg",
+      "sha256": "ea1efc087945ad1d01bb697c389b9fdee410fff61a8974f984d25ee4c25899b6"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-temporal/Differential.tla",
+      "sha256": "e97cb4213863c20ea35db000aa15dd30f905f57ac5df095f8975bf170b21c076"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-two-variables.log",
+      "sha256": "a10063f01598e01589334b94fb6018efa2edbd6e67b179000f391da6757448ba"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-two-variables/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-action-frame-two-variables/Differential.tla",
+      "sha256": "89372e83c1eda9458a41cdefba3b14e083e2f1b5a1720961ab85ed3e004d0f85"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-filter.log",
+      "sha256": "979adc0f6c5c5f8c2fcf3e1c4e3d27d4b8175e6d763ddd624888b9a8f2b56d76"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-filter/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-filter/Differential.tla",
+      "sha256": "f3b6f895c4976981436b920a7251e32386478087ff7ea90109f8d336a313bfe5"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-fold-sequence.log",
+      "sha256": "253778c525438297185133a03cca9e79150f742bcac43dae281646e6ef209170"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-fold-sequence/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-fold-sequence/Differential.tla",
+      "sha256": "73c2beb88d2e40912033062626f9aabe8f169c51006de670c1415852092b9ab0"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-fold-set.log",
+      "sha256": "328142398369d9d09ee3d34ce780c6296bbd6a7c47eb6e40d5584b4c58663595"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-fold-set/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-fold-set/Differential.tla",
+      "sha256": "4e9d4c8110c93dc8db86468608d7f8c18b6f588dbb213b47262c885269e0271a"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-function.log",
+      "sha256": "d364e2dd0017a4102f42d6df0abc966c9a669f557f85de9c5cc7fef276b3d5a4"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-function/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-function/Differential.tla",
+      "sha256": "5897bc7a7b73fc7b26f567a200ff18d53070c1240bbc2345fd2f909b6295eaa5"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-map-set.log",
+      "sha256": "5868c0c374684f22ad9b5e354676bccd14fa096d51258dfc7416421e037ca492"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-map-set/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-map-set/Differential.tla",
+      "sha256": "0780dd14116c0d81c1a95748e2fc1d7508fb955521937a1fc18e44c5d872a962"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-quantifier.log",
+      "sha256": "30b1874c8147c16ed1d289235906ef3e42c680afb103aa0edceddbf25ad4a466"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-quantifier/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-quantifier/Differential.tla",
+      "sha256": "c81c5d6e365a75da6b39736bec369b8b503a42767aa787a2c1d2775a91081acd"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-tuple-pattern.log",
+      "sha256": "2a66f07335382d8287a1f8dbcc4ab453eaef66dcd811adf132def8447e405e89"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-tuple-pattern/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-binder-tuple-pattern/Differential.tla",
+      "sha256": "699478c435d43b909c4b113360cf92b7b44bf1d6bb52654bb3a4488e7208b805"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-case-condition-step3f.log",
+      "sha256": "5b6f651ec6d073d89c43acd0a8d6f8889d261de4f8a12c8800d3974fe99a2591"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-case-condition-step3f/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-case-condition-step3f/Differential.tla",
+      "sha256": "4da68d087349e9efb7f12b6dec4b8c626f45801292024606b303d460759ce254"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-chain-10.log",
+      "sha256": "cd05bad73beda0dd2e9d2df21ebd96b5303ce2bed36650114929f8267792e7e9"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-chain-10/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-chain-10/Differential.tla",
+      "sha256": "306bdafe0ac908e02fe2463f7910e5b8f635c10e2df5814b8b3b470dfbca2841"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-chain-20.log",
+      "sha256": "4331abc4734205e18a291e4fe3b81ac52416815d7fde76626a42b94204987b5b"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-chain-20/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-chain-20/Differential.tla",
+      "sha256": "fae454100fe3fb513105674dd738f8ca32e837b6c19a34b60367be55dd3b05ac"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-chain-30.log",
+      "sha256": "bd0d7f9e55584994eaef514e4dee6ee0e133dbcce6fedd37ce0fbb8012fe8b4e"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-chain-30/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-chain-30/Differential.tla",
+      "sha256": "758c4bcc663b6f12a26cb3d87282ae3f7df529e50aabee0146fad603db272bf7"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-chain-60.log",
+      "sha256": "ca195f3253caa1828e0186b07f2baf6f6b41b17a9c49b2201e267de2534d90d0"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-chain-60/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-chain-60/Differential.tla",
+      "sha256": "2edb69f4f3476c2ac599630b455a13e65384d024ba8bb526ec87e18a14e81e49"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-domain-caller-step3f-state-violation.log",
+      "sha256": "bd669c73957b0a5b4d3a5124b20806abfe1ca28854359d89836ef2bba4e13bb3"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-domain-caller-step3f-state-violation/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-domain-caller-step3f-state-violation/Differential.tla",
+      "sha256": "d2f857c7567c286fe04f34771403ff8cd46c81512c4ae55f0e1ef60c8194cd61"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-domain-caller-step3f-violation.log",
+      "sha256": "6262356b62f9d6ccbd65b7443c562913545b0ed1e1f8a8438b015f0d4f9e651c"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-domain-caller-step3f-violation/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-domain-caller-step3f-violation/Differential.tla",
+      "sha256": "76cfb87a163a531c6ab1f934dc4ab2fe8f9f2cd337da88eaacac3ab4c8e286b5"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-domain-caller-step3f.log",
+      "sha256": "34208deef5cda113dbf20774ef4efdb8794a5c088221c7f24d8af2002e1d1b9c"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-domain-caller-step3f/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-domain-caller-step3f/Differential.tla",
+      "sha256": "b2fc288f84d0ba89d2c99b52147fd32014fe81dadba4b81e32c65ee01d56d6a5"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-old-domain-argument-step3f-state-violation.log",
+      "sha256": "d96e12df770a17c2e06e4eb64d7670a90a26cf918fe2ae7211b9c8cc2d1eaff6"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-old-domain-argument-step3f-state-violation/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-old-domain-argument-step3f-state-violation/Differential.tla",
+      "sha256": "9c77439319efc69b0ac2c1ff2425e8c4ad055bf65ab98b3f615fcc502c820502"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-old-domain-argument-step3f-violation.log",
+      "sha256": "e101cb4445e624c51d890bd852be40a74b0c2240365f66a0bc5271d2681e3b9c"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-old-domain-argument-step3f-violation/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-old-domain-argument-step3f-violation/Differential.tla",
+      "sha256": "f0e2b59d43defbbf3ecea87b7290ede9f24a03097304d91b866e12d2e3bb5a21"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-old-domain-argument-step3f.log",
+      "sha256": "b4eb6b10555ea7c3a1406a473f8e81877ce68de4fa7f551c7adc7473a874144d"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-old-domain-argument-step3f/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-old-domain-argument-step3f/Differential.tla",
+      "sha256": "17570b61cd28be26fb9c076b0c69d4b5a710c10e8810f84016c91923c1446252"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-old-predicate-argument-step3f-state-violation.log",
+      "sha256": "87fe817f71554d69fcefeda46c2ebcda8c88cc5b09e860d3f474fd21e609ac01"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-old-predicate-argument-step3f-state-violation/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-old-predicate-argument-step3f-state-violation/Differential.tla",
+      "sha256": "3bc83a01c50aba5de895b212e2b9833bf61bf182627a0239a4b14fb9d23fef7d"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-old-predicate-argument-step3f-violation.log",
+      "sha256": "f74400f4ffa68399e01930945c13b7aee72e8de5d05b97274717aca2d0486947"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-old-predicate-argument-step3f-violation/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-old-predicate-argument-step3f-violation/Differential.tla",
+      "sha256": "2a1d00fe296c2425226b9d30c49e99a24fea21fdb35c2b407db07147168ae5df"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-old-predicate-argument-step3f.log",
+      "sha256": "768350e9c4b305f489012a726503b66d729ecce18d88b021f1614e2023512c5a"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-old-predicate-argument-step3f/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-old-predicate-argument-step3f/Differential.tla",
+      "sha256": "d60152c724ec1cdab45c5d1184d06bbc78dead7b13caffd595b7d679468a6563"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-predicate-caller-step3f-state-violation.log",
+      "sha256": "e6f4767a5a434e14070f8f96503aa4c20ca1bcafc53270e4956320552ae4f054"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-predicate-caller-step3f-state-violation/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-predicate-caller-step3f-state-violation/Differential.tla",
+      "sha256": "574280d9754bea19d399ae8558fbc9cead669d4bcd7fabb124fa9460fbb88b76"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-predicate-caller-step3f-violation.log",
+      "sha256": "a27196f45bb6087f05959f090a221485a43619aa69b421c610f6693e52129242"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-predicate-caller-step3f-violation/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-predicate-caller-step3f-violation/Differential.tla",
+      "sha256": "d454eb135ee7de4cb0ce7053110ba5b4090ac71d56ed34e7d73daa5c55569171"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-predicate-caller-step3f.log",
+      "sha256": "ec7f255d5c275299f59dde10a47f1f430b0caf401f0cf8f2816c83e7cf846185"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-predicate-caller-step3f/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-choose-predicate-caller-step3f/Differential.tla",
+      "sha256": "35de3056d21f2511789d0c1774240f673d08e81ffa984a64811b94ff36c91a89"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-enabled-forward-reference.log",
+      "sha256": "fd53bf68ec7e43aff6b4349c61b721dd2a4afc96ec6dde32f9377c8df45732ae"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-enabled-forward-reference/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-enabled-forward-reference/Differential.tla",
+      "sha256": "b925fd9b1b918cc899dbbfb9f86a345d54b5fbb911a0eb1624269f6c2ffba102"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-enabled.log",
+      "sha256": "67be2650b9c6da090800ef2a3577510e05b7037aaa5f1523307b3e2d5ef3766f"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-enabled/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-enabled/Differential.tla",
+      "sha256": "41c6ac5ddb2b4739a864dd13e92dccf49be275858d7659af8935274b01088713"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-binder-control.log",
+      "sha256": "5ae1bcf17dc72ec412b94ad4647985b5796508030d648375141a674199aa0f63"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-binder-control/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-binder-control/Differential.tla",
+      "sha256": "ac5c871ba6504ade0302e32ed6ee4f70921183785f516c2c8ace1bb479b5399a"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-binder-exact-control.log",
+      "sha256": "fe714c00ae52336eebda10eaf724a61c25cb5a61274adc8b204631f55c32c1a5"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-binder-exact-control/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-binder-exact-control/Differential.tla",
+      "sha256": "7798d272da127e5b402432189ee605a07ff0ce119688a5eb4f18b633fd9e37d1"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-binder-exact.log",
+      "sha256": "d42c2e611e55a9ee0af354b8c3f3479dca2465091dc2d9c039a78272a7d5d6ff"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-binder-exact/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-binder-exact/Differential.tla",
+      "sha256": "cebd007282806bc5bad17a024d44596d2a57a56304ce78048e6b30b1e3c2d5e3"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-binder.log",
+      "sha256": "b16b9ac67344a34d28d71c297f4badb556e5b34696798b2dc1921e25bc68bbeb"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-binder/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-binder/Differential.tla",
+      "sha256": "fb267a2152d93e927d6c4de52bad6a4e5739140cd46dd78a927db0e01f096ae1"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-except-control.log",
+      "sha256": "0182ed0db630266a74cb658bae0fa02468c50f62c614ecda1bf89e5fde2eb0cf"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-except-control/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-except-control/Differential.tla",
+      "sha256": "bb5a9f4560ae78c2289d9593a4123ffdbd88b74a58ed40691a2340bef8ebc45e"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-except.log",
+      "sha256": "733e998254d4fe4891d53a67c7edb9a5418e1eb409afc2f61273d931f858c72b"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-except/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-except/Differential.tla",
+      "sha256": "2275c8ebd933facb0c06306d894e918dda728b46e5434d677afa076e14bc6d34"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-membership-alias.log",
+      "sha256": "05f9c6e0b9ccbd8f12a7c278e020853ea9c72d97c4a7d4abd4f5339aaaa77ced"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-membership-alias/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-membership-alias/Differential.tla",
+      "sha256": "52707687cd1745d1c115cc2ae70e99b1727938ee657cd63ba868c5cb3815bef7"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-membership.log",
+      "sha256": "10cbbd7e53a1fa84bef01695e2cfdff5d9111a46d5a66dea6f28c9c32cefc251"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-membership/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-generative-membership/Differential.tla",
+      "sha256": "43303f0163a6e2cd7811a6f02fbd3509959e847b3b5a7222a2497a55cf848a45"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-lexical-capture.log",
+      "sha256": "a6126c05428eacee34ce156bd9f7c849352cc3d855bbc98237159c7e73d89828"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-lexical-capture/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-lexical-capture/Differential.tla",
+      "sha256": "a54b0117a051d8a0998ca7c419276adc4554e6e433505df1d33a38f001f6703a"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-notin-formal-step3f.log",
+      "sha256": "48fc2ec2e3b19ad2f927e5f87d27c8920bd7101f727461ddb54189be3df8dc49"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-notin-formal-step3f/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-notin-formal-step3f/Differential.tla",
+      "sha256": "5bb7fb5b153ef4bd4a551a82407989f19c9f457187afead3497865bc0b80f58c"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-prime-forward-reference.log",
+      "sha256": "13c605f4df1738e953915fed1b7f715ce8ee6c6879d8e3b72296e1e20098d582"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-prime-forward-reference/Differential.cfg",
+      "sha256": "ea1efc087945ad1d01bb697c389b9fdee410fff61a8974f984d25ee4c25899b6"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-prime-forward-reference/Differential.tla",
+      "sha256": "4b5106f606fef3d9246ed1f9cf668199d99579310dc2b88883ae8900486f0151"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-prime.log",
+      "sha256": "ff544d765c098597530c1f1812c9418ed98819730abcce4c6d104fd8ef4dd099"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-prime/Differential.cfg",
+      "sha256": "ea1efc087945ad1d01bb697c389b9fdee410fff61a8974f984d25ee4c25899b6"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-prime/Differential.tla",
+      "sha256": "35fc7551979d9a5689af0f0a3c2d14f11edd7e259dc07df9eafdbf12fead3076"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-temporal-forall-step3e-b.log",
+      "sha256": "1716cd8299d7b70199878fd33a0121e524d5613206d9dbb030fe31e7834108a4"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-temporal-forall-step3e-b/Differential.cfg",
+      "sha256": "ea1efc087945ad1d01bb697c389b9fdee410fff61a8974f984d25ee4c25899b6"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-temporal-forall-step3e-b/Differential.tla",
+      "sha256": "e50c4699121d4e9750d0ea56a9c1dcd5630bbd8de670d953bc875bc685957138"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-temporal-true-step3e-b.log",
+      "sha256": "adf16bc2374fa44e232fb8adb931a3e83a4a35c66aa5a01e7441b623b9711649"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-temporal-true-step3e-b/Differential.cfg",
+      "sha256": "ea1efc087945ad1d01bb697c389b9fdee410fff61a8974f984d25ee4c25899b6"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-temporal-true-step3e-b/Differential.tla",
+      "sha256": "363ea0d29b0426be38fc51b88d116f20e152d22394714316a8201decec6590ce"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-unchanged-alias.log",
+      "sha256": "83045a9e021e951461af5ccc461d9444aa3a99e417e24a0e80d732a6250632c0"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-unchanged-alias/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-unchanged-alias/Differential.tla",
+      "sha256": "a7c58a05e96df2930d4613d2c48a73ed74628726edfe15711fb35630b2bde24d"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-unchanged-nested.log",
+      "sha256": "18f292020a4bfa657f345433392b5753d5709304807f447be9f738e490e4b165"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-unchanged-nested/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-unchanged-nested/Differential.tla",
+      "sha256": "00bbe1ed5dea24d95c6783d36c39207507cd76473cb7e4ae2b3a227917b53b77"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-unchanged-parameter.log",
+      "sha256": "2e04c60520adedcbfc4bf4ffa76cd1d6a97f39ebea2dd6af0cf1e076c4bfc540"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-unchanged-parameter/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-unchanged-parameter/Differential.tla",
+      "sha256": "1f3c9c31caefa7126fb185df64749fa951059602a05679e2ca4ec3ed1dec591a"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-unused-argument.log",
+      "sha256": "891e6fdf00001f6af109f4c642858a5709f4d78df7b7248a7f315b4216ffbb7d"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-unused-argument/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-unused-argument/Differential.tla",
+      "sha256": "e2e40d83b1571270d0d0d4725abe8d025ca40228ed27ddd70f919a9cd5fe69bf"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-used-argument.log",
+      "sha256": "a0c1710fd657b65891afde05eabe46b9da3e7b35eb3afcec9983d68b4d6d5ed1"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-used-argument/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-used-argument/Differential.tla",
+      "sha256": "319c8fcd218792a789496b33c2120f3fb1b3693e042ffa3d8c2978a113a7e5ed"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-work-60.log",
+      "sha256": "1512516b11acc57843a64889ce04ffed1e8578cb5ca24d7e41f5f2ba911bf6b3"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-work-60/Differential.cfg",
+      "sha256": "04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/sharing-work-60/Differential.tla",
+      "sha256": "7c02375aa069cb97a5bb21a787d0c78af8bd1466eea609dccf30a2c4570d39a0"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/v1-baseline.json",
+      "sha256": "f3d22bab133893f6490db9d9161316267e0e6ad5a758340f4b9de9d3c2ccad08"
+    },
+    {
+      "path": "evals/fixtures/tlc-operator-sharing/v1-current-step3e-a.json",
+      "sha256": "34f267656bbbdca003ed3020e2564d4db0eea010b6210dd1c4035aef35604dc4"
+    },
+    {
+      "path": "evals/fixtures/tlc-strings/expected.json",
+      "sha256": "93dcb0a5b4bf6e133f13b21590a539915cbc03c5387d6b7e9e68601e8b465594"
+    },
+    {
+      "path": "evals/fixtures/tlc-strings/string-append-error.log",
+      "sha256": "28f8a0035224962010bb2b11a100bddb29ef30267d07791f1d8736ffbbb895cc"
+    },
+    {
+      "path": "evals/fixtures/tlc-strings/string-head-error.log",
+      "sha256": "895d17f5bece8184af67d6fb02536dabe1fcd67ee6bc691c22899f799f2a25e4"
+    },
+    {
+      "path": "evals/fixtures/trace-buffer-before.json",
+      "sha256": "ae41f80ba8871d0e9a65e053cf25356fe2ba865067c020c301e888ff14b017eb"
+    },
+    {
+      "path": "evals/fixtures/trace-buffer-before.ts",
+      "sha256": "f3bb120449be59bf8bf122016fd35fbd45b81bfe910de3b9436b33ee45c52995"
+    },
+    {
+      "path": "evals/harness/README.md",
+      "sha256": "ccb5e55881e0c2170ab4b4bf387ea4419c63edef547420466b5fd8305e9d3e82"
+    },
+    {
+      "path": "evals/harness/counter-faults.ts",
+      "sha256": "f1a96e52e04deead66e8f04b6fa4a763e5fc9bad88e81db509d9ad2381d434a3"
+    },
+    {
+      "path": "evals/harness/evaluate.ts",
+      "sha256": "5279a70bf343cdccc657b38bbc3ee40180cbb7668f9030fc66fb07807888d590"
+    },
+    {
+      "path": "evals/harness/history.ts",
+      "sha256": "be84848677987cf72717399ca01e91937b5442671b3ffe85233fc4de8329828c"
+    },
+    {
+      "path": "evals/harness/replay.ts",
+      "sha256": "15cb11f633db10e7b47291cbff2d1ee3935bd66eedfde7e9bda3e2716c9e3cd6"
+    },
+    {
+      "path": "evals/harness/scheduled-counter.ts",
+      "sha256": "660df920aca1c760a1a0fa7b0d87e5ebc3f776b27b1b510e390f5a8c67c6d72f"
+    },
+    {
+      "path": "evals/harness/search.ts",
+      "sha256": "b0a051938a87e1175c3b1ee5cb2eb8138498f0134ea705999c672d9a56bae2e0"
+    },
+    {
+      "path": "evals/harness/ttl.ts",
+      "sha256": "2e4b7d6f934adec10e15e8c95e4785a338163eced63e1a0a82ac511b48c6fd19"
+    },
+    {
+      "path": "evals/plans/0005-usable-core.md",
+      "sha256": "8d234bb62a176a5212251394c3ce253fc0983ad49f5f1d511b932ec047507230"
+    },
+    {
+      "path": "evals/portable/contract-test.ts",
+      "sha256": "97c1d5f3b0b533542b0b2713bc4c0db520e10ab141e630dd32820449a817cda9"
+    },
+    {
+      "path": "evals/portable/evaluate.ts",
+      "sha256": "eaac58e87590f42f34b9bc45370d455e1545f98f98fc402eb5a11eb545d55d96"
+    },
+    {
+      "path": "evals/portable/provenance.ts",
+      "sha256": "994429c9a8cc056c078a2985409d6ecc36ec4530c928b75f5693541cd5bbba73"
+    },
+    {
+      "path": "evals/portable/replay.ts",
+      "sha256": "105ae1c589a9b63a95dc8c0d7513de75454b40f899827eed91870131a2a722b0"
+    },
+    {
+      "path": "evals/portable/transcript.ts",
+      "sha256": "13a754af42a58215a73763f8b98f74ea7fd0bb6fbe2b09f4e104af4b76854f39"
+    },
+    {
+      "path": "evals/usable/benchmark-run.ts",
+      "sha256": "1289ace267a57510cfc354dd809339ec683fe7badd9a2290c92263b75714e824"
+    },
+    {
+      "path": "evals/usable/benchmark.ts",
+      "sha256": "6c8d5a74f05dec59e7fa9755829db46888cc88b676489e399130c784abe15b4a"
+    },
+    {
+      "path": "evals/usable/contract-test.ts",
+      "sha256": "9cbc187fda3887631676bac832c395e2f4b8cc63dc02b6dfaecf9b14b0c2a909"
+    },
+    {
+      "path": "evals/usable/evaluate.ts",
+      "sha256": "bea40a34b0d13dab9c3ff39ddef4d445ac2ae16739a3b49c7d807364613d1de2"
+    },
+    {
+      "path": "evals/usable/mutex.ts",
+      "sha256": "41aec7e102b26dd68515e8e85b8aecdd56f22700889ec59518abffaff3762e07"
+    },
+    {
+      "path": "evals/usable/native.ts",
+      "sha256": "c53d7066d30261d7fa201b22f1692939fa26c67a2a2f7b409bdd0c2c1a069ad4"
+    },
+    {
+      "path": "evals/usable/provenance.ts",
+      "sha256": "4317b2876dab1d6c976eb2470a8557689a707f1305a9a0ab3c307ff49824eaee"
+    },
+    {
+      "path": "evals/usable/replay.ts",
+      "sha256": "e691fdfb37473b29f05ec776858b6e67849036e9e2c7d8c2dac2c96684294567"
+    },
+    {
+      "path": "evals/usable/scenario.ts",
+      "sha256": "ef0eab1137779fccc4cead04011f61fc8de5afb619ebb73c8cad4ebc147c36c2"
+    },
+    {
+      "path": "examples/counter-model.ts",
+      "sha256": "8635f088a3fdf9e0b1bf4ea1f96790d56d578766d6e3c3c81a483cd9127f7721"
+    },
+    {
+      "path": "examples/demo.ts",
+      "sha256": "4c42c6701d69d7853add037078137a99174ad80470631c9786867340f8ca9f0d"
+    },
+    {
+      "path": "examples/durable-counter.ts",
+      "sha256": "5f77b4b8dbbb815b71dc31f121d220623484f67e36efad0c4114996ee444521c"
+    },
+    {
+      "path": "fixtures/portable-values.json",
+      "sha256": "562c75aac08ec5435d4b39a78602050d2ef09ec405ebfa3ba1832d193b5da12e"
+    },
+    {
+      "path": "package.json",
+      "sha256": "26db0c28bcb585a2fcde704d2d24928f1b9e187b1a9f531951d0c630f8d54af6"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "6fa7a6e5c4233f14a9171f53a031350dd7ff5a1f942eccc4a5ee986672e44e46"
+    },
+    {
+      "path": "scripts/check-support-test.ts",
+      "sha256": "bd7c2a70f40ff5f3e1313e7e50bbae69041f072b45e3c681dc00f4806c79b623"
+    },
+    {
+      "path": "scripts/check-support.ts",
+      "sha256": "43ab7760b5b74cfd3aee8d0d548579d4e81aab5927f4edcfa169353ac2287e4d"
+    },
+    {
+      "path": "scripts/go-consumer.ts",
+      "sha256": "73b6791c466b1a82306aba321c1ad1355227207106ad291b9720d4937372499f"
+    },
+    {
+      "path": "scripts/package-test.ts",
+      "sha256": "bdda785f50cf480292a06a0f8a0ace1547839740b195c34e79ca5c149a6b6d4c"
+    },
+    {
+      "path": "scripts/package.ts",
+      "sha256": "0143e64242f7c7545242edd58c16f2703fc459e76e726ed45557dcb07a077ec4"
+    },
+    {
+      "path": "scripts/prepare-tlc-modules.ts",
+      "sha256": "ba86bf29c9e1426f2bdd6ee3d63e074870c240301d9c86f5ce3f9dd2aecacd0b"
+    },
+    {
+      "path": "scripts/release.ts",
+      "sha256": "f9f5d402302e67c2515fa9d060cc0971988046f4c482d6a5181ddb77acbb0dde"
+    },
+    {
+      "path": "src/alloy.ts",
+      "sha256": "9d267f5b9b13aad4cc693b1c0d3d0960480d85ca84c4937b8bdcc7526c5116be"
+    },
+    {
+      "path": "src/backend.ts",
+      "sha256": "6dc14c671b2eb4c3e47554337c0818a6aeecebec782015219e135ae2eccd9b14"
+    },
+    {
+      "path": "src/budget.ts",
+      "sha256": "59239e0c17b0e6670d22c031de983434c9444cdc74f58dde3f4ed42f2e0d2ba8"
+    },
+    {
+      "path": "src/checker.ts",
+      "sha256": "0d3d22b03dddd84e9b523f298a1c111b2a61dc4cec8731b8969d640124692e4b"
+    },
+    {
+      "path": "src/compose.ts",
+      "sha256": "a3fd903ca6dce125b6efb8ac34d77fc92d91640994e14e1a86a313d30c11f4e6"
+    },
+    {
+      "path": "src/conformance.ts",
+      "sha256": "fde9957b697b171e252b9abc6fdbd765f283389212684d99b262617a3bb12326"
+    },
+    {
+      "path": "src/contracts.ts",
+      "sha256": "0e3fdc1014ff6be694a91cd7b6089293a16989cf8486ab115de12511b27f7d93"
+    },
+    {
+      "path": "src/finite.ts",
+      "sha256": "69c6c67e3ab8cc6ec33359c7668a8717a40d3f4c62367606a2afacb7ca936489"
+    },
+    {
+      "path": "src/history.ts",
+      "sha256": "78cfeda2537605446f7226fe3e6865acc047299105aca0273d90b9d1c09d8bd5"
+    },
+    {
+      "path": "src/host.ts",
+      "sha256": "c952e1da81a9c0a1a71a78b2c35a4441b156e087c96a6c1241c712647a0ca30b"
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "d8219cc54aabba15e4f04c604decdaf61d3f8dbcab9b01b721298e35f047867f"
+    },
+    {
+      "path": "src/portable-value.ts",
+      "sha256": "0c9391402f23a6b6ddc1995b09b582ea43d37f0abdf2726031932443dedf0643"
+    },
+    {
+      "path": "src/portable-wasm.ts",
+      "sha256": "7e9e964c903b923e8ea98827b5bf0da15f7cb4dffdd5786a1d5b041a12647275"
+    },
+    {
+      "path": "src/portable.ts",
+      "sha256": "dff305e22b085674f23409fbc3a09a505c2f87c9949786f4bd38dd30f9961da7"
+    },
+    {
+      "path": "src/prepared-safety.ts",
+      "sha256": "937ef30ba8b3a5be7201c2cb706cd3976dbf0fed3c8c939725c09b2678afc3f8"
+    },
+    {
+      "path": "src/property.ts",
+      "sha256": "52b5afd86848a425e27423241de275dfe7c67f8bc812119eab8593bcf0f6e60a"
+    },
+    {
+      "path": "src/safety-coverage.ts",
+      "sha256": "f325cc119bee3ba4e83234bc535f0738a20f991d2586d8840e9e2a70c43fc008"
+    },
+    {
+      "path": "src/safety-program.ts",
+      "sha256": "acb7131aff82ef76da088eebc1b8b72fa1c712ac7ede595e59b557724d44d21e"
+    },
+    {
+      "path": "src/safety.ts",
+      "sha256": "732aa0c92155f8d10c8aee2d06adf154baa61b5d78806834e49f4f46fdeea6a6"
+    },
+    {
+      "path": "src/scheduling.ts",
+      "sha256": "b48010720d2641a8da84fb7146cae21214ccf77c8b79d9cd778a2f952b3dde0a"
+    },
+    {
+      "path": "src/sharding.ts",
+      "sha256": "ed7b6f23dd4f2ec86a732828990f38f12ee50151788de734b0fd6c3a19f73b19"
+    },
+    {
+      "path": "src/shrink.ts",
+      "sha256": "2b0cfe9a1586a1b52e106695df11378acbcd61c2e6e967349c2cc03dda5cf57c"
+    },
+    {
+      "path": "src/smt.ts",
+      "sha256": "702836572848046b6e91585cbb21f96b2cacff42a2180f06e04cfc27e05b94ac"
+    },
+    {
+      "path": "src/testing-wire.ts",
+      "sha256": "d7352b089bd96c2c9e4b1540983573d19b2a7b46af59b42b589071a535813e0a"
+    },
+    {
+      "path": "src/testing.ts",
+      "sha256": "475d5b3f99e32366d6ed0f0b5cd9d86fdaad1aa7b9453d13a5ed4ddae495be2a"
+    },
+    {
+      "path": "src/tla-safety-analysis.ts",
+      "sha256": "3cd50f72570e1cb50ccc6789fe09f752a9cbe27ae184b2c3ef39ddf0284ddef7"
+    },
+    {
+      "path": "src/tla-safety.ts",
+      "sha256": "809956226ddd0ed1356f28848da91237ed2cef55f64941dc756e8b3b9287dd6e"
+    },
+    {
+      "path": "src/tla-source.ts",
+      "sha256": "890fe59101900702bde0cfa7a6062526ccaa0427b51d1a47cb1c862d1a35735b"
+    },
+    {
+      "path": "src/tla.ts",
+      "sha256": "eb9ad130861c0adc49e08428320b4c120f23dbd0bacfe1724347e25dc425edac"
+    },
+    {
+      "path": "src/trace.ts",
+      "sha256": "0a20a45ba0d84841139bec2dd8178c40585276fffc75e536d33ea1ca2c077cf3"
+    },
+    {
+      "path": "tests/advanced-contract.ts",
+      "sha256": "1dfdfdf7c8d4b443d1f7faf3f87f535e9ab0e38bab53cb8c76f848f359c61299"
+    },
+    {
+      "path": "tests/async-contract.ts",
+      "sha256": "15800e0abf7c6a0911f4fb9bb4336e92e244a8137918322186cc0119f5ce95bc"
+    },
+    {
+      "path": "tests/async.vitest.test.ts",
+      "sha256": "5d211256073c7c8e433c5a9671409ca54da0585b42bc61151d4f08366aafd73c"
+    },
+    {
+      "path": "tests/backend-contract.ts",
+      "sha256": "e2c49d6eb8d921a0bd746f65fe7d54da1ef902fd83083fb8ab0b2f1878fc7d1e"
+    },
+    {
+      "path": "tests/backend.vitest.test.ts",
+      "sha256": "1898ff8a690bca5c77f26b1d89c0992c38a73cc70d7d0fabba7c87012abe2962"
+    },
+    {
+      "path": "tests/browser-entry.ts",
+      "sha256": "24d9b7b487e9a871f41e4491c4827dde0aaec9be4384a60f86b337ece4f7f6a8"
+    },
+    {
+      "path": "tests/browser.spec.ts",
+      "sha256": "1a92a352ca6d4d4ba7837e9209c2088b769490e0de0234a80b1a01802b512d0a"
+    },
+    {
+      "path": "tests/budget-contract.ts",
+      "sha256": "5cb46382dba85718b7f668346a3785b40084659688b48f6789d39f36efc88d16"
+    },
+    {
+      "path": "tests/budget.vitest.test.ts",
+      "sha256": "e10039dacf4a580a35a58365b66f81401f3bbfa0afa2ec72ec7f0cad14e93ed3"
+    },
+    {
+      "path": "tests/contract.ts",
+      "sha256": "8449009ea948cb626ebbab14b7fbdd482e5b66da6fbcb3f6046f544027247294"
+    },
+    {
+      "path": "tests/core.vitest.test.ts",
+      "sha256": "fdfc2b6dfec2215074e9baf91dac37d173c2cefd2a6e062676394a0898d78d54"
+    },
+    {
+      "path": "tests/eval-loop-contract.ts",
+      "sha256": "f040dcbfd8331c5858460cbe9feb9148b314b7487fd66b62af1863bad27d636b"
+    },
+    {
+      "path": "tests/eval-loop.vitest.test.ts",
+      "sha256": "dfb3dd54ba2b2dcc729413349646d622cd099fe671239d1c9fbfb91987a5f280"
+    },
+    {
+      "path": "tests/evaluation-contract.ts",
+      "sha256": "22d4da800b571334d805ec90c7708764a7e846666e51f8617c81bf24563c16a4"
+    },
+    {
+      "path": "tests/evaluation.vitest.test.ts",
+      "sha256": "12a1d6f1775991385685bb9c503bfcfcc8b89157b797252692c0729ddd582ab0"
+    },
+    {
+      "path": "tests/integration-contract.ts",
+      "sha256": "7bdd1718a5ff8192444a53774d2c53e632544af90bf4ec8271063eaa0393bb84"
+    },
+    {
+      "path": "tests/integration.vitest.test.ts",
+      "sha256": "6f8451ad66fcce7cc93b952a2c1cab3de535039e2d04458104cf06d91790a0c8"
+    },
+    {
+      "path": "tests/node.test.ts",
+      "sha256": "53adefcdbee02c4ddf3e7af865be99a7409c7d70a9054eec22b0c51124d9a9d5"
+    },
+    {
+      "path": "tests/portable-browser-entry.ts",
+      "sha256": "d5b1064dd1a2610a8f37e4f90c36e352efc7751ed8da3712ed27d058bf8cd93f"
+    },
+    {
+      "path": "tests/portable-contract.ts",
+      "sha256": "384429fbda7b71b70000bd03db27242a063cbec667421be248e870ddec8a08b3"
+    },
+    {
+      "path": "tests/portable.browser.spec.ts",
+      "sha256": "7c7ce6b35d94e365c51ee04dd7444698ffe17118fbb4377cce97c8cd731b5d8b"
+    },
+    {
+      "path": "tests/portable.vitest.test.ts",
+      "sha256": "5f26c1b97eea68da21d665c05a153e9e9db7ba0775730163fbb0fb3933c9992f"
+    },
+    {
+      "path": "tests/property-contract.ts",
+      "sha256": "3e201ec866114524fd5be554fff530a6ab1e090339dd38657b4bab8d73bfb61d"
+    },
+    {
+      "path": "tests/property.vitest.test.ts",
+      "sha256": "711606a5daebbf4cb962e3b6dd0d9d138fb6338984cac7c257450932af955702"
+    },
+    {
+      "path": "tests/rtla-browser-entry.ts",
+      "sha256": "f8a4d04fdb7290528dfcf05be70a9d9959fca27498c43b5aa1d8f34ca6d14c6e"
+    },
+    {
+      "path": "tests/rtla.browser.spec.ts",
+      "sha256": "ec0c2e0edd016a7f8857cbd89f5921d0ecfaebc32d319e2310ec25ba94f3686f"
+    },
+    {
+      "path": "tests/runtime-browser-entry.ts",
+      "sha256": "392e555573fba1b26f1c2a722b3ad99ae2a5ff1f3ca40131b6834674a4a653aa"
+    },
+    {
+      "path": "tests/runtime.browser.spec.ts",
+      "sha256": "25cc60a1ec40e1fc16a449ac73f88256e0640575680a58dd008e17bece5cfc7e"
+    },
+    {
+      "path": "tests/safety-contract.ts",
+      "sha256": "baba959158546e656936e47d2f0b39f33e0a2490a1fb6311aaf4a4cafd3be120"
+    },
+    {
+      "path": "tests/safety.vitest.test.ts",
+      "sha256": "9e0f7268da0a1d74526cee2f51b45c8497161edff321df8671a51dc5a99bb136"
+    },
+    {
+      "path": "tests/scheduling-browser.spec.ts",
+      "sha256": "093a3e9f117ec706a022e2cb961df6463b21f375c2c3d054cc65a75b0dad91df"
+    },
+    {
+      "path": "tests/scheduling-contract.ts",
+      "sha256": "d8b22c09350e71a066a43c9f08f7f59fb6148141b8ce42892e4d06f0c3c4ff54"
+    },
+    {
+      "path": "tests/scheduling.vitest.test.ts",
+      "sha256": "b3f67a5d2608021b0c025c18db9bd00890733bbff85aefb7fc5c1c9a826ea288"
+    },
+    {
+      "path": "tests/sharding-contract.ts",
+      "sha256": "0c4bb6e2944c420a49f28960f880b6be0c597ba9770fea8ef2373bcec9d14f3f"
+    },
+    {
+      "path": "tests/sharding.vitest.test.ts",
+      "sha256": "5ff4ff9a0eea0395332c990a6af22aa47109fe68526d2728009dd821be6561a2"
+    },
+    {
+      "path": "tests/source-contract.ts",
+      "sha256": "19ccc34c9afc48778d8605dd6b78f1428975946739835fdda4959ed64bd940af"
+    },
+    {
+      "path": "tests/source.vitest.test.ts",
+      "sha256": "eecc0df8d0956123faf89e7a44bdcddf8d9e47fafa6afd9b504b0e6f083c423e"
+    },
+    {
+      "path": "tests/usable-contract.ts",
+      "sha256": "96f10348affdb981388fba4d812c87aa629322f5842186ccdd7f617d3a128781"
+    },
+    {
+      "path": "tests/usable.vitest.test.ts",
+      "sha256": "ef72bb12048422462911cc6755804932d82e8df0ecf5dd431bd9430bad2f89c2"
+    },
+    {
+      "path": "tsconfig.build.json",
+      "sha256": "51198715fe7ac9ccbbf4f8c17f599cf12ff0cb0f98e243ded16f68cc91287a47"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "eaac469e1494bb2c8d27ac601a03b00a13d4388521aa58a304b873f82d37f245"
+    }
+  ],
+  "sourceVersion": "0d2acbb454a307f559d597a4a5c43cbeb78d1c4d3acdc8896f32c8313a992bd4",
+  "commit": "04d3378174b9473b5db010328c33d64ad610e5c9",
+  "dirtyPaths": [
+    "M .jev-lint/checklists/idealis-core.record.json",
+    " M .jev-lint/checklists/idealis-smt.record.json",
+    " M .jev-lint/checklists/idealis-testing.record.json",
+    " M .jev-lint/checklists/oracle.record.json",
+    " M .jev-lint/checklists/ralloy.record.json",
+    " M .jev-lint/checklists/rtla-compiler.record.json",
+    " M .jev-lint/checklists/rtla.manifest.json",
+    " M .jev-lint/checklists/rtla.record.json",
+    " M .jev-lint/checklists/rtlc.record.json",
+    " M README.md",
+    " M crates/rtla/README.md",
+    " M crates/rtla/SUPPORT.md",
+    " M crates/rtla/src/parser.rs",
+    " M evals/fixtures/tlc-operator-sharing/analysis-inventory.json",
+    " M evals/plans/0068-rtla-compatibility.md",
+    " M evals/runs/ledger.jsonl",
+    " M justfile",
+    " M tests/rtla-browser-entry.ts",
+    " M tests/rtla.browser.spec.ts",
+    "?? crates/rtla/tests/labels.rs",
+    "?? evals/iterations/0068-rtla-compatibility.md",
+    "?? evals/rtla-compatibility/",
+    "?? evals/runs/0068-audit/",
+    "?? evals/runs/0068-baseline/",
+    "?? evals/runs/0068-before/",
+    "?? evals/runs/0068-final-inventory-review/",
+    "?? evals/runs/0068-final-verification/",
+    "?? evals/runs/0068-inventory-review/",
+    "?? evals/runs/0068-label-junction-reference/",
+    "?? evals/runs/0068-preview-audit/",
+    "?? evals/runs/0068-preview-fixed/",
+    "?? evals/runs/0068-stable-audit/",
+    "?? evals/runs/0068-stable-fixed/",
+    "?? evals/runs/0068-stable-root/",
+    "?? evals/runs/0068-stable/",
+    "?? evals/runs/0068-verification/"
+  ],
+  "node": "v24.22.2",
+  "rust": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+  "platform": "darwin",
+  "arch": "arm64",
+  "startedAt": "2026-11-18T22:34:28.869Z",
+  "upstream": {
+    "repository": "https://github.com/DirtyHairy/async-mutex",
+    "before": "e7bc6a43c9a8f43971150ebd6f51f829d60b97ef",
+    "after": "8331143c133585ae41b35b69dab7404e2f66751e",
+    "fix": "https://github.com/DirtyHairy/async-mutex/commit/8331143c133585ae41b35b69dab7404e2f66751e",
+    "license": "MIT",
+    "files": [
+      {
+        "path": "before/Mutex.ts",
+        "sha256": "14a3e3ff1b66fedb99694cd7c5031329871c4b7cb81b09512ecb730a0cfccf81"
+      },
+      {
+        "path": "before/MutexInterface.ts",
+        "sha256": "261e07fd68edfb1152964e328b57a2988fd060bb5c43b9dca393d454607c3e37"
+      },
+      {
+        "path": "before/Semaphore.ts",
+        "sha256": "5f5a201615518ec346bbdb05afbf6c11105bd2461a032ddfa7cdfc983a28543c"
+      },
+      {
+        "path": "before/SemaphoreInterface.ts",
+        "sha256": "945145928f162a08080846fbebcc83cd3d1b98f6ed3198fa0df597abe05815a9"
+      },
+      {
+        "path": "after/Mutex.ts",
+        "sha256": "14a3e3ff1b66fedb99694cd7c5031329871c4b7cb81b09512ecb730a0cfccf81"
+      },
+      {
+        "path": "after/MutexInterface.ts",
+        "sha256": "261e07fd68edfb1152964e328b57a2988fd060bb5c43b9dca393d454607c3e37"
+      },
+      {
+        "path": "after/Semaphore.ts",
+        "sha256": "b014c003e2971744ec20dcc00a0b01fe60e4e5ea359abb8a68ea5ff69cbfa1c3"
+      },
+      {
+        "path": "after/SemaphoreInterface.ts",
+        "sha256": "945145928f162a08080846fbebcc83cd3d1b98f6ed3198fa0df597abe05815a9"
+      }
+    ]
+  },
+  "wasmBytes": 3134287,
+  "wasmSha256": "e4b966d460b1703bc6a859e29c8e8d79eba64071fb5a2e1daca8254b0cc5551a",
+  "seeds": [
+    161,
+    162,
+    163,
+    164,
+    165,
+    166,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180
+  ],
+  "maxOperations": 256,
+  "maxDepth": 10
+}

@@ -48,13 +48,43 @@ const scopes: readonly CrateScope[] = [
       },
       {
         path: "src/parser.rs",
-        topic: "対応する構文と未対応構文、infixとCASEの解析",
+        contains: "fn expression(",
+        topic: "infixとprefixの結合、CASEとselectorの構文、資源上限の分類",
+      },
+      {
+        path: "src/parser.rs",
+        contains: "fn module_inner(",
+        topic: "nested module、RECURSIVE、宣言とproofの構造保持",
+      },
+      {
+        path: "src/parser.rs",
+        contains: "fn instance(",
+        topic: "引数付きINSTANCE、記号WITHとLET内INSTANCEの構文",
+        context: ["tests/modules.rs", "tests/instances.rs"],
+      },
+      {
+        path: "src/parser/proof.rs",
+        topic: "ASSUME/PROVE、proof step階層と参照の保持、証明検証との区別",
+      },
+      {
+        path: "src/lexer.rs",
+        topic: "ASCIIとUnicodeのoperator・構造alias、字句処理と位置",
+      },
+      {
+        path: "tests/versions.rs",
+        topic:
+          "1.7.4/1.8.0の優先順位選択、既定と共通文法、廃止文法や旧版の不具合との区別",
       },
     ],
   },
   {
     name: "rtla-compiler",
     evidence: [
+      {
+        path: "src/symmetry.rs",
+        topic:
+          "限定したSYMMETRY設定のlowering、untyped model valueとflat moduleの条件、対称性証明との区別",
+      },
       {
         path: "benches/quint_generated.rs",
         contains: "fn measurements(",
@@ -66,7 +96,18 @@ const scopes: readonly CrateScope[] = [
         path: "src/link.rs",
         topic:
           "明示したmodule集合のEXTENDS/INSTANCE、LOCALとscope、設定置換の対応範囲・拒否と展開上限",
-        context: ["src/rewrite.rs"],
+        contains: "fn instantiate(",
+      },
+      {
+        path: "src/rewrite.rs",
+        topic:
+          "字句名とoperator引数のhygienicな置換、selectorとmodule引数の解決",
+      },
+      {
+        path: "src/link.rs",
+        contains: "pub(crate) fn resolve(",
+        topic:
+          "moduleと設定の上書き、値とoperatorのarity、欠落・衝突・上限の検証",
       },
       {
         path: "src/lib.rs",
@@ -121,7 +162,66 @@ const scopes: readonly CrateScope[] = [
         contains: "fn apply(",
         targetContains: "signed 32-bit整数",
         topic:
-          "有限式、action、CASE、Apalache foldsと限定したVariantsのlowering",
+          "有限式、action、CASE、Apalache folds、限定したVariants、SelectSeq/SortSeq/Assertのlowering",
+      },
+      {
+        path: "src/lib.rs",
+        contains: "fn parts(",
+        topic:
+          "SPECIFICATIONの分解、定数有限domain上の量化fairness、wrapperと対象外の区別",
+      },
+      {
+        path: "src/lib.rs",
+        contains: "fn shared_body_ir(",
+        topic:
+          "共有expression/action/temporal定義の登録、phase・用途・target signature・body kindの区別と遅延引数",
+      },
+      {
+        path: "src/typed_expr.rs",
+        topic:
+          "明示v2の型付きexpression lowering、共有callとframe-localなbinder、SelectSeq/SortSeq/Assertと再帰callback",
+      },
+      {
+        path: "src/typed_lower.rs",
+        topic:
+          "明示v2のprogramとaction/temporal frame、caller環境とtarget解決、module連結、frameが必要な非再帰action/temporalと再帰actionの共有call、零引数inlineと展開上限",
+      },
+      {
+        path: "src/elaborate.rs",
+        topic:
+          "高階operator・LAMBDAの静的特殊化、上限と公開action名、stateへ格納するoperator値との区別",
+      },
+      {
+        path: "src/select.rs",
+        topic: "label・binder引数と一般subexpression selectorの解決と対象外",
+      },
+      {
+        path: "src/levels.rs",
+        topic:
+          "未使用定義を含むsource level制約、formal/capture/LET/再帰への固定点伝播、引数の上限と結果の依存の区別。全SANY名前・型・proof検査は対象外",
+      },
+      {
+        path: "src/functions.rs",
+        topic:
+          "有限domainの暗黙再帰関数、直接keyとDOMAINのlowering、eagerな関数値との区別",
+      },
+      {
+        path: "src/old.rs",
+        topic:
+          "引数なしLETの自由なEXCEPT @を宣言側へ保持し、引数あり定義の適用側oldと区別する",
+      },
+      {
+        path: "src/labels.rs",
+        topic:
+          "labelのbound parameter・重複・EXCEPT境界の検査と、完全なSANY意味解析との区別",
+      },
+      {
+        path: "src/link/local.rs",
+        topic: "LET内の引数付きINSTANCEと字句scopeの保持",
+      },
+      {
+        path: "src/link/nested.rs",
+        topic: "nested moduleの宣言位置のscope、外側の宣言と内側WITH対象の区別",
       },
     ],
   },
@@ -155,20 +255,101 @@ const scopes: readonly CrateScope[] = [
       },
       {
         path: "src/ir.rs",
-        topic: "IRの値と式・予算・結果の公開契約",
-        context: ["src/value.rs", "src/safety.rs"],
+        topic:
+          "IRの値と式・action定義・Step call・予算・結果のwire契約。準備済み所有型の実装は別比較",
+        context: ["src/lib.rs"],
+        targetContains: "IRのwire構造は",
       },
       {
         path: "src/safety.rs",
-        topic: "有限BFS、invariantとdeadlock、結果と探索予算",
+        contains: "pub fn prepare(self)",
+        topic:
+          "所有するPreparedSafetyProgramの静的準備、値やASSUMEを先に評価しない契約、Data索引の再利用",
+        context: ["src/safety_prepared.rs"],
+      },
+      {
+        path: "src/safety.rs",
+        topic:
+          "有限BFS、invariantとdeadlock、結果と探索予算、opt-inの逐次action coverageとworkの内訳",
+        context: ["src/safety_coverage.rs"],
       },
       {
         path: "src/temporal.rs",
         topic: "temporal/fairnessの検査とlasso、保証範囲の区別",
       },
       {
+        path: "src/safety_symmetry.rs",
+        topic:
+          "単一のuntypedモデル値群、scalar/flat recordのnode関数とnode部分集合、同じnode行のopt-in代表展開、equivarianceの利用者前提、具体traceと計数、対象外",
+        context: ["src/safety_parallel.rs"],
+      },
+      {
+        path: "src/safety_values.rs",
+        contains: "pub fn scalar_record_shape(",
+        topic:
+          "symmetryのflat record payloadのfield名・Int/Bool型の検証とnested/node参照の拒否",
+      },
+      {
+        path: "src/safety_partial_order.rs",
+        topic:
+          "opt-inの限定POR、不可視で独立な単調Bool flagの条件、他branchによるresetの禁止、fallback、一般PORとの区別",
+        context: ["src/safety.rs"],
+      },
+      {
+        path: "src/safety_prepared.rs",
+        topic:
+          "immutableなData式のslot登録、未評価分岐や失敗を先に評価しない定数の準備。状態依存式と型別命令VMは対象外",
+      },
+      {
         path: "src/safety_parallel.rs",
         topic: "native内部並列化の対象、逐次fallback、workerとworkの契約",
+      },
+      {
+        path: "src/safety_values.rs",
+        contains: "impl<'scope> Arena<'scope>",
+        topic:
+          "immutable domain共有、Boolと整数の別bit表現、membershipの論理work、worker参照とremap、hash衝突の完全比較",
+        context: ["src/safety_functions.rs"],
+      },
+      {
+        path: "src/safety_functions.rs",
+        contains: "pub fn position(",
+        targetContains: "Int/Ref domainのlookupは",
+        topic:
+          "Int/Refの添字候補を完全key一致のときだけ使用し、疎なdomain・Ref順が異なる場合・欠落keyを線形検索へ戻す",
+      },
+      {
+        path: "src/safety_lazy.rs",
+        topic:
+          "v2の選択とDOMAINでalias/actual/record/tupleを通る有限関数の遅延観測、所有snapshotと要求key、完全観測の実体化。全観測位置のTLC lazy互換とmemoizationは対象外",
+      },
+      {
+        path: "src/safety_definitions.rs",
+        topic:
+          "v2の定義graph、expression/action/temporal kind・ID/arity/capture/phaseとframe-local slot、明示recursiveの強連結成分と固定点によるmetadata検証",
+      },
+      {
+        path: "src/safety_expressions.rs",
+        contains: "fn eval_reference<T>(",
+        topic:
+          "call-by-nameの要求時評価、callerのlexical環境とphase、callと引数のwork課金。値のmemoizationとの区別",
+      },
+      {
+        path: "src/safety_expressions.rs",
+        contains: "pub(crate) fn visit_branch(",
+        topic:
+          "共有action呼出しの代入生成、分岐の巻き戻しとcaller継続、再帰フラグとwork境界",
+      },
+      {
+        path: "src/safety_expressions.rs",
+        contains: "impl CallFrame {",
+        topic:
+          "actual/capture間でのimmutableな親frameの共有、caller locals/oldと要求時評価、値cacheを持たないこと",
+      },
+      {
+        path: "src/bounded_drop.rs",
+        topic:
+          "深いIR/Valueの破棄を32段の再帰とworklistで制限する。評価・compileの既存深さ上限とは区別する",
       },
     ],
   },
@@ -204,7 +385,7 @@ const scopes: readonly CrateScope[] = [
     ],
   },
   {
-    name: "idealis-smt",
+    name: "rusmt",
     evidence: [
       {
         path: "src/parser.rs",
@@ -240,8 +421,36 @@ const scopes: readonly CrateScope[] = [
     ],
   },
   {
-    name: "idealis-testing",
+    name: "idealis-cli",
     evidence: [
+      {
+        path: "src/bin/idealis/tlc.rs",
+        topic: "有限TLCの引数、終了値、予算切れと検査完了の区別",
+        targetContains: "`idealis tlc` は",
+        context: ["src/bin/idealis/modules.rs", "tests/tla_cli.rs"],
+      },
+      {
+        path: "src/bin/idealis/tla.rs",
+        topic: "SANY互換の限定した解析オプションと診断",
+        targetContains: "`idealis tla` は",
+        context: ["src/bin/idealis/modules.rs", "tests/tla_cli.rs"],
+      },
+      {
+        path: "src/main.rs",
+        topic:
+          "JSONLの各行を同じEngineへ渡し、応答を行単位でflushするnative実行口",
+      },
+    ],
+  },
+  {
+    name: "idealis-connect",
+    evidence: [
+      {
+        path: "src/tla.rs",
+        topic:
+          "任意のtla featureでの制約適用後の有限モデル射影と実装照合、invalidとmismatchの区別",
+        context: ["tests/tla.rs", "examples/tla_store.rs"],
+      },
       {
         path: "src/session.rs",
         topic: "PBT effect、失敗signature、縮小と再生、未確定と成功の区別",
@@ -260,8 +469,61 @@ const scopes: readonly CrateScope[] = [
       },
     ],
   },
+  {
+    name: "roracle",
+    evidence: [
+      {
+        path: "src/wire.rs",
+        topic:
+          "version付き観測batchをOracleGroupへ通すJSON境界、件数と入力size、CLIとWasm ABI",
+        context: [
+          "src/wasm.rs",
+          "src/main.rs",
+          "src/wire_observation.rs",
+          "tests/json.rs",
+          "tests/bytes.rs",
+          "tests/value.rs",
+          "benches/wire.rs",
+        ],
+      },
+      {
+        path: "src/typescript.rs",
+        topic:
+          "開発用typescript featureのRust契約からのTS型生成、既定依存と実行時serde制約との分離",
+        context: [
+          "Cargo.toml",
+          "examples/typescript.rs",
+          "src/report.rs",
+          "src/wire.rs",
+        ],
+      },
+      {
+        path: "src/report.rs",
+        topic:
+          "typed observation比較とmatched/mismatch/invalid/unknown/error、集約の優先順位",
+      },
+      {
+        path: "src/group.rs",
+        topic:
+          "groupとcase登録、入力付きreport、保存oracleを呼ばないreplay、構造検査",
+      },
+      {
+        path: "src/bench.rs",
+        topic:
+          "preflightと全呼出照合、予算、clock、順序、raw samplesと速度比、部分失敗",
+        context: ["tests/oracle.rs"],
+      },
+    ],
+  },
 ];
-const shared = ["scripts/check-support.ts", "package.json", "pnpm-lock.yaml"];
+const shared = [
+  "scripts/check-support.ts",
+  "justfile",
+  "package.json",
+  "packages/idealis/package.json",
+  "pnpm-workspace.yaml",
+  "pnpm-lock.yaml",
+];
 const manifestPath = (name: string) =>
   `.jev-lint/checklists/${name}.manifest.json`;
 const recordPath = (name: string) => `.jev-lint/checklists/${name}.record.json`;
@@ -603,7 +865,7 @@ const run = async () => {
   if (sync && code === 0)
     execFileSync(
       "pnpm",
-      ["exec", "biome", "format", "--write", ".jev-lint/checklists"],
+      ["exec", "vp", "fmt", "--write", ".jev-lint/checklists"],
       { cwd: root, stdio: "inherit" },
     );
   process.exitCode = code;

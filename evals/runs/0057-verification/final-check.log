@@ -1,0 +1,239 @@
+pnpm check
+
+> @mizchi/idealis@0.1.0-alpha.0 check /Users/mz/ghq/github.com/mizchi/idealis
+> biome check .
+
+evals/alloy-subset/run.ts:159:5 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    157 │   await appendFile(
+    158 │     "evals/runs/ledger.jsonl",
+  > 159 │     JSON.stringify({
+        │     ^^^^^^^^^^^^^^^^
+  > 160 │       runId: basename(directory),
+  > 161 │       kind: "ralloy-differential",
+  > 162 │       status: "complete",
+  > 163 │       sourceVersion: stamp.sourceVersion,
+  > 164 │     }) + "\n",
+        │     ^^^^^^^^^
+    165 │   );
+    166 │ } catch (error) {
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
+  i Unsafe fix: Use a template literal.
+  
+    157 157 │     await appendFile(
+    158 158 │       "evals/runs/ledger.jsonl",
+    159     │ - ····JSON.stringify({
+        159 │ + ····`${JSON.stringify({
+    160 160 │         runId: basename(directory),
+    161 161 │         kind: "ralloy-differential",
+    162 162 │         status: "complete",
+    163 163 │         sourceVersion: stamp.sourceVersion,
+    164     │ - ····})·+·"\n",
+        164 │ + ····})}\n`,
+    165 165 │     );
+    166 166 │   } catch (error) {
+  
+
+evals/alloy-subset/run.ts:178:5 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    176 │   await appendFile(
+    177 │     "evals/runs/ledger.jsonl",
+  > 178 │     JSON.stringify({
+        │     ^^^^^^^^^^^^^^^^
+  > 179 │       runId: basename(directory),
+  > 180 │       kind: "ralloy-differential",
+  > 181 │       status: "error",
+  > 182 │       sourceVersion: stamp.sourceVersion,
+  > 183 │     }) + "\n",
+        │     ^^^^^^^^^
+    184 │   );
+    185 │   throw error;
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
+  i Unsafe fix: Use a template literal.
+  
+    176 176 │     await appendFile(
+    177 177 │       "evals/runs/ledger.jsonl",
+    178     │ - ····JSON.stringify({
+        178 │ + ····`${JSON.stringify({
+    179 179 │         runId: basename(directory),
+    180 180 │         kind: "ralloy-differential",
+    181 181 │         status: "error",
+    182 182 │         sourceVersion: stamp.sourceVersion,
+    183     │ - ····})·+·"\n",
+        183 │ + ····})}\n`,
+    184 184 │     );
+    185 185 │     throw error;
+  
+
+evals/smt-subset/benchmark.ts:22:22 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+    20 │   wasmPath,
+    21 │ } from "./clients.js";
+  > 22 │ import { benchmarks, type Input } from "./corpus.js";
+       │                      ^^^^^^^^^^
+    23 │ import { digest, fingerprint } from "./provenance.js";
+    24 │ import { createWasm } from "./wasm.js";
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    22 │ import·{·benchmarks,·type·Input·}·from·"./corpus.js";
+       │                      -----------                     
+
+src/backend.ts:470:5 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    468 │   const first = obligations[0];
+    469 │   if (
+  > 470 │     !first ||
+        │     ^^^^^^^^^
+  > 471 │     first.query.kind !== "induction" ||
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    472 │     first.query.obligation === "all"
+    473 │   )
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    468 468 │     const first = obligations[0];
+    469 469 │     if (
+    470     │ - ····!first·||
+    471     │ - ····first.query.kind·!==·"induction"·||
+        470 │ + ····first?.query.kind·!==·"induction"·||
+    472 471 │       first.query.obligation === "all"
+    473 472 │     )
+  
+
+Checked 628 files in 86ms. No fixes applied.
+Found 2 warnings.
+Found 2 infos.
+pnpm typecheck
+
+> @mizchi/idealis@0.1.0-alpha.0 typecheck /Users/mz/ghq/github.com/mizchi/idealis
+> tsc --noEmit
+
+pnpm test
+
+> @mizchi/idealis@0.1.0-alpha.0 test /Users/mz/ghq/github.com/mizchi/idealis
+> pnpm test:vitest && pnpm test:node
+
+
+> @mizchi/idealis@0.1.0-alpha.0 test:vitest /Users/mz/ghq/github.com/mizchi/idealis
+> vitest run
+
+
+ RUN  v5.1.0 /Users/mz/ghq/github.com/mizchi/idealis
+
+
+ Test Files  14 passed (14)
+      Tests  78 passed (78)
+   Start at  06:04:39
+   Duration  947ms (tests 67%, import 19%, transform 12%, worker 2%)
+
+
+> @mizchi/idealis@0.1.0-alpha.0 test:node /Users/mz/ghq/github.com/mizchi/idealis
+> pnpm build && node --test dist/tests/node.test.js
+
+
+> @mizchi/idealis@0.1.0-alpha.0 build /Users/mz/ghq/github.com/mizchi/idealis
+> tsc -p tsconfig.build.json
+
+✔ a durable implementation conforms through retries, crashes and restarts (0.95225ms)
+✔ a volatile write loses an acknowledged value after a crash (0.362333ms)
+✔ a missing deduplication check applies a retried request twice (0.086042ms)
+✔ oracle generation gives replayable witnesses and distinguishes a depth bound (5.156167ms)
+✔ trace artifacts survive a JSON round trip (0.20975ms)
+✔ driver errors propagate instead of counting as a detected mismatch (0.2115ms)
+✔ compiled IR preserves a snapshot and rejects unsupported wire shapes (2.918041ms)
+✔ behavior witnesses keep state arity, initial actions, loop edges and bound semantics (0.432625ms)
+✔ backend snapshots isolate metadata and reject forged induction evidence (0.366541ms)
+✔ backend wire contracts preserve guarantees and reject unsupported versions and claims (1.028625ms)
+✔ induction requires matching obligations, implication and a nonempty initial domain (0.271125ms)
+✔ unknown, errors and obligation counterexamples never become an inductive proof (0.130792ms)
+✔ dropped messages are removed before a later delivery (0.086667ms)
+✔ reset clears request deduplication and durable state between cases (0.06625ms)
+✔ restarting a running process preserves volatile state (0.0395ms)
+✔ the trace boundary accepts supported actions and rejects malformed JSON domains (0.060125ms)
+✔ successful reports and replay expose the complete observation record (0.078042ms)
+✔ differential execution disposes the reference and names its observation record (0.065084ms)
+✔ delayed, reordered and dropped network messages remain replayable (0.049209ms)
+✔ a differential oracle detects an implementation regression (0.044083ms)
+✔ finite graph closure, state limits and empty initial states are distinct (0.061167ms)
+✔ model invariants return a shortest in-bound counterexample (0.056958ms)
+✔ conformance keeps one consistent nondeterministic history (0.075375ms)
+✔ invalid inputs and initial observations cannot pass vacuously (0.05525ms)
+✔ driver cleanup runs when stepping fails (0.058709ms)
+✔ trace replay checks the initial observation before any action (0.032916ms)
+✔ trace decoding validates the caller's action and observation domains (0.1125ms)
+✔ composed models expose interleavings and cross-component invariant failures (0.149083ms)
+✔ shared actions advance both components and preserve component invariants (0.102166ms)
+✔ property tests generate valid action sequences for a conforming implementation (3.228833ms)
+✔ shrunk fault traces replay from seed and path (2.238708ms)
+✔ discarding every generated input is exhaustion, never a passing test (0.151958ms)
+✔ property testing propagates infrastructure errors (0.090875ms)
+✔ request renaming is a metamorphic relation independent of the model (1.087292ms)
+✔ a real TLA+ counterexample becomes an executable implementation oracle (8.296292ms)
+✔ a successful TLA check does not fabricate a witness (1.084375ms)
+✔ Z3 Wasm solves SMT-LIB integer constraints and supplies a concrete test input (221.109417ms)
+✔ mixed-depth search alternates short and long cases under one operation budget (1.432417ms)
+✔ complete model coverage can miss a third-retry implementation fault (9.19675ms)
+✔ both experimental searches obey the same operation budget and replay on the normal implementation (1.036ms)
+✔ a virtual clock reproduces the expiry boundary and the corrected version passes (0.226ms)
+✔ state-dependent inputs remain executable when the choice list shrinks (0.314708ms)
+✔ history checking accepts overlapping valid operations, rejects lost updates, and respects real-time precedence (0.271417ms)
+✔ actual asynchronous lost updates depend on the controlled schedule and replay exactly (1.203042ms)
+✔ the experimental history checker agrees with an independent counter characterization (0.600542ms)
+✔ plans reject overlapping seed splits and unsupported scope (2.941542ms)
+✔ completed runs retain evidence and cannot overwrite an existing run ID (632.08425ms)
+✔ method comparison keeps improvements, regressions and broken controls distinct (0.197416ms)
+✔ time and memory budgets choose a feasible worker count and depth (0.144958ms)
+✔ insufficient and uncalibrated budgets never become successful exploration (0.040375ms)
+✔ packed and dynamic finite models generate the same results and action traces (3.823458ms)
+✔ schedule depth bounds distinguish partial exploration from all interleavings (0.183875ms)
+✔ sharding preserves task identities and exactly covers the manifest (1.81775ms)
+✔ cloud aggregation distinguishes missing tasks, retries, errors and incompatible results (0.704667ms)
+✔ portable values follow the shared canonical fixtures (0.4515ms)
+✔ portable codecs preserve integer precision and structural collections (0.3425ms)
+✔ portable values reject lossy or unsupported host values (0.060125ms)
+✔ portable traces have a distinct strict versioned format (0.102291ms)
+✔ finite artifacts retain closure, edge observations and invariants (8.447042ms)
+✔ finite edges preserve differing observations for the same target state (0.090333ms)
+✔ finite artifacts preserve violations and do not duplicate enabled actions (0.100958ms)
+✔ shrinking preserves failure identity, validity and explicit budgets (0.256542ms)
+✔ simulation hosts replay choices, queues, clocks and durable state (0.578458ms)
+✔ late responses resolve uncertainty at their actual event position (0.327916ms)
+✔ history formats reject unmatched ids, duplicate outcomes and unsupported metadata (0.0815ms)
+✔ trace buffers return isolated full snapshots and the exact failure prefix (0.113958ms)
+✔ unknown and cancel may take effect, confirmed failures cannot (0.133834ms)
+✔ concurrent responses may reorder, real-time order and budgets are preserved (0.217666ms)
+✔ causal shrinking can remove dependent pairs and preflight invalid histories (0.111666ms)
+✔ coverage validates counts, exact fields and conservation of totals (0.3635ms)
+✔ safety compilation produces a portable program without enumerating reachable states (0.188042ms)
+✔ safety compilation rejects unsupported configuration instead of ignoring it (0.689375ms)
+✔ safety compilation rejects missing arithmetic imports and constant NEXT (0.125792ms)
+✔ safety compilation rejects unbound, recursive and conflicting symbols (0.269458ms)
+✔ safety result validates lasso boundaries and preserves compound snapshots (0.165041ms)
+✔ schedule chooses measured parallelism within time and memory budgets (0.219792ms)
+✔ cost order batches small jobs while FIFO preserves input order (0.055042ms)
+✔ scheduling rejects ambiguous identities and invalid resource estimates (0.088042ms)
+ℹ tests 78
+ℹ suites 0
+ℹ pass 78
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1016.649208

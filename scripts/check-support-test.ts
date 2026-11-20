@@ -252,7 +252,7 @@ test("the real offline gate rejects stale, missing and corrupted staged Jev evid
     const manifests = view.paths.filter((path) =>
       /^\.jev-lint\/checklists\/[^/]+\.manifest.json$/.test(path),
     );
-    assert.equal(manifests.length, 7);
+    assert.equal(manifests.length, 8);
     for (const path of manifests) {
       const manifest = parseDocumentManifest(
         JSON.parse((await view.read(path)).toString()),
@@ -284,6 +284,21 @@ test("the real offline gate rejects stale, missing and corrupted staged Jev evid
     stage();
     const clean = check(true);
     assert.equal(clean.status, 0, clean.stderr);
+    const linkedPath = "docs/safety-ir-v2.md";
+    const linked = await readFile(join(root, linkedPath));
+    await writeFile(
+      join(root, linkedPath),
+      Buffer.concat([linked, Buffer.from("\n")]),
+    );
+    stage();
+    assert.notEqual(
+      check(true).status,
+      0,
+      "linked support evidence must invalidate saved records",
+    );
+    await writeFile(join(root, linkedPath), linked);
+    stage();
+    assert.equal(check(true).status, 0);
     const fixturePath = "crates/rtla-compiler/tests/finite-support.json";
     const fixture = await readFile(join(root, fixturePath));
     await writeFile(

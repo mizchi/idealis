@@ -4,20 +4,23 @@ import { createHash } from "node:crypto";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { cases } from "../evals/collections-temporal/cases.js";
-import { config, names } from "../evals/quint-generated/cases.js";
-import { startNative } from "../evals/usable/native.js";
-import type { SafetyBounds, SafetyExpansionCache } from "../src/contracts.js";
-import { createPortableWasm } from "../src/portable-wasm.js";
-import { checkSafety } from "../src/safety.js";
+import { cases } from "../evals/experiments/collections-temporal/cases.js";
+import { config, names } from "../evals/experiments/quint-generated/cases.js";
+import { startNative } from "../evals/experiments/usable/native.js";
+import type {
+  SafetyBounds,
+  SafetyExpansionCache,
+} from "../packages/idealis/src/contracts.js";
+import { createPortableWasm } from "../packages/idealis/src/portable-wasm.js";
 import {
   checkSafetyIncremental,
   createSafetyExpansionCache,
   decodeSafetyExpansionCache,
   mergeSafetyExpansions,
-} from "../src/safety-expansions.js";
-import { compileTlaSource } from "../src/tla-source.js";
-import { isRecord } from "../src/trace.js";
+} from "../packages/idealis/src/safety-expansions.js";
+import { checkSafety } from "../packages/idealis/src/safety.js";
+import { compileTlaSource } from "../packages/idealis/src/tla-source.js";
+import { isRecord } from "../packages/idealis/src/trace.js";
 
 const bytes = await readFile(
   "crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm",
@@ -153,7 +156,7 @@ export const registerExpansionContract = (
     try {
       const first = spawnSync(
         process.execPath,
-        ["dist/evals/cached-expansions/run.js", output],
+        ["dist/evals/experiments/cached-expansions/run.js", output],
         { encoding: "utf8" },
       );
       assert.equal(first.status, 0, first.stdout + first.stderr);
@@ -165,7 +168,7 @@ export const registerExpansionContract = (
       assert.equal(result.guardCases, 32);
       const duplicate = spawnSync(
         process.execPath,
-        ["dist/evals/cached-expansions/run.js", output],
+        ["dist/evals/experiments/cached-expansions/run.js", output],
         { encoding: "utf8" },
       );
       assert.notEqual(duplicate.status, 0);
@@ -250,12 +253,12 @@ export const registerExpansionContract = (
   });
   test("Quint expansions retain TLC outcomes and counts in both IR versions", async () => {
     const oracle = JSON.parse(
-      await readFile("evals/fixtures/quint-generated/tlc-oracle.json", "utf8"),
+      await readFile("fixtures/quint-generated/tlc-oracle.json", "utf8"),
     );
     for (const irVersion of [1, 2] as const)
       for (const name of names) {
         const source = await readFile(
-          `evals/fixtures/quint-generated/generated/${name}.tla`,
+          `fixtures/quint-generated/generated/${name}.tla`,
           "utf8",
         );
         const normal = compileTlaSource(core, {
@@ -363,12 +366,10 @@ export const registerExpansionContract = (
     sameResult(expanded.result, checkSafety(core, compile(), bounds));
     const guarded = {
       ...limited,
-      invariants: [
-        ...limited.constraints.map((constraint) => ({
-          ...constraint,
-          name: "Boundary",
-        })),
-      ],
+      invariants: limited.constraints.map((constraint) => ({
+        ...constraint,
+        name: "Boundary",
+      })),
     };
     assert.equal(
       check(guarded, expanded.cache).result.status,

@@ -1,0 +1,137 @@
+{
+  "status": "failed",
+  "phase": "setup",
+  "reason": "request envelope version/request missing",
+  "original": [
+    {
+      "kind": "check-safety",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 1,
+        "name": "SharingRed",
+        "variables": [
+          "x"
+        ],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [
+          {
+            "name": "Safe",
+            "expression": {
+              "op": "literal",
+              "value": {
+                "type": "bool",
+                "value": true
+              }
+            }
+          }
+        ],
+        "assumptions": [],
+        "checkDeadlock": false
+      },
+      "bounds": {
+        "maxDepth": 64,
+        "maxStates": 10000,
+        "maxWork": 1000000
+      }
+    },
+    {
+      "kind": "check-safety",
+      "program": {
+        "format": "modelt.safety-program",
+        "version": 2,
+        "name": "SharingRed",
+        "variables": [
+          "x"
+        ],
+        "initial": [
+          {
+            "name": "Init",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "next": [
+          {
+            "name": "Next",
+            "steps": [
+              {
+                "kind": "assign",
+                "slot": 0,
+                "value": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                }
+              }
+            ]
+          }
+        ],
+        "invariants": [
+          {
+            "name": "Safe",
+            "expression": {
+              "op": "literal",
+              "value": {
+                "type": "bool",
+                "value": true
+              }
+            }
+          }
+        ],
+        "assumptions": [],
+        "checkDeadlock": false,
+        "definitions": []
+      },
+      "bounds": {
+        "maxDepth": 64,
+        "maxStates": 10000,
+        "maxWork": 1000000
+      }
+    }
+  ],
+  "replies": "{\"kind\":\"error\",\"code\":\"protocol\",\"message\":\"unknown field `kind`, expected `version` or `request` at line 1 column 7\"}\n{\"kind\":\"error\",\"code\":\"protocol\",\"message\":\"unknown field `kind`, expected `version` or `request` at line 1 column 7\"}\n"
+}

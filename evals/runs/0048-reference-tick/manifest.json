@@ -1,0 +1,396 @@
+{
+  "plan": "0048-fairness-operators",
+  "sources": [
+    {
+      "path": "evals/plans/0048-fairness-operators.md",
+      "sha256": "24a15fabee7f10f3f3b160205b9459c4badd1f1052bf9004b22d984bd8997387"
+    },
+    {
+      "path": "evals/fairness-operators/reference.ts",
+      "sha256": "f01dbdaddfff640a15e16b27ebca668e3f117f1155262adbd26eac19f3f89721"
+    },
+    {
+      "path": "evals/collections-temporal/tlc.ts",
+      "sha256": "d48983518d56355c8236953d4c02576e8e60cd6737947483541988d992727c43"
+    },
+    {
+      "path": "evals/tlc-differential/compare.ts",
+      "sha256": "5a3d9e2397cc24ba7d23dbe6a4b5ff14dcd2988ddaf77f718ee8214e75f9be97"
+    },
+    {
+      "path": "crates/rtla-compiler/tests/operators-support.json",
+      "sha256": "6da840a9bbcfd319efb43c1b953cf96df698bc4fca1d3f6db2b5c6629f7a5cd4"
+    },
+    {
+      "path": ".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java",
+      "sha256": "0f642542ea1f0be6957557c0db96653ec128113bb5a4aaa7c2534d1d72ddb51f"
+    },
+    {
+      "path": ".artifacts/tlc/tla2tools.jar",
+      "sha256": "936a262061c914694dfd669a543be24573c45d5aa0ff20a8b96b23d01e050e88"
+    }
+  ],
+  "inputs": [
+    {
+      "name": "select-order",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == v > 1\nInit == x = (SelectSeq(<<3,1,2,3>>, Keep))\nNext == UNCHANGED x\nSafe == x = (<<3,2,3>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "select-empty",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == 1 \\div 0 = 0\nInit == x = (SelectSeq(<<>>, Keep))\nNext == UNCHANGED x\nSafe == x = (<<>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "select-duplicates",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == v = 2\nInit == x = (SelectSeq(<<2,2,1,2>>, Keep))\nNext == UNCHANGED x\nSafe == x = (<<2,2,2>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "select-none",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == FALSE\nInit == x = (SelectSeq(<<1,2>>, Keep))\nNext == UNCHANGED x\nSafe == x = (<<>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "select-all",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == TRUE\nInit == x = (SelectSeq(<<1,2>>, Keep))\nNext == UNCHANGED x\nSafe == x = (<<1,2>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "select-function",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == v > 1\nInit == x = (SelectSeq([i \\in 1..3 |-> i], Keep))\nNext == UNCHANGED x\nSafe == x = (<<2,3>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "select-scope",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nMake(limit) == LET Keep(v) == v > limit IN SelectSeq(<<1,2,3>>, Keep)\nInit == x = (Make(1))\nNext == UNCHANGED x\nSafe == x = (<<2,3>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "select-nested",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nInner(v) == v > 1\nKeep(v) == Len(SelectSeq(<<v>>, Inner)) = 1\nInit == x = (SelectSeq(<<1,2>>, Keep))\nNext == UNCHANGED x\nSafe == x = (<<2>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "select-bool-error",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == 1\nInit == x = (SelectSeq(<<1>>, Keep))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "model-error",
+      "tlc": "model-error"
+    },
+    {
+      "name": "select-string-error",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == TRUE\nInit == x = (SelectSeq(\"abc\", Keep))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "model-error",
+      "tlc": "model-error"
+    },
+    {
+      "name": "select-missing-import",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE x\nKeep(v) == TRUE\nInit == x = (SelectSeq(<<1>>, Keep))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "unsupported",
+      "tlc": "input-error"
+    },
+    {
+      "name": "select-wrong-arity",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(a,b) == TRUE\nInit == x = (SelectSeq(<<1>>, Keep))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "unsupported",
+      "tlc": "input-error"
+    },
+    {
+      "name": "sort-ascending",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == a < b\nInit == x = (SortSeq(<<3,1,2,1>>, Less))\nNext == UNCHANGED x\nSafe == x = (<<1,1,2,3>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-descending",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == a > b\nInit == x = (SortSeq(<<3,1,2,1>>, Less))\nNext == UNCHANGED x\nSafe == x = (<<3,2,1,1>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-false",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == FALSE\nInit == x = (SortSeq(<<3,1,2>>, Less))\nNext == UNCHANGED x\nSafe == x = (<<3,1,2>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-true",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == TRUE\nInit == x = (SortSeq(<<3,1,2>>, Less))\nNext == UNCHANGED x\nSafe == x = (<<2,1,3>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-stable",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == a.rank < b.rank\nInit == x = (SortSeq(<<[rank |-> 0, id |-> 1],[rank |-> 0, id |-> 2]>>, Less))\nNext == UNCHANGED x\nSafe == x = (<<[rank |-> 0, id |-> 1],[rank |-> 0, id |-> 2]>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-nonstrict",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == a.rank <= b.rank\nInit == x = (SortSeq(<<[rank |-> 0, id |-> 1],[rank |-> 0, id |-> 2]>>, Less))\nNext == UNCHANGED x\nSafe == x = (<<[rank |-> 0, id |-> 2],[rank |-> 0, id |-> 1]>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-empty",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == 1 \\div 0 = 0\nInit == x = (SortSeq(<<>>, Less))\nNext == UNCHANGED x\nSafe == x = (<<>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-singleton",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == 1 \\div 0 = 0\nInit == x = (SortSeq(<<9>>, Less))\nNext == UNCHANGED x\nSafe == x = (<<9>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-function",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == a < b\nInit == x = (SortSeq([i \\in 1..3 |-> 4-i], Less))\nNext == UNCHANGED x\nSafe == x = (<<1,2,3>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-scope",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nMake(offset) == LET Less(a,b) == a+offset < b+offset IN SortSeq(<<3,1,2>>, Less)\nInit == x = (Make(0))\nNext == UNCHANGED x\nSafe == x = (<<1,2,3>>)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "sort-bool-error",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == 1\nInit == x = (SortSeq(<<1,2>>, Less))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "model-error",
+      "tlc": "model-error"
+    },
+    {
+      "name": "sort-string-error",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a,b) == TRUE\nInit == x = (SortSeq(\"abc\", Less))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "model-error",
+      "tlc": "model-error"
+    },
+    {
+      "name": "sort-missing-import",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences\nVARIABLE x\nLess(a,b) == TRUE\nInit == x = (SortSeq(<<1>>, Less))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "unsupported",
+      "tlc": "input-error"
+    },
+    {
+      "name": "sort-wrong-arity",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nLess(a) == TRUE\nInit == x = (SortSeq(<<1>>, Less))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "unsupported",
+      "tlc": "input-error"
+    },
+    {
+      "name": "assert-true",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\n\nInit == x = (Assert(TRUE, \"ok\"))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "assert-value-message",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\n\nInit == x = (Assert(TRUE, [tag |-> 2]))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "assert-false",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\n\nInit == x = (Assert(FALSE, \"expected failure\"))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "model-error",
+      "tlc": "model-error"
+    },
+    {
+      "name": "assert-nonbool",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\n\nInit == x = (Assert(1, \"not Boolean\"))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "model-error",
+      "tlc": "model-error"
+    },
+    {
+      "name": "assert-eager-message",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\n\nInit == x = (Assert(TRUE, 1 \\div 0))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "model-error",
+      "tlc": "model-error"
+    },
+    {
+      "name": "assert-lazy-branch",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\n\nInit == x = (IF TRUE THEN 7 ELSE Assert(FALSE, \"unused\"))\nNext == UNCHANGED x\nSafe == x = (7)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "assert-missing-import",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE x\n\nInit == x = (Assert(TRUE, \"ok\"))\nNext == UNCHANGED x\nSafe == x = (TRUE)\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "unsupported",
+      "tlc": "input-error"
+    },
+    {
+      "name": "fair-forall",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (\\A p \\in {1,2}: WF_done(Step(p)))\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "fair-exists",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (\\E p \\in {1,2}: WF_done(Step(p)))\nLive == <> (done # {})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "fair-exists-fault",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (\\E p \\in {1,2}: WF_done(Step(p)))\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "liveness-violation",
+      "tlc": "liveness-violation"
+    },
+    {
+      "name": "fair-no-control",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (TRUE)\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "liveness-violation",
+      "tlc": "liveness-violation"
+    },
+    {
+      "name": "fair-tuple",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (\\A <<p,q>> \\in {<<1,0>>,<<2,0>>}: WF_done(Step(p+q)))\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "fair-nested",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (\\A p \\in {1,2}: \\A q \\in {0}: WF_done(Step(p+q)))\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "fair-empty-forall",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (\\A p \\in {}: WF_done(Step(p)))\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "liveness-violation",
+      "tlc": "liveness-violation"
+    },
+    {
+      "name": "fair-empty-exists",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (\\E p \\in {}: WF_done(Step(p)))\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "model-error",
+      "tlc": "model-error"
+    },
+    {
+      "name": "fair-wrapper",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE done\nInit == done = {}\nStep(p) == p \\notin done /\\ done' = done \\cup {p}\nNext == \\E p \\in {1,2}: Step(p)\nFair(processes) == \\A p \\in processes: WF_done(Step(p))\nSpec == Init /\\ [][Next]_done /\\ (Fair({1,2}))\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "fair-intermittent-WF",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLES turn, done\nvars == <<turn,done>>\nInit == turn = 0 /\\ done = {}\nTick == turn' = 1-turn /\\ UNCHANGED done\nStep(p) == turn = 1 /\\ p \\notin done /\\ turn' = 0 /\\ done' = done \\cup {p}\nNext == Tick \\/ (\\E p \\in {1,2}: Step(p))\nSpec == Init /\\ [][Next]_vars /\\ FairTick /\\ (\\A p \\in {1,2}: WF_vars(Step(p)))\nFairTick == WF_vars(Tick)\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "liveness-violation",
+      "tlc": "liveness-violation"
+    },
+    {
+      "name": "fair-intermittent-SF",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLES turn, done\nvars == <<turn,done>>\nInit == turn = 0 /\\ done = {}\nTick == turn' = 1-turn /\\ UNCHANGED done\nStep(p) == turn = 1 /\\ p \\notin done /\\ turn' = 0 /\\ done' = done \\cup {p}\nNext == Tick \\/ (\\E p \\in {1,2}: Step(p))\nSpec == Init /\\ [][Next]_vars /\\ FairTick /\\ (\\A p \\in {1,2}: SF_vars(Step(p)))\nFairTick == WF_vars(Tick)\nLive == <> (done = {1,2})\n====",
+      "config": "SPECIFICATION Spec\nPROPERTY Live\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    },
+    {
+      "name": "select-prime",
+      "source": "---- MODULE Differential ----\nEXTENDS Integers, Sequences, TLC\nVARIABLE x\nKeep(v) == v > x\nInit == x = 2\nNext == x' = 1 /\\ SelectSeq(<<1,2>>, Keep)' = <<2>>\nSafe == x \\in {1,2}\n====",
+      "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+      "modules": {},
+      "expected": "complete",
+      "tlc": "complete"
+    }
+  ],
+  "kind": "reference-only"
+}

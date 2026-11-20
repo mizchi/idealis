@@ -5,6 +5,8 @@ use rtla::ast::{
     DefinitionKind, Expression, ExpressionKind as E, Location, Module,
 };
 use std::collections::{BTreeMap, BTreeSet};
+mod local;
+mod nested;
 
 const STANDARD: &[&str] = &[
     "Naturals",
@@ -18,6 +20,7 @@ const STANDARD: &[&str] = &[
 
 pub(crate) fn declares_instances_or_overrides(module: &Module, config: &Config) -> bool {
     !module.instances.is_empty()
+        || !module.modules.is_empty()
         || !config.substitutions.is_empty()
         || config.constants.iter().any(|assignment| {
             assignment.module.is_some()
@@ -42,18 +45,34 @@ enum Kind {
     Constant,
     Variable,
     Definition,
+    Lexical,
 }
 
 #[derive(Clone)]
 struct Symbol {
+    captured: bool,
     id: String,
     kind: Kind,
     arity: usize,
     local: bool,
 }
 
+#[derive(Clone)]
+struct Namespace {
+    id: String,
+    arity: usize,
+    local: bool,
+}
+
+#[derive(Clone, Default)]
+struct Introduced {
+    symbols: BTreeMap<String, Symbol>,
+    namespaces: BTreeMap<String, Namespace>,
+}
+
 #[derive(Clone, Default)]
 struct Linked {
+    namespaces: BTreeMap<String, Namespace>,
     symbols: BTreeMap<String, Symbol>,
     definitions: BTreeMap<String, Definition>,
     origins: BTreeMap<String, (String, String)>,
@@ -74,12 +93,19 @@ impl Linked {
         }
         if let Some(previous) = self.symbols.get(name) {
             symbol.local &= previous.local;
+            symbol.captured &= previous.captured;
         }
         self.symbols.insert(name.into(), symbol);
         Ok(())
     }
 
     fn merge(&mut self, dependency: &Self) -> Result<()> {
+        for (name, namespace) in &dependency.namespaces {
+            if namespace.local {
+                continue;
+            }
+            self.namespace(name, namespace.clone())?;
+        }
         for (name, symbol) in &dependency.symbols {
             if !symbol.local {
                 self.insert(name, symbol.clone())?;
@@ -95,9 +121,29 @@ impl Linked {
     }
 
     fn limit(&self) -> Result<()> {
-        if self.definitions.len() + self.constants.len() + self.variables.len() > 4096 {
+        if self.definitions.len()
+            + self.constants.len()
+            + self.variables.len()
+            + self.namespaces.len()
+            > 4096
+        {
             return unsupported("module expansion exceeds 4096 symbols");
         }
+        Ok(())
+    }
+
+    fn namespace(&mut self, name: &str, namespace: Namespace) -> Result<()> {
+        if self.symbols.contains_key(name) {
+            return unsupported(format!("conflicting module namespace {name}"));
+        }
+        if self
+            .namespaces
+            .get(name)
+            .is_some_and(|previous| previous.id != namespace.id)
+        {
+            return unsupported(format!("conflicting module namespace {name}"));
+        }
+        self.namespaces.insert(name.into(), namespace);
         Ok(())
     }
 
@@ -110,6 +156,9 @@ impl Linked {
 }
 
 struct Linker<'a> {
+    declarations: BTreeMap<(String, String), Symbol>,
+    lexical_scopes: BTreeMap<String, nested::Scope>,
+    introductions: BTreeMap<(String, usize), Introduced>,
     sources: BTreeMap<String, &'a Module>,
     cache: BTreeMap<String, Linked>,
     visiting: Vec<String>,
@@ -132,6 +181,37 @@ impl Linker<'_> {
         })?;
         self.visiting.push(name.into());
         let mut result = Linked::default();
+        let scope = self.lexical_scopes.get(name).cloned().unwrap_or_default();
+        for (name, origin) in &scope.declarations {
+            let mut symbol =
+                self.declarations
+                    .get(origin)
+                    .cloned()
+                    .ok_or_else(|| CompileError {
+                        message: format!("missing lexical declaration {name}"),
+                    })?;
+            symbol.local = true;
+            symbol.captured = true;
+            result.insert(name, symbol)?;
+        }
+        for origin in &scope.instances {
+            let introduced =
+                self.introductions
+                    .get(origin)
+                    .cloned()
+                    .ok_or_else(|| CompileError {
+                        message: "outer module instance is not yet in scope".into(),
+                    })?;
+            for (name, mut symbol) in introduced.symbols {
+                symbol.local = true;
+                symbol.captured = true;
+                result.insert(&name, symbol)?;
+            }
+            for (name, mut namespace) in introduced.namespaces {
+                namespace.local = true;
+                result.namespace(&name, namespace)?;
+            }
+        }
         for dependency in &module.extends {
             if STANDARD.contains(&dependency.as_str()) {
                 result.extends.insert(dependency.clone());
@@ -145,16 +225,10 @@ impl Linker<'_> {
             (Kind::Variable, &module.variables),
         ] {
             for declaration in declarations {
-                let id = self.rewrite.fresh();
-                result.insert(
-                    &declaration.name,
-                    Symbol {
-                        id: id.clone(),
-                        kind,
-                        arity: declaration.arity,
-                        local: false,
-                    },
-                )?;
+                let symbol =
+                    self.declarations[&(module.name.clone(), declaration.name.clone())].clone();
+                let id = symbol.id.clone();
+                result.insert(&declaration.name, symbol)?;
                 let mut declaration = declaration.clone();
                 declaration.name = id.clone();
                 if kind == Kind::Constant {
@@ -165,141 +239,69 @@ impl Linker<'_> {
             }
         }
         for definition in &module.definitions {
-            let arity = match &definition.head {
-                DefinitionKind::Operator { params } => params.len(),
-                DefinitionKind::Function { .. } => 0,
-            };
             result.insert(
                 &definition.name,
-                Symbol {
-                    id: self.rewrite.fresh(),
-                    kind: Kind::Definition,
-                    arity,
-                    local: definition.is_local,
-                },
+                self.declarations[&(module.name.clone(), definition.name.clone())].clone(),
             )?;
         }
-        for instance in &module.instances {
-            let template = self.module(&instance.module)?;
-            if instance.name.is_none() {
-                imports.extend(template.extends.clone());
-                if template.constants.is_empty()
-                    && template.variables.is_empty()
-                    && instance.substitutions.is_empty()
-                {
-                    let mut shared = template.clone();
-                    shared.assumptions.clear();
-                    for symbol in shared.symbols.values_mut() {
-                        symbol.local |= instance.is_local;
-                    }
-                    result.merge(&shared)?;
-                    for (name, symbol) in &template.symbols {
-                        if !symbol.local {
-                            result.insert(
-                                name,
-                                Symbol {
-                                    local: instance.is_local,
-                                    ..symbol.clone()
-                                },
-                            )?;
-                        }
-                    }
-                    continue;
-                }
-            }
-            let mut replacements = BTreeMap::new();
-            for substitution in &instance.substitutions {
-                if !template
-                    .symbols
-                    .get(&substitution.name)
-                    .is_some_and(|symbol| symbol.kind != Kind::Definition)
-                {
-                    return unsupported(format!(
-                        "unknown INSTANCE parameter {}",
-                        substitution.name
-                    ));
-                }
-                if replacements
-                    .insert(substitution.name.clone(), substitution.expression.clone())
-                    .is_some()
-                {
-                    return unsupported("duplicate INSTANCE substitution");
-                }
-            }
-            let names = result.names(instance.location);
-            let mut mapping = Names::new();
-            for (name, symbol) in &template.symbols {
-                if symbol.kind == Kind::Definition {
-                    continue;
-                }
-                if symbol.arity != 0 {
-                    return unsupported("higher order INSTANCE parameter");
-                }
-                let mut expression = replacements
-                    .remove(name)
-                    .unwrap_or_else(|| identifier(name, instance.location));
-                if symbol.kind == Kind::Variable
-                    && !matches!(&expression.node, E::Identifier { name } if result.symbols.get(name).is_some_and(|symbol| symbol.kind == Kind::Variable))
-                {
-                    return unsupported("INSTANCE variable substitution requires a state variable");
-                }
-                self.rewrite.strict = true;
-                self.rewrite.imports = imports.clone();
-                self.rewrite.expression(&mut expression, &names)?;
-                self.rewrite.strict = false;
-                if matches!(&expression.node, E::Identifier { name } if !result.symbols.values().any(|symbol| symbol.id == *name) && name != "TRUE" && name != "FALSE" && name != "BOOLEAN")
-                {
-                    return unsupported(format!("missing INSTANCE substitution {name}"));
-                }
-                mapping.insert(symbol.id.clone(), expression);
-            }
-            for id in template.definitions.keys() {
-                mapping.insert(
-                    id.clone(),
-                    identifier(&self.rewrite.fresh(), instance.location),
-                );
-            }
-            for (id, definition) in &template.definitions {
-                let E::Identifier { name } = &mapping[id].node else {
-                    unreachable!()
-                };
-                let mut definition = definition.clone();
-                definition.name = name.clone();
-                self.rewrite.definition(&mut definition, &mapping)?;
-                result.definitions.insert(name.clone(), definition);
-                result
-                    .origins
-                    .insert(name.clone(), template.origins[id].clone());
-            }
-            for (name, symbol) in &template.symbols {
-                if symbol.local || symbol.kind != Kind::Definition {
-                    continue;
-                }
-                let E::Identifier { name: id } = &mapping[&symbol.id].node else {
-                    unreachable!()
-                };
-                let public = instance
-                    .name
-                    .as_ref()
-                    .map_or_else(|| name.clone(), |prefix| format!("{prefix}!{name}"));
-                result.insert(
-                    &public,
-                    Symbol {
-                        id: id.clone(),
-                        local: instance.is_local,
-                        ..symbol.clone()
-                    },
-                )?;
-            }
-            result.extends.extend(template.extends);
-            result.limit()?;
+        for (index, instance) in module.instances.iter().enumerate() {
+            let symbols: BTreeSet<_> = result.symbols.keys().cloned().collect();
+            let namespaces: BTreeSet<_> = result.namespaces.keys().cloned().collect();
+            self.instantiate(instance, &mut result, &mut imports)?;
+            self.introductions.insert(
+                (name.into(), index),
+                Introduced {
+                    symbols: result
+                        .symbols
+                        .iter()
+                        .filter(|(name, _)| !symbols.contains(*name))
+                        .map(|(name, symbol)| (name.clone(), symbol.clone()))
+                        .collect(),
+                    namespaces: result
+                        .namespaces
+                        .iter()
+                        .filter(|(name, _)| !namespaces.contains(*name))
+                        .map(|(name, namespace)| (name.clone(), namespace.clone()))
+                        .collect(),
+                },
+            );
+        }
+        let children: Vec<_> = self
+            .lexical_scopes
+            .iter()
+            .filter(|(_, scope)| scope.parent.as_deref() == Some(name))
+            .map(|(name, _)| name.clone())
+            .collect();
+        for child in children {
+            self.module(&child)?;
         }
         let names = result.names(module.location);
+        self.rewrite.namespaces = result
+            .namespaces
+            .iter()
+            .map(|(name, namespace)| (name.clone(), namespace.arity))
+            .collect();
         self.rewrite.strict = true;
-        self.rewrite.imports = imports;
+        self.rewrite.imports = imports.clone();
+        let mut extra_imports = BTreeSet::new();
         for definition in &module.definitions {
             let id = result.symbols[&definition.name].id.clone();
             let mut rewritten = definition.clone();
+            self.expand_local_definition(
+                &mut rewritten,
+                &result,
+                &BTreeMap::new(),
+                &imports,
+                &mut extra_imports,
+                0,
+            )?;
+            self.rewrite.strict = true;
+            self.rewrite.imports = imports.clone();
+            self.rewrite.namespaces = result
+                .namespaces
+                .iter()
+                .map(|(name, namespace)| (name.clone(), namespace.arity))
+                .collect();
             rewritten.name = id.clone();
             self.rewrite.definition(&mut rewritten, &names)?;
             result.definitions.insert(id.clone(), rewritten);
@@ -309,15 +311,259 @@ impl Linker<'_> {
         }
         for assumption in &module.assumptions {
             let mut assumption = assumption.clone();
+            self.expand_local_expression(
+                &mut assumption.expression,
+                &result,
+                &BTreeMap::new(),
+                &imports,
+                &mut extra_imports,
+                0,
+            )?;
+            self.rewrite.strict = true;
+            self.rewrite.imports = imports.clone();
+            self.rewrite.namespaces = result
+                .namespaces
+                .iter()
+                .map(|(name, namespace)| (name.clone(), namespace.arity))
+                .collect();
             self.rewrite
                 .expression(&mut assumption.expression, &names)?;
             result.assumptions.insert(self.rewrite.fresh(), assumption);
         }
         self.rewrite.strict = false;
+        result.extends.extend(extra_imports);
         result.limit()?;
         self.visiting.pop();
         self.cache.insert(name.into(), result.clone());
         Ok(result)
+    }
+
+    fn instantiate(
+        &mut self,
+        instance: &rtla::ast::Instance,
+        result: &mut Linked,
+        imports: &mut BTreeSet<String>,
+    ) -> Result<()> {
+        let mut template = self.module(&instance.module)?;
+        if !instance.params.is_empty() {
+            let mut definitions: Vec<_> = template.definitions.values().cloned().collect();
+            let functions =
+                crate::functions::expand(&mut definitions, &mut || Ok(self.rewrite.fresh()))?;
+            if !functions.is_empty() {
+                for definition in &mut definitions {
+                    crate::functions::rewrite_tree(&mut definition.body, &functions, 0)?;
+                    template
+                        .origins
+                        .entry(definition.name.clone())
+                        .or_insert_with(|| (instance.module.clone(), definition.name.clone()));
+                }
+                template.definitions = definitions
+                    .into_iter()
+                    .map(|definition| (definition.name.clone(), definition))
+                    .collect();
+            }
+        }
+        if instance.name.is_none() {
+            imports.extend(template.extends.clone());
+            if template.constants.is_empty()
+                && template.variables.is_empty()
+                && instance.substitutions.is_empty()
+            {
+                let mut shared = template.clone();
+                shared.assumptions.clear();
+                for symbol in shared.symbols.values_mut() {
+                    symbol.local |= instance.is_local;
+                }
+                result.merge(&shared)?;
+                for (name, symbol) in &template.symbols {
+                    if !symbol.local {
+                        result.insert(
+                            name,
+                            Symbol {
+                                local: instance.is_local,
+                                ..symbol.clone()
+                            },
+                        )?;
+                    }
+                }
+                return Ok(());
+            }
+        }
+        let mut replacements = BTreeMap::new();
+        for substitution in &instance.substitutions {
+            if !template
+                .symbols
+                .get(&substitution.name)
+                .is_some_and(|symbol| symbol.kind != Kind::Definition && !symbol.captured)
+            {
+                return unsupported(format!("unknown INSTANCE parameter {}", substitution.name));
+            }
+            if replacements
+                .insert(substitution.name.clone(), substitution.expression.clone())
+                .is_some()
+            {
+                return unsupported("duplicate INSTANCE substitution");
+            }
+        }
+        let mut names = result.names(instance.location);
+        let mut params = vec![];
+        for parameter in &instance.params {
+            if names.contains_key(&parameter.name) {
+                return unsupported(format!("conflicting INSTANCE parameter {}", parameter.name));
+            }
+            let fresh = self.rewrite.fresh();
+            names.insert(
+                parameter.name.clone(),
+                identifier(&fresh, parameter.location),
+            );
+            let mut parameter = parameter.clone();
+            parameter.name = fresh;
+            params.push(parameter);
+        }
+        self.rewrite.namespaces = result
+            .namespaces
+            .iter()
+            .map(|(name, namespace)| (name.clone(), namespace.arity))
+            .collect();
+        let mut mapping = Names::new();
+        for (name, symbol) in &template.symbols {
+            if symbol.kind == Kind::Definition || symbol.captured {
+                continue;
+            }
+            let mut expression = replacements
+                .remove(name)
+                .unwrap_or_else(|| identifier(name, instance.location));
+            let arity = match &expression.node {
+                E::Identifier { name } => result
+                    .symbols
+                    .get(name)
+                    .map(|symbol| symbol.arity)
+                    .or_else(|| {
+                        instance
+                            .params
+                            .iter()
+                            .find(|param| param.name == *name)
+                            .map(|param| param.arity)
+                    })
+                    .or_else(|| crate::symbols::standard_arity(name)),
+                E::Lambda { params, .. } => Some(params.len()),
+                _ => Some(0),
+            };
+            if symbol.arity != 0 && arity != Some(symbol.arity)
+                || symbol.arity == 0 && arity.is_some_and(|arity| arity != 0)
+            {
+                return unsupported(format!(
+                    "INSTANCE parameter {name} expects operator arity {}",
+                    symbol.arity
+                ));
+            }
+            if symbol.kind == Kind::Variable
+                && !matches!(&expression.node, E::Identifier { name } if result.symbols.get(name).is_some_and(|symbol| symbol.kind == Kind::Variable || symbol.kind == Kind::Lexical && symbol.arity == 0) || instance.params.iter().any(|param| param.name == *name && param.arity == 0))
+            {
+                return unsupported("INSTANCE variable substitution requires a state variable");
+            }
+            self.rewrite.strict = true;
+            self.rewrite.imports = imports.clone();
+            self.rewrite.expression(&mut expression, &names)?;
+            self.rewrite.strict = false;
+            if matches!(&expression.node, E::Identifier { name } if !result.symbols.values().any(|symbol| symbol.id == *name) && !params.iter().any(|param| param.name == *name) && name != "TRUE" && name != "FALSE" && name != "BOOLEAN")
+            {
+                return unsupported(format!("missing INSTANCE substitution {name}"));
+            }
+            mapping.insert(symbol.id.clone(), expression);
+        }
+        for id in template.definitions.keys() {
+            let name = self.rewrite.fresh();
+            let expression = if params.is_empty() {
+                identifier(&name, instance.location)
+            } else {
+                Expression {
+                    location: instance.location,
+                    node: E::Apply {
+                        operator: name,
+                        args: params
+                            .iter()
+                            .map(|param| identifier(&param.name, param.location))
+                            .collect(),
+                    },
+                }
+            };
+            mapping.insert(id.clone(), expression);
+        }
+        for (id, definition) in &template.definitions {
+            let name = match &mapping[id].node {
+                E::Identifier { name } | E::Apply { operator: name, .. } => name,
+                _ => unreachable!(),
+            };
+            let mut definition = definition.clone();
+            definition.name = name.clone();
+            self.rewrite.definition(&mut definition, &mapping)?;
+            if !params.is_empty() {
+                let body = crate::definition_body(&definition);
+                let mut leading = params.clone();
+                if let DefinitionKind::Operator { params } = definition.head {
+                    leading.extend(params);
+                }
+                definition.head = DefinitionKind::Operator { params: leading };
+                definition.body = body;
+            }
+            result.definitions.insert(name.clone(), definition);
+            result
+                .origins
+                .insert(name.clone(), template.origins[id].clone());
+        }
+        for (name, symbol) in &template.symbols {
+            if symbol.local || symbol.captured || symbol.kind != Kind::Definition {
+                continue;
+            }
+            let id = match &mapping[&symbol.id].node {
+                E::Identifier { name } | E::Apply { operator: name, .. } => name,
+                _ => unreachable!(),
+            };
+            let public = instance
+                .name
+                .as_ref()
+                .map_or_else(|| name.clone(), |prefix| format!("{prefix}!{name}"));
+            result.insert(
+                &public,
+                Symbol {
+                    id: id.clone(),
+                    arity: symbol.arity + params.len(),
+                    local: instance.is_local,
+                    ..symbol.clone()
+                },
+            )?;
+        }
+        if let Some(name) = &instance.name {
+            result.namespace(
+                name,
+                Namespace {
+                    id: self.rewrite.fresh(),
+                    arity: params.len(),
+                    local: instance.is_local,
+                },
+            )?;
+        }
+        for (name, namespace) in &template.namespaces {
+            if namespace.local {
+                continue;
+            }
+            let public = instance
+                .name
+                .as_ref()
+                .map_or_else(|| name.clone(), |prefix| format!("{prefix}!{name}"));
+            result.namespace(
+                &public,
+                Namespace {
+                    id: self.rewrite.fresh(),
+                    local: instance.is_local,
+                    ..namespace.clone()
+                },
+            )?;
+        }
+        result.extends.extend(template.extends);
+        result.limit()?;
+        Ok(())
     }
 
     fn literal(
@@ -360,6 +606,7 @@ impl Linker<'_> {
                     DefinitionKind::Function { .. } => 0,
                 };
                 symbols.push(Symbol {
+                    captured: false,
                     id: id.clone(),
                     arity,
                     kind: Kind::Definition,
@@ -557,6 +804,9 @@ pub(crate) fn resolve(
         return unsupported("source bundle exceeds 256 modules");
     }
     let mut linker = Linker {
+        declarations: BTreeMap::new(),
+        lexical_scopes: BTreeMap::new(),
+        introductions: BTreeMap::new(),
         sources: BTreeMap::new(),
         cache: BTreeMap::new(),
         visiting: vec![],
@@ -566,13 +816,59 @@ pub(crate) fn resolve(
             imports: BTreeSet::new(),
             labels: BTreeMap::new(),
             depth: 0,
+            namespaces: BTreeMap::new(),
+            translated: BTreeSet::new(),
         },
     };
-    for module in std::iter::once(root).chain(modules) {
+    let sources = nested::flatten(root, modules)?;
+    linker.lexical_scopes = sources.scopes;
+    for module in &sources.modules {
+        crate::symbols::validate(module)?;
         if STANDARD.contains(&module.name.as_str())
             || linker.sources.insert(module.name.clone(), module).is_some()
         {
             return unsupported(format!("duplicate or reserved module {}", module.name));
+        }
+        for (kind, declarations) in [
+            (Kind::Constant, &module.constants),
+            (Kind::Variable, &module.variables),
+        ] {
+            for declaration in declarations {
+                let symbol = Symbol {
+                    captured: false,
+                    id: linker.rewrite.fresh(),
+                    kind,
+                    arity: declaration.arity,
+                    local: false,
+                };
+                if linker
+                    .declarations
+                    .insert((module.name.clone(), declaration.name.clone()), symbol)
+                    .is_some()
+                {
+                    return unsupported(format!("conflicting module symbol {}", declaration.name));
+                }
+            }
+        }
+        for definition in &module.definitions {
+            let arity = match &definition.head {
+                DefinitionKind::Operator { params } => params.len(),
+                DefinitionKind::Function { .. } => 0,
+            };
+            let symbol = Symbol {
+                captured: false,
+                id: linker.rewrite.fresh(),
+                kind: Kind::Definition,
+                arity,
+                local: definition.is_local,
+            };
+            if linker
+                .declarations
+                .insert((module.name.clone(), definition.name.clone()), symbol)
+                .is_some()
+            {
+                return unsupported(format!("conflicting module symbol {}", definition.name));
+            }
         }
     }
     let mut linked = linker.module(&root.name)?;
@@ -639,6 +935,9 @@ pub(crate) fn resolve(
             variables,
             definitions: linked.definitions.into_values().collect(),
             instances: vec![],
+            recursive: vec![],
+            modules: vec![],
+            directives: vec![],
             assumptions: linked.assumptions.into_values().collect(),
             theorems: vec![],
             location: root.location,

@@ -1,0 +1,30 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 113 and seed 5653144683654402150 with 1 worker on 10 cores with 7282MB heap and 64MB offheap memory [pid: 94595] (Mac OS X 26.6.2 aarch64, Eclipse Adoptium 21.0.13 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file /Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0067-actions-tlc/record-2-fault/model/Differential.tla
+Parsing file /private/var/folders/_h/_rf455xj4h3_3g6z86pg244c0000gn/T/idealis-tlc-QMeJHz/Naturals.tla
+Parsing file /private/var/folders/_h/_rf455xj4h3_3g6z86pg244c0000gn/T/idealis-tlc-QMeJHz/TLC.tla
+Parsing file /private/var/folders/_h/_rf455xj4h3_3g6z86pg244c0000gn/T/idealis-tlc-QMeJHz/Sequences.tla
+Parsing file /private/var/folders/_h/_rf455xj4h3_3g6z86pg244c0000gn/T/idealis-tlc-QMeJHz/FiniteSets.tla
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module Differential
+Starting... (2026-11-19 05:41:41)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-11-19 05:41:41.
+Error: Invariant Safe is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+local = (p0 :> [term |-> 0, ready |-> FALSE] @@ p1 :> [term |-> 0, ready |-> FALSE])
+
+State 2: <Next line 7, col 29 to line 7, col 90 of module Differential>
+local = (p0 :> [term |-> 1, ready |-> FALSE] @@ p1 :> [term |-> 0, ready |-> FALSE])
+
+State 3: <Next line 7, col 29 to line 7, col 90 of module Differential>
+local = (p0 :> [term |-> 2, ready |-> FALSE] @@ p1 :> [term |-> 0, ready |-> FALSE])
+
+6 states generated, 4 distinct states found, 1 states left on queue.
+The depth of the complete state graph search is 3.
+The average outdegree of the complete state graph is 2 (minimum is 2, the maximum 2 and the 95th percentile is 2).
+Finished in 00s at (2026-11-19 05:41:41)

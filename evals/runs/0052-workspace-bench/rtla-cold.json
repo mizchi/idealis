@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "name": "rtla-cold",
+  "mode": "cold",
+  "baseline": {
+    "path": "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/0052-before/rtla",
+    "args": []
+  },
+  "candidate": {
+    "path": "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/0052-after/rtla",
+    "args": []
+  },
+  "cases": [
+    {
+      "id": "linear-ring",
+      "request": {
+        "kind": "module",
+        "source": "---- MODULE LinearRing ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE x\nInit == x=0\nNext == x'=IF x<N-1 THEN x+1 ELSE 0\nSafe == x \\in 0..(N-1)\n===="
+      },
+      "requirements": [
+        {
+          "pointer": "/kind",
+          "value": "module"
+        }
+      ]
+    },
+    {
+      "id": "function-cube",
+      "request": {
+        "kind": "module",
+        "source": "---- MODULE FunctionCube ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE nodes\nInit == nodes = [node \\in 1..N |-> 0]\nNext == \\E node \\in 1..N: nodes' = [nodes EXCEPT ![node] = 1-@]\nSafe == nodes \\in [1..N -> 0..1]\n===="
+      },
+      "requirements": [
+        {
+          "pointer": "/kind",
+          "value": "module"
+        }
+      ]
+    }
+  ],
+  "config": {
+    "baseline": "baseline",
+    "scope": "fresh process, JSONL transport, request and response serialization",
+    "samples": 7,
+    "warmup": 1,
+    "iterations": 3,
+    "max_evaluations": 10000
+  }
+}

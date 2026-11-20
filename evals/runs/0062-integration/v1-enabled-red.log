@@ -1,0 +1,22 @@
+   Compiling rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.28s
+     Running unittests src/lib.rs (crates/rtlc/target/debug/deps/rtlc-4755f7e95d4686b7)
+
+running 1 test
+test safety_expressions::tests::v1_enabled_subscript_keeps_the_existing_long_branch_limit ... FAILED
+
+failures:
+
+---- safety_expressions::tests::v1_enabled_subscript_keeps_the_existing_long_branch_limit stdout ----
+
+thread 'safety_expressions::tests::v1_enabled_subscript_keeps_the_existing_long_branch_limit' (55942216) panicked at src/safety_expressions.rs:1995:101:
+called `Result::unwrap()` on an `Err` value: CoreError { code: "protocol", message: "Safety evaluation nesting exceeds 128" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    safety_expressions::tests::v1_enabled_subscript_keeps_the_existing_long_branch_limit
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 123 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`

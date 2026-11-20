@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "name": "idealis-testing-reused",
+  "mode": "reused",
+  "baseline": {
+    "path": "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/0052-final-before/idealis-testing",
+    "args": []
+  },
+  "candidate": {
+    "path": "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/0052-final-after/idealis-testing",
+    "args": []
+  },
+  "cases": [
+    {
+      "id": "allowed-1",
+      "request": {
+        "version": 1,
+        "request": {
+          "kind": "compare",
+          "oracle": {
+            "kind": "allowed",
+            "values": [
+              0
+            ]
+          },
+          "targets": [
+            {
+              "id": "target",
+              "outcome": {
+                "kind": "value",
+                "value": 0
+              }
+            }
+          ]
+        }
+      },
+      "requirements": [
+        {
+          "pointer": "/kind",
+          "value": "comparison"
+        },
+        {
+          "pointer": "/result/status",
+          "value": "matched"
+        }
+      ]
+    },
+    {
+      "id": "allowed-32",
+      "request": {
+        "version": 1,
+        "request": {
+          "kind": "compare",
+          "oracle": {
+            "kind": "allowed",
+            "values": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23,
+              24,
+              25,
+              26,
+              27,
+              28,
+              29,
+              30,
+              31
+            ]
+          },
+          "targets": [
+            {
+              "id": "target",
+              "outcome": {
+                "kind": "value",
+                "value": 31
+              }
+            }
+          ]
+        }
+      },
+      "requirements": [
+        {
+          "pointer": "/kind",
+          "value": "comparison"
+        },
+        {
+          "pointer": "/result/status",
+          "value": "matched"
+        }
+      ]
+    }
+  ],
+  "config": {
+    "baseline": "baseline",
+    "scope": "reused independent JSONL processes, transport, request and response serialization",
+    "samples": 7,
+    "warmup": 1,
+    "iterations": 3,
+    "max_evaluations": 10000
+  }
+}

@@ -1,0 +1,340 @@
+{
+  "status": "complete",
+  "plan": "0058",
+  "adopted": "packed function fmix64 hash",
+  "performanceDecision": "function native/Wasm and prepared sequential improvement; channel wall ratios inconclusive because reference timings varied substantially",
+  "counterRegressions": "Criterion ring sequential time increased about 8%, counter sequential about 4%; no >10% regression",
+  "checks": [
+    {
+      "command": "just check",
+      "status": "passed"
+    },
+    {
+      "command": "just browser",
+      "status": "passed"
+    },
+    {
+      "command": "just portable-test",
+      "status": "passed"
+    },
+    {
+      "command": "just safety-test",
+      "status": "passed"
+    },
+    {
+      "command": "just criterion-test",
+      "status": "passed"
+    },
+    {
+      "command": "node --test dist/evals/*/contract-test.js",
+      "status": "passed"
+    },
+    {
+      "command": "just runtime-build",
+      "status": "passed"
+    },
+    {
+      "command": "just runtime-test",
+      "status": "passed"
+    },
+    {
+      "command": "just evaluate",
+      "status": "passed"
+    },
+    {
+      "command": "just replay-evaluation",
+      "status": "passed"
+    },
+    {
+      "command": "just package",
+      "status": "passed"
+    },
+    {
+      "command": "just tlc-diff-test <java> <jar>",
+      "status": "passed"
+    },
+    {
+      "command": "just tlc-diff <java> <jar> development evals/runs/0058-tlc",
+      "status": "passed"
+    },
+    {
+      "command": "just tlc-diff <java> <jar> confirmation evals/runs/0058-tlc-confirmation",
+      "status": "passed"
+    },
+    {
+      "command": "just tlc-diff-replay <java> <jar> evals/runs/0058-tlc evals/runs/0058-tlc-replay",
+      "status": "passed"
+    },
+    {
+      "command": "just support-plan",
+      "status": "passed"
+    },
+    {
+      "command": "just support-sync",
+      "status": "passed"
+    },
+    {
+      "command": "just support-check",
+      "status": "passed"
+    },
+    {
+      "command": "just support-check-staged",
+      "status": "passed"
+    },
+    {
+      "command": "pnpm check (final docs)",
+      "status": "passed"
+    }
+  ],
+  "priorFailures": {
+    "red.log": "mix_packed absent on baseline",
+    "parity.log": "baseline path typo before model execution; verified run retained separately"
+  },
+  "mutation": "not run; no mutation targets or shared TS tests changed; no Rust mutation score claimed",
+  "tlc": {
+    "0058-tlc": {
+      "cases": 155,
+      "matched": 153,
+      "rejectedInputs": 2,
+      "modelErrors": 30,
+      "witnesses": 105,
+      "infrastructureErrors": 0,
+      "incomplete": 0,
+      "mismatches": []
+    },
+    "0058-tlc-confirmation": {
+      "cases": 32,
+      "matched": 32,
+      "rejectedInputs": 0,
+      "modelErrors": 0,
+      "witnesses": 19,
+      "infrastructureErrors": 0,
+      "incomplete": 0,
+      "mismatches": []
+    },
+    "0058-tlc-replay": {
+      "cases": 155,
+      "matched": 153,
+      "rejectedInputs": 2,
+      "modelErrors": 30,
+      "witnesses": 105,
+      "infrastructureErrors": 0,
+      "incomplete": 0,
+      "mismatches": []
+    }
+  },
+  "files": [
+    {
+      "path": "after-build-checks.json",
+      "sha256": "3394125a597cf23b44b0890d2f82bbe25aa34105d7063dd3f94aab05fac9712a"
+    },
+    {
+      "path": "after-source.tar.gz",
+      "sha256": "f5b3213c3095dc7b1b7e255e83d66ab34cf44219352f9751eb08db5e89174f57"
+    },
+    {
+      "path": "before-source.tar.gz",
+      "sha256": "444571456b961ff80943e5a55e26d54dd41220f84379066a153ba77ff9d0884a"
+    },
+    {
+      "path": "build.log",
+      "sha256": "64165f62ddf4a39be484eaf088ec38461291223bbb10dcf4a367b26c903a972e"
+    },
+    {
+      "path": "clippy.log",
+      "sha256": "444cbffa8d1252cf3c4181ec5670cbc5fcc56bafe15eba3f8d694134408c811a"
+    },
+    {
+      "path": "comparison.log",
+      "sha256": "ac6bdc5eefc0ca5d602eaf6cf8dbc688fbe97a25ba2d8b6734e0a46988404257"
+    },
+    {
+      "path": "criterion-build.log",
+      "sha256": "e832888243d42c8f334d963f26da3067a375883af2cd1f584942765bafaf2f93"
+    },
+    {
+      "path": "criterion-inputs.json",
+      "sha256": "d9a95e8abff4900e74ca918a9fbd9ae6d1b9fcb39d00a9759ef114044a85b835"
+    },
+    {
+      "path": "criterion.log",
+      "sha256": "76b1e4fd7a139d770b279a256574236a179b3057d7b4d3be6f261f93a13dad78"
+    },
+    {
+      "path": "final-browser.log",
+      "sha256": "afdd2d4cc85316347ba7fbcd891a1e523d5f386f4f553e911b79327821d679d8"
+    },
+    {
+      "path": "final-check.log",
+      "sha256": "adbad82efcf28f69c638b9833c1f67b008544a621599e95b7a86599e4a12bf06"
+    },
+    {
+      "path": "final-criterion-test.log",
+      "sha256": "591dbb1f1fb579bed1d7d567e007f5cd5e9d9a1673cec242cf5475c6df6a49fd"
+    },
+    {
+      "path": "final-eval-contracts.log",
+      "sha256": "42182aeb2a8cdd27e11a51f5ab5654025450bf4ed95606756e7ebb33d4ef521c"
+    },
+    {
+      "path": "final-evaluate.log",
+      "sha256": "fa4ff84632936c575d1458893ce4223792426e9419040dd7ffe909d8a25d9938"
+    },
+    {
+      "path": "final-lint.log",
+      "sha256": "51da7ecbd17a85781eef86d29094eb9073541d8cf082ea3170877e77b16649f5"
+    },
+    {
+      "path": "final-package.log",
+      "sha256": "969fe0211e0fe4530e309375286f9933447b4cf5fc49f4d0f263382f352ab13f"
+    },
+    {
+      "path": "final-portable.log",
+      "sha256": "11cb8d402bd2d365d7156e6d8e2be41e98424080918de5c136e49df29db2a8cd"
+    },
+    {
+      "path": "final-replay-evaluation.log",
+      "sha256": "726981d4697b24e2a613fba5f4379f0e2dfa82348043181862831a63053d077d"
+    },
+    {
+      "path": "final-runtime-build.log",
+      "sha256": "42102c18c2aa40fa9012b786991a9f1df566767d9c9fdd5ef0486bfcd2f612aa"
+    },
+    {
+      "path": "final-runtime-test.log",
+      "sha256": "6a33a5e7ea2cb9b1b784f24e48f5a0b74a65f69f4c5c983a9405a33a9d4c1db1"
+    },
+    {
+      "path": "final-safety.log",
+      "sha256": "aba975fed34dadb25f625110bf5bbd833a3639d86df4812191170d207d7a1456"
+    },
+    {
+      "path": "final-tlc-confirmation.log",
+      "sha256": "f74241ec17b564b180ad6e50403b1ee23ade4ea2bcd37a05e83b4d72698d3812"
+    },
+    {
+      "path": "final-tlc-replay.log",
+      "sha256": "3f272835c31ea0b6de911f6e28002fef42bab4cd6be608f2d4493c8093d3829a"
+    },
+    {
+      "path": "final-tlc-tests.log",
+      "sha256": "85f49e328758f5d4e1d273fa714649661aa2f679123bb5c68ec10dae0d4dc156"
+    },
+    {
+      "path": "final-tlc.log",
+      "sha256": "c989659429b9628e2e20e31b550d0903d46599c6d0958c96101db8a4c02ee8ef"
+    },
+    {
+      "path": "format.log",
+      "sha256": "9754b2106ea3d203e76fb861de4c6c511358847410edb045e4cff834d63a170b"
+    },
+    {
+      "path": "green.log",
+      "sha256": "edbc3b2e7414226e81fee09124a2feff34996e45d5a02742d5f80177f5401a08"
+    },
+    {
+      "path": "measure-commands.sh",
+      "sha256": "e0eedbac6c7cf8c8d7ec1d1affee03f45663cfbb122a80fc4c1353493f99e78b"
+    },
+    {
+      "path": "parity-proof.json",
+      "sha256": "5050cbbc77a9da7b542df7080da52fa99a8a89c062ce0175a0683b39dced918d"
+    },
+    {
+      "path": "parity-verified.log",
+      "sha256": "08d0d69d535e6fb0f58d6ea6f14558791fb794b9257fcf1dd1b6aca4cbd55e74"
+    },
+    {
+      "path": "parity.log",
+      "sha256": "8d4a16c39aaec0b9a0a0829c887718e87d7f2c6698a2572d45b4281589415ab9"
+    },
+    {
+      "path": "plan-commit.log",
+      "sha256": "bae8f05dbdd09bc059eb477e62efc0c11135b51a72592bef7fa2901c0ac045fc"
+    },
+    {
+      "path": "profile-build.log",
+      "sha256": "d9ae0ff0a1c9602455cb0c680ecf6aad56aa19c1048f7e0f3897febb0e69a4e1"
+    },
+    {
+      "path": "profile-summary.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "profile.log",
+      "sha256": "e38d319020f89b263141cf8bfbbc92bd7ae3adee7a844fde2ab96ebaf87e20d2"
+    },
+    {
+      "path": "proof-source.txt",
+      "sha256": "1c7aee2c7bf881f1393d12f21733f26437c92fea080fe7b9b7a878ade26a8a05"
+    },
+    {
+      "path": "proof.log",
+      "sha256": "b99266f2c27413ab2d1d9faaf3a0093746315a1ff54f4578611176e255e9338a"
+    },
+    {
+      "path": "red.log",
+      "sha256": "ed5b204154b75a1407970243c0e04282842797fe5b82b3084120bc483e50e955"
+    },
+    {
+      "path": "reference/MurmurHash3.cpp",
+      "sha256": "30f121ed155ebf336af398aabb7d8d157afdfafc8d981e7b48d2a1ceb4b63e4e"
+    },
+    {
+      "path": "reference/MurmurHash3.h",
+      "sha256": "9af2003e3885c841fa0ac08cb5d5f31541ee9d793f8a9c4a4f771f43fb0d6f41"
+    },
+    {
+      "path": "reference/build.json",
+      "sha256": "1ac57d604e7b7c22352d0c61d0d14fe7c581268792f8f5add13eb57909e7411d"
+    },
+    {
+      "path": "reference/manifest.json",
+      "sha256": "41d5292252803ba1df1b966b6eeb9549fb576d55fed09183a873642f86edce40"
+    },
+    {
+      "path": "reference/revision.txt",
+      "sha256": "0a7e8062d2670fdd2134d855ee9a5122f3be57f5370d58cc40d7c39bf848d494"
+    },
+    {
+      "path": "reference/vectors.cpp",
+      "sha256": "a5a69cc27c05a485a4e9ba92b5a22c8e4f7526eb9f272292bc92902d3a2b2929"
+    },
+    {
+      "path": "reference/vectors.txt",
+      "sha256": "f256c56343a80dc35d023daafe2eb81d03fc3d2810089cea553bed0dce52a177"
+    },
+    {
+      "path": "reference-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "summary.log",
+      "sha256": "8bc05984d0f6ef0db55d4d4cfac84ae1cedb01e13eb7e28633f822cdbe852581"
+    },
+    {
+      "path": "support-check-staged.log",
+      "sha256": "ba6e0230004998016f16d87fb5f3dce877014f9c3d7ca322b653f541b13c93f1"
+    },
+    {
+      "path": "support-check.log",
+      "sha256": "3896821505071af23fd92ea2e24d350d4c95bcccbf8c03b7ae148d78c0a4b062"
+    },
+    {
+      "path": "support-plan-final.log",
+      "sha256": "21809f8ba92c95672034f5f6a0a6a0b9f00a3964b1959555810cb0c16dfc7c6a"
+    },
+    {
+      "path": "support-plan.log",
+      "sha256": "21809f8ba92c95672034f5f6a0a6a0b9f00a3964b1959555810cb0c16dfc7c6a"
+    },
+    {
+      "path": "support-sync.log",
+      "sha256": "4bd8b1a0903ad30bcf23d7aa486a86ea7bc894a17b3f3ad01f0d8d6532ebccb0"
+    },
+    {
+      "path": "validation-commands.sh",
+      "sha256": "3b4bc5001fe7cb551e164a9fce4b4fb14586cedcab924461e5ef606e91b405dc"
+    }
+  ]
+}

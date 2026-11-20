@@ -1,0 +1,25 @@
+evals/compact-functions/compare.ts:2:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ import assert from "node:assert/strict";
+  > 2 │ import { execFileSync } from "node:child_process";
+      │        ^^^^^^^^^^^^^^^^
+    3 │ import { mkdir, readFile, writeFile } from "node:fs/promises";
+    4 │ import { join, resolve } from "node:path";
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+      1   1 │   import assert from "node:assert/strict";
+      2     │ - import·{·execFileSync·}·from·"node:child_process";
+      3   2 │   import { mkdir, readFile, writeFile } from "node:fs/promises";
+      4   3 │   import { join, resolve } from "node:path";
+  
+
+Skipped 1 suggested fixes.
+If you wish to apply the suggested (unsafe) fixes, use the command biome check --write --unsafe
+
+Checked 1 file in 29ms. Fixed 1 file.
+Found 1 warning.

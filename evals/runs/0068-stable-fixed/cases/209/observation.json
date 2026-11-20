@@ -1,0 +1,524 @@
+{
+  "actual": {
+    "kind": "module",
+    "module": {
+      "name": "Test",
+      "extends": [],
+      "constants": [],
+      "variables": [],
+      "definitions": [
+        {
+          "name": "op",
+          "kind": "Operator",
+          "params": [],
+          "body": {
+            "kind": "UnboundedQuantifier",
+            "quantifier": "Forall",
+            "names": [
+              "x"
+            ],
+            "isTemporal": false,
+            "body": {
+              "kind": "Identifier",
+              "name": "TRUE",
+              "location": {
+                "start": 36,
+                "end": 40,
+                "line": 3,
+                "column": 14
+              }
+            },
+            "location": {
+              "start": 29,
+              "end": 31,
+              "line": 3,
+              "column": 7
+            }
+          },
+          "isLocal": false,
+          "isRecursive": false,
+          "location": {
+            "start": 23,
+            "end": 25,
+            "line": 3,
+            "column": 1
+          }
+        },
+        {
+          "name": "op",
+          "kind": "Operator",
+          "params": [],
+          "body": {
+            "kind": "UnboundedQuantifier",
+            "quantifier": "Exists",
+            "names": [
+              "x",
+              "y"
+            ],
+            "isTemporal": false,
+            "body": {
+              "kind": "Identifier",
+              "name": "FALSE",
+              "location": {
+                "start": 57,
+                "end": 62,
+                "line": 4,
+                "column": 17
+              }
+            },
+            "location": {
+              "start": 47,
+              "end": 49,
+              "line": 4,
+              "column": 7
+            }
+          },
+          "isLocal": false,
+          "isRecursive": false,
+          "location": {
+            "start": 41,
+            "end": 43,
+            "line": 4,
+            "column": 1
+          }
+        },
+        {
+          "name": "op",
+          "kind": "Operator",
+          "params": [],
+          "body": {
+            "kind": "UnboundedQuantifier",
+            "quantifier": "Forall",
+            "names": [
+              "x",
+              "y",
+              "z"
+            ],
+            "isTemporal": true,
+            "body": {
+              "kind": "Identifier",
+              "name": "TRUE",
+              "location": {
+                "start": 83,
+                "end": 87,
+                "line": 5,
+                "column": 21
+              }
+            },
+            "location": {
+              "start": 69,
+              "end": 72,
+              "line": 5,
+              "column": 7
+            }
+          },
+          "isLocal": false,
+          "isRecursive": false,
+          "location": {
+            "start": 63,
+            "end": 65,
+            "line": 5,
+            "column": 1
+          }
+        },
+        {
+          "name": "op",
+          "kind": "Operator",
+          "params": [],
+          "body": {
+            "kind": "UnboundedQuantifier",
+            "quantifier": "Exists",
+            "names": [
+              "x",
+              "y",
+              "z",
+              "w"
+            ],
+            "isTemporal": true,
+            "body": {
+              "kind": "Identifier",
+              "name": "FALSE",
+              "location": {
+                "start": 111,
+                "end": 116,
+                "line": 6,
+                "column": 24
+              }
+            },
+            "location": {
+              "start": 94,
+              "end": 97,
+              "line": 6,
+              "column": 7
+            }
+          },
+          "isLocal": false,
+          "isRecursive": false,
+          "location": {
+            "start": 88,
+            "end": 90,
+            "line": 6,
+            "column": 1
+          }
+        }
+      ],
+      "assumptions": [],
+      "theorems": [],
+      "location": {
+        "start": 1,
+        "end": 5,
+        "line": 2,
+        "column": 1
+      }
+    }
+  },
+  "reference": {
+    "kind": "accepted",
+    "tree": {
+      "kind": 382,
+      "image": "N_Module",
+      "children": [
+        {
+          "kind": 333,
+          "image": "N_BeginModule",
+          "children": [
+            {
+              "kind": 3,
+              "image": "---- MODULE",
+              "children": []
+            },
+            {
+              "kind": 231,
+              "image": "Test",
+              "children": []
+            },
+            {
+              "kind": 35,
+              "image": "----",
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": 350,
+          "image": "N_Extends",
+          "children": []
+        },
+        {
+          "kind": 334,
+          "image": "N_Body",
+          "children": [
+            {
+              "kind": 389,
+              "image": "N_OperatorDefinition",
+              "children": [
+                {
+                  "kind": 366,
+                  "image": "N_IdentLHS",
+                  "children": [
+                    {
+                      "kind": 231,
+                      "image": "op",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "kind": 92,
+                  "image": "==",
+                  "children": []
+                },
+                {
+                  "kind": 425,
+                  "image": "N_UnboundedQuant",
+                  "children": [
+                    {
+                      "kind": 48,
+                      "image": "\\A",
+                      "children": []
+                    },
+                    {
+                      "kind": 231,
+                      "image": "x",
+                      "children": []
+                    },
+                    {
+                      "kind": 88,
+                      "image": ":",
+                      "children": []
+                    },
+                    {
+                      "kind": 358,
+                      "image": "N_GeneralId",
+                      "children": [
+                        {
+                          "kind": 367,
+                          "image": "N_IdPrefix",
+                          "children": []
+                        },
+                        {
+                          "kind": 231,
+                          "image": "TRUE",
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": 389,
+              "image": "N_OperatorDefinition",
+              "children": [
+                {
+                  "kind": 366,
+                  "image": "N_IdentLHS",
+                  "children": [
+                    {
+                      "kind": 231,
+                      "image": "op",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "kind": 92,
+                  "image": "==",
+                  "children": []
+                },
+                {
+                  "kind": 425,
+                  "image": "N_UnboundedQuant",
+                  "children": [
+                    {
+                      "kind": 46,
+                      "image": "\\E",
+                      "children": []
+                    },
+                    {
+                      "kind": 231,
+                      "image": "x",
+                      "children": []
+                    },
+                    {
+                      "kind": 87,
+                      "image": ",",
+                      "children": []
+                    },
+                    {
+                      "kind": 231,
+                      "image": "y",
+                      "children": []
+                    },
+                    {
+                      "kind": 88,
+                      "image": ":",
+                      "children": []
+                    },
+                    {
+                      "kind": 358,
+                      "image": "N_GeneralId",
+                      "children": [
+                        {
+                          "kind": 367,
+                          "image": "N_IdPrefix",
+                          "children": []
+                        },
+                        {
+                          "kind": 231,
+                          "image": "FALSE",
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": 389,
+              "image": "N_OperatorDefinition",
+              "children": [
+                {
+                  "kind": 366,
+                  "image": "N_IdentLHS",
+                  "children": [
+                    {
+                      "kind": 231,
+                      "image": "op",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "kind": 92,
+                  "image": "==",
+                  "children": []
+                },
+                {
+                  "kind": 425,
+                  "image": "N_UnboundedQuant",
+                  "children": [
+                    {
+                      "kind": 60,
+                      "image": "\\AA",
+                      "children": []
+                    },
+                    {
+                      "kind": 231,
+                      "image": "x",
+                      "children": []
+                    },
+                    {
+                      "kind": 87,
+                      "image": ",",
+                      "children": []
+                    },
+                    {
+                      "kind": 231,
+                      "image": "y",
+                      "children": []
+                    },
+                    {
+                      "kind": 87,
+                      "image": ",",
+                      "children": []
+                    },
+                    {
+                      "kind": 231,
+                      "image": "z",
+                      "children": []
+                    },
+                    {
+                      "kind": 88,
+                      "image": ":",
+                      "children": []
+                    },
+                    {
+                      "kind": 358,
+                      "image": "N_GeneralId",
+                      "children": [
+                        {
+                          "kind": 367,
+                          "image": "N_IdPrefix",
+                          "children": []
+                        },
+                        {
+                          "kind": 231,
+                          "image": "TRUE",
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": 389,
+              "image": "N_OperatorDefinition",
+              "children": [
+                {
+                  "kind": 366,
+                  "image": "N_IdentLHS",
+                  "children": [
+                    {
+                      "kind": 231,
+                      "image": "op",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "kind": 92,
+                  "image": "==",
+                  "children": []
+                },
+                {
+                  "kind": 425,
+                  "image": "N_UnboundedQuant",
+                  "children": [
+                    {
+                      "kind": 59,
+                      "image": "\\EE",
+                      "children": []
+                    },
+                    {
+                      "kind": 231,
+                      "image": "x",
+                      "children": []
+                    },
+                    {
+                      "kind": 87,
+                      "image": ",",
+                      "children": []
+                    },
+                    {
+                      "kind": 231,
+                      "image": "y",
+                      "children": []
+                    },
+                    {
+                      "kind": 87,
+                      "image": ",",
+                      "children": []
+                    },
+                    {
+                      "kind": 231,
+                      "image": "z",
+                      "children": []
+                    },
+                    {
+                      "kind": 87,
+                      "image": ",",
+                      "children": []
+                    },
+                    {
+                      "kind": 231,
+                      "image": "w",
+                      "children": []
+                    },
+                    {
+                      "kind": 88,
+                      "image": ":",
+                      "children": []
+                    },
+                    {
+                      "kind": 358,
+                      "image": "N_GeneralId",
+                      "children": [
+                        {
+                          "kind": 367,
+                          "image": "N_IdPrefix",
+                          "children": []
+                        },
+                        {
+                          "kind": 231,
+                          "image": "FALSE",
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": 345,
+          "image": "N_EndModule",
+          "children": [
+            {
+              "kind": 36,
+              "image": "====",
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "tlaTs": "accepted"
+}

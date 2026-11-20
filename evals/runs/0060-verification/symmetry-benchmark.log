@@ -1,0 +1,23 @@
+0-native-plain-1 1.016s
+0-native-symmetry-1 0.036s
+0-native-plain-8 0.479s
+0-native-symmetry-8-request 0.032s
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert.ok(isRecord(actual.output))
+
+    at file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/symmetry/benchmark.js:116:24
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.22.2

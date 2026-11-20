@@ -1,21 +1,14 @@
 import { readFile } from "node:fs/promises";
 import { createServer, type Server } from "node:http";
 import { expect, test } from "@playwright/test";
-import { build } from "esbuild";
+import { bundleModule } from "../scripts/bundle-module.js";
 
 let server: Server | undefined;
 let origin: string;
 test.beforeAll(async () => {
-  const bundle = await build({
-    entryPoints: ["tests/rtla-browser-entry.ts"],
-    bundle: true,
-    platform: "browser",
-    format: "iife",
+  const bundle = await bundleModule("tests/rtla-browser-entry.ts", {
     globalName: "parserBrowser",
-    write: false,
   });
-  const output = bundle.outputFiles[0];
-  if (!output) throw new Error("Missing parser browser bundle");
   const wasm = await readFile(
     "crates/rtla/target/wasm32-unknown-unknown/release/rtla.wasm",
   );
@@ -26,7 +19,7 @@ test.beforeAll(async () => {
       request.url === "/rtla.wasm"
         ? "application/wasm"
         : request.url === "/bundle.js"
-          ? "text/javascript"
+          ? "text/javascript; charset=utf-8"
           : request.url === "/module.tla"
             ? "text/plain"
             : "text/html",
@@ -35,7 +28,7 @@ test.beforeAll(async () => {
       request.url === "/rtla.wasm"
         ? wasm
         : request.url === "/bundle.js"
-          ? output.contents
+          ? Buffer.from(bundle.code)
           : request.url === "/module.tla"
             ? source
             : '<!doctype html><title>rtla</title><script src="/bundle.js"></script>',
@@ -73,6 +66,8 @@ test("rtla parses TLA/config in Chromium and reuses memory after a syntax error"
     unicode: "Forall",
     large: 100_000,
     invalid: "syntax",
+    label: "syntax",
+    symbols: ["%%", "-.", "^+", "Main"],
     limit: "unsupported",
     config: "config",
     repeat: true,

@@ -1,0 +1,273 @@
+{
+  "status": "complete",
+  "plan": "0066-domain-offset",
+  "baseline": "54f39529",
+  "planCommit": "7d48352a",
+  "snapshots": [
+    {
+      "name": "before",
+      "manifestSha256": "aa99e933c2b3e635607e766d7f21b545350a2dcfa2bd9da3898256f70eca6b26",
+      "archiveSha256": "459640d96a44f3dff9de4883d953c111b858e2e20efdf5f238631e42ccd1f365",
+      "files": [
+        {
+          "path": "criterion.json",
+          "sha256": "230ddc7cd83b2a880844774400a0389c75492f743d10fa902f96f8a1fd3b07a6"
+        },
+        {
+          "path": "idealis-core",
+          "sha256": "5b2158c28b6c07bb0d848d561846a86b8b26ff40b7eb79a3e56abcf4068572ee"
+        },
+        {
+          "path": "idealis_core.wasm",
+          "sha256": "e232061b2da4f35032c63eb11ba5d449d6598613eefdf6298e31418b3747ba0d"
+        },
+        {
+          "path": "safety-bench",
+          "sha256": "b4a0640594e145586500d088be4b2fd5f83fd74492f6745bd4d814335e4d5fbc"
+        },
+        {
+          "path": "source.tar",
+          "sha256": "ce404890ed18e38ba9bbfeb6e7f6aa1cd6cdf927cb639c5faff9d3721b0d62e8"
+        }
+      ]
+    },
+    {
+      "name": "after",
+      "manifestSha256": "7bb4d41c0073d352a977a2e6590036bc79295fea871f7f941a94492e66e1f10f",
+      "archiveSha256": "659b11c0ebacddb639a7659e84d0716ba985cef44f451ec9a8766b5f12056007",
+      "files": [
+        {
+          "path": "criterion.json",
+          "sha256": "be24e3b12691623a6de62c7597e3255f766471b41aa1a4c1700abb40006eba21"
+        },
+        {
+          "path": "idealis-core",
+          "sha256": "e09d613401e68c3e6071554b3231f71378979e3ea684a7b5b476e08f9d5701a0"
+        },
+        {
+          "path": "idealis_core.wasm",
+          "sha256": "ccff9ee1b9e4a1e5c335453a0a861e5bd80b9c8346f9980a694465b820d91e77"
+        },
+        {
+          "path": "safety-bench",
+          "sha256": "e73db747e8d5603d8ae217f9d2e848ddeb1fb73df7e671e74356731154b444f2"
+        },
+        {
+          "path": "source.tar",
+          "sha256": "4c6ada23ef6135479770a1a49bb488d945146211fe8763487e019f9156771536"
+        }
+      ]
+    },
+    {
+      "name": "final",
+      "manifestSha256": "794313ccf1d1fd492a74ae687e472b342911051e9b9d0b12750a8676f72c4095",
+      "archiveSha256": "015df9a166700751c27041a0c8adbe0ee8306140a6b33625509bd4e82435b0a1",
+      "files": [
+        {
+          "path": "criterion.json",
+          "sha256": "be24e3b12691623a6de62c7597e3255f766471b41aa1a4c1700abb40006eba21"
+        },
+        {
+          "path": "idealis-core",
+          "sha256": "e09d613401e68c3e6071554b3231f71378979e3ea684a7b5b476e08f9d5701a0"
+        },
+        {
+          "path": "idealis_core.wasm",
+          "sha256": "ccff9ee1b9e4a1e5c335453a0a861e5bd80b9c8346f9980a694465b820d91e77"
+        },
+        {
+          "path": "safety-bench",
+          "sha256": "e73db747e8d5603d8ae217f9d2e848ddeb1fb73df7e671e74356731154b444f2"
+        },
+        {
+          "path": "source.tar",
+          "sha256": "a1989209b3592aaac7383771713f861d859e6005ea04b10f8bc595182745d90d"
+        }
+      ]
+    }
+  ],
+  "drivers": [
+    {
+      "path": ".artifacts/0066-confirm.ts",
+      "name": "drivers/0-0066-confirm.ts",
+      "sha256": "9c2a8f2495828cb4a298cee6fdcc3a45158a82f536268e68632a6bba08f27d5e"
+    },
+    {
+      "path": "evals/p0-checker/corpus.ts",
+      "name": "drivers/1-corpus.ts",
+      "sha256": "4c1240a27ba7ca9555d6dc0e473961d4afd94addf0b37341292789d3dc63b54b"
+    },
+    {
+      "path": "evals/evaluator-tuning/corpus-summary.ts",
+      "name": "drivers/2-corpus-summary.ts",
+      "sha256": "902b6911716098c64c586d42e3db62b1ba7c0cf8bcef91a2b331f72130f17616"
+    },
+    {
+      "path": "evals/oracle-tuning/kernel.ts",
+      "name": "drivers/3-kernel.ts",
+      "sha256": "4145c6433a8c39182b6bbfb5f29d3a4bfab6619b5bae7e1c4c9c6654a16c0f71"
+    },
+    {
+      "path": "evals/evaluator-tuning/summarize.ts",
+      "name": "drivers/4-summarize.ts",
+      "sha256": "f4f303d38c8dda41c03a0669a67dae9ad2d5658ed6011ce21ba728416ae2792d"
+    },
+    {
+      "path": "evals/p0-checker/verify.ts",
+      "name": "drivers/5-verify.ts",
+      "sha256": "bf14a1f18d3902d399bebeb0ab49d453814e4d4885d873acbd14702954f4a3b9"
+    },
+    {
+      "path": "evals/temporal-tuning/parity.ts",
+      "name": "drivers/6-parity.ts",
+      "sha256": "8f929aec7f8422f3b2d02d6b3c184a5fa39e6fb5ede60043b137ff9eec9db8d8"
+    },
+    {
+      "path": "evals/symmetry/evaluate.ts",
+      "name": "drivers/7-evaluate.ts",
+      "sha256": "67c8cf4329735509c4bb32c4368ea502863363eba1c6008502d332275d5daa39"
+    },
+    {
+      "path": ".artifacts/0066-archive.ts",
+      "name": "drivers/8-0066-archive.ts",
+      "sha256": "cfd666c091039dc16c35103081cb95013e9188916175142fdf538c5e18287e1f"
+    }
+  ],
+  "runs": [
+    "0066-actions-tlc",
+    "0066-check-retry",
+    "0066-corpus",
+    "0066-corpus-summary",
+    "0066-parity",
+    "0066-por-tlc",
+    "0066-safety-kernel",
+    "0066-safety-summary",
+    "0066-symmetry-tlc",
+    "0066-tcommit-confirmation",
+    "0066-verification"
+  ],
+  "logs": [
+    {
+      "name": "0066-actions-tlc.log",
+      "sha256": "c7637a0ca12da45f7a879483e154409d049aaec246f0dd8dab7ffba99c94c27c",
+      "gzipSha256": "fe81c3d38e52027943fe97b3fb3f80e6bc1bb7426d200fcc0e2aed0378fd2ef7"
+    },
+    {
+      "name": "0066-confirm.log",
+      "sha256": "1c243b5206b93a8cb57180e42ee45c0bce7ee49562f0af46114bd4bb4e6fbb96",
+      "gzipSha256": "8753e1cc7f75dce2862727e70e4c72e1563a27307272258692d7496a500f908e"
+    },
+    {
+      "name": "0066-contract-after.log",
+      "sha256": "4a46322b9ae98bf1ea9b13f0858db71d301ccaa4c078e59372d5dd60ff39385f",
+      "gzipSha256": "0725fb6f97e06d90f4c4cd2815d6d9299b4febffc944a34f8409df24d4390b16"
+    },
+    {
+      "name": "0066-contract-before.log",
+      "sha256": "9495fe301c576fff5c96eec40426ab42d401126d1c900311de0ab2c155d4a509",
+      "gzipSha256": "5dd6c3e3a8c99112190840d2843cf89c65fbaa83050aeb12ee2883a69a400149"
+    },
+    {
+      "name": "0066-corpus.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipSha256": "abfbb86f9f5ddfbd9fc1a72c43ab384702ce8bae86b60f3324748485e235e61e"
+    },
+    {
+      "name": "0066-format-final.log",
+      "sha256": "4a92263598e249585b1641897db38d357d4f8ada18fd595f21e9174273bda84f",
+      "gzipSha256": "176bccb364d22ceb99369d8d842a379d87c9ed5dad105a3c25bc06b40ca17689"
+    },
+    {
+      "name": "0066-format-report-final.log",
+      "sha256": "f8ef864cea6b720c9abed6728973c7319a9effb231e31d65fa35c8ff0dd6e191",
+      "gzipSha256": "d0ef6eac220aada8339b56c3bc8203e8c24218c9a1ec8bc60f278d1106015190"
+    },
+    {
+      "name": "0066-format-report.log",
+      "sha256": "fcc7cc44f6f6d388477a89da3c38b0ca7436fcaf9e3bdc7746a5b0be577ef8af",
+      "gzipSha256": "1c887b99a56cbb5f7bc01ade51cd6650efdb7ee47cbe06655a23c33a9f726eef"
+    },
+    {
+      "name": "0066-format.log",
+      "sha256": "aad84e3c642973723a5df1667e8431f4be2f46fd3ec1c1e641566a5cea4c3d76",
+      "gzipSha256": "e16c287e2e19e008940509bd33ecd957e4b747b558d8e881c08d2b85176c7040"
+    },
+    {
+      "name": "0066-parity.log",
+      "sha256": "9e96e3a845d9f4ae82ecf640dac8da21ecbce9d67f436fcd43dd0c0a2da867c0",
+      "gzipSha256": "ee4193a97fabe31521f16e9f9c495626afff44f713f673cad1cf169a8befd9ff"
+    },
+    {
+      "name": "0066-plan-commit.log",
+      "sha256": "1187b426d5d146c7f995e5d164ab51c229eb15185b6955c6fc5c4fe2316a1d84",
+      "gzipSha256": "d6d27f42106ecf56399b7777212c4667c4ae12cb7c4649792a3f79fa62d617f1"
+    },
+    {
+      "name": "0066-por-tlc.log",
+      "sha256": "2c50229909024991e080d5b97a9b76d63b3c309c5b54784412a6f9edca44e2b5",
+      "gzipSha256": "87fab7f864f9c02b48dec69cdc412f8decf21bf0ff9ac7d6e9d31305dcb1f587"
+    },
+    {
+      "name": "0066-portable-build.log",
+      "sha256": "b48f76f8405ca2af73c258985eb04c515ab2f88978dad777374f5bcb991b12e2",
+      "gzipSha256": "1971ec4964fde64cab9d1ebbaa66a3544b93fb7c97665a51fbfef839aa2b4dd9"
+    },
+    {
+      "name": "0066-safety-build.log",
+      "sha256": "c33261f6e0a4ad89180cc484ee3fb4d209896b2698ba29fca2ec128f20f1954a",
+      "gzipSha256": "0b222fb1a3710ce3afd863078ff2941152e0f12cff869ad23a12e8c2cf082701"
+    },
+    {
+      "name": "0066-safety-kernel.log",
+      "sha256": "eed18ee50a0b6befe3c15ce50b0ac154cd590107218532549007b99e042ea7ae",
+      "gzipSha256": "0a9363c1211d7975f747af33e2f54734932369df9c65d7fae58e1c945599119d"
+    },
+    {
+      "name": "0066-support-check.log",
+      "sha256": "6d17ee22842b24903350f6cc27532b44a63bc172a15d95e352343a77f04841e4",
+      "gzipSha256": "01f033840fae7991b08be6f204f89d3e5fe8283d4423725e352f776bc942c3ed"
+    },
+    {
+      "name": "0066-support-plan.log",
+      "sha256": "2a63866207f5989518821cd9e637ed7d8f6faa6ba2da2b9eaac9e9ba4fde6610",
+      "gzipSha256": "04018e76fc66331eabdbfcc9e0527724169f51cfd20b909c4af2ca8e65c6b690"
+    },
+    {
+      "name": "0066-support-sync.log",
+      "sha256": "12002617ba419a3f0905696fb5e24ba4d641ddf6c17d6cf13fce602d95182e8b",
+      "gzipSha256": "651ffbf293174b0576aebaaa29eb05079b743db546f65f527a80a755666fa2c5"
+    },
+    {
+      "name": "0066-symmetry-tlc.log",
+      "sha256": "c7637a0ca12da45f7a879483e154409d049aaec246f0dd8dab7ffba99c94c27c",
+      "gzipSha256": "fe81c3d38e52027943fe97b3fb3f80e6bc1bb7426d200fcc0e2aed0378fd2ef7"
+    },
+    {
+      "name": "0066-ts-build.log",
+      "sha256": "80a1a5a215e40ab2060bf2ee500b157a39e8264b45d5cb8f1910ab1dbe3b20be",
+      "gzipSha256": "d9b0409881b62c4d805b6bce9eed059c1688d7a88cac7c3f210c9725c62784c4"
+    },
+    {
+      "name": "0066-ts-final-build.log",
+      "sha256": "80a1a5a215e40ab2060bf2ee500b157a39e8264b45d5cb8f1910ab1dbe3b20be",
+      "gzipSha256": "d9b0409881b62c4d805b6bce9eed059c1688d7a88cac7c3f210c9725c62784c4"
+    },
+    {
+      "name": "0066-verification.log",
+      "sha256": "e155704d548c5dfec55692192a8cf8ea0bc1e7e753a3ef096164768d1530822b",
+      "gzipSha256": "03081a94f4b871b92f5872223a1e6f38fa8dc91154c142a7e263563590afcddc"
+    }
+  ],
+  "verification": {
+    "first": "0066-verification",
+    "failed": "just check: new iteration table format",
+    "passedAfterFix": "0066-check-retry",
+    "otherChecks": 20,
+    "productionSourceUnchanged": true
+  },
+  "tlcSource": {
+    "revision": "d8fb231de4e4b5d02c1b2ed1ac759c086f694021",
+    "path": "tlc2/value/impl/FcnRcdValue.java",
+    "referenceJar": "1.7.4 5a47802"
+  }
+}

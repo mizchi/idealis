@@ -1,13 +1,16 @@
 import assert from "node:assert/strict";
 import { counterModel } from "../examples/counter-model.js";
-import { checkModel } from "../src/checker.js";
+import { checkModel } from "../packages/idealis/src/checker.js";
 import {
   compileFiniteModel,
   createFiniteModel,
   parseFiniteModel,
-} from "../src/finite.js";
-import { createSimulationHost } from "../src/host.js";
-import { deletionCandidates, shrinkCounterexample } from "../src/shrink.js";
+} from "../packages/idealis/src/finite.js";
+import { createSimulationHost } from "../packages/idealis/src/host.js";
+import {
+  deletionCandidates,
+  shrinkCounterexample,
+} from "../packages/idealis/src/shrink.js";
 
 export const registerUsableContract = (
   test: (name: string, run: () => void | Promise<void>) => unknown,

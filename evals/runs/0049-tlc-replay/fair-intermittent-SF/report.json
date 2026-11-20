@@ -1,0 +1,677 @@
+{
+  "name": "fair-intermittent-SF",
+  "compiled": {
+    "kind": "compiled",
+    "program": {
+      "format": "modelt.safety-program",
+      "version": 1,
+      "name": "Differential",
+      "variables": [
+        "turn",
+        "done"
+      ],
+      "initial": [
+        {
+          "name": "Init",
+          "steps": [
+            {
+              "kind": "assign",
+              "slot": 0,
+              "value": {
+                "op": "literal",
+                "value": {
+                  "type": "int",
+                  "value": "0"
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "slot": 1,
+              "value": {
+                "op": "set",
+                "values": []
+              }
+            }
+          ]
+        }
+      ],
+      "next": [
+        {
+          "name": "Tick",
+          "steps": [
+            {
+              "kind": "assign",
+              "slot": 0,
+              "value": {
+                "op": "sub",
+                "left": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "1"
+                  }
+                },
+                "right": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "slot": 1,
+              "value": {
+                "op": "read",
+                "slot": 1,
+                "next": false
+              }
+            }
+          ]
+        },
+        {
+          "name": "Step",
+          "steps": [
+            {
+              "kind": "bind",
+              "slot": 0,
+              "domain": {
+                "kind": "set",
+                "values": [
+                  {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "guard",
+              "expression": {
+                "op": "eq",
+                "left": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "right": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "1"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "guard",
+              "expression": {
+                "op": "not",
+                "argument": {
+                  "op": "in",
+                  "value": {
+                    "op": "bound",
+                    "slot": 0
+                  },
+                  "domain": {
+                    "kind": "value",
+                    "value": {
+                      "op": "read",
+                      "slot": 1,
+                      "next": false
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "slot": 0,
+              "value": {
+                "op": "literal",
+                "value": {
+                  "type": "int",
+                  "value": "0"
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "slot": 1,
+              "value": {
+                "op": "cup",
+                "left": {
+                  "op": "read",
+                  "slot": 1,
+                  "next": false
+                },
+                "right": {
+                  "op": "set",
+                  "values": [
+                    {
+                      "op": "bound",
+                      "slot": 0
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "invariants": [],
+      "assumptions": [],
+      "checkDeadlock": false,
+      "properties": [
+        {
+          "name": "Live",
+          "formula": {
+            "kind": "eventually",
+            "formula": {
+              "kind": "atom",
+              "expression": {
+                "op": "eq",
+                "left": {
+                  "op": "read",
+                  "slot": 1,
+                  "next": false
+                },
+                "right": {
+                  "op": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "1"
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "2"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ],
+      "fairness": [
+        {
+          "kind": "always",
+          "formula": {
+            "kind": "eventually",
+            "formula": {
+              "kind": "or",
+              "left": {
+                "kind": "not",
+                "formula": {
+                  "kind": "atom",
+                  "expression": {
+                    "op": "enabled",
+                    "branches": [
+                      {
+                        "name": "Tick",
+                        "steps": [
+                          {
+                            "kind": "assign",
+                            "slot": 0,
+                            "value": {
+                              "op": "sub",
+                              "left": {
+                                "op": "literal",
+                                "value": {
+                                  "type": "int",
+                                  "value": "1"
+                                }
+                              },
+                              "right": {
+                                "op": "read",
+                                "slot": 0,
+                                "next": false
+                              }
+                            }
+                          },
+                          {
+                            "kind": "assign",
+                            "slot": 1,
+                            "value": {
+                              "op": "read",
+                              "slot": 1,
+                              "next": false
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "subscript": {
+                      "op": "tuple",
+                      "values": [
+                        {
+                          "op": "read",
+                          "slot": 0,
+                          "next": false
+                        },
+                        {
+                          "op": "read",
+                          "slot": 1,
+                          "next": false
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "right": {
+                "kind": "atom",
+                "expression": {
+                  "op": "and",
+                  "left": {
+                    "op": "and",
+                    "left": {
+                      "op": "and",
+                      "left": {
+                        "op": "literal",
+                        "value": {
+                          "type": "bool",
+                          "value": true
+                        }
+                      },
+                      "right": {
+                        "op": "eq",
+                        "left": {
+                          "op": "read",
+                          "slot": 0,
+                          "next": true
+                        },
+                        "right": {
+                          "op": "sub",
+                          "left": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "1"
+                            }
+                          },
+                          "right": {
+                            "op": "read",
+                            "slot": 0,
+                            "next": false
+                          }
+                        }
+                      }
+                    },
+                    "right": {
+                      "op": "eq",
+                      "left": {
+                        "op": "read",
+                        "slot": 1,
+                        "next": false
+                      },
+                      "right": {
+                        "op": "prime",
+                        "argument": {
+                          "op": "read",
+                          "slot": 1,
+                          "next": false
+                        }
+                      }
+                    }
+                  },
+                  "right": {
+                    "op": "ne",
+                    "left": {
+                      "op": "tuple",
+                      "values": [
+                        {
+                          "op": "read",
+                          "slot": 0,
+                          "next": false
+                        },
+                        {
+                          "op": "read",
+                          "slot": 1,
+                          "next": false
+                        }
+                      ]
+                    },
+                    "right": {
+                      "op": "prime",
+                      "argument": {
+                        "op": "tuple",
+                        "values": [
+                          {
+                            "op": "read",
+                            "slot": 0,
+                            "next": false
+                          },
+                          {
+                            "op": "read",
+                            "slot": 1,
+                            "next": false
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "forall",
+          "bounds": [
+            {
+              "slot": 0,
+              "domain": {
+                "kind": "set",
+                "values": [
+                  {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "formula": {
+            "kind": "or",
+            "left": {
+              "kind": "eventually",
+              "formula": {
+                "kind": "always",
+                "formula": {
+                  "kind": "not",
+                  "formula": {
+                    "kind": "atom",
+                    "expression": {
+                      "op": "enabled",
+                      "branches": [
+                        {
+                          "name": "Step",
+                          "steps": [
+                            {
+                              "kind": "guard",
+                              "expression": {
+                                "op": "eq",
+                                "left": {
+                                  "op": "read",
+                                  "slot": 0,
+                                  "next": false
+                                },
+                                "right": {
+                                  "op": "literal",
+                                  "value": {
+                                    "type": "int",
+                                    "value": "1"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "guard",
+                              "expression": {
+                                "op": "not",
+                                "argument": {
+                                  "op": "in",
+                                  "value": {
+                                    "op": "bound",
+                                    "slot": 0
+                                  },
+                                  "domain": {
+                                    "kind": "value",
+                                    "value": {
+                                      "op": "read",
+                                      "slot": 1,
+                                      "next": false
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "assign",
+                              "slot": 0,
+                              "value": {
+                                "op": "literal",
+                                "value": {
+                                  "type": "int",
+                                  "value": "0"
+                                }
+                              }
+                            },
+                            {
+                              "kind": "assign",
+                              "slot": 1,
+                              "value": {
+                                "op": "cup",
+                                "left": {
+                                  "op": "read",
+                                  "slot": 1,
+                                  "next": false
+                                },
+                                "right": {
+                                  "op": "set",
+                                  "values": [
+                                    {
+                                      "op": "bound",
+                                      "slot": 0
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      "subscript": {
+                        "op": "tuple",
+                        "values": [
+                          {
+                            "op": "read",
+                            "slot": 0,
+                            "next": false
+                          },
+                          {
+                            "op": "read",
+                            "slot": 1,
+                            "next": false
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "right": {
+              "kind": "always",
+              "formula": {
+                "kind": "eventually",
+                "formula": {
+                  "kind": "atom",
+                  "expression": {
+                    "op": "and",
+                    "left": {
+                      "op": "and",
+                      "left": {
+                        "op": "and",
+                        "left": {
+                          "op": "and",
+                          "left": {
+                            "op": "and",
+                            "left": {
+                              "op": "literal",
+                              "value": {
+                                "type": "bool",
+                                "value": true
+                              }
+                            },
+                            "right": {
+                              "op": "eq",
+                              "left": {
+                                "op": "read",
+                                "slot": 0,
+                                "next": false
+                              },
+                              "right": {
+                                "op": "literal",
+                                "value": {
+                                  "type": "int",
+                                  "value": "1"
+                                }
+                              }
+                            }
+                          },
+                          "right": {
+                            "op": "not",
+                            "argument": {
+                              "op": "in",
+                              "value": {
+                                "op": "bound",
+                                "slot": 0
+                              },
+                              "domain": {
+                                "kind": "value",
+                                "value": {
+                                  "op": "read",
+                                  "slot": 1,
+                                  "next": false
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "right": {
+                          "op": "eq",
+                          "left": {
+                            "op": "read",
+                            "slot": 0,
+                            "next": true
+                          },
+                          "right": {
+                            "op": "literal",
+                            "value": {
+                              "type": "int",
+                              "value": "0"
+                            }
+                          }
+                        }
+                      },
+                      "right": {
+                        "op": "eq",
+                        "left": {
+                          "op": "read",
+                          "slot": 1,
+                          "next": true
+                        },
+                        "right": {
+                          "op": "cup",
+                          "left": {
+                            "op": "read",
+                            "slot": 1,
+                            "next": false
+                          },
+                          "right": {
+                            "op": "set",
+                            "values": [
+                              {
+                                "op": "bound",
+                                "slot": 0
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "right": {
+                      "op": "ne",
+                      "left": {
+                        "op": "tuple",
+                        "values": [
+                          {
+                            "op": "read",
+                            "slot": 0,
+                            "next": false
+                          },
+                          {
+                            "op": "read",
+                            "slot": 1,
+                            "next": false
+                          }
+                        ]
+                      },
+                      "right": {
+                        "op": "prime",
+                        "argument": {
+                          "op": "tuple",
+                          "values": [
+                            {
+                              "op": "read",
+                              "slot": 0,
+                              "next": false
+                            },
+                            {
+                              "op": "read",
+                              "slot": 1,
+                              "next": false
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "checked": {
+    "kind": "safety",
+    "result": {
+      "status": "complete",
+      "reason": null,
+      "states": 8,
+      "generated": 13,
+      "depth": 5,
+      "work": 16961,
+      "violation": null
+    }
+  },
+  "reference": {
+    "status": "complete",
+    "states": 8,
+    "generated": 13,
+    "exit": 0
+  },
+  "witness": null
+}

@@ -1,0 +1,27 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 116 and seed -6634023284724419451 with 1 worker on 10 cores with 7282MB heap and 64MB offheap memory [pid: 29764] (Mac OS X 26.6.2 aarch64, Eclipse Adoptium 21.0.13 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file /Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0061-final-existing-tlc/function-comparison-error/model/Differential.tla
+Parsing file /private/var/folders/_h/_rf455xj4h3_3g6z86pg244c0000gn/T/idealis-tlc-6deNll/Integers.tla
+Parsing file /private/var/folders/_h/_rf455xj4h3_3g6z86pg244c0000gn/T/idealis-tlc-6deNll/Sequences.tla
+Parsing file /private/var/folders/_h/_rf455xj4h3_3g6z86pg244c0000gn/T/idealis-tlc-6deNll/FiniteSets.tla
+Parsing file /private/var/folders/_h/_rf455xj4h3_3g6z86pg244c0000gn/T/idealis-tlc-6deNll/Naturals.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module Differential
+Starting... (2026-11-18 17:52:53)
+Computing initial states...
+Error: Attempted to apply the operator overridden by the Java method
+public static tlc2.value.impl.IntValue tlc2.module.FiniteSets.Cardinality(tlc2.value.impl.Value),
+but it produced the following error:
+Attempted to compare integer 0 with non-integer:
+TRUE
+Error: The error occurred when TLC was evaluating the nested
+expressions at the following positions:
+0. Line 4, column 9 to line 4, column 74 in Differential
+1. Line 4, column 14 to line 4, column 73 in Differential
+
+
+0 states generated, 0 distinct states found, 0 states left on queue.
+Finished in 00s at (2026-11-18 17:52:53)

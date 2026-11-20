@@ -1,0 +1,208 @@
+{
+  "actual": {
+    "kind": "error",
+    "error": {
+      "kind": "syntax",
+      "message": "Precedence conflict. Add parentheses",
+      "location": {
+        "start": 38,
+        "end": 39,
+        "line": 4,
+        "column": 3
+      }
+    }
+  },
+  "reference": {
+    "kind": "accepted",
+    "tree": {
+      "kind": 382,
+      "image": "N_Module",
+      "children": [
+        {
+          "kind": 333,
+          "image": "N_BeginModule",
+          "children": [
+            {
+              "kind": 3,
+              "image": "---- MODULE",
+              "children": []
+            },
+            {
+              "kind": 289,
+              "image": "Test",
+              "children": []
+            },
+            {
+              "kind": 36,
+              "image": "----",
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": 350,
+          "image": "N_Extends",
+          "children": []
+        },
+        {
+          "kind": 334,
+          "image": "N_Body",
+          "children": [
+            {
+              "kind": 422,
+              "image": "N_Theorem",
+              "children": [
+                {
+                  "kind": 67,
+                  "image": "THEOREM",
+                  "children": []
+                },
+                {
+                  "kind": 358,
+                  "image": "N_GeneralId",
+                  "children": [
+                    {
+                      "kind": 367,
+                      "image": "N_IdPrefix",
+                      "children": []
+                    },
+                    {
+                      "kind": 289,
+                      "image": "TRUE",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "kind": 402,
+                  "image": "N_Proof",
+                  "children": [
+                    {
+                      "kind": 406,
+                      "image": "N_ProofStep",
+                      "children": [
+                        {
+                          "kind": 290,
+                          "image": "<1>abc",
+                          "children": []
+                        },
+                        {
+                          "kind": 444,
+                          "image": "N_AssertStep",
+                          "children": [
+                            {
+                              "kind": 385,
+                              "image": "N_Number",
+                              "children": [
+                                {
+                                  "kind": 109,
+                                  "image": "1",
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "kind": 402,
+                          "image": "N_Proof",
+                          "children": [
+                            {
+                              "kind": 406,
+                              "image": "N_ProofStep",
+                              "children": [
+                                {
+                                  "kind": 291,
+                                  "image": "<2>def",
+                                  "children": []
+                                },
+                                {
+                                  "kind": 444,
+                                  "image": "N_AssertStep",
+                                  "children": [
+                                    {
+                                      "kind": 385,
+                                      "image": "N_Number",
+                                      "children": [
+                                        {
+                                          "kind": 109,
+                                          "image": "2",
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "kind": 406,
+                              "image": "N_ProofStep",
+                              "children": [
+                                {
+                                  "kind": 290,
+                                  "image": "<2>ghi",
+                                  "children": []
+                                },
+                                {
+                                  "kind": 407,
+                                  "image": "N_QEDStep",
+                                  "children": [
+                                    {
+                                      "kind": 78,
+                                      "image": "QED",
+                                      "children": []
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "kind": 406,
+                      "image": "N_ProofStep",
+                      "children": [
+                        {
+                          "kind": 290,
+                          "image": "<1>jkl",
+                          "children": []
+                        },
+                        {
+                          "kind": 407,
+                          "image": "N_QEDStep",
+                          "children": [
+                            {
+                              "kind": 78,
+                              "image": "QED",
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": 345,
+          "image": "N_EndModule",
+          "children": [
+            {
+              "kind": 37,
+              "image": "====",
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "tlaTs": "rejected",
+  "tlaTsError": "TlaSyntaxError: <*> and <+> cannot be used for a named step at line 5, column 3"
+}

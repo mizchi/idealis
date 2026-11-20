@@ -1,0 +1,13 @@
+
+> @mizchi/idealis@0.1.0-alpha.0 build /Users/mz/ghq/github.com/mizchi/idealis
+> tsc -p tsconfig.build.json
+
+evals/prepared-safety/contract-test.ts(9,3): error TS2305: Module '"../../src/portable.js"' has no exported member 'prepareSafetyProgram'.
+evals/prepared-safety/contract-test.ts(31,71): error TS2379: Argument of type '{ maxDepth?: number; maxStates?: number; maxTemporalNodes?: number; maxWork: number; }' is not assignable to parameter of type 'SafetyBounds' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Property 'maxDepth' is optional in type '{ maxDepth?: number; maxStates?: number; maxTemporalNodes?: number; maxWork: number; }' but required in type 'SafetyBounds'.
+evals/prepared-safety/contract-test.ts(63,51): error TS2322: Type '"prepare-safety"' is not assignable to type '"cancel" | "canonicalize" | "check-finite" | "check-history" | "check-loaded" | "check-safety" | "check-safety-coverage" | "check-safety-parallel" | "check-tla" | "compile-tla" | ... 8 more ... | "start-loaded"'.
+evals/prepared-safety/contract-test.ts(65,14): error TS2339: Property 'kind' does not exist on type 'never'.
+evals/prepared-safety/contract-test.ts(66,91): error TS2339: Property 'handle' does not exist on type 'never'.
+evals/prepared-safety/contract-test.ts(69,53): error TS2322: Type '"release-safety"' is not assignable to type '"cancel" | "canonicalize" | "check-finite" | "check-history" | "check-loaded" | "check-safety" | "check-safety-coverage" | "check-safety-parallel" | "check-tla" | "compile-tla" | ... 8 more ... | "start-loaded"'.
+evals/prepared-safety/contract-test.ts(69,89): error TS2339: Property 'handle' does not exist on type 'never'.
+ ELIFECYCLE  Command failed with exit code 2.

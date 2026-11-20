@@ -1,0 +1,127 @@
+{
+  "input": {
+    "name": "packed-range-False-{0}",
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE f\nInit == f = [i \\in 1..2 |-> 0]\nNext == f' = [f EXCEPT ![1] = 1-@]\nSafe == f \\in [1..2 -> {0}]\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+    "family": "graph"
+  },
+  "classification": "compared",
+  "ours": {
+    "result": {
+      "status": "invariant-violation",
+      "reason": null,
+      "states": 2,
+      "generated": 2,
+      "depth": 1,
+      "work": 19,
+      "violation": {
+        "name": "Safe",
+        "trace": [
+          {
+            "action": null,
+            "values": [
+              {
+                "type": "list",
+                "value": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "int",
+                    "value": "0"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "list",
+                "value": [
+                  {
+                    "type": "int",
+                    "value": "1"
+                  },
+                  {
+                    "type": "int",
+                    "value": "0"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "native": {
+    "result": {
+      "status": "invariant-violation",
+      "reason": null,
+      "states": 2,
+      "generated": 2,
+      "depth": 1,
+      "work": 19,
+      "violation": {
+        "name": "Safe",
+        "trace": [
+          {
+            "action": null,
+            "values": [
+              {
+                "type": "list",
+                "value": [
+                  {
+                    "type": "int",
+                    "value": "0"
+                  },
+                  {
+                    "type": "int",
+                    "value": "0"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "list",
+                "value": [
+                  {
+                    "type": "int",
+                    "value": "1"
+                  },
+                  {
+                    "type": "int",
+                    "value": "0"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "reference": {
+    "status": "invariant-violation",
+    "states": 2,
+    "generated": 2,
+    "exit": 12
+  },
+  "witness": {
+    "input": {
+      "source": "---- MODULE Differential ----\nEXTENDS Naturals\nVARIABLE f\nInit == f = [i \\in 1..2 |-> 0]\nNext == f' = [f EXCEPT ![1] = 1-@]\nSafe == f \\in [1..2 -> {0}]\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (f = <<0,0>>)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (f' = <<1,0>>)) \\/ (__position = 1 /\\ __position' = 1 /\\ (f' = <<1,0>>))) /\\ (Next \\/ UNCHANGED <<f>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<f,__position>> /\\ WF_<<f,__position>>(__TraceNext)\n__Expected == <>(~(Safe))\n====",
+      "expected": "complete",
+      "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+    },
+    "status": "complete",
+    "states": 2
+  },
+  "differences": []
+}

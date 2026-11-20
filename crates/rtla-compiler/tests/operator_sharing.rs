@@ -46,13 +46,13 @@ macro_rules! oracle {
         #[test]
         fn $test() {
             let module = rtla::parse_module(include_str!(concat!(
-                "../../../evals/fixtures/tlc-operator-sharing/",
+                "../../../fixtures/tlc-operator-sharing/",
                 $case,
                 "/Differential.tla"
             )))
             .unwrap();
             let config = rtla::parse_config(include_str!(concat!(
-                "../../../evals/fixtures/tlc-operator-sharing/",
+                "../../../fixtures/tlc-operator-sharing/",
                 $case,
                 "/Differential.cfg"
             )))
@@ -83,19 +83,19 @@ macro_rules! oracle {
                 max_temporal_nodes: None,
             });
             let golden: serde_json::Value = serde_json::from_str(include_str!(
-                "../../../evals/fixtures/tlc-operator-sharing/expected.json"
+                "../../../fixtures/tlc-operator-sharing/expected.json"
             ))
             .unwrap();
             let additional: serde_json::Value = serde_json::from_str(include_str!(
-                "../../../evals/fixtures/tlc-operator-sharing/expected-step3c.json"
+                "../../../fixtures/tlc-operator-sharing/expected-step3c.json"
             ))
             .unwrap();
             let generative: serde_json::Value = serde_json::from_str(include_str!(
-                "../../../evals/fixtures/tlc-operator-sharing/expected-step3d-a.json"
+                "../../../fixtures/tlc-operator-sharing/expected-step3d-a.json"
             ))
             .unwrap();
             let frames: serde_json::Value = serde_json::from_str(include_str!(
-                "../../../evals/fixtures/tlc-operator-sharing/expected-step3e-a.json"
+                "../../../fixtures/tlc-operator-sharing/expected-step3e-a.json"
             ))
             .unwrap();
             let fixture = golden["cases"]
@@ -404,7 +404,7 @@ oracle!(v2_action_frame_shadow, "sharing-action-frame-shadow");
 oracle!(v2_action_frame_enabled, "sharing-action-frame-enabled");
 
 #[test]
-fn v2_let_with_free_old_is_refused() {
+fn v2_let_with_free_old_matches_tlc_in_nested_enabled() {
     for (definition, application) in [
         ("Step(a) == @ = 9 /\\ x' = a", "Step(x)"),
         ("Step == @ = 9 /\\ x' = x", "Step"),
@@ -415,21 +415,67 @@ fn v2_let_with_free_old_is_refused() {
         let source = source_control("", &safe, "UNCHANGED x")
             .replace("VARIABLE x", "EXTENDS Naturals, Sequences\nVARIABLE x");
         let module = rtla::parse_module(&source).unwrap();
-        let config = rtla::parse_config("INIT Init\nNEXT Next\nINVARIANT Safe").unwrap();
-        let error = compile_with_options(
+        let config =
+            rtla::parse_config("INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE")
+                .unwrap();
+        let program = compile_with_options(
             &module,
             &config,
             CompileOptions {
                 irVersion: IrVersion::V2,
             },
         )
-        .unwrap_err();
-        assert_eq!(error.message, "LET definitions with free EXCEPT @");
+        .unwrap();
+        let result = program
+            .check(SafetyBounds {
+                max_depth: 64,
+                max_states: 10000,
+                max_work: 1000000,
+                max_temporal_nodes: None,
+            })
+            .unwrap();
+        if application == "Step" {
+            assert!(
+                compile_with_options(
+                    &module,
+                    &config,
+                    CompileOptions {
+                        irVersion: IrVersion::V1
+                    }
+                )
+                .unwrap_err()
+                .message
+                .contains("require safety IR v2")
+            );
+            assert_eq!(result.status, "complete");
+            assert!(result.violation.is_none());
+            let wrong = rtla::parse_module(&source.replace("@ = 9", "@ = 4")).unwrap();
+            let wrong = compile_with_options(
+                &wrong,
+                &config,
+                CompileOptions {
+                    irVersion: IrVersion::V2,
+                },
+            )
+            .unwrap()
+            .check(SafetyBounds {
+                max_depth: 64,
+                max_states: 10000,
+                max_work: 1000000,
+                max_temporal_nodes: None,
+            })
+            .unwrap();
+            assert_eq!(wrong.status, "invariant-violation");
+        } else {
+            assert_eq!(result.status, "invariant-violation");
+            assert!(result.violation.is_some());
+            assert_source_control(&source.replace("@ = 9", "@ = 4"));
+        }
     }
 }
 
 #[test]
-fn v2_function_definition_domains_refuse_free_except_old() {
+fn v2_function_definition_domains_capture_free_except_old() {
     for (domain, body, application) in [
         ("@", "i", "f[9] = 9"),
         ("@", "i", "TRUE"),
@@ -447,19 +493,7 @@ fn v2_function_definition_domains_refuse_free_except_old() {
                 ),
                 "UNCHANGED x",
             );
-            let module = rtla::parse_module(&source).unwrap();
-            let config =
-                rtla::parse_config("INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE")
-                    .unwrap();
-            let error = compile_with_options(
-                &module,
-                &config,
-                CompileOptions {
-                    irVersion: IrVersion::V2,
-                },
-            )
-            .unwrap_err();
-            assert_eq!(error.message, "LET definitions with free EXCEPT @");
+            assert_source_control(&source);
         }
     }
     for definition in ["f[i \\in @] == i", "f == [i \\in @ |-> i]"] {
@@ -470,26 +504,14 @@ fn v2_function_definition_domains_refuse_free_except_old() {
             ),
             "UNCHANGED x",
         );
-        let module = rtla::parse_module(&source).unwrap();
-        let config =
-            rtla::parse_config("INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE")
-                .unwrap();
-        let error = compile_with_options(
-            &module,
-            &config,
-            CompileOptions {
-                irVersion: IrVersion::V2,
-            },
-        )
-        .unwrap_err();
-        assert_eq!(error.message, "LET definitions with free EXCEPT @");
+        assert_source_control(&source);
     }
 }
 
 #[test]
 fn v2_function_definition_domains_propagate_target_and_membership_requirements() {
     let golden: serde_json::Value = serde_json::from_str(include_str!(
-        "../../../evals/fixtures/tlc-operator-sharing/expected-step3c.json"
+        "../../../fixtures/tlc-operator-sharing/expected-step3c.json"
     ))
     .unwrap();
     let stuttering_control = golden["cases"]
@@ -505,9 +527,9 @@ fn v2_function_definition_domains_propagate_target_and_membership_requirements()
             "(IF ENABLED (UNCHANGED v) THEN {0} ELSE {})",
             "f[0] = 0",
             "x = 0 /\\ F(x)",
-            13,
+            12,
         ),
-        ("p", "{IF x \\in p THEN 1 ELSE 2}", "f[1] = 1", "F(Nat)", 11),
+        ("p", "{IF x \\in p THEN 1 ELSE 2}", "f[1] = 1", "F(Nat)", 10),
     ] {
         let mut previous = None;
         for definition in [
@@ -563,8 +585,6 @@ fn v2_function_definition_domains_propagate_target_and_membership_requirements()
     }
 }
 
-const V2_LINKING_REFUSAL: &str = "Unsupported TLA input: safety IR v2 does not support module linking or configuration operator substitution";
-
 fn module_corpus_case(name: &str) -> serde_json::Value {
     let cases: Vec<serde_json::Value> =
         serde_json::from_str(include_str!("modules-support.json")).unwrap();
@@ -605,46 +625,68 @@ macro_rules! linking_case {
 
         #[test]
         fn $v2() {
-            let refusal = compile_corpus_case(&module_corpus_case($case), IrVersion::V2)
-                .err()
-                .unwrap_or_else(|| panic!("{}: IR v2 compiled the case", $case));
-            assert_eq!(refusal.to_string(), V2_LINKING_REFUSAL, "{}", $case);
+            let program = compile_corpus_case(&module_corpus_case($case), IrVersion::V2)
+                .unwrap_or_else(|error| panic!("{}: {error}", $case));
+            assert_eq!(serde_json::to_value(&program).unwrap()["version"], 2);
         }
     };
 }
 linking_case!(
     v1_compiles_instances_with_substitutions,
-    v2_refuses_instances_with_substitutions,
+    v2_compiles_instances_with_substitutions,
     "instance-twice"
 );
 linking_case!(
     v1_compiles_configuration_operator_substitution,
-    v2_refuses_configuration_operator_substitution,
+    v2_compiles_configuration_operator_substitution,
     "constant-operator-override"
 );
 
 #[test]
-fn v2_refuses_every_module_corpus_case_that_v1_compiles_and_repeats_every_v1_refusal() {
+fn v2_module_corpus_keeps_valid_models_and_invalid_input_diagnostics() {
     let cases: Vec<serde_json::Value> =
         serde_json::from_str(include_str!("modules-support.json")).unwrap();
-    let mut compiled_by_v1 = 0;
-    let mut refused_by_v1 = 0;
+    let mut accepted = 0;
+    let mut refused = 0;
     for case in &cases {
         let name = case["name"].as_str().unwrap();
-        let expected = match compile_corpus_case(case, IrVersion::V1) {
-            Ok(_) => {
-                compiled_by_v1 += 1;
-                V2_LINKING_REFUSAL.to_string()
+        let first = compile_corpus_case(case, IrVersion::V1);
+        let second = compile_corpus_case(case, IrVersion::V2);
+        match (first, second) {
+            (Ok(first), Ok(second)) => {
+                assert_ne!(case["expected"], "unsupported", "{name}");
+                let bounds = SafetyBounds {
+                    max_depth: 100,
+                    max_states: 1000,
+                    max_work: 1000000,
+                    max_temporal_nodes: None,
+                };
+                let first = first.check(bounds);
+                let second = second.check(bounds);
+                if case["expected"] == "model-error" {
+                    let first = first.unwrap_err();
+                    let second = second.unwrap_err();
+                    assert_eq!(first.code, second.code, "{name}");
+                    assert!(first.message.contains("CASE with no conditions true"));
+                    assert!(second.message.contains("CASE with no conditions true"));
+                    accepted += 1;
+                    continue;
+                }
+                let first = first.unwrap();
+                let second = second.unwrap();
+                assert_eq!(first.status, case["expected"].as_str().unwrap(), "{name}");
+                assert_eq!(first.status, second.status, "{name}");
+                assert_eq!(first.states, second.states, "{name}");
+                assert_eq!(first.generated, second.generated, "{name}");
+                accepted += 1;
             }
-            Err(error) => {
-                refused_by_v1 += 1;
-                error.to_string()
+            (Err(first), Err(second)) => {
+                assert_eq!(case["expected"], "unsupported", "{name}");
+                assert_eq!(first, second, "{name}");
+                refused += 1;
             }
-        };
-        let refusal = compile_corpus_case(case, IrVersion::V2)
-            .err()
-            .map(|error| error.to_string());
-        assert_eq!(refusal, Some(expected), "{name}");
+            (first, second) => panic!("{name}: {first:?} != {second:?}"),
+        }
     }
-    assert!(compiled_by_v1 > 0 && refused_by_v1 > 0);
+    assert!(accepted > 0 && refused > 0);
 }

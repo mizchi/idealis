@@ -1,0 +1,137 @@
+{
+  "input": "SequenceFold",
+  "route": "after-native-v1",
+  "iteration": 1,
+  "warmup": false,
+  "status": "complete",
+  "compileMs": 0.16654099999999517,
+  "checkMs": 0.049333999999987554,
+  "sourceMs": 0.10412499999995362,
+  "irBytes": 945,
+  "definitions": null,
+  "result": {
+    "status": "complete",
+    "reason": null,
+    "states": 1,
+    "generated": 2,
+    "depth": 0,
+    "work": 11,
+    "violation": null
+  },
+  "program": {
+    "format": "modelt.safety-program",
+    "version": 1,
+    "name": "SequenceFold",
+    "variables": [
+      "total"
+    ],
+    "initial": [
+      {
+        "name": "init",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "fold",
+              "accumulator": 0,
+              "initial": {
+                "op": "literal",
+                "value": {
+                  "type": "int",
+                  "value": "0"
+                }
+              },
+              "collection": {
+                "op": "tuple",
+                "values": [
+                  {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "3"
+                    }
+                  },
+                  {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                ]
+              },
+              "order": "sequence-left",
+              "body": {
+                "op": "add",
+                "left": {
+                  "op": "mul",
+                  "left": {
+                    "op": "bound",
+                    "slot": 0
+                  },
+                  "right": {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "10"
+                    }
+                  }
+                },
+                "right": {
+                  "op": "bound",
+                  "slot": 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "next": [
+      {
+        "name": "step",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "read",
+              "slot": 0,
+              "next": false
+            }
+          }
+        ]
+      }
+    ],
+    "invariants": [
+      {
+        "name": "safety",
+        "expression": {
+          "op": "eq",
+          "left": {
+            "op": "read",
+            "slot": 0,
+            "next": false
+          },
+          "right": {
+            "op": "literal",
+            "value": {
+              "type": "int",
+              "value": "312"
+            }
+          }
+        }
+      }
+    ],
+    "assumptions": [],
+    "checkDeadlock": true
+  }
+}

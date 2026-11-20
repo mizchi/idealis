@@ -1,0 +1,38 @@
+{
+  "input": {
+    "name": "packed-bool-65",
+    "source": "---- MODULE Differential ----\nEXTENDS Naturals\nCONSTANT N\nVARIABLE f\nInit == f = [i \\in 1..N |-> FALSE]\nNext == f' = [f EXCEPT ![1] = ~@]\nSafe == f \\in [1..N -> BOOLEAN]\n====",
+    "config": "CONSTANT N=65\nINIT Init\nNEXT Next\nINVARIANT Safe",
+    "family": "graph"
+  },
+  "classification": "compared",
+  "ours": {
+    "result": {
+      "status": "complete",
+      "reason": null,
+      "states": 2,
+      "generated": 3,
+      "depth": 1,
+      "work": 339,
+      "violation": null
+    }
+  },
+  "native": {
+    "result": {
+      "status": "complete",
+      "reason": null,
+      "states": 2,
+      "generated": 3,
+      "depth": 1,
+      "work": 339,
+      "violation": null
+    }
+  },
+  "reference": {
+    "status": "complete",
+    "states": 2,
+    "generated": 3,
+    "exit": 0
+  },
+  "differences": []
+}

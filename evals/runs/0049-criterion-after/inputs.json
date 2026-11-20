@@ -1,0 +1,430 @@
+[
+  {
+    "name": "div-negative",
+    "family": "arithmetic",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nSafe == x = -3\nInit == x = (-7) \\div 3\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "div-negative-denominator",
+    "family": "arithmetic",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nSafe == x = -3\nInit == x = 7 \\div (-3)\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "div-both-negative",
+    "family": "arithmetic",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nSafe == x = 2\nInit == x = (-7) \\div (-3)\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "mod-negative",
+    "family": "arithmetic",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nSafe == x = 2\nInit == x = (-7) % 3\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "power-negative",
+    "family": "arithmetic",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nSafe == x = -8\nInit == x = (-2)^3\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "power-min",
+    "family": "arithmetic",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nSafe == x = (-2147483647 - 1)\nInit == x = (-2)^31\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "power-large-unit",
+    "family": "arithmetic",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nSafe == x = -1\nInit == x = (-1)^2147483647\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "power-zero",
+    "family": "arithmetic",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nSafe == x = 1\nInit == x = 9^0\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "div-zero",
+    "family": "arithmetic",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\n\nInit == x = 1 \\div 0\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\n",
+    "expected": "model-error",
+    "error": "zero"
+  },
+  {
+    "name": "div-overflow",
+    "family": "arithmetic",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\n\nInit == x = (-2147483647 - 1) \\div (-1)\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\n",
+    "expected": "model-error",
+    "error": "overflow"
+  },
+  {
+    "name": "mod-zero",
+    "family": "arithmetic",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\n\nInit == x = 1 % 0\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\n",
+    "expected": "model-error",
+    "error": "positive"
+  },
+  {
+    "name": "mod-negative-denominator",
+    "family": "arithmetic",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\n\nInit == x = 1 % (-2)\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\n",
+    "expected": "model-error",
+    "error": "positive"
+  },
+  {
+    "name": "power-negative-exponent",
+    "family": "arithmetic",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\n\nInit == x = 2^(-1)\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\n",
+    "expected": "model-error",
+    "error": "natural"
+  },
+  {
+    "name": "power-zero-zero",
+    "family": "arithmetic",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\n\nInit == x = 0^0\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\n",
+    "expected": "model-error",
+    "error": "0^0"
+  },
+  {
+    "name": "power-overflow",
+    "family": "arithmetic",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\n\nInit == x = 2^31\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\n",
+    "expected": "model-error",
+    "error": "overflow"
+  },
+  {
+    "name": "arithmetic-lazy",
+    "family": "arithmetic",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\n\nInit == x = IF TRUE THEN 1 ELSE 0^0\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\n",
+    "expected": "complete"
+  },
+  {
+    "name": "choose-order",
+    "family": "choose",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nSafe == x = 2\nInit == x = CHOOSE n \\in {3, 1, 2}: n > 1\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "choose-equivalent",
+    "family": "choose",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nSafe == x = (CHOOSE n \\in 1..3: n > 0)\nInit == x = (CHOOSE n \\in {3, 1, 2}: n > 0)\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "choose-tuple",
+    "family": "choose",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nSafe == x = <<1, 3>>\nInit == x = CHOOSE <<a, b>> \\in {<<2, 0>>, <<1, 3>>}: a < b\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "choose-nested",
+    "family": "choose",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nSafe == x = 2\nInit == x = CHOOSE n \\in 1..3: (CHOOSE m \\in 1..3: m > n) = 3\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "choose-no-witness",
+    "family": "choose",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\n\nInit == x = CHOOSE n \\in 1..3: n > 9\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\n",
+    "expected": "model-error",
+    "error": "no element"
+  },
+  {
+    "name": "choose-empty",
+    "family": "choose",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\n\nInit == x = CHOOSE n \\in {}: TRUE\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\n",
+    "expected": "model-error",
+    "error": "no element"
+  },
+  {
+    "name": "choose-lazy",
+    "family": "choose",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\n\nInit == x = IF TRUE THEN 1 ELSE (CHOOSE n \\in {}: TRUE)\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\n",
+    "expected": "complete"
+  },
+  {
+    "name": "state-constraint",
+    "family": "constraints",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nLimit == x < 3\nInit == x = 0\nNext == x' = x + 1\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTRAINT Limit",
+    "expected": "complete"
+  },
+  {
+    "name": "action-constraint",
+    "family": "constraints",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nLimit == x' < 3\nInit == x = 0\nNext == x' = x + 1\n====",
+    "config": "INIT Init\nNEXT Next\nACTION_CONSTRAINT Limit",
+    "expected": "complete"
+  },
+  {
+    "name": "constraint-boundary-invariant",
+    "family": "constraints",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nLimit == x < 3\nSafe == x < 3\nInit == x = 0\nNext == x' = x + 1\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTRAINT Limit\nINVARIANT Safe",
+    "expected": "invariant-violation"
+  },
+  {
+    "name": "constraint-boundary-property",
+    "family": "constraints",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nLimit == x < 3\nSafe == [][x' < 3]_x\nInit == x = 0\nNext == x' = x + 1\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTRAINT Limit\nPROPERTY Safe",
+    "expected": "property-violation"
+  },
+  {
+    "name": "constraint-initial-invariant",
+    "family": "constraints",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nLimit == x > 1\nSafe == x > 1\nInit == x = 0\nNext == x' = x + 1\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTRAINT Limit\nINVARIANT Safe",
+    "expected": "invariant-violation"
+  },
+  {
+    "name": "constraint-initial-empty",
+    "family": "constraints",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nLimit == x > 1\nInit == x = 0\nNext == x' = x + 1\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTRAINT Limit",
+    "expected": "empty"
+  },
+  {
+    "name": "constraint-does-not-deadlock",
+    "family": "constraints",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nLimit == x = 0\nInit == x = 0\nNext == x' = x + 1\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTRAINT Limit",
+    "expected": "complete"
+  },
+  {
+    "name": "temporal-forall",
+    "family": "temporal",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nLive == \\A n \\in 0..1: <> (x = n)\nInit == x = 0\nNext == x' = 1 - x\n====",
+    "config": "INIT Init\nNEXT Next\nPROPERTY Live",
+    "expected": "liveness-violation"
+  },
+  {
+    "name": "temporal-exists",
+    "family": "temporal",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nLive == \\E n \\in 0..1: []<> (x = n)\nInit == x = 0\nNext == x' = 1 - x\n====",
+    "config": "INIT Init\nNEXT Next\nPROPERTY Live",
+    "expected": "complete"
+  },
+  {
+    "name": "temporal-forall-empty",
+    "family": "temporal",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nLive == \\A n \\in {}: <> FALSE\nInit == x = 0\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nPROPERTY Live",
+    "expected": "model-error",
+    "error": "tautology"
+  },
+  {
+    "name": "temporal-exists-empty",
+    "family": "temporal",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nLive == \\E n \\in {}: <> TRUE\nInit == x = 0\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nPROPERTY Live",
+    "expected": "liveness-violation"
+  },
+  {
+    "name": "temporal-tuple",
+    "family": "temporal",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nLive == \\A <<a, b>> \\in {<<0, 1>>}: [] (x = a) \\/ <> (x = b)\nInit == x = 0\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nPROPERTY Live",
+    "expected": "complete"
+  },
+  {
+    "name": "temporal-fair",
+    "family": "temporal",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nLive == \\A n \\in 0..1: <> (x = n)\nInit == x = 0\nNext == x' = 1 - x\nSpec == Init /\\ [][Next]_x /\\ WF_x(Next)\n====",
+    "config": "SPECIFICATION Spec\nPROPERTY Live",
+    "expected": "complete"
+  },
+  {
+    "name": "model-untyped",
+    "family": "models",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nCONSTANT Nodes\nSafe == x \\in Nodes\nInit == x \\in Nodes\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTANT Nodes = {alice, bob}\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "model-typed",
+    "family": "models",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nCONSTANT Nodes\nSafe == x \\in Nodes\nInit == x \\in Nodes\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTANT Nodes = {p_1, p_2}\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "model-string-distinct",
+    "family": "models",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nCONSTANT Nodes\nSafe == x # \"alice\"\nInit == x \\in Nodes\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTANT Nodes = {alice}\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "model-typed-error",
+    "family": "models",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nCONSTANT Nodes\nSafe == x # 1\nInit == x \\in Nodes\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTANT Nodes = {p_1}\nINVARIANT Safe",
+    "expected": "model-error",
+    "error": "model"
+  },
+  {
+    "name": "model-typed-different",
+    "family": "models",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nCONSTANT Nodes\nSafe == TRUE\nInit == x \\in Nodes\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTANT Nodes = {p_1, q_1}\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "model-range-member",
+    "family": "models",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nCONSTANT Nodes\nSafe == x \\notin 1..3\nInit == x \\in Nodes\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTANT Nodes = {alice}\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "model-function-member",
+    "family": "models",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nCONSTANT Nodes\nSafe == x \\notin [1..2 -> BOOLEAN]\nInit == x \\in Nodes\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTANT Nodes = {alice}\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "model-sequence-member",
+    "family": "models",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nCONSTANT Nodes\nSafe == x \\notin Seq(BOOLEAN)\nInit == x \\in Nodes\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTANT Nodes = {alice}\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "model-record-member",
+    "family": "models",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nCONSTANT Nodes\nSafe == x \\notin [key: BOOLEAN]\nInit == x \\in Nodes\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTANT Nodes = {alice}\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "model-subset-member",
+    "family": "models",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nCONSTANT Nodes\nSafe == x \\notin SUBSET {1,2}\nInit == x \\in Nodes\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTANT Nodes = {alice}\nINVARIANT Safe",
+    "expected": "model-error",
+    "error": "finite set"
+  },
+  {
+    "name": "model-cross-type-equality",
+    "family": "models",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nCONSTANT Nodes\nSafe == x # (CHOOSE n \\in Nodes: n # x)\nInit == x \\in Nodes\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTANT Nodes = {p_1, q_1}\nINVARIANT Safe",
+    "expected": "model-error",
+    "error": "model"
+  },
+  {
+    "name": "model-fault",
+    "family": "models",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nCONSTANT Nodes\nSafe == x # (CHOOSE n \\in Nodes: TRUE)\nInit == x \\in Nodes\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTANT Nodes = {alice,bob}\nINVARIANT Safe",
+    "expected": "invariant-violation"
+  },
+  {
+    "name": "model-map-key",
+    "family": "models",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nCONSTANT Nodes\nSafe == [n \\in Nodes |-> n][x] = x\nInit == x \\in Nodes\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTANT Nodes = {p_1,p_2}\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "model-choose-order",
+    "family": "models",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nCONSTANT Nodes\nSafe == (CHOOSE n \\in Nodes: TRUE) = (CHOOSE n \\in {x} \\cup Nodes: TRUE)\nInit == x \\in Nodes\nNext == UNCHANGED x\n====",
+    "config": "INIT Init\nNEXT Next\nCONSTANT Nodes = {alice,bob}\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "choose-tuple-error",
+    "family": "choose",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE x\nInit == x = CHOOSE <<a,b>> \\in {<<1>>}: TRUE\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+    "expected": "model-error",
+    "error": "length"
+  },
+  {
+    "name": "choose-predicate-error",
+    "family": "choose",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE x\nInit == x = CHOOSE a \\in {1}: a\nNext == UNCHANGED x\nSafe == TRUE\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+    "expected": "model-error",
+    "error": "boolean"
+  },
+  {
+    "name": "choose-capture",
+    "family": "choose",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE x\nInit == x = {CHOOSE m \\in 0..3: m > n: n \\in 0..2}\nNext == UNCHANGED x\nSafe == x = {1,2,3}\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "choose-string-order",
+    "family": "choose",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE x\nInit == x = CHOOSE n \\in {\"z\", \"a\", \"b\"}: n # \"a\"\nNext == UNCHANGED x\nSafe == x = \"b\"\n====",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe",
+    "expected": "complete"
+  },
+  {
+    "name": "temporal-nested",
+    "family": "temporal",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nLive == \\A n \\in 0..1: \\E m \\in {n}: <> (x = m)\nInit == x = 0\nNext == x' = 1 - x\nSpec == Init /\\ [][Next]_x /\\ WF_x(Next)\n====",
+    "config": "SPECIFICATION Spec\nPROPERTY Live",
+    "expected": "complete"
+  },
+  {
+    "name": "temporal-outer-always",
+    "family": "temporal",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nLive == [] (\\A n \\in 0..1: <> (x = n))\nInit == x = 0\nNext == x' = 1 - x\nSpec == Init /\\ [][Next]_x /\\ WF_x(Next)\n====",
+    "config": "SPECIFICATION Spec\nPROPERTY Live",
+    "expected": "complete"
+  },
+  {
+    "name": "temporal-negation",
+    "family": "temporal",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers, FiniteSets, Sequences\nVARIABLE x\nLive == ~ (\\E n \\in 0..1: [] (x = n))\nInit == x = 0\nNext == x' = 1 - x\nSpec == Init /\\ [][Next]_x /\\ WF_x(Next)\n====",
+    "config": "SPECIFICATION Spec\nPROPERTY Live",
+    "expected": "complete"
+  },
+  {
+    "name": "constraint-temporal-unfair",
+    "family": "constraints",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = x + 1\nLimit == x < 2\nLive == <> (x = 2)\nSpec == Init /\\ [][Next]_x\n====",
+    "config": "SPECIFICATION Spec\nCONSTRAINT Limit\nPROPERTY Live",
+    "expected": "liveness-violation"
+  },
+  {
+    "name": "constraint-temporal-fair",
+    "family": "constraints",
+    "source": "---- MODULE Differential ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = x + 1\nLimit == x < 2\nLive == <> (x = 2)\nSpec == Init /\\ [][Next]_x /\\ WF_x(Next)\n====",
+    "config": "SPECIFICATION Spec\nCONSTRAINT Limit\nPROPERTY Live",
+    "expected": "complete"
+  }
+]

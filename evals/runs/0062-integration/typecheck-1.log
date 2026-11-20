@@ -1,0 +1,13 @@
+
+> @mizchi/idealis@0.1.0-alpha.0 typecheck /Users/mz/ghq/github.com/mizchi/idealis
+> tsc --noEmit
+
+src/safety-program.ts(324,7): error TS2554: Expected 3 arguments, but got 2.
+src/safety-program.ts(325,7): error TS2554: Expected 3 arguments, but got 2.
+src/safety-program.ts(329,7): error TS2554: Expected 3 arguments, but got 2.
+src/safety-program.ts(330,7): error TS2554: Expected 3 arguments, but got 2.
+src/tla-safety-analysis.ts(585,3): error TS2739: Type '{ data: { op: "annotation"; value: "annotation"; }; bound: { op: "annotation"; slot: "annotation"; }; old: { op: "annotation"; }; "unmatched-case": { op: "annotation"; location: "annotation"; }; set: { op: "annotation"; values: Field; }; ... 57 more ...; capture: { ...; }; }' is missing the following properties from type '{ readonly add: Descriptor<{ readonly op: "add" | "and" | "div" | "eq" | "ge" | "gt" | "implies" | "le" | "lt" | "mod" | "mul" | "ne" | "or" | "pow" | "sub"; readonly left: SafetyExpressionFor<2>; readonly right: SafetyExpressionFor<...>; }>; ... 64 more ...; readonly "variant-tag": Descriptor<...>; }': assert, "select-seq", "sort-seq"
+src/tla-safety-analysis.ts(691,3): error TS2741: Property 'symmetry' is missing in type '{ format: "annotation"; version: "annotation"; name: "annotation"; variables: "annotation"; checkDeadlock: "annotation"; initial: Field; next: Field; definitions: Field; ... 7 more ...; fairness: Field; }' but required in type 'Descriptor<SafetyProgramV2>'.
+src/tla-safety-analysis.ts(795,14): error TS7053: Element implicitly has an 'any' type because expression of type '"add" | "and" | "append" | "assert" | "at" | "bound" | "call" | "cap" | "capture" | "cardinality" | "choose" | "concat" | "cup" | "data" | "difference" | "div" | "domain" | "enabled" | ... 47 more ... | "variant-tag"' can't be used to index type '{ data: { op: "annotation"; value: "annotation"; }; bound: { op: "annotation"; slot: "annotation"; }; old: { op: "annotation"; }; "unmatched-case": { op: "annotation"; location: "annotation"; }; set: { op: "annotation"; values: Field; }; ... 57 more ...; capture: { ...; }; }'.
+  Property 'assert' does not exist on type '{ data: { op: "annotation"; value: "annotation"; }; bound: { op: "annotation"; slot: "annotation"; }; old: { op: "annotation"; }; "unmatched-case": { op: "annotation"; location: "annotation"; }; set: { op: "annotation"; values: Field; }; ... 57 more ...; capture: { ...; }; }'.
+ ELIFECYCLE  Command failed with exit code 1.

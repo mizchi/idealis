@@ -1,4 +1,4 @@
-import { test } from "vitest";
+import { test } from "vite-plus/test";
 import { registerAsyncContract } from "./async-contract.js";
 
 registerAsyncContract((name, run) => {

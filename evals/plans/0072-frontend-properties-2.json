@@ -1,0 +1,15 @@
+{
+  "parent": "0072-frontend-semantics",
+  "developmentSeed": 1172,
+  "confirmationSeed": 2172,
+  "casesPerSeed": 6,
+  "variants": ["normal", "invariant-fault"],
+  "width": [2, 6],
+  "depth": [1, 4],
+  "maxDepth": 1000,
+  "maxStates": 2000,
+  "maxWork": 1000000,
+  "scope": "Repeated parameterized actions plus shared temporal helpers. Generated faults are deliberate; reference outputs are independent TLC executions.",
+  "supersedes": "0072-frontend-properties.json",
+  "reason": "Original unit controls omitted fairness and passed state predicates as temporal actuals unsupported by pinned TLC. Original inputs and failure outputs retained in conditions-1.zip. Corrected generated controls use constant temporal actuals and state invariants true under stuttering. Both original seeds were observed and are not reused for confirmation."
+}

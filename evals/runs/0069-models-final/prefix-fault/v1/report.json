@@ -1,0 +1,94 @@
+{
+  "input": {
+    "name": "prefix-fault",
+    "family": "graph",
+    "source": "---- MODULE Differential ----\n\nVARIABLE x\n-. value == ~value\nInit == x = FALSE\nNext == x' = (-x)\nSafe == x = FALSE\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Safe\nCHECK_DEADLOCK FALSE",
+    "expected": "invariant-violation",
+    "irVersion": 1
+  },
+  "comparison": {},
+  "classification": "compared",
+  "ours": {
+    "result": {
+      "status": "invariant-violation",
+      "reason": null,
+      "states": 2,
+      "generated": 2,
+      "depth": 1,
+      "work": 4,
+      "violation": {
+        "name": "Safe",
+        "trace": [
+          {
+            "action": null,
+            "values": [
+              {
+                "type": "bool",
+                "value": false
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "bool",
+                "value": true
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "native": {
+    "result": {
+      "status": "invariant-violation",
+      "reason": null,
+      "states": 2,
+      "generated": 2,
+      "depth": 1,
+      "work": 4,
+      "violation": {
+        "name": "Safe",
+        "trace": [
+          {
+            "action": null,
+            "values": [
+              {
+                "type": "bool",
+                "value": false
+              }
+            ]
+          },
+          {
+            "action": "Next",
+            "values": [
+              {
+                "type": "bool",
+                "value": true
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "reference": {
+    "status": "invariant-violation",
+    "states": 2,
+    "generated": 2,
+    "exit": 12
+  },
+  "witness": {
+    "input": {
+      "source": "---- MODULE Differential ----\n\nVARIABLE x\n-. value == ~value\nInit == x = FALSE\nNext == x' = (-x)\nSafe == x = FALSE\n\nVARIABLE __position\n__TraceInit == Init /\\ __position = 0 /\\ (x = FALSE)\n__TraceNext == ((__position = 0 /\\ __position' = 1 /\\ (x' = TRUE)) \\/ (__position = 1 /\\ __position' = 1 /\\ (x' = TRUE))) /\\ (Next \\/ UNCHANGED <<x>>)\n__TraceSpec == __TraceInit /\\ [][__TraceNext]_<<x,__position>> /\\ WF_<<x,__position>>(__TraceNext)\n__Expected == <>(~(Safe))\n====",
+      "expected": "complete",
+      "config": "SPECIFICATION __TraceSpec\n\n\nPROPERTY __Expected\nCHECK_DEADLOCK TRUE"
+    },
+    "status": "complete",
+    "states": 2
+  },
+  "differences": []
+}

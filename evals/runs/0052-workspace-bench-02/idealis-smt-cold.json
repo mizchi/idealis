@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "name": "idealis-smt-cold",
+  "mode": "cold",
+  "baseline": {
+    "path": "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/0052-final-before/idealis-smt",
+    "args": []
+  },
+  "candidate": {
+    "path": "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/0052-final-after/idealis-smt",
+    "args": []
+  },
+  "cases": [
+    {
+      "id": "ttl",
+      "request": {
+        "version": 1,
+        "request": {
+          "kind": "solve",
+          "source": "(set-logic QF_LIA)(declare-const ttl Int)(declare-const elapsed Int)(assert (and (>= ttl 1)(<= ttl 10000)(>= elapsed 0)(<= elapsed 20000)(= elapsed ttl)))",
+          "maxWork": 10000000
+        }
+      },
+      "requirements": [
+        {
+          "pointer": "/kind",
+          "value": "solution"
+        },
+        {
+          "pointer": "/result/status",
+          "value": "sat"
+        }
+      ]
+    },
+    {
+      "id": "amount",
+      "request": {
+        "version": 1,
+        "request": {
+          "kind": "solve",
+          "source": "(set-logic QF_LIA)(declare-const amount Int)(declare-const other Int)(assert (and (> amount 0)(< amount 10)(= other 3)(= (+ amount other) 10)))",
+          "maxWork": 10000000
+        }
+      },
+      "requirements": [
+        {
+          "pointer": "/kind",
+          "value": "solution"
+        },
+        {
+          "pointer": "/result/status",
+          "value": "sat"
+        }
+      ]
+    }
+  ],
+  "config": {
+    "baseline": "baseline",
+    "scope": "fresh process, JSONL transport, request and response serialization",
+    "samples": 7,
+    "warmup": 1,
+    "iterations": 3,
+    "max_evaluations": 10000
+  }
+}

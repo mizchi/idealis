@@ -1,0 +1,29 @@
+{
+  "status": "complete",
+  "compatibility": "partial",
+  "sourceCheck": "unchanged",
+  "verification": {
+    "run": "0068-final-verification",
+    "passed": 21,
+    "total": 21
+  },
+  "rtlaChecks": [
+    "fmt/clippy/all Rust targets and native/Wasm AST tests",
+    "Chromium rejection and reuse",
+    "368 full snapshot responses (SUT regression, not independent oracle)",
+    "7 additional junction label inputs against both saved SANY references"
+  ],
+  "corpusOutcome": "The 355-case acceptance matrices in 0068 remain unchanged after the final junction guard; all 368 final native/Wasm responses equal the first fixed snapshots. Only the official invalid label differs from baseline.",
+  "limitations": [
+    "SANY 1.7.4 still has one reference internal exception, recorded as partial-reference",
+    "Acceptance comparison does not establish full AST correctness, name/level checks, or whole-language compatibility"
+  ],
+  "preservedRuns": [
+    "0068-audit",
+    "0068-verification",
+    "0068-inventory-review",
+    "0068-final-inventory-review",
+    "0068-label-junction-reference",
+    "0068-final-verification"
+  ]
+}

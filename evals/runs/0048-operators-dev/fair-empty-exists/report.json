@@ -1,0 +1,318 @@
+{
+  "name": "fair-empty-exists",
+  "compiled": {
+    "kind": "compiled",
+    "program": {
+      "format": "modelt.safety-program",
+      "version": 1,
+      "name": "Differential",
+      "variables": [
+        "done"
+      ],
+      "initial": [
+        {
+          "name": "Init",
+          "steps": [
+            {
+              "kind": "assign",
+              "slot": 0,
+              "value": {
+                "op": "set",
+                "values": []
+              }
+            }
+          ]
+        }
+      ],
+      "next": [
+        {
+          "name": "Step",
+          "steps": [
+            {
+              "kind": "bind",
+              "slot": 0,
+              "domain": {
+                "kind": "set",
+                "values": [
+                  {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "1"
+                    }
+                  },
+                  {
+                    "op": "literal",
+                    "value": {
+                      "type": "int",
+                      "value": "2"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "guard",
+              "expression": {
+                "op": "not",
+                "argument": {
+                  "op": "in",
+                  "value": {
+                    "op": "bound",
+                    "slot": 0
+                  },
+                  "domain": {
+                    "kind": "value",
+                    "value": {
+                      "op": "read",
+                      "slot": 0,
+                      "next": false
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "slot": 0,
+              "value": {
+                "op": "cup",
+                "left": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "right": {
+                  "op": "set",
+                  "values": [
+                    {
+                      "op": "bound",
+                      "slot": 0
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "invariants": [],
+      "assumptions": [],
+      "checkDeadlock": false,
+      "properties": [
+        {
+          "name": "Live",
+          "formula": {
+            "kind": "eventually",
+            "formula": {
+              "kind": "atom",
+              "expression": {
+                "op": "eq",
+                "left": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "right": {
+                  "op": "set",
+                  "values": [
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "1"
+                      }
+                    },
+                    {
+                      "op": "literal",
+                      "value": {
+                        "type": "int",
+                        "value": "2"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ],
+      "fairness": [
+        {
+          "kind": "exists",
+          "bounds": [
+            {
+              "slot": 0,
+              "domain": {
+                "kind": "set",
+                "values": []
+              }
+            }
+          ],
+          "formula": {
+            "kind": "always",
+            "formula": {
+              "kind": "eventually",
+              "formula": {
+                "kind": "or",
+                "left": {
+                  "kind": "not",
+                  "formula": {
+                    "kind": "atom",
+                    "expression": {
+                      "op": "enabled",
+                      "branches": [
+                        {
+                          "name": "Step",
+                          "steps": [
+                            {
+                              "kind": "guard",
+                              "expression": {
+                                "op": "not",
+                                "argument": {
+                                  "op": "in",
+                                  "value": {
+                                    "op": "bound",
+                                    "slot": 0
+                                  },
+                                  "domain": {
+                                    "kind": "value",
+                                    "value": {
+                                      "op": "read",
+                                      "slot": 0,
+                                      "next": false
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "assign",
+                              "slot": 0,
+                              "value": {
+                                "op": "cup",
+                                "left": {
+                                  "op": "read",
+                                  "slot": 0,
+                                  "next": false
+                                },
+                                "right": {
+                                  "op": "set",
+                                  "values": [
+                                    {
+                                      "op": "bound",
+                                      "slot": 0
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      "subscript": {
+                        "op": "read",
+                        "slot": 0,
+                        "next": false
+                      }
+                    }
+                  }
+                },
+                "right": {
+                  "kind": "atom",
+                  "expression": {
+                    "op": "and",
+                    "left": {
+                      "op": "and",
+                      "left": {
+                        "op": "and",
+                        "left": {
+                          "op": "literal",
+                          "value": {
+                            "type": "bool",
+                            "value": true
+                          }
+                        },
+                        "right": {
+                          "op": "not",
+                          "argument": {
+                            "op": "in",
+                            "value": {
+                              "op": "bound",
+                              "slot": 0
+                            },
+                            "domain": {
+                              "kind": "value",
+                              "value": {
+                                "op": "read",
+                                "slot": 0,
+                                "next": false
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "right": {
+                        "op": "eq",
+                        "left": {
+                          "op": "read",
+                          "slot": 0,
+                          "next": true
+                        },
+                        "right": {
+                          "op": "cup",
+                          "left": {
+                            "op": "read",
+                            "slot": 0,
+                            "next": false
+                          },
+                          "right": {
+                            "op": "set",
+                            "values": [
+                              {
+                                "op": "bound",
+                                "slot": 0
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "right": {
+                      "op": "ne",
+                      "left": {
+                        "op": "read",
+                        "slot": 0,
+                        "next": false
+                      },
+                      "right": {
+                        "op": "prime",
+                        "argument": {
+                          "op": "read",
+                          "slot": 0,
+                          "next": false
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "checked": {
+    "kind": "error",
+    "code": "protocol",
+    "message": "Temporal formula is a tautology (its negation is unsatisfiable)"
+  },
+  "reference": {
+    "status": "model-error",
+    "states": null,
+    "generated": null,
+    "exit": 77
+  },
+  "witness": null
+}

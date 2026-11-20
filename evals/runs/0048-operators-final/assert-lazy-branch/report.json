@@ -1,0 +1,116 @@
+{
+  "name": "assert-lazy-branch",
+  "compiled": {
+    "kind": "compiled",
+    "program": {
+      "format": "modelt.safety-program",
+      "version": 1,
+      "name": "Differential",
+      "variables": [
+        "x"
+      ],
+      "initial": [
+        {
+          "name": "Init",
+          "steps": [
+            {
+              "kind": "assign",
+              "slot": 0,
+              "value": {
+                "op": "if",
+                "condition": {
+                  "op": "literal",
+                  "value": {
+                    "type": "bool",
+                    "value": true
+                  }
+                },
+                "consequent": {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "7"
+                  }
+                },
+                "alternative": {
+                  "op": "assert",
+                  "condition": {
+                    "op": "literal",
+                    "value": {
+                      "type": "bool",
+                      "value": false
+                    }
+                  },
+                  "message": {
+                    "op": "data",
+                    "value": {
+                      "type": "string",
+                      "value": "unused"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "next": [
+        {
+          "name": "Next",
+          "steps": [
+            {
+              "kind": "assign",
+              "slot": 0,
+              "value": {
+                "op": "read",
+                "slot": 0,
+                "next": false
+              }
+            }
+          ]
+        }
+      ],
+      "invariants": [
+        {
+          "name": "Safe",
+          "expression": {
+            "op": "eq",
+            "left": {
+              "op": "read",
+              "slot": 0,
+              "next": false
+            },
+            "right": {
+              "op": "literal",
+              "value": {
+                "type": "int",
+                "value": "7"
+              }
+            }
+          }
+        }
+      ],
+      "assumptions": [],
+      "checkDeadlock": false
+    }
+  },
+  "checked": {
+    "kind": "safety",
+    "result": {
+      "status": "complete",
+      "reason": null,
+      "states": 1,
+      "generated": 2,
+      "depth": 0,
+      "work": 4,
+      "violation": null
+    }
+  },
+  "reference": {
+    "status": "complete",
+    "states": 1,
+    "generated": 2,
+    "exit": 0
+  },
+  "witness": null
+}

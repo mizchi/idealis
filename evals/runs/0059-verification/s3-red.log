@@ -1,0 +1,161 @@
+   Compiling rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+error[E0599]: no method named `prepare_lookups` found for struct `Buffer` in the current scope
+   --> src/safety_parallel.rs:288:16
+    |
+ 43 | struct Buffer {
+    | ------------- method `prepare_lookups` not found for this struct
+...
+288 |         buffer.prepare_lookups(&store, &workers.pool);
+    |                ^^^^^^^^^^^^^^^ method not found in `Buffer`
+
+error[E0609]: no field `lookups` on type `Buffer`
+   --> src/safety_parallel.rs:289:24
+    |
+289 |         assert!(buffer.lookups.is_empty());
+    |                        ^^^^^^^ unknown field
+    |
+    = note: available fields are: `candidates`, `next`
+
+error[E0599]: no method named `prepare_lookups` found for struct `Buffer` in the current scope
+   --> src/safety_parallel.rs:291:16
+    |
+ 43 | struct Buffer {
+    | ------------- method `prepare_lookups` not found for this struct
+...
+291 |         buffer.prepare_lookups(&store, &workers.pool);
+    |                ^^^^^^^^^^^^^^^ method not found in `Buffer`
+
+error[E0609]: no field `lookups` on type `Buffer`
+   --> src/safety_parallel.rs:292:27
+    |
+292 |         assert_eq!(buffer.lookups.len(), 512);
+    |                           ^^^^^^^ unknown field
+    |
+    = note: available fields are: `candidates`, `next`
+
+error[E0609]: no field `lookups` on type `Buffer`
+   --> src/safety_parallel.rs:293:27
+    |
+293 |         assert_eq!(buffer.lookups[0].unwrap().existing, Some(0));
+    |                           ^^^^^^^ unknown field
+    |
+    = note: available fields are: `candidates`, `next`
+
+error[E0609]: no field `lookups` on type `Buffer`
+   --> src/safety_parallel.rs:294:24
+    |
+294 |         assert!(buffer.lookups[1].is_none());
+    |                        ^^^^^^^ unknown field
+    |
+    = note: available fields are: `candidates`, `next`
+
+error[E0609]: no field `lookups` on type `Buffer`
+   --> src/safety_parallel.rs:295:27
+    |
+295 |         assert_eq!(buffer.lookups[2].unwrap().existing, None);
+    |                           ^^^^^^^ unknown field
+    |
+    = note: available fields are: `candidates`, `next`
+
+error[E0609]: no field `lookups` on type `Buffer`
+   --> src/safety_parallel.rs:297:24
+    |
+297 |         assert!(buffer.lookups.is_empty());
+    |                        ^^^^^^^ unknown field
+    |
+    = note: available fields are: `candidates`, `next`
+
+error[E0599]: no method named `lookup` found for struct `StateStore` in the current scope
+   --> src/safety.rs:682:27
+    |
+ 30 | struct StateStore {
+    | ----------------- method `lookup` not found for this struct
+...
+682 |         let known = store.lookup(0, &integer);
+    |                           ^^^^^^ method not found in `StateStore`
+
+error[E0599]: no method named `lookup` found for struct `StateStore` in the current scope
+   --> src/safety.rs:683:29
+    |
+ 30 | struct StateStore {
+    | ----------------- method `lookup` not found for this struct
+...
+683 |         let unknown = store.lookup(0, &boolean);
+    |                             ^^^^^^ method not found in `StateStore`
+
+error[E0599]: no method named `resolve` found for struct `StateStore` in the current scope
+   --> src/safety.rs:686:26
+    |
+ 30 | struct StateStore {
+    | ----------------- method `resolve` not found for this struct
+...
+686 |         assert_eq!(store.resolve(unknown, &boolean), None);
+    |                          ^^^^^^^ method not found in `StateStore`
+
+error[E0599]: no method named `resolve` found for struct `StateStore` in the current scope
+   --> src/safety.rs:688:26
+    |
+ 30 | struct StateStore {
+    | ----------------- method `resolve` not found for this struct
+...
+688 |         assert_eq!(store.resolve(unknown, &boolean), Some(1));
+    |                          ^^^^^^^ method not found in `StateStore`
+
+error[E0599]: no method named `resolve` found for struct `StateStore` in the current scope
+   --> src/safety.rs:689:26
+    |
+ 30 | struct StateStore {
+    | ----------------- method `resolve` not found for this struct
+...
+689 |         assert_eq!(store.resolve(known, &integer), Some(0));
+    |                          ^^^^^^^ method not found in `StateStore`
+
+error[E0599]: no method named `lookup` found for struct `StateStore` in the current scope
+   --> src/safety.rs:698:28
+    |
+ 30 | struct StateStore {
+    | ----------------- method `lookup` not found for this struct
+...
+698 |         let hints = [store.lookup(4, &first), store.lookup(4, &first), store.lookup(4, &second)];
+    |                            ^^^^^^ method not found in `StateStore`
+
+error[E0599]: no method named `lookup` found for struct `StateStore` in the current scope
+   --> src/safety.rs:698:53
+    |
+ 30 | struct StateStore {
+    | ----------------- method `lookup` not found for this struct
+...
+698 |         let hints = [store.lookup(4, &first), store.lookup(4, &first), store.lookup(4, &second)];
+    |                                                     ^^^^^^ method not found in `StateStore`
+
+error[E0599]: no method named `lookup` found for struct `StateStore` in the current scope
+   --> src/safety.rs:698:78
+    |
+ 30 | struct StateStore {
+    | ----------------- method `lookup` not found for this struct
+...
+698 |         let hints = [store.lookup(4, &first), store.lookup(4, &first), store.lookup(4, &second)];
+    |                                                                              ^^^^^^ method not found in `StateStore`
+
+error[E0599]: no method named `resolve` found for struct `StateStore` in the current scope
+   --> src/safety.rs:700:22
+    |
+ 30 | struct StateStore {
+    | ----------------- method `resolve` not found for this struct
+...
+700 |             if store.resolve(hint, &values).is_none() { store.push(hint.hash, &values).unwrap(); }
+    |                      ^^^^^^^ method not found in `StateStore`
+
+error[E0277]: the size for values of type `[std::option::Option<ir::Scalar>]` cannot be known at compilation time
+   --> src/safety.rs:699:20
+    |
+699 |         for (hint, values) in hints.into_iter().zip([first, first, second]) {
+    |                    ^^^^^^ doesn't have a size known at compile-time
+    |
+    = help: the trait `Sized` is not implemented for `[std::option::Option<ir::Scalar>]`
+    = note: all local variables must have a statically known size
+
+Some errors have detailed explanations: E0277, E0599, E0609.
+For more information about an error, try `rustc --explain E0277`.
+error: could not compile `rtlc` (lib test) due to 18 previous errors
+warning: build failed, waiting for other jobs to finish...

@@ -1,0 +1,177 @@
+{
+  "route": "tla-ts",
+  "command": "/Users/mz/.local/share/mise/installs/node/24.22.2/bin/node",
+  "args": [
+    "--max-old-space-size=8192",
+    "/Users/mz/ghq/github.com/mizchi/idealis/dist/evals/single-model/worker.js",
+    "tla-ts",
+    "/Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0058-comparison/control-parallel-channels-fault-tla-ts/input.json"
+  ],
+  "exit": 0,
+  "wallMs": 73.45870800000012,
+  "stdout": "{\"apiMs\":13.824166000000005,\"result\":{\"status\":\"invariant-violation\",\"violation\":{\"name\":\"Safe\",\"trace\":[{\"state\":{\"chan\":{\"kind\":\"Function\",\"domain\":[1,2],\"range\":[{\"kind\":\"Function\",\"domain\":[\"val\",\"rdy\",\"ack\"],\"range\":[0,0,0],\"hash\":-1056714141,\"fingerprint\":0,\"functionClass\":\"record\",\"isFingerprinted\":false},{\"kind\":\"Function\",\"domain\":[\"val\",\"rdy\",\"ack\"],\"range\":[0,0,0],\"hash\":-1056714141,\"fingerprint\":0,\"functionClass\":\"record\",\"isFingerprinted\":false}],\"hash\":952130133,\"fingerprint\":0,\"isFingerprinted\":false}},\"output\":[]},{\"action\":\"Send\",\"label\":\"Send line 6, col 23 to line 7, col 81 of module ParallelChannels\",\"state\":{\"chan\":{\"kind\":\"Function\",\"domain\":[1,2],\"range\":[{\"kind\":\"Function\",\"domain\":[\"val\",\"rdy\",\"ack\"],\"range\":[1,1,0],\"hash\":-1963751833,\"fingerprint\":0,\"functionClass\":\"record\",\"isFingerprinted\":false},{\"kind\":\"Function\",\"domain\":[\"val\",\"rdy\",\"ack\"],\"range\":[0,0,0],\"hash\":-1056714141,\"fingerprint\":0,\"functionClass\":\"record\",\"isFingerprinted\":false}],\"hash\":814950677,\"fingerprint\":0,\"isFingerprinted\":false}},\"output\":[]}],\"traceOutput\":[]},\"generatedStates\":3,\"distinctStates\":3,\"queuedStates\":1,\"depth\":2,\"initialStates\":{\"generated\":1,\"distinct\":1},\"violationOutDegrees\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}}\n",
+  "stderr": "",
+  "output": {
+    "apiMs": 13.824166000000005,
+    "result": {
+      "status": "invariant-violation",
+      "violation": {
+        "name": "Safe",
+        "trace": [
+          {
+            "state": {
+              "chan": {
+                "kind": "Function",
+                "domain": [
+                  1,
+                  2
+                ],
+                "range": [
+                  {
+                    "kind": "Function",
+                    "domain": [
+                      "val",
+                      "rdy",
+                      "ack"
+                    ],
+                    "range": [
+                      0,
+                      0,
+                      0
+                    ],
+                    "hash": -1056714141,
+                    "fingerprint": 0,
+                    "functionClass": "record",
+                    "isFingerprinted": false
+                  },
+                  {
+                    "kind": "Function",
+                    "domain": [
+                      "val",
+                      "rdy",
+                      "ack"
+                    ],
+                    "range": [
+                      0,
+                      0,
+                      0
+                    ],
+                    "hash": -1056714141,
+                    "fingerprint": 0,
+                    "functionClass": "record",
+                    "isFingerprinted": false
+                  }
+                ],
+                "hash": 952130133,
+                "fingerprint": 0,
+                "isFingerprinted": false
+              }
+            },
+            "output": []
+          },
+          {
+            "action": "Send",
+            "label": "Send line 6, col 23 to line 7, col 81 of module ParallelChannels",
+            "state": {
+              "chan": {
+                "kind": "Function",
+                "domain": [
+                  1,
+                  2
+                ],
+                "range": [
+                  {
+                    "kind": "Function",
+                    "domain": [
+                      "val",
+                      "rdy",
+                      "ack"
+                    ],
+                    "range": [
+                      1,
+                      1,
+                      0
+                    ],
+                    "hash": -1963751833,
+                    "fingerprint": 0,
+                    "functionClass": "record",
+                    "isFingerprinted": false
+                  },
+                  {
+                    "kind": "Function",
+                    "domain": [
+                      "val",
+                      "rdy",
+                      "ack"
+                    ],
+                    "range": [
+                      0,
+                      0,
+                      0
+                    ],
+                    "hash": -1056714141,
+                    "fingerprint": 0,
+                    "functionClass": "record",
+                    "isFingerprinted": false
+                  }
+                ],
+                "hash": 814950677,
+                "fingerprint": 0,
+                "isFingerprinted": false
+              }
+            },
+            "output": []
+          }
+        ],
+        "traceOutput": []
+      },
+      "generatedStates": 3,
+      "distinctStates": 3,
+      "queuedStates": 1,
+      "depth": 2,
+      "initialStates": {
+        "generated": 1,
+        "distinct": 1
+      },
+      "violationOutDegrees": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "decodeError": null,
+  "memory": [],
+  "sampledMaxRssBytes": null,
+  "phases": null,
+  "phaseError": null
+}

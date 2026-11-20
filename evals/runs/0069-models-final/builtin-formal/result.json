@@ -1,0 +1,35 @@
+{
+  "input": {
+    "name": "builtin-formal",
+    "family": "graph",
+    "source": "---- MODULE Differential ----\n\nVARIABLE x\nUnused(_ /\\ _) == TRUE\nInit == x = 0\nNext == UNCHANGED x\n====\n",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE",
+    "expected": "builtin-conflict"
+  },
+  "classification": "input-error",
+  "reference": {
+    "status": "error",
+    "exit": 150,
+    "states": null,
+    "generated": null,
+    "log": "TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)\nRunning breadth-first search Model-Checking with fp 83 and seed -3158382075196587335 with 1 worker on 10 cores with 7282MB heap and 64MB offheap memory [pid: 75017] (Mac OS X 26.6.2 aarch64, Eclipse Adoptium 21.0.13 x86_64, MSBDiskFPSet, DiskStateQueue).\nParsing file /Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0069-models-final/builtin-formal/reference/Differential.tla\nSemantic processing of module Differential\nSemantic errors:\n\n*** Errors: 1\n\nline 4, col 8 to line 4, col 13 of module Differential\n\nMultiply-defined symbol '\\land': this definition or declaration conflicts \nwith the one at In module --TLA+ BUILTINS--.\n\n\n\nStarting... (2026-11-19 07:56:53)\nError: Parsing or semantic analysis failed.\nFinished in 00s at (2026-11-19 07:56:53)\n"
+  },
+  "actual": [
+    {
+      "irVersion": 1,
+      "response": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: builtin or imported symbol /\\"
+      }
+    },
+    {
+      "irVersion": 2,
+      "response": {
+        "kind": "error",
+        "code": "protocol",
+        "message": "Unsupported TLA input: builtin or imported symbol /\\"
+      }
+    }
+  ]
+}

@@ -1,0 +1,1034 @@
+{
+  "input": "TCommit-8",
+  "route": "before-native-v1",
+  "iteration": 2,
+  "warmup": false,
+  "status": "complete",
+  "compileMs": 0.7348750000001019,
+  "checkMs": 123.55141600000024,
+  "sourceMs": 121.86074999999983,
+  "irBytes": 8037,
+  "definitions": null,
+  "result": {
+    "status": "complete",
+    "reason": null,
+    "states": 6816,
+    "generated": 53513,
+    "depth": 16,
+    "work": 2361523,
+    "violation": null
+  },
+  "program": {
+    "format": "modelt.safety-program",
+    "version": 1,
+    "name": "TCommit",
+    "variables": [
+      "rmState"
+    ],
+    "initial": [
+      {
+        "name": "TCInit",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "function",
+              "bounds": [
+                {
+                  "slot": 0,
+                  "domain": {
+                    "kind": "value",
+                    "value": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r0"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r1"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r2"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r3"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r4"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r5"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r6"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r7"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "body": {
+                "op": "data",
+                "value": {
+                  "type": "string",
+                  "value": "working"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "next": [
+      {
+        "name": "Prepare",
+        "steps": [
+          {
+            "kind": "bind",
+            "slot": 0,
+            "domain": {
+              "kind": "value",
+              "value": {
+                "op": "set",
+                "values": [
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r0"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r1"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r2"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r3"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r4"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r5"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r6"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r7"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "kind": "guard",
+            "expression": {
+              "op": "eq",
+              "left": {
+                "op": "at",
+                "target": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "key": {
+                  "op": "bound",
+                  "slot": 0
+                }
+              },
+              "right": {
+                "op": "data",
+                "value": {
+                  "type": "string",
+                  "value": "working"
+                }
+              }
+            }
+          },
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "update",
+              "target": {
+                "op": "read",
+                "slot": 0,
+                "next": false
+              },
+              "updates": [
+                {
+                  "path": [
+                    {
+                      "op": "bound",
+                      "slot": 0
+                    }
+                  ],
+                  "value": {
+                    "op": "data",
+                    "value": {
+                      "type": "string",
+                      "value": "prepared"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Decide",
+        "steps": [
+          {
+            "kind": "bind",
+            "slot": 0,
+            "domain": {
+              "kind": "value",
+              "value": {
+                "op": "set",
+                "values": [
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r0"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r1"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r2"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r3"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r4"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r5"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r6"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r7"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "kind": "guard",
+            "expression": {
+              "op": "eq",
+              "left": {
+                "op": "at",
+                "target": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "key": {
+                  "op": "bound",
+                  "slot": 0
+                }
+              },
+              "right": {
+                "op": "data",
+                "value": {
+                  "type": "string",
+                  "value": "prepared"
+                }
+              }
+            }
+          },
+          {
+            "kind": "guard",
+            "expression": {
+              "op": "forall",
+              "bounds": [
+                {
+                  "slot": 1,
+                  "domain": {
+                    "kind": "value",
+                    "value": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r0"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r1"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r2"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r3"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r4"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r5"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r6"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r7"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "body": {
+                "op": "in",
+                "value": {
+                  "op": "at",
+                  "target": {
+                    "op": "read",
+                    "slot": 0,
+                    "next": false
+                  },
+                  "key": {
+                    "op": "bound",
+                    "slot": 1
+                  }
+                },
+                "domain": {
+                  "kind": "set",
+                  "values": [
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "string",
+                        "value": "prepared"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "string",
+                        "value": "committed"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "update",
+              "target": {
+                "op": "read",
+                "slot": 0,
+                "next": false
+              },
+              "updates": [
+                {
+                  "path": [
+                    {
+                      "op": "bound",
+                      "slot": 0
+                    }
+                  ],
+                  "value": {
+                    "op": "data",
+                    "value": {
+                      "type": "string",
+                      "value": "committed"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Decide",
+        "steps": [
+          {
+            "kind": "bind",
+            "slot": 0,
+            "domain": {
+              "kind": "value",
+              "value": {
+                "op": "set",
+                "values": [
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r0"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r1"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r2"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r3"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r4"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r5"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r6"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "model-value",
+                      "value": "r7"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "kind": "guard",
+            "expression": {
+              "op": "in",
+              "value": {
+                "op": "at",
+                "target": {
+                  "op": "read",
+                  "slot": 0,
+                  "next": false
+                },
+                "key": {
+                  "op": "bound",
+                  "slot": 0
+                }
+              },
+              "domain": {
+                "kind": "set",
+                "values": [
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "string",
+                      "value": "working"
+                    }
+                  },
+                  {
+                    "op": "data",
+                    "value": {
+                      "type": "string",
+                      "value": "prepared"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "kind": "guard",
+            "expression": {
+              "op": "forall",
+              "bounds": [
+                {
+                  "slot": 1,
+                  "domain": {
+                    "kind": "value",
+                    "value": {
+                      "op": "set",
+                      "values": [
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r0"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r1"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r2"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r3"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r4"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r5"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r6"
+                          }
+                        },
+                        {
+                          "op": "data",
+                          "value": {
+                            "type": "model-value",
+                            "value": "r7"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "body": {
+                "op": "ne",
+                "left": {
+                  "op": "at",
+                  "target": {
+                    "op": "read",
+                    "slot": 0,
+                    "next": false
+                  },
+                  "key": {
+                    "op": "bound",
+                    "slot": 1
+                  }
+                },
+                "right": {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "committed"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "update",
+              "target": {
+                "op": "read",
+                "slot": 0,
+                "next": false
+              },
+              "updates": [
+                {
+                  "path": [
+                    {
+                      "op": "bound",
+                      "slot": 0
+                    }
+                  ],
+                  "value": {
+                    "op": "data",
+                    "value": {
+                      "type": "string",
+                      "value": "aborted"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "invariants": [
+      {
+        "name": "TCTypeOK",
+        "expression": {
+          "op": "function-in",
+          "left": {
+            "op": "read",
+            "slot": 0,
+            "next": false
+          },
+          "right": {
+            "op": "function-set",
+            "left": {
+              "op": "set",
+              "values": [
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "model-value",
+                    "value": "r0"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "model-value",
+                    "value": "r1"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "model-value",
+                    "value": "r2"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "model-value",
+                    "value": "r3"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "model-value",
+                    "value": "r4"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "model-value",
+                    "value": "r5"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "model-value",
+                    "value": "r6"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "model-value",
+                    "value": "r7"
+                  }
+                }
+              ]
+            },
+            "right": {
+              "op": "set",
+              "values": [
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "working"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "prepared"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "committed"
+                  }
+                },
+                {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "aborted"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "name": "TCConsistent",
+        "expression": {
+          "op": "forall",
+          "bounds": [
+            {
+              "slot": 0,
+              "domain": {
+                "kind": "value",
+                "value": {
+                  "op": "set",
+                  "values": [
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r0"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r1"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r2"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r3"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r4"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r5"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r6"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r7"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "slot": 1,
+              "domain": {
+                "kind": "value",
+                "value": {
+                  "op": "set",
+                  "values": [
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r0"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r1"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r2"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r3"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r4"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r5"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r6"
+                      }
+                    },
+                    {
+                      "op": "data",
+                      "value": {
+                        "type": "model-value",
+                        "value": "r7"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "body": {
+            "op": "not",
+            "argument": {
+              "op": "and",
+              "left": {
+                "op": "and",
+                "left": {
+                  "op": "literal",
+                  "value": {
+                    "type": "bool",
+                    "value": true
+                  }
+                },
+                "right": {
+                  "op": "eq",
+                  "left": {
+                    "op": "at",
+                    "target": {
+                      "op": "read",
+                      "slot": 0,
+                      "next": false
+                    },
+                    "key": {
+                      "op": "bound",
+                      "slot": 0
+                    }
+                  },
+                  "right": {
+                    "op": "data",
+                    "value": {
+                      "type": "string",
+                      "value": "aborted"
+                    }
+                  }
+                }
+              },
+              "right": {
+                "op": "eq",
+                "left": {
+                  "op": "at",
+                  "target": {
+                    "op": "read",
+                    "slot": 0,
+                    "next": false
+                  },
+                  "key": {
+                    "op": "bound",
+                    "slot": 1
+                  }
+                },
+                "right": {
+                  "op": "data",
+                  "value": {
+                    "type": "string",
+                    "value": "committed"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ],
+    "assumptions": [],
+    "checkDeadlock": false
+  }
+}

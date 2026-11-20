@@ -1,0 +1,147 @@
+{
+  "input": "Choice",
+  "route": "before-native-v2",
+  "iteration": 0,
+  "warmup": true,
+  "status": "complete",
+  "compileMs": 0.192292000000009,
+  "checkMs": 0.06433299999997644,
+  "sourceMs": 0.09262499999999818,
+  "irBytes": 1026,
+  "definitions": 1,
+  "result": {
+    "status": "complete",
+    "reason": null,
+    "states": 3,
+    "generated": 10,
+    "depth": 1,
+    "work": 26,
+    "violation": null
+  },
+  "program": {
+    "format": "modelt.safety-program",
+    "version": 2,
+    "name": "Choice",
+    "variables": [
+      "value"
+    ],
+    "initial": [
+      {
+        "name": "init",
+        "steps": [
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "literal",
+              "value": {
+                "type": "int",
+                "value": "0"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "next": [
+      {
+        "name": "step",
+        "steps": [
+          {
+            "kind": "bind",
+            "slot": 0,
+            "domain": {
+              "kind": "set",
+              "values": [
+                {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "0"
+                  }
+                },
+                {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "1"
+                  }
+                },
+                {
+                  "op": "literal",
+                  "value": {
+                    "type": "int",
+                    "value": "2"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "kind": "assign",
+            "slot": 0,
+            "value": {
+              "op": "bound",
+              "slot": 0
+            }
+          }
+        ]
+      }
+    ],
+    "invariants": [
+      {
+        "name": "safety",
+        "expression": {
+          "op": "call",
+          "definition": 0,
+          "arguments": [],
+          "captures": []
+        }
+      }
+    ],
+    "assumptions": [],
+    "checkDeadlock": true,
+    "definitions": [
+      {
+        "id": 0,
+        "parameterCount": 0,
+        "captureCount": 0,
+        "bodyKind": "expression",
+        "localScope": 0,
+        "body": {
+          "op": "and",
+          "left": {
+            "op": "ge",
+            "left": {
+              "op": "read",
+              "slot": 0,
+              "next": false
+            },
+            "right": {
+              "op": "literal",
+              "value": {
+                "type": "int",
+                "value": "0"
+              }
+            }
+          },
+          "right": {
+            "op": "le",
+            "left": {
+              "op": "read",
+              "slot": 0,
+              "next": false
+            },
+            "right": {
+              "op": "literal",
+              "value": {
+                "type": "int",
+                "value": "2"
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

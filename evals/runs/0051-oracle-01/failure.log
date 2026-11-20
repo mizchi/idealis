@@ -1,0 +1,32 @@
+pnpm build
+
+> @mizchi/idealis@0.1.0-alpha.0 build /Users/mz/ghq/github.com/mizchi/idealis
+> tsc -p tsconfig.build.json
+
+node dist/evals/oracle-comparison/run.js 'evals/runs/0051-oracle-01' '.artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java' '.artifacts/tlc/tla2tools.jar'
+
+thread 'main' (51784269) panicked at src/main.rs:292:5:
+assertion `left == right` failed
+  left: Unknown
+ right: Mismatch
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+node:internal/errors:986
+  const err = new Error(message);
+              ^
+
+Error: Command failed: /Users/mz/ghq/github.com/mizchi/idealis/evals/oracle-comparison/rust/target/release/oracle-comparison /Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0051-oracle-01
+    at genericNodeError (node:internal/errors:986:15)
+    at wrappedFn (node:internal/errors:540:14)
+    at checkExecSyncError (node:child_process:943:11)
+    at execFileSync (node:child_process:979:15)
+    at file:///Users/mz/ghq/github.com/mizchi/idealis/dist/evals/oracle-comparison/run.js:99:1 {
+  status: 101,
+  signal: null,
+  output: [ null, null, null ],
+  pid: 18582,
+  stdout: null,
+  stderr: null
+}
+
+Node.js v24.22.2
+error: Recipe `oracle-eval` failed on line 53 with exit code 1

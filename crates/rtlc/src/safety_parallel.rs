@@ -1,7 +1,8 @@
-use super::Search;
+use super::{Recording, Search};
 use crate::CoreError;
 use crate::ir::{SafetyProgram, Scalar, Step};
 use crate::safety_expressions::{EvalContext, visit_branch};
+use crate::safety_symmetry::visit_representatives;
 use crate::safety_values::{Arena, ValueDelta};
 use crate::safety_work::WorkBudget;
 use rayon::iter::{
@@ -91,7 +92,9 @@ pub(super) fn is_expensive(program: &SafetyProgram) -> bool {
         .any(|step| match step {
             Step::Assign { value, .. } => !value.is_scalar_cost(),
             Step::Guard { expression } => !expression.is_scalar_cost(),
-            Step::Frame { .. } | Step::Bind { .. } | Step::Choose { .. } => true,
+            Step::Frame { .. } | Step::Call { .. } | Step::Bind { .. } | Step::Choose { .. } => {
+                true
+            }
         })
         || program
             .invariants
@@ -99,7 +102,7 @@ pub(super) fn is_expensive(program: &SafetyProgram) -> bool {
             .any(|predicate| !predicate.expression.is_scalar_cost())
 }
 
-impl Search<'_, '_> {
+impl<R: Recording> Search<'_, '_, R> {
     pub(super) fn parallel_frontier(
         &mut self,
         frontier: Range<usize>,
@@ -183,18 +186,42 @@ impl Search<'_, '_> {
             let current = self.store.state(parent);
             let mut enabled = false;
             for (action, branch) in self.program.next.iter().enumerate() {
-                let result = visit_branch(
-                    branch,
-                    0,
-                    EvalContext::new(current, &[]),
-                    &mut buffer.next,
-                    &mut arena,
-                    &mut |values, _arena| {
-                        enabled = true;
-                        buffer.candidates.push(parent, action, values);
-                        Ok(false)
-                    },
-                );
+                let context = EvalContext::new(current, &[]);
+                let members = if self.options.symmetry_actions {
+                    self.symmetry
+                        .as_ref()
+                        .unwrap()
+                        .action_members(branch, context, &mut arena)
+                } else {
+                    Ok(None)
+                };
+                let result = match members {
+                    Err(error) => Err(error),
+                    Ok(Some(members)) => visit_representatives(
+                        branch,
+                        context,
+                        &mut buffer.next,
+                        &mut arena,
+                        &members,
+                        &mut |values, _arena| {
+                            enabled = true;
+                            buffer.candidates.push(parent, action, values);
+                            Ok(false)
+                        },
+                    ),
+                    Ok(None) => visit_branch(
+                        branch,
+                        0,
+                        EvalContext::new(current, &[]),
+                        &mut buffer.next,
+                        &mut arena,
+                        &mut |values, _arena| {
+                            enabled = true;
+                            buffer.candidates.push(parent, action, values);
+                            Ok(false)
+                        },
+                    ),
+                };
                 match result {
                     Ok(true) => return arena.into_delta(),
                     Ok(false) => {}

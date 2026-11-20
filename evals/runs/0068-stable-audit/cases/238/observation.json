@@ -1,0 +1,413 @@
+{
+  "actual": {
+    "kind": "module",
+    "module": {
+      "name": "Test",
+      "extends": [],
+      "constants": [],
+      "variables": [],
+      "definitions": [
+        {
+          "name": "op",
+          "kind": "Operator",
+          "params": [],
+          "body": {
+            "kind": "SetFilter",
+            "bound": {
+              "pattern": {
+                "kind": "Name",
+                "name": "x"
+              },
+              "set": {
+                "kind": "And",
+                "operands": [
+                  {
+                    "kind": "Identifier",
+                    "name": "A",
+                    "location": {
+                      "start": 46,
+                      "end": 47,
+                      "line": 5,
+                      "column": 8
+                    }
+                  },
+                  {
+                    "kind": "Identifier",
+                    "name": "B",
+                    "location": {
+                      "start": 55,
+                      "end": 56,
+                      "line": 6,
+                      "column": 8
+                    }
+                  },
+                  {
+                    "kind": "Identifier",
+                    "name": "C",
+                    "location": {
+                      "start": 64,
+                      "end": 65,
+                      "line": 7,
+                      "column": 8
+                    }
+                  }
+                ],
+                "isBulleted": true,
+                "location": {
+                  "start": 43,
+                  "end": 45,
+                  "line": 5,
+                  "column": 5
+                }
+              }
+            },
+            "predicate": {
+              "kind": "And",
+              "operands": [
+                {
+                  "kind": "Identifier",
+                  "name": "D",
+                  "location": {
+                    "start": 81,
+                    "end": 82,
+                    "line": 9,
+                    "column": 8
+                  }
+                },
+                {
+                  "kind": "Identifier",
+                  "name": "E",
+                  "location": {
+                    "start": 90,
+                    "end": 91,
+                    "line": 10,
+                    "column": 8
+                  }
+                },
+                {
+                  "kind": "Identifier",
+                  "name": "F",
+                  "location": {
+                    "start": 99,
+                    "end": 100,
+                    "line": 11,
+                    "column": 8
+                  }
+                }
+              ],
+              "isBulleted": true,
+              "location": {
+                "start": 78,
+                "end": 80,
+                "line": 9,
+                "column": 5
+              }
+            },
+            "location": {
+              "start": 29,
+              "end": 30,
+              "line": 3,
+              "column": 7
+            }
+          },
+          "isLocal": false,
+          "isRecursive": false,
+          "location": {
+            "start": 23,
+            "end": 25,
+            "line": 3,
+            "column": 1
+          }
+        }
+      ],
+      "assumptions": [],
+      "theorems": [],
+      "location": {
+        "start": 1,
+        "end": 5,
+        "line": 2,
+        "column": 1
+      }
+    }
+  },
+  "reference": {
+    "kind": "accepted",
+    "tree": {
+      "kind": 382,
+      "image": "N_Module",
+      "children": [
+        {
+          "kind": 333,
+          "image": "N_BeginModule",
+          "children": [
+            {
+              "kind": 3,
+              "image": "---- MODULE",
+              "children": []
+            },
+            {
+              "kind": 231,
+              "image": "Test",
+              "children": []
+            },
+            {
+              "kind": 35,
+              "image": "----",
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": 350,
+          "image": "N_Extends",
+          "children": []
+        },
+        {
+          "kind": 334,
+          "image": "N_Body",
+          "children": [
+            {
+              "kind": 389,
+              "image": "N_OperatorDefinition",
+              "children": [
+                {
+                  "kind": 366,
+                  "image": "N_IdentLHS",
+                  "children": [
+                    {
+                      "kind": 231,
+                      "image": "op",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "kind": 92,
+                  "image": "==",
+                  "children": []
+                },
+                {
+                  "kind": 419,
+                  "image": "N_SubsetOf",
+                  "children": [
+                    {
+                      "kind": 101,
+                      "image": "{",
+                      "children": []
+                    },
+                    {
+                      "kind": 231,
+                      "image": "x",
+                      "children": []
+                    },
+                    {
+                      "kind": 427,
+                      "image": "\\in",
+                      "children": []
+                    },
+                    {
+                      "kind": 341,
+                      "image": "N_ConjList",
+                      "children": [
+                        {
+                          "kind": 340,
+                          "image": "N_ConjItem",
+                          "children": [
+                            {
+                              "kind": 130,
+                              "image": "/\\",
+                              "children": []
+                            },
+                            {
+                              "kind": 358,
+                              "image": "N_GeneralId",
+                              "children": [
+                                {
+                                  "kind": 367,
+                                  "image": "N_IdPrefix",
+                                  "children": []
+                                },
+                                {
+                                  "kind": 231,
+                                  "image": "A",
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "kind": 340,
+                          "image": "N_ConjItem",
+                          "children": [
+                            {
+                              "kind": 130,
+                              "image": "/\\",
+                              "children": []
+                            },
+                            {
+                              "kind": 358,
+                              "image": "N_GeneralId",
+                              "children": [
+                                {
+                                  "kind": 367,
+                                  "image": "N_IdPrefix",
+                                  "children": []
+                                },
+                                {
+                                  "kind": 231,
+                                  "image": "B",
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "kind": 340,
+                          "image": "N_ConjItem",
+                          "children": [
+                            {
+                              "kind": 130,
+                              "image": "/\\",
+                              "children": []
+                            },
+                            {
+                              "kind": 358,
+                              "image": "N_GeneralId",
+                              "children": [
+                                {
+                                  "kind": 367,
+                                  "image": "N_IdPrefix",
+                                  "children": []
+                                },
+                                {
+                                  "kind": 231,
+                                  "image": "C",
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "kind": 88,
+                      "image": ":",
+                      "children": []
+                    },
+                    {
+                      "kind": 341,
+                      "image": "N_ConjList",
+                      "children": [
+                        {
+                          "kind": 340,
+                          "image": "N_ConjItem",
+                          "children": [
+                            {
+                              "kind": 130,
+                              "image": "/\\",
+                              "children": []
+                            },
+                            {
+                              "kind": 358,
+                              "image": "N_GeneralId",
+                              "children": [
+                                {
+                                  "kind": 367,
+                                  "image": "N_IdPrefix",
+                                  "children": []
+                                },
+                                {
+                                  "kind": 231,
+                                  "image": "D",
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "kind": 340,
+                          "image": "N_ConjItem",
+                          "children": [
+                            {
+                              "kind": 130,
+                              "image": "/\\",
+                              "children": []
+                            },
+                            {
+                              "kind": 358,
+                              "image": "N_GeneralId",
+                              "children": [
+                                {
+                                  "kind": 367,
+                                  "image": "N_IdPrefix",
+                                  "children": []
+                                },
+                                {
+                                  "kind": 231,
+                                  "image": "E",
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "kind": 340,
+                          "image": "N_ConjItem",
+                          "children": [
+                            {
+                              "kind": 130,
+                              "image": "/\\",
+                              "children": []
+                            },
+                            {
+                              "kind": 358,
+                              "image": "N_GeneralId",
+                              "children": [
+                                {
+                                  "kind": 367,
+                                  "image": "N_IdPrefix",
+                                  "children": []
+                                },
+                                {
+                                  "kind": 231,
+                                  "image": "F",
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "kind": 102,
+                      "image": "}",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": 345,
+          "image": "N_EndModule",
+          "children": [
+            {
+              "kind": 36,
+              "image": "====",
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "tlaTs": "accepted"
+}

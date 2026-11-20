@@ -1,0 +1,40 @@
+   Compiling rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+error[E0308]: mismatched types
+   --> src/safety_prepared.rs:110:10
+    |
+110 |         (result.map_err(|error| (error.code, error.message)), arena.work)
+    |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Result<Value, (String, String)>`, found `Result<Value, (&str, String)>`
+    |
+    = note: expected enum `Result<_, (std::string::String, std::string::String)>`
+               found enum `Result<_, (&str, std::string::String)>`
+
+error[E0599]: no method named `plan` found for struct `PreparedProgram<'a>` in the current scope
+   --> src/safety_prepared.rs:126:29
+    |
+  6 | pub(crate) struct PreparedProgram<'a> {
+    | ------------------------------------- method `plan` not found for this struct
+...
+126 |             assert!(program.plan(&expression).is_some(), "{operator}");
+    |                             ^^^^ method not found in `PreparedProgram<'_>`
+
+error[E0599]: no method named `plan` found for struct `PreparedProgram<'a>` in the current scope
+   --> src/safety_prepared.rs:138:68
+    |
+  6 | pub(crate) struct PreparedProgram<'a> {
+    | ------------------------------------- method `plan` not found for this struct
+...
+138 |             assert!(PreparedProgram::from_roots(vec![&expression]).plan(&expression).is_some());
+    |                                                                    ^^^^ method not found in `PreparedProgram<'_>`
+
+error[E0599]: no method named `plan` found for struct `PreparedProgram<'a>` in the current scope
+   --> src/safety_prepared.rs:166:62
+    |
+  6 | pub(crate) struct PreparedProgram<'a> {
+    | ------------------------------------- method `plan` not found for this struct
+...
+166 |         assert!(PreparedProgram::from_roots(vec![&fallback]).plan(&fallback).is_none());
+    |                                                              ^^^^ method not found in `PreparedProgram<'_>`
+
+Some errors have detailed explanations: E0308, E0599.
+For more information about an error, try `rustc --explain E0308`.
+error: could not compile `rtlc` (lib test) due to 4 previous errors

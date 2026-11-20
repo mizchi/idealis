@@ -1,0 +1,45 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 47 and seed -8642123853717725944 with 1 worker on 10 cores with 7282MB heap and 64MB offheap memory [pid: 68161] (Mac OS X 26.6.2 aarch64, Eclipse Adoptium 21.0.13 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file /Users/mz/ghq/github.com/mizchi/idealis/evals/runs/0066-por-tlc/por-2-deadlock/model/Differential.tla
+Parsing file /private/var/folders/_h/_rf455xj4h3_3g6z86pg244c0000gn/T/idealis-tlc-ZN9ngw/Naturals.tla
+Semantic processing of module Naturals
+Semantic processing of module Differential
+Starting... (2026-11-19 05:16:53)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-11-19 05:16:53.
+Error: Deadlock reached.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ flag0 = FALSE
+/\ flag1 = FALSE
+/\ visible = 0
+
+State 2: <Next line 5, col 10 to line 5, col 66 of module Differential>
+/\ flag0 = TRUE
+/\ flag1 = FALSE
+/\ visible = 0
+
+State 3: <Next line 5, col 73 to line 5, col 129 of module Differential>
+/\ flag0 = TRUE
+/\ flag1 = TRUE
+/\ visible = 0
+
+State 4: <Next line 5, col 136 to line 5, col 230 of module Differential>
+/\ flag0 = TRUE
+/\ flag1 = TRUE
+/\ visible = 1
+
+State 5: <Next line 5, col 136 to line 5, col 230 of module Differential>
+/\ flag0 = TRUE
+/\ flag1 = TRUE
+/\ visible = 2
+
+State 6: <Next line 5, col 136 to line 5, col 230 of module Differential>
+/\ flag0 = TRUE
+/\ flag1 = TRUE
+/\ visible = 3
+
+29 states generated, 16 distinct states found, 0 states left on queue.
+The depth of the complete state graph search is 6.
+The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 3 and the 95th percentile is 3).
+Finished in 00s at (2026-11-19 05:16:53)

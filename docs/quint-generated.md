@@ -1,6 +1,6 @@
 # Quintから生成したTLA+を実行する
 
-Quint 0.33.1がApalache 0.63.0経由で生成したTLA+を、書き換えずにRust frontendとrtlcで検査する。6モデルの正常なinvariantと違反するinvariant、計12件をnative/WasmとTLCへ渡し、判定・出力される状態数と生成数を照合した。6件の反例も、生成元のTLA+をimportする別モジュールでTLCへ再生した。[入力と生成物](../evals/fixtures/quint-generated)、[評価0044](../evals/iterations/0044-quint-generated.md)を参照。
+Quint 0.33.1がApalache 0.63.0経由で生成したTLA+を、書き換えずにRust frontendとrtlcで検査する。6モデルの正常なinvariantと違反するinvariant、計12件をnative/WasmとTLCへ渡し、判定・出力される状態数と生成数を照合した。6件の反例も、生成元のTLA+をimportする別モジュールでTLCへ再生した。[入力と生成物](../fixtures/quint-generated)、[評価0044](../evals/iterations/0044-quint-generated.md)を参照。
 
 | Quintの入力  | 確認した経路                           | 正常版の状態数 / 生成数 |
 | ------------ | -------------------------------------- | ----------------------- |

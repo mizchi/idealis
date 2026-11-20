@@ -1,0 +1,121 @@
+   Compiling rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+   Compiling rtla-compiler v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtla-compiler)
+   Compiling idealis-core v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/idealis-core)
+error[E0277]: the trait bound `SafetyBatchResult: Clone` is not satisfied
+   --> src/lib.rs:297:19
+    |
+289 | #[derive(Clone, Debug, Serialize, Deserialize)]
+    |          ----- in this derive macro expansion
+...
+297 |     SafetyBatch { results: Vec<SafetyBatchResult> },
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Clone` is not implemented for `SafetyBatchResult`
+    |
+    = note: required for `Vec<SafetyBatchResult>` to implement `Clone`
+help: consider annotating `SafetyBatchResult` with `#[derive(Clone)]`
+    |
+174 + #[derive(Clone)]
+175 | pub enum SafetyBatchResult {
+    |
+
+error[E0277]: the trait bound `SafetyBatchResult: serde::Deserialize<'de>` is not satisfied
+    --> src/lib.rs:297:28
+     |
+ 297 |     SafetyBatch { results: Vec<SafetyBatchResult> },
+     |                            ^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+     |
+help: the trait `Deserialize<'_>` is not implemented for `SafetyBatchResult`
+    --> src/lib.rs:174:1
+     |
+ 174 | pub enum SafetyBatchResult {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+     = note: for local types consider adding `#[derive(serde::Deserialize)]` to your `SafetyBatchResult` type
+     = note: for types from other crates check whether the crate offers a `serde` feature flag
+     = help: the following other types implement trait `Deserialize<'de>`:
+               &'a Path
+               &'a [u8]
+               &'a str
+               ()
+               (T,)
+               (T0, T1)
+               (T0, T1, T2)
+               (T0, T1, T2, T3)
+             and 268 others
+     = note: required for `Vec<SafetyBatchResult>` to implement `Deserialize<'_>`
+note: required by a bound in `next_element`
+    --> /Users/mz/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.229/src/de/mod.rs:1771:12
+     |
+1769 |     fn next_element<T>(&mut self) -> Result<Option<T>, Self::Error>
+     |        ------------ required by a bound in this associated function
+1770 |     where
+1771 |         T: Deserialize<'de>,
+     |            ^^^^^^^^^^^^^^^^ required by this bound in `SeqAccess::next_element`
+
+error[E0277]: the trait bound `SafetyBatchResult: serde::Deserialize<'de>` is not satisfied
+    --> src/lib.rs:297:28
+     |
+ 297 |     SafetyBatch { results: Vec<SafetyBatchResult> },
+     |                            ^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+     |
+help: the trait `Deserialize<'_>` is not implemented for `SafetyBatchResult`
+    --> src/lib.rs:174:1
+     |
+ 174 | pub enum SafetyBatchResult {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+     = note: for local types consider adding `#[derive(serde::Deserialize)]` to your `SafetyBatchResult` type
+     = note: for types from other crates check whether the crate offers a `serde` feature flag
+     = help: the following other types implement trait `Deserialize<'de>`:
+               &'a Path
+               &'a [u8]
+               &'a str
+               ()
+               (T,)
+               (T0, T1)
+               (T0, T1, T2)
+               (T0, T1, T2, T3)
+             and 268 others
+     = note: required for `Vec<SafetyBatchResult>` to implement `Deserialize<'_>`
+note: required by a bound in `next_value`
+    --> /Users/mz/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.229/src/de/mod.rs:1916:12
+     |
+1914 |     fn next_value<V>(&mut self) -> Result<V, Self::Error>
+     |        ---------- required by a bound in this associated function
+1915 |     where
+1916 |         V: Deserialize<'de>,
+     |            ^^^^^^^^^^^^^^^^ required by this bound in `MapAccess::next_value`
+
+error[E0277]: the trait bound `SafetyBatchResult: serde::Deserialize<'de>` is not satisfied
+   --> src/lib.rs:289:35
+    |
+289 | #[derive(Clone, Debug, Serialize, Deserialize)]
+    |                                   ^^^^^^^^^^^ unsatisfied trait bound
+    |
+help: the trait `Deserialize<'_>` is not implemented for `SafetyBatchResult`
+   --> src/lib.rs:174:1
+    |
+174 | pub enum SafetyBatchResult {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: for local types consider adding `#[derive(serde::Deserialize)]` to your `SafetyBatchResult` type
+    = note: for types from other crates check whether the crate offers a `serde` feature flag
+    = help: the following other types implement trait `Deserialize<'de>`:
+              &'a Path
+              &'a [u8]
+              &'a str
+              ()
+              (T,)
+              (T0, T1)
+              (T0, T1, T2)
+              (T0, T1, T2, T3)
+            and 268 others
+    = note: required for `Vec<SafetyBatchResult>` to implement `Deserialize<'_>`
+note: required by a bound in `_::_serde::__private229::de::missing_field`
+   --> /Users/mz/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs:26:8
+    |
+ 24 | pub fn missing_field<'de, V, E>(field: &'static str) -> Result<V, E>
+    |        ------------- required by a bound in this function
+ 25 | where
+ 26 |     V: Deserialize<'de>,
+    |        ^^^^^^^^^^^^^^^^ required by this bound in `missing_field`
+    = note: this error originates in the derive macro `Deserialize` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `idealis-core` (lib) due to 4 previous errors

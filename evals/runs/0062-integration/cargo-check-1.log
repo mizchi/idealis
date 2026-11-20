@@ -1,0 +1,84 @@
+    Checking rtlc v0.1.0-alpha.0 (/Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc)
+error[E0277]: expected an `FnMut(&mut [std::option::Option<Scalar>], &mut Arena<'_>)` closure, found `impl FnMut(&[Option<Scalar>], &mut Arena) -> Result<bool, CoreError>`
+   --> /Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc/src/safety_symmetry.rs:313:13
+    |
+313 |             visitor,
+    |             ^^^^^^^ expected an `FnMut(&mut [std::option::Option<Scalar>], &mut Arena<'_>)` closure, found `impl FnMut(&[Option<Scalar>], &mut Arena) -> Result<bool, CoreError>`
+    |
+    = note: expected a closure with signature `for<'a, 'b, 'c> fn(&'a mut _, &'b mut Arena<'c>)`
+               found a closure with signature `fn(&_, &mut Arena<'_>)`
+    = note: required for the cast from `&mut impl FnMut(&[Option<Scalar>], &mut Arena) -> Result<bool, CoreError>` to `&mut dyn FnMut(&mut [Option<Scalar>], &mut Arena<'c>) -> ...`
+    = note: the full name for the type has been written to '/Users/mz/ghq/github.com/mizchi/idealis/crates/idealis-core/target/debug/deps/rtlc-7735e536292c31ff.long-type-13351694349433546392.txt'
+    = note: consider using `--verbose` to print the full type name to the console
+
+error[E0004]: non-exhaustive patterns: `&mut Expression::SelectSeq { .. }`, `&mut Expression::SortSeq { .. }` and `&mut Expression::Assert { .. }` not covered
+   --> /Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc/src/bounded_drop.rs:257:11
+    |
+257 |     match node {
+    |           ^^^^ patterns `&mut Expression::SelectSeq { .. }`, `&mut Expression::SortSeq { .. }` and `&mut Expression::Assert { .. }` not covered
+    |
+note: `Expression` defined here
+   --> /Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc/src/ir.rs:31:10
+    |
+ 31 | pub enum Expression {
+    |          ^^^^^^^^^^
+...
+126 |     SelectSeq {
+    |     --------- not covered
+...
+131 |     SortSeq {
+    |     ------- not covered
+...
+136 |     Assert {
+    |     ------ not covered
+    = note: the matched value is of type `&mut Expression`
+help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern, a match arm with multiple or-patterns as shown, or multiple match arms
+    |
+391 ~         },
+392 +         &mut Expression::SelectSeq { .. } | &mut Expression::SortSeq { .. } | &mut Expression::Assert { .. } => todo!()
+    |
+
+error[E0004]: non-exhaustive patterns: `&Expression::Assert { .. }` not covered
+    --> /Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc/src/safety_expressions.rs:1020:18
+     |
+1020 |         Ok(match self {
+     |                  ^^^^ pattern `&Expression::Assert { .. }` not covered
+     |
+note: `Expression` defined here
+    --> /Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc/src/ir.rs:31:10
+     |
+  31 | pub enum Expression {
+     |          ^^^^^^^^^^
+...
+ 136 |     Assert {
+     |     ------ not covered
+     = note: the matched value is of type `&Expression`
+help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern or an explicit pattern as shown
+     |
+1496 ~             Self::Enabled { .. } => self.eval_enabled(ctx, arena)?,
+1497 ~             &Expression::Assert { .. } => todo!(),
+     |
+
+error[E0004]: non-exhaustive patterns: `&ir::Step::Frame { .. }` not covered
+   --> /Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc/src/safety_symmetry.rs:77:23
+    |
+ 77 |                 match step {
+    |                       ^^^^ pattern `&ir::Step::Frame { .. }` not covered
+    |
+note: `ir::Step` defined here
+   --> /Users/mz/ghq/github.com/mizchi/idealis/crates/rtlc/src/ir.rs:322:10
+    |
+322 | pub enum Step {
+    |          ^^^^
+323 |     Frame {
+    |     ----- not covered
+    = note: the matched value is of type `&ir::Step`
+help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern or an explicit pattern as shown
+    |
+ 84 ~                     },
+ 85 +                     &ir::Step::Frame { .. } => todo!()
+    |
+
+Some errors have detailed explanations: E0004, E0277.
+For more information about an error, try `rustc --explain E0004`.
+error: could not compile `rtlc` (lib) due to 4 previous errors

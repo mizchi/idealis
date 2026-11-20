@@ -12,59 +12,31 @@ import { resolve } from "node:path";
 
 const target = resolve(process.argv[2] ?? ".artifacts/packages");
 await mkdir(target, { recursive: true });
-await mkdir("assets", { recursive: true });
-await copyFile(
-  "crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm",
-  "assets/idealis-core.wasm",
+const packageDir = resolve("packages/idealis");
+const pkg = JSON.parse(
+  await readFile(resolve(packageDir, "package.json"), "utf8"),
 );
-await copyFile(
-  "crates/rtla/target/wasm32-unknown-unknown/release/rtla.wasm",
-  "assets/rtla.wasm",
-);
-const wasm = await readFile("assets/idealis-core.wasm");
-const pkg = JSON.parse(await readFile("package.json", "utf8"));
-await writeFile(
-  "assets/manifest.json",
-  `${JSON.stringify({ version: pkg.version, abi: 1, sha256: createHash("sha256").update(wasm).digest("hex"), bytes: wasm.length }, null, 2)}\n`,
-);
-const parser = await readFile("assets/rtla.wasm");
-await writeFile(
-  "assets/rtla-manifest.json",
-  `${JSON.stringify({ version: pkg.version, abi: 1, sha256: createHash("sha256").update(parser).digest("hex"), bytes: parser.length }, null, 2)}\n`,
-);
-await copyFile(
-  "crates/ralloy/target/wasm32-unknown-unknown/release/ralloy.wasm",
-  "assets/ralloy.wasm",
-);
-const alloy = await readFile("assets/ralloy.wasm");
-await writeFile(
-  "assets/ralloy-manifest.json",
-  `${JSON.stringify({ version: pkg.version, abi: 1, sha256: createHash("sha256").update(alloy).digest("hex"), bytes: alloy.length }, null, 2)}\n`,
-);
-await copyFile(
-  "crates/idealis-testing/target/wasm32-unknown-unknown/release/idealis_testing.wasm",
-  "assets/idealis-testing.wasm",
-);
-const testing = await readFile("assets/idealis-testing.wasm");
-await writeFile(
-  "assets/idealis-testing-manifest.json",
-  `${JSON.stringify({ version: pkg.version, abi: 1, sha256: createHash("sha256").update(testing).digest("hex"), bytes: testing.length }, null, 2)}\n`,
-);
-execFileSync("pnpm", ["pack", "--pack-destination", target], { stdio: "pipe" });
+execFileSync("pnpm", ["pack", "--pack-destination", target], {
+  cwd: packageDir,
+  stdio: "inherit",
+});
 const workspace = await mkdtemp(resolve(target, "cargo-workspace-"));
-for (const name of [
+const crates = [
   "rtla",
   "rtlc",
   "rtla-compiler",
   "idealis-core",
-  "idealis-smt",
+  "rusmt",
   "ralloy",
-  "idealis-testing",
-]) {
+  "idealis-connect",
+  "idealis-cli",
+  "roracle",
+];
+for (const name of crates) {
   await mkdir(resolve(workspace, name));
   for (const file of [
     "src",
-    "examples",
+    ...(name === "idealis-cli" ? [] : ["examples"]),
     "tests",
     "Cargo.toml",
     "Cargo.lock",
@@ -72,7 +44,7 @@ for (const name of [
     "SUPPORT.md",
     "LICENSE",
     ...(["rtla", "ralloy"].includes(name) ? ["NOTICE"] : []),
-    ...(name === "idealis-smt" ? ["benches"] : []),
+    ...(["rusmt", "roracle"].includes(name) ? ["benches"] : []),
   ])
     await cp(`crates/${name}/${file}`, resolve(workspace, name, file), {
       recursive: true,
@@ -80,7 +52,7 @@ for (const name of [
 }
 await writeFile(
   resolve(workspace, "Cargo.toml"),
-  '[workspace]\nmembers=["rtla","rtlc","rtla-compiler","idealis-core","idealis-smt","ralloy","idealis-testing"]\nresolver="3"\n',
+  `[workspace]\nmembers=${JSON.stringify(crates)}\nresolver="3"\n`,
 );
 await copyFile("crates/rtlc/Cargo.lock", resolve(workspace, "Cargo.lock"));
 execFileSync(
@@ -108,52 +80,36 @@ execFileSync(
   ],
   { stdio: "pipe" },
 );
-for (const name of [
-  "rtla",
-  "rtlc",
-  "rtla-compiler",
-  "idealis-core",
-  "idealis-smt",
-  "ralloy",
-  "idealis-testing",
-]) {
+for (const name of crates) {
   const crate = `${name}-${pkg.version}.crate`;
   await copyFile(
     resolve(workspace, "target/package", crate),
     resolve(target, crate),
   );
 }
-await copyFile(
-  "assets/idealis-core.wasm",
-  resolve(target, "idealis-core.wasm"),
-);
-await copyFile("assets/manifest.json", resolve(target, "wasm-manifest.json"));
-await copyFile("assets/rtla.wasm", resolve(target, "rtla.wasm"));
-await copyFile(
-  "assets/rtla-manifest.json",
-  resolve(target, "rtla-manifest.json"),
-);
+for (const file of [
+  "idealis-core.wasm",
+  "manifest.json",
+  "rtla.wasm",
+  "rtla-manifest.json",
+  "ralloy.wasm",
+  "ralloy-manifest.json",
+  "idealis-connect.wasm",
+  "idealis-connect-manifest.json",
+]) {
+  await copyFile(
+    resolve(packageDir, "assets", file),
+    resolve(target, file === "manifest.json" ? "wasm-manifest.json" : file),
+  );
+}
 const smt = await readFile(
-  "crates/idealis-smt/target/wasm32-unknown-unknown/release/idealis_smt.wasm",
+  "crates/rusmt/target/wasm32-unknown-unknown/release/rusmt.wasm",
 );
-await writeFile(resolve(target, "idealis-smt.wasm"), smt);
+await writeFile(resolve(target, "rusmt.wasm"), smt);
 await writeFile(
-  resolve(target, "idealis-smt-manifest.json"),
+  resolve(target, "rusmt-manifest.json"),
   `${JSON.stringify({ version: pkg.version, abi: 1, sha256: createHash("sha256").update(smt).digest("hex"), bytes: smt.length }, null, 2)}\n`,
 );
-await writeFile(resolve(target, "ralloy.wasm"), alloy);
-await writeFile(
-  resolve(target, "ralloy-manifest.json"),
-  `${JSON.stringify({ version: pkg.version, abi: 1, sha256: createHash("sha256").update(alloy).digest("hex"), bytes: alloy.length }, null, 2)}\n`,
-);
-await copyFile(
-  "assets/idealis-testing.wasm",
-  resolve(target, "idealis-testing.wasm"),
-);
-await copyFile(
-  "assets/idealis-testing-manifest.json",
-  resolve(target, "idealis-testing-manifest.json"),
-);
 console.log(
-  `Verified npm, rtla/rtla-compiler/rtlc/idealis-core/idealis-smt/ralloy/idealis-testing Cargo and Wasm artifacts: ${target}`,
+  `Verified npm, rtla/rtla-compiler/rtlc/idealis-core/rusmt/ralloy/idealis-connect/idealis-cli/roracle Cargo and Wasm artifacts: ${target}`,
 );
