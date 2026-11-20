@@ -49,7 +49,7 @@ registry へ公開済みの version は使い回さない。途中まで公開�
 
 ## CI の分割粒度
 
-PR は1ジョブで TS / Rust / ブラウザ / mutation / 実バグ評価 / consumer を順に検証する。push の自動実行は main に限り、PR branch の push と pull_request の二重起動を避ける。
+PR と `main` への push では、テストを独立した 2 ジョブで並列実行する。`SDK, solvers and packages (1/2)` は SDK・ソルバー・Wasm ホスト・配布物の consumer を検査し、結果を `verification-evidence-sdk` に保存する。`Model checking and Go (2/2)` は portable core をビルドして TLC 差分検査、Go の race テスト、3 言語での実装照合を行い、結果を `verification-evidence-model` に保存する。TLC 結果キャッシュはこのジョブが復元・保存する。Lean の `cache-proof` は両シャードと並列に実行する。
 
 4800件の portable 評価、runtime 性能評価、4 runner の cloud sharding はそれぞれ workflow_dispatch で残す。重い評価を明示的に実行でき、sharding の manifest / 欠落・衝突検出も保持する。PR で runner を prepare → shard → merge と3段階待つ構造を外した。GitHub の割当待ちそのものを短縮する保証ではない。
 

@@ -12,7 +12,8 @@ concurrency:
 env:
   CI: true
 jobs:
-  test:
+  sdk:
+    name: SDK, solvers and packages (1/2)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -39,8 +40,6 @@ jobs:
       - run: cargo build --release --locked --manifest-path crates/roracle/Cargo.toml
       - run: just oracle-types-check
       - run: just oracle-native-test
-      - run: node dist/scripts/prepare-tlc-modules.js
-      - run: node --test dist/tests/tlc-differential/compare-test.js dist/tests/tlc-differential/standard-modules-test.js
       - run: cargo fmt --manifest-path evals/experiments/workspace-oracle/rust/Cargo.toml -- --check
       - run: cargo clippy --all-targets --locked --manifest-path evals/experiments/workspace-oracle/rust/Cargo.toml -- -D warnings
       - run: cargo test --locked --manifest-path evals/experiments/workspace-oracle/rust/Cargo.toml
@@ -86,9 +85,44 @@ jobs:
       - run: cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/rusmt/Cargo.toml
       - run: node --test dist/tests/smt-subset/contract-test.js dist/tests/smt-expansion/contract-test.js dist/tests/smt-scripts/contract-test.js dist/tests/smt-tuning/contract-test.js
       - run: just vitest --project=smt
+      - run: just wasm-test
+      - run: node --test dist/tests/oracle-tuning/wasm-test.js
+      - run: node --test dist/tests/workspace-oracle/catalog-test.js
+      - run: just usable-test
+      - run: just runtime-test
+      - run: just mutation
+      - run: just evaluate
+      - run: just replay-evaluation
+      - run: just eval-loop evals/plans/0002-mixed-depth.json ci-mixed .artifacts/evals
+      - run: just replay-loop .artifacts/evals/ci-mixed-confirmation
+      - run: just package-prepare
+      - run: just package-test
+      - run: just usable-eval .artifacts/usable-evaluation
+      - run: just usable-replay .artifacts/usable-evaluation
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: verification-evidence-sdk
+          path: |
+            .mutator/report
+            .artifacts/evaluation
+            .artifacts/evals
+            .artifacts/usable-evaluation
+            .artifacts/packages
+          if-no-files-found: warn
+
+  model:
+    name: Model checking and Go (2/2)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      - run: rustup target add wasm32-unknown-unknown
       - run: cargo fmt --manifest-path crates/idealis-core/Cargo.toml -- --check
       - run: cargo clippy --all-targets --locked --manifest-path crates/idealis-core/Cargo.toml -- -D warnings
       - run: just portable-build
+      - run: node dist/scripts/prepare-tlc-modules.js
+      - run: node --test dist/tests/tlc-differential/compare-test.js dist/tests/tlc-differential/standard-modules-test.js
       - name: Identify TLC-compatible checkers
         id: tlc-build
         run: |
@@ -110,7 +144,6 @@ jobs:
       - run: just expansion-eval .artifacts/cache-expansion-eval
       - run: just expansion-replay .artifacts/cache-expansion-eval .artifacts/cache-expansion-replay
       - run: just rtla-build
-      - run: node --test dist/tests/oracle-tuning/wasm-test.js
       - run: node --test dist/tests/rtla-compatibility/contract-test.js dist/tests/symbolic-operators/contract-test.js
       - run: cargo build --locked --manifest-path crates/rtla-compiler/Cargo.toml --example analysis_roles
       - run: node --test dist/tests/tlc-differential/analysis-parity-test.js dist/tests/tlc-differential/frame-decoder-test.js dist/tests/p0-checker/contract-test.js
@@ -152,29 +185,11 @@ jobs:
       - run: node dist/evals/experiments/async-tuning/evaluate.js regression .artifacts/async-tuning
       - run: node dist/evals/experiments/async-tuning/replay.js .artifacts/async-tuning
       - run: just portable-test
-      - run: node --test dist/tests/workspace-oracle/catalog-test.js
-      - run: just usable-test
-      - run: just runtime-test
-      - run: just wasm-test
-      - run: just mutation
-      - run: just evaluate
-      - run: just replay-evaluation
-      - run: just eval-loop evals/plans/0002-mixed-depth.json ci-mixed .artifacts/evals
-      - run: just replay-loop .artifacts/evals/ci-mixed-confirmation
-      - run: just package-prepare
-      - run: just package-test
-      - run: just usable-eval .artifacts/usable-evaluation
-      - run: just usable-replay .artifacts/usable-evaluation
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
-          name: verification-evidence
+          name: verification-evidence-model
           path: |
-            .mutator/report
-            .artifacts/evaluation
-            .artifacts/evals
-            .artifacts/usable-evaluation
-            .artifacts/packages
             .artifacts/go
             .artifacts/shared-oracle
             .artifacts/async-tuning
