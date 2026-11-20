@@ -1,5 +1,11 @@
 name: CI
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      tasks:
+        description: Workloads as a JSON array
+        type: string
+        default: '["rtlc-tests","native-core","wasm-core","wasi-cli"]'
 permissions:
   contents: read
 jobs:
@@ -7,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        task: [rtlc-tests, native-core, wasm-core, wasi-cli]
+        task: ${{ fromJSON(inputs.tasks) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -23,4 +29,6 @@ jobs:
           echo "25012a78de164686f552b7703b5d0223adab4829c79cd1fb351108221d61c7d8  $archive.tar.gz" | sha256sum -c -
           tar -xzf "$archive.tar.gz" --strip-components=1 "$archive/wild"
           "$RUNNER_TEMP/wild" --version
-      - run: python3 evals/experiments/ci-linker/compare.py "${{ matrix.task }}"
+      - run: python3 evals/experiments/ci-linker/compare.py "$WORKLOAD"
+        env:
+          WORKLOAD: ${{ matrix.task }}

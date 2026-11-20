@@ -40,8 +40,8 @@ console.log(JSON.stringify(core.request(JSON.parse(process.argv[2]))));"""
 const wasi = new WASI({version:'preview1', args:['idealis','tlc','-help'], returnOnExit:true});
 const {instance} = await WebAssembly.instantiate(readFileSync(process.argv[1]), {wasi_snapshot_preview1:wasi.wasiImport});
 process.exitCode = wasi.start(instance);"""
-        result = subprocess.check_output(["node", "--input-type=module", "-e", code, binary], text=True, stderr=subprocess.STDOUT)
-        assert "TLC" in result or "tlc" in result, result
+        result = subprocess.run(["node", "--input-type=module", "-e", code, binary], text=True, capture_output=True)
+        assert result.returncode == 1 and "Usage: idealis tlc" in result.stdout, result
     if task in ("rtlc-tests", "native-core"):
         binary = (target / "release/idealis-core") if task == "native-core" else next(p for p in (target / "debug/deps").glob("rtlc-*") if os.access(p,os.X_OK))
         comment = subprocess.check_output(["readelf", "-p", ".comment", binary], text=True)
