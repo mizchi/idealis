@@ -69,3 +69,11 @@ just cache-replay .artifacts/new-cache-eval .artifacts/new-cache-replay
 ```
 
 TLC用にはJSON trace出力を含む`tlaplus` jarを指定する。2 worker・2取得世代・clock 0..3の有限モデルを探索し、3つの人工故障と正常なpublishへの到達を対照にする。clockや世代の上限による終端はdeadlockとして扱わず、livenessは検査しない。評価条件は[計画](../evals/plans/verified-cache.md)、結果は[評価記録](../evals/iterations/verified-cache.md)に残す。
+
+## 通常 CI での再利用
+
+GitHub Actions の差分テストでは、Quint 生成モデル、記号演算子、Rust safety、collections/temporal、TLC 回帰コーパスの検査結果をモデル単位で保存する。CI で使う検査器は `rtlc` の native / Wasm と参照用の `tla-ts`。それぞれの非空の完了結果を別々に保存し、ヒット時も状態数やオラクルとの照合を実行する。反例・予算切れ・エラーと、時間やメモリを測るテストは毎回実行する。
+
+Actions のキーには両検査器のバージョン、実行バイナリと Wasm、ホストの JS、依存ロック、OS・CPU アーキテクチャ・Node のバージョンを含める。コーパスを変更した場合は同じ検査器ビルドのスナップショットを復元し、検査要求全体が一致するエントリを再利用する。設定、モジュール、探索上限などを変えた入力は再検査する。各テストプロセスのログには検査器別のヒット数と保存数が出る。
+
+ローカルでは既定で無効。ビルド済みの作業ツリーで `IDEALIS_TLC_RESULTS=.artifacts/tlc-results just rtla-symbols-test` を同じ条件で 2 回実行すると、初回の保存と次回の再利用を確認できる。

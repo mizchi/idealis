@@ -5,14 +5,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { PortableCommand } from "../../packages/idealis/src/contracts.js";
 import { PortableCoreError } from "../../packages/idealis/src/portable-value.js";
-import { createPortableWasm } from "../../packages/idealis/src/portable-wasm.js";
 import { isRecord } from "../../packages/idealis/src/trace.js";
+import { nativePath, wasmPath } from "../ci/tlc-build.js";
+import { createCiWasm, ciNativeResult } from "../ci/tlc-checkers.js";
+export { nativePath, wasmPath };
 
 export const directory = "fixtures/tlc-operator-sharing";
-export const wasmPath =
-  "crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm";
-export const nativePath = "crates/idealis-core/target/release/idealis-core";
-export const core = await createPortableWasm(await readFile(wasmPath));
+export const core = await createCiWasm();
 
 export const capture = <Value>(run: () => Value) => {
   try {
@@ -24,15 +23,18 @@ export const capture = <Value>(run: () => Value) => {
 };
 
 export const native = (request: PortableCommand["request"]): unknown => {
-  const result = spawnSync(nativePath, [], {
-    input: `${JSON.stringify({ version: 1, request })}\n`,
-    encoding: "utf8",
-    timeout: 60_000,
-    maxBuffer: 16 * 1024 * 1024,
+  const command = { version: 1 as const, request };
+  return ciNativeResult(command, () => {
+    const result = spawnSync(nativePath, [], {
+      input: `${JSON.stringify(command)}\n`,
+      encoding: "utf8",
+      timeout: 60_000,
+      maxBuffer: 16 * 1024 * 1024,
+    });
+    assert.ifError(result.error);
+    assert.equal(result.status, 0, result.stderr);
+    return JSON.parse(result.stdout);
   });
-  assert.ifError(result.error);
-  assert.equal(result.status, 0, result.stderr);
-  return JSON.parse(result.stdout);
 };
 
 export const normalize = (value: unknown): unknown => {

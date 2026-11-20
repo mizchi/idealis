@@ -11,14 +11,13 @@ import {
 } from "../../evals/experiments/symbolic-operators/corpus.js";
 import { models } from "../../evals/experiments/symbolic-operators/models.js";
 import type { Report } from "../../evals/experiments/tlc-differential/differential.js";
-import { startNative } from "../../evals/experiments/usable/native.js";
-import { createPortableWasm } from "../../packages/idealis/src/portable-wasm.js";
 import { decodeSafetyResult } from "../../packages/idealis/src/safety.js";
 import {
   checkTlaSource,
   compileTlaSource,
 } from "../../packages/idealis/src/tla-source.js";
 import { isRecord } from "../../packages/idealis/src/trace.js";
+import { startCiNative, createCiWasm } from "../ci/tlc-checkers.js";
 
 interface SyntaxRun {
   readonly status: string;
@@ -121,12 +120,8 @@ test("IR v1/v2 replay TLC models, witnesses and symbolic conflict refusals", asy
     await readFile(join(root, "manifest.json"), "utf8"),
   );
   assert.deepEqual(manifest.inputs, models);
-  const core = await createPortableWasm(
-    await readFile(
-      "crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm",
-    ),
-  );
-  const native = startNative();
+  const core = await createCiWasm();
+  const native = startCiNative();
   try {
     for (const record of saved.records) {
       const model = models.find((model) => model.name === record.name);

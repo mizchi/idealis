@@ -1,30 +1,27 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import { test } from "node:test";
-import { check } from "tla-ts";
 import {
   bounds,
   cases,
 } from "../../evals/experiments/collections-temporal/cases.js";
 import { traceInput } from "../../evals/experiments/collections-temporal/tlc.js";
-import { startNative } from "../../evals/experiments/usable/native.js";
-import { createPortableWasm } from "../../packages/idealis/src/portable-wasm.js";
 import {
   checkSafety,
   decodeSafetyResult,
 } from "../../packages/idealis/src/safety.js";
 import { compileTlaSafety } from "../../packages/idealis/src/tla-safety.js";
 import { isRecord } from "../../packages/idealis/src/trace.js";
+import {
+  startCiNative,
+  createCiWasm,
+  checkCiReference,
+} from "../ci/tlc-checkers.js";
 
-const core = await createPortableWasm(
-  await readFile(
-    "crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm",
-  ),
-);
+const core = await createCiWasm();
 for (const input of cases)
   test(input.name, async () => {
     const program = compileTlaSafety(input);
-    const native = startNative();
+    const native = startCiNative();
     try {
       const response = await native.request({
         version: 1,
@@ -48,7 +45,7 @@ for (const input of cases)
         assert.equal(actual.status, input.expected, JSON.stringify(actual));
         if (actual.violation?.trace.length && actual.status !== "deadlock") {
           const forced = traceInput(input, program, actual);
-          const witness = await check({
+          const witness = await checkCiReference({
             ...forced,
             livenessCheck: "final",
           });
@@ -72,12 +69,15 @@ for (const input of cases)
       if (input.bounds || input.expected === "empty") return;
       if (input.expected === "error") {
         assert.equal(
-          (await check({ ...input, livenessCheck: "final" })).status,
+          (await checkCiReference({ ...input, livenessCheck: "final" })).status,
           "error",
         );
         return;
       }
-      const reference = await check({ ...input, livenessCheck: "final" });
+      const reference = await checkCiReference({
+        ...input,
+        livenessCheck: "final",
+      });
       assert.equal(
         reference.status,
         input.expected === "complete"

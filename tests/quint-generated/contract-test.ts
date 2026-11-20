@@ -7,8 +7,6 @@ import {
   config,
   names,
 } from "../../evals/experiments/quint-generated/cases.js";
-import { startNative } from "../../evals/experiments/usable/native.js";
-import { createPortableWasm } from "../../packages/idealis/src/portable-wasm.js";
 import { decodeSafetyProgram } from "../../packages/idealis/src/safety-program.js";
 import {
   checkSafety,
@@ -19,14 +17,11 @@ import {
   compileTlaSource,
 } from "../../packages/idealis/src/tla-source.js";
 import { isRecord } from "../../packages/idealis/src/trace.js";
+import { startCiNative, createCiWasm } from "../ci/tlc-checkers.js";
 
 const directory = "fixtures/quint-generated/generated";
-const core = await createPortableWasm(
-  await readFile(
-    "crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm",
-  ),
-);
-const native = startNative();
+const core = await createCiWasm();
+const native = startCiNative();
 after(() => native.close());
 const oracle: unknown = JSON.parse(
   await readFile("fixtures/quint-generated/tlc-oracle.json", "utf8"),

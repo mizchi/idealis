@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { corpus } from "../../evals/experiments/rtla-parser/corpus.js";
@@ -7,7 +6,6 @@ import { operatorSharingCases } from "../../evals/experiments/tlc-differential/c
 import { expandTemporalTemplates } from "../../evals/experiments/tlc-differential/expand-temporal.js";
 import { digest } from "../../evals/experiments/usable/provenance.js";
 import type {
-  PortableCommand,
   SafetyDefinition,
   SafetyExpressionV2,
   SafetyProgram,
@@ -16,7 +14,6 @@ import type {
   TlaSourceOptions,
 } from "../../packages/idealis/src/contracts.js";
 import { PortableCoreError } from "../../packages/idealis/src/portable-value.js";
-import { createPortableWasm } from "../../packages/idealis/src/portable-wasm.js";
 import { checkSafety } from "../../packages/idealis/src/safety.js";
 import { compileTlaSafety } from "../../packages/idealis/src/tla-safety.js";
 import {
@@ -24,14 +21,12 @@ import {
   compileTlaSource,
 } from "../../packages/idealis/src/tla-source.js";
 import { isRecord } from "../../packages/idealis/src/trace.js";
+import { createCiWasm } from "../ci/tlc-checkers.js";
+import { native } from "./operator-sharing-support.js";
 
 const directory = "fixtures/tlc-operator-sharing";
 const bounds = { maxDepth: 64, maxStates: 10_000, maxWork: 1_000_000 };
-const core = await createPortableWasm(
-  await readFile(
-    "crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm",
-  ),
-);
+const core = await createCiWasm();
 interface Golden {
   readonly name: string;
   readonly source: string;
@@ -135,21 +130,6 @@ const capture = <Value>(run: () => Value) => {
     assert.ok(error instanceof PortableCoreError);
     return { kind: "error" as const, code: error.code, message: error.message };
   }
-};
-const native = (request: PortableCommand["request"]): unknown => {
-  const result = spawnSync(
-    "crates/idealis-core/target/release/idealis-core",
-    [],
-    {
-      input: `${JSON.stringify({ version: 1, request })}\n`,
-      encoding: "utf8",
-      timeout: 60_000,
-      maxBuffer: 16 * 1024 * 1024,
-    },
-  );
-  assert.ifError(result.error);
-  assert.equal(result.status, 0, result.stderr);
-  return JSON.parse(result.stdout);
 };
 const inputAt = (name: string) => {
   const input = inputs.find((entry) => entry.name === name);
