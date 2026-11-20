@@ -1,0 +1,21 @@
+[package]
+name = "nesting-harness-after"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+rtla = { path = "<after>/crates/rtla" }
+rtla-compiler = { path = "<after>/crates/rtla-compiler" }
+rtlc = { path = "<after>/crates/rtlc" }
+serde_json = { version = "1.0", features = ["unbounded_depth"] }
+serde = "1.0"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[profile.dev]
+panic = "abort"

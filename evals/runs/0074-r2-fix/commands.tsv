@@ -1,0 +1,40 @@
+tsc-1	2026-11-20T16:28:40Z	2026-11-20T16:28:41Z	pnpm exec tsc -p tsconfig.json	cwd=<after>	exit=0
+baseline-before	2026-11-20T16:28:44Z	2026-11-20T16:29:17Z	node dist/evals/experiments/nesting-chains/baseline.js <before>/crates/idealis-core/target/release/idealis-core <before>/crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm <before>/dist <scratch>/fix1/baseline-before-new.json	cwd=<after>	exit=0
+generate-cases	2026-11-20T16:29:31Z	2026-11-20T16:29:31Z	node dist/evals/experiments/nesting-chains/generate.js <scratch>/fix1/baseline-before-new.json <scratch>/fix1/cases-new.json	cwd=<after>	exit=0
+digests-before	2026-11-20T16:29:40Z	2026-11-20T16:30:51Z	node dist/evals/experiments/nesting-chains/digests.js <before>/crates/idealis-core/target/release/idealis-core <before>/crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm <before>/dist <scratch>/fix1/digests-before-new.json	cwd=<after>	exit=0
+tsc-2	2026-11-20T16:37:32Z	2026-11-20T16:37:33Z	pnpm exec tsc -p tsconfig.json	cwd=<after>	exit=0
+sizes-record-base	2026-11-20T16:37:33Z	2026-11-20T16:37:35Z	node dist/evals/experiments/nesting-chains/sizes-record.js <scratch>/fix1/sizes-base.json	cwd=<before>	exit=1
+tsc-3	2026-11-20T16:37:40Z	2026-11-20T16:37:42Z	pnpm exec tsc -p tsconfig.json	cwd=<after>	exit=0
+sizes-record-base	2026-11-20T16:37:42Z	2026-11-20T16:37:43Z	node dist/evals/experiments/nesting-chains/sizes-record.js <scratch>/fix1/sizes-base.json	cwd=<before>	exit=1
+tsc-4	2026-11-20T16:38:07Z	2026-11-20T16:38:10Z	pnpm exec tsc -p tsconfig.json	cwd=<after>	exit=0
+sizes-record-base	2026-11-20T16:38:10Z	2026-11-20T16:38:15Z	node dist/evals/experiments/nesting-chains/sizes-record.js <scratch>/fix1/sizes-base.json	cwd=<before>	exit=0
+tsc-5	2026-11-20T16:38:37Z	2026-11-20T16:38:38Z	pnpm exec tsc -p tsconfig.json	cwd=<after>	exit=0
+red-ts-current	2026-11-20T16:38:38Z	2026-11-20T16:42:00Z	node --test dist/tests/nesting-chains/contract-test.js	cwd=<after>	exit=1
+red-rust-current	2026-11-20T16:42:09Z	2026-11-20T16:46:43Z	cargo test --locked --manifest-path crates/rtla-compiler/Cargo.toml --test nesting_chains --target-dir <scratch>/fix1/target-fix1	cwd=<after>	exit=0
+tsc-6	2026-11-20T16:47:15Z	2026-11-20T16:47:16Z	pnpm exec tsc -p tsconfig.json	cwd=<after>	exit=0
+baseline-before-2	2026-11-20T16:47:16Z	2026-11-20T16:47:16Z	node dist/evals/experiments/nesting-chains/baseline.js <before>/crates/idealis-core/target/release/idealis-core <before>/crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm <before>/dist <scratch>/fix1/baseline-v2.json	cwd=<after>	exit=1
+generate-cases-2	2026-11-20T16:47:16Z	2026-11-20T16:47:16Z	node dist/evals/experiments/nesting-chains/generate.js <scratch>/fix1/baseline-v2.json <scratch>/fix1/cases-v2.json	cwd=<after>	exit=1
+digests-before-2	2026-11-20T16:47:16Z	2026-11-20T16:47:16Z	node dist/evals/experiments/nesting-chains/digests.js <before>/crates/idealis-core/target/release/idealis-core <before>/crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm <before>/dist <scratch>/fix1/digests-v2.json	cwd=<after>	exit=1
+baseline-v2	2026-11-20T16:47:32Z	2026-11-20T16:47:46Z	node dist/evals/experiments/nesting-chains/baseline.js <before>/crates/idealis-core/target/release/idealis-core <before>/crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm <before>/dist <scratch>/fix1/baseline-v2.json	cwd=<after>	exit=0
+cases-v2	2026-11-20T16:47:46Z	2026-11-20T16:47:46Z	node dist/evals/experiments/nesting-chains/generate.js <scratch>/fix1/baseline-v2.json <scratch>/fix1/cases-v2.json	cwd=<after>	exit=0
+digests-v2	2026-11-20T16:47:46Z	2026-11-20T16:48:28Z	node dist/evals/experiments/nesting-chains/digests.js <before>/crates/idealis-core/target/release/idealis-core <before>/crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm <before>/dist <scratch>/fix1/digests-v2.json	cwd=<after>	exit=0
+tsc-7	2026-11-20T16:48:36Z	2026-11-20T16:48:36Z	pnpm exec tsc -p tsconfig.json	cwd=<after>	exit=0
+red-rust-current-2	2026-11-20T16:48:37Z	2026-11-20T16:49:39Z	cargo test --locked --manifest-path crates/rtla-compiler/Cargo.toml --test nesting_chains --target-dir <scratch>/fix1/target-fix1	cwd=<after>	exit=0
+base-ts	2026-11-20T16:50:00Z	2026-11-20T16:51:03Z	node --test dist/tests/nesting-chains/contract-test.js	cwd=<scratch>/fix1/base-run	exit=1
+base-rust	2026-11-20T16:51:03Z	2026-11-20T16:52:12Z	cargo test --locked --manifest-path crates/rtla-compiler/Cargo.toml --test nesting_chains --target-dir <scratch>/fix1/target-base	cwd=<scratch>/fix1/base-run	exit=101
+tsc-8	2026-11-20T16:52:35Z	2026-11-20T16:52:36Z	pnpm exec tsc -p tsconfig.json	cwd=<after>	exit=0
+green-ts	2026-11-20T16:52:41Z	2026-11-20T16:54:17Z	node --test dist/tests/nesting-chains/contract-test.js	cwd=<after>	exit=0
+style-check-1	2026-11-20T16:54:38Z	2026-11-20T16:54:39Z	just style-check	cwd=<after>	exit=1
+just-check	2026-11-20T16:55:05Z	2026-11-20T16:55:05Z	just check	cwd=<after>	exit=1
+just-compiler-test	2026-11-20T16:55:05Z	2026-11-20T16:56:15Z	just compiler-test	cwd=<after>	exit=0
+just-safety-test	2026-11-20T16:56:15Z	2026-11-20T16:57:53Z	just safety-test	cwd=<after>	exit=0
+just-analysis-test	2026-11-20T16:57:53Z	2026-11-20T16:58:01Z	just analysis-test	cwd=<after>	exit=1
+just-wasm-test	2026-11-20T16:58:01Z	2026-11-20T16:58:06Z	just wasm-test	cwd=<after>	exit=0
+just-quint-test	2026-11-20T16:58:06Z	2026-11-20T16:58:08Z	just quint-test	cwd=<after>	exit=0
+just-portable-test	2026-11-20T16:58:08Z	2026-11-20T16:59:43Z	just portable-test	cwd=<after>	exit=0
+cargo-fmt-check	2026-11-20T16:59:43Z	2026-11-20T16:59:43Z	cargo fmt --manifest-path crates/rtla-compiler/Cargo.toml -- --check	cwd=<after>	exit=0
+cargo-clippy	2026-11-20T16:59:43Z	2026-11-20T16:59:46Z	cargo clippy --all-targets --locked --manifest-path crates/rtla-compiler/Cargo.toml --target-dir <scratch>/fix1/target-fix1 -- -D warnings	cwd=<after>	exit=0
+just-analysis-test-2	2026-11-20T17:00:12Z	2026-11-20T17:00:20Z	just analysis-test	cwd=<after>	exit=0
+just-typecheck-2	2026-11-20T17:00:20Z	2026-11-20T17:00:20Z	just typecheck	cwd=<after>	exit=0
+just-test-2	2026-11-20T17:00:20Z	2026-11-20T17:00:25Z	just test	cwd=<after>	exit=0
+tsc-final	2026-11-20T17:17:42Z	2026-11-20T17:17:43Z	pnpm exec tsc -p tsconfig.json	cwd=<after>	exit=0

@@ -1,0 +1,24 @@
+== abba-1: sampler 1-min load: n=197 min=4.63 median=11.05 max=18.79
+  compatibility        functions= 27  change% median  +2.56  min  -41.57  max +101.98  flagged>=+10%: 10
+  frontend             functions= 21  change% median  -0.30  min  -46.81  max  +67.83  flagged>=+10%: 8
+  frontend_semantics   functions= 21  change% median  -3.28  min  -43.62  max  +44.47  flagged>=+10%: 4
+  nesting_chains       functions=  6  change% median -21.04  min  -35.21  max   -3.67  flagged>=+10%: 0
+  quint_generated      functions= 42  change% median -11.49  min  -53.61  max  +85.11  flagged>=+10%: 7
+  recursive_actions    functions= 21  change% median  -0.01  min  -55.54  max  +70.43  flagged>=+10%: 6
+== abba-2: sampler 1-min load: n=193 min=1.31 median=1.93 max=18.76
+  compatibility        functions= 27  change% median  -0.01  min   -2.27  max   +3.01  flagged>=+10%: 0
+  frontend             functions= 21  change% median  -0.91  min   -3.99  max   +0.42  flagged>=+10%: 0
+  frontend_semantics   functions= 21  change% median  -0.74  min   -3.23  max   +0.42  flagged>=+10%: 0
+  nesting_chains       functions=  6  change% median -20.11  min  -46.47  max   -1.49  flagged>=+10%: 0
+  quint_generated      functions= 42  change% median  +4.91  min   -0.81  max  +10.90  flagged>=+10%: 1
+  recursive_actions    functions= 21  change% median  -0.54  min   -1.52  max   +1.18  flagged>=+10%: 0
+== abba-3: sampler 1-min load: n=68 min=1.38 median=1.93 max=6.85
+  nesting_chains       functions=  6  change% median -15.15  min  -26.05  max   -5.32  flagged>=+10%: 0
+  quint_generated      functions= 42  change% median  -0.24  min   -1.42  max   +5.63  flagged>=+10%: 0
+
+nesting_chains (mean ns; before=avg(B0,B3), after=avg(A1,A2); change %)
+abba-1 if-chain-3: 64891->53853 (-17.0%) | if-chain-38: 409816->394782 (-3.7%) | if-chain-8: 101833->93792 (-7.9%) | paren-and-3: 53848->40353 (-25.1%) | paren-and-38: 503733->335478 (-33.4%) | paren-and-8: 115517->74846 (-35.2%)
+abba-2 if-chain-3: 51058->50295 (-1.5%) | if-chain-38: 688932->368761 (-46.5%) | if-chain-8: 168508->108801 (-35.4%) | paren-and-3: 68782->39709 (-42.3%) | paren-and-38: 317424->302215 (-4.8%) | paren-and-8: 72485->69123 (-4.6%)
+abba-3 if-chain-3: 66983->49533 (-26.1%) | if-chain-38: 421038->360336 (-14.4%) | if-chain-8: 112913->85493 (-24.3%) | paren-and-3: 39443->37345 (-5.3%) | paren-and-38: 357380->300608 (-15.9%) | paren-and-8: 76546->67003 (-12.5%)
+
+flagged in a later run: quint_generated quint-parse_SetFold {'abba-1': -53.6, 'abba-2': 10.9, 'abba-3': 3.9}

@@ -17,13 +17,13 @@ label == IF x = 0 THEN 100 ELSE IF x = 1 THEN 101 ELSE ... ELSE IF x = 53 THEN 1
 
 最上位の invariant に置いたとき、今受理される最大の長さは次のとおり。
 
-| 連鎖                 |   v1 |   v2 | 次の長さでの拒否                                                                 |
-| -------------------- | ---: | ---: | -------------------------------------------------------------------------------- |
-| 括弧つき左結合の連言 |   24 |   39 | v1 は checker 48（v1 は各二項に TRUE を足すので IR が約 2 倍）、v2 は frontend 40 |
-| 平たい連言           |   47 |   48 | checker 48                                                                       |
-| IF / ELSE IF         |   37 |   38 | frontend 40                                                                      |
-| CASE                 |   47 |   47 | checker 48                                                                       |
-| 括弧つき・IF の共通  |   61 |   61 | parser（`TLA parsing: Expression nesting exceeds 64`）                           |
+| 連鎖                 |  v1 |  v2 | 次の長さでの拒否                                                                  |
+| -------------------- | --: | --: | --------------------------------------------------------------------------------- |
+| 括弧つき左結合の連言 |  24 |  39 | v1 は checker 48（v1 は各二項に TRUE を足すので IR が約 2 倍）、v2 は frontend 40 |
+| 平たい連言           |  47 |  48 | checker 48                                                                        |
+| IF / ELSE IF         |  37 |  38 | frontend 40                                                                       |
+| CASE                 |  47 |  47 | checker 48                                                                        |
+| 括弧つき・IF の共通  |  61 |  61 | parser（`TLA parsing: Expression nesting exceeds 64`）                            |
 
 深さは、連鎖の 1 段ごとに次の場所で増える。
 
@@ -41,12 +41,12 @@ frontend は連鎖の段ごとに数えるが、出力する IR は綴りによ�
 
 上限の目的は、native と Wasm の stack を守ること。上限の定数だけを外した複製（評価専用）で、1 段あたりに要る最小の stack を二分探索した（v2、括弧つき連言と IF 連鎖、各段を別 thread で実行）。
 
-| 処理           | native release | native debug  | Wasm（stack 1 MiB で通る最大の段数）                   |
+| 処理           | native release |  native debug | Wasm（stack 1 MiB で通る最大の段数）                   |
 | -------------- | -------------: | ------------: | ------------------------------------------------------ |
-| parse          |        約 5 KB | 約 15 / 29 KB | `compile-tla`（parse と compile）で 641〜642 段         |
-| compile        | 約 3.5〜3.8 KB |       約 27 KB | 同上                                                   |
-| JSON の decode | 約 1.2〜1.3 KB |      約 4.8 KB | `check-safety`（decode・検証・評価）で 1,918〜2,048 段 |
-| 検証と評価     |      約 0.9 KB |     約 26.5 KB | 同上                                                   |
+| parse          |        約 5 KB | 約 15 / 29 KB | `compile-tla`（parse と compile）で 641〜642 段        |
+| compile        | 約 3.5〜3.8 KB |      約 27 KB | 同上                                                   |
+| JSON の decode | 約 1.2〜1.3 KB |     約 4.8 KB | `check-safety`（decode・検証・評価）で 1,918〜2,048 段 |
+| 検証と評価     |      約 0.9 KB |    約 26.5 KB | 同上                                                   |
 
 Rust のテストが既定で使う 2 MiB の thread（debug）では、64 段で parse（IF）が 1,891 KiB、compile が 1,827 KiB を使う。上限を上げる案を支えるのは、この条件で 64 段程度までなので、上限の値は変えない。debug build で 128 の動的評価の拒否より前に stack overflow になる件は、別の [#83](https://github.com/mizchi/idealis/issues/83) で扱う。
 
@@ -91,3 +91,17 @@ run は追記のみ。source / binary / 入力・driver・実行順・予算・h
 Red から Green、TLC との一致、既存の入力の IR の一致、完全応答の一致、再現する後退がないことが揃ったときに採用する。採否と残る制約を iteration と README に戻す。
 
 この変更の後も、式の位置の連鎖は IR の深さが長さに比例するので、次の入力は拒否される。54 枝の LongIfChain は rtlc の検証 48 で止まる。49 項以上の連言（さらに長いと frontend の出力検査 128）、48 枝以上の CASE、連鎖を呼び出しの中に重ねた式（動的評価 128）も拒否される。これらは同じ #82 の次の iteration 0075 で扱う。0075 では v2 を拡張し、連言・選言・CASE を 1 つの node で表して、各項と各枝を node の直下で評価する。平衡二分木は、最後の項を深くして今受理される program を 128 で拒否することを観測したので使わない。
+
+## 実装の段で変えた条件
+
+- `fixtures/tlc-operator-sharing/analysis-inventory.json` の `extracted` を更新した。変更した `typed_expr.rs`・`typed_lower.rs`・`tla-safety.ts` の sha256 と、lowering の証跡（文字列と関数名）を機械で再抽出した値に置き換えた。既存の inventory のテストは、この 2 つが現在のソースと完全一致することを要求する。分類と位置の記録は変えていない。
+- v2 の期待値は、変更前のコードで検査した `fixtures/nesting-chains/baseline.json` から導出した。連鎖の綴りの期待値は同じ意味の綴りの変更前の結果と等しいとし、v1 と連鎖でない入れ子は変更前の結果そのものとした。長さの閾値（平たい連言と選言 48、CASE と IF 連鎖 47、62 段は Rust だけ parser で拒否）は、別にリテラルで検査する。
+- Rust のテストは 64 MiB の thread で動かす。parser の上限に近い入力は、変更前から debug の 2 MiB の thread で parse だけで stack overflow になるため。
+- TS frontend は `\div` と `%` を持たないので、0 除算の対照は Rust frontend だけで結果を検査する。TS では、連鎖と平たい綴りがともに `expression Apply \div` で拒否されることを検査する。両 frontend で通す対照は、非 Boolean の項と条件を使う。
+- v1 の CASE（OTHER つき）の閾値は、このテストの包み（`label == CASE ...`、`Inv == label >= 0`）で 44 枝受理・47 枝拒否だった。上の表の 47 とは包みが違う。v1 は変えないので、観測値を期待値とした。
+- 式位置の右結合の連言は引き続き段ごとに数える。Rust の parser は右結合の連言を 30 段で受理し 32 段で拒否するため、Rust の右結合と action 位置の左右の入れ子は、AST を直接組んだテストで確かめる。
+- Quint の生成物（LongConjunction、LongIfChain）は、設計の段の固定版（Quint 0.33.1、Apalache 0.63.0）の出力をそのまま `fixtures/nesting-chains/quint/` へ置き、sha256 を plan の値と照合した。生成スクリプトは追加しない。
+- レビューの後に TS frontend の action の選言（`actionChain` の `Or`）の蓄積を、項ごとに配列を複製する形から末尾への追加へ変えた。flat な選言の n 項で複製が O(n^2) になり、上限を超える入力でも最後の `limited` まで払っていたため。IR・branch の順序・報告するエラーは変えない。Rust 側（`typed_lower.rs`）は項ごとに蓄積を移動して `limited` を通すだけで、変更前と同じ費用なので変えていない。
+- 枝の上限での診断の順序を `fixtures/nesting-chains/` に足した（group `limit`。Next、ENABLED、SPECIFICATION の parts に置いた 4,097 項の選言と、13 個の `(x = 0 \/ x = 1)` の連言のあとの未定義の演算子）。期待値は 0c425fdaa を fresh に build して `baseline.json` を再生成した値で、既存の 240 件は変更前と byte 単位で一致し、新しい件は実装の出力から取っていない。完了した内側の `Or` の `limited` と、`And` の途中の `limited` をそれぞれ外した植え込みが、既存の 250 件では検出されなかったことへの対応。
+- 費用の上限は `fixtures/nesting-chains/sizes.json` に置いた。Next の 100,000 項の選言（`\/` を行頭に並べた形）は、変更前の 0c425fdaa で TS 0.90 秒、Wasm 1.42 秒で枝の上限により拒否される（記録した計測）。修正前の実装は TS で 4.7 秒の時点でメモリの上限（1 GiB）に当たって止まる。テストは先例（operator-sharing-limits-test）と同じ子 process で 5 秒・1 GiB の上限を課し、結果は変更前の値と一致させる。項を中置の `\/` で連ねる形は、変更前から parser の費用が項数に対して超線形で、50,000 項で TS が約 8 秒かかり、修正の差が埋もれるため使わない。メモリの上限は、変更前の TS の実測が最大 749 MB だったため、先例の 256 MiB ではなく 1 GiB とした。
+- Rust のテストの group `limit` は debug build での時間のため、v2 の 4 件（`limit-next-or-flat-4097`、`limit-next-and-chain-13`、`limit-next-or-inner-then-missing`、`limit-next-and-chain-then-missing`）だけを検査する。25 件すべてを v2 で検査すると debug で約 59 秒かかった。group `limit` の全件と v1 は、TS 側の contract が Rust frontend の native / Wasm を含む全 path で検査する。ENABLED と SPECIFICATION の placement は、診断の順序が分かれる 4 形（`or-inner-then-missing`、`or-missing-then-inner`、`and-chain-then-missing`、`and-right-then-missing`）に限った。

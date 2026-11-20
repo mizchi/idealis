@@ -59,6 +59,8 @@
 - [x] 明示v2で再帰関数をalias・operator actual経由で渡し、DOMAINと選択keyを遅延評価する。宣言時state・binder・oldのsnapshotはrtlcが保持する。等値・状態保存など完全な値を要する位置では有限domainを実体化する。
 - [ ] 一般のlazy関数値。EXCEPTのtarget、fold、membershipなど通常のScalar評価を使う観測位置の完全なTLC遅延評価互換。
 - [x] v2でもmodule連結、設定operator置換・定数表・定義上書きをlowerする。
+- [x] v2のfrontendは、同じ種類の連言・選言が直接の項になっている連鎖と、`ELSE`が直接`IF`である連鎖を、明示的なloopでたどり、連鎖全体を1段の入れ子として数える。式とmembershipの位置では連言・選言は左のspineだけ、action・SPECIFICATIONのparts・ENABLEDの位置では左右どちらの入れ子もたどる。右結合の入れ子（式の位置）、`IF`のTHEN側、Label・LET・演算子の呼び出しをまたぐ入れ子、時間論理の連言・選言は段ごとに数えたままにする。出力IRは同じ意味の綴り（平たい連言・選言、OTHER付きCASE）と同じで、v1の数え方とIRは変えない。
+- [ ] 連鎖を1段と数えても、IRの深さは連鎖の長さに比例する。最上位のinvariantでは平たい連言・選言48項、IF連鎖とCASE47枝までを受理し、超える入力（54枝のIF連鎖を含む）はcompileを通っても検査時に`Safety expression nesting exceeds 48`で拒否する。連鎖を呼び出しの中に重ねた式はv2の動的評価128で拒否する。Rustのparserは最も外側まで括弧で囲んだ62段以上の連鎖を`TLA parsing: Expression nesting exceeds 64`で拒否し、TS frontendはparseする。
 - [ ] v2は、tuple別名の連鎖`V0 == x`、`Vn == <<V(n-1), V(n-1)>>`に対する`UNCHANGED Vn`を、n=7（展開後のleafが128個）以上で検査時に`Safety evaluation nesting exceeds 128`で拒否する。v1はn=8（leafが256個）まで受理する。測定した現在の限界で、原因は調べていない。
 
 - [x] 引数付きINSTANCE、LET内INSTANCE、nested moduleの宣言時scope、名前・LAMBDAによるWITH operator置換。
@@ -82,6 +84,7 @@
 
 [実装](src/lib.rs)、[回帰](tests/compiler.rs)、[追加対応の回帰](tests/finite_support.rs)、[比較入力](tests/finite-support.json)、[標準演算と公平性の回帰](tests/operators.rs)、[その比較入力](tests/operators-support.json)、[Quint生成物の12設定](../../docs/quint-generated.md)、[既存frontendとの比較](../../evals/iterations/0029-rtla-compiler.md)を参照。
 [operator共有の回帰](tests/operator_sharing.rs)も参照。
+[連鎖の入れ子の回帰](tests/nesting_chains.rs)も参照。
 [記号operatorの回帰](tests/symbolic.rs)、[binding検査](src/symbols.rs)と[構文・TLC比較](../../evals/iterations/0069-symbolic-operators.md)も参照。高階operatorは静的に特殊化し、operatorをstateへ格納する一般の値とは区別する。
 
 [operator-sharing cohort](../../tests/tlc-differential/operator-sharing-test.ts)は保存TLCログ、TS/Rust構造、native / Wasm完全応答、線形成長と小予算のbounded / workを検査する。固定した有限fragmentと入力での根拠であり、全TLA+互換や指数的な評価仕事の除去、一般的な速度改善は主張しない。

@@ -14,6 +14,8 @@ rtlaの型付きModule/Configを、rtlcのSafetyProgramへ変換するRust front
 
 frontendの式nestingとbound variableは40、checkerの定義内式深さは48、値深さは64、TS decoderは128のまま。定義間call経路長を定義内の式nestingへ加算せず、v2の動的な評価は別に入れ子128までとする。call entryと遅延引数・captureの要求はrtlcのwork予算へ各1課金し、枯渇はbounded / workになる。生成IRが既存のcompiled expression decoder深さ128を超える場合は両frontendが同じ型で拒否する。共有は評価仕事の指数増大の除去や、全TLA+との互換性を意味しない。
 
+v2のfrontendは、同じ種類の`And`・`Or`が直接の項になっている連鎖と、`ELSE`が直接`IF`である連鎖を、明示的なloopでたどり、連鎖全体を1段の入れ子として数える。式とmembershipの位置では連言・選言は左のspineだけをたどり、右結合の入れ子は段ごとに数える。action・SPECIFICATIONのparts・ENABLEDの位置では左右どちらの入れ子もたどる。Label・LET・演算子の呼び出しは連鎖を切り、時間論理の連言・選言は対象外とする。出力IRは同じ意味の綴り（平たい連言・選言、OTHER付きCASE）と同じで、v1の数え方とIRは変えない。IRの深さは連鎖の長さに比例するので、checkerの定義内式48は緩めない。最上位のinvariantに置いたとき、平たい連言・選言は48項、IF連鎖とCASEは47枝までが受理で、超える入力（54枝のIF連鎖を含む）は検査時に`Safety expression nesting exceeds 48`で拒否する。連鎖を呼び出しの中に重ねた式はv2の動的評価128で拒否する。Rustのparserは、最も外側まで括弧で囲んだ62段以上の連鎖を`TLA parsing: Expression nesting exceeds 64`で拒否し、TS frontendはparseする。
+
 root moduleの`EXTENDS Apalache`がある場合、`:=`を同モジュールの定義どおり等号として扱う。`EXTENDS Variants`ではApalache 0.63.0の`Variant`、`VariantTag`、`VariantGetUnsafe`を扱い、tag取得はdomainが一つの文字列keyである関数に限定する。他のVariants operatorと無制限CHOOSEは未対応。`EXTENDS TLC`は受理するが、TLCの全operatorを実装するものではない。
 
 CASEは式・actionともOTHERを省略でき、ソース順で最初の真のarmを選ぶ。OTHERがなく全条件が偽なら、TLC v1.7.4 (`5a47802`) と同様に評価時に未一致エラーとソース位置を返す。未評価の分岐内ではエラーにしない。
