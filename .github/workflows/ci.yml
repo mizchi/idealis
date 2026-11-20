@@ -116,6 +116,11 @@ jobs:
       - run: node --test dist/tests/oracle-tuning/wasm-test.js
       - run: node --test dist/tests/workspace-oracle/catalog-test.js
       - run: just runtime-test
+      - name: Fetch locked dependencies for offline package checks
+        run: |
+          for manifest in crates/*/Cargo.toml; do
+            cargo fetch --locked --manifest-path "$manifest"
+          done
       - run: just package-prepare
       - run: just package-test
       - run: just usable-eval .artifacts/usable-evaluation
