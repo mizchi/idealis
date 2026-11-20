@@ -49,7 +49,18 @@ registry へ公開済みの version は使い回さない。途中まで公開�
 
 ## CI の分割粒度
 
-PR と `main` への push では、テストを独立した 2 ジョブで並列実行する。`SDK, solvers and packages (1/2)` は SDK・ソルバー・Wasm ホスト・配布物の consumer を検査し、結果を `verification-evidence-sdk` に保存する。`Model checking and Go (2/2)` は portable core をビルドして TLC 差分検査、Go の race テスト、3 言語での実装照合を行い、結果を `verification-evidence-model` に保存する。TLC 結果キャッシュはこのジョブが復元・保存する。Lean の `cache-proof` は両シャードと並列に実行する。
+PR と `main` への push では、4 つの検証ジョブを並列に実行する。各ジョブの結果は `verification-evidence-<ジョブ ID>` に保存する。
+
+| ジョブ ID | 検査                                                                                                  |
+| --------- | ----------------------------------------------------------------------------------------------------- |
+| `sdk`     | SDK、Connect bindings、各 crate の lint・単体テスト、mutation                                         |
+| `wasm`    | native / Wasm の release ビルド、ホスト・ソルバーの統合テスト、配布物の consumer、usable の評価と再生 |
+| `model`   | portable core、TLC 差分検査、safety / temporal                                                        |
+| `go`      | Go adapter の race テスト、3 言語の実装照合、非同期履歴の評価と再生                                   |
+
+`model` と `go` はそれぞれ portable core をビルドする。TLC の結果キャッシュは `model` だけが復元・保存し、チェッカーのビルドが一致する検査結果を再利用する。Lean の `cache-proof` は 4 ジョブと並列に実行する。
+
+同じコミットで TLC 結果の再利用による時間差を測るには、CI の手動実行で `reuse_tlc_results` をオン・オフして比較する。オフにすると空の結果ディレクトリから開始し、run 内で得た結果はその run 内で再利用する。
 
 4800件の portable 評価、runtime 性能評価、4 runner の cloud sharding はそれぞれ workflow_dispatch で残す。重い評価を明示的に実行でき、sharding の manifest / 欠落・衝突検出も保持する。PR で runner を prepare → shard → merge と3段階待つ構造を外した。GitHub の割当待ちそのものを短縮する保証ではない。
 

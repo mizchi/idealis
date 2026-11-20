@@ -4,6 +4,11 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      reuse_tlc_results:
+        description: Restore and save TLC results across runs
+        type: boolean
+        default: true
 permissions:
   contents: read
 concurrency:
@@ -13,14 +18,14 @@ env:
   CI: true
 jobs:
   sdk:
-    name: SDK, solvers and packages (1/2)
+    name: SDK and crates (1/4)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Reject tracked Rust build outputs
         run: test -z "$(git ls-files -- ':(glob)**/target/**')"
       - uses: ./.github/actions/setup
-      - run: rustup target add wasm32-unknown-unknown wasm32-wasip1
+      - run: rustup target add wasm32-unknown-unknown
       - run: just check
       - run: node --test dist/tests/connect/conformance.test.js
       - run: just connect-bindings-test
@@ -29,26 +34,17 @@ jobs:
       - run: cargo fmt --manifest-path evals/experiments/sat-foundation/rust/Cargo.toml -- --check
       - run: cargo clippy --all-targets --locked --manifest-path evals/experiments/sat-foundation/rust/Cargo.toml -- -D warnings
       - run: cargo test --all-targets --locked --manifest-path evals/experiments/sat-foundation/rust/Cargo.toml
-      - run: cargo build --release --locked --manifest-path evals/experiments/sat-foundation/rust/Cargo.toml
-      - run: cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path evals/experiments/sat-foundation/rust/Cargo.toml
-      - run: node --test dist/tests/sat-foundation/contract-test.js
       - run: cargo fmt --manifest-path crates/roracle/Cargo.toml -- --check
       - run: cargo clippy --all-targets --locked --manifest-path crates/roracle/Cargo.toml -- -D warnings
       - run: cargo test --locked --manifest-path crates/roracle/Cargo.toml
       - run: cargo test --locked --manifest-path crates/roracle/Cargo.toml --bench wire
-      - run: cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/roracle/Cargo.toml
-      - run: cargo build --release --locked --manifest-path crates/roracle/Cargo.toml
       - run: just oracle-types-check
       - run: just oracle-native-test
       - run: cargo fmt --manifest-path evals/experiments/workspace-oracle/rust/Cargo.toml -- --check
       - run: cargo clippy --all-targets --locked --manifest-path evals/experiments/workspace-oracle/rust/Cargo.toml -- -D warnings
       - run: cargo test --locked --manifest-path evals/experiments/workspace-oracle/rust/Cargo.toml
-      - run: cargo build --release --locked --manifest-path evals/experiments/workspace-oracle/rust/Cargo.toml
-      - run: node --test dist/tests/workspace-oracle/contract-test.js
       - run: cargo fmt --manifest-path evals/experiments/oracle-comparison/rust/Cargo.toml -- --check
       - run: cargo clippy --all-targets --locked --manifest-path evals/experiments/oracle-comparison/rust/Cargo.toml -- -D warnings
-      - run: cargo build --release --locked --manifest-path evals/experiments/oracle-comparison/rust/Cargo.toml
-      - run: cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path evals/experiments/oracle-comparison/rust/Cargo.toml
       - run: cargo fmt --manifest-path crates/idealis-connect/Cargo.toml -- --check
       - run: cargo fmt --manifest-path crates/idealis-cli/Cargo.toml -- --check
       - run: cargo clippy --all-targets --all-features --locked --manifest-path crates/idealis-connect/Cargo.toml -- -D warnings
@@ -74,31 +70,14 @@ jobs:
       - run: cargo fmt --manifest-path crates/ralloy/Cargo.toml -- --check
       - run: cargo clippy --all-targets --locked --manifest-path crates/ralloy/Cargo.toml -- -D warnings
       - run: cargo test --all-targets --locked --manifest-path crates/ralloy/Cargo.toml
-      - run: just ralloy-build
-      - run: node --test dist/tests/alloy-subset/contract-test.js
-      - run: node --test dist/tests/alloy-instance/contract-test.js
-      - run: just vitest --project=alloy
       - run: cargo fmt --manifest-path crates/rusmt/Cargo.toml -- --check
       - run: cargo clippy --all-targets --locked --manifest-path crates/rusmt/Cargo.toml -- -D warnings
       - run: cargo test --all-targets --locked --manifest-path crates/rusmt/Cargo.toml
-      - run: cargo build --release --locked --manifest-path crates/rusmt/Cargo.toml
-      - run: cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/rusmt/Cargo.toml
-      - run: node --test dist/tests/smt-subset/contract-test.js dist/tests/smt-expansion/contract-test.js dist/tests/smt-scripts/contract-test.js dist/tests/smt-tuning/contract-test.js
-      - run: just vitest --project=smt
-      - run: just wasm-test
-      - run: node --test dist/tests/oracle-tuning/wasm-test.js
-      - run: node --test dist/tests/workspace-oracle/catalog-test.js
-      - run: just usable-test
-      - run: just runtime-test
       - run: just mutation
       - run: just evaluate
       - run: just replay-evaluation
       - run: just eval-loop evals/plans/0002-mixed-depth.json ci-mixed .artifacts/evals
       - run: just replay-loop .artifacts/evals/ci-mixed-confirmation
-      - run: just package-prepare
-      - run: just package-test
-      - run: just usable-eval .artifacts/usable-evaluation
-      - run: just usable-replay .artifacts/usable-evaluation
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
@@ -107,12 +86,56 @@ jobs:
             .mutator/report
             .artifacts/evaluation
             .artifacts/evals
-            .artifacts/usable-evaluation
+          if-no-files-found: warn
+
+  wasm:
+    name: Wasm and packages (2/4)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      - run: rustup target add wasm32-unknown-unknown wasm32-wasip1
+      - run: cargo build --release --locked --manifest-path evals/experiments/sat-foundation/rust/Cargo.toml
+      - run: cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path evals/experiments/sat-foundation/rust/Cargo.toml
+      - run: node --test dist/tests/sat-foundation/contract-test.js
+      - run: cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/roracle/Cargo.toml
+      - run: cargo build --release --locked --manifest-path crates/roracle/Cargo.toml
+      - run: cargo build --release --locked --manifest-path evals/experiments/workspace-oracle/rust/Cargo.toml
+      - run: node --test dist/tests/workspace-oracle/contract-test.js
+      - run: cargo build --release --locked --manifest-path evals/experiments/oracle-comparison/rust/Cargo.toml
+      - run: cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path evals/experiments/oracle-comparison/rust/Cargo.toml
+      - run: just ralloy-build
+      - run: node --test dist/tests/alloy-subset/contract-test.js
+      - run: node --test dist/tests/alloy-instance/contract-test.js
+      - run: just vitest --project=alloy
+      - run: cargo build --release --locked --manifest-path crates/rusmt/Cargo.toml
+      - run: cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/rusmt/Cargo.toml
+      - run: node --test dist/tests/smt-subset/contract-test.js dist/tests/smt-expansion/contract-test.js dist/tests/smt-scripts/contract-test.js dist/tests/smt-tuning/contract-test.js
+      - run: just vitest --project=smt
+      - run: just wasm-test
+      - run: node --test dist/tests/oracle-tuning/wasm-test.js
+      - run: node --test dist/tests/workspace-oracle/catalog-test.js
+      - run: just runtime-test
+      - name: Fetch locked dependencies for offline package checks
+        run: |
+          for manifest in crates/*/Cargo.toml; do
+            cargo fetch --locked --manifest-path "$manifest"
+          done
+      - run: just package-prepare
+      - run: just package-test
+      - run: just usable-eval .artifacts/usable-evaluation
+      - run: just usable-replay .artifacts/usable-evaluation
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: verification-evidence-wasm
+          path: |
             .artifacts/packages
+            .artifacts/usable-evaluation
           if-no-files-found: warn
 
   model:
-    name: Model checking and Go (2/2)
+    name: Model checking (3/4)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -132,6 +155,7 @@ jobs:
           echo "inputs=$inputs" >> "$GITHUB_OUTPUT"
           echo "IDEALIS_TLC_RESULTS=.artifacts/tlc-results" >> "$GITHUB_ENV"
       - name: Restore model check results for this checker build
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.reuse_tlc_results }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .artifacts/tlc-results/${{ steps.tlc-build.outputs.build }}
@@ -156,6 +180,30 @@ jobs:
       - run: node dist/evals/experiments/collections-temporal/replay.js .artifacts/collections-temporal
       - run: node dist/evals/experiments/rust-safety/evaluate.js .artifacts/rust-safety
       - run: node dist/evals/experiments/rust-safety/replay.js .artifacts/rust-safety
+      - run: just portable-test
+      - run: just usable-test
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: verification-evidence-model
+          path: |
+            .artifacts/rust-safety
+            .artifacts/collections-temporal
+            .artifacts/frontier-safety
+            .artifacts/readme-comparison
+            .artifacts/rtla-compiler
+            .artifacts/cache-expansion-eval
+            .artifacts/cache-expansion-replay
+          if-no-files-found: warn
+
+  go:
+    name: Go and cross-language (4/4)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      - run: rustup target add wasm32-unknown-unknown
+      - run: just portable-build
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: 1.25.x
@@ -184,22 +232,14 @@ jobs:
       - run: node --test dist/tests/async-tuning/contract-test.js
       - run: node dist/evals/experiments/async-tuning/evaluate.js regression .artifacts/async-tuning
       - run: node dist/evals/experiments/async-tuning/replay.js .artifacts/async-tuning
-      - run: just portable-test
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
-          name: verification-evidence-model
+          name: verification-evidence-go
           path: |
             .artifacts/go
             .artifacts/shared-oracle
             .artifacts/async-tuning
-            .artifacts/rust-safety
-            .artifacts/collections-temporal
-            .artifacts/frontier-safety
-            .artifacts/readme-comparison
-            .artifacts/rtla-compiler
-            .artifacts/cache-expansion-eval
-            .artifacts/cache-expansion-replay
           if-no-files-found: warn
 
   cache-proof:
