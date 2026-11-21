@@ -57,6 +57,8 @@ Rust frontendは有限モデルを検査IRへ変換する。高階operatorは名
 
 再帰経路で動的評価128段に達した場合は`bounded / evaluation`、work枯渇は`bounded / work`になる。未確定の結果を成功として扱わない。式nesting・bound variable 40、checkerの式48・値64、TS decoder128を維持する。
 
+v2のfrontendは、同じ種類の`And`・`Or`が直接の項になっている連鎖と、`ELSE`が直接`IF`である連鎖を、明示的なloopでたどり、連鎖全体を1段の入れ子として数える。式とmembershipの位置では連言・選言は左のspineだけをたどり、右結合の入れ子は段ごとに数える。action・SPECIFICATIONのparts・ENABLEDの位置では左右どちらの入れ子もたどる。Label・LET・演算子の呼び出しは連鎖を切り、時間論理の連言・選言は対象外とする。出力IRは同じ意味の綴り（平たい連言・選言、OTHER付きCASE）と同じで、v1の数え方とIRは変えない。IRの深さは連鎖の長さに比例するので、checkerの定義内式48は緩めない。最上位のinvariantに置いたとき、平たい連言・選言は48項、IF連鎖とCASEは47枝までが受理で、超える入力（54枝のIF連鎖を含む）は検査時に`Safety expression nesting exceeds 48`で拒否する。連鎖を呼び出しの中に重ねた式はv2の動的評価128で拒否する。Rustのparserは、最も外側まで括弧で囲んだ62段以上の連鎖を`TLA parsing: Expression nesting exceeds 64`で拒否し、TS frontendはparseする。
+
 追加ソースは`modules: { ModuleName: source }`で渡す。IR v1/v2の両方でEXTENDS、引数付きINSTANCE、LET内INSTANCE、nested module、LOCAL、WITH、設定の定数・operator置換を解決する。外側の宣言はnested moduleの宣言位置のscopeへ束縛する。外側の定数を内側のWITH対象として扱わない。変数の置換先はstate variableのaliasに制限する。ファイルシステムやネットワークは読まない。
 
 SelectSeq / SortSeq / AssertはIR v1/v2でlowerする。callbackは名前またはLAMBDAを使い、再帰callbackはv2を要求する。定数有限domain上のSPECIFICATIONの量化fairnessも扱う。state依存の時間論理domain、無限集合の列挙、VIEWなどの範囲は[チェックリスト](../crates/rtla-compiler/SUPPORT.md)を参照。

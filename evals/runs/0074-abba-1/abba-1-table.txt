@@ -1,0 +1,140 @@
+bench               function                                               before ns    after ns    chg%   B0 A1 A2 B3 (ns)   spreadB spreadA
+compatibility       check_action-constraint                                      508         558   +9.88   512 613 503 503     1.8%  19.8%
+compatibility       check_choose-order                                           715         624  -12.69   610 639 609 819    29.4%   4.7%
+compatibility       check_model-untyped                                         1173        1203   +2.56   1201 1227 1179 1145     4.8%   4.0%
+compatibility       check_power-min                                              615         840  +36.65   517 1170 509 712    31.6%  78.7%  FLAG>=10%
+compatibility       check_state-constraint                                       518         778  +50.16   524 1029 527 513     2.1%  64.6%  FLAG>=10%
+compatibility       check_temporal-fair                                         6826        7210   +5.63   6788 7908 6512 6863     1.1%  19.4%
+compatibility       compile_action-constraint                                  15640       28632  +83.08   15748 41810 15455 15531     1.4%  92.0%  FLAG>=10%
+compatibility       compile_choose-order                                       22332       27822  +24.59   22657 33340 22305 22006     2.9%  39.7%  FLAG>=10%
+compatibility       compile_model-untyped                                      16144       18130  +12.30   16306 20355 15905 15983     2.0%  24.5%  FLAG>=10%
+compatibility       compile_power-min                                          35364       20662  -41.57   20319 21153 20172 50408    85.1%   4.8%
+compatibility       compile_state-constraint                                   15471       15255   -1.40   15341 15628 14881 15602     1.7%   4.9%
+compatibility       compile_temporal-fair                                      48295       85057  +76.12   47770 123540 46575 48820     2.2%  90.5%  FLAG>=10%
+compatibility       modules_extends-counter                                    51956       39143  -24.66   36797 40076 38209 67114    58.4%   4.8%
+compatibility       modules_extends-diamond                                    35008       25081  -28.36   25028 25732 24430 44988    57.0%   5.2%
+compatibility       modules_flat-counter                                       23578       23158   -1.78   23281 23442 22875 23874     2.5%   2.5%
+compatibility       modules_instance-twice                                    110632       97376  -11.98   99661 99035 95717 121602    19.8%   3.4%
+compatibility       modules_module-definition-override                         33991       33574   -1.23   33419 34127 33021 34563     3.4%   3.3%
+compatibility       operators-check_assert-true                                  525        1061 +101.98   548 1607 515 503     8.6% 102.9%  FLAG>=10%
+compatibility       operators-check_fair-forall                                39715       44825  +12.87   39724 50498 39153 39707     0.0%  25.3%  FLAG>=10%
+compatibility       operators-check_fair-intermittent-SF                      652774      780601  +19.58   658992 913612 647589 646556     1.9%  34.1%  FLAG>=10%
+compatibility       operators-check_select-order                                1095        1087   -0.78   1106 1088 1085 1084     2.0%   0.3%
+compatibility       operators-check_sort-ascending                              1149        1158   +0.78   1185 1175 1141 1114     6.1%   2.9%
+compatibility       operators-compile_assert-true                              14386       25195  +75.14   14665 36288 14102 14106     3.9%  88.1%  FLAG>=10%
+compatibility       operators-compile_fair-forall                             101506      108234   +6.63   103239 114886 101583 99773     3.4%  12.3%
+compatibility       operators-compile_fair-intermittent-SF                    205058      209594   +2.21   206805 215040 204149 203311     1.7%   5.2%
+compatibility       operators-compile_select-order                             30717       28064   -8.64   33698 27937 28191 27736    19.4%   0.9%
+compatibility       operators-compile_sort-ascending                           29185       29071   -0.39   29494 29307 28835 28876     2.1%   1.6%
+frontend            frontend-check_except-zero-arity                           17848       11439  -35.91   10708 10993 11884 24987    80.0%   7.8%
+frontend            frontend-check_factorial                                   16640       16535   -0.63   16483 16675 16395 16796     1.9%   1.7%
+frontend            frontend-check_fold-recursive                              17577       21163  +20.41   17284 17271 25055 17870     3.3%  36.8%  FLAG>=10%
+frontend            frontend-check_instance-parameter                           6345        8026  +26.49   6301 6269 9783 6390     1.4%  43.8%  FLAG>=10%
+frontend            frontend-check_label                                        3898        3849   -1.27   3848 3835 3863 3948     2.6%   0.7%
+frontend            frontend-check_named                                        7902        6868  -13.08   8293 6948 6788 7510     9.9%   2.3%
+frontend            frontend-check_select-lambda                                5543        7413  +33.73   5481 5351 9474 5606     2.3%  55.6%  FLAG>=10%
+frontend            frontend-compile_except-zero-arity                        236289      150069  -36.49   125671 130691 169447 346907    93.6%  25.8%
+frontend            frontend-compile_factorial                                 73423       73199   -0.30   71873 73222 73175 74972     4.2%   0.1%
+frontend            frontend-compile_fold-recursive                            72658      121939  +67.83   72619 72402 171476 72697     0.1%  81.2%  FLAG>=10%
+frontend            frontend-compile_instance-parameter                        96827      115216  +18.99   95159 102840 127593 98495     3.4%  21.5%  FLAG>=10%
+frontend            frontend-compile_label                                     64329       62807   -2.37   64580 62028 63586 64079     0.8%   2.5%
+frontend            frontend-compile_named                                    142305       75688  -46.81   204330 75674 75702 80280    87.2%   0.0%
+frontend            frontend-compile_select-lambda                             56326       71757  +27.40   55897 55675 87839 56755     1.5%  44.8%  FLAG>=10%
+frontend            frontend-parse_except-zero-arity                           49211       33739  -31.44   28830 29365 38114 69592    82.8%  25.9%
+frontend            frontend-parse_factorial                                   19239       19969   +3.79   18512 20458 19480 19966     7.6%   4.9%
+frontend            frontend-parse_fold-recursive                              23768       32651  +37.37   23542 23514 41788 23994     1.9%  56.0%  FLAG>=10%
+frontend            frontend-parse_instance-parameter                          15109       15522   +2.73   14551 15022 16022 15668     7.4%   6.4%
+frontend            frontend-parse_label                                       20528       18429  -10.23   21686 18486 18371 19370    11.3%   0.6%
+frontend            frontend-parse_named                                       38882       21500  -44.71   54492 21558 21441 23271    80.3%   0.5%
+frontend            frontend-parse_select-lambda                               16416       24743  +50.73   15873 16682 32804 16958     6.6%  65.2%  FLAG>=10%
+frontend_semantics  semantics-check_action-capture                             10244       13722  +33.94   10332 17793 9651 10157     1.7%  59.3%  FLAG>=10%
+frontend_semantics  semantics-check_action-repeat-4                            18369       19997   +8.86   18520 18913 21081 18217     1.7%  10.8%
+frontend_semantics  semantics-check_action-repeat-6                            76506       68683  -10.23   67775 66002 71364 85238    22.8%   7.8%
+frontend_semantics  semantics-check_lazy-control                               48023       44283   -7.79   65247 54056 34510 30800    71.7%  44.1%
+frontend_semantics  semantics-check_scalar-control                              1181        1082   -8.35   1265 1092 1072 1096    14.3%   1.8%
+frontend_semantics  semantics-check_temporal-repeat-3                          40783       39446   -3.28   41418 41560 37332 40149     3.1%  10.7%
+frontend_semantics  semantics-check_temporal-repeat-5                         164789      169146   +2.64   161256 174197 164094 168322     4.3%   6.0%
+frontend_semantics  semantics-compile_action-capture                           66380       66748   +0.55   63532 69265 64231 69227     8.6%   7.5%
+frontend_semantics  semantics-compile_action-repeat-4                          99056      108143   +9.17   104010 110402 105884 94102    10.0%   4.2%
+frontend_semantics  semantics-compile_action-repeat-6                         237890      134126  -43.62   155617 129840 138413 320163    69.2%   6.4%
+frontend_semantics  semantics-compile_lazy-control                            120815      174542  +44.47   119283 229545 119540 122346     2.5%  63.0%  FLAG>=10%
+frontend_semantics  semantics-compile_scalar-control                           16221       14347  -11.55   17450 14335 14359 14991    15.2%   0.2%
+frontend_semantics  semantics-compile_temporal-repeat-3                       138550      147880   +6.73   138490 166384 129375 138610     0.1%  25.0%
+frontend_semantics  semantics-compile_temporal-repeat-5                       516806      491214   -4.95   527701 495127 487301 505910     4.2%   1.6%
+frontend_semantics  semantics-prepared_action-capture                           5681        7533  +32.60   5894 9805 5261 5468     7.5%  60.3%  FLAG>=10%
+frontend_semantics  semantics-prepared_action-repeat-4                         22734       14614  -35.72   15649 13933 15295 29820    62.3%   9.3%
+frontend_semantics  semantics-prepared_action-repeat-6                         64830       68587   +5.79   61901 73288 63886 67759     9.0%  13.7%
+frontend_semantics  semantics-prepared_lazy-control                             3475        2473  -28.83   4661 2571 2376 2289    68.2%   7.9%
+frontend_semantics  semantics-prepared_scalar-control                            406         549  +35.22   403 698 400 409     1.5%  54.1%  FLAG>=10%
+frontend_semantics  semantics-prepared_temporal-repeat-3                       38029       34406   -9.53   37205 34941 33870 38852     4.3%   3.1%
+frontend_semantics  semantics-prepared_temporal-repeat-5                      176419      159384   -9.66   190086 160782 157987 162753    15.5%   1.8%
+nesting_chains      nesting-chains-compile_if-chain-3                          64891       53853  -17.01   76825 54829 52877 52958    36.8%   3.6%
+nesting_chains      nesting-chains-compile_if-chain-38                        409816      394782   -3.67   424709 395011 394553 394922     7.3%   0.1%
+nesting_chains      nesting-chains-compile_if-chain-8                         101833       93792   -7.90   110522 94859 92725 93145    17.1%   2.3%
+nesting_chains      nesting-chains-compile_paren-and-3                         53848       40353  -25.06   68267 40827 39879 39428    53.6%   2.4%
+nesting_chains      nesting-chains-compile_paren-and-38                       503733      335478  -33.40   679577 339149 331806 327888    69.8%   2.2%
+nesting_chains      nesting-chains-compile_paren-and-8                        115517       74846  -35.21   156366 75452 74239 74669    70.7%   1.6%
+quint_generated     quint-check_Choice_v1                                       1497        1101  -26.42   1859 1089 1114 1135    48.4%   2.3%
+quint_generated     quint-check_Choice_v2                                       3975        3604   -9.34   4366 3662 3546 3585    19.6%   3.2%
+quint_generated     quint-check_Counter_v1                                      1019        1000   -1.80   1008 992 1008 1029     2.0%   1.6%
+quint_generated     quint-check_Counter_v2                                      6414        4058  -36.73   4085 4152 3965 8743    72.6%   4.6%
+quint_generated     quint-check_Match_v1                                        4510        7022  +55.70   4401 4310 9735 4619     4.8%  77.3%  FLAG>=10%
+quint_generated     quint-check_Match_v2                                       25281       41092  +62.54   25728 25392 56791 24834     3.5%  76.4%  FLAG>=10%
+quint_generated     quint-check_NestedFold_v1                                   1129        1218   +7.80   1149 1142 1293 1110     3.5%  12.5%
+quint_generated     quint-check_NestedFold_v2                                  11677       11782   +0.90   11466 11669 11896 11888     3.6%   1.9%
+quint_generated     quint-check_SequenceFold_v1                                  866         790   -8.84   846 783 796 887     4.7%   1.7%
+quint_generated     quint-check_SequenceFold_v2                                10002        5793  -42.08   13784 5784 5803 6219    75.6%   0.3%
+quint_generated     quint-check_SetFold_v1                                      1113         638  -42.67   1414 633 644 813    54.0%   1.8%
+quint_generated     quint-check_SetFold_v2                                      5544        4476  -19.25   5586 4514 4439 5501     1.5%   1.7%
+quint_generated     quint-compile_Choice_v1                                    58103       33411  -42.50   81090 33071 33751 35116    79.1%   2.0%
+quint_generated     quint-compile_Choice_v2                                    44238       38834  -12.22   49606 38521 39146 38870    24.3%   1.6%
+quint_generated     quint-compile_Counter_v1                                   35549       34676   -2.46   36253 34205 35147 34846     4.0%   2.7%
+quint_generated     quint-compile_Counter_v2                                   56489       40448  -28.40   40871 39936 40960 72107    55.3%   2.5%
+quint_generated     quint-compile_Match_v1                                    226603      140546  -37.98   135633 128907 152186 317573    80.3%  16.6%
+quint_generated     quint-compile_Match_v2                                    182065      337023  +85.11   182915 180713 493332 181215     0.9%  92.8%  FLAG>=10%
+quint_generated     quint-compile_NestedFold_v1                                49655       55787  +12.35   50063 49893 61681 49248     1.6%  21.1%  FLAG>=10%
+quint_generated     quint-compile_NestedFold_v2                                83669       86082   +2.88   83650 84448 87716 83688     0.0%   3.8%
+quint_generated     quint-compile_SequenceFold_v1                              41093       36539  -11.08   40159 36631 36447 42028     4.5%   0.5%
+quint_generated     quint-compile_SequenceFold_v2                              53276       50468   -5.27   52772 50492 50444 53780     1.9%   0.1%
+quint_generated     quint-compile_SetFold_v1                                   67907       31996  -52.88   79697 32068 31924 56117    34.7%   0.5%
+quint_generated     quint-compile_SetFold_v2                                   56277       44805  -20.39   58030 44633 44976 54524     6.2%   0.8%
+quint_generated     quint-end-to-end_Choice_v1                                 76520       61498  -19.63   83767 60395 62601 69273    18.9%   3.6%
+quint_generated     quint-end-to-end_Choice_v2                                 70945       70697   -0.35   74587 69088 72305 67302    10.3%   4.5%
+quint_generated     quint-end-to-end_Counter_v1                               104425       60590  -41.98   61388 60198 60982 147463    82.4%   1.3%
+quint_generated     quint-end-to-end_Counter_v2                               119979       70290  -41.41   118660 69535 71045 121299     2.2%   2.1%
+quint_generated     quint-end-to-end_Match_v1                                 247309      393475  +59.10   250833 244894 542056 243785     2.9%  75.5%  FLAG>=10%
+quint_generated     quint-end-to-end_Match_v2                                 323730      393265  +21.48   312865 320127 466403 334595     6.7%  37.2%  FLAG>=10%
+quint_generated     quint-end-to-end_NestedFold_v1                             93909       99736   +6.20   94254 101240 98231 93563     0.7%   3.0%
+quint_generated     quint-end-to-end_NestedFold_v2                            144550      144300   -0.17   139569 143374 145225 149531     6.9%   1.3%
+quint_generated     quint-end-to-end_SequenceFold_v1                           75420       69894   -7.33   75989 68794 70993 74851     1.5%   3.1%
+quint_generated     quint-end-to-end_SequenceFold_v2                          155726       89832  -42.31   217205 88913 90751 94246    79.0%   2.0%
+quint_generated     quint-end-to-end_SetFold_v1                               103681       64462  -37.83   129418 63560 65363 77945    49.6%   2.8%
+quint_generated     quint-end-to-end_SetFold_v2                                95766       82472  -13.88   94643 82190 82754 96888     2.3%   0.7%
+quint_generated     quint-parse_Choice                                         41183       25731  -37.52   54898 25472 25989 27467    66.6%   2.0%
+quint_generated     quint-parse_Counter                                        24670       23867   -3.26   24446 23818 23916 24895     1.8%   0.4%
+quint_generated     quint-parse_Match                                         138303      110485  -20.11   109963 108918 112052 166643    41.0%   2.8%
+quint_generated     quint-parse_NestedFold                                     43501       48876  +12.36   43005 43883 53870 43997     2.3%  20.4%  FLAG>=10%
+quint_generated     quint-parse_SequenceFold                                   35873       31605  -11.90   35159 31171 32040 36588     4.0%   2.7%
+quint_generated     quint-parse_SetFold                                        66527       30861  -53.61   75710 30483 31238 57345    27.6%   2.4%
+recursive_actions   recursive-check_accumulator                                21327       22784   +6.83   21924 20882 24686 20731     5.6%  16.7%
+recursive_actions   recursive-check_branching                                  29056       12917  -55.54   33509 13125 12710 24604    30.6%   3.2%
+recursive_actions   recursive-check_captured                                   17178       14322  -16.63   16765 14688 13955 17592     4.8%   5.1%
+recursive_actions   recursive-check_inline-control                              1755        1797   +2.43   1734 1725 1869 1775     2.4%   8.1%
+recursive_actions   recursive-check_multi-argument                            794084     1094871  +37.88   770108 1477725 712016 818060     6.0%  69.9%  FLAG>=10%
+recursive_actions   recursive-check_tail-12                                    19588       33383  +70.43   19173 47186 19581 20002     4.2%  82.7%  FLAG>=10%
+recursive_actions   recursive-check_target-capture                             16396       19466  +18.72   16255 14132 24799 16536     1.7%  54.8%  FLAG>=10%
+recursive_actions   recursive-compile_accumulator                              98905      104762   +5.92   99280 108606 100919 98530     0.8%   7.3%
+recursive_actions   recursive-compile_branching                               179305      116461  -35.05   111852 125864 107059 246758    75.2%  16.1%
+recursive_actions   recursive-compile_captured                                139728      110587  -20.86   148159 113776 107397 131296    12.1%   5.8%
+recursive_actions   recursive-compile_inline-control                           19807       18661   -5.79   18579 18482 18840 21035    12.4%   1.9%
+recursive_actions   recursive-compile_multi-argument                          117360      147406  +25.60   117900 187486 107325 116819     0.9%  54.4%  FLAG>=10%
+recursive_actions   recursive-compile_tail-12                                  81936      128956  +57.39   80245 175939 81973 83627     4.1%  72.9%  FLAG>=10%
+recursive_actions   recursive-compile_target-capture                          160392      148423   -7.46   160126 130509 166337 160658     0.3%  24.1%
+recursive_actions   recursive-prepared_accumulator                              3136        2961   -5.57   2906 2769 3153 3366    14.7%  13.0%
+recursive_actions   recursive-prepared_branching                                6413        4091  -36.21   7879 4368 3814 4947    45.7%  13.5%
+recursive_actions   recursive-prepared_captured                                 7314        6366  -12.96   7332 6522 6209 7295     0.5%   4.9%
+recursive_actions   recursive-prepared_inline-control                            528         528   -0.01   518 550 505 538     3.7%   8.5%
+recursive_actions   recursive-prepared_multi-argument                         751996      763026   +1.47   779910 823237 702814 724081     7.4%  15.8%
+recursive_actions   recursive-prepared_tail-12                                 19524       13838  -29.12   12803 14753 12923 26246    68.8%  13.2%
+recursive_actions   recursive-prepared_target-capture                           7615       10302  +35.28   7507 6392 14212 7724     2.8%  75.9%  FLAG>=10%
+functions 138 max change % 101.98 min -55.54 flagged >=+10%: 35

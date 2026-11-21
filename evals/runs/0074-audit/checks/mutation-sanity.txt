@@ -1,0 +1,12 @@
+Hand-planted defects in the implementation, each run against tests/nesting-chains/contract-test.ts (TS, Wasm and native cores rebuilt for Rust plants) and crates/rtla-compiler/tests/nesting_chains.rs.
+Sources were restored byte for byte after each run (sha256 verified).
+
+Rust m1b action And frame ignores the base bound of the enclosing frame: TS 2 failed, Rust 1 failed (killed)
+Rust m4 action ELSE IF assembled in forward order: TS 3 failed, Rust 1 failed (killed)
+Rust m5 left chain folds the first operand of every outer layer again: both suites did not terminate (exponential re-lowering); processes were killed (killed by non-termination)
+TS t1 action And frame ignores the base bound: 4 failed (killed)
+TS t2 expression left chain folds layers outermost first: 52 failed (killed)
+TS t3 action ELSE IF drops the taken branches: 4 failed (killed)
+TS t4 SPECIFICATION parts visit nested conjunction operands in reverse: 5 failed (killed)
+TS t5 action Or chain skips its final limited check: 2 failed (killed)
+First attempt m1 (before the shape corpus held two binders in one tree): survived (TS 246 pass, Rust 11 pass); the shape corpus and a binder-bearing Rust AST test were added and the same plant is now killed (m1b).

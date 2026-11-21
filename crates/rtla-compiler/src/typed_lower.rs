@@ -5,6 +5,7 @@ use crate::{
 use crate::{
     analysis::{Node, NodeMut, analysis_children},
     typed,
+    typed_expr::same_kind,
 };
 use rtlc::ir::{self, Expression as I, Step, TemporalFormula as T};
 use std::collections::HashSet;
@@ -14,6 +15,16 @@ fn branch(name: &str, steps: Vec<Step>) -> ir::Branch {
         name: name.into(),
         steps,
     }
+}
+fn inherited(value: &Expression) -> Vec<&Expression> {
+    analysis_children(Node::Source(value))
+        .into_iter()
+        .filter(|edge| edge.descriptor.action == "inherit")
+        .filter_map(|edge| match edge.node {
+            Node::Source(operand) => Some(operand),
+            _ => None,
+        })
+        .collect()
 }
 fn guard(expression: I) -> Step {
     Step::Guard { expression }
@@ -139,6 +150,58 @@ fn unchanged(value: I) -> Result<Vec<Step>> {
         _ => unsupported("generative UNCHANGED requires state variables"),
     }
 }
+enum ChainStep<'a> {
+    Descend(ChainFrame<'a>),
+    Done(Vec<ir::Branch>),
+}
+struct ChainFrame<'a> {
+    and: bool,
+    operands: &'a [Expression],
+    position: usize,
+    bound: usize,
+    result: Vec<ir::Branch>,
+    next: Vec<ir::Branch>,
+    branch: usize,
+}
+impl<'a> ChainFrame<'a> {
+    fn new(and: bool, operands: &'a [Expression], bound: usize, name: &str) -> Self {
+        Self {
+            and,
+            operands,
+            position: 0,
+            bound,
+            result: if and {
+                vec![branch(name, vec![])]
+            } else {
+                vec![]
+            },
+            next: vec![],
+            branch: 0,
+        }
+    }
+    fn append(&mut self, additions: Vec<ir::Branch>) -> Result<()> {
+        for mut addition in additions {
+            addition
+                .steps
+                .splice(0..0, self.result[self.branch].steps.clone());
+            self.next.push(addition);
+            if self.next.len() > 4096 {
+                return unsupported("action expansion exceeds 4096 branches");
+            }
+        }
+        Ok(())
+    }
+    fn accept(&mut self, branches: Vec<ir::Branch>) -> Result<()> {
+        if self.and {
+            self.append(branches)?;
+            self.branch += 1;
+        } else {
+            self.result.extend(branches);
+            self.result = typed::limited(std::mem::take(&mut self.result))?;
+        }
+        Ok(())
+    }
+}
 impl Compiler<'_> {
     fn target_reads_ir(&mut self, value: &Expression, context: &Context) -> Result<Vec<I>> {
         let target = Self::target_ir(&self.resolve_target_within(value, context, 256)?)?;
@@ -206,62 +269,8 @@ impl Compiler<'_> {
                 }
                 typed::limited(branches)
             }
-            E::Or { operands, .. } => {
-                let mut result = vec![];
-                for operand in operands {
-                    result.extend(self.action_ir(operand, &child, name)?);
-                    result = typed::limited(result)?;
-                }
-                Ok(result)
-            }
-            E::And { operands, .. } => {
-                let mut result = vec![branch(name, vec![])];
-                for operand in operands {
-                    let mut next = vec![];
-                    for branch in &result {
-                        let bound = context.bound
-                            + branch
-                                .steps
-                                .iter()
-                                .filter(|step| matches!(step, Step::Bind { .. }))
-                                .count();
-                        for mut addition in self.action_ir(
-                            operand,
-                            &Context {
-                                bound,
-                                ..child.clone()
-                            },
-                            name,
-                        )? {
-                            addition.steps.splice(0..0, branch.steps.clone());
-                            next.push(addition);
-                            if next.len() > 4096 {
-                                return unsupported("action expansion exceeds 4096 branches");
-                            }
-                        }
-                    }
-                    result = typed::limited(next)?;
-                }
-                Ok(result)
-            }
-            E::If {
-                condition,
-                consequent,
-                alternative,
-            } => {
-                let condition = self.expression_ir(condition, &child)?;
-                let mut result = vec![];
-                for (body, condition) in [
-                    (consequent, condition.clone()),
-                    (alternative, not(condition)),
-                ] {
-                    for mut branch in self.action_ir(body, &child, name)? {
-                        branch.steps.insert(0, guard(condition.clone()));
-                        result.push(branch);
-                    }
-                }
-                typed::limited(result)
-            }
+            E::Or { .. } | E::And { .. } => self.action_chain_ir(value, context, &child, name),
+            E::If { .. } => self.action_else_if_ir(value, &child, name),
             E::Case { arms, other } if !arms.is_empty() => {
                 let mut result = vec![];
                 let mut previous: Vec<I> = vec![];
@@ -341,6 +350,117 @@ impl Compiler<'_> {
                 name,
                 vec![guard(self.expression_ir(value, context)?)],
             )]),
+        }
+    }
+    fn action_else_if_ir(
+        &mut self,
+        value: &Expression,
+        child: &Context,
+        name: &str,
+    ) -> Result<Vec<ir::Branch>> {
+        let mut arms = vec![];
+        let mut tail = value;
+        while let E::If {
+            condition,
+            consequent,
+            alternative,
+        } = &tail.node
+        {
+            let condition = self.expression_ir(condition, child)?;
+            let mut taken = vec![];
+            for mut branch in self.action_ir(consequent, child, name)? {
+                branch.steps.insert(0, guard(condition.clone()));
+                taken.push(branch);
+            }
+            arms.push((condition, taken));
+            tail = alternative;
+        }
+        let mut alternative = self.action_ir(tail, child, name)?;
+        for (condition, taken) in arms.into_iter().rev() {
+            let mut result = taken;
+            for mut branch in alternative {
+                branch.steps.insert(0, guard(not(condition.clone())));
+                result.push(branch);
+            }
+            alternative = typed::limited(result)?;
+        }
+        Ok(alternative)
+    }
+    fn action_chain_ir(
+        &mut self,
+        value: &Expression,
+        context: &Context,
+        child: &Context,
+        name: &str,
+    ) -> Result<Vec<ir::Branch>> {
+        let (E::And { operands, .. } | E::Or { operands, .. }) = &value.node else {
+            return unsupported("action chain");
+        };
+        let and = matches!(value.node, E::And { .. });
+        let mut stack = vec![ChainFrame::new(and, operands, context.bound, name)];
+        let mut finished = None;
+        while let Some(frame) = stack.last_mut() {
+            if let Some(branches) = finished.take() {
+                frame.accept(branches)?;
+            }
+            match self.advance_chain(frame, child, name)? {
+                ChainStep::Descend(inner) => stack.push(inner),
+                ChainStep::Done(branches) => {
+                    stack.pop();
+                    finished = Some(branches);
+                }
+            }
+        }
+        Ok(finished.unwrap_or_default())
+    }
+    fn advance_chain<'a>(
+        &mut self,
+        frame: &mut ChainFrame<'a>,
+        child: &Context,
+        name: &str,
+    ) -> Result<ChainStep<'a>> {
+        if !frame.and {
+            while let Some(operand) = frame.operands.get(frame.position) {
+                frame.position += 1;
+                if let Some(inner) = same_kind(operand, false) {
+                    return Ok(ChainStep::Descend(ChainFrame::new(false, inner, 0, name)));
+                }
+                frame.result.extend(self.action_ir(operand, child, name)?);
+                frame.result = typed::limited(std::mem::take(&mut frame.result))?;
+            }
+            return Ok(ChainStep::Done(std::mem::take(&mut frame.result)));
+        }
+        loop {
+            let Some(operand) = frame.operands.get(frame.position) else {
+                return Ok(ChainStep::Done(std::mem::take(&mut frame.result)));
+            };
+            if frame.branch == frame.result.len() {
+                frame.result = typed::limited(std::mem::take(&mut frame.next))?;
+                frame.position += 1;
+                frame.branch = 0;
+                continue;
+            }
+            let bound = frame.bound
+                + frame.result[frame.branch]
+                    .steps
+                    .iter()
+                    .filter(|step| matches!(step, Step::Bind { .. }))
+                    .count();
+            if let Some(inner) = same_kind(operand, true) {
+                return Ok(ChainStep::Descend(ChainFrame::new(
+                    true, inner, bound, name,
+                )));
+            }
+            let additions = self.action_ir(
+                operand,
+                &Context {
+                    bound,
+                    ..child.clone()
+                },
+                name,
+            )?;
+            frame.append(additions)?;
+            frame.branch += 1;
         }
     }
     fn template_expression<'a>(&'a self, mut formula: &'a T, mut always: bool) -> Option<I> {
@@ -751,12 +871,18 @@ impl Compiler<'_> {
                 Ok(())
             }
             E::And { .. } => {
-                for edge in analysis_children(Node::Source(value))
-                    .into_iter()
-                    .filter(|edge| edge.descriptor.action == "inherit")
-                {
-                    if let Node::Source(operand) = edge.node {
-                        self.parts_ir(operand, &context.nested()?, initial, next, fairness)?;
+                let mut pending = vec![inherited(value).into_iter()];
+                while let Some(operands) = pending.last_mut() {
+                    match operands.next() {
+                        Some(operand) if matches!(operand.node, E::And { .. }) => {
+                            pending.push(inherited(operand).into_iter());
+                        }
+                        Some(operand) => {
+                            self.parts_ir(operand, &context.nested()?, initial, next, fairness)?;
+                        }
+                        None => {
+                            pending.pop();
+                        }
                     }
                 }
                 Ok(())

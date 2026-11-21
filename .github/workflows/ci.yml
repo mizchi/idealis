@@ -223,7 +223,7 @@ jobs:
       - run: node --test dist/tests/quint-generated/contract-test.js
       - run: node --test dist/tests/frontier-safety/contract-test.js
       - run: node --test dist/tests/readme-comparison/contract-test.js
-      - run: node --test dist/tests/rust-safety/contract-test.js dist/tests/collections-temporal/contract-test.js dist/tests/tlc-differential/compare-test.js dist/tests/parallel-safety/contract-test.js
+      - run: node --test dist/tests/rust-safety/contract-test.js dist/tests/collections-temporal/contract-test.js dist/tests/tlc-differential/compare-test.js dist/tests/nesting-chains/contract-test.js dist/tests/parallel-safety/contract-test.js
       # The regression suite measures native execution against a wall-clock budget.
       - run: node --test dist/tests/tlc-differential/regression-test.js
       - run: node dist/evals/experiments/collections-temporal/evaluate.js .artifacts/collections-temporal
