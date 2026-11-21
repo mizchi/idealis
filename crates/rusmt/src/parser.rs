@@ -4,7 +4,7 @@ use num_traits::{Signed, Zero};
 use std::{collections::BTreeMap, sync::Arc};
 
 #[derive(Clone)]
-enum Node {
+pub(super) enum Node {
     Atom(String, bool),
     List(Vec<Self>),
 }
@@ -20,7 +20,7 @@ fn list(node: &Node) -> Result<&[Node]> {
         _ => Err(Error::new("syntax", "expected list")),
     }
 }
-fn parse(source: &str) -> Result<Vec<Node>> {
+pub(super) fn parse(source: &str) -> Result<Vec<Node>> {
     if source.len() > 1_048_576 {
         return Err(Error::new("resource", "source exceeds 1 MiB"));
     }
@@ -237,9 +237,9 @@ impl Term {
         }
     }
 }
-struct Compiler {
-    variables: BTreeMap<String, (Variable, usize)>,
-    constants: BTreeMap<String, BigInt>,
+struct Compiler<'a> {
+    variables: &'a BTreeMap<String, (Variable, usize)>,
+    constants: &'a BTreeMap<String, BigInt>,
     visible: usize,
 }
 fn name(node: &Node) -> Result<String> {
@@ -373,7 +373,7 @@ fn equality(left: Term, right: Term) -> Result<Arc<Formula>> {
         _ => Err(Error::new("type", "equality operands have different sorts")),
     }
 }
-impl Compiler {
+impl Compiler<'_> {
     fn term(&self, node: &Node, locals: &BTreeMap<String, Term>, depth: usize) -> Result<Term> {
         if depth > 32 {
             return Err(Error::new("resource", "term nesting exceeds 32"));
@@ -641,15 +641,35 @@ impl Compiler {
         }
     }
 }
-pub(super) fn compile(source: &str) -> Result<Problem> {
-    let nodes = parse(source)?;
+/// Declarations fixed by the command prefix of a source.
+pub(super) struct Declarations {
+    variables: Arc<Variables>,
+    integers: usize,
+    booleans: usize,
+}
+impl Declarations {
+    pub(super) fn visible(&self) -> usize {
+        self.variables.len()
+    }
+}
+/// A parsed assertion with the declarations visible at its position.
+#[derive(Clone)]
+pub(super) struct Asserted {
+    pub(super) node: Arc<Node>,
+    pub(super) visible: usize,
+}
+pub(super) type Constants = BTreeMap<String, BigInt>;
+/// Declared symbols with their declaration order.
+pub(crate) type Variables = BTreeMap<String, (Variable, usize)>;
+
+pub(super) fn commands(nodes: &[Node]) -> Result<(Declarations, Vec<Asserted>)> {
     let mut variables = BTreeMap::new();
     let mut integers = 0;
     let mut booleans = 0;
     let mut assertions = vec![];
     let mut checked = false;
     let mut logic = false;
-    for node in &nodes {
+    for node in nodes {
         if checked {
             return Err(Error::new("unsupported", "commands after check-sat"));
         }
@@ -713,7 +733,10 @@ pub(super) fn compile(source: &str) -> Result<Problem> {
                 if command.len() != 2 {
                     return Err(Error::new("syntax", "assert arity"));
                 }
-                assertions.push((command[1].clone(), variables.len()));
+                assertions.push(Asserted {
+                    node: Arc::new(command[1].clone()),
+                    visible: variables.len(),
+                });
             }
             "check-sat" => {
                 if command.len() != 1 {
@@ -724,13 +747,37 @@ pub(super) fn compile(source: &str) -> Result<Problem> {
             _ => return Err(Error::new("unsupported", format!("command {operator}"))),
         }
     }
-    let mut constants = BTreeMap::new();
-    for (assertion, visible) in &assertions {
-        collect_constants(assertion, &variables, *visible, &mut constants);
-    }
+    Ok((
+        Declarations {
+            variables: Arc::new(variables),
+            integers,
+            booleans,
+        },
+        assertions,
+    ))
+}
+/// Unconditional integer constants of `assertion` that `bound` does not fix yet.
+/// Earlier assertions win, so extending with these equals collecting over the
+/// whole assertion sequence.
+pub(super) fn new_constants(
+    declarations: &Declarations,
+    assertion: &Asserted,
+    bound: &Constants,
+) -> Constants {
+    let mut found = BTreeMap::new();
+    collect_constants(
+        &assertion.node,
+        &declarations.variables,
+        assertion.visible,
+        &mut found,
+    );
+    found.retain(|name, _| !bound.contains_key(name));
+    found
+}
+pub(super) fn anchors(declarations: &Declarations, constants: &Constants) -> Vec<Edge> {
     let mut anchors = vec![];
-    for (name, value) in &constants {
-        if let Some((Variable::Int(slot), _)) = variables.get(name) {
+    for (name, value) in constants {
+        if let Some((Variable::Int(slot), _)) = declarations.variables.get(name) {
             anchors.extend([
                 Edge {
                     from: 0,
@@ -745,30 +792,54 @@ pub(super) fn compile(source: &str) -> Result<Problem> {
             ]);
         }
     }
-    let mut compiler = Compiler {
-        variables,
+    anchors
+}
+pub(super) fn formula(
+    declarations: &Declarations,
+    constants: &Constants,
+    assertion: &Asserted,
+) -> Result<Arc<Formula>> {
+    Compiler {
+        variables: &declarations.variables,
         constants,
-        visible: 0,
-    };
-    let mut formulas = vec![];
-    for (assertion, visible) in &assertions {
-        compiler.visible = *visible;
-        formulas.push(compiler.term(assertion, &BTreeMap::new(), 0)?.boolean()?);
+        visible: assertion.visible,
     }
-    Ok(Problem {
-        variables: compiler
-            .variables
-            .into_iter()
-            .map(|(name, (variable, _))| (name, variable))
-            .collect(),
+    .term(&assertion.node, &BTreeMap::new(), 0)?
+    .boolean()
+}
+pub(super) fn problem(
+    declarations: &Declarations,
+    anchors: Vec<Edge>,
+    formulas: Vec<Arc<Formula>>,
+) -> Problem {
+    Problem {
+        variables: declarations.variables.clone(),
         root: Arc::new(Formula::And(formulas)),
         anchors,
-        integers,
-        booleans,
-    })
+        integers: declarations.integers,
+        booleans: declarations.booleans,
+    }
+}
+pub(super) fn compile(source: &str) -> Result<Problem> {
+    let nodes = parse(source)?;
+    let (declarations, assertions) = commands(&nodes)?;
+    let mut constants = BTreeMap::new();
+    for assertion in &assertions {
+        let found = new_constants(&declarations, assertion, &constants);
+        constants.extend(found);
+    }
+    let formulas = assertions
+        .iter()
+        .map(|assertion| formula(&declarations, &constants, assertion))
+        .collect::<Result<Vec<_>>>()?;
+    Ok(problem(
+        &declarations,
+        anchors(&declarations, &constants),
+        formulas,
+    ))
 }
 
-fn render(node: &Node) -> String {
+pub(super) fn render(node: &Node) -> String {
     match node {
         Node::Atom(value, true) => format!("|{value}|"),
         Node::Atom(value, false) => value.clone(),
@@ -778,24 +849,22 @@ fn render(node: &Node) -> String {
         ),
     }
 }
-pub(super) fn session_source(source: &str) -> Result<String> {
-    let mut nodes = parse(source)?;
-    if matches!(nodes.last(), Some(Node::List(command)) if matches!(command.first(), Some(Node::Atom(name,false)) if name == "check-sat"))
-    {
-        nodes.pop();
+/// Tokens the tokenizer produces for `node`, counting both parentheses of a list.
+pub(super) fn token_count(node: &Node) -> usize {
+    match node {
+        Node::Atom(..) => 1,
+        Node::List(nodes) => 2 + nodes.iter().map(token_count).sum::<usize>(),
     }
-    let source = nodes.iter().map(render).collect::<Vec<_>>().join("\n");
-    if source.len() > 1_048_576 {
-        return Err(Error::new("resource", "normalized source exceeds 1 MiB"));
-    }
-    Ok(source)
 }
-pub(super) fn assertion(expression: &str) -> Result<String> {
-    let nodes = parse(expression)?;
-    if nodes.len() != 1 {
-        return Err(Error::new("syntax", "assert needs a single expression"));
+/// Deepest nesting below `node`, as checked by the tree builder.
+pub(super) fn nesting(node: &Node) -> usize {
+    match node {
+        Node::List(nodes) if !nodes.is_empty() => 1 + nodes.iter().map(nesting).max().unwrap_or(0),
+        _ => 0,
     }
-    Ok(format!("(assert {})", render(&nodes[0])))
+}
+pub(super) fn is_check(node: &Node) -> bool {
+    matches!(node, Node::List(command) if matches!(command.first(), Some(Node::Atom(name,false)) if name == "check-sat"))
 }
 
 pub(super) fn script(source: &str) -> Result<Vec<(Arc<Problem>, Vec<Assumption>)>> {

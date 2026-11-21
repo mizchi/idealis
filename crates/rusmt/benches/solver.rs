@@ -37,6 +37,34 @@ fn cases(criterion: &mut Criterion) {
             bench.iter(|| script.solve(black_box(2_000_000)))
         });
     }
+    for count in [32, 256] {
+        let declarations = (0..count)
+            .map(|index| format!("(declare-const x{index} Int)"))
+            .collect::<String>();
+        let assertions = (1..count)
+            .map(|index| format!("(<= (- x{index} x{}) {index})", index - 1))
+            .collect::<Vec<_>>();
+        criterion.bench_function(&format!("context-assert-{count}"), |bench| {
+            bench.iter(|| {
+                let mut solver = Solver::parse(black_box(&declarations)).unwrap();
+                for assertion in &assertions {
+                    solver.assert(black_box(assertion)).unwrap();
+                }
+                black_box(solver)
+            })
+        });
+        let constant = format!("(= x{} 0)", count - 1);
+        criterion.bench_function(&format!("context-constant-{count}"), |bench| {
+            bench.iter(|| {
+                let mut solver = Solver::parse(black_box(&declarations)).unwrap();
+                for assertion in &assertions {
+                    solver.assert(black_box(assertion)).unwrap();
+                }
+                solver.assert(black_box(&constant)).unwrap();
+                black_box(solver)
+            })
+        });
+    }
     let source = include_str!("fixtures/repeat-64.smt2")
         .split_once("(check-sat)")
         .unwrap()
