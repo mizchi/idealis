@@ -16,35 +16,22 @@ SUPPORT.mdはRustのcrate archiveにも同梱する。配布検査では9つのa
 | idealis-connect | [生成・縮小・再生・差分比較](../crates/idealis-connect/SUPPORT.md)             |
 | roracle         | [実装登録・差分検査・保存oracle再生・比較ベンチ](../crates/roracle/SUPPORT.md) |
 
-jev-lint 0.8.0のdocuments APIで、各READMEとチェックリスト、選択した実装境界の記述を比較する。比較箇所と全Rust source/test/bench・同梱JSON/TLA/CFG fixture・Cargo manifest/lock等の内容digestは`.jev-lint/checklists/*.manifest.json`と`*.record.json`へ保存する。モデルはjev-1.14.0に固定する。
+## コミット前と CI
 
-## 変更したとき
+`just support-check` は作業ツリーの crate 一覧、対応・未対応の宣言、リンク先を検査する。CI と同じ検査を stage 済みの内容に対して行うには `just support-check-staged` を使う。`just support-hooks` でこの検査を pre-commit に設定できる。いずれも API キーは不要。
+
+## 任意の Jev レビュー
+
+README や実装とチェックリストの記述を照合したいときは、次のコマンドを使う。
 
 ```sh
 just support-plan
 just support-sync
-git add crates .jev-lint/checklists
-just support-check-staged
+just support-review
 ```
 
-`support-plan`は送信する比較の件数・文字数を表示し、APIを呼ばない。`support-sync`は作業ツリーの対象箇所をJevへ送り、判定と使用量を保存する。TYPESAFE_API_KEYまたはTYPESAFEAI_API_KEYが未設定なら警告してスキップし、判定やmanifestを書き換えない。再判定を実行するときは環境へキーを設定する。キーは文書や記録へ書かない。
+`support-plan` は送信予定の比較件数と文字数を表示する。`support-sync` は Jev に問い合わせ、比較対象の manifest と判定記録を `.jev-lint/checklists/` に保存する。モデルは `jev-1.14.0`。API キー（`TYPESAFE_API_KEY` または `TYPESAFEAI_API_KEY`）が未設定なら、警告して生成をスキップする。
 
-判定はsupports / contradicts / unrelated / insufficient_context。矛盾の候補は根拠を読んで修正し、未回答や文脈不足を整合へ読み替えない。記録を手で合格へ変更しない。ここで比較するのは宣言した箇所の意味であり、全ての実装の正しさや形式言語への完全互換性を証明しない。
+`support-review` はローカルの記録をオフラインで再生する。部分 stage のレビューには `just support-sync-staged` と `just support-review --staged` を組み合わせる。記録は Git の管理対象外で、コミットやマージに必要なのは人が管理するチェックリストだけ。Jev の結果は助言として読み、矛盾の候補や未確定の判定は根拠を確認する。明示的にレビューした際は、古い記録や未完了の検査を終了コードで識別できる。
 
-部分stageを行う場合は、先に変更をstageしてから`just support-sync-staged`を使う。これはindexのblobからsnapshotを作るため、未stageの訂正でコミット内容の不整合を隠せない。新しいmanifestと判定記録もstageした後、`support-check-staged`で確認する。sourceの追加・削除と新しいcrateも一覧へ反映する。
-
-## コミット前とCI
-
-```sh
-just support-hooks
-just support-check
-just support-test
-```
-
-`support-hooks`はGitのpre-commitへshimを設置し、追跡している`.jev-lint/hooks/pre-commit`を呼ぶ。他のhookがある場合は上書きせず、そこからこのhookを呼ぶ行を追加するよう案内する。別ブランチに追跡hookがない場合、shimは何も実行しない。
-
-pre-commitは両方のAPIキーが未設定なら警告してスキップし、コミットを妨げない。キーがある場合はstagedのチェックリストと証拠をオフラインで検査する。スキップを検査済みとは表示しない。
-
-明示的な`support-check` / `support-check-staged`とCIのオフライン再生は、APIキーなしでも実行する。CIはcheckoutしたファイルを対象にする。sourceやREADMEの変更、古い記録、判定の欠落・未確定・矛盾は非zero終了にし、再確認を求める。リファクタやコメントだけの変更でも、入力digestが変われば新しい記録が必要になる。全crateを無条件に対応済みとする検査ではない。
-
-新しいcrateを追加するときはSUPPORT.mdとREADMEを作り、`scripts/check-support.ts`のcatalogへ比較する実装箇所を追加する。チェックリストの欠落・参照切れや宣言一覧のずれは、Jevを呼ぶ前に決定的に検査する。
+新しい crate を追加するときは SUPPORT.md と README を作り、`scripts/check-support.ts` の catalog に比較する実装箇所を追加する。

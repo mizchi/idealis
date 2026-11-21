@@ -13,11 +13,11 @@ import { basename, dirname, join } from "node:path";
 import {
   type DocumentInput,
   documentExitCode,
-  parseDocumentManifest,
   parseDocumentReport,
   prepareDocuments,
   scanDocuments,
 } from "jev-lint/documents";
+import { manifestFor, sourceView } from "../../../scripts/check-support.js";
 import { digest } from "../usable/provenance.js";
 
 const cases = [
@@ -125,13 +125,9 @@ if (process.argv[3] === "--replay") {
   for (const item of cases) {
     const temporary = await mkdtemp(join(tmpdir(), "idealis-support-control-"));
     try {
-      const full = parseDocumentManifest(
-        JSON.parse(
-          await readFile(
-            `.jev-lint/checklists/${item.crate}.manifest.json`,
-            "utf8",
-          ),
-        ),
+      const full = await manifestFor(
+        sourceView(process.cwd(), false),
+        item.crate,
       );
       const manifest = {
         ...full,

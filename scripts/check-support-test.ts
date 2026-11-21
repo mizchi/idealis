@@ -11,7 +11,6 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
-import { parseDocumentManifest } from "jev-lint/documents";
 import {
   checkSupport,
   installSupportHook,
@@ -62,42 +61,6 @@ test("sync without a Jev key warns and skips before reading or writing the repos
       assert.match(result.stderr, /warning:.*Jev.*key.*skipping/i);
       assert.deepEqual(await readdir(root), []);
     }
-  } finally {
-    await rm(root, { recursive: true, force: true });
-  }
-});
-
-test("pre-commit skips without either key and continues when either alias is set", async () => {
-  const root = await mkdtemp(join(tmpdir(), "idealis-support-hook-key-"));
-  try {
-    const hook = resolve(".jev-lint/hooks/pre-commit");
-    const environment = {
-      ...process.env,
-      TYPESAFE_API_KEY: "",
-      TYPESAFEAI_API_KEY: "",
-    };
-    const skipped = spawnSync("sh", [hook], {
-      cwd: root,
-      encoding: "utf8",
-      env: environment,
-    });
-    assert.equal(skipped.status, 0, skipped.stderr);
-    assert.match(skipped.stderr, /warning:.*Jev.*key.*skipping/i);
-    for (const key of ["TYPESAFE_API_KEY", "TYPESAFEAI_API_KEY"]) {
-      const continued = spawnSync("sh", [hook], {
-        cwd: root,
-        encoding: "utf8",
-        env: { ...environment, [key]: "offline-hook-test" },
-      });
-      assert.notEqual(
-        continued.status,
-        0,
-        "the hook should reach Git when a key is present",
-      );
-      assert.doesNotMatch(continued.stderr, /skipping/i);
-      assert.match(continued.stderr, /not a git repository/i);
-    }
-    assert.deepEqual(await readdir(root), []);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -233,147 +196,52 @@ test("a checklist made only of examples in a code fence is not a support declara
   }
 });
 
-test("the real offline gate rejects stale, missing and corrupted staged Jev evidence", async () => {
+test("CI and staged checks run without Jev evidence and ignore a broken local report", async () => {
   const project = process.cwd();
-  const view = sourceView(project, false);
-  const root = await mkdtemp(join(tmpdir(), "idealis-support-gate-"));
+  const root = await mkdtemp(join(tmpdir(), "idealis-support-advisory-"));
   try {
     execFileSync("git", ["init", "--quiet"], { cwd: root });
-    execFileSync("git", ["config", "core.hooksPath", ".git/hooks"], {
-      cwd: root,
-    });
-    const paths = new Set(
-      view.paths.filter(
-        (path) =>
-          /^(?:docs\/|evals\/iterations\/).*\.md$/.test(path) ||
-          path === "evals/README.md",
-      ),
+    const view = sourceView(project, false);
+    const supportFiles = view.paths.filter((path) =>
+      /^crates\/[^/]+\/SUPPORT\.md$/.test(path),
     );
-    const manifests = view.paths.filter((path) =>
-      /^\.jev-lint\/checklists\/[^/]+\.manifest.json$/.test(path),
-    );
-    const crateManifests = view.paths
-      .filter((path) => /^crates\/[^/]+\/Cargo\.toml$/.test(path))
-      .map((path) => `.jev-lint/checklists/${path.split("/")[1]}.manifest.json`)
-      .sort();
-    assert.deepEqual(manifests.sort(), crateManifests);
-    for (const path of manifests) {
-      const manifest = parseDocumentManifest(
-        JSON.parse((await view.read(path)).toString()),
-      );
+    const paths = new Set([".gitignore"]);
+    for (const path of supportFiles) {
       paths.add(path);
-      paths.add(path.replace(".manifest.json", ".record.json"));
-      for (const source of Object.values(manifest.files))
-        paths.add(source.path);
+      paths.add(join(dirname(path), "Cargo.toml"));
+      const content = (await view.read(path)).toString();
+      for (const match of content.matchAll(/\]\(([^)]+)\)/g)) {
+        const target = match[1]?.split("#")[0];
+        if (target && !/^https?:/.test(target))
+          paths.add(join(dirname(path), target));
+      }
     }
     for (const path of paths) {
       await mkdir(dirname(join(root, path)), { recursive: true });
       await writeFile(join(root, path), await view.read(path));
     }
-    const stage = () => execFileSync("git", ["add", "."], { cwd: root });
-    const check = (staged: boolean) =>
+    const check = (...args: string[]) =>
       spawnSync(
         process.execPath,
         [
           "--experimental-strip-types",
           resolve(project, "scripts/check-support.ts"),
-          ...(staged ? ["--staged"] : []),
+          ...args,
         ],
-        {
-          cwd: root,
-          encoding: "utf8",
-          env: { ...process.env, TYPESAFE_API_KEY: "", TYPESAFEAI_API_KEY: "" },
-        },
+        { cwd: root, encoding: "utf8" },
       );
-    stage();
-    const clean = check(true);
-    assert.equal(clean.status, 0, clean.stderr);
-    const linkedPath = "docs/safety-ir-v2.md";
-    const linked = await readFile(join(root, linkedPath));
-    await writeFile(
-      join(root, linkedPath),
-      Buffer.concat([linked, Buffer.from("\n")]),
-    );
-    stage();
-    assert.notEqual(
-      check(true).status,
-      0,
-      "linked support evidence must invalidate saved records",
-    );
-    await writeFile(join(root, linkedPath), linked);
-    stage();
-    assert.equal(check(true).status, 0);
-    const fixturePath = "crates/rtla-compiler/tests/finite-support.json";
-    const fixture = await readFile(join(root, fixturePath));
-    await writeFile(
-      join(root, fixturePath),
-      Buffer.concat([fixture, Buffer.from("\n")]),
-    );
-    stage();
-    assert.notEqual(
-      check(true).status,
-      0,
-      "compiled fixtures must invalidate saved evidence",
-    );
-    await writeFile(join(root, fixturePath), fixture);
-    stage();
-    assert.equal(check(true).status, 0);
-    const sourcePath = "crates/rtla/src/error.rs";
-    const original = await readFile(join(root, sourcePath));
-    await writeFile(
-      join(root, sourcePath),
-      Buffer.concat([
-        original,
-        Buffer.from("\n// changed implementation evidence\n"),
-      ]),
-    );
-    assert.equal(
-      check(true).status,
-      0,
-      "unstaged implementation must not affect the commit",
-    );
-    assert.notEqual(
-      check(false).status,
-      0,
-      "working-tree review must detect the changed source",
-    );
-    stage();
-    const checklistPath = "crates/rtla/SUPPORT.md";
-    const checklist = await readFile(join(root, checklistPath));
-    await writeFile(
-      join(root, checklistPath),
-      Buffer.concat([checklist, Buffer.from("\nunstaged correction\n")]),
-    );
-    assert.notEqual(
-      check(true).status,
-      0,
-      "unstaged text cannot repair a stale staged snapshot",
-    );
-    await writeFile(join(root, sourcePath), original);
-    await writeFile(join(root, checklistPath), checklist);
-    stage();
-    assert.equal(check(true).status, 0);
-    const recordPath = "./.jev-lint/checklists/rtla.record.json";
-    const record = await readFile(join(root, recordPath));
-    execFileSync("git", ["update-index", "--force-remove", recordPath], {
-      cwd: root,
-    });
-    assert.notEqual(
-      check(true).status,
-      0,
-      "unstaged record cannot replace a missing staged record",
-    );
-    stage();
-    await writeFile(join(root, recordPath), "{}\n");
-    stage();
-    assert.notEqual(
-      check(true).status,
-      0,
-      "corrupted records cannot approve a commit",
-    );
-    await writeFile(join(root, recordPath), record);
-    stage();
-    assert.equal(check(true).status, 0);
+    execFileSync("git", ["add", "."], { cwd: root });
+    const fresh = check();
+    assert.equal(fresh.status, 0, fresh.stderr);
+    const local = ".jev-lint/checklists/rtla.record.json";
+    await mkdir(dirname(join(root, local)), { recursive: true });
+    await writeFile(join(root, local), "invalid JSON");
+    execFileSync("git", ["check-ignore", "--quiet", local], { cwd: root });
+    const staged = check("--staged");
+    assert.equal(staged.status, 0, staged.stderr);
+    await writeFile(join(root, "crates/rtla/SUPPORT.md"), "# incomplete");
+    assert.notEqual(check().status, 0);
+    assert.equal(check("--staged").status, 0);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

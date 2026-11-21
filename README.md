@@ -1,10 +1,18 @@
 # idealis
 
+日本語 · [English](README.en.md)
+
 仕様を起点に、モデルの性質と実装の振る舞いを検査する、ポータブルな形式モデル駆動のツールキット。
 
 **このリポジトリは開発途中の未完成なツールキットです。** 現在は`0.1.0-alpha.0`の試作段階で、API・対応範囲・backend間の統合を整備しています。npm / crates.ioには未公開です。
 
 設計の軸は、値や制約を扱うZ3/SMTと、状態遷移や並行実行を扱うTLA+。この二つを相互運用できるライブラリとして用意し、モデル検査・オラクル生成・実装照合を各テストツールへつなぎたい。最初の対象言語はTypeScript、Rust、Go。[目指す構成と進める順序](docs/vision.md)を参照。
+
+## 互換性と API の安定性
+
+`rtla`、`rtla-compiler`、`rtlc` は、既存の TLA+ モデルや TLC 設定をそのまま使える範囲を広げ、解析・検査を高速化することを目指す。`rusmt` も、対応する SMT-LIB 入力を増やし、求解性能を改善していく。互換性の基準は、入力を受理できるか、その意味や検査結果が参照実装と一致するかにある。現在の対応範囲は各 crate の [チェックリスト](docs/crate-checklists.md) に記録している。
+
+`idealis-cli` が提供する `idealis tla` と `idealis tlc` は、対応する SANY / TLC のオプションや終了コードとの互換性を重視する。一方、モデルと実装をつなぐ `idealis-connect` や TypeScript SDK などの高レベルなラッパーは、抽象度が上がるほど API が変わりやすい。アルファ版の更新時には、関数の引数や Driver の型など、呼び出し側の変更が必要になることがある。[CLI の対応範囲](crates/idealis-cli/README.md#tla-ファイルを検査する)
 
 ## 目指す開発体験
 
@@ -42,7 +50,7 @@
 
 ## 構成とライブラリの役割
 
-各crateの[対応チェックリストとコミット前の同期検査](docs/crate-checklists.md)を参照。
+各crateの[対応チェックリストと任意の Jev レビュー](docs/crate-checklists.md)を参照。
 
 roracleのrequest/report型はRustからTSへ生成する。Node向けnapi-rsは[比較実験](evals/experiments/roracle-native/README.md)として追加し、既定のWasm経路を維持する。他crate全体の型生成やnative bindingは未対応。
 
