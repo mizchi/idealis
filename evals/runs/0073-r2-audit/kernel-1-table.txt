@@ -1,0 +1,35 @@
+r2 binarySha256 ['6e291c3a98b5', '83e9a814982a'] order ['before', 'after', 'after', 'before'] sampleSize 20 warmupMs 500 measurementMs 1000
+kernel                                  before ns     after ns  change %  rep0(B) rep1(A) rep2(A) rep3(B) ns   flagged>=10%
+membership/function-cube                  1445769      1447457     +0.12  1449042 1438608 1456305 1442495  no  intra-side spread B 0.5% A 1.2%
+membership/parallel-channels               849966       848097     -0.22  854238 855954 840240 845695  no  intra-side spread B 1.0% A 1.9%
+search/counter-product/1                  9305194      9337408     +0.35  9354735 9338536 9336279 9255652  no  intra-side spread B 1.1% A 0.0%
+search/counter-product/8                  9304052      9332426     +0.30  9341414 9327798 9337054 9266691  no  intra-side spread B 0.8% A 0.1%
+search/function-cube/1                    5480291      5535694     +1.01  5488396 5535978 5535410 5472186  no  intra-side spread B 0.3% A 0.0%
+search/function-cube/8                    5250135      5204183     -0.88  5154251 5195897 5212468 5346019  no  intra-side spread B 3.7% A 0.3%
+search/linear-ring/1                       943214       940730     -0.26  944931 941494 939965 941497  no  intra-side spread B 0.4% A 0.2%
+search/linear-ring/8                       950050       951624     +0.17  950788 945862 957386 949313  no  intra-side spread B 0.2% A 1.2%
+search/parallel-channels/1               10431321     10505470     +0.71  10412808 10464825 10546115 10449833  no  intra-side spread B 0.4% A 0.8%
+search/parallel-channels/8                5685069      5747162     +1.09  5702673 5774141 5720182 5667465  no  intra-side spread B 0.6% A 0.9%
+values/except-function                     381101       377697     -0.89  381424 377801 377593 380778  no  intra-side spread B 0.2% A 0.1%
+values/except-record                      3778585      3760739     -0.47  3783740 3751466 3770012 3773430  no  intra-side spread B 0.3% A 0.5%
+values/intern-existing-functions           321610       323063     +0.45  325133 320480 325646 318088  no  intra-side spread B 2.2% A 1.6%
+values/intern-new-functions                370569       364334     -1.68  371305 365316 363352 369834  no  intra-side spread B 0.4% A 0.5%
+count 14 max change 1.0922062954400902 min change -1.6826995043128123
+
+previous run (eval-0073), reference only binarySha256 ['6e291c3a98b5', '2065f48179a7'] order ['before', 'after', 'after', 'before'] sampleSize 20 warmupMs 500 measurementMs 1000
+kernel                                  before ns     after ns  change %  rep0(B) rep1(A) rep2(A) rep3(B) ns   flagged>=10%
+membership/function-cube                  1453157      1472069     +1.30  1453044 1473208 1470930 1453270  no  intra-side spread B 0.0% A 0.2%
+membership/parallel-channels               845176       842750     -0.29  842087 841635 843865 848264  no  intra-side spread B 0.7% A 0.3%
+search/counter-product/1                  9268558      9412968     +1.56  9257916 9469866 9356070 9279199  no  intra-side spread B 0.2% A 1.2%
+search/counter-product/8                  9264154      9358950     +1.02  9266632 9365262 9352639 9261676  no  intra-side spread B 0.1% A 0.1%
+search/function-cube/1                    5484679      5587519     +1.88  5487138 5574756 5600282 5482220  no  intra-side spread B 0.1% A 0.5%
+search/function-cube/8                    5162318      5232478     +1.36  5135493 5394330 5070626 5189143  no  intra-side spread B 1.0% A 6.4%
+search/linear-ring/1                       941636       948135     +0.69  942839 946017 950254 940434  no  intra-side spread B 0.3% A 0.4%
+search/linear-ring/8                       949443       951102     +0.17  954218 950307 951896 944667  no  intra-side spread B 1.0% A 0.2%
+search/parallel-channels/1               10378094     10686734     +2.97  10393227 10715942 10657527 10362962  no  intra-side spread B 0.3% A 0.5%
+search/parallel-channels/8                5679770      5694301     +0.26  5597795 5726177 5662425 5761746  no  intra-side spread B 2.9% A 1.1%
+values/except-function                     378775       384788     +1.59  377480 385220 384357 380071  no  intra-side spread B 0.7% A 0.2%
+values/except-record                      3745449      3742504     -0.08  3718305 3749611 3735397 3772592  no  intra-side spread B 1.5% A 0.4%
+values/intern-existing-functions           327149       307472     -6.01  329395 305950 308993 324903  no  intra-side spread B 1.4% A 1.0%
+values/intern-new-functions                370025       363299     -1.82  370407 361873 364725 369642  no  intra-side spread B 0.2% A 0.8%
+count 14 max change 2.9739561850333107 min change -6.01478905825844

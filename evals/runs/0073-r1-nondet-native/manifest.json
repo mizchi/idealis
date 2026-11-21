@@ -1,0 +1,34 @@
+{
+  "driver": "nondet-native.mjs",
+  "driverSha256": "b80a6e6ab0e028fdb63047f3a17e0cc9c9f830f994c171cac76fe67778c6004e",
+  "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+  "bounds": {
+    "maxDepth": 10000000,
+    "maxStates": 10000000,
+    "maxWork": 4000000000
+  },
+  "irVersion": 2,
+  "workers": [
+    1,
+    2,
+    4
+  ],
+  "warmup": 1,
+  "samples": 3,
+  "order": "iteration 0 is the warmup; even iterations run before then after, odd iterations run after then before",
+  "request": "compile-tla (irVersion 2) then check-safety-parallel with workers, one fresh idealis-core process per sample",
+  "sourceSha256": {
+    "safety": "03bee5032cdc8b703ed9495d40d5f2971187674d4bdb7a08f8873ce5ae46bafa",
+    "broken": "a73f0d6d749867f8734c4f4b2d2a5f6130dd1f75f3fa8b06ec0a3f60af9b78e1"
+  },
+  "binaries": {
+    "before": "d96e4d108e7df16845cb2e4b5be9d342f27bb3f96613da375ed405027ee6e270",
+    "after": "64468511bb08a1e1f9b114c825637e77144b4bd2b383e7548b9440c126d63eb2"
+  },
+  "roots": {
+    "before": "<scratch>/eval-0073/snapshots/before",
+    "after": "<scratch>/eval-0073/snapshots/after"
+  },
+  "cpu": "Apple M5 Pro",
+  "cpus": 15
+}

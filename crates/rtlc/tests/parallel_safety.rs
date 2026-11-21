@@ -257,7 +257,8 @@ fn wide_batches_keep_budget_cuts_and_action_constraint_errors() {
     };
     let mut program = wide_batch();
     for workers in [2, 4, 8] {
-        for max_work in [1, 511, 4000, 10000] {
+        let total = program.check_parallel(limits, workers).unwrap().work;
+        for max_work in [1, 511, total / 2, total - 1] {
             let result = program
                 .check_parallel(SafetyBounds { max_work, ..limits }, workers)
                 .unwrap();

@@ -5,6 +5,7 @@ use crate::ir::{
 use crate::safety_values::Arena;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::safety_values::ValueRemap;
+use std::collections::HashMap;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
@@ -2073,6 +2074,20 @@ pub(crate) fn visit_branch(
             domain,
             tuple_size,
         } => {
+            if let Some(run) = arena.bind_run(branch, position) {
+                let mut locals = ctx.locals.to_vec();
+                return visit_bind_run(
+                    branch,
+                    position,
+                    run,
+                    ctx,
+                    &mut locals,
+                    next,
+                    arena,
+                    visitor,
+                    &mut Continuations::default(),
+                );
+            }
             let values = domain.values(context, arena)?;
             let mut locals = ctx.locals.to_vec();
             if *slot != locals.len() {
@@ -2102,12 +2117,343 @@ pub(crate) fn visit_branch(
     }
 }
 
+pub(crate) struct BindRun {
+    end: usize,
+    read: Vec<usize>,
+}
+
+const RECORDED_SUCCESSORS_PER_RUN: usize = 4096;
+const RECORDED_SUCCESSORS_PER_CONTINUATION: usize = 64;
+const RECORDED_CONTINUATIONS_PER_RUN: usize = 4096;
+const UNREPLAYED_CONTINUATIONS_BEFORE_GIVING_UP: usize = 256;
+
+type Successors = Vec<Vec<Option<Scalar>>>;
+
+#[derive(Default)]
+struct Continuations {
+    entries: HashMap<Vec<Scalar>, Option<Successors>>,
+    recorded: usize,
+    replayed: usize,
+}
+
+enum ReadWork<'a> {
+    Expression(&'a Expression),
+    Expressions(std::slice::Iter<'a, Expression>),
+    Children(std::vec::IntoIter<&'a Expression>),
+    Steps(std::slice::Iter<'a, Step>),
+    Branches(std::slice::Iter<'a, Branch>),
+}
+
+fn step_reads(steps: &[Step], reads: &mut Vec<usize>) -> bool {
+    let mut work = vec![ReadWork::Steps(steps.iter())];
+    while let Some(item) = work.pop() {
+        match item {
+            ReadWork::Expression(expression) => match expression {
+                Expression::Bound { slot } => reads.push(*slot),
+                Expression::Enabled { .. } => return false,
+                _ => work.push(ReadWork::Children(expression.children().into_iter())),
+            },
+            ReadWork::Expressions(mut remaining) => {
+                if let Some(expression) = remaining.next() {
+                    work.push(ReadWork::Expressions(remaining));
+                    work.push(ReadWork::Expression(expression));
+                }
+            }
+            ReadWork::Children(mut remaining) => {
+                if let Some(expression) = remaining.next() {
+                    work.push(ReadWork::Children(remaining));
+                    work.push(ReadWork::Expression(expression));
+                }
+            }
+            ReadWork::Steps(mut remaining) => {
+                let Some(step) = remaining.next() else {
+                    continue;
+                };
+                work.push(ReadWork::Steps(remaining));
+                match step {
+                    Step::Guard { expression } => work.push(ReadWork::Expression(expression)),
+                    Step::Assign { value, .. } => work.push(ReadWork::Expression(value)),
+                    Step::Choose { domain, .. } | Step::Bind { domain, .. } => {
+                        work.push(ReadWork::Children(domain.children().into_iter()));
+                    }
+                    Step::Call {
+                        arguments,
+                        captures,
+                        ..
+                    } => {
+                        work.push(ReadWork::Expressions(captures.iter()));
+                        work.push(ReadWork::Expressions(arguments.iter()));
+                    }
+                    Step::Frame {
+                        arguments,
+                        captures,
+                        branches,
+                        ..
+                    } => {
+                        work.push(ReadWork::Branches(branches.iter()));
+                        work.push(ReadWork::Expressions(captures.iter()));
+                        work.push(ReadWork::Expressions(arguments.iter()));
+                    }
+                }
+            }
+            ReadWork::Branches(mut remaining) => {
+                if let Some(branch) = remaining.next() {
+                    work.push(ReadWork::Branches(remaining));
+                    work.push(ReadWork::Steps(branch.steps.iter()));
+                }
+            }
+        }
+    }
+    true
+}
+
+fn plan_bind_run(branch: &Branch, position: usize) -> Option<BindRun> {
+    let Some(Step::Bind { slot: first, .. }) = branch.steps.get(position) else {
+        return None;
+    };
+    let end = position
+        + branch.steps[position..]
+            .iter()
+            .take_while(|step| matches!(step, Step::Bind { .. }))
+            .count();
+    if end == branch.steps.len() {
+        return None;
+    }
+    let mut reads = vec![];
+    if !step_reads(&branch.steps[end..], &mut reads) {
+        return None;
+    }
+    let slots = *first..first.checked_add(end - position)?;
+    let read: Vec<usize> = slots.clone().filter(|slot| reads.contains(slot)).collect();
+    (read.len() < slots.len()).then_some(BindRun { end, read })
+}
+
+pub(crate) fn plan_bind_runs<'a>(
+    branches: &'a [Branch],
+    register: &mut impl FnMut(&'a Branch, usize, BindRun),
+) {
+    let mut pending = vec![branches];
+    while let Some(branches) = pending.pop() {
+        for branch in branches {
+            for (position, step) in branch.steps.iter().enumerate() {
+                if let Step::Frame { branches, .. } = step {
+                    pending.push(branches);
+                }
+                if let Some(run) = plan_bind_run(branch, position) {
+                    register(branch, position, run);
+                }
+            }
+        }
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn visit_bind_run(
+    branch: &Branch,
+    position: usize,
+    run: &BindRun,
+    ctx: EvalContext<'_>,
+    locals: &mut Vec<Scalar>,
+    next: &mut [Option<Scalar>],
+    arena: &mut Arena,
+    visitor: &mut BranchVisitor<'_>,
+    continuations: &mut Continuations,
+) -> Result<bool, CoreError> {
+    if position == run.end {
+        return visit_continuation(
+            branch,
+            run,
+            ctx,
+            locals,
+            next,
+            arena,
+            visitor,
+            continuations,
+        );
+    }
+    let mut ctx = ctx;
+    if locals.len() > ctx.locals.len() {
+        ctx.descend(arena)?;
+        arena.tick()?;
+    }
+    let Some(Step::Bind {
+        slot,
+        domain,
+        tuple_size,
+    }) = branch.steps.get(position)
+    else {
+        return Err(CoreError::protocol("Invalid bound variable run"));
+    };
+    let values = domain.values(
+        EvalContext {
+            next,
+            locals,
+            ..ctx
+        },
+        arena,
+    )?;
+    if *slot != locals.len() {
+        return Err(CoreError::protocol("Unbound action variable"));
+    }
+    for value in values {
+        arena.check_tuple(value, *tuple_size)?;
+        locals.push(value);
+        let found = visit_bind_run(
+            branch,
+            position + 1,
+            run,
+            ctx,
+            locals,
+            next,
+            arena,
+            visitor,
+            continuations,
+        )?;
+        locals.pop();
+        if found {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn visit_continuation(
+    branch: &Branch,
+    run: &BindRun,
+    ctx: EvalContext<'_>,
+    locals: &[Scalar],
+    next: &mut [Option<Scalar>],
+    arena: &mut Arena,
+    visitor: &mut BranchVisitor<'_>,
+    continuations: &mut Continuations,
+) -> Result<bool, CoreError> {
+    let key: Vec<Scalar> = run.read.iter().map(|slot| locals[*slot]).collect();
+    if let Some(Some(successors)) = continuations.entries.get(&key) {
+        continuations.replayed += 1;
+        arena.tick()?;
+        for successor in successors.clone() {
+            let mut successor = successor;
+            arena.tick()?;
+            if visitor(&mut successor, arena)? {
+                return Ok(true);
+            }
+        }
+        return Ok(false);
+    }
+    let known = continuations.entries.contains_key(&key);
+    let unproductive = continuations.replayed == 0
+        && continuations.entries.len() >= UNREPLAYED_CONTINUATIONS_BEFORE_GIVING_UP;
+    if !known && (unproductive || continuations.entries.len() >= RECORDED_CONTINUATIONS_PER_RUN) {
+        return visit_branch(
+            branch,
+            run.end,
+            EvalContext { locals, ..ctx },
+            next,
+            arena,
+            visitor,
+        );
+    }
+    let mut recording =
+        (!known && continuations.recorded < RECORDED_SUCCESSORS_PER_RUN).then(Vec::new);
+    let capacity = RECORDED_SUCCESSORS_PER_CONTINUATION
+        .min(RECORDED_SUCCESSORS_PER_RUN.saturating_sub(continuations.recorded));
+    let found = visit_branch(
+        branch,
+        run.end,
+        EvalContext { locals, ..ctx },
+        next,
+        arena,
+        &mut |values, arena| {
+            if let Some(successors) = &mut recording {
+                if successors.len() < capacity {
+                    successors.push(values.to_vec());
+                } else {
+                    recording = None;
+                }
+            }
+            visitor(values, arena)
+        },
+    )?;
+    if !known && !found {
+        continuations.recorded += recording.as_ref().map_or(0, Vec::len);
+        continuations.entries.insert(key, recording);
+    }
+    Ok(found)
+}
+
 #[cfg(test)]
 mod tests {
     use super::EvalContext;
     use crate::Value;
     use crate::ir::{Expression, Scalar};
     use crate::safety_values::Arena;
+
+    #[test]
+    fn a_continuation_crossing_the_run_wide_budget_is_not_recorded_and_not_replayed() {
+        use super::{BindRun, Continuations, RECORDED_SUCCESSORS_PER_RUN, visit_continuation};
+        use crate::ir::{Branch, Domain, Step};
+        let literal = |value| Expression::Literal {
+            value: Scalar::Int(value),
+        };
+        let branch = Branch {
+            name: "Two".into(),
+            steps: vec![
+                Step::Bind {
+                    slot: 0,
+                    domain: Domain::Set {
+                        values: vec![literal(0)],
+                    },
+                    tuple_size: None,
+                },
+                Step::Choose {
+                    slot: 0,
+                    domain: Domain::Set {
+                        values: vec![literal(1), literal(2)],
+                    },
+                },
+            ],
+        };
+        let run = BindRun {
+            end: 1,
+            read: vec![],
+        };
+        let current = [Scalar::Int(0)];
+        let locals = [Scalar::Int(0)];
+        let mut continuations = Continuations {
+            recorded: RECORDED_SUCCESSORS_PER_RUN - 1,
+            ..Continuations::default()
+        };
+        let visits = |continuations: &mut Continuations| {
+            let mut arena = Arena::new(1000);
+            let mut seen = vec![];
+            let found = visit_continuation(
+                &branch,
+                &run,
+                EvalContext {
+                    locals: &locals,
+                    ..EvalContext::new(&current, &[])
+                },
+                &locals,
+                &mut [None],
+                &mut arena,
+                &mut |values, _| {
+                    seen.push(values.to_vec());
+                    Ok(false)
+                },
+                continuations,
+            )
+            .unwrap();
+            assert!(!found);
+            seen
+        };
+        let expected = vec![vec![Some(Scalar::Int(1))], vec![Some(Scalar::Int(2))]];
+        assert_eq!(visits(&mut continuations), expected);
+        assert_eq!(continuations.recorded, RECORDED_SUCCESSORS_PER_RUN - 1);
+        assert!(matches!(continuations.entries.get(&vec![]), Some(None)));
+        assert_eq!(visits(&mut continuations), expected);
+        assert_eq!(continuations.replayed, 0);
+    }
 
     #[test]
     fn v1_enabled_subscript_keeps_the_existing_long_branch_limit() {

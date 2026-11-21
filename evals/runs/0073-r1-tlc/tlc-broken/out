@@ -1,0 +1,71 @@
+TLC2 Version 2026.11.20.092152
+Running breadth-first search Model-Checking with fp 90 and seed 4054936601075282901 with 1 worker on 15 cores with 14564MB heap and 64MB offheap memory [pid: 28285] (Mac OS X 27.2.1 aarch64, Eclipse Adoptium 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
+Parsing file <scratch>/eval-0073/runs/0073-r1-tlc/tlc-broken/NondetTags.tla
+Parsing file /private<tmp>/tlc-8195779840534606088/Integers.tla (jar:file:<tools>/quint-home/apalache-dist-0.62.4/apalache/lib/apalache.jar!/tla2sany/StandardModules/Integers.tla)
+Parsing file /private<tmp>/tlc-8195779840534606088/Sequences.tla (jar:file:<tools>/quint-home/apalache-dist-0.62.4/apalache/lib/apalache.jar!/tla2sany/StandardModules/Sequences.tla)
+Parsing file /private<tmp>/tlc-8195779840534606088/FiniteSets.tla (jar:file:<tools>/quint-home/apalache-dist-0.62.4/apalache/lib/apalache.jar!/tla2sany/StandardModules/FiniteSets.tla)
+Parsing file /private<tmp>/tlc-8195779840534606088/TLC.tla (jar:file:<tools>/quint-home/apalache-dist-0.62.4/apalache/lib/apalache.jar!/tla2sany/StandardModules/TLC.tla)
+Parsing file /private<tmp>/tlc-8195779840534606088/Apalache.tla (jar:file:<tools>/quint-home/apalache-dist-0.62.4/apalache/lib/apalache.jar!/tla2sany/StandardModules/Apalache.tla)
+Parsing file /private<tmp>/tlc-8195779840534606088/Variants.tla (jar:file:<tools>/quint-home/apalache-dist-0.62.4/apalache/lib/apalache.jar!/tla2sany/StandardModules/Variants.tla)
+Parsing file /private<tmp>/tlc-8195779840534606088/_TLCTrace.tla (jar:file:<tools>/quint-home/apalache-dist-0.62.4/apalache/lib/apalache.jar!/tla2sany/StandardModules/_TLCTrace.tla)
+Parsing file /private<tmp>/tlc-8195779840534606088/Naturals.tla (jar:file:<tools>/quint-home/apalache-dist-0.62.4/apalache/lib/apalache.jar!/tla2sany/StandardModules/Naturals.tla)
+Parsing file /private<tmp>/tlc-8195779840534606088/TLCExt.tla (jar:file:<tools>/quint-home/apalache-dist-0.62.4/apalache/lib/apalache.jar!/tla2sany/StandardModules/TLCExt.tla)
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module Apalache
+Semantic processing of module Variants
+Semantic processing of module TLCExt
+Semantic processing of module _TLCTrace
+Semantic processing of module NondetTags
+Linting of module Apalache
+Linting of module Variants
+Linting of module TLCExt
+Linting of module _TLCTrace
+Linting of module NondetTags
+Starting... (2026-11-20 18:21:52)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-11-20 18:21:52.
+Error: Invariant q_inv is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ done = 0
+/\ pending = {}
+/\ last = "init"
+
+State 2: <step line 205, col 11 to line 205, col 76 of module NondetTags>
+/\ done = 0
+/\ pending = {1}
+/\ last = "request"
+
+State 3: <step line 205, col 11 to line 205, col 76 of module NondetTags>
+/\ done = 0
+/\ pending = {1, 2}
+/\ last = "request"
+
+State 4: <step line 205, col 11 to line 205, col 76 of module NondetTags>
+/\ done = 0
+/\ pending = {1, 2, 3}
+/\ last = "request"
+
+State 5: <step line 205, col 11 to line 205, col 76 of module NondetTags>
+/\ done = 1
+/\ pending = {2, 3}
+/\ last = "reply"
+
+State 6: <step line 205, col 11 to line 205, col 76 of module NondetTags>
+/\ done = 2
+/\ pending = {3}
+/\ last = "reply"
+
+State 7: <step line 205, col 11 to line 205, col 76 of module NondetTags>
+/\ done = 3
+/\ pending = {}
+/\ last = "reply"
+
+257641 states generated, 1824 distinct states found, 430 states left on queue.
+The depth of the complete state graph search is 7.
+Finished in 00s at (2026-11-20 18:21:53)
+Trace exploration spec path: ./NondetTags_TTrace_1795166512.tla
