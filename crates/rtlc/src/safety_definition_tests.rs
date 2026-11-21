@@ -1442,3 +1442,302 @@ fn analysis_parity_wire_arity_and_slot_controls_remain_distinct_from_range_check
         }
     }
 }
+
+#[test]
+fn bind_run_planning_does_not_recurse_before_the_nesting_limit_is_checked() {
+    use crate::ir::{Branch, Domain, Expression, Scalar, Step};
+    let outcome = std::thread::Builder::new()
+        .stack_size(512 * 1024)
+        .spawn(|| {
+            let mut input: SafetyProgram = serde_json::from_value(json!({
+                "format":"modelt.safety-program",
+                "version":1,
+                "name":"Deep",
+                "variables":["x"],
+                "initial":[{"name":"Init","steps":[{"kind":"assign","slot":0,"value":{"op":"literal","value":{"type":"int","value":"0"}}}]}],
+                "next":[],
+                "invariants":[],
+                "assumptions":[],
+                "checkDeadlock":false
+            }))
+            .unwrap();
+            let mut guard = Expression::Literal {
+                value: Scalar::Bool(true),
+            };
+            for _ in 0..100_000 {
+                guard = Expression::Not {
+                    argument: Box::new(guard),
+                };
+            }
+            input.next = vec![Branch {
+                name: "Next".into(),
+                steps: vec![
+                    Step::Bind {
+                        slot: 0,
+                        domain: Domain::Set {
+                            values: vec![Expression::Literal {
+                                value: Scalar::Bool(true),
+                            }],
+                        },
+                        tuple_size: None,
+                    },
+                    Step::Guard { expression: guard },
+                ],
+            }];
+            let error = input
+                .check(SafetyBounds {
+                    max_depth: 64,
+                    max_states: 10000,
+                    max_work: 1000000,
+                    max_temporal_nodes: None,
+                })
+                .unwrap_err();
+            (error.code, error.message)
+        })
+        .unwrap()
+        .join()
+        .unwrap();
+    assert_eq!(outcome.0, "protocol");
+    assert_eq!(outcome.1, "Safety expression nesting exceeds 48");
+}
+
+#[test]
+fn bind_run_planning_stops_at_the_first_enabled_before_the_branch_limit_is_checked() {
+    use crate::ir::{Branch, Domain, Expression, Step};
+    let mut input: SafetyProgram = serde_json::from_value(json!({
+        "format":"modelt.safety-program",
+        "version":1,
+        "name":"Pairs",
+        "variables":["x"],
+        "initial":[{"name":"Init","steps":[{"kind":"assign","slot":0,"value":{"op":"literal","value":{"type":"int","value":"0"}}}]}],
+        "next":[],
+        "invariants":[],
+        "assumptions":[],
+        "checkDeadlock":false
+    }))
+    .unwrap();
+    let steps = (0..20_000)
+        .flat_map(|_| {
+            [
+                Step::Bind {
+                    slot: 0,
+                    domain: Domain::Set { values: vec![] },
+                    tuple_size: None,
+                },
+                Step::Guard {
+                    expression: Expression::Enabled {
+                        branches: vec![],
+                        subscript: None,
+                    },
+                },
+            ]
+        })
+        .collect();
+    input.next = vec![Branch {
+        name: "Next".into(),
+        steps,
+    }];
+    let started = std::time::Instant::now();
+    let error = input
+        .check(SafetyBounds {
+            max_depth: 64,
+            max_states: 10000,
+            max_work: 1000000,
+            max_temporal_nodes: None,
+        })
+        .unwrap_err();
+    assert_eq!(error.message, "Safety branch exceeds 256 steps");
+    assert!(
+        started.elapsed() < std::time::Duration::from_secs(3),
+        "{:?}",
+        started.elapsed()
+    );
+}
+
+fn pairs_before_the_branch_limit(
+    tail: crate::ir::Step,
+) -> (crate::SafetyProgram, std::time::Instant) {
+    use crate::ir::{Branch, Domain, Expression, Scalar, Step};
+    let mut input: SafetyProgram = serde_json::from_value(json!({
+        "format":"modelt.safety-program",
+        "version":1,
+        "name":"Pairs",
+        "variables":["x"],
+        "initial":[{"name":"Init","steps":[{"kind":"assign","slot":0,"value":{"op":"literal","value":{"type":"int","value":"0"}}}]}],
+        "next":[],
+        "invariants":[],
+        "assumptions":[],
+        "checkDeadlock":false
+    }))
+    .unwrap();
+    let mut steps: Vec<Step> = (0..512)
+        .flat_map(|_| {
+            [
+                Step::Bind {
+                    slot: 0,
+                    domain: Domain::Set { values: vec![] },
+                    tuple_size: None,
+                },
+                Step::Guard {
+                    expression: Expression::Literal {
+                        value: Scalar::Bool(true),
+                    },
+                },
+            ]
+        })
+        .collect();
+    steps.push(tail);
+    input.next = vec![Branch {
+        name: "Next".into(),
+        steps,
+    }];
+    (input, std::time::Instant::now())
+}
+
+fn refused_within(
+    input: &crate::SafetyProgram,
+    started: std::time::Instant,
+    limit: std::time::Duration,
+) {
+    let error = input
+        .check(SafetyBounds {
+            max_depth: 64,
+            max_states: 10000,
+            max_work: 1000000,
+            max_temporal_nodes: None,
+        })
+        .unwrap_err();
+    assert_eq!(error.message, "Safety branch exceeds 256 steps");
+    assert!(started.elapsed() < limit, "{:?}", started.elapsed());
+}
+
+fn refused_quickly(input: &crate::SafetyProgram, started: std::time::Instant) {
+    refused_within(input, started, std::time::Duration::from_millis(600));
+}
+
+#[test]
+fn bind_run_planning_checks_an_expression_in_source_order_before_its_later_siblings() {
+    use crate::ir::{Expression, Scalar, Step};
+    let truth = || Expression::Literal {
+        value: Scalar::Bool(true),
+    };
+    let (input, _) = pairs_before_the_branch_limit(Step::Guard {
+        expression: Expression::And {
+            left: Box::new(Expression::Enabled {
+                branches: vec![],
+                subscript: None,
+            }),
+            right: Box::new(Expression::Set {
+                values: vec![truth(); 100_000],
+            }),
+        },
+    });
+    refused_quickly(&input, std::time::Instant::now());
+}
+
+#[test]
+fn bind_run_planning_checks_frame_arguments_before_any_frame_branch() {
+    use crate::ir::{Branch, Expression, Step};
+    let enabled = || Expression::Enabled {
+        branches: vec![],
+        subscript: None,
+    };
+    let empty = || Branch {
+        name: "Empty".into(),
+        steps: vec![],
+    };
+    let frame = |arguments: Vec<Expression>, first: Vec<Step>| Step::Frame {
+        arguments,
+        captures: vec![],
+        parameter_count: 0,
+        capture_count: 0,
+        local_scope: 0,
+        branches: std::iter::once(Branch {
+            name: "First".into(),
+            steps: first,
+        })
+        .chain(std::iter::repeat_with(empty).take(500_000))
+        .collect(),
+    };
+    for tail in [
+        frame(vec![enabled()], vec![]),
+        frame(
+            vec![],
+            vec![Step::Guard {
+                expression: enabled(),
+            }],
+        ),
+    ] {
+        let (input, started) = pairs_before_the_branch_limit(tail);
+        refused_quickly(&input, started);
+    }
+}
+
+#[test]
+fn bind_run_planning_checks_argument_and_capture_lists_one_element_at_a_time() {
+    use crate::ir::{Expression, Scalar, Step};
+    let enabled = || Expression::Enabled {
+        branches: vec![],
+        subscript: None,
+    };
+    let truth = || Expression::Literal {
+        value: Scalar::Bool(true),
+    };
+    let long = || {
+        std::iter::once(enabled())
+            .chain(std::iter::repeat_with(truth).take(125_000))
+            .collect::<Vec<_>>()
+    };
+    let frame = |arguments: Vec<Expression>, captures: Vec<Expression>| Step::Frame {
+        arguments,
+        captures,
+        parameter_count: 0,
+        capture_count: 0,
+        local_scope: 0,
+        branches: vec![],
+    };
+    let call = |arguments: Vec<Expression>, captures: Vec<Expression>| Step::Call {
+        definition: 0,
+        arguments,
+        captures,
+    };
+    for tail in [
+        call(long(), vec![]),
+        call(vec![truth()], long()),
+        frame(long(), vec![]),
+        frame(vec![truth()], long()),
+    ] {
+        let (input, started) = pairs_before_the_branch_limit(tail);
+        refused_within(&input, started, std::time::Duration::from_millis(300));
+    }
+}
+
+#[test]
+fn bind_run_planning_checks_a_long_child_list_one_element_at_a_time() {
+    use crate::ir::{Domain, Expression, Scalar, Step};
+    let values = || {
+        std::iter::once(Expression::Enabled {
+            branches: vec![],
+            subscript: None,
+        })
+        .chain(
+            std::iter::repeat_with(|| Expression::Literal {
+                value: Scalar::Bool(true),
+            })
+            .take(200_000),
+        )
+        .collect::<Vec<_>>()
+    };
+    for tail in [
+        Step::Guard {
+            expression: Expression::Set { values: values() },
+        },
+        Step::Choose {
+            slot: 0,
+            domain: Domain::Set { values: values() },
+        },
+    ] {
+        let (input, started) = pairs_before_the_branch_limit(tail);
+        refused_within(&input, started, std::time::Duration::from_millis(850));
+    }
+}

@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0073: 後続が読まない束縛の再利用](iterations/0073-dead-binding-reuse.md)は、`nondet` を重ねたQuint生成物で同じ後続を何度も評価する費用を除く。合成モデルのnative 1/2/4/8 workerで約0.48〜0.52倍、状態・生成数・反例は一致し、workは変更前を超えない。2回の独立レビューで見つかった6件と対応も記録した。既存corpusと14本のCriterionに後退はない。
+
 [0072: source level・遅延関数・template共有](iterations/0072-frontend-semantics.md)は、SANY/TLCの拒否・正常/故障対照とnative/Wasm/Chromiumを照合する。共有化前後の完全応答・workとCriterionのcompile/fresh/preparedを分け、入力条件の修正と失敗も保存する。
 
 [0070: TLA+ frontendの追加対応](iterations/0070-tla-coverage.md)は二版のSANY構文木、native/Wasm/TLCの実行と反例、再帰の予算切れを比較する。高階・module・proofの構文保持と有限実行の範囲を区別する。

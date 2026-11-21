@@ -1,0 +1,49 @@
+{
+  "driver": "nondet-native-rss.mjs",
+  "mode": "time",
+  "driverSha256": "52013f8b0926ab9f873b1463c6c45eaf56e20ec12802418414fad4e258bc183d",
+  "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+  "bounds": {
+    "maxDepth": 10000000,
+    "maxStates": 10000000,
+    "maxWork": 4000000000
+  },
+  "irVersion": 2,
+  "workers": [
+    1,
+    2,
+    4,
+    8
+  ],
+  "warmup": 1,
+  "samples": 3,
+  "order": "iteration 0 is the warmup; even iterations run before then after, odd iterations run after then before",
+  "request": "one fresh /usr/bin/time -l idealis-core process per sample; stdin holds one check-safety-parallel request with the program compiled beforehand by the same side's binary (irVersion 2); maxRssBytes is the kernel maximum resident set size of the time wrapper child",
+  "cappedPath": null,
+  "cappedSha256": null,
+  "sourceSha256": {
+    "safety": "03bee5032cdc8b703ed9495d40d5f2971187674d4bdb7a08f8873ce5ae46bafa",
+    "broken": "a73f0d6d749867f8734c4f4b2d2a5f6130dd1f75f3fa8b06ec0a3f60af9b78e1"
+  },
+  "programSha256": {
+    "before-safety": "834fb9e5bec62089ac4dd6bd4a2ef8bc9b2e578673bf54233cb7b200fe641de8",
+    "before-broken": "84cd0bdc26d1da3249dc7b3b4bbc03dc25484557001587618809fbf6e80b682c",
+    "after-safety": "834fb9e5bec62089ac4dd6bd4a2ef8bc9b2e578673bf54233cb7b200fe641de8",
+    "after-broken": "84cd0bdc26d1da3249dc7b3b4bbc03dc25484557001587618809fbf6e80b682c"
+  },
+  "binaries": {
+    "before": "d96e4d108e7df16845cb2e4b5be9d342f27bb3f96613da375ed405027ee6e270",
+    "after": "387a2f304836e6a960db22af2c47350ea54692ceaaed709420420cba0d1373d9"
+  },
+  "roots": {
+    "before": "<scratch>/eval-0073/snapshots/before",
+    "after": "<scratch>/eval-0073-r2/snapshots/after"
+  },
+  "cpu": "Apple M5 Pro",
+  "cpus": 15,
+  "hostLoadAtStart": [
+    2.52783203125,
+    2.69970703125,
+    2.46923828125
+  ]
+}
