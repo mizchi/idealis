@@ -104,7 +104,7 @@ just replay-loop evals/runs/my-run-confirmation
 5. 数値だけでなく witness を再現する。正常版の誤検出、無効操作、再現失敗は判断の前提を崩す。
 6. iteration に判断を追記する。後退がある場合も保存し、次の仮説へ進む。
 
-run には iteration が引用する summary（表、集計、manifest、終了コード、sha256）だけを commit する。Criterion の sample、ケースごとの出力、log、大きな before / after の dump は commit せず、必要なら消したファイルの数・バイト数・digest を `reduced.json` に残す（例: [0074](iterations/0074-nesting-chains.md#記録の縮小)）。
+run には iteration が引用する summary（表、集計、manifest、終了コード、sha256）だけを commit する。Criterion の sample、ケースごとの出力、log、大きな before / after の dump は commit せず、必要なら消したファイルの数・バイト数・digest を `reduced.json` に残す（例: [0074](iterations/0074-nesting-chains.md#記録の縮小)）。`just replay-loop` が読む run（`result.json` のある eval-loop・確認 run）は `trials.json`・`corpora.json`・`witnesses.json` を含め、縮小しない。digest は、元の記録を持つ者が照合するためのもので、commit した記録だけでは消した内容を検証できない。
 
 既存 run ID は上書きできない。中断や例外で `result.json` がない run を合格として扱わない。結果・台帳を編集して再試行を隠さず、新しい ID で実行する。formatter の対象から `runs/` を除外し、元の証拠を保つ。
 

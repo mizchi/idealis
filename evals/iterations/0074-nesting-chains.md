@@ -178,7 +178,7 @@ rebase の後、`evals/runs/0074-*` を iteration が引用する summary だけ
 
 - 消したもの: Criterion の sample の directory（ABBA と kernel）、ケースごとの出力（p0 corpus の応答、TLC の入力と log）、before / after の IR と経路の dump、時間論理の応答の全文、`*.log`、Git から再現できる tracked diff、fixtures と同じ Quint の生成物と Apalache server の出力、browser の失敗時の context。
 - 残したもの: 表、`criterion-summary.txt`、各 bench の `runs.json`、`analysis.txt`・`differences.tsv` などの集計、TLC の `results.json` と `verdicts.json`、manifest、`commands.tsv`、終了コード、sha256 の一覧、driver。時間論理は、応答ごとの sha256 を `summary.json` に要約した。
-- 各 run の `reduced.json` に、消したファイルの数・バイト数・一覧の digest（sha256sum の行を path 順に並べた sha256）と、256 KiB 以上のファイルの sha256 を残した。元の記録は 57df6301a にあり、この digest と照合できる。
+- 各 run の `reduced.json` に、消したファイルの数・バイト数・一覧の digest（sha256sum の行を path 順に並べた sha256）と、256 KiB 以上のファイルの sha256 を残した。元の記録は公開していない。`reduced.json` の digest は、元の記録を持つ者が消した内容を照合するためのもので、公開した記録だけでは消した内容を検証できない。
 
 ## 残る制約
 

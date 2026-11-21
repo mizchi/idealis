@@ -133,11 +133,12 @@ for (const run of runs) {
         .map(({ path, bytes, sha256 }) => ({ path, bytes, sha256 })),
     },
   };
-  for (const file of removed) await rm(join(directory, file.path));
   await writeFile(
     join(directory, "reduced.json"),
     `${JSON.stringify(record, null, 2)}\n`,
+    { flag: "wx" },
   );
+  for (const file of removed) await rm(join(directory, file.path));
   for (const entry of (
     await readdir(directory, { recursive: true, withFileTypes: true })
   )
