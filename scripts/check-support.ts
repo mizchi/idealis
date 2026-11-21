@@ -12,12 +12,16 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, posix, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import type { AskClient } from "jev-lint/client";
 import {
   type DocumentManifest,
+  type DocumentReport,
   documentExitCode,
+  documentJudgmentKey,
+  loadDocumentLedger,
   parseDocumentManifest,
-  parseDocumentReport,
   prepareDocuments,
+  replayDocuments,
   scanDocuments,
 } from "jev-lint/documents";
 
@@ -524,9 +528,15 @@ const shared = [
   "pnpm-workspace.yaml",
   "pnpm-lock.yaml",
 ];
-const manifestPath = (name: string) =>
-  `.jev-lint/checklists/${name}.manifest.json`;
-const recordPath = (name: string) => `.jev-lint/checklists/${name}.record.json`;
+/** The model every checklist judgment is asked of and keyed on. */
+const MODEL = "jev-1.14.0";
+/**
+ * One judgment ledger per crate (jev-lint 0.10): append-only files keyed on
+ * the compared excerpts, committed and merged as a union. The manifest is
+ * rebuilt from the catalog on every run and is not stored.
+ */
+export const supportLedger = (root: string, name: string) =>
+  join(root, ".jev-lint/checklists", name);
 const git = (root: string, args: readonly string[]) =>
   execFileSync("git", [...args], { cwd: root, maxBuffer: 16 * 1024 * 1024 });
 
@@ -736,6 +746,103 @@ const snapshot = async (
   return input;
 };
 
+/** Build the crate's manifest and snapshot from `view` in a temporary directory. */
+const withInput = async <T>(
+  view: SourceView,
+  name: string,
+  use: (
+    input: ReturnType<typeof prepareDocuments>,
+    manifest: DocumentManifest,
+    directory: string,
+  ) => Promise<T>,
+): Promise<T> => {
+  const directory = await mkdtemp(join(tmpdir(), "idealis-support-"));
+  try {
+    const manifest = await manifestFor(view, name);
+    return await use(
+      await snapshot(view, manifest, directory),
+      manifest,
+      directory,
+    );
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+};
+
+/**
+ * Sync asks Jev only what the crate's ledger cannot answer and appends the new
+ * answers; replay reports from the ledger alone. An unrecorded comparison is
+ * reported as such and never counts as agreement.
+ */
+export const reviewSupport = async (
+  view: SourceView,
+  name: string,
+  {
+    ledgerDir,
+    sync,
+    client,
+    currentView,
+  }: {
+    ledgerDir: string;
+    sync: boolean;
+    client?: AskClient;
+    /** The tree as it is now; sync is stale unless it still matches the reviewed snapshot. */
+    currentView?: () => SourceView;
+  },
+): Promise<DocumentReport> =>
+  withInput(view, name, async (input, manifest, directory) => {
+    const ledger = loadDocumentLedger(ledgerDir);
+    for (const error of ledger.loadErrors) console.warn(`${name}: ${error}`);
+    if (!sync)
+      return replayDocuments(input, ledger, { model: client?.model ?? MODEL });
+    const report = await scanDocuments(input, {
+      ...(client ? { client } : { clientOptions: { model: MODEL } }),
+      ...(currentView
+        ? {
+            // Compare with the bytes copied into the snapshot, not another
+            // read of the working tree, which would follow an edit.
+            snapshotCheck: async () => {
+              const current = currentView();
+              assert.deepEqual(await manifestFor(current, name), manifest);
+              for (const source of Object.values(manifest.files))
+                assert.deepEqual(
+                  await current.read(source.path),
+                  await readFile(join(directory, source.path)),
+                );
+              return true;
+            },
+          }
+        : {}),
+      ledger,
+    });
+    ledger.flush({ model: report.model });
+    return report;
+  });
+
+/** Fold the crate's ledger into one file holding only the answers its checklist still asks. */
+export const compactSupport = async (
+  view: SourceView,
+  name: string,
+  { ledgerDir, dryRun = false }: { ledgerDir: string; dryRun?: boolean },
+) =>
+  withInput(view, name, async (input) => {
+    const ledger = loadDocumentLedger(ledgerDir);
+    // The question digest the scan keyed on, as the replay reports it.
+    const { questionDigest } = replayDocuments(input, ledger, { model: MODEL });
+    const live = new Set(
+      input.comparisons.map((c) =>
+        documentJudgmentKey(c, questionDigest, MODEL),
+      ),
+    );
+    const all = ledger.keys();
+    if (dryRun) {
+      const kept = all.filter((key) => live.has(key)).length;
+      return { kept, dropped: all.length - kept };
+    }
+    const { kept, dropped } = ledger.compact({ live, model: MODEL });
+    return { kept, dropped };
+  });
+
 export const installSupportHook = async (root: string): Promise<void> => {
   const path = resolve(
     root,
@@ -768,6 +875,7 @@ const run = async () => {
         "--sync",
         "--replay",
         "--dry-run",
+        "--compact",
         "--install-hook",
       ].includes(arg),
     ),
@@ -775,8 +883,9 @@ const run = async () => {
   );
   const sync = args.includes("--sync");
   assert.ok(
-    args.filter((arg) => ["--sync", "--replay", "--dry-run"].includes(arg))
-      .length <= 1,
+    args.filter((arg) =>
+      ["--sync", "--replay", "--dry-run", "--compact"].includes(arg),
+    ).length <= 1,
     "Select one Jev review mode",
   );
   if (
@@ -803,7 +912,10 @@ const run = async () => {
     view,
     scopes.map((scope) => scope.name),
   );
-  if (!sync && !args.includes("--dry-run") && !args.includes("--replay")) {
+  if (
+    !sync &&
+    !["--dry-run", "--replay", "--compact"].some((mode) => args.includes(mode))
+  ) {
     console.log(
       "Support checklist structure and links checked. Jev review is optional.",
     );
@@ -811,73 +923,38 @@ const run = async () => {
   }
   let code = 0;
   for (const scope of scopes) {
-    const directory = await mkdtemp(join(tmpdir(), "idealis-support-"));
-    try {
-      const manifest = await manifestFor(view, scope.name);
-      const input = await snapshot(view, manifest, directory);
-      if (args.includes("--dry-run")) {
+    const ledgerDir = supportLedger(root, scope.name);
+    if (args.includes("--dry-run")) {
+      await withInput(view, scope.name, async (input) => {
         console.log(
           `${scope.name}: ${input.comparisons.length} comparisons, ${input.sources.length} sources, ${input.comparisons.reduce((sum, item) => sum + JSON.stringify(item).length, 0)} chars`,
         );
-        continue;
-      }
-      if (sync) {
-        await mkdir(join(root, ".jev-lint/checklists"), { recursive: true });
-        await writeFile(
-          join(root, manifestPath(scope.name)),
-          `${JSON.stringify(manifest, null, 2)}\n`,
-        );
-        const report = await scanDocuments(input, {
-          clientOptions: { model: "jev-1.14.0" },
-          snapshotCheck: async () => {
-            const current = sourceView(root, staged);
-            assert.deepEqual(await manifestFor(current, scope.name), manifest);
-            for (const source of Object.values(manifest.files))
-              assert.deepEqual(
-                await current.read(source.path),
-                await readFile(join(directory, source.path)),
-              );
-            return true;
-          },
-        });
-        await writeFile(
-          join(root, recordPath(scope.name)),
-          `${JSON.stringify(report, null, 2)}\n`,
-        );
-        const exit = documentExitCode(report);
-        console.log(
-          `${scope.name}: ${report.status}, ${report.coverage.contradictions} contradictions, ${report.coverage.unassessed} unassessed, $${report.usage.usd.toFixed(6)}`,
-        );
-        for (const candidate of report.candidates)
-          if (candidate.judgment?.choice !== "supports")
-            console.log(
-              `${candidate.id}: ${candidate.judgment?.choice ?? "unanswered"}`,
-            );
-        if (exit) code = exit;
-      } else {
-        const savedManifest: unknown = JSON.parse(
-          await readFile(join(root, manifestPath(scope.name)), "utf8"),
-        );
-        assert.deepEqual(
-          savedManifest,
-          manifest,
-          "Stale local checklist manifest; regenerate with just support-sync",
-        );
-        const report = parseDocumentReport(
-          JSON.parse(
-            await readFile(join(root, recordPath(scope.name)), "utf8"),
-          ),
-          input,
-        );
-        const exit = documentExitCode(report);
-        console.log(
-          `${scope.name}: ${report.status}, ${report.coverage.answered}/${report.coverage.expected} answered (offline)`,
-        );
-        if (exit) code = exit;
-      }
-    } finally {
-      await rm(directory, { recursive: true, force: true });
+      });
+      continue;
     }
+    if (args.includes("--compact")) {
+      assert.ok(!staged, "Compact the working tree on main, not a staged view");
+      const { kept, dropped } = await compactSupport(view, scope.name, {
+        ledgerDir,
+      });
+      console.log(`${scope.name}: kept ${kept}, dropped ${dropped}`);
+      continue;
+    }
+    const report = await reviewSupport(view, scope.name, {
+      ledgerDir,
+      sync,
+      currentView: () => sourceView(root, staged),
+    });
+    const exit = documentExitCode(report);
+    console.log(
+      `${scope.name}: ${report.status}, ${report.coverage.answered}/${report.coverage.expected} answered (${report.coverage.reused} from the ledger), ${report.coverage.contradictions} contradictions, ${report.coverage.unassessed} unassessed${sync ? `, $${report.usage.usd.toFixed(6)}` : " (offline)"}`,
+    );
+    for (const candidate of report.candidates)
+      if (candidate.judgment?.choice !== "supports")
+        console.log(
+          `${candidate.id}: ${candidate.judgment?.choice ?? "unrecorded"}`,
+        );
+    if (exit) code = exit;
   }
   process.exitCode = code;
 };

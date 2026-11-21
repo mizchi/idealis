@@ -20,6 +20,9 @@ support-sync:
 support-sync-staged:
   node --experimental-strip-types scripts/check-support.ts --sync --staged
 
+support-compact:
+  node --experimental-strip-types scripts/check-support.ts --compact
+
 support-hooks:
   node --experimental-strip-types scripts/check-support.ts --install-hook
 

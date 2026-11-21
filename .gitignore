@@ -42,7 +42,11 @@ evals/experiments/roracle-wit/generated/*.node
 evals/experiments/roracle-wit/generated/*.wasm
 evals/experiments/roracle-wit/generated/*.js
 
-/.jev-lint/checklists/
+# jev-lint 0.9 checklist records and manifests; the crate ledgers under
+# .jev-lint/checklists/<crate>/ are committed. Convert old records with
+# `pnpm exec jev-lint ledger migrate`.
+/.jev-lint/checklists/*.record.json
+/.jev-lint/checklists/*.manifest.json
 
 /packages/idealis/README.md
 /packages/idealis/LICENSE
