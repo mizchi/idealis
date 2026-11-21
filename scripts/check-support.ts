@@ -753,12 +753,17 @@ const withInput = async <T>(
   use: (
     input: ReturnType<typeof prepareDocuments>,
     manifest: DocumentManifest,
+    directory: string,
   ) => Promise<T>,
 ): Promise<T> => {
   const directory = await mkdtemp(join(tmpdir(), "idealis-support-"));
   try {
     const manifest = await manifestFor(view, name);
-    return await use(await snapshot(view, manifest, directory), manifest);
+    return await use(
+      await snapshot(view, manifest, directory),
+      manifest,
+      directory,
+    );
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
@@ -776,22 +781,38 @@ export const reviewSupport = async (
     ledgerDir,
     sync,
     client,
-    snapshotCheck,
+    currentView,
   }: {
     ledgerDir: string;
     sync: boolean;
     client?: AskClient;
-    snapshotCheck?: () => Promise<boolean>;
+    /** The tree as it is now; sync is stale unless it still matches the reviewed snapshot. */
+    currentView?: () => SourceView;
   },
 ): Promise<DocumentReport> =>
-  withInput(view, name, async (input) => {
+  withInput(view, name, async (input, manifest, directory) => {
     const ledger = loadDocumentLedger(ledgerDir);
     for (const error of ledger.loadErrors) console.warn(`${name}: ${error}`);
     if (!sync)
       return replayDocuments(input, ledger, { model: client?.model ?? MODEL });
     const report = await scanDocuments(input, {
       ...(client ? { client } : { clientOptions: { model: MODEL } }),
-      ...(snapshotCheck ? { snapshotCheck } : {}),
+      ...(currentView
+        ? {
+            // Compare with the bytes copied into the snapshot, not another
+            // read of the working tree, which would follow an edit.
+            snapshotCheck: async () => {
+              const current = currentView();
+              assert.deepEqual(await manifestFor(current, name), manifest);
+              for (const source of Object.values(manifest.files))
+                assert.deepEqual(
+                  await current.read(source.path),
+                  await readFile(join(directory, source.path)),
+                );
+              return true;
+            },
+          }
+        : {}),
       ledger,
     });
     ledger.flush({ model: report.model });
@@ -919,20 +940,10 @@ const run = async () => {
       console.log(`${scope.name}: kept ${kept}, dropped ${dropped}`);
       continue;
     }
-    const manifest = await manifestFor(view, scope.name);
     const report = await reviewSupport(view, scope.name, {
       ledgerDir,
       sync,
-      snapshotCheck: async () => {
-        const current = sourceView(root, staged);
-        assert.deepEqual(await manifestFor(current, scope.name), manifest);
-        for (const source of Object.values(manifest.files))
-          assert.deepEqual(
-            await current.read(source.path),
-            await view.read(source.path),
-          );
-        return true;
-      },
+      currentView: () => sourceView(root, staged),
     });
     const exit = documentExitCode(report);
     console.log(

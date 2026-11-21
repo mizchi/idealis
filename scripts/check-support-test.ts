@@ -362,3 +362,32 @@ test("compaction keeps only the answers the current checklist still asks", async
     await rm(ledgerDir, { recursive: true, force: true });
   }
 });
+
+test("a source edited while Jev answers marks the sync stale instead of complete", async () => {
+  const view = sourceView(process.cwd(), false);
+  const ledgerDir = await mkdtemp(join(tmpdir(), "idealis-support-ledger-"));
+  try {
+    let edited = false;
+    // Like the working tree, the reviewed view itself follows the edit.
+    const live = {
+      ...view,
+      read: async (path: string) =>
+        edited && path === "crates/rtla/SUPPORT.md"
+          ? Buffer.concat([await view.read(path), Buffer.from("\nedited\n")])
+          : view.read(path),
+    };
+    const currentView = () => live;
+    const report = await reviewSupport(live, "rtla", {
+      ledgerDir,
+      sync: true,
+      client: answering(() => {
+        edited = true;
+      }),
+      currentView,
+    });
+    assert.equal(report.snapshotChanged, true);
+    assert.equal(documentExitCode(report), 3);
+  } finally {
+    await rm(ledgerDir, { recursive: true, force: true });
+  }
+});
