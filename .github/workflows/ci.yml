@@ -29,7 +29,8 @@ jobs:
       - run: just check
       - run: node --test dist/tests/connect/conformance.test.js
       - run: just connect-bindings-test
-      - run: node --experimental-strip-types scripts/check-support.ts
+      - name: Check crate support declarations and links
+        run: just support-check
       - run: node --test dist/scripts/check-support-test.js
       - run: cargo fmt --manifest-path evals/experiments/sat-foundation/rust/Cargo.toml -- --check
       - run: cargo clippy --all-targets --locked --manifest-path evals/experiments/sat-foundation/rust/Cargo.toml -- -D warnings

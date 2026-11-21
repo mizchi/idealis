@@ -50,7 +50,7 @@ Run `idealis tlc -workers 1 -config Spec.cfg Spec.tla` or `idealis tla Spec.tla`
 
 ## Libraries and their roles
 
-Each crate tracks its supported behavior in a checklist that is synchronized before commits. TypeScript request and report types for `roracle` are generated from Rust. Its default backend is Wasm. A Node napi-rs binding is available as a comparison experiment. Other crates do not yet have equivalent generated types or native bindings. [Crate checklists](docs/crate-checklists.md) · [Native binding experiment](evals/experiments/roracle-native/README.md)
+Each crate tracks its supported behavior in a checklist. Jev can review it locally. TypeScript request and report types for `roracle` are generated from Rust. Its default backend is Wasm. A Node napi-rs binding is available as a comparison experiment. Other crates do not yet have equivalent generated types or native bindings. [Crate checklists](docs/crate-checklists.md) · [Native binding experiment](evals/experiments/roracle-native/README.md)
 
 | Library                                          | Input                                                              | Responsibility                                                                                                                                        |
 | ------------------------------------------------ | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |

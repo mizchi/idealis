@@ -7,6 +7,10 @@ support-check:
 support-check-staged:
   node --experimental-strip-types scripts/check-support.ts --staged
 
+[positional-arguments]
+support-review *args:
+  node --experimental-strip-types scripts/check-support.ts --replay "$@"
+
 support-plan:
   node --experimental-strip-types scripts/check-support.ts --dry-run
 

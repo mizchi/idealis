@@ -1,8 +1,4 @@
 #!/bin/sh
 set -eu
-if [ -z "${TYPESAFE_API_KEY:-}" ] && [ -z "${TYPESAFEAI_API_KEY:-}" ]; then
-  printf '%s\n' 'warning: Jev API key is not set (TYPESAFE_API_KEY / TYPESAFEAI_API_KEY); skipping pre-commit checklist review.' >&2
-  exit 0
-fi
 cd "$(git rev-parse --show-toplevel)"
 exec node --experimental-strip-types scripts/check-support.ts --staged

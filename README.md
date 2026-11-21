@@ -50,7 +50,7 @@
 
 ## 構成とライブラリの役割
 
-各crateの[対応チェックリストとコミット前の同期検査](docs/crate-checklists.md)を参照。
+各crateの[対応チェックリストと任意の Jev レビュー](docs/crate-checklists.md)を参照。
 
 roracleのrequest/report型はRustからTSへ生成する。Node向けnapi-rsは[比較実験](evals/experiments/roracle-native/README.md)として追加し、既定のWasm経路を維持する。他crate全体の型生成やnative bindingは未対応。
 

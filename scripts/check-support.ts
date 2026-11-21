@@ -645,10 +645,12 @@ export const checkSupport = async (
   }
 };
 
-const manifestFor = async (
+export const manifestFor = async (
   view: SourceView,
-  scope: CrateScope,
+  name: string,
 ): Promise<DocumentManifest> => {
+  const scope = scopes.find((candidate) => candidate.name === name);
+  assert.ok(scope, `Unknown support scope: ${name}`);
   const prefix = `crates/${scope.name}/`;
   const support = (await view.read(`${prefix}SUPPORT.md`)).toString();
   const linked = [...support.matchAll(/\]\(([^)]+)\)/g)].flatMap((match) => {
@@ -761,14 +763,21 @@ const run = async () => {
   const args = process.argv.slice(2);
   assert.ok(
     args.every((arg) =>
-      ["--staged", "--sync", "--dry-run", "--install-hook"].includes(arg),
+      [
+        "--staged",
+        "--sync",
+        "--replay",
+        "--dry-run",
+        "--install-hook",
+      ].includes(arg),
     ),
     "Unknown support-check option",
   );
   const sync = args.includes("--sync");
   assert.ok(
-    !sync || !args.includes("--dry-run"),
-    "Use dry-run before sync, not together",
+    args.filter((arg) => ["--sync", "--replay", "--dry-run"].includes(arg))
+      .length <= 1,
+    "Select one Jev review mode",
   );
   if (
     sync &&
@@ -794,11 +803,17 @@ const run = async () => {
     view,
     scopes.map((scope) => scope.name),
   );
+  if (!sync && !args.includes("--dry-run") && !args.includes("--replay")) {
+    console.log(
+      "Support checklist structure and links checked. Jev review is optional.",
+    );
+    return;
+  }
   let code = 0;
   for (const scope of scopes) {
     const directory = await mkdtemp(join(tmpdir(), "idealis-support-"));
     try {
-      const manifest = await manifestFor(view, scope);
+      const manifest = await manifestFor(view, scope.name);
       const input = await snapshot(view, manifest, directory);
       if (args.includes("--dry-run")) {
         console.log(
@@ -816,7 +831,7 @@ const run = async () => {
           clientOptions: { model: "jev-1.14.0" },
           snapshotCheck: async () => {
             const current = sourceView(root, staged);
-            assert.deepEqual(await manifestFor(current, scope), manifest);
+            assert.deepEqual(await manifestFor(current, scope.name), manifest);
             for (const source of Object.values(manifest.files))
               assert.deepEqual(
                 await current.read(source.path),
@@ -841,15 +856,17 @@ const run = async () => {
         if (exit) code = exit;
       } else {
         const savedManifest: unknown = JSON.parse(
-          (await view.read(manifestPath(scope.name))).toString(),
+          await readFile(join(root, manifestPath(scope.name)), "utf8"),
         );
         assert.deepEqual(
           savedManifest,
           manifest,
-          "Stale checklist manifest; run just support-sync and stage its outputs",
+          "Stale local checklist manifest; regenerate with just support-sync",
         );
         const report = parseDocumentReport(
-          JSON.parse((await view.read(recordPath(scope.name))).toString()),
+          JSON.parse(
+            await readFile(join(root, recordPath(scope.name)), "utf8"),
+          ),
           input,
         );
         const exit = documentExitCode(report);
@@ -862,12 +879,6 @@ const run = async () => {
       await rm(directory, { recursive: true, force: true });
     }
   }
-  if (sync && code === 0)
-    execFileSync(
-      "pnpm",
-      ["exec", "vp", "fmt", "--write", ".jev-lint/checklists"],
-      { cwd: root, stdio: "inherit" },
-    );
   process.exitCode = code;
 };
 
@@ -877,8 +888,6 @@ if (
 )
   await run().catch((error: unknown) => {
     console.error(error instanceof Error ? error.message : String(error));
-    console.error(
-      "Checklist review is incomplete. Run just support-sync (or support-sync-staged), inspect the findings, then stage SUPPORT.md and .jev-lint/checklists.",
-    );
+
     process.exitCode = 3;
   });
