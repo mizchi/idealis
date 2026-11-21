@@ -30,8 +30,8 @@ just support-sync
 just support-review
 ```
 
-`support-plan` は送信予定の比較件数と文字数を表示する。`support-sync` は Jev に問い合わせ、比較対象の manifest と判定記録を `.jev-lint/checklists/` に保存する。モデルは `jev-1.14.0`。API キー（`TYPESAFE_API_KEY` または `TYPESAFEAI_API_KEY`）が未設定なら、警告して生成をスキップする。
+`support-plan` は送信予定の比較件数と文字数を表示する。`support-sync` は、比較した抜粋・質問・モデルが同じ判定を台帳から再利用し、残りだけを Jev に問い合わせる。新しい判定は crate ごとの台帳 `.jev-lint/checklists/<crate>/` に1ファイルとして追記する。モデルは `jev-1.14.0`。API キー（`TYPESAFE_API_KEY` または `TYPESAFEAI_API_KEY`）が未設定なら、警告して生成をスキップする。
 
-`support-review` はローカルの記録をオフラインで再生する。部分 stage のレビューには `just support-sync-staged` と `just support-review --staged` を組み合わせる。記録は Git の管理対象外で、コミットやマージに必要なのは人が管理するチェックリストだけ。Jev の結果は助言として読み、矛盾の候補や未確定の判定は根拠を確認する。明示的にレビューした際は、古い記録や未完了の検査を終了コードで識別できる。
+`support-review` は台帳だけを使ってオフラインで再生し、判定のない比較は `unrecorded` として合格にしない。部分 stage のレビューには `just support-sync-staged` と `just support-review --staged` を組み合わせる。台帳は commit する。ファイル名が一意で既存ファイルを書き換えないので、ブランチ同士のマージで衝突しない。今のチェックリストが使わなくなった判定は、main で `just support-compact` を実行して1ファイルにまとめる。コミットやマージに必要なのは人が管理するチェックリストで、Jev の判定は必須ではない。Jev の結果は助言として読み、矛盾の候補や未確定の判定は根拠を確認する。明示的にレビューした際は、古い記録や未完了の検査を終了コードで識別できる。
 
 新しい crate を追加するときは SUPPORT.md と README を作り、`scripts/check-support.ts` の catalog に比較する実装箇所を追加する。

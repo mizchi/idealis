@@ -11,9 +11,13 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
+import { Jev } from "jev-lint/client";
+import { documentExitCode } from "jev-lint/documents";
 import {
   checkSupport,
+  compactSupport,
   installSupportHook,
+  reviewSupport,
   sourceView,
 } from "./check-support.js";
 
@@ -196,7 +200,7 @@ test("a checklist made only of examples in a code fence is not a support declara
   }
 });
 
-test("CI and staged checks run without Jev evidence and ignore a broken local report", async () => {
+test("CI and staged checks run without Jev evidence and ignore a broken ledger", async () => {
   const project = process.cwd();
   const root = await mkdtemp(join(tmpdir(), "idealis-support-advisory-"));
   try {
@@ -233,10 +237,10 @@ test("CI and staged checks run without Jev evidence and ignore a broken local re
     execFileSync("git", ["add", "."], { cwd: root });
     const fresh = check();
     assert.equal(fresh.status, 0, fresh.stderr);
-    const local = ".jev-lint/checklists/rtla.record.json";
+    const local =
+      ".jev-lint/checklists/rtla/20260101T000000000Z-00000000.jsonl";
     await mkdir(dirname(join(root, local)), { recursive: true });
     await writeFile(join(root, local), "invalid JSON");
-    execFileSync("git", ["check-ignore", "--quiet", local], { cwd: root });
     const staged = check("--staged");
     assert.equal(staged.status, 0, staged.stderr);
     await writeFile(join(root, "crates/rtla/SUPPORT.md"), "# incomplete");
@@ -244,5 +248,117 @@ test("CI and staged checks run without Jev evidence and ignore a broken local re
     assert.equal(check("--staged").status, 0);
   } finally {
     await rm(root, { recursive: true, force: true });
+  }
+});
+
+const answering = (onAsk: () => void = () => {}) =>
+  new Jev({
+    apiKey: "fixture",
+    model: "jev-1.14.0",
+    fetch: async () => {
+      onAsk();
+      return Response.json({
+        model: "jev-1.14.0",
+        answers: {
+          q0000: {
+            type: "choice",
+            choice: "supports",
+            confidence: 1,
+            probabilities: {
+              supports: 1,
+              contradicts: 0,
+              unrelated: 0,
+              insufficient_context: 0,
+            },
+          },
+        },
+      });
+    },
+  });
+
+test("Jev review replays from the crate ledger, reuses recorded answers and never passes unrecorded comparisons", async () => {
+  const view = sourceView(process.cwd(), false);
+  const ledgerDir = await mkdtemp(join(tmpdir(), "idealis-support-ledger-"));
+  try {
+    const empty = await reviewSupport(view, "rtla", { ledgerDir, sync: false });
+    assert.equal(documentExitCode(empty), 3);
+    assert.ok(empty.errors.every((error) => error.code === "unrecorded"));
+
+    let asked = 0;
+    const synced = await reviewSupport(view, "rtla", {
+      ledgerDir,
+      sync: true,
+      client: answering(() => asked++),
+    });
+    assert.equal(synced.status, "complete");
+    assert.equal(asked, synced.coverage.expected);
+    assert.equal((await readdir(ledgerDir)).length, 1);
+
+    const again = await reviewSupport(view, "rtla", {
+      ledgerDir,
+      sync: true,
+      client: answering(() =>
+        assert.fail("a recorded comparison is asked again"),
+      ),
+    });
+    assert.equal(again.coverage.reused, again.coverage.expected);
+    assert.equal(
+      (await readdir(ledgerDir)).length,
+      1,
+      "a run that learns nothing writes nothing",
+    );
+
+    const replayed = await reviewSupport(view, "rtla", {
+      ledgerDir,
+      sync: false,
+    });
+    assert.equal(replayed.status, "complete");
+    assert.equal(replayed.usage.requests, 0);
+  } finally {
+    await rm(ledgerDir, { recursive: true, force: true });
+  }
+});
+
+test("compaction keeps only the answers the current checklist still asks", async () => {
+  const view = sourceView(process.cwd(), false);
+  const ledgerDir = await mkdtemp(join(tmpdir(), "idealis-support-ledger-"));
+  try {
+    await reviewSupport(view, "rtla", {
+      ledgerDir,
+      sync: true,
+      client: answering(),
+    });
+    await writeFile(
+      join(ledgerDir, "19700101T000000000Z-00000000.jsonl"),
+      `${JSON.stringify({ schema: "jev-lint-ledger-1", namespace: "jev-lint-documents-judgments-1" })}\n${JSON.stringify(
+        {
+          key: "0".repeat(64),
+          at: "1970-01-01T00:00:00.000Z",
+          value: {
+            judgment: {
+              choice: "supports",
+              confidence: 1,
+              probabilities: {
+                supports: 1,
+                contradicts: 0,
+                unrelated: 0,
+                insufficient_context: 0,
+              },
+            },
+            comparisonId: "gone",
+            target: "x",
+          },
+        },
+      )}\n`,
+    );
+    const result = await compactSupport(view, "rtla", { ledgerDir });
+    assert.equal(result.dropped, 1);
+    assert.equal((await readdir(ledgerDir)).length, 1);
+    assert.equal(
+      (await reviewSupport(view, "rtla", { ledgerDir, sync: false })).status,
+      "complete",
+    );
+  } finally {
+    await rm(ledgerDir, { recursive: true, force: true });
   }
 });

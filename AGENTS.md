@@ -17,7 +17,7 @@
 - sharding は manifest / source version / task ID を固定し、欠落・再試行・異なる結果を区別する。輸送上の全 task 完了を、モデルの安全性や完全探索の証明として扱わない。
 - コミットは conventional commits。公開やリリースは依頼の範囲に従う。
 - crate の対応範囲は各 `crates/*/SUPPORT.md` に記録する。`just support-check-staged` と CI の `just support-check` は crate 一覧、宣言、参照先を検査する。
-- Jev は任意の助言として使う。`just support-plan` で比較対象を確認し、必要に応じて `just support-sync`（部分 stage は `support-sync-staged`）で判定を生成する。`.jev-lint/checklists/` はローカルの生成物として Git の対象外とする。
+- Jev は任意の助言として使う。`just support-plan` で比較対象を確認し、必要に応じて `just support-sync`（部分 stage は `support-sync-staged`）で判定を生成する。判定は crate ごとの台帳 `.jev-lint/checklists/<crate>/` に追記され、commit する。既存のファイルは編集せず、整理は main で `just support-compact` を使う。
 - 有限モデル・縮小・ホストの変更は `just usable-test` と `just usable-eval` / `just usable-replay` で検査する。archive と vendor の原本を編集せず、registry 初回公開やアカウント設定は別途扱う。配布変更は `just package` の単独 consumer まで確認する。
 - portable core を変更したら `just portable-build` / `just portable-test`、crate の cargo fmt / clippy を実行する。値・protocol の互換性は共有 fixture と既存 TS checker への差分比較で検査し、BFS や PBT まで移植済みと解釈しない。
 - Go adapter は `adapters/go` の独立 module。変更時は `just go-test` で CGO 無効・race・vet・TS fixture・別 module の consumer を検査する。照合の意味論は Wasm コアに任せる。

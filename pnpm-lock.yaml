@@ -197,8 +197,8 @@ importers:
         specifier: 0.8.3
         version: 0.8.3
       jev-lint:
-        specifier: 0.8.0
-        version: 0.8.0
+        specifier: 0.10.0
+        version: 0.10.0(typescript@7.0.2)
       tla-ts:
         specifier: 0.0.10
         version: 0.0.10
@@ -1847,10 +1847,15 @@ packages:
     resolution: {integrity: sha512-IKXpvIzjnC9XTAUbVBcMfGS0EPaIXtW6v+zr+RRp+hqULEpo0owZax6wyRwPOJbWbzjYspQwusTsfVr0ifh4uQ==}
     engines: {node: '>=0.10.0'}
 
-  jev-lint@0.8.0:
-    resolution: {integrity: sha512-KeRtCWq8ss2GH2FoE0KEeVQRaGRsZZ/epywDu9lKlP/mxplWImYHoQbNyme00ZaUBJJOu48OBhyo8pkClYuY0A==}
+  jev-lint@0.10.0:
+    resolution: {integrity: sha512-UJ5yy39jGnTBRec0ssxevWP+0xWMAIf4xRM9LdblQqYwR9LeamiGHK/qpNQVdNcMhqEb5R4HYi9ZfYQmPUaVYQ==}
     engines: {node: '>=24'}
     hasBin: true
+    peerDependencies:
+      typescript: '>=5.9 <7'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -3295,10 +3300,12 @@ snapshots:
     dependencies:
       safer-buffer: 2.1.2
 
-  jev-lint@0.8.0:
+  jev-lint@0.10.0(typescript@7.0.2):
     dependencies:
       '@ast-grep/cli': 0.45.3
       yaml: 2.9.1
+    optionalDependencies:
+      typescript: 7.0.2
 
   js-tokens@4.0.0: {}
 
