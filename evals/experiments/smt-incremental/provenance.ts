@@ -32,6 +32,7 @@ export const fingerprint = async () => {
     "evals/plans/0074a-smt-lazy-cache-keys.md",
     "evals/plans/0074b-smt-memoized-cache-keys.md",
     "evals/plans/0074c-smt-compact-cache-records.md",
+    "evals/plans/0074d-smt-prepared-remeasure.md",
     "evals/plans/0040-smt-expansion.md",
     "evals/plans/0040a-smt-expansion-adjustment.md",
     "evals/plans/0041-smt-scripts.md",
