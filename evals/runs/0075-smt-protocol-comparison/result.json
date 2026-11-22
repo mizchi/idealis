@@ -1,0 +1,198 @@
+{
+  "status": "complete",
+  "plan": "0075-smt-cache-transport",
+  "decision": "implement-store",
+  "nativeHitSlowerAt512": true,
+  "wasmHitSlowerAt512": true,
+  "scope": "transport cost of one chain-32 query; no claim about other problems",
+  "runs": [
+    "evals/runs/0075-smt-protocol-native-development",
+    "evals/runs/0075-smt-protocol-native-confirmation",
+    "evals/runs/0075-smt-protocol-wasm-development",
+    "evals/runs/0075-smt-protocol-wasm-confirmation"
+  ],
+  "native": [
+    {
+      "run": "evals/runs/0075-smt-protocol-native-development",
+      "checkNs": 16729.95690909091,
+      "rows": [
+        {
+          "entries": 0,
+          "hitNs": 14207.84809328711,
+          "missNs": 23757.131020833334,
+          "storeHitNs": 1862.5534317637669,
+          "storeMissNs": 17540.450079516537,
+          "hitOverCheck": 0.8492459466866105,
+          "missOverCheck": 1.420035398173914,
+          "hitOverStore": 7.628155977159174
+        },
+        {
+          "entries": 64,
+          "hitNs": 55098.19070710181,
+          "missNs": 64828.956716133944,
+          "storeHitNs": 1803.6101601520486,
+          "storeMissNs": 17506.84683195592,
+          "hitOverCheck": 3.2933850939664966,
+          "missOverCheck": 3.875022336782378,
+          "hitOverStore": 30.548835842916798
+        },
+        {
+          "entries": 512,
+          "hitNs": 356364.69609053497,
+          "missNs": 364096.32253086416,
+          "storeHitNs": 1796.8392445002773,
+          "storeMissNs": 17847.82963576159,
+          "hitOverCheck": 21.3009930645362,
+          "missOverCheck": 21.763135703775628,
+          "hitOverStore": 198.32864691779608
+        },
+        {
+          "entries": 4096,
+          "hitNs": 2795517.7041666666,
+          "missNs": 2800884.770833333,
+          "storeHitNs": 1863.5345278415616,
+          "storeMissNs": 18674.82947368421,
+          "hitOverCheck": 167.09652746610524,
+          "missOverCheck": 167.41733323361743,
+          "hitOverStore": 1500.1158617675703
+        }
+      ],
+      "hitSlopeNsPerEntry": 679.5871620266074,
+      "missSlopeNsPerEntry": 678.6159070658425,
+      "storeHitSlopeNsPerEntry": 0.009584771322978443
+    },
+    {
+      "run": "evals/runs/0075-smt-protocol-native-confirmation",
+      "checkNs": 16717.918418196172,
+      "rows": [
+        {
+          "entries": 0,
+          "hitNs": 14021.840050643596,
+          "missNs": 23856.31302666114,
+          "storeHitNs": 1821.0504320987654,
+          "storeMissNs": 17191.242446784163,
+          "hitOverCheck": 0.8387312164044238,
+          "missOverCheck": 1.426990635430747,
+          "hitOverStore": 7.699863663019693
+        },
+        {
+          "entries": 64,
+          "hitNs": 54462.055500602764,
+          "missNs": 63641.13175675676,
+          "storeHitNs": 1811.3208803024522,
+          "storeMissNs": 16989.851113861387,
+          "hitOverCheck": 3.2577055431329893,
+          "missOverCheck": 3.806761713078362,
+          "hitOverStore": 30.067591056262078
+        },
+        {
+          "entries": 512,
+          "hitNs": 356204.82407407404,
+          "missNs": 362877.10736655776,
+          "storeHitNs": 1827.5817070766807,
+          "storeMissNs": 18226.923726267727,
+          "hitOverCheck": 21.306768890938745,
+          "missOverCheck": 21.705878584237727,
+          "hitOverStore": 194.90500626855345
+        },
+        {
+          "entries": 4096,
+          "hitNs": 2782068.247596154,
+          "missNs": 2888439.114583333,
+          "storeHitNs": 1821.9748330054913,
+          "storeMissNs": 18086.790598290598,
+          "hitOverCheck": 166.41235936216114,
+          "missOverCheck": 172.77504545299664,
+          "hitOverStore": 1526.9520726622293
+        }
+      ],
+      "hitSlopeNsPerEntry": 676.2768108840872,
+      "missSlopeNsPerEntry": 700.9136760171214,
+      "storeHitSlopeNsPerEntry": 0.0007908779355141371
+    }
+  ],
+  "wasm": [
+    {
+      "run": "evals/runs/0075-smt-protocol-wasm-development",
+      "checkNs": 26318.32759548144,
+      "rows": [
+        {
+          "entries": 0,
+          "hitNs": 24177.67202729045,
+          "missNs": 37048.662686567164,
+          "hitOverCheck": 0.9186629332572591,
+          "missOverCheck": 1.4077134100621196,
+          "missCacheBytes": 2
+        },
+        {
+          "entries": 64,
+          "hitNs": 102847.36550308007,
+          "missNs": 114741.81149425288,
+          "hitOverCheck": 3.9078229849505255,
+          "missOverCheck": 4.359768343105234,
+          "missCacheBytes": 12489
+        },
+        {
+          "entries": 512,
+          "hitNs": 720565.1857142857,
+          "missNs": 729115.036231884,
+          "hitOverCheck": 27.3788364059272,
+          "missOverCheck": 27.703699393006445,
+          "missCacheBytes": 98953
+        },
+        {
+          "entries": 4096,
+          "hitNs": 5806837.944444444,
+          "missNs": 5788331.055555556,
+          "hitOverCheck": 220.6385616022734,
+          "missOverCheck": 219.9353676465881,
+          "missCacheBytes": 790665
+        }
+      ],
+      "hitSlopeNsPerEntry": 1414.3928592318587,
+      "missSlopeNsPerEntry": 1406.8011617763154,
+      "bytesPerEntry": 193.033447265625
+    },
+    {
+      "run": "evals/runs/0075-smt-protocol-wasm-confirmation",
+      "checkNs": 25823.374476987447,
+      "rows": [
+        {
+          "entries": 0,
+          "hitNs": 24185.46656905808,
+          "missNs": 36916.790155440416,
+          "hitOverCheck": 0.9365726617414393,
+          "missOverCheck": 1.429588150392153,
+          "missCacheBytes": 2
+        },
+        {
+          "entries": 64,
+          "hitNs": 103259.1673553719,
+          "missNs": 115820.66937354988,
+          "hitOverCheck": 3.9986705628805996,
+          "missOverCheck": 4.485109778226843,
+          "missCacheBytes": 12489
+        },
+        {
+          "entries": 512,
+          "hitNs": 726514.7971014492,
+          "missNs": 733332.1304347827,
+          "hitOverCheck": 28.133999208696927,
+          "missOverCheck": 28.397997755417023,
+          "missCacheBytes": 98953
+        },
+        {
+          "entries": 4096,
+          "hitNs": 5892307.833333334,
+          "missNs": 5820768.5,
+          "hitOverCheck": 228.17729877186562,
+          "missOverCheck": 225.40696628115703,
+          "missCacheBytes": 790665
+        }
+      ],
+      "hitSlopeNsPerEntry": 1435.614788460808,
+      "missSlopeNsPerEntry": 1414.6700539715696,
+      "bytesPerEntry": 193.033447265625
+    }
+  ]
+}
