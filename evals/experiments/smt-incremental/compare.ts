@@ -123,7 +123,8 @@ if (mode === "solver") {
       confirmationRatio: ratios[1],
     };
   });
-  // Reported, not gated: the plan only requires warm not to exceed cold.
+  // 0074 required warm not to exceed cold; 0074b also gates warm against the
+  // uncached script solve.
   const warmNotSlower = ["repeat-64", "scopes-32", "ite-64"].map((name) => ({
     name,
     holds: runs.every(
@@ -132,11 +133,26 @@ if (mode === "solver") {
         run.estimate(`script-cache-cold-${name}`).medianNs,
     ),
   }));
+  const warmBelowPrepared = ["repeat-64", "scopes-32", "ite-64"].map(
+    (name) => ({
+      name,
+      ratios: runs.map(
+        (run) =>
+          run.estimate(`script-cache-warm-${name}`).medianNs /
+          run.estimate(`script-prepared-${name}`).medianNs,
+      ),
+    }),
+  );
   result = {
     status: "complete",
-    plan: "0074-smt-incremental-cache",
+    plan: "0074b-smt-memoized-cache-keys",
     mode,
-    decision: warmNotSlower.every((row) => row.holds) ? "report" : "hold",
+    decision:
+      warmNotSlower.every((row) => row.holds) &&
+      warmBelowPrepared.every((row) => row.ratios.every((ratio) => ratio <= 1))
+        ? "adopt"
+        : "hold",
+    warmBelowPrepared,
     scope: "fixed cost of the opt-in cache within one candidate binary",
     runs: paths,
     rows,

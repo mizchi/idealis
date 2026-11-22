@@ -3,7 +3,7 @@ use crate::{
     Solution, cache, parser, solver::cached_solve,
 };
 use sha2::{Digest, Sha256};
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 
 struct Query {
     problem: Arc<Problem>,
@@ -12,6 +12,14 @@ struct Query {
     /// plain parsing and solving pay nothing for the cache key.
     source: Sha256,
     assumptions: Vec<Assumption>,
+    /// The cache key, computed on the first cached solve and kept afterwards.
+    key: OnceLock<String>,
+}
+impl Query {
+    fn key(&self) -> &str {
+        self.key
+            .get_or_init(|| cache::key(&self.source.clone().finalize().into(), &self.assumptions))
+    }
 }
 pub struct Script {
     queries: Vec<Query>,
@@ -26,6 +34,7 @@ impl Script {
                     problem,
                     source,
                     assumptions,
+                    key: OnceLock::new(),
                 })
             })
             .collect::<Result<Vec<_>>>()?;
@@ -64,7 +73,7 @@ impl Script {
             let result = cached_solve(
                 cache,
                 &query.problem,
-                cache::key(&query.source.clone().finalize().into(), &query.assumptions),
+                query.key().to_owned(),
                 query.todo.clone(),
                 remaining,
             )?;
