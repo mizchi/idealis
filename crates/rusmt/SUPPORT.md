@@ -44,7 +44,7 @@
 - [x] engine側のcheck cache store。`cache-open` / `cache-export` / `cache-close`と、incremental requestの`cacheHandle`。snapshotの経路は変えない。
 - [x] snapshotを往復させた場合との結果・work/stats・cache stats・exportの一致（seedから生成した60系列・2400要求）。開く時のdigest検査、別build、容量、handleの独立、fieldの併用を拒否すること。native/Wasmの完全応答一致。
 
-人工故障3件（writeの消失、開いた時のoptionの無視、古い状態のexport）を検出した。
+人工故障3件（writeの消失、開いた時のoptionの無視、古い状態のexport）を検出した。32変数のchainでは、storeのhitはNによらずnative 4.6 µs・Wasm 9.9 µsで、4096 entryのsnapshotを往復させる場合の約1/600だった。[評価0076](../../evals/iterations/0076-smt-cache-store.md)を参照。
 
 ## 非対応・対象外
 
