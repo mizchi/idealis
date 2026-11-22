@@ -24,6 +24,9 @@ import {
 
 const bounds = { maxDepth: 8, maxStates: 100, maxWork: 100_000 };
 const bounded: Limits = { milliseconds: 5_000, bytes: mebibytes(256) };
+const hangBound: Limits = { milliseconds: 30_000, bytes: mebibytes(256) };
+const baselineOperands = 12_500;
+const slowdownFactor = 24;
 const nesting128 = {
   kind: "error",
   code: "protocol",
@@ -65,11 +68,24 @@ const protocolOutcome = (outcome: unknown) =>
     : outcome;
 
 test("operator sharing b20 v2 flat conjunction 50000 native: refused without aborting", async () => {
-  const measured = await runNative(
-    { kind: "check-tla", ...flatSource(50_000), bounds },
-    bounded,
+  const refuse = async (operands: number) => {
+    const measured = await runNative(
+      { kind: "check-tla", ...flatSource(operands), bounds },
+      hangBound,
+    );
+    assert.deepEqual(measured.outcome, nesting128);
+    return measured.elapsedMs;
+  };
+  const baseline = Math.min(
+    await refuse(baselineOperands),
+    await refuse(baselineOperands),
+    await refuse(baselineOperands),
   );
-  assert.deepEqual(measured.outcome, nesting128);
+  const elapsed = await refuse(50_000);
+  assert.ok(
+    elapsed <= slowdownFactor * baseline,
+    `refusing 50000 operands took ${elapsed.toFixed(0)} ms, more than ${slowdownFactor} times the ${baseline.toFixed(0)} ms for ${baselineOperands}`,
+  );
 });
 
 test("operator sharing b20 v2 flat conjunction 5000 Wasm: refused with the nesting message", async () => {
