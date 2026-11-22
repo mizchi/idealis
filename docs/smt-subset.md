@@ -119,7 +119,7 @@ Scriptのwork予算は全checkで共有する。hitは予算を消費しない�
 
 JSONは`run-script-incremental {source,maxWork,...}`と`check-incremental {handle,maxWork,assumptions?,...}`。共通の`cache?`、`enabled?`、`buildDigest?`、`maxEntries?`を受け、`incremental-script-results` / `incremental-solution`で`stats`と更新した`cache`を返す。`enabled`を省略した場合は無効で、渡したsnapshotをそのまま返す。
 
-missは新しい探索に加えて、keyの計算と書き込みの固定費（4〜128変数の整数chainで1 checkあたり約2.4〜4 µs）がかかる。4変数の問題では約5.4倍、128変数では約5%遅くなる。小さい問い合わせでは固定費が上回るため既定は無効にする。[評価0074](../evals/iterations/0074-smt-incremental-cache.md)を参照。
+missは新しい探索に加えて、keyの計算と書き込みの固定費（4〜128変数の整数chainで1 checkあたり約2.5〜12 µs）がかかる。4変数の問題では約5.2〜5.4倍、128変数では約4〜7%遅くなる。小さい問い合わせでは固定費が上回るため既定は無効にする。Scriptはqueryごとに最初のcached solveでkeyを作って保持し、cacheを使わないparse/solveはkeyを作らない。[評価0074](../evals/iterations/0074-smt-incremental-cache.md)を参照。
 
 [Wasm loader](../evals/experiments/smt-subset/wasm.ts)はNodeやZ3へ依存しない。実Chromiumで`crossOriginIsolated === false`のままSAT、UNSAT、unknown、未対応、再利用を検査した。0030で測定した生Wasmは330,749 bytesで、Z3 Wasmは39,205,260 bytesだった。対応機能が異なるため、汎用ソルバー同士の容量比較にはしない。
 
