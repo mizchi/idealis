@@ -6,6 +6,7 @@ import { generated, handCases } from "../smt-scripts/corpus.js";
 import { nativePath, wasmPath } from "../smt-subset/paths.js";
 import { sequences } from "./context.js";
 import { digest, fingerprint } from "./provenance.js";
+import { compactRecords } from "./records.js";
 import { verify } from "./verify.js";
 
 // run <development|confirmation> <run-dir> <baseline-dir> [parent-run]
@@ -56,6 +57,7 @@ const save = async (path: string, value: unknown) =>
 await save("manifest.json", {
   ...source,
   plan: "0074-smt-incremental-cache",
+  recordFormat: "0074c-smt-compact-cache-records",
   binaries,
   baselineSourceCommit: "bcf018be1",
   phase,
@@ -85,7 +87,9 @@ try {
   assert.equal((await fingerprint()).sourceVersion, source.sourceVersion);
   await writeFile(
     join(directory, "records.jsonl"),
-    `${records.map((record) => JSON.stringify(record)).join("\n")}\n`,
+    `${compactRecords(records)
+      .map((record) => JSON.stringify(record))
+      .join("\n")}\n`,
     { flag: "wx" },
   );
   await save("result.json", {

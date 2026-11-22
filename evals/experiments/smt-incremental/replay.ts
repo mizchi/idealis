@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { digest, fingerprint } from "./provenance.js";
+import { compactRecords, expandRecords } from "./records.js";
 import { verify } from "./verify.js";
 
 const directory = process.argv[2];
@@ -45,8 +46,11 @@ const deterministic = (entries: Record<string, unknown>[]) =>
         }
       : entry,
   );
+assert.equal(manifest.recordFormat, "0074c-smt-compact-cache-records");
+// Every saved cache delta must rebuild a snapshot with its recorded digest.
+expandRecords(saved);
 assert.deepEqual(
-  deterministic(JSON.parse(JSON.stringify(records))),
+  deterministic(JSON.parse(JSON.stringify(compactRecords(records)))),
   deterministic(saved),
 );
 console.log(JSON.stringify({ status: "replayed", ...summary }));

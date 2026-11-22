@@ -899,7 +899,7 @@ smt-cache-test: smt-build build
 
 # 0074: incremental contexts and the check cache against bcf018be1 and Z3.
 smt-incremental-test: smt-build build
-  node --test dist/tests/smt-incremental/contract-test.js
+  node --test dist/tests/smt-incremental/records-test.js dist/tests/smt-incremental/contract-test.js
 
 smt-incremental-bench-build:
   CARGO_PROFILE_BENCH_STRIP=none cargo bench --no-run --locked --manifest-path crates/rusmt/Cargo.toml --bench solver --bench cache
@@ -1022,3 +1022,6 @@ expansion-bench output baseline: build
 
 expansion-bench-replay output: build
   node dist/evals/experiments/cached-expansions/benchmark-replay.js {{quote(output)}}
+
+smt-incremental-equivalence full compact: build
+  node dist/evals/experiments/smt-incremental/equivalence.js {{quote(full)}} {{quote(compact)}}
