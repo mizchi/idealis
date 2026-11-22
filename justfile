@@ -902,7 +902,7 @@ smt-incremental-test: smt-build build
   node --test dist/tests/smt-incremental/records-test.js dist/tests/smt-incremental/contract-test.js
 
 smt-incremental-bench-build:
-  CARGO_PROFILE_BENCH_STRIP=none cargo bench --no-run --locked --manifest-path crates/rusmt/Cargo.toml --bench solver --bench cache
+  CARGO_PROFILE_BENCH_STRIP=none cargo bench --no-run --locked --manifest-path crates/rusmt/Cargo.toml --bench solver --bench cache --bench protocol
 
 smt-incremental-capture binary bench library output: build
   node dist/evals/experiments/smt-incremental/capture.js {{quote(binary)}} {{quote(bench)}} {{quote(library)}} {{quote(output)}}
@@ -1025,3 +1025,12 @@ expansion-bench-replay output: build
 
 smt-incremental-equivalence full compact: build
   node dist/evals/experiments/smt-incremental/equivalence.js {{quote(full)}} {{quote(compact)}}
+
+smt-protocol-test: smt-build build
+  node --test dist/tests/smt-protocol/contract-test.js
+
+smt-protocol-wasm-bench stage run: smt-build build
+  node dist/evals/experiments/smt-protocol/wasm-bench.js {{quote(stage)}} {{quote(run)}}
+
+smt-protocol-compare native-dev native-conf wasm-dev wasm-conf output: build
+  node dist/evals/experiments/smt-protocol/compare.js {{quote(native-dev)}} {{quote(native-conf)}} {{quote(wasm-dev)}} {{quote(wasm-conf)}} {{quote(output)}}

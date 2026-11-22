@@ -9,6 +9,7 @@ import { digest, fingerprint } from "./provenance.js";
 const stage = process.argv[2];
 const provenance = process.argv[3];
 const directory = process.argv[4];
+const plan = process.argv[5] ?? "0074-smt-incremental-cache";
 assert.ok(directory && provenance && stage);
 const binary = JSON.parse(await readFile(provenance, "utf8"));
 assert.ok(isBench(binary.bench));
@@ -29,7 +30,7 @@ const save = (path: string, data: unknown) =>
   });
 await save("manifest.json", {
   stage,
-  plan: "0074-smt-incremental-cache",
+  plan,
   binary,
   driver,
   environment: {
@@ -117,6 +118,6 @@ await save("result.json", {
 });
 await appendFile(
   "evals/runs/ledger.jsonl",
-  `${JSON.stringify({ runId: basename(directory), kind: "smt-incremental-criterion", plan: "0074-smt-incremental-cache", bench: binary.bench, stage, status: "complete", binary: binary.sha256 })}\n`,
+  `${JSON.stringify({ runId: basename(directory), kind: "smt-incremental-criterion", plan, bench: binary.bench, stage, status: "complete", binary: binary.sha256 })}\n`,
 );
 console.log(JSON.stringify({ stage, results }));
