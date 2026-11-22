@@ -1,0 +1,700 @@
+{
+  "stage": "confirmation",
+  "plan": "0075-smt-cache-transport",
+  "wasm": {
+    "path": "crates/rusmt/target/wasm32-unknown-unknown/release/rusmt.wasm",
+    "sha256": "5f1cd444660228616e878cd1262c0c53be607e64be4dd949bcc6e7cfc96a0f51"
+  },
+  "sources": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "0f06ca0c80057346e0891ec9967d5363b6cb228549eb2caefeeebee2b62c4a0c"
+    },
+    {
+      "path": "crates/roracle/Cargo.lock",
+      "sha256": "e178d47ab1bd406036b62b493e929bc9d0d48d2730cbc892489626c0de539cc9"
+    },
+    {
+      "path": "crates/roracle/Cargo.toml",
+      "sha256": "4a4a6743efc90b0475ede81d9d416156ecb51c7bbc2ce0b460f208f8786f493d"
+    },
+    {
+      "path": "crates/roracle/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/roracle/SUPPORT.md",
+      "sha256": "a45fd296d3b6a6c94246e99474a3538ed59688b3e1ffaf5f98bda4e9ba26ec8d"
+    },
+    {
+      "path": "crates/roracle/benches/wire.rs",
+      "sha256": "9b5f79b0cf0b093e40228efb507ecb42f418458a7d0c0be77e4b51c92e4e57bf"
+    },
+    {
+      "path": "crates/roracle/examples/comparison.rs",
+      "sha256": "bd4bb3427620e2742dba164c0f306475916ff8e5aaf22bf99d3a48e64e428e4a"
+    },
+    {
+      "path": "crates/roracle/examples/observations.rs",
+      "sha256": "4fb004c106c60485666b2c643050086b544ee349796c0002360ca4c4b26a250c"
+    },
+    {
+      "path": "crates/roracle/examples/typescript.rs",
+      "sha256": "cc997279dc06e852223f62ef4f00f59ecaaf7029c0cc230eea7809b7db415cfb"
+    },
+    {
+      "path": "crates/roracle/src/bench.rs",
+      "sha256": "a525cbb79d6027acc95c7c12e2ebd02b034fdcf2bb47819847a7ad0e017dba10"
+    },
+    {
+      "path": "crates/roracle/src/group.rs",
+      "sha256": "8b070ee278bfe88aebc945eca17ad2a53d10925495a77a8987e1f16f4bb1e21a"
+    },
+    {
+      "path": "crates/roracle/src/lib.rs",
+      "sha256": "462f5fc05da939cdc9338eeceee8e6f9d76a3ece85cd5560ddb0c079b259ddb4"
+    },
+    {
+      "path": "crates/roracle/src/main.rs",
+      "sha256": "05128b591a2a1018a838b4edc41ffb0667a58f8b214fc735d55eed638a2fabcf"
+    },
+    {
+      "path": "crates/roracle/src/report.rs",
+      "sha256": "89c58addee08b27df37113db774a3f8f70b908768770259f67d8d178df20e86d"
+    },
+    {
+      "path": "crates/roracle/src/typescript.rs",
+      "sha256": "4ba4c7ac96855433f88cd38be50901d1434c19b163e056bebf9d5f0f8abc20ed"
+    },
+    {
+      "path": "crates/roracle/src/wasm.rs",
+      "sha256": "14d26f23c729fcbc848967640cb124474db9555a0556c9bb590c4771b3b15dc6"
+    },
+    {
+      "path": "crates/roracle/src/wire.rs",
+      "sha256": "5700ad16fb3b3c2d172d5b8391b2abf8a7596188914df83721dd83dac400d1b3"
+    },
+    {
+      "path": "crates/roracle/src/wire_observation.rs",
+      "sha256": "3771f736c4837a4aa2cf70813135d69f486640699fe4059a5b7da558c9fa3858"
+    },
+    {
+      "path": "crates/roracle/target/wasm32-unknown-unknown/release/roracle.wasm",
+      "sha256": "d2d53485bfc31d45c0dc250fe0426298beb975ab3d91c3e1466f217b165b78bf"
+    },
+    {
+      "path": "crates/roracle/tests/bytes.rs",
+      "sha256": "915c4e96a1ca630917c8ea165271cee0221b9baae00209e4547b062805832e8a"
+    },
+    {
+      "path": "crates/roracle/tests/json.rs",
+      "sha256": "7ea9a2a5edd7d840ea54b84d7217d190f70e5932da8a3783ef68355beb4fbcfd"
+    },
+    {
+      "path": "crates/roracle/tests/oracle.rs",
+      "sha256": "a40851e0ae6345d1a7f891cb67a24e4e2d1de967a5718a9b6bdf9ed05fc5f6e7"
+    },
+    {
+      "path": "crates/roracle/tests/value.rs",
+      "sha256": "4ab1dd0d2c4ef0d341904b63af31f08255b444c63339fa3730c470f599125f51"
+    },
+    {
+      "path": "crates/rusmt/Cargo.lock",
+      "sha256": "a5715438f76ff0c7ce08fc32750675a903fde06e9ec48ad74c735751d70be8d3"
+    },
+    {
+      "path": "crates/rusmt/Cargo.toml",
+      "sha256": "24c86d3af083b71c4075398ee6e24bae08b4d2248dad4973c00c291645097246"
+    },
+    {
+      "path": "crates/rusmt/LICENSE",
+      "sha256": "c5f6ee341fb447b0b69264d5e304186f1d9cd2e9d1b9d33095d08879888defc1"
+    },
+    {
+      "path": "crates/rusmt/SUPPORT.md",
+      "sha256": "9d3277ed76869a183013735b1e90e3e33d036d74874da096ec0f36b13b00e629"
+    },
+    {
+      "path": "crates/rusmt/benches/cache.rs",
+      "sha256": "45c363627c062ed7bae6279344f9d1b637ad2d5ca44ba654d33a57df3e3687c3"
+    },
+    {
+      "path": "crates/rusmt/benches/fixtures/integer-ite.smt2",
+      "sha256": "85251ab4f3e371c94f8711fe29a75cd5510cd2e895b21d08932965164aeffa88"
+    },
+    {
+      "path": "crates/rusmt/benches/fixtures/ite-64.smt2",
+      "sha256": "e657efa742cefaba0555cea0e3f5aab4bde884214da832a2519bb6f82d813c78"
+    },
+    {
+      "path": "crates/rusmt/benches/fixtures/repeat-64.smt2",
+      "sha256": "14d047b31ccf8608cbf3624ab51c52c385ce284b87b0d27c878c2e4517fd63a2"
+    },
+    {
+      "path": "crates/rusmt/benches/fixtures/scopes-32.smt2",
+      "sha256": "6a099a1f9b833483dd92494e2187880b2551139e5562d9c721a21795fa03254f"
+    },
+    {
+      "path": "crates/rusmt/benches/protocol.rs",
+      "sha256": "64d5bdc5898afaec966bf418a8798ebcdfa15ef30a8c532228b9f56b33738981"
+    },
+    {
+      "path": "crates/rusmt/benches/solver.rs",
+      "sha256": "e920d693489b63904b949c7a8de0dc38b041072baffb0757a026dc2687183fb4"
+    },
+    {
+      "path": "crates/rusmt/examples/ttl.rs",
+      "sha256": "a5f98c9a0d804ebaf27474fdc2470497e3e9f6e934028cb229a9ef485abd6744"
+    },
+    {
+      "path": "crates/rusmt/src/cache.rs",
+      "sha256": "d4b0a4e633d2c7a8b87653898f3771661107ff1c02da0caa33318085a2fe9eb6"
+    },
+    {
+      "path": "crates/rusmt/src/lib.rs",
+      "sha256": "aeb9bcd86aca2118f16d95ceceea5d7071bac9bcf00b3f3abfb91f77cfcd9bb1"
+    },
+    {
+      "path": "crates/rusmt/src/main.rs",
+      "sha256": "b8b63f70dcdaa6fec64d0bfbb96c6b48c55f22dcd1fa973ef0aa544c616e071e"
+    },
+    {
+      "path": "crates/rusmt/src/parser.rs",
+      "sha256": "86bc8b4cfc8b56281b6e8c65802090c34b34136ca9d4a03bb1553e636873851a"
+    },
+    {
+      "path": "crates/rusmt/src/protocol.rs",
+      "sha256": "42292416633b165bf88d5323b14681e50e30569961a27f8b29c96c95b94060ee"
+    },
+    {
+      "path": "crates/rusmt/src/script.rs",
+      "sha256": "b15f5ca93b4efc50ec6f53f2addf1f5145fe7ed2de76e6fe7981607c6c69d0f4"
+    },
+    {
+      "path": "crates/rusmt/src/session.rs",
+      "sha256": "8e34edf6dcaf28e841d3adcec9a55b0c17e53112c1113e889f6a868db7201e2c"
+    },
+    {
+      "path": "crates/rusmt/src/solver.rs",
+      "sha256": "d28688051f2533c001c24132ee204ac9021854f59805e70632b2158cc5bc5d44"
+    },
+    {
+      "path": "crates/rusmt/src/wasm.rs",
+      "sha256": "942d755ec0342a5aff28bf7e25bbe48e601bb9631a57fd98d012c6873b8a172e"
+    },
+    {
+      "path": "crates/rusmt/tests/benchmark.rs",
+      "sha256": "a6c84dba93389b672f1f707ec60b7a2413ea8f4091a2e941098cf1111bda5862"
+    },
+    {
+      "path": "crates/rusmt/tests/cache.rs",
+      "sha256": "2e705dc5a19c14669edbaed28e3ae709d0387329a68f1b916cfe36f7a5859ac2"
+    },
+    {
+      "path": "crates/rusmt/tests/cache_store.rs",
+      "sha256": "f5f65aa92ec73d2554d0bfb374e8ba2e27516b9b26407a7960b50ea192ecbf0f"
+    },
+    {
+      "path": "crates/rusmt/tests/expansion.rs",
+      "sha256": "ba96f61ae0c61e65e7f8e201d4fba7c6529775d666663aede838a847490c54e5"
+    },
+    {
+      "path": "crates/rusmt/tests/incremental.rs",
+      "sha256": "d295d8a0b13b1a3b3414e35aee3f9996b7fbfd3d1d8836ad7e2dd460dea2298b"
+    },
+    {
+      "path": "crates/rusmt/tests/scripts.rs",
+      "sha256": "fed494b5c67c89c8a4478d5669be9025c2f9d76ec20d73592e25dbec3432e066"
+    },
+    {
+      "path": "crates/rusmt/tests/solver.rs",
+      "sha256": "10696db5e441cf1bfdfd9265664a80a460a774aa275ff6e943775f57efc1919d"
+    },
+    {
+      "path": "evals/experiments/harness/ttl.ts",
+      "sha256": "07f05418d1ac47b84a234ef005fefa5c5dc41a4568a0a72a3098c8e83b915ea0"
+    },
+    {
+      "path": "evals/experiments/profile-tuning/hotspots.ts",
+      "sha256": "ae05ed1ae29b2a01904706a65b180f32c90dc2814ebb07ee080da93e8a28b27d"
+    },
+    {
+      "path": "evals/experiments/smt-cache/checks.ts",
+      "sha256": "03b71f11163135c800392f41ed28b8aa541fc1bdf7c4ad3896311f6ff53aa632"
+    },
+    {
+      "path": "evals/experiments/smt-expansion/checks.ts",
+      "sha256": "65a24d2694c83e070e0eb3d22282d9829d7e7b7f0a004bd61321e61b6d7d87d4"
+    },
+    {
+      "path": "evals/experiments/smt-expansion/corpus.ts",
+      "sha256": "9c7ed33e7182f2bce5d32d7d64f8fb229d644f69b1cb3f2c4c2627f17e69a4ef"
+    },
+    {
+      "path": "evals/experiments/smt-expansion/provenance.ts",
+      "sha256": "b12116c0cc2241ba1349118161efe6b5023bd58d971d66b62bc16c684767dd51"
+    },
+    {
+      "path": "evals/experiments/smt-expansion/replay.ts",
+      "sha256": "b20f9d5f58175f26f46857e770a688ea31313ae52b27fe5de982e42aed22336e"
+    },
+    {
+      "path": "evals/experiments/smt-expansion/run.ts",
+      "sha256": "d460710eb9a1be2c805420c90a53d9b5a5b2b10774713ee887f21f135b2b946e"
+    },
+    {
+      "path": "evals/experiments/smt-expansion/verify.ts",
+      "sha256": "d48c2ebf993753fc17bccc2bb90b75643572c059e405b3abcc36642011ebb75f"
+    },
+    {
+      "path": "evals/experiments/smt-incremental/capture.ts",
+      "sha256": "bf7200b385ae622742a31890f3dbe9bf59747c80144f1d277174409847fbd5cc"
+    },
+    {
+      "path": "evals/experiments/smt-incremental/cases.ts",
+      "sha256": "5ec465096d22574ace42d7d383f355b14c0b5fddb9a143bd6717b37c61d3ac89"
+    },
+    {
+      "path": "evals/experiments/smt-incremental/checks.ts",
+      "sha256": "28eccf2e9b9fb9a83fbbc3e83af19195c7ba70ec349e41b43d18ce3129b2a0b0"
+    },
+    {
+      "path": "evals/experiments/smt-incremental/compare.ts",
+      "sha256": "0027594b23c1446199dc8be425f16c5c553a521d75cf859dca17646efb883f83"
+    },
+    {
+      "path": "evals/experiments/smt-incremental/context.ts",
+      "sha256": "463efaa8b923ccdff59059698786803979234fc1fbfee836ecfb4c07a044559c"
+    },
+    {
+      "path": "evals/experiments/smt-incremental/criterion.ts",
+      "sha256": "c7267dcbe4d09fcea8494b0559a719e1f763d23800aae5a4627779df1b387f21"
+    },
+    {
+      "path": "evals/experiments/smt-incremental/equivalence.ts",
+      "sha256": "f3d81b6448665a1abde883f160027c0227fa7077670949dffbc9d9a5d32051f1"
+    },
+    {
+      "path": "evals/experiments/smt-incremental/provenance.ts",
+      "sha256": "6ac5fdc0b1d4e21040f7039844f0517d595127c82c28a8e60ff70cf2be30b9c8"
+    },
+    {
+      "path": "evals/experiments/smt-incremental/records.ts",
+      "sha256": "bc7e7a72cb3745d6caebc74e58aac4a2020854f03490120ce6c6614bf87cab19"
+    },
+    {
+      "path": "evals/experiments/smt-incremental/replay.ts",
+      "sha256": "b735c781a52aab4f6a1d40ce0e01d6f0ecca07bb162b381f56b2eb43e412f0d3"
+    },
+    {
+      "path": "evals/experiments/smt-incremental/run.ts",
+      "sha256": "3dce04b6bfecb0bd5d3b9d0c654169f17506eef014b632c319a935f90afd97ee"
+    },
+    {
+      "path": "evals/experiments/smt-incremental/verify.ts",
+      "sha256": "9385089eb520c6afada5774b810b1ce6624541e82c84720be120210dc9c47064"
+    },
+    {
+      "path": "evals/experiments/smt-protocol/cases.ts",
+      "sha256": "901b0b251c9ca3eb2d666aa70acf64c11278c24c9412b3cf902d2142608b8ac7"
+    },
+    {
+      "path": "evals/experiments/smt-protocol/compare-store.ts",
+      "sha256": "719b36c1a44e976f060e56df8aa3ff3deea3194801528cd8a89238f7ae93a8e9"
+    },
+    {
+      "path": "evals/experiments/smt-protocol/compare.ts",
+      "sha256": "35786044599c6fd77254715b4fa0d87c422d976234da49b74041bd54773bcb68"
+    },
+    {
+      "path": "evals/experiments/smt-protocol/wasm-bench.ts",
+      "sha256": "c57591e707a05cc16c1b6cf49604415c08ce88788e1748980f32858a7d31f7e3"
+    },
+    {
+      "path": "evals/experiments/smt-scripts/checks.ts",
+      "sha256": "9bb02282f1a81450e43bd637210dfdeb1b844a877b8715506547bb27fe768bd3"
+    },
+    {
+      "path": "evals/experiments/smt-scripts/corpus.ts",
+      "sha256": "251f41cc54daa4d2a08b793e575766501dea521437656bc30a6f00d32b09b66f"
+    },
+    {
+      "path": "evals/experiments/smt-scripts/provenance.ts",
+      "sha256": "83a18257a605933ffcf224f53e1677d497cef3839ebd6f6e21f883e11cf1a4ba"
+    },
+    {
+      "path": "evals/experiments/smt-scripts/replay.ts",
+      "sha256": "e93e16683dd3973f319756b7406de0a69cd4d695d0bf1e505b772167161f341f"
+    },
+    {
+      "path": "evals/experiments/smt-scripts/run.ts",
+      "sha256": "ce580661779a614864fb8a66d670b24434b3c86a35f78b1a5486c02e1d64ce43"
+    },
+    {
+      "path": "evals/experiments/smt-scripts/verify.ts",
+      "sha256": "7b98b6914d12a546af03db76147ab2db039a1dff8782a527047bf58358a6ed7e"
+    },
+    {
+      "path": "evals/experiments/smt-subset/benchmark.ts",
+      "sha256": "56e5282695a31acad16c3b82130467d8ac90b753238e2446753c441a51ffcd8a"
+    },
+    {
+      "path": "evals/experiments/smt-subset/clients.ts",
+      "sha256": "5f14e89fdd97fce0a9bfaa49568a82451997131d86c382fe8e449230b37d580c"
+    },
+    {
+      "path": "evals/experiments/smt-subset/cold.ts",
+      "sha256": "251ef81a8c9402086e051c2e0021ff27094ba4ed65e0c20d56444206c03e400d"
+    },
+    {
+      "path": "evals/experiments/smt-subset/corpus.ts",
+      "sha256": "fdae5e395365e9c4b3d19b119eb37162be88494651f89a26a5fccaeac8826a7c"
+    },
+    {
+      "path": "evals/experiments/smt-subset/paths.ts",
+      "sha256": "4dc5557b2d328590d324375fabde74fe80672a477518f0c8fbaa74d5b813ad4a"
+    },
+    {
+      "path": "evals/experiments/smt-subset/provenance.ts",
+      "sha256": "9c28e97718c7e3c76558d0ac6235778e0274ffdba43b112cd90ce63655ec3598"
+    },
+    {
+      "path": "evals/experiments/smt-subset/verify-run.ts",
+      "sha256": "3204373d00f4d3abafa49e7de1008a5caa8415684ef66bdef868ebcc64e887d6"
+    },
+    {
+      "path": "evals/experiments/smt-subset/verify.ts",
+      "sha256": "c79052820f6dd23f1b5fc70e3e3cdda2a4ec3ce2dff8946f18cfe8afac05aa11"
+    },
+    {
+      "path": "evals/experiments/smt-subset/wasm.ts",
+      "sha256": "deb5ddf7dfaf8f1dcce372caffb0ebfa93c4aaeac1b77462853c3c0d8695a0a9"
+    },
+    {
+      "path": "evals/experiments/smt-subset/wire.ts",
+      "sha256": "bf45caea9e35f2332aac4cfde6d7745fd6291ed95fb146250ed2c9e6eef498e8"
+    },
+    {
+      "path": "evals/experiments/smt-tuning/capture.ts",
+      "sha256": "0143e0107ec65889b6dc5742ca55d039be973cd5afe894790b3a09798906adbe"
+    },
+    {
+      "path": "evals/experiments/smt-tuning/cases.ts",
+      "sha256": "ae312d2652add51f834137f7099c7d162ed4517c1ff88fa75e53aacd7ff9b76e"
+    },
+    {
+      "path": "evals/experiments/smt-tuning/checks.ts",
+      "sha256": "4070d1b6e3549342cb6991a18032de4c7467d7b81340847a032f66c3ba75bb44"
+    },
+    {
+      "path": "evals/experiments/smt-tuning/compare.ts",
+      "sha256": "12ce68b3d76156c579456a6727ac4a8766a75698012adb7cdf130fdfd52cd693"
+    },
+    {
+      "path": "evals/experiments/smt-tuning/criterion.ts",
+      "sha256": "186f4918423f5d63ad7970dfc8b65b0ed6e174be92e8c5e5ffac6e73f93f1445"
+    },
+    {
+      "path": "evals/experiments/smt-tuning/profile.ts",
+      "sha256": "437725eb7be6adccb05b8677e84aa17734894bae6075e20744ba4457de2ea510"
+    },
+    {
+      "path": "evals/experiments/smt-tuning/provenance.ts",
+      "sha256": "e4a91ac9552a92d047cbca0f5c08346d0833c6c54724390a3f9cc9b59e7149b1"
+    },
+    {
+      "path": "evals/experiments/smt-tuning/replay.ts",
+      "sha256": "e93e16683dd3973f319756b7406de0a69cd4d695d0bf1e505b772167161f341f"
+    },
+    {
+      "path": "evals/experiments/smt-tuning/run.ts",
+      "sha256": "6c36fb1bf9ed3bcd33202f5a77587da4437e6e81c3e4537bfdf00ca34526fcfb"
+    },
+    {
+      "path": "evals/experiments/smt-tuning/verify.ts",
+      "sha256": "7bad1865a7a9b8ca1109b8d87e1aa0d3ed376bd4d323f9d8d9d801bbf7760565"
+    },
+    {
+      "path": "evals/experiments/workspace-oracle/catalog.ts",
+      "sha256": "ae323fe227104ea13bac5701b1a564df2748813f6ab2ec09761005a362d57787"
+    },
+    {
+      "path": "evals/experiments/workspace-oracle/cost-worker.ts",
+      "sha256": "2bd1150122d0abd36917c995d84a7e4edc8199c8c78b78f79fa09fc6a8fe0b05"
+    },
+    {
+      "path": "evals/experiments/workspace-oracle/cost.ts",
+      "sha256": "c2c1940ada1a439e5c5c751fab5f18a1d6420a138ade7b039ea94edcd09eb168"
+    },
+    {
+      "path": "evals/experiments/workspace-oracle/legacy-parity.ts",
+      "sha256": "67e8d811ef8012e181db8ac4c196d038b52c279abcb35cd6e43527d42f64a186"
+    },
+    {
+      "path": "evals/experiments/workspace-oracle/node.ts",
+      "sha256": "ca64ffd5bda8c7667c2fdeadb7454a9e5e48f8f101b05f84cfd8d6b73d0a0bc5"
+    },
+    {
+      "path": "evals/experiments/workspace-oracle/protocol.ts",
+      "sha256": "f4f757998236aaac2c979404dff3d2d2fe165808a991ce3b4b3041a6dbca0052"
+    },
+    {
+      "path": "evals/experiments/workspace-oracle/rust/Cargo.lock",
+      "sha256": "5eee9acb35b21143708f511bc15b45f3d9be62118de23fc0d261ac1b2e9a7bee"
+    },
+    {
+      "path": "evals/experiments/workspace-oracle/rust/Cargo.toml",
+      "sha256": "792acedec5276756f3ebfa6596a03235e35d92c8dca47811722555b56dbcceb9"
+    },
+    {
+      "path": "evals/experiments/workspace-oracle/rust/src/main.rs",
+      "sha256": "a86360f898eefef34aa07b3e603465f61bd61e1d933a7f8269b91b0bb5e0a9ca"
+    },
+    {
+      "path": "evals/experiments/workspace-oracle/rust/tests/process.rs",
+      "sha256": "ce3c16bc0154133d7461ac4f87663c80a46fcefc44af7368893df199da60daf6"
+    },
+    {
+      "path": "evals/experiments/workspace-oracle/snapshot.ts",
+      "sha256": "77d5a67bc673df13d57560115d0c7cff036cffd15829fdb27f27d9a33d5ce987"
+    },
+    {
+      "path": "evals/experiments/workspace-oracle/tune.ts",
+      "sha256": "be911cadb9b13890af7ee72b3c5f30fe2d4c5e5209baa32e03d33666b9f63c12"
+    },
+    {
+      "path": "evals/experiments/workspace-oracle/wasm.ts",
+      "sha256": "6483cbc68839c551c3816d5213b0db9bfd6d1670018bafe7ce73f3507432294f"
+    },
+    {
+      "path": "evals/experiments/workspace-oracle/worker-files.ts",
+      "sha256": "dc400212df646d2be22c9e470a2b3307325e6bea6d81175926fb930a18e4d0e6"
+    },
+    {
+      "path": "evals/plans/0040-smt-expansion.md",
+      "sha256": "15413576dd029de47f82a0cff11f3120f4435710c198332029591b74ddc8c17c"
+    },
+    {
+      "path": "evals/plans/0040a-smt-expansion-adjustment.md",
+      "sha256": "4ea9bcf39fc705ffffd30a28bce4697f2c8946631957af93ef11c110f3714399"
+    },
+    {
+      "path": "evals/plans/0041-smt-scripts.md",
+      "sha256": "c9abf5e8ad218b4f29f8f9089b190c5d2fe7921a5710a3dc92a0927931d3bfd9"
+    },
+    {
+      "path": "evals/plans/0042-smt-tuning.md",
+      "sha256": "5ec800ec66709a0bc6a09bb8b646b8c456b2e10b80e2865934c3fb485d8c039e"
+    },
+    {
+      "path": "evals/plans/0042a-smt-measurement-recheck.md",
+      "sha256": "17a34cd08995618727de47e262e7cde2a3b7a43ec3753211963893c9cdde3b34"
+    },
+    {
+      "path": "evals/plans/0074-smt-incremental-cache.md",
+      "sha256": "ab50ece86372fbaed3fd7513dc8335b6a63c94e78ae2dd889dd2e2ae10e2dc3a"
+    },
+    {
+      "path": "evals/plans/0074a-smt-lazy-cache-keys.md",
+      "sha256": "0711dcd45daf7193cb75c9a4d772de4a89e4bc6914a09f0ed56843a300271d74"
+    },
+    {
+      "path": "evals/plans/0074b-smt-memoized-cache-keys.md",
+      "sha256": "ce7b89273ce543ec1eaf517f925d9254452d3aad9d5e1ba1f0c3e4d214adb9f7"
+    },
+    {
+      "path": "evals/plans/0074c-smt-compact-cache-records.md",
+      "sha256": "ae4a53d0e3e9bc752572d1ef42f77a6f9d2a913eb1e61fdb91f289934bcc3a2e"
+    },
+    {
+      "path": "evals/plans/0074d-smt-prepared-remeasure.md",
+      "sha256": "2bdca44d9f175281374633c6ad667e92e9d9b2d979edb67a4ea58b7edb08e4fe"
+    },
+    {
+      "path": "evals/plans/0075-smt-cache-transport.md",
+      "sha256": "f7db46b07d321fea43934ab7a2fce126facc08ec3b5fb1473f996a43900d0538"
+    },
+    {
+      "path": "examples/counter-model.ts",
+      "sha256": "92ecc88aafaf78d9ed09c4fe2de56fdcdafb2f64b6c0b19d530b5787b5397121"
+    },
+    {
+      "path": "examples/durable-counter.ts",
+      "sha256": "90826338808f6dffad2844572ba859df958390c40cfdbd477c52a713f426a5b3"
+    },
+    {
+      "path": "fixtures/workspace-oracle/migrations.json",
+      "sha256": "f5040011df66be48d10a6f33639368f6b6bfe0303861453464bc62b8287ee9ba"
+    },
+    {
+      "path": "justfile",
+      "sha256": "d9dd7c8535d91edcbcb46b3f79a06a50d093d4d863141f651ce264f9e3205d5a"
+    },
+    {
+      "path": "package.json",
+      "sha256": "22c79f6e8f6d6d75e5b364b1304a0e45be5add7e37a6b9ddce9e9f162165c67e"
+    },
+    {
+      "path": "packages/idealis/package.json",
+      "sha256": "5093a45ccb1a57497d82539eeb009eaf3771378b223ee8bb80a5a81d374abb05"
+    },
+    {
+      "path": "packages/idealis/src/conformance.ts",
+      "sha256": "fde9957b697b171e252b9abc6fdbd765f283389212684d99b262617a3bb12326"
+    },
+    {
+      "path": "packages/idealis/src/contracts.ts",
+      "sha256": "86df71c1f8182f7eec4dae4ceb172ba1e4c5d77cd98ece661378bf49ca35b898"
+    },
+    {
+      "path": "packages/idealis/src/trace.ts",
+      "sha256": "0a20a45ba0d84841139bec2dd8178c40585276fffc75e536d33ea1ca2c077cf3"
+    },
+    {
+      "path": "packages/idealis/tsconfig.json",
+      "sha256": "9f9f84d3bc37e42f7a7897de8fc54086eee6b9254c14a46348089164351e164f"
+    },
+    {
+      "path": "playwright.config.ts",
+      "sha256": "31acd167d8d090e91d0035ff64df9c696553fd77885cd5beeaf647c47f408864"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "c26d4ff4aab61cc47443a5ebd43d092074b92ea8c6e0dabb69ce82248948e497"
+    },
+    {
+      "path": "pnpm-workspace.yaml",
+      "sha256": "169d3edaf39673c1fa352d1dc0d2110a893b5d9284687c12d3ac9be25f3137a5"
+    },
+    {
+      "path": "scripts/package-test.ts",
+      "sha256": "dacab7ac8dd859bc9c3a6e4a0325f553d353a1123b23eef1be77c922a670a7f8"
+    },
+    {
+      "path": "scripts/package.ts",
+      "sha256": "2fc8fb56a98cc315fc12ddb1f036bdbf048886c2ada0e12215975b0ce0d2c8b5"
+    },
+    {
+      "path": "tests/smt-cache/browser-entry.ts",
+      "sha256": "9deecd4ee1dca70fc2e4f46a1af0f8e3bc36049bb9c0c1b6bc1c408c1628386b"
+    },
+    {
+      "path": "tests/smt-cache/contract-test.ts",
+      "sha256": "5361ed970652f8a5de2a6269e943d48a01d2d1932b57c1ee0d12d45c3ab3520a"
+    },
+    {
+      "path": "tests/smt-expansion/browser-entry.ts",
+      "sha256": "903a563c8f649a0324d3075cbb7ca68b98524e858395b8dce5bfbe6c7472f92c"
+    },
+    {
+      "path": "tests/smt-expansion/contract-test.ts",
+      "sha256": "ba0f5706b19ef553cb2ee8999c7cc141d6d498203dacff63de40e83bc3c665b1"
+    },
+    {
+      "path": "tests/smt-expansion/runner.vitest.ts",
+      "sha256": "79f4a3962720ea5f6a4c1ce3cd0810d88a13c0daa135db496ec236396399979d"
+    },
+    {
+      "path": "tests/smt-incremental/contract-test.ts",
+      "sha256": "7436008377974660a33b03cf98eb2ca574a9523f5186170909baf23163be2ecb"
+    },
+    {
+      "path": "tests/smt-incremental/records-test.ts",
+      "sha256": "7ea61ab3a85597b156029f1ed422882ada9d4e536921b735cc216e3826778717"
+    },
+    {
+      "path": "tests/smt-protocol/contract-test.ts",
+      "sha256": "6867fa14b5185c2e1ebddc822d480113112feefb70c857da6fbe7a33f94f7dd4"
+    },
+    {
+      "path": "tests/smt-scripts/browser-entry.ts",
+      "sha256": "d12a2b173824713cdae13af3a30facd1a14990bd4a44e2b52cd93e78ff5401f5"
+    },
+    {
+      "path": "tests/smt-scripts/contract-test.ts",
+      "sha256": "4320f3ccad2bab10747f87c49f052c832aa4438c16f630ed3760303c96de267a"
+    },
+    {
+      "path": "tests/smt-scripts/runner.vitest.ts",
+      "sha256": "4c7a2e40712399708061720bd06c782cf91881a8be4486eae2efd41c851fa2dc"
+    },
+    {
+      "path": "tests/smt-subset/browser-entry.ts",
+      "sha256": "87f520c4afb4fc082d231652a759c87b25270dc0ec6dadee40abfdf75bf0ecff"
+    },
+    {
+      "path": "tests/smt-subset/browser.spec.ts",
+      "sha256": "86a3b2508998b17ec70aeed921d068d4b3098063973182f5f3be1ac28fffd08a"
+    },
+    {
+      "path": "tests/smt-subset/cache-browser.spec.ts",
+      "sha256": "981214ac7c56b1fb0a3a9b1bb8c7e544e2acd7fd6868db2bc95a013d53bd44a3"
+    },
+    {
+      "path": "tests/smt-subset/contract-test.ts",
+      "sha256": "d1b5530994020d33ab21cef5fa942d35b9016669a1ebd401a4e15804ddf084f8"
+    },
+    {
+      "path": "tests/smt-subset/expansion-browser.spec.ts",
+      "sha256": "f2cb35b57feb7f81cc063f4d47a314ce60dbb8ab0ea3712a533d446d9f07781e"
+    },
+    {
+      "path": "tests/smt-subset/script-browser.spec.ts",
+      "sha256": "b26322d8d3b920a68fb3b73ab876c2b145a9140df7f870a737e50c5753b0d066"
+    },
+    {
+      "path": "tests/smt-tuning/contract-test.ts",
+      "sha256": "34a07ee4e251c9e532914ddc7bfa31e44d60c75e3e3c7d29f4e37c5239768faf"
+    },
+    {
+      "path": "tests/smt-tuning/runner.vitest.ts",
+      "sha256": "3f0f2e3af27903bbe6c2d2e26ab376420ce6fc4c5d900beb8fc936e6d179ad67"
+    },
+    {
+      "path": "tests/workspace-oracle/browser-entry.ts",
+      "sha256": "9cd06f08784c00e69bab26ced2babf209e3395b264fa6becbf485a0b8c541761"
+    },
+    {
+      "path": "tests/workspace-oracle/browser.spec.ts",
+      "sha256": "6b6134a15fd432d995926f250a123dbfdf6c951fa296d856a4cabe186752d6ac"
+    },
+    {
+      "path": "tests/workspace-oracle/catalog-test.ts",
+      "sha256": "c73d33700c050753ccc2c3c130b7e06063b9a6e1a25a7b529451caa5555808c9"
+    },
+    {
+      "path": "tests/workspace-oracle/contract-test.ts",
+      "sha256": "403be26cf47700fcb9ca9c6336b805cc1cebe5bc63b18745b65db72cdfeda92b"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "ab73c47423e8abba6b76288647e90bb86052c55312f9abe1efebf17cd71638f4"
+    },
+    {
+      "path": "vite.config.ts",
+      "sha256": "00639733a8d7a93883575dfcd7f0fe99d17e5b984a24755f1ae9ab8c670d2766"
+    }
+  ],
+  "sourceVersion": "a1a47ddae418479c482bc2313467619b82128d6aafbe28cf38cf7de4827568eb",
+  "environment": {
+    "node": "v24.22.2",
+    "cpu": "Apple M5",
+    "logicalCpus": 10,
+    "platform": "darwin",
+    "arch": "arm64",
+    "os": "25.6.0",
+    "loadAverage": [
+      2.84521484375,
+      3.11572265625,
+      2.9970703125
+    ],
+    "dedicatedHost": false
+  },
+  "conditions": {
+    "samples": 20,
+    "warmupSeconds": 1,
+    "minimumSampleMilliseconds": 50,
+    "statistic": "median",
+    "client": "evals/experiments/smt-subset/wasm.ts createWasm().request"
+  }
+}
