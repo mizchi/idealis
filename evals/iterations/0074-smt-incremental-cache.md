@@ -88,13 +88,14 @@ native/WasmとChromiumでは、cold・warm・無効の統計と回答を確認�
 増分解析は既定の経路として採用する。check cacheは任意機能として既定無効で採用する。回答の再利用で、学習状態・理論状態の再利用や探索の中断・再開ではない。keyはSHA-256のみでsource全文を保持しないため、衝突がないことは前提とする。entryのdigestは破損検出で、署名ではない。公開backendへの接続、永続storeとCASは扱っていない。
 
 - 0074bの`prepared-128`は後退として記録したまま。追加で判断するなら、新しい追記planで再測定する。
-- Jevのrusmt 4比較は未記録。API keyのない環境で実行したため`support-sync`は判定を作らず、offlineの再生は0/4だった。
-- 確認runは19 MB、開発runは5.7 MB。check-incrementalの各応答が成長するcache snapshotを含むためで、0042の確認run（1.5 MB）より大きい。
+- Jevのrusmt 4比較は、最初はAPI keyのない環境で実行したため未記録だった。keyを設定した`support-sync`で4/4が`supports`、矛盾0になった。
+- 0074bの記録は確認19 MB、開発5.7 MB。check-incrementalの各応答が成長するcache snapshotを含み、総量がcheck数の2乗で増えていた。[0074c](../plans/0074c-smt-compact-cache-records.md)でsnapshotを流れごとの差分（digest・entry数・追加・削除）へ変えた。同じbinaryで両seedを再実行し、要約が0074bと一致し、0074bの記録を圧縮すると新しい記録と一致し、差分から全snapshotを復元できることを確かめた。確認runは18.9 MBから2.24 MB（0.118倍）、開発runは5.6 MBから1.34 MB（0.238倍）。planで決めた目標2 MB以下には届かなかった。cacheの記録は0.76 MBまで減り、残りは差分化の対象外の既存記録（約1.5 MB）。runは[開発](../runs/0074c-smt-correctness-development/result.json)と[確認](../runs/0074c-smt-correctness-confirmation/result.json)。
 
 ```sh
 just rusmt-test
 just smt-incremental-test
 just smt-incremental-eval confirmation <new-run> .artifacts/smt-incremental/baseline <development-run>
-just smt-incremental-replay evals/runs/0074b-smt-correctness-confirmation
+just smt-incremental-replay evals/runs/0074c-smt-correctness-confirmation
+just smt-incremental-equivalence evals/runs/0074b-smt-correctness-confirmation evals/runs/0074c-smt-correctness-confirmation
 just smt-incremental-compare solver <baseline> <candidate> <candidate-confirmation> <baseline-confirmation> <new-output>
 ```
