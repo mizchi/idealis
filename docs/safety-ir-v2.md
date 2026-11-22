@@ -56,6 +56,8 @@ call entryと引数・captureの要求時にそれぞれ`Arena::consume(1)`へ�
 
 定義graphを先に検証し、明示再帰の強連結成分を固定点で解析する。phase別の受理条件・formalへの依存とconstant / context-free metadataをactualとcaptureへ合成する。callを葉として判定しない。frontend nesting 40、checkerの定義内expression深さ48、値深さ64、TS decoder深さ128は変更しない。call graphの経路長を定義内の式深さとして加算しない。v2の動的な式・membership・branch・binder評価は別に入れ子128までとし、再帰経路の超過はbounded/evaluation、通常の不正な深さはprotocolエラーにする。値やcall結果のcacheではなく、検証contextごとのmetadata解析結果だけを再利用する。
 
+v2のfrontendは、同じ種類の`And`（または`Or`）が直接の項になっている連鎖と、`IF`の`ELSE`が直接`IF`である連鎖を、段ごとに再帰せず明示的なloopでたどり、連鎖全体を1段の入れ子として数える。連鎖の各項と各枝は、連鎖の先頭で1段進めたcontextでlowerする。式とmembershipの位置では、連言・選言は左のspineだけをたどって今までと同じ左結合の二項を作り、IF連鎖は今までと同じ入れ子の`if`を作る。右結合の入れ子と`IF`のTHEN側の入れ子は段ごとに数える。action・SPECIFICATIONのparts・ENABLEDの位置では、連言・選言の左右どちらの入れ子もたどり、branchの組み立て順と`limited`の検査位置は入れ子のときと同じにする。Label・LET・演算子の呼び出しは連鎖を切り、時間論理の連言・選言は対象外とする。部分式をlowerする順序（最初に報告するエラー）は変えない。出力IRは同じ意味の綴り（平たい連言・選言、OTHER付きCASE）と同じで、v1の数え方とIRは変えない。連鎖の長さに比例するのはIRの深さなので、checkerの定義内式48は緩めない。最上位のinvariantに置いたとき、平たい連言・選言は48項、IF連鎖とCASEは47枝まで受理し、超える入力（54枝のIF連鎖を含む）はcompileを通っても検査時に`Safety expression nesting exceeds 48`で拒否する。IRの深さが128を超える入力はfrontendの出力検査が、連鎖を呼び出しの中に重ねた式はv2の動的評価128が拒否する。Rustのparserは、最も外側まで括弧で囲んだ62段以上の連鎖を`TLA parsing: Expression nesting exceeds 64`で拒否し、TS frontendはparseする。この差は変更前からあり、この変更では揃えない。
+
 ## 検証範囲
 
 rtlc unit testsは不正IR、frame-local slot、直接評価のwork境界を検査する。operator-sharing cohortではTS/Rustが生成するv2を保存済みTLCログと照合し、chain、binder、lexical capture、未使用 / 使用引数、prime、ENABLEDを検査する。両frontendの正規化後構造、native / Wasmの完全応答、定義数・call edge数・serialized bytesの線形増加も検査する。両枝を評価するchainは小さいwork予算でbounded / workになることを要求し、指数的な評価仕事の除去とは数えない。

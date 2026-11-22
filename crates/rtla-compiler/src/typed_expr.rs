@@ -47,6 +47,13 @@ fn unmatched(value: &Expression) -> I {
         ),
     }
 }
+pub(crate) fn same_kind(value: &Expression, and: bool) -> Option<&[Expression]> {
+    match &value.node {
+        E::And { operands, .. } if and => Some(operands),
+        E::Or { operands, .. } if !and => Some(operands),
+        _ => None,
+    }
+}
 impl Compiler<'_> {
     pub(super) fn expression_ir(&mut self, value: &Expression, context: &Context) -> Result<I> {
         let child = context.nested()?;
@@ -227,15 +234,7 @@ impl Compiler<'_> {
                     body: Box::new(self.expression_ir(body, &bound)?),
                 }
             }
-            E::If {
-                condition,
-                consequent,
-                alternative,
-            } => I::If {
-                condition: Box::new(self.expression_ir(condition, &child)?),
-                consequent: Box::new(self.expression_ir(consequent, &child)?),
-                alternative: Box::new(self.expression_ir(alternative, &child)?),
-            },
+            E::If { .. } => self.else_if_ir(value, &child)?,
             E::Case { arms, other } => {
                 let mut result = if let Some(other) = other {
                     self.expression_ir(other, &child)?
@@ -254,23 +253,7 @@ impl Compiler<'_> {
                 result
             }
             E::And { operands, .. } | E::Or { operands, .. } => {
-                let and = matches!(value.node, E::And { .. });
-                let mut operands = operands.iter();
-                let mut result = if let Some(first) = operands.next() {
-                    self.expression_ir(first, &child)?
-                } else {
-                    boolean(and)
-                };
-                for operand in operands {
-                    let left = Box::new(result);
-                    let right = Box::new(self.expression_ir(operand, &child)?);
-                    result = if and {
-                        I::And { left, right }
-                    } else {
-                        I::Or { left, right }
-                    };
-                }
-                result
+                self.left_chain_ir(matches!(value.node, E::And { .. }), operands, &child)?
             }
             E::BoxAction { action, subscript } | E::AngleAction { action, subscript } => {
                 let boxed = matches!(value.node, E::BoxAction { .. });
@@ -300,6 +283,59 @@ impl Compiler<'_> {
                 ));
             }
         })
+    }
+    fn else_if_ir(&mut self, value: &Expression, child: &Context) -> Result<I> {
+        let mut arms = vec![];
+        let mut tail = value;
+        while let E::If {
+            condition,
+            consequent,
+            alternative,
+        } = &tail.node
+        {
+            arms.push((
+                self.expression_ir(condition, child)?,
+                self.expression_ir(consequent, child)?,
+            ));
+            tail = alternative;
+        }
+        let mut result = self.expression_ir(tail, child)?;
+        for (condition, consequent) in arms.into_iter().rev() {
+            result = I::If {
+                condition: Box::new(condition),
+                consequent: Box::new(consequent),
+                alternative: Box::new(result),
+            };
+        }
+        Ok(result)
+    }
+    fn left_chain_ir(&mut self, and: bool, operands: &[Expression], child: &Context) -> Result<I> {
+        let mut layers = vec![];
+        let mut current = operands;
+        loop {
+            layers.push(current);
+            match current.first().and_then(|first| same_kind(first, and)) {
+                Some(inner) => current = inner,
+                None => break,
+            }
+        }
+        let mut result = if let Some(first) = current.first() {
+            self.expression_ir(first, child)?
+        } else {
+            boolean(and)
+        };
+        for layer in layers.into_iter().rev() {
+            for operand in layer.iter().skip(1) {
+                let left = Box::new(result);
+                let right = Box::new(self.expression_ir(operand, child)?);
+                result = if and {
+                    I::And { left, right }
+                } else {
+                    I::Or { left, right }
+                };
+            }
+        }
+        Ok(result)
     }
     fn expressions_ir(&mut self, values: &[Expression], context: &Context) -> Result<Vec<I>> {
         values
@@ -456,15 +492,31 @@ impl Compiler<'_> {
                 self.membership_ir(body, &inner)?
             }
             E::Label { body, .. } => self.membership_ir(body, &child)?,
-            E::If {
-                condition,
-                consequent,
-                alternative,
-            } => I::If {
-                condition: Box::new(self.expression_ir(condition, &child)?),
-                consequent: Box::new(self.membership_ir(consequent, &child)?),
-                alternative: Box::new(self.membership_ir(alternative, &child)?),
-            },
+            E::If { .. } => {
+                let mut arms = vec![];
+                let mut tail = value;
+                while let E::If {
+                    condition,
+                    consequent,
+                    alternative,
+                } = &tail.node
+                {
+                    arms.push((
+                        self.expression_ir(condition, &child)?,
+                        self.membership_ir(consequent, &child)?,
+                    ));
+                    tail = alternative;
+                }
+                let mut result = self.membership_ir(tail, &child)?;
+                for (condition, consequent) in arms.into_iter().rev() {
+                    result = I::If {
+                        condition: Box::new(condition),
+                        consequent: Box::new(consequent),
+                        alternative: Box::new(result),
+                    };
+                }
+                result
+            }
             E::Case { arms, other } if !arms.is_empty() => {
                 let mut result = if let Some(other) = other {
                     self.membership_ir(other, &child)?

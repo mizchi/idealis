@@ -1,0 +1,49 @@
+[before] ts-wasm vs ts-native outcome differs: 0; rust-wasm vs rust-native differs: 0; TS-vs-Rust: {'equal': 400, 'rust parser limit (TS parses)': 24, 'ts refuses unsupported operator (\\div or %)': 56, 'OTHER': 8}
+   OTHER ('quint:LongConjunction-safety', 'v1', 'compile: modules or EXTENDS', 'compile: expression or operator nesting exceeds 40')
+   OTHER ('quint:LongConjunction-safety', 'v2', 'compile: modules or EXTENDS', 'compile: expression or operator nesting exceeds 40')
+   OTHER ('quint:LongConjunction-broken', 'v1', 'compile: modules or EXTENDS', 'compile: expression or operator nesting exceeds 40')
+   OTHER ('quint:LongConjunction-broken', 'v2', 'compile: modules or EXTENDS', 'compile: expression or operator nesting exceeds 40')
+   OTHER ('quint:LongIfChain-safety', 'v1', 'compile: modules or EXTENDS', 'compile: expression or operator nesting exceeds 40')
+   OTHER ('quint:LongIfChain-safety', 'v2', 'compile: modules or EXTENDS', 'compile: expression or operator nesting exceeds 40')
+   OTHER ('quint:LongIfChain-broken', 'v1', 'compile: modules or EXTENDS', 'compile: expression or operator nesting exceeds 40')
+   OTHER ('quint:LongIfChain-broken', 'v2', 'compile: modules or EXTENDS', 'compile: expression or operator nesting exceeds 40')
+[after] ts-wasm vs ts-native outcome differs: 0; rust-wasm vs rust-native differs: 0; TS-vs-Rust: {'equal': 386, 'rust parser limit (TS parses)': 24, 'ts refuses unsupported operator (\\div or %)': 70, 'OTHER': 8}
+   OTHER ('quint:LongConjunction-safety', 'v1', 'compile: modules or EXTENDS', 'compile: expression or operator nesting exceeds 40')
+   OTHER ('quint:LongConjunction-safety', 'v2', 'compile: modules or EXTENDS', 'complete 6/7 w20')
+   OTHER ('quint:LongConjunction-broken', 'v1', 'compile: modules or EXTENDS', 'compile: expression or operator nesting exceeds 40')
+   OTHER ('quint:LongConjunction-broken', 'v2', 'compile: modules or EXTENDS', 'violation trace5 w15')
+   OTHER ('quint:LongIfChain-safety', 'v1', 'compile: modules or EXTENDS', 'compile: expression or operator nesting exceeds 40')
+   OTHER ('quint:LongIfChain-safety', 'v2', 'compile: modules or EXTENDS', 'check: Safety expression nesting exceeds 48')
+   OTHER ('quint:LongIfChain-broken', 'v1', 'compile: modules or EXTENDS', 'compile: expression or operator nesting exceeds 40')
+   OTHER ('quint:LongIfChain-broken', 'v2', 'compile: modules or EXTENDS', 'check: Safety expression nesting exceeds 48')
+[before] TS vs Rust IR (normalized) compared where both compile: 215; differing: 1 [('enabled-and-flat-44', 'v1', 'wasm!=native')]
+[after] TS vs Rust IR (normalized) compared where both compile: 272; differing: 1 [('enabled-and-flat-44', 'v1', 'wasm!=native')]
+before vs after: differing (case,version,path) cells: 334 of 1952
+ by version: {'v2': 334}
+  118 ('v2', 'before 40-refusal -> after accepted (result/complete)')
+  60 ('v2', 'before 40-refusal -> after accepted (result/invariant-violation)')
+  44 ('v2', 'before 40-refusal -> after check refusal: Expected a boolean')
+  22 ('v2', 'before 40-refusal -> after check refusal: Integer division by zero')
+  50 ('v2', 'before 40-refusal -> after check refusal: Safety expression nesting exceeds 48')
+  28 ('v2', 'before 40-refusal -> after other compile refusal: expression Apply \\div')
+  12 ('v2', 'before 40-refusal -> after other compile refusal: operator Early')
+OTHER differences: 0
+after vs recorded expectations mismatches: 0
+after: IR(v2) equals IR of equivalent spelling: compared 386 (case,path) pairs with a compiled program; differing 16
+   ('paren-and-62', 'flat-and-62', 'rust-wasm', 'compile: TLA parsing: Expression nesting exceeds 64', 'check: Safety expression nesting exceeds 48')
+   ('paren-and-62', 'flat-and-62', 'rust-native', 'compile: TLA parsing: Expression nesting exceeds 64', 'check: Safety expression nesting exceeds 48')
+   ('paren-or-62', 'flat-or-62', 'rust-wasm', 'compile: TLA parsing: Expression nesting exceeds 64', 'check: Safety expression nesting exceeds 48')
+   ('paren-or-62', 'flat-or-62', 'rust-native', 'compile: TLA parsing: Expression nesting exceeds 64', 'check: Safety expression nesting exceeds 48')
+   ('if-chain-62', 'case-other-62', 'rust-wasm', 'compile: TLA parsing: Expression nesting exceeds 64', 'check: Safety expression nesting exceeds 48')
+   ('if-chain-62', 'case-other-62', 'rust-native', 'compile: TLA parsing: Expression nesting exceeds 64', 'check: Safety expression nesting exceeds 48')
+   ('next-and-right-44', 'next-and-flat-44', 'rust-wasm', 'compile: TLA parsing: Expression nesting exceeds 64', 'complete 6/7 w278')
+   ('next-and-right-44', 'next-and-flat-44', 'rust-native', 'compile: TLA parsing: Expression nesting exceeds 64', 'complete 6/7 w278')
+   ('next-binders-right-44', 'next-binders-flat-44', 'rust-wasm', 'compile: TLA parsing: Expression nesting exceeds 64', 'complete 6/7 w362')
+   ('next-binders-right-44', 'next-binders-flat-44', 'rust-native', 'compile: TLA parsing: Expression nesting exceeds 64', 'complete 6/7 w362')
+   ('next-or-right-44', 'next-or-flat-44', 'rust-wasm', 'compile: TLA parsing: Expression nesting exceeds 64', 'complete 45/45 w2115')
+   ('next-or-right-44', 'next-or-flat-44', 'rust-native', 'compile: TLA parsing: Expression nesting exceeds 64', 'complete 45/45 w2115')
+   ('enabled-and-right-44', 'enabled-and-flat-44', 'rust-wasm', 'compile: TLA parsing: Expression nesting exceeds 64', 'complete 6/7 w290')
+   ('enabled-and-right-44', 'enabled-and-flat-44', 'rust-native', 'compile: TLA parsing: Expression nesting exceeds 64', 'complete 6/7 w290')
+   ('specification-right-45', 'specification-flat-45', 'rust-wasm', 'compile: TLA parsing: Expression nesting exceeds 64', 'complete 6/7 w64')
+   ('specification-right-45', 'specification-flat-45', 'rust-native', 'compile: TLA parsing: Expression nesting exceeds 64', 'complete 6/7 w64')
+before: pairs compared 386; differing 298 (before: chains exceeding 40 have no IR, so these count pairs where only one side compiled)

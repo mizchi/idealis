@@ -1,0 +1,69 @@
+# sha256 of crates/rtla-compiler/src/*.rs (current) vs first-evaluation record
+aacf266915498a068b519a52962200a444f2483c3df03f300912d66df0e50ca5  crates/rtla-compiler/src/analysis.rs
+7ac784fddaadafbc0d01b55d668c8f4ebe30fd426c61d1833b30781e2638791d  crates/rtla-compiler/src/elaborate.rs
+055e8d877268c79718aa96feb77b03fff1a39d9dfbc8ceb89f5a7a5e7335b5b7  crates/rtla-compiler/src/functions.rs
+9ac54db69b92fc164f1b50dd17d021dbb5eb43d98decdd15b823f2aa5c641c20  crates/rtla-compiler/src/labels.rs
+a282e1af857c102f57c1ff67cc096e5c9274976d6cd9a3b02ef75d0dcaf332d4  crates/rtla-compiler/src/levels.rs
+0bc4f919b9760bce8006903c618d0b677070ac822bf5b8dd0db0553865905792  crates/rtla-compiler/src/lib.rs
+b151695fbc86bfd74d45798061e1c9797fa3142dd8da7e90c4f0da93e37c72b6  crates/rtla-compiler/src/link.rs
+7652b1be9da29b2f8e7f14b9b7cd96e1058f4a17ec1058026754507318e5492b  crates/rtla-compiler/src/old.rs
+ce64d1afcd7a9ed6cf0269ae5f7514034c0b97cc851690e1ec587f4e5ee58d41  crates/rtla-compiler/src/rewrite.rs
+8a4b41424d56fe8701adbf123531e6c9e4fd490ad46149833a69afa7f83f227a  crates/rtla-compiler/src/select.rs
+4575230c7c2d97d45f8d9d525aa7c7f99c7f2abb131fb25afa194057eb70da15  crates/rtla-compiler/src/source.rs
+a2066b5bfbec1a97d0e2754050f62d50e29ed29621e99db2eb09094df99f131c  crates/rtla-compiler/src/symbols.rs
+ecf438b158b2c31422ff4ae7a8c79bb43d7311dce736a68ab3b03fc947e877c6  crates/rtla-compiler/src/symmetry.rs
+f801cd6774a99e4b4130a7e36fa451912de75df88cc7bcd510e6551edd624351  crates/rtla-compiler/src/typed_expr.rs
+42fd8301d991d8e5769360a3ad883d47e8a85c58ab1d48483e53caac9633583d  crates/rtla-compiler/src/typed_lower.rs
+049fdae8e3e03f6d3c9b8754572035c47bf0eeb220b798234b05315f94115702  crates/rtla-compiler/src/typed.rs
+
+# first evaluation (evals/runs/0074-audit/start/modified-files-before-after.txt)
+crates/rtla-compiler/src/typed_expr.rs before=1c811e617e8fac7c3f4146b1dcb6d1f915a8b5a3fc20396fa4362ca275fd3a3d after=f801cd6774a99e4b4130a7e36fa451912de75df88cc7bcd510e6551edd624351
+crates/rtla-compiler/src/typed_lower.rs before=54c086096cfb93560ff620758b88c06654455c934c037d09667b2fe3d770f7a0 after=42fd8301d991d8e5769360a3ad883d47e8a85c58ab1d48483e53caac9633583d
+
+# current vs before-src (cmp)
+identical-to-before crates/rtla-compiler/src/analysis.rs
+identical-to-before crates/rtla-compiler/src/elaborate.rs
+identical-to-before crates/rtla-compiler/src/functions.rs
+identical-to-before crates/rtla-compiler/src/labels.rs
+identical-to-before crates/rtla-compiler/src/levels.rs
+identical-to-before crates/rtla-compiler/src/lib.rs
+identical-to-before crates/rtla-compiler/src/link.rs
+identical-to-before crates/rtla-compiler/src/old.rs
+identical-to-before crates/rtla-compiler/src/rewrite.rs
+identical-to-before crates/rtla-compiler/src/select.rs
+identical-to-before crates/rtla-compiler/src/source.rs
+identical-to-before crates/rtla-compiler/src/symbols.rs
+identical-to-before crates/rtla-compiler/src/symmetry.rs
+differs-from-before crates/rtla-compiler/src/typed_expr.rs
+differs-from-before crates/rtla-compiler/src/typed_lower.rs
+identical-to-before crates/rtla-compiler/src/typed.rs
+
+# other protected
+2c98a88b5767c9ce73fc0e17c3622baf1c1925624e4b8ff1842a5f1513c79c7b  crates/rtlc/src/benchmarks.rs
+40bb877f20b923634c8de4b189f54270832dca74b2e35a703fb161ec3c877b5b  crates/rtlc/src/bounded_drop.rs
+4a97f85d300d8c4f5e13d171a1e1648b29be054451f66ab8f6563a90dabcd112  crates/rtlc/src/coverage_benchmarks.rs
+f3e03ddfc7319ef07d224d94f1fd6572f9ad77e9b6b8c72d2f7be7000ba9e73b  crates/rtlc/src/display.rs
+620f537aec55d0638a7d57fe5860c15cd43ddb6e5db008a88cedbb1dbc92bc51  crates/rtlc/src/expansion_benchmarks.rs
+3fb58bb1d94e5e79a35fd647416ae75e99171f668efa828065b2b5e612fca139  crates/rtlc/src/expansions.rs
+c83763f7796d8ea4c51eec8207065204eee1890c41cf23a1a72d01bf6ec2eb9d  crates/rtlc/src/ir.rs
+5c9cbb9bec93f108a62775092be30abefb6da7f163354b08d27f5a401dab9141  crates/rtlc/src/lib.rs
+8b84d296370ecf9c987e4bc240bccee062be8c25aa6593d18bef6a8c02300684  crates/rtlc/src/safety_coverage.rs
+018e112c2eaf59f774d9ff7760476ed47f355fca0961bb5a82c365762526bd9d  crates/rtlc/src/safety_definition_tests.rs
+b3b43402b604314931d535425246beb86ab5ef4ec1a9dc8d0c8324ae51de3c19  crates/rtlc/src/safety_definitions.rs
+2ced4cfc6c17420d83eb471cf22d223f3c602db880f46de0c17eb7f5e157fea2  crates/rtlc/src/safety_expressions.rs
+e5b5cbde433c948fab21e7927741b4a4f1102d72786fb7299bf3bed61f8b7281  crates/rtlc/src/safety_functions.rs
+553c78b1d19765f7222b3aee29e2be927993fdb5156506aea7afef394a799993  crates/rtlc/src/safety_lazy.rs
+4c227e3e2c8c1fa0c200224bfa8bcd8d6667678a9d5a2dc333c3e2ffce824390  crates/rtlc/src/safety_parallel.rs
+e0296f9dbb88e176774d55ea41139e0055fa83b21726ab657a7fe4bed836c20e  crates/rtlc/src/safety_partial_order.rs
+5138e35881de2621b33e23793867485cf9a444eab2c950f595f27ac18a1076cd  crates/rtlc/src/safety_prepared.rs
+a10ccc6c8e1b82dedc4e671b009d8454cb94926e6dcdce42ba3f7439b99291c8  crates/rtlc/src/safety_symmetry.rs
+a586be7679e52c4dc9ebe8dfafd07c1b1293ef04885df61904c3265c7f3c500c  crates/rtlc/src/safety_values.rs
+74667c6064180bc3020acbb2b9d35bcf395e9275ff1af14f29c6eed31025ed38  crates/rtlc/src/safety_work.rs
+3a240ff93a1a3f6e87e5533b380c10ef267865f37e4a91270c023e55ac83c383  crates/rtlc/src/safety.rs
+64a83f5af2bd9cbc91939953e3434710c21d994c99aa20343d90980d9147c7a9  crates/rtlc/src/symmetry_benchmarks.rs
+f564c1c536c66ee687f7853b3621da7e9929551f0ed5356b3c4b57f7099f4c75  crates/rtlc/src/temporal.rs
+dd9fad8e4c8a688bec6bf4555326184bf5c4b10528e581eeb5edad3133059743  crates/rtlc/src/value.rs
+d6fdded5dec1ab09a9e11262c804c5d28b4ec7997c99eee4f78c1ca9b3d54875  packages/idealis/src/safety-program.ts
+86df71c1f8182f7eec4dae4ceb172ba1e4c5d77cd98ece661378bf49ca35b898  packages/idealis/src/contracts.ts
+d114857b244e05873f3f9762ea6086d51f79bbc0f4f252fef29e6dd0bfaea7af  packages/idealis/src/tla-safety.ts
+packages/idealis/src/tla-safety.ts before=349b0f54a6b1c7fe8d5a2e6621cb3c20f76c12b936fc87b61f47071c51e7848a after=55141a5c1205496aa05664de4fcbacb5081f10ae97e207cf469d3a24b772d2a5

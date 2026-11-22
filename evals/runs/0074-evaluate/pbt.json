@@ -1,0 +1,5557 @@
+[
+  {
+    "generator": "raw",
+    "seed": 1,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 97,
+    "cases": 161,
+    "operations": 348,
+    "executionMs": 3.0342500000000427,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 1,
+    "fault": "persistence",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 97,
+    "cases": 161,
+    "operations": 348,
+    "executionMs": 1.3667499999999677,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 1,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 6,
+    "numShrinks": 2,
+    "numSkips": 14,
+    "cases": 40,
+    "operations": 105,
+    "executionMs": 1.2033329999999864,
+    "path": "19:1:9",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 0
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 1,
+    "fault": "late-retry",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 97,
+    "cases": 161,
+    "operations": 348,
+    "executionMs": 1.5224999999999795,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 1,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 97,
+    "cases": 161,
+    "operations": 348,
+    "executionMs": 1.3007910000000038,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 1,
+    "fault": "drop-ignored",
+    "status": "failed",
+    "numRuns": 6,
+    "numShrinks": 3,
+    "numSkips": 14,
+    "cases": 68,
+    "operations": 245,
+    "executionMs": 0.8607079999999883,
+    "path": "19:2:12:16",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "drop",
+        "index": 0
+      },
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 0
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 2,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 135,
+    "cases": 199,
+    "operations": 392,
+    "executionMs": 1.5158329999999864,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 2,
+    "fault": "persistence",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 135,
+    "cases": 199,
+    "operations": 392,
+    "executionMs": 1.227374999999995,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 2,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 3,
+    "numShrinks": 1,
+    "numSkips": 6,
+    "cases": 19,
+    "operations": 51,
+    "executionMs": 0.24679200000002766,
+    "path": "8:6",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 2,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 15,
+    "numShrinks": 0,
+    "numSkips": 41,
+    "cases": 62,
+    "operations": 144,
+    "executionMs": 0.5822919999999954,
+    "path": "55",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 2,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 135,
+    "cases": 199,
+    "operations": 392,
+    "executionMs": 1.312291000000016,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 2,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 135,
+    "cases": 199,
+    "operations": 392,
+    "executionMs": 1.2500830000000178,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 3,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 115,
+    "cases": 179,
+    "operations": 394,
+    "executionMs": 1.0728750000000105,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 3,
+    "fault": "persistence",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 115,
+    "cases": 179,
+    "operations": 394,
+    "executionMs": 1.1700409999999692,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 3,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 2,
+    "numShrinks": 2,
+    "numSkips": 2,
+    "cases": 18,
+    "operations": 48,
+    "executionMs": 0.2194170000000213,
+    "path": "3:5:4",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 3,
+    "fault": "late-retry",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 115,
+    "cases": 179,
+    "operations": 394,
+    "executionMs": 0.994624999999985,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 3,
+    "fault": "fifo-only",
+    "status": "failed",
+    "numRuns": 2,
+    "numShrinks": 1,
+    "numSkips": 3,
+    "cases": 28,
+    "operations": 87,
+    "executionMs": 0.3180419999999913,
+    "path": "4:11",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 3,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 115,
+    "cases": 179,
+    "operations": 394,
+    "executionMs": 1.179708000000005,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 4,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 140,
+    "cases": 204,
+    "operations": 407,
+    "executionMs": 1.295583000000022,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 4,
+    "fault": "persistence",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 140,
+    "cases": 204,
+    "operations": 407,
+    "executionMs": 1.181165999999962,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 4,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 1,
+    "numShrinks": 5,
+    "numSkips": 2,
+    "cases": 29,
+    "operations": 115,
+    "executionMs": 0.36033300000002555,
+    "path": "2:3:4:5:4:0",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 4,
+    "fault": "late-retry",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 140,
+    "cases": 204,
+    "operations": 407,
+    "executionMs": 1.106708000000026,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 4,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 140,
+    "cases": 204,
+    "operations": 407,
+    "executionMs": 1.1391669999999863,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 4,
+    "fault": "drop-ignored",
+    "status": "failed",
+    "numRuns": 59,
+    "numShrinks": 2,
+    "numSkips": 134,
+    "cases": 240,
+    "operations": 556,
+    "executionMs": 1.6311659999999506,
+    "path": "192:14:16",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "drop",
+        "index": 0
+      },
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 0
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 5,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 131,
+    "cases": 195,
+    "operations": 440,
+    "executionMs": 1.1092079999999669,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 5,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 33,
+    "numShrinks": 2,
+    "numSkips": 74,
+    "cases": 131,
+    "operations": 305,
+    "executionMs": 0.9599999999999795,
+    "path": "106:4:11",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 5,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 9,
+    "numShrinks": 3,
+    "numSkips": 22,
+    "cases": 48,
+    "operations": 97,
+    "executionMs": 0.31020900000004303,
+    "path": "30:7:1:3",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 5,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 28,
+    "numShrinks": 0,
+    "numSkips": 71,
+    "cases": 108,
+    "operations": 235,
+    "executionMs": 0.6214999999999691,
+    "path": "98",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 5,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 131,
+    "cases": 195,
+    "operations": 440,
+    "executionMs": 1.2705829999999878,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 5,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 131,
+    "cases": 195,
+    "operations": 440,
+    "executionMs": 1.0880839999999807,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 6,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 151,
+    "cases": 215,
+    "operations": 511,
+    "executionMs": 1.3147500000000036,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 6,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 2,
+    "numShrinks": 2,
+    "numSkips": 0,
+    "cases": 24,
+    "operations": 82,
+    "executionMs": 0.24091699999996763,
+    "path": "1:3:10",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 6,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 2,
+    "numShrinks": 3,
+    "numSkips": 0,
+    "cases": 28,
+    "operations": 77,
+    "executionMs": 0.22054199999996627,
+    "path": "1:6:5:7",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 6,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 54,
+    "numShrinks": 1,
+    "numSkips": 126,
+    "cases": 191,
+    "operations": 453,
+    "executionMs": 1.1250830000000178,
+    "path": "179:2",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 6,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 151,
+    "cases": 215,
+    "operations": 511,
+    "executionMs": 1.2997080000000096,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 6,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 151,
+    "cases": 215,
+    "operations": 511,
+    "executionMs": 1.3075830000000224,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 7,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 97,
+    "cases": 161,
+    "operations": 381,
+    "executionMs": 0.9296249999999873,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 7,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 8,
+    "numShrinks": 3,
+    "numSkips": 12,
+    "cases": 50,
+    "operations": 187,
+    "executionMs": 0.4465409999999679,
+    "path": "19:6:4:10",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 7,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 2,
+    "numShrinks": 3,
+    "numSkips": 3,
+    "cases": 15,
+    "operations": 44,
+    "executionMs": 0.12270800000004556,
+    "path": "4:1:1:2",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 7,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 2,
+    "numShrinks": 3,
+    "numSkips": 3,
+    "cases": 26,
+    "operations": 93,
+    "executionMs": 0.2629999999999768,
+    "path": "4:8:1:4",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 7,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 97,
+    "cases": 161,
+    "operations": 381,
+    "executionMs": 1.0006249999999568,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 7,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 97,
+    "cases": 161,
+    "operations": 381,
+    "executionMs": 0.8846670000000358,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 8,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 111,
+    "cases": 175,
+    "operations": 380,
+    "executionMs": 1.0025829999999587,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 8,
+    "fault": "persistence",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 111,
+    "cases": 175,
+    "operations": 380,
+    "executionMs": 0.9215419999999881,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 8,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 5,
+    "numShrinks": 1,
+    "numSkips": 5,
+    "cases": 23,
+    "operations": 60,
+    "executionMs": 0.1705419999999549,
+    "path": "9:7",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 8,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 44,
+    "numShrinks": 2,
+    "numSkips": 80,
+    "cases": 144,
+    "operations": 330,
+    "executionMs": 0.932707999999991,
+    "path": "123:6:7",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 8,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 111,
+    "cases": 175,
+    "operations": 380,
+    "executionMs": 0.8990420000000086,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 8,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 111,
+    "cases": 175,
+    "operations": 380,
+    "executionMs": 1.0247919999999908,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 9,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 107,
+    "cases": 171,
+    "operations": 381,
+    "executionMs": 0.9476669999999672,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 9,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 60,
+    "numShrinks": 3,
+    "numSkips": 95,
+    "cases": 193,
+    "operations": 474,
+    "executionMs": 1.3020840000000362,
+    "path": "154:10:8:10",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 9,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 2,
+    "numShrinks": 2,
+    "numSkips": 3,
+    "cases": 18,
+    "operations": 43,
+    "executionMs": 0.1414999999999509,
+    "path": "4:3:5",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 9,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 43,
+    "numShrinks": 1,
+    "numSkips": 71,
+    "cases": 121,
+    "operations": 271,
+    "executionMs": 0.649167000000034,
+    "path": "113:1",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 9,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 107,
+    "cases": 171,
+    "operations": 381,
+    "executionMs": 1.025291999999979,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 9,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 107,
+    "cases": 171,
+    "operations": 381,
+    "executionMs": 0.8857909999999833,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 10,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 165,
+    "cases": 229,
+    "operations": 476,
+    "executionMs": 1.2985830000000078,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 10,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 6,
+    "numShrinks": 3,
+    "numSkips": 16,
+    "cases": 51,
+    "operations": 152,
+    "executionMs": 0.3791659999999979,
+    "path": "21:4:5:10",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 10,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 8,
+    "numShrinks": 2,
+    "numSkips": 27,
+    "cases": 48,
+    "operations": 104,
+    "executionMs": 0.2712500000000091,
+    "path": "34:1:5",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 10,
+    "fault": "late-retry",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 165,
+    "cases": 229,
+    "operations": 476,
+    "executionMs": 1.1749999999999545,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 10,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 165,
+    "cases": 229,
+    "operations": 476,
+    "executionMs": 1.2710409999999683,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 10,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 165,
+    "cases": 229,
+    "operations": 476,
+    "executionMs": 1.7995840000000385,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 11,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 140,
+    "cases": 204,
+    "operations": 430,
+    "executionMs": 1.165584000000024,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 11,
+    "fault": "persistence",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 140,
+    "cases": 204,
+    "operations": 430,
+    "executionMs": 1.2756669999999986,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 11,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 17,
+    "numShrinks": 2,
+    "numSkips": 32,
+    "cases": 58,
+    "operations": 123,
+    "executionMs": 0.39583399999997937,
+    "path": "48:2:2",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 11,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 34,
+    "numShrinks": 2,
+    "numSkips": 71,
+    "cases": 127,
+    "operations": 291,
+    "executionMs": 0.8174590000000421,
+    "path": "104:2:10",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 11,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 140,
+    "cases": 204,
+    "operations": 430,
+    "executionMs": 1.238207999999986,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 11,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 140,
+    "cases": 204,
+    "operations": 430,
+    "executionMs": 1.1748339999999757,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 12,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 104,
+    "cases": 168,
+    "operations": 368,
+    "executionMs": 0.995207999999991,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 12,
+    "fault": "persistence",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 104,
+    "cases": 168,
+    "operations": 368,
+    "executionMs": 0.9959170000000199,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 12,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 28,
+    "numShrinks": 1,
+    "numSkips": 21,
+    "cases": 59,
+    "operations": 134,
+    "executionMs": 0.422834000000023,
+    "path": "48:6",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 12,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 34,
+    "numShrinks": 2,
+    "numSkips": 28,
+    "cases": 89,
+    "operations": 239,
+    "executionMs": 0.847582999999986,
+    "path": "61:6:11",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 12,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 104,
+    "cases": 168,
+    "operations": 368,
+    "executionMs": 1.014291999999955,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 12,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 104,
+    "cases": 168,
+    "operations": 368,
+    "executionMs": 0.9591249999999718,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 13,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 130,
+    "cases": 194,
+    "operations": 424,
+    "executionMs": 1.2475829999999632,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 13,
+    "fault": "persistence",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 130,
+    "cases": 194,
+    "operations": 424,
+    "executionMs": 1.1252079999999864,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 13,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 1,
+    "numShrinks": 1,
+    "numSkips": 0,
+    "cases": 15,
+    "operations": 37,
+    "executionMs": 0.3083750000000123,
+    "path": "0:8",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 13,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 23,
+    "numShrinks": 3,
+    "numSkips": 53,
+    "cases": 97,
+    "operations": 249,
+    "executionMs": 0.7430420000000026,
+    "path": "75:2:5:6",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 13,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 130,
+    "cases": 194,
+    "operations": 424,
+    "executionMs": 1.226583000000005,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 13,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 130,
+    "cases": 194,
+    "operations": 424,
+    "executionMs": 1.3164170000000013,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 14,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 147,
+    "cases": 211,
+    "operations": 501,
+    "executionMs": 1.512707999999975,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 14,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 45,
+    "numShrinks": 3,
+    "numSkips": 85,
+    "cases": 156,
+    "operations": 423,
+    "executionMs": 1.3837080000000128,
+    "path": "129:3:7:6",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 14,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 6,
+    "numShrinks": 1,
+    "numSkips": 8,
+    "cases": 23,
+    "operations": 59,
+    "executionMs": 0.17658299999999372,
+    "path": "13:5",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 14,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 19,
+    "numShrinks": 3,
+    "numSkips": 27,
+    "cases": 82,
+    "operations": 230,
+    "executionMs": 0.7543750000000387,
+    "path": "45:10:5:10",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 14,
+    "fault": "fifo-only",
+    "status": "failed",
+    "numRuns": 44,
+    "numShrinks": 2,
+    "numSkips": 82,
+    "cases": 161,
+    "operations": 420,
+    "executionMs": 1.4780000000000086,
+    "path": "125:12:10",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 14,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 147,
+    "cases": 211,
+    "operations": 501,
+    "executionMs": 1.1788339999999948,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 15,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 104,
+    "cases": 168,
+    "operations": 378,
+    "executionMs": 1.022707999999966,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 15,
+    "fault": "persistence",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 104,
+    "cases": 168,
+    "operations": 378,
+    "executionMs": 0.89712499999996,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 15,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 2,
+    "numShrinks": 2,
+    "numSkips": 6,
+    "cases": 18,
+    "operations": 33,
+    "executionMs": 0.165958000000046,
+    "path": "7:2:3",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 15,
+    "fault": "late-retry",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 104,
+    "cases": 168,
+    "operations": 378,
+    "executionMs": 0.9789159999999697,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 15,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 104,
+    "cases": 168,
+    "operations": 378,
+    "executionMs": 0.8908749999999941,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 15,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 104,
+    "cases": 168,
+    "operations": 378,
+    "executionMs": 0.9570420000000013,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 16,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 134,
+    "cases": 198,
+    "operations": 413,
+    "executionMs": 0.9675419999999804,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 16,
+    "fault": "persistence",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 134,
+    "cases": 198,
+    "operations": 413,
+    "executionMs": 1.0214170000000422,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 16,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 6,
+    "numShrinks": 2,
+    "numSkips": 8,
+    "cases": 26,
+    "operations": 62,
+    "executionMs": 0.1754579999999919,
+    "path": "13:2:3",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 16,
+    "fault": "late-retry",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 134,
+    "cases": 198,
+    "operations": 413,
+    "executionMs": 0.94562499999995,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 16,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 134,
+    "cases": 198,
+    "operations": 413,
+    "executionMs": 1.0434170000000336,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 16,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 134,
+    "cases": 198,
+    "operations": 413,
+    "executionMs": 0.9565000000000055,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 17,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 133,
+    "cases": 197,
+    "operations": 454,
+    "executionMs": 1.0938330000000178,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 17,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 11,
+    "numShrinks": 3,
+    "numSkips": 28,
+    "cases": 59,
+    "operations": 146,
+    "executionMs": 0.35704099999998107,
+    "path": "38:7:1:2",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 17,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 8,
+    "numShrinks": 2,
+    "numSkips": 17,
+    "cases": 40,
+    "operations": 80,
+    "executionMs": 0.23283399999996846,
+    "path": "24:2:6",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 17,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 59,
+    "numShrinks": 2,
+    "numSkips": 120,
+    "cases": 205,
+    "operations": 512,
+    "executionMs": 1.2284170000000358,
+    "path": "178:9:7",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 17,
+    "fault": "fifo-only",
+    "status": "failed",
+    "numRuns": 18,
+    "numShrinks": 2,
+    "numSkips": 41,
+    "cases": 75,
+    "operations": 183,
+    "executionMs": 0.42604100000005474,
+    "path": "58:1:2",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 17,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 133,
+    "cases": 197,
+    "operations": 454,
+    "executionMs": 1.0068750000000364,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 18,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 110,
+    "cases": 174,
+    "operations": 392,
+    "executionMs": 1.0238749999999754,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 18,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 23,
+    "numShrinks": 4,
+    "numSkips": 33,
+    "cases": 92,
+    "operations": 226,
+    "executionMs": 0.5877080000000205,
+    "path": "55:6:4:7:8",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 18,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 22,
+    "numShrinks": 4,
+    "numSkips": 29,
+    "cases": 69,
+    "operations": 143,
+    "executionMs": 0.3529169999999908,
+    "path": "50:2:0:4:5",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 18,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 55,
+    "numShrinks": 3,
+    "numSkips": 93,
+    "cases": 177,
+    "operations": 436,
+    "executionMs": 1.1393749999999727,
+    "path": "147:2:7:9",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 18,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 110,
+    "cases": 174,
+    "operations": 392,
+    "executionMs": 0.8863750000000437,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 18,
+    "fault": "drop-ignored",
+    "status": "failed",
+    "numRuns": 39,
+    "numShrinks": 2,
+    "numSkips": 54,
+    "cases": 145,
+    "operations": 467,
+    "executionMs": 1.1502500000000282,
+    "path": "92:18:17",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "drop",
+        "index": 0
+      },
+      {
+        "type": "deliver",
+        "index": 0
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 19,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 145,
+    "cases": 209,
+    "operations": 467,
+    "executionMs": 1.0500000000000114,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 19,
+    "fault": "persistence",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 145,
+    "cases": 209,
+    "operations": 467,
+    "executionMs": 1.1169170000000008,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 19,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 11,
+    "numShrinks": 3,
+    "numSkips": 11,
+    "cases": 36,
+    "operations": 83,
+    "executionMs": 0.21649999999999636,
+    "path": "21:2:3:3",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 19,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 18,
+    "numShrinks": 4,
+    "numSkips": 29,
+    "cases": 74,
+    "operations": 202,
+    "executionMs": 0.45387499999998226,
+    "path": "46:3:3:6:6",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 19,
+    "fault": "fifo-only",
+    "status": "failed",
+    "numRuns": 42,
+    "numShrinks": 0,
+    "numSkips": 89,
+    "cases": 143,
+    "operations": 321,
+    "executionMs": 0.7935840000000098,
+    "path": "130",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 19,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 145,
+    "cases": 209,
+    "operations": 467,
+    "executionMs": 1.0329590000000053,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 20,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 152,
+    "cases": 216,
+    "operations": 499,
+    "executionMs": 1.1696249999999964,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 20,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 62,
+    "numShrinks": 3,
+    "numSkips": 148,
+    "cases": 233,
+    "operations": 564,
+    "executionMs": 1.258041999999989,
+    "path": "209:2:1:10",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 20,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 7,
+    "numShrinks": 1,
+    "numSkips": 5,
+    "cases": 20,
+    "operations": 37,
+    "executionMs": 0.1095409999999788,
+    "path": "11:4",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "raw",
+    "seed": 20,
+    "fault": "late-retry",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 152,
+    "cases": 216,
+    "operations": 499,
+    "executionMs": 1.1772080000000074,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 20,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 152,
+    "cases": 216,
+    "operations": 499,
+    "executionMs": 1.282792000000029,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "raw",
+    "seed": 20,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 152,
+    "cases": 216,
+    "operations": 499,
+    "executionMs": 1.2385829999999487,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 1,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 306,
+    "executionMs": 1.2690830000000233,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 1,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 23,
+    "numShrinks": 20,
+    "numSkips": 0,
+    "cases": 123,
+    "operations": 539,
+    "executionMs": 1.7369579999999587,
+    "path": "22:2:2:2:2:2:2:2:3:2:2:2:2:4:5:6:6:5:5:7:7",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 1,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 4,
+    "numShrinks": 18,
+    "numSkips": 0,
+    "cases": 128,
+    "operations": 578,
+    "executionMs": 1.6607079999999996,
+    "path": "3:2:4:2:3:2:3:2:2:2:2:2:7:1:7:10:18:14:12",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 1,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 4,
+    "numShrinks": 22,
+    "numSkips": 0,
+    "cases": 277,
+    "operations": 1718,
+    "executionMs": 4.290708000000052,
+    "path": "3:16:7:13:7:22:20:18:7:8:7:7:7:7:7:11:11:11:11:11:11:11:12",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 1,
+    "fault": "fifo-only",
+    "status": "failed",
+    "numRuns": 8,
+    "numShrinks": 3,
+    "numSkips": 0,
+    "cases": 258,
+    "operations": 1615,
+    "executionMs": 3.593250000000012,
+    "path": "7:56:57:68",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 1,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 306,
+    "executionMs": 0.6574170000000095,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 2,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 339,
+    "executionMs": 0.8188329999999837,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 2,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 4,
+    "numShrinks": 8,
+    "numSkips": 0,
+    "cases": 82,
+    "operations": 330,
+    "executionMs": 0.7529580000000351,
+    "path": "3:4:3:5:5:10:11:7:13",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 2,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 2,
+    "numShrinks": 21,
+    "numSkips": 0,
+    "cases": 132,
+    "operations": 562,
+    "executionMs": 1.4300409999999601,
+    "path": "1:2:2:3:2:2:2:2:2:2:2:2:2:2:2:2:2:5:7:1:21:8",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 0
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 2,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 2,
+    "numShrinks": 7,
+    "numSkips": 0,
+    "cases": 226,
+    "operations": 1340,
+    "executionMs": 2.8541669999999613,
+    "path": "1:25:21:27:21:21:29:38",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 2,
+    "fault": "fifo-only",
+    "status": "failed",
+    "numRuns": 63,
+    "numShrinks": 7,
+    "numSkips": 0,
+    "cases": 415,
+    "operations": 2183,
+    "executionMs": 5.041665999999964,
+    "path": "62:20:43:39:43:35:61:50",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 2,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 339,
+    "executionMs": 0.7132080000000087,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 3,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 327,
+    "executionMs": 0.7505409999999983,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 3,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 18,
+    "numShrinks": 9,
+    "numSkips": 0,
+    "cases": 104,
+    "operations": 452,
+    "executionMs": 0.9840000000000373,
+    "path": "17:4:2:7:4:7:7:9:8:8",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 3,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 1,
+    "numShrinks": 6,
+    "numSkips": 0,
+    "cases": 68,
+    "operations": 227,
+    "executionMs": 0.6517499999999927,
+    "path": "0:2:4:3:1:3:24",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 3,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 1,
+    "numShrinks": 5,
+    "numSkips": 0,
+    "cases": 155,
+    "operations": 684,
+    "executionMs": 1.3717919999999708,
+    "path": "0:20:18:16:18:39",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 3,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 327,
+    "executionMs": 0.7674170000000231,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 3,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 327,
+    "executionMs": 0.6429589999999621,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 4,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 316,
+    "executionMs": 0.7749999999999773,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 4,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 1,
+    "numShrinks": 12,
+    "numSkips": 0,
+    "cases": 247,
+    "operations": 1294,
+    "executionMs": 2.690416999999968,
+    "path": "0:2:2:3:16:18:21:19:17:24:25:25:32",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 4,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 3,
+    "numShrinks": 7,
+    "numSkips": 0,
+    "cases": 68,
+    "operations": 241,
+    "executionMs": 0.5612909999999829,
+    "path": "2:1:1:8:1:5:8:17",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 4,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 37,
+    "numShrinks": 16,
+    "numSkips": 0,
+    "cases": 356,
+    "operations": 2337,
+    "executionMs": 5.709375000000023,
+    "path": "36:4:4:5:2:3:19:8:43:32:16:21:10:26:27:27:29",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 4,
+    "fault": "fifo-only",
+    "status": "failed",
+    "numRuns": 2,
+    "numShrinks": 4,
+    "numSkips": 0,
+    "cases": 196,
+    "operations": 1055,
+    "executionMs": 2.7066659999999843,
+    "path": "1:7:18:52:57",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 4,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 316,
+    "executionMs": 0.8142499999999586,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 5,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 309,
+    "executionMs": 0.6902919999999995,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 5,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 21,
+    "numShrinks": 14,
+    "numSkips": 0,
+    "cases": 107,
+    "operations": 393,
+    "executionMs": 1.1672909999999774,
+    "path": "20:3:1:3:1:1:2:1:2:6:8:7:7:9:9",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 5,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 3,
+    "numShrinks": 3,
+    "numSkips": 0,
+    "cases": 51,
+    "operations": 229,
+    "executionMs": 0.5375419999999735,
+    "path": "2:2:19:13",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 5,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 3,
+    "numShrinks": 2,
+    "numSkips": 0,
+    "cases": 106,
+    "operations": 590,
+    "executionMs": 1.422083999999984,
+    "path": "2:40:32",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 5,
+    "fault": "fifo-only",
+    "status": "failed",
+    "numRuns": 53,
+    "numShrinks": 16,
+    "numSkips": 0,
+    "cases": 655,
+    "operations": 3697,
+    "executionMs": 8.581416999999988,
+    "path": "52:25:26:28:35:29:29:38:37:37:39:37:39:38:37:37:38",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 5,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 309,
+    "executionMs": 0.8063750000000027,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 6,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 327,
+    "executionMs": 0.7752500000000282,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 6,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 2,
+    "numShrinks": 15,
+    "numSkips": 0,
+    "cases": 167,
+    "operations": 808,
+    "executionMs": 1.9225420000000213,
+    "path": "1:4:2:2:5:2:10:10:11:12:15:13:12:14:13:13",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 6,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 1,
+    "numShrinks": 5,
+    "numSkips": 0,
+    "cases": 84,
+    "operations": 260,
+    "executionMs": 0.5865000000000009,
+    "path": "0:1:3:15:26:15",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 6,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 11,
+    "numShrinks": 21,
+    "numSkips": 0,
+    "cases": 192,
+    "operations": 851,
+    "executionMs": 2.1458749999999895,
+    "path": "10:7:2:3:2:2:2:3:2:2:2:4:11:5:5:13:14:12:12:12:14:12",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 6,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 327,
+    "executionMs": 0.73599999999999,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 6,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 327,
+    "executionMs": 0.6233749999999532,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 7,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 311,
+    "executionMs": 0.6058750000000259,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 7,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 33,
+    "numShrinks": 11,
+    "numSkips": 0,
+    "cases": 91,
+    "operations": 422,
+    "executionMs": 1.161625000000015,
+    "path": "32:5:2:2:2:2:2:2:2:4:5:10",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 7,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 3,
+    "numShrinks": 14,
+    "numSkips": 0,
+    "cases": 81,
+    "operations": 318,
+    "executionMs": 0.8053750000000264,
+    "path": "2:2:0:2:3:4:3:2:2:2:4:4:12:4:10",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 7,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 6,
+    "numShrinks": 9,
+    "numSkips": 0,
+    "cases": 155,
+    "operations": 979,
+    "executionMs": 2.2819999999999823,
+    "path": "5:8:12:12:12:11:12:12:12:26",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 7,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 311,
+    "executionMs": 0.7077920000000404,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 7,
+    "fault": "drop-ignored",
+    "status": "failed",
+    "numRuns": 61,
+    "numShrinks": 13,
+    "numSkips": 0,
+    "cases": 407,
+    "operations": 2470,
+    "executionMs": 5.474583999999993,
+    "path": "60:10:19:11:11:18:21:11:20:18:35:30:30:50",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "drop",
+        "index": 0
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 0
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 8,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 314,
+    "executionMs": 0.6383749999999964,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 8,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 14,
+    "numShrinks": 23,
+    "numSkips": 0,
+    "cases": 242,
+    "operations": 1179,
+    "executionMs": 2.6113750000000095,
+    "path": "13:4:2:2:2:2:3:2:3:2:2:8:10:11:10:12:12:10:10:11:10:10:14:27",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 8,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 21,
+    "numShrinks": 2,
+    "numSkips": 0,
+    "cases": 60,
+    "operations": 208,
+    "executionMs": 0.579667000000029,
+    "path": "20:9:14",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 8,
+    "fault": "late-retry",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 314,
+    "executionMs": 0.6331669999999576,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 8,
+    "fault": "fifo-only",
+    "status": "failed",
+    "numRuns": 22,
+    "numShrinks": 9,
+    "numSkips": 0,
+    "cases": 232,
+    "operations": 1126,
+    "executionMs": 2.4793339999999944,
+    "path": "21:2:0:10:12:24:29:29:31:32",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 8,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 314,
+    "executionMs": 0.7544169999999895,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 9,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 281,
+    "executionMs": 0.6343749999999773,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 9,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 42,
+    "numShrinks": 18,
+    "numSkips": 0,
+    "cases": 231,
+    "operations": 1146,
+    "executionMs": 2.659582999999998,
+    "path": "41:8:3:5:9:7:10:13:10:1:10:9:14:1:10:11:10:12:10",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 9,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 3,
+    "numShrinks": 7,
+    "numSkips": 0,
+    "cases": 60,
+    "operations": 214,
+    "executionMs": 0.7164169999999785,
+    "path": "2:2:3:2:10:5:4:17",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 9,
+    "fault": "late-retry",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 281,
+    "executionMs": 0.6730000000000018,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 9,
+    "fault": "fifo-only",
+    "status": "failed",
+    "numRuns": 11,
+    "numShrinks": 12,
+    "numSkips": 0,
+    "cases": 102,
+    "operations": 562,
+    "executionMs": 1.4668330000000083,
+    "path": "10:2:2:2:3:2:2:3:3:2:2:9:19",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 9,
+    "fault": "drop-ignored",
+    "status": "failed",
+    "numRuns": 9,
+    "numShrinks": 12,
+    "numSkips": 0,
+    "cases": 400,
+    "operations": 2781,
+    "executionMs": 5.941249999999968,
+    "path": "8:10:2:2:17:11:11:42:43:41:41:43:59",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "drop",
+        "index": 0
+      },
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 0
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 10,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 357,
+    "executionMs": 0.747333000000026,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 10,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 11,
+    "numShrinks": 17,
+    "numSkips": 0,
+    "cases": 201,
+    "operations": 873,
+    "executionMs": 2.0200829999999996,
+    "path": "10:4:2:4:2:2:3:9:8:8:8:8:9:8:16:23:17:17",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 10,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 9,
+    "numShrinks": 8,
+    "numSkips": 0,
+    "cases": 79,
+    "operations": 315,
+    "executionMs": 0.7734169999999949,
+    "path": "8:2:3:2:2:10:5:8:15",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 10,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 16,
+    "numShrinks": 2,
+    "numSkips": 0,
+    "cases": 106,
+    "operations": 461,
+    "executionMs": 1.0543330000000424,
+    "path": "15:35:27",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 10,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 357,
+    "executionMs": 0.7918750000000045,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 10,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 357,
+    "executionMs": 0.7528340000000071,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 11,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 291,
+    "executionMs": 0.6911670000000072,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 11,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 11,
+    "numShrinks": 11,
+    "numSkips": 0,
+    "cases": 109,
+    "operations": 542,
+    "executionMs": 1.3575419999999667,
+    "path": "10:2:2:3:2:2:2:8:6:10:9:22",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 11,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 26,
+    "numShrinks": 2,
+    "numSkips": 0,
+    "cases": 79,
+    "operations": 255,
+    "executionMs": 0.5259169999999926,
+    "path": "25:1:25",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 11,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 53,
+    "numShrinks": 11,
+    "numSkips": 0,
+    "cases": 298,
+    "operations": 1334,
+    "executionMs": 2.8552909999999656,
+    "path": "52:2:0:21:19:19:21:19:19:32:25:29",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 11,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 291,
+    "executionMs": 0.5720000000000027,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 11,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 291,
+    "executionMs": 0.6501249999999459,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 12,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 271,
+    "executionMs": 0.5344580000000292,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 12,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 4,
+    "numShrinks": 16,
+    "numSkips": 0,
+    "cases": 101,
+    "operations": 505,
+    "executionMs": 1.0689159999999447,
+    "path": "3:2:2:2:3:2:2:3:2:2:2:2:2:6:10:20:11",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 12,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 1,
+    "numShrinks": 11,
+    "numSkips": 0,
+    "cases": 80,
+    "operations": 388,
+    "executionMs": 0.8903339999999389,
+    "path": "0:2:0:7:2:15:3:3:3:13:6:8",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 12,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 1,
+    "numShrinks": 32,
+    "numSkips": 0,
+    "cases": 613,
+    "operations": 3850,
+    "executionMs": 8.381250000000023,
+    "path": "0:11:6:12:3:7:9:8:12:28:24:24:24:35:34:35:24:24:25:24:24:24:10:10:10:1:4:12:18:23:17:17:17",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 12,
+    "fault": "fifo-only",
+    "status": "failed",
+    "numRuns": 64,
+    "numShrinks": 12,
+    "numSkips": 0,
+    "cases": 328,
+    "operations": 1758,
+    "executionMs": 3.9645000000000437,
+    "path": "63:9:2:2:2:4:2:31:33:31:34:35:34",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 12,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 271,
+    "executionMs": 0.5438749999999573,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 13,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 318,
+    "executionMs": 0.6040000000000418,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 13,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 18,
+    "numShrinks": 14,
+    "numSkips": 0,
+    "cases": 186,
+    "operations": 858,
+    "executionMs": 1.8442500000001019,
+    "path": "17:3:9:2:7:8:11:10:11:11:10:10:10:12:11",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 13,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 4,
+    "numShrinks": 10,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 224,
+    "executionMs": 0.5024590000000444,
+    "path": "3:2:3:2:4:6:4:3:10:3:7",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 13,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 36,
+    "numShrinks": 6,
+    "numSkips": 0,
+    "cases": 139,
+    "operations": 611,
+    "executionMs": 1.277249999999981,
+    "path": "35:5:2:2:14:20:14",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 13,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 318,
+    "executionMs": 0.6886670000000095,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 13,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 318,
+    "executionMs": 0.5958330000000842,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 14,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 285,
+    "executionMs": 0.5567080000000715,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 14,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 17,
+    "numShrinks": 11,
+    "numSkips": 0,
+    "cases": 152,
+    "operations": 722,
+    "executionMs": 1.7625000000000455,
+    "path": "16:2:3:6:8:10:11:8:9:8:10:25",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 14,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 4,
+    "numShrinks": 2,
+    "numSkips": 0,
+    "cases": 66,
+    "operations": 246,
+    "executionMs": 0.5206249999999955,
+    "path": "3:1:30",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 14,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 4,
+    "numShrinks": 5,
+    "numSkips": 0,
+    "cases": 98,
+    "operations": 482,
+    "executionMs": 1.1101670000000468,
+    "path": "3:2:11:2:6:35",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 14,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 285,
+    "executionMs": 0.5692080000000033,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 14,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 285,
+    "executionMs": 0.6750000000000682,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 15,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 301,
+    "executionMs": 0.598374999999919,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 15,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 7,
+    "numShrinks": 13,
+    "numSkips": 0,
+    "cases": 116,
+    "operations": 490,
+    "executionMs": 1.1787910000000466,
+    "path": "6:6:3:4:3:2:5:6:7:8:7:7:9:15",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 15,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 4,
+    "numShrinks": 12,
+    "numSkips": 0,
+    "cases": 77,
+    "operations": 295,
+    "executionMs": 0.6455409999999802,
+    "path": "3:2:2:2:5:2:3:2:2:3:2:11:13",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 15,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 4,
+    "numShrinks": 16,
+    "numSkips": 0,
+    "cases": 308,
+    "operations": 1622,
+    "executionMs": 3.578624999999988,
+    "path": "3:14:10:9:12:10:9:9:10:9:19:12:13:14:33:31:38",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 15,
+    "fault": "fifo-only",
+    "status": "failed",
+    "numRuns": 61,
+    "numShrinks": 7,
+    "numSkips": 0,
+    "cases": 337,
+    "operations": 1890,
+    "executionMs": 4.260209000000032,
+    "path": "60:24:22:29:23:40:41:43",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 15,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 301,
+    "executionMs": 0.5873329999999441,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 16,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 288,
+    "executionMs": 0.663167000000044,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 16,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 30,
+    "numShrinks": 12,
+    "numSkips": 0,
+    "cases": 148,
+    "operations": 768,
+    "executionMs": 1.6503340000000435,
+    "path": "29:6:3:5:4:3:4:8:9:10:13:9:17",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 16,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 4,
+    "numShrinks": 10,
+    "numSkips": 0,
+    "cases": 227,
+    "operations": 833,
+    "executionMs": 1.7793750000000728,
+    "path": "3:1:20:20:22:19:19:21:29:18:23",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 16,
+    "fault": "late-retry",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 288,
+    "executionMs": 0.5493749999999409,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 16,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 288,
+    "executionMs": 0.5505830000000742,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 16,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 288,
+    "executionMs": 0.6135829999999487,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 17,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 323,
+    "executionMs": 0.61424999999997,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 17,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 23,
+    "numShrinks": 9,
+    "numSkips": 0,
+    "cases": 111,
+    "operations": 545,
+    "executionMs": 1.180708999999979,
+    "path": "22:3:5:3:7:7:8:9:8:8",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 17,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 8,
+    "numShrinks": 4,
+    "numSkips": 0,
+    "cases": 39,
+    "operations": 144,
+    "executionMs": 0.3351670000000695,
+    "path": "7:2:5:7:7",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 17,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 12,
+    "numShrinks": 8,
+    "numSkips": 0,
+    "cases": 232,
+    "operations": 1082,
+    "executionMs": 2.3902500000000373,
+    "path": "11:6:18:25:33:25:25:27:27",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 17,
+    "fault": "fifo-only",
+    "status": "failed",
+    "numRuns": 28,
+    "numShrinks": 12,
+    "numSkips": 0,
+    "cases": 342,
+    "operations": 2283,
+    "executionMs": 5.358333000000016,
+    "path": "27:14:3:15:10:30:34:21:22:26:26:29:37",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 17,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 323,
+    "executionMs": 0.6824589999999944,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 18,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 270,
+    "executionMs": 0.5674589999999853,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 18,
+    "fault": "persistence",
+    "status": "failed",
+    "numRuns": 20,
+    "numShrinks": 23,
+    "numSkips": 0,
+    "cases": 260,
+    "operations": 1209,
+    "executionMs": 2.964458000000036,
+    "path": "19:4:3:2:2:3:2:8:7:7:11:8:9:7:11:12:13:19:5:17:12:12:14:12",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "crash"
+      },
+      {
+        "type": "restart"
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 18,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 9,
+    "numShrinks": 12,
+    "numSkips": 0,
+    "cases": 78,
+    "operations": 311,
+    "executionMs": 0.7462079999999105,
+    "path": "8:2:0:5:2:2:2:2:7:8:1:3:3",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 18,
+    "fault": "late-retry",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 270,
+    "executionMs": 0.8371250000000146,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 18,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 270,
+    "executionMs": 0.6575410000000375,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 18,
+    "fault": "drop-ignored",
+    "status": "failed",
+    "numRuns": 52,
+    "numShrinks": 6,
+    "numSkips": 0,
+    "cases": 226,
+    "operations": 1183,
+    "executionMs": 2.764124999999922,
+    "path": "51:12:10:44:14:14:39",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "drop",
+        "index": 0
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 0
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 19,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 259,
+    "executionMs": 0.713292000000024,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 19,
+    "fault": "persistence",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 259,
+    "executionMs": 0.5205829999999878,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 19,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 8,
+    "numShrinks": 3,
+    "numSkips": 0,
+    "cases": 61,
+    "operations": 197,
+    "executionMs": 0.4597079999999778,
+    "path": "7:3:2:14",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 19,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 24,
+    "numShrinks": 24,
+    "numSkips": 0,
+    "cases": 303,
+    "operations": 1964,
+    "executionMs": 4.5163330000000315,
+    "path": "23:11:5:14:10:12:11:10:15:6:7:7:28:29:1:1:3:2:2:3:2:5:2:2:35",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "a",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 19,
+    "fault": "fifo-only",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 259,
+    "executionMs": 0.6076249999999845,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 19,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 259,
+    "executionMs": 0.5010839999999916,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 20,
+    "fault": "none",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 301,
+    "executionMs": 0.5836669999999913,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 20,
+    "fault": "persistence",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 301,
+    "executionMs": 0.6748749999999291,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  },
+  {
+    "generator": "enabled",
+    "seed": 20,
+    "fault": "deduplication",
+    "status": "failed",
+    "numRuns": 2,
+    "numShrinks": 10,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 172,
+    "executionMs": 0.42829200000005585,
+    "path": "1:1:0:6:6:8:4:4:6:4:6",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 20,
+    "fault": "late-retry",
+    "status": "failed",
+    "numRuns": 2,
+    "numShrinks": 9,
+    "numSkips": 0,
+    "cases": 225,
+    "operations": 851,
+    "executionMs": 2.1121669999999995,
+    "path": "1:1:24:24:26:22:22:24:22:24",
+    "counterexample": [
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 20,
+    "fault": "fifo-only",
+    "status": "failed",
+    "numRuns": 23,
+    "numShrinks": 8,
+    "numSkips": 0,
+    "cases": 365,
+    "operations": 1983,
+    "executionMs": 4.473208,
+    "path": "22:23:23:39:41:40:43:41:39",
+    "counterexample": [
+      {
+        "type": "send",
+        "id": "b",
+        "amount": 1
+      },
+      {
+        "type": "send",
+        "id": "a",
+        "amount": 1
+      },
+      {
+        "type": "deliver",
+        "index": 1
+      },
+      {
+        "type": "add",
+        "id": "b",
+        "amount": 1
+      }
+    ],
+    "replayed": true,
+    "fixedPassed": true
+  },
+  {
+    "generator": "enabled",
+    "seed": 20,
+    "fault": "drop-ignored",
+    "status": "passed",
+    "numRuns": 64,
+    "numShrinks": 0,
+    "numSkips": 0,
+    "cases": 64,
+    "operations": 301,
+    "executionMs": 0.7677079999999705,
+    "path": null,
+    "counterexample": null,
+    "replayed": null,
+    "fixedPassed": null
+  }
+]
