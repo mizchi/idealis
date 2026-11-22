@@ -1,15 +1,8 @@
 use criterion::{Criterion, criterion_group, criterion_main};
-use rusmt::{CacheOptions, CheckCache, Problem, Script, Solver};
+use rusmt::{Problem, Script, Solver};
 use std::{hint::black_box, time::Duration};
 
-const BUILD: &str = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
-
 fn cases(criterion: &mut Criterion) {
-    let options = CacheOptions {
-        enabled: true,
-        build_digest: BUILD,
-        max_entries: 4096,
-    };
     for count in [4, 32, 128] {
         let mut source = (0..count)
             .map(|index| format!("(declare-const x{index} Int)"))
@@ -24,16 +17,6 @@ fn cases(criterion: &mut Criterion) {
         });
         criterion.bench_function(&format!("prepared-{count}"), |bench| {
             bench.iter(|| problem.solve(black_box(2_000_000)))
-        });
-        // Every call misses: a fresh cache pays for the key and the write.
-        let solver = Solver::parse(&source).unwrap();
-        criterion.bench_function(&format!("cache-miss-{count}"), |bench| {
-            bench.iter(|| {
-                let mut cache = CheckCache::default();
-                solver
-                    .check_incremental(&[], black_box(2_000_000), &mut cache, options)
-                    .unwrap()
-            })
         });
     }
     let source = include_str!("fixtures/integer-ite.smt2");
@@ -52,25 +35,6 @@ fn cases(criterion: &mut Criterion) {
         });
         criterion.bench_function(&format!("script-prepared-{name}"), |bench| {
             bench.iter(|| script.solve(black_box(2_000_000)))
-        });
-        criterion.bench_function(&format!("script-cache-cold-{name}"), |bench| {
-            bench.iter(|| {
-                let mut cache = CheckCache::default();
-                script
-                    .solve_incremental(black_box(2_000_000), &mut cache, options)
-                    .unwrap()
-            })
-        });
-        let mut warm = CheckCache::default();
-        script
-            .solve_incremental(2_000_000, &mut warm, options)
-            .unwrap();
-        criterion.bench_function(&format!("script-cache-warm-{name}"), |bench| {
-            bench.iter(|| {
-                script
-                    .solve_incremental(black_box(2_000_000), &mut warm, options)
-                    .unwrap()
-            })
         });
     }
     for count in [32, 256] {

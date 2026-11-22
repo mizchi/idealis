@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
+import type { ScriptInput } from "../smt-scripts/corpus.js";
 import { generated, handCases } from "../smt-scripts/corpus.js";
 import { nativePath, wasmPath } from "../smt-subset/paths.js";
 import { createWasm } from "../smt-subset/wasm.js";
@@ -13,48 +14,47 @@ import type {
 } from "../smt-subset/wire.js";
 import { decode } from "../smt-subset/wire.js";
 
-type Engine = (requests: readonly Request[]) => Reply[];
-const native: Engine = (requests) =>
-  execFileSync(nativePath, {
-    input: requests
-      .map((request) => JSON.stringify({ version: 1, request }))
-      .join("\n"),
-    encoding: "utf8",
-    maxBuffer: 1 << 28,
-  })
-    .trim()
-    .split("\n")
-    .map((line) => decode(JSON.parse(line)));
-const answer = (solution: Solution) => {
+/** Runs a request batch in one engine instance and returns every reply. */
+export type Engine = (requests: readonly Request[]) => Reply[];
+export const nativeEngine =
+  (path: string): Engine =>
+  (requests) =>
+    execFileSync(path, {
+      input: requests
+        .map((request) => JSON.stringify({ version: 1, request }))
+        .join("\n"),
+      encoding: "utf8",
+      maxBuffer: 1 << 28,
+    })
+      .trim()
+      .split("\n")
+      .map((line) => decode(JSON.parse(line)));
+export const answer = (solution: Solution) => {
   const { status, values, booleans, reason } = solution;
   return { status, values, booleans, reason };
 };
 
 /**
- * Drives the same cached request sequence through native and Wasm. Cold runs
+ * Drives the same cached request sequence through every engine. Cold runs
  * must equal plain run-script, warm runs must return the same answers with
- * zero work, and disabled runs must ignore the snapshot.
+ * zero work, and disabled runs must ignore the snapshot. Engines must agree.
  */
-export const checks = async (): Promise<void> => {
-  const bytes = await readFile(wasmPath);
-  const wasm = await createWasm(bytes);
-  const engines: Record<string, Engine> = {
-    native,
-    wasm: (requests) => requests.map((request) => wasm.request(request)),
-  };
-  const buildDigest = createHash("sha256").update(bytes).digest("hex");
-  const inputs = [...handCases(), ...generated(0x74c1, 4)];
-  const requests: Request[] = [];
-  for (const input of inputs) {
-    requests.push({
-      kind: "run-script",
-      source: input.source,
-      maxWork: 2_000_000,
-    });
-  }
+export const verifyScriptCache = (
+  inputs: readonly ScriptInput[],
+  engines: Readonly<Record<string, Engine>>,
+  buildDigest: string,
+  onRecord: (record: unknown) => void,
+) => {
   const transcripts: Record<string, unknown[]> = {};
+  let hits = 0;
   for (const [name, engine] of Object.entries(engines)) {
-    const plain = engine(requests);
+    const plain = engine(
+      inputs.map((input) => ({
+        kind: "run-script",
+        source: input.source,
+        maxWork: 2_000_000,
+      })),
+    );
     let cache: CheckCache | undefined;
     const transcript: unknown[] = [];
     for (const [index, input] of inputs.entries()) {
@@ -109,14 +109,34 @@ export const checks = async (): Promise<void> => {
       assert.deepEqual(disabled.results, expected.results, input.name);
       assert.deepEqual(disabled.cache, cache, input.name);
       transcript.push(cold, warm, disabled);
+      if (name === Object.keys(engines)[0]) hits += warm.stats.hits;
     }
     transcripts[name] = transcript;
+    onRecord({ scriptCache: name, transcript });
   }
-  assert.deepEqual(transcripts.native, transcripts.wasm);
+  const [first, ...rest] = Object.values(transcripts);
+  for (const transcript of rest) assert.deepEqual(transcript, first);
+  return { cacheScripts: inputs.length, cacheWarmHits: hits };
+};
+
+export const checks = async (): Promise<void> => {
+  const bytes = await readFile(wasmPath);
+  const wasm = await createWasm(bytes);
+  const engines: Record<string, Engine> = {
+    native: nativeEngine(nativePath),
+    wasm: (requests) => requests.map((request) => wasm.request(request)),
+  };
+  const buildDigest = createHash("sha256").update(bytes).digest("hex");
+  verifyScriptCache(
+    [...handCases(), ...generated(0x74c1, 4)],
+    engines,
+    buildDigest,
+    () => {},
+  );
   const [tampered] = engines.wasm!([
     {
       kind: "run-script-incremental",
-      source: inputs[0]!.source,
+      source: handCases()[0]!.source,
       maxWork: 0,
       enabled: true,
       buildDigest,
