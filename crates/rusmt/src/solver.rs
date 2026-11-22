@@ -77,8 +77,8 @@ impl Solver {
             stats: cache.stats(),
         })
     }
-    pub(super) fn snapshot(&self) -> (Arc<Problem>, [u8; 32]) {
-        (self.session.problem().clone(), self.session.source_digest())
+    pub(super) fn snapshot(&self) -> (Arc<Problem>, sha2::Sha256) {
+        (self.session.problem().clone(), self.session.source_state())
     }
 }
 

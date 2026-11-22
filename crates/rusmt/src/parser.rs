@@ -867,7 +867,7 @@ pub(super) fn is_check(node: &Node) -> bool {
     matches!(node, Node::List(command) if matches!(command.first(), Some(Node::Atom(name,false)) if name == "check-sat"))
 }
 
-pub(super) type Snapshot = (Arc<Problem>, [u8; 32]);
+pub(super) type Snapshot = (Arc<Problem>, sha2::Sha256);
 pub(super) fn script(source: &str) -> Result<Vec<(Snapshot, Vec<Assumption>)>> {
     let nodes = parse(source)?;
     let mut prefix = String::new();

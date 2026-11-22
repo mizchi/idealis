@@ -1,13 +1,17 @@
 use crate::{
-    CacheOptions, CacheStats, CheckCache, Formula, IncrementalScript, Problem, Result, Solution,
-    cache, parser, solver::cached_solve,
+    Assumption, CacheOptions, CacheStats, CheckCache, Formula, IncrementalScript, Problem, Result,
+    Solution, cache, parser, solver::cached_solve,
 };
+use sha2::{Digest, Sha256};
 use std::sync::Arc;
 
 struct Query {
     problem: Arc<Problem>,
     todo: Vec<(Arc<Formula>, bool)>,
-    key: String,
+    /// Hash state of the normalized source; finalized only when caching, so
+    /// plain parsing and solving pay nothing for the cache key.
+    source: Sha256,
+    assumptions: Vec<Assumption>,
 }
 pub struct Script {
     queries: Vec<Query>,
@@ -19,8 +23,9 @@ impl Script {
             .map(|((problem, source), assumptions)| {
                 Ok(Query {
                     todo: problem.assumption_todo(&assumptions)?,
-                    key: cache::key(&source, &assumptions),
                     problem,
+                    source,
+                    assumptions,
                 })
             })
             .collect::<Result<Vec<_>>>()?;
@@ -59,7 +64,7 @@ impl Script {
             let result = cached_solve(
                 cache,
                 &query.problem,
-                query.key.clone(),
+                cache::key(&query.source.clone().finalize().into(), &query.assumptions),
                 query.todo.clone(),
                 remaining,
             )?;

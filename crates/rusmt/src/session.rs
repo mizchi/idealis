@@ -133,6 +133,10 @@ impl Session {
     pub(crate) fn source_digest(&self) -> [u8; 32] {
         self.source.clone().finalize().into()
     }
+    /// The running hash state, for callers that may never need the digest.
+    pub(crate) fn source_state(&self) -> Sha256 {
+        self.source.clone()
+    }
 }
 fn compile_all(
     declarations: &Declarations,

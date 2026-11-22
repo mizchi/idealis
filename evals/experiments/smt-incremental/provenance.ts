@@ -29,6 +29,7 @@ export const fingerprint = async () => {
     "evals/experiments/smt-incremental",
     "tests/smt-incremental",
     "evals/plans/0074-smt-incremental-cache.md",
+    "evals/plans/0074a-smt-lazy-cache-keys.md",
     "evals/plans/0040-smt-expansion.md",
     "evals/plans/0040a-smt-expansion-adjustment.md",
     "evals/plans/0041-smt-scripts.md",
