@@ -1,0 +1,153 @@
+{
+  "status": "complete",
+  "plan": "0074-smt-incremental-cache",
+  "mode": "cache",
+  "decision": "report",
+  "scope": "fixed cost of the opt-in cache within one candidate binary",
+  "runs": [
+    "evals/runs/0074a-smt-cache-development",
+    "evals/runs/0074a-smt-cache-confirmation"
+  ],
+  "rows": [
+    {
+      "reference": "prepared-4",
+      "cached": "cache-miss-4",
+      "referenceNs": [
+        582.4912362351428,
+        578.1241781022555
+      ],
+      "cachedNs": [
+        3112.3591730442176,
+        3017.5657745772764
+      ],
+      "developmentRatio": 5.343186265188385,
+      "confirmationRatio": 5.219580652175293
+    },
+    {
+      "reference": "prepared-32",
+      "cached": "cache-miss-32",
+      "referenceNs": [
+        13659.1578595724,
+        13961.87441690962
+      ],
+      "cachedNs": [
+        17727.25514491716,
+        18158.415282979608
+      ],
+      "developmentRatio": 1.297829289855803,
+      "confirmationRatio": 1.3005714519955456
+    },
+    {
+      "reference": "prepared-128",
+      "cached": "cache-miss-128",
+      "referenceNs": [
+        178461.03770180437,
+        179127.78921568627
+      ],
+      "cachedNs": [
+        185808.13011877827,
+        187870.53464052288
+      ],
+      "developmentRatio": 1.0411691678564055,
+      "confirmationRatio": 1.048807309369009
+    },
+    {
+      "reference": "script-prepared-repeat-64",
+      "cached": "script-cache-cold-repeat-64",
+      "referenceNs": [
+        882913.1824009323,
+        889439.1356749311
+      ],
+      "cachedNs": [
+        139008.4156889809,
+        141263.8869485294
+      ],
+      "developmentRatio": 0.15744290430795374,
+      "confirmationRatio": 0.15882355664655395
+    },
+    {
+      "reference": "script-prepared-repeat-64",
+      "cached": "script-cache-warm-repeat-64",
+      "referenceNs": [
+        882913.1824009323,
+        889439.1356749311
+      ],
+      "cachedNs": [
+        120328.24234449762,
+        121167.6684981685
+      ],
+      "developmentRatio": 0.1362854748835955,
+      "confirmationRatio": 0.1362292973607723
+    },
+    {
+      "reference": "script-prepared-scopes-32",
+      "cached": "script-cache-cold-scopes-32",
+      "referenceNs": [
+        13188.895969791449,
+        13387.00506672874
+      ],
+      "cachedNs": [
+        65131.672126745434,
+        66397.10198135198
+      ],
+      "developmentRatio": 4.938371814890837,
+      "confirmationRatio": 4.959817498416532
+    },
+    {
+      "reference": "script-prepared-scopes-32",
+      "cached": "script-cache-warm-scopes-32",
+      "referenceNs": [
+        13188.895969791449,
+        13387.00506672874
+      ],
+      "cachedNs": [
+        62096.13212723106,
+        64475.47874720358
+      ],
+      "developmentRatio": 4.708213050543378,
+      "confirmationRatio": 4.816273574695738
+    },
+    {
+      "reference": "script-prepared-ite-64",
+      "cached": "script-cache-cold-ite-64",
+      "referenceNs": [
+        14018.195532273603,
+        14032.656451282051
+      ],
+      "cachedNs": [
+        69077.69441325098,
+        71140.99313276651
+      ],
+      "developmentRatio": 4.927716570525487,
+      "confirmationRatio": 5.069673969412038
+    },
+    {
+      "reference": "script-prepared-ite-64",
+      "cached": "script-cache-warm-ite-64",
+      "referenceNs": [
+        14018.195532273603,
+        14032.656451282051
+      ],
+      "cachedNs": [
+        64245.377131410256,
+        66810.21047777163
+      ],
+      "developmentRatio": 4.582999073133227,
+      "confirmationRatio": 4.761052243366773
+    }
+  ],
+  "warmNotSlower": [
+    {
+      "name": "repeat-64",
+      "holds": true
+    },
+    {
+      "name": "scopes-32",
+      "holds": true
+    },
+    {
+      "name": "ite-64",
+      "holds": true
+    }
+  ]
+}
