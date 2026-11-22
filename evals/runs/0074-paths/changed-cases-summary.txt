@@ -1,0 +1,25 @@
+  1 cases | after (v2) = accepted: complete | paths changed: rust-native,rust-wasm
+      quint:LongConjunction-safety
+ 28 cases | after (v2) = accepted: complete | paths changed: rust-native,rust-wasm,ts-native,ts-wasm
+      boolean-or-true-skips-1-paren, boolean-or-true-skips-22-paren, boolean-or-true-skips-23-paren, boolean-or-true-skips-44-paren, division-or-true-skips-1-paren, division-or-true-skips-22-paren, division-or-true-skips-23-paren, division-or-true-skips-44-paren, enabled-and-paren-44, if-chain-39, if-chain-40, if-chain-44, if-chain-47, membership-if-44, mixed-and-44, next-and-paren-44, next-binders-paren-44, next-if-54, next-or-paren-44, paren-and-40, paren-and-44, paren-and-47, paren-and-48, paren-or-40, paren-or-44, paren-or-47, paren-or-48, specification-paren-45
+  5 cases | after (v2) = accepted: complete | paths changed: ts-native,ts-wasm
+      enabled-and-right-44, next-and-right-44, next-binders-right-44, next-or-right-44, specification-right-45
+  5 cases | after (v2) = accepted: invariant-violation | paths changed: rust-native,rust-wasm
+      division-selects-1-if, division-selects-22-if, division-selects-23-if, division-selects-44-if, quint:LongConjunction-broken
+ 14 cases | after (v2) = accepted: invariant-violation | paths changed: rust-native,rust-wasm,ts-native,ts-wasm
+      boolean-and-false-1-paren, boolean-and-false-22-paren, boolean-and-false-23-paren, boolean-and-false-44-paren, boolean-and-false-skips-1-paren, boolean-and-false-skips-22-paren, boolean-and-false-skips-23-paren, boolean-selects-1-if, boolean-selects-22-if, boolean-selects-23-if, boolean-selects-44-if, division-and-false-skips-1-paren, division-and-false-skips-22-paren, division-and-false-skips-23-paren
+ 11 cases | after (v2) = check-refusal: Expected a boolean | paths changed: rust-native,rust-wasm,ts-native,ts-wasm
+      boolean-and-error-1-paren, boolean-and-error-22-paren, boolean-and-error-23-paren, boolean-and-error-44-paren, boolean-and-error-first-1-paren, boolean-and-error-first-22-paren, boolean-and-error-first-23-paren, boolean-condition-error-1-if, boolean-condition-error-22-if, boolean-condition-error-23-if, boolean-condition-error-44-if
+  3 cases | after (v2) = check-refusal: Integer division by zero | paths changed: rust-native,rust-wasm
+      division-condition-error-1-if, division-condition-error-22-if, division-condition-error-23-if
+  8 cases | after (v2) = check-refusal: Integer division by zero | paths changed: rust-native,rust-wasm,ts-native,ts-wasm
+      division-and-error-1-paren, division-and-error-22-paren, division-and-error-23-paren, division-and-error-44-paren, division-and-error-first-1-paren, division-and-error-first-22-paren, division-and-error-first-23-paren, division-condition-error-44-if
+  2 cases | after (v2) = check-refusal: Safety expression nesting exceeds 48 | paths changed: rust-native,rust-wasm
+      quint:LongIfChain-broken, quint:LongIfChain-safety
+ 10 cases | after (v2) = check-refusal: Safety expression nesting exceeds 48 | paths changed: rust-native,rust-wasm,ts-native,ts-wasm
+      if-chain-48, if-chain-49, if-chain-54, if-chain-61, paren-and-49, paren-and-54, paren-and-61, paren-or-49, paren-or-54, paren-or-61
+  3 cases | after (v2) = check-refusal: Safety expression nesting exceeds 48 | paths changed: ts-native,ts-wasm
+      if-chain-62, paren-and-62, paren-or-62
+  3 cases | after (v2) = compile-refusal: operator Early | paths changed: rust-native,rust-wasm,ts-native,ts-wasm
+      order-and-paren, order-if-44, order-or-paren
+total changed cases 93

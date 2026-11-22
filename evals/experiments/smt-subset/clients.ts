@@ -113,6 +113,28 @@ const sourceParts = (input: Input) => {
   };
 };
 
+type Z3Api = Awaited<ReturnType<typeof init>>;
+
+export const evaluateScript = async (
+  api: Z3Api,
+  context: Parameters<Z3Api["Z3"]["eval_smtlib2_string"]>[0],
+  source: string,
+): Promise<string> => {
+  const bytes = new TextEncoder().encode(
+    `(reset)(set-option :print-success false)${source}`,
+  );
+  const pointer = api.em._malloc(bytes.length + 1);
+  api.em.HEAPU8.set(bytes, pointer);
+  api.em.HEAPU8[pointer + bytes.length] = 0;
+  try {
+    return await api.em.async_call(() =>
+      api.em._async_Z3_eval_smtlib2_string(context, pointer),
+    );
+  } finally {
+    api.em._free(pointer);
+  }
+};
+
 export const createZ3 = async () => {
   const api = await init();
   const context = new api.Context("smt-subset-eval");
@@ -175,10 +197,7 @@ export const createZ3 = async () => {
   return {
     version: api.getFullVersion(),
     script: (source: string): Promise<string> =>
-      api.Z3.eval_smtlib2_string(
-        context.ptr,
-        `(reset)(set-option :print-success false)${source}`,
-      ),
+      evaluateScript(api, context.ptr, source),
     prepare,
     scoped,
     solve: async (input: Input): Promise<Answer> => {

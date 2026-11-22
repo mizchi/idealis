@@ -43,6 +43,17 @@ const sourceEdges = (value: Expression) =>
   analysisChildren({ space: "source", value }).flatMap((edge) =>
     edge.node.space === "source" ? [{ ...edge, value: edge.node.value }] : [],
   );
+const chained = (
+  value: Expression | undefined,
+  kind: "And" | "Or",
+): readonly Expression[] | undefined =>
+  value && (value.kind === "And" || value.kind === "Or") && value.kind === kind
+    ? value.operands
+    : undefined;
+const inherited = (value: Expression): readonly Expression[] =>
+  sourceEdges(value)
+    .filter((edge) => edge.forwarding.action === "inherit")
+    .map((edge) => edge.value);
 type StaticTarget =
   | { readonly kind: "slot"; readonly slot: number }
   | { readonly kind: "binding"; readonly binding: number }
@@ -2065,6 +2076,29 @@ export const compileTlaSafety = (options: TlaSourceOptions): SafetyProgram => {
         ),
       };
     }
+    if (value.kind === "If" && shared) {
+      const arms: {
+        readonly condition: SafetyExpression;
+        readonly consequent: SafetyExpression;
+      }[] = [];
+      let tail: Expression = value;
+      while (tail.kind === "If") {
+        arms.push({
+          condition: expression(tail.condition, child),
+          consequent: expression(tail.consequent, child),
+        });
+        tail = tail.alternative;
+      }
+      return arms.reduceRight<SafetyExpression>(
+        (alternative, arm) => ({
+          op: "if",
+          condition: arm.condition,
+          consequent: arm.consequent,
+          alternative,
+        }),
+        expression(tail, child),
+      );
+    }
     if (value.kind === "If")
       return {
         op: "if",
@@ -2083,15 +2117,28 @@ export const compileTlaSafety = (options: TlaSourceOptions): SafetyProgram => {
         value.other ? expression(value.other, child) : unmatchedCase(value),
       );
     if (value.kind === "And" || value.kind === "Or") {
-      if (shared && value.operands[0])
-        return value.operands.slice(1).reduce<SafetyExpression>(
-          (left, operand) => ({
-            op: value.kind === "And" ? "and" : "or",
-            left,
-            right: expression(operand, child),
-          }),
-          expression(value.operands[0], child),
-        );
+      if (shared) {
+        const layers: (readonly Expression[])[] = [];
+        let current: readonly Expression[] = value.operands;
+        for (;;) {
+          layers.push(current);
+          const inner = chained(current[0], value.kind);
+          if (!inner) break;
+          current = inner;
+        }
+        const first = current[0];
+        let result: SafetyExpression = first
+          ? expression(first, child)
+          : bool(value.kind === "And");
+        for (const layer of layers.reverse())
+          for (const operand of layer.slice(1))
+            result = {
+              op: value.kind === "And" ? "and" : "or",
+              left: result,
+              right: expression(operand, child),
+            };
+        return result;
+      }
       return value.operands.reduce<SafetyExpression>(
         (left, operand) => ({
           op: value.kind === "And" ? "and" : "or",
@@ -2264,13 +2311,29 @@ export const compileTlaSafety = (options: TlaSourceOptions): SafetyProgram => {
       return membershipSet(value.body, letContext(value, context));
     if (shared && value.kind === "Label")
       return membershipSet(value.body, nested(context));
-    if (shared && value.kind === "If")
-      return {
-        op: "if",
-        condition: expression(value.condition, nested(context)),
-        consequent: membershipSet(value.consequent, nested(context)),
-        alternative: membershipSet(value.alternative, nested(context)),
-      };
+    if (shared && value.kind === "If") {
+      const arms: {
+        readonly condition: SafetyExpression;
+        readonly consequent: SafetyExpression;
+      }[] = [];
+      let tail: Expression = value;
+      while (tail.kind === "If") {
+        arms.push({
+          condition: expression(tail.condition, nested(context)),
+          consequent: membershipSet(tail.consequent, nested(context)),
+        });
+        tail = tail.alternative;
+      }
+      return arms.reduceRight<SafetyExpression>(
+        (alternative, arm) => ({
+          op: "if",
+          condition: arm.condition,
+          consequent: arm.consequent,
+          alternative,
+        }),
+        membershipSet(tail, nested(context)),
+      );
+    }
     if (shared && value.kind === "Case" && (value.other || value.arms.length))
       return value.arms.reduceRight<SafetyExpression>(
         (alternative, arm) => ({
@@ -2751,6 +2814,143 @@ export const compileTlaSafety = (options: TlaSourceOptions): SafetyProgram => {
     }
     return results[0] ?? false;
   };
+  interface ChainFrame {
+    readonly and: boolean;
+    readonly operands: readonly Expression[];
+    readonly bound: number;
+    position: number;
+    result: readonly SafetyBranch[];
+    next: SafetyBranch[];
+    branch: number;
+  }
+  type ChainStep =
+    | { readonly kind: "descend"; readonly frame: ChainFrame }
+    | { readonly kind: "done"; readonly branches: readonly SafetyBranch[] };
+  const actionChain = (
+    value: Extract<Expression, { kind: "And" | "Or" }>,
+    context: Context,
+    child: Context,
+    name: string,
+  ): readonly SafetyBranch[] => {
+    const enter = (
+      and: boolean,
+      operands: readonly Expression[],
+      bound: number,
+    ): ChainFrame => ({
+      and,
+      operands,
+      bound,
+      position: 0,
+      result: and ? [{ name, steps: [] }] : [],
+      next: [],
+      branch: 0,
+    });
+    const absorb = (frame: ChainFrame, additions: readonly SafetyBranch[]) => {
+      const prefix = frame.result[frame.branch];
+      if (!prefix) return;
+      for (const addition of additions)
+        frame.next.push({
+          name: addition.name,
+          steps: [...prefix.steps, ...addition.steps],
+        });
+    };
+    const accept = (frame: ChainFrame, branches: readonly SafetyBranch[]) => {
+      if (frame.and) {
+        absorb(frame, branches);
+        frame.branch += 1;
+      } else for (const branch of branches) frame.next.push(branch);
+    };
+    const advance = (frame: ChainFrame): ChainStep => {
+      if (!frame.and) {
+        for (;;) {
+          const operand = frame.operands[frame.position];
+          if (!operand) return { kind: "done", branches: limited(frame.next) };
+          frame.position += 1;
+          const inner = chained(operand, "Or");
+          if (inner) return { kind: "descend", frame: enter(false, inner, 0) };
+          for (const branch of action(operand, child, name))
+            frame.next.push(branch);
+        }
+      }
+      for (;;) {
+        const operand = frame.operands[frame.position];
+        if (!operand) return { kind: "done", branches: frame.result };
+        if (frame.branch === frame.result.length) {
+          frame.result = limited(frame.next);
+          frame.next = [];
+          frame.position += 1;
+          frame.branch = 0;
+          continue;
+        }
+        const bound =
+          frame.bound +
+          (frame.result[frame.branch]?.steps.filter(
+            (step) => step.kind === "bind",
+          ).length ?? 0);
+        const inner = chained(operand, "And");
+        if (inner) return { kind: "descend", frame: enter(true, inner, bound) };
+        absorb(frame, action(operand, { ...child, bound }, name));
+        frame.branch += 1;
+      }
+    };
+    const stack = [enter(value.kind === "And", value.operands, context.bound)];
+    let finished: readonly SafetyBranch[] | undefined;
+    for (let frame = stack.at(-1); frame; frame = stack.at(-1)) {
+      if (finished) {
+        accept(frame, finished);
+        finished = undefined;
+      }
+      const step = advance(frame);
+      if (step.kind === "descend") stack.push(step.frame);
+      else {
+        stack.pop();
+        finished = step.branches;
+      }
+    }
+    return finished ?? [];
+  };
+  const actionElseIf = (
+    value: Extract<Expression, { kind: "If" }>,
+    child: Context,
+    name: string,
+  ): readonly SafetyBranch[] => {
+    const arms: {
+      readonly condition: SafetyExpression;
+      readonly taken: readonly SafetyBranch[];
+    }[] = [];
+    let tail: Expression = value;
+    while (tail.kind === "If") {
+      const condition = expression(tail.condition, child);
+      arms.push({
+        condition,
+        taken: action(tail.consequent, child, name).map((branch) => ({
+          ...branch,
+          steps: [
+            { kind: "guard", expression: condition } satisfies SafetyStep,
+            ...branch.steps,
+          ],
+        })),
+      });
+      tail = tail.alternative;
+    }
+    return arms.reduceRight<readonly SafetyBranch[]>(
+      (alternative, arm) =>
+        limited([
+          ...arm.taken,
+          ...alternative.map((branch) => ({
+            ...branch,
+            steps: [
+              {
+                kind: "guard",
+                expression: { op: "not", argument: arm.condition },
+              } satisfies SafetyStep,
+              ...branch.steps,
+            ],
+          })),
+        ]),
+      action(tail, child, name),
+    );
+  };
   const action = (
     value: Expression,
     context: Context,
@@ -2877,6 +3077,9 @@ export const compileTlaSafety = (options: TlaSourceOptions): SafetyProgram => {
         })),
       );
     }
+    if (shared && (value.kind === "Or" || value.kind === "And"))
+      return actionChain(value, context, child, name);
+    if (shared && value.kind === "If") return actionElseIf(value, child, name);
     if (value.kind === "Or")
       return limited(
         value.operands.flatMap((operand) => action(operand, child, name)),
@@ -3351,12 +3554,19 @@ export const compileTlaSafety = (options: TlaSourceOptions): SafetyProgram => {
         return;
       }
       if (value.kind === "And") {
-        for (const operand of shared
-          ? sourceEdges(value)
-              .filter((edge) => edge.forwarding.action === "inherit")
-              .map((edge) => edge.value)
-          : value.operands)
-          parts(operand, nested(context));
+        if (!shared) {
+          for (const operand of value.operands) parts(operand, nested(context));
+          return;
+        }
+        const pending = [{ operands: inherited(value), index: 0 }];
+        for (let top = pending.at(-1); top; top = pending.at(-1)) {
+          const operand = top.operands[top.index];
+          top.index += 1;
+          if (!operand) pending.pop();
+          else if (operand.kind === "And")
+            pending.push({ operands: inherited(operand), index: 0 });
+          else parts(operand, nested(context));
+        }
         return;
       }
       if (value.kind === "Always" && value.expression.kind === "BoxAction") {

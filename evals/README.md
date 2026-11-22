@@ -4,6 +4,8 @@
 
 [0074: SMT contextの増分解析とcheck cache](iterations/0074-smt-incremental-cache.md)は、assertで追加した式だけを解析する変更と既定無効のcheck cacheを、bcf018be1との交互順Criterion、旧native/Wasmとの完全応答、Z3照合で評価する。保存runで見つけた2回の後退と追記plan、最終測定に残った`prepared-128`の1組の後退も記録した。
 
+[0074: 連言・選言とELSE IFの連鎖](iterations/0074-nesting-chains.md)は、Quint生成物の長い括弧つき連言とIF連鎖を、IR v2の両frontendで1段の入れ子として数える。44項の連言はTLCと同じ6状態・7生成で検査でき、連鎖をたどる処理は段ごとに再帰しなくなり、61段の連鎖もdebugの2 MiBのthreadでcompileできる。今受理される入力のIRは4,651入力・27,906セルで一致し、完全応答と時間論理の照合も一致した。Criterionに再現する後退はない。54枝のIF連鎖はcheckerの48で止まり、0075で扱う。
+
 [0073: 後続が読まない束縛の再利用](iterations/0073-dead-binding-reuse.md)は、`nondet` を重ねたQuint生成物で同じ後続を何度も評価する費用を除く。合成モデルのnative 1/2/4/8 workerで約0.48〜0.52倍、状態・生成数・反例は一致し、workは変更前を超えない。2回の独立レビューで見つかった6件と対応も記録した。既存corpusと14本のCriterionに後退はない。
 
 [0072: source level・遅延関数・template共有](iterations/0072-frontend-semantics.md)は、SANY/TLCの拒否・正常/故障対照とnative/Wasm/Chromiumを照合する。共有化前後の完全応答・workとCriterionのcompile/fresh/preparedを分け、入力条件の修正と失敗も保存する。
@@ -103,6 +105,8 @@ just replay-loop evals/runs/my-run-confirmation
 4. 同じ plan / ソースのまま確認用 seed で実行する。途中の変更、重複 seed、変更された証拠を拒否する。
 5. 数値だけでなく witness を再現する。正常版の誤検出、無効操作、再現失敗は判断の前提を崩す。
 6. iteration に判断を追記する。後退がある場合も保存し、次の仮説へ進む。
+
+run には iteration が引用する summary（表、集計、manifest、終了コード、sha256）だけを commit する。Criterion の sample、ケースごとの出力、log、大きな before / after の dump は commit せず、必要なら消したファイルの数・バイト数・digest を `reduced.json` に残す（例: [0074](iterations/0074-nesting-chains.md#記録の縮小)）。`just replay-loop` が読む run（`result.json` のある eval-loop・確認 run）は `trials.json`・`corpora.json`・`witnesses.json` を含め、縮小しない。digest は、元の記録を持つ者が照合するためのもので、commit した記録だけでは消した内容を検証できない。
 
 既存 run ID は上書きできない。中断や例外で `result.json` がない run を合格として扱わない。結果・台帳を編集して再試行を隠さず、新しい ID で実行する。formatter の対象から `runs/` を除外し、元の証拠を保つ。
 
