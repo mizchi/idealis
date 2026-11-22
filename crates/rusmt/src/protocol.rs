@@ -1,4 +1,4 @@
-use crate::{Assumption, Error, Problem, Script, Solver};
+use crate::{Assumption, CacheOptions, CheckCache, Error, Problem, Script, Solver};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use std::collections::BTreeMap;
@@ -9,9 +9,47 @@ struct Command {
     version: u32,
     request: Request,
 }
+/// Cache fields shared by the incremental requests; disabled when omitted.
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct CacheRequest {
+    #[serde(default)]
+    cache: Option<CheckCache>,
+    #[serde(default)]
+    enabled: bool,
+    #[serde(default)]
+    build_digest: String,
+    #[serde(default)]
+    max_entries: u32,
+}
+impl CacheRequest {
+    fn options(&self) -> CacheOptions<'_> {
+        CacheOptions {
+            enabled: self.enabled,
+            build_digest: &self.build_digest,
+            max_entries: self.max_entries,
+        }
+    }
+}
 #[derive(Deserialize)]
 #[serde(tag = "kind", rename_all = "kebab-case", deny_unknown_fields)]
 enum Request {
+    RunScriptIncremental {
+        source: String,
+        #[serde(rename = "maxWork")]
+        max_work: u32,
+        #[serde(flatten)]
+        cache: CacheRequest,
+    },
+    CheckIncremental {
+        handle: u32,
+        #[serde(rename = "maxWork")]
+        max_work: u32,
+        #[serde(default)]
+        assumptions: Vec<Assumption>,
+        #[serde(flatten)]
+        cache: CacheRequest,
+    },
     RunScript {
         source: String,
         #[serde(rename = "maxWork")]
@@ -115,6 +153,48 @@ impl Engine {
                     .ok_or_else(|| Error::new("protocol", "unknown handle"))?
                     .pop(count)?;
                 Ok(json!({"kind":"updated"}))
+            }
+            Request::RunScriptIncremental {
+                source,
+                max_work,
+                mut cache,
+            } => {
+                let mut store = cache.cache.take().unwrap_or_default();
+                let reply = Script::parse(&source)?.solve_incremental(
+                    max_work,
+                    &mut store,
+                    cache.options(),
+                )?;
+                Ok(json!({
+                    "kind": "incremental-script-results",
+                    "results": reply.results,
+                    "stats": reply.stats,
+                    "cache": store,
+                }))
+            }
+            Request::CheckIncremental {
+                handle,
+                max_work,
+                assumptions,
+                mut cache,
+            } => {
+                let problem = self
+                    .problems
+                    .get(&handle)
+                    .ok_or_else(|| Error::new("protocol", "unknown handle"))?;
+                let mut store = cache.cache.take().unwrap_or_default();
+                let reply = problem.check_incremental(
+                    &assumptions,
+                    max_work,
+                    &mut store,
+                    cache.options(),
+                )?;
+                Ok(json!({
+                    "kind": "incremental-solution",
+                    "result": reply.result,
+                    "stats": reply.stats,
+                    "cache": store,
+                }))
             }
             Request::Release { handle } => {
                 if self.problems.remove(&handle).is_none() {

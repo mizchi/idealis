@@ -1,10 +1,13 @@
+mod cache;
 mod parser;
 mod protocol;
 mod script;
+mod session;
 mod solver;
 #[cfg(target_arch = "wasm32")]
 mod wasm;
 
+pub use cache::{CacheOptions, CacheStats, CheckCache, IncrementalCheck, IncrementalScript};
 use num_bigint::BigInt;
 use num_traits::Zero;
 pub use protocol::Engine;
@@ -56,7 +59,7 @@ enum Variable {
     Bool(usize),
 }
 pub struct Problem {
-    variables: BTreeMap<String, Variable>,
+    variables: Arc<parser::Variables>,
     root: Arc<Formula>,
     anchors: Vec<Edge>,
     integers: usize,
@@ -144,7 +147,7 @@ impl Problem {
         let mut todo = vec![(self.root.clone(), true)];
         for assumption in assumptions {
             match self.variables.get(&assumption.symbol) {
-                Some(Variable::Bool(slot)) => {
+                Some((Variable::Bool(slot), _)) => {
                     todo.push((Arc::new(Formula::Boolean(*slot)), assumption.positive))
                 }
                 Some(_) => return Err(Error::new("type", "assumption needs a Bool symbol")),
@@ -225,7 +228,7 @@ impl Problem {
                 Ok(Some(values)) => values,
             };
             let mut solution = Self::finished("sat", stats, None);
-            for (name, variable) in &self.variables {
+            for (name, (variable, _)) in self.variables.iter() {
                 match variable {
                     Variable::Int(slot) => {
                         solution

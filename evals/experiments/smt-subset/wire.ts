@@ -16,7 +16,32 @@ export interface Assumption {
   readonly symbol: string;
   readonly positive: boolean;
 }
+export interface CacheStats {
+  readonly hits: number;
+  readonly misses: number;
+  readonly writes: number;
+  readonly invalidated: boolean;
+}
+/** Opaque check cache snapshot; the engine validates its contents. */
+export type CheckCache = Readonly<Record<string, unknown>>;
+export interface CacheFields {
+  readonly cache?: CheckCache;
+  readonly enabled?: boolean;
+  readonly buildDigest?: string;
+  readonly maxEntries?: number;
+}
 export type Request =
+  | ({
+      readonly kind: "run-script-incremental";
+      readonly source: string;
+      readonly maxWork: number;
+    } & CacheFields)
+  | ({
+      readonly kind: "check-incremental";
+      readonly handle: number;
+      readonly maxWork: number;
+      readonly assumptions?: readonly Assumption[];
+    } & CacheFields)
   | {
       readonly kind: "run-script";
       readonly source: string;
@@ -46,14 +71,72 @@ export type Request =
     }
   | { readonly kind: "release"; readonly handle: number };
 export type Reply =
+  | {
+      readonly kind: "incremental-script-results";
+      readonly results: readonly Solution[];
+      readonly stats: CacheStats;
+      readonly cache: CheckCache;
+    }
+  | {
+      readonly kind: "incremental-solution";
+      readonly result: Solution;
+      readonly stats: CacheStats;
+      readonly cache: CheckCache;
+    }
   | { readonly kind: "script-results"; readonly results: readonly Solution[] }
   | { readonly kind: "solution"; readonly result: Solution }
   | { readonly kind: "prepared"; readonly handle: number }
   | { readonly kind: "released" }
   | { readonly kind: "updated" }
   | { readonly kind: "error"; readonly code: string; readonly message: string };
+const cacheStats = (input: unknown): CacheStats => {
+  if (
+    !isRecord(input) ||
+    Object.keys(input).length !== 4 ||
+    typeof input.invalidated !== "boolean"
+  )
+    throw new Error("Invalid SMT cache stats");
+  const [hits, misses, writes] = [input.hits, input.misses, input.writes].map(
+    (value) => {
+      if (
+        typeof value !== "number" ||
+        !Number.isSafeInteger(value) ||
+        value < 0
+      )
+        throw new Error("Invalid SMT cache counts");
+      return value;
+    },
+  );
+  return {
+    hits: hits!,
+    misses: misses!,
+    writes: writes!,
+    invalidated: input.invalidated,
+  };
+};
+const checkCache = (input: unknown): CheckCache => {
+  if (!isRecord(input)) throw new Error("Invalid SMT check cache");
+  return input;
+};
 export const decode = (input: unknown): Reply => {
   if (!isRecord(input)) throw new Error("Invalid SMT reply");
+  if (input.kind === "incremental-script-results") {
+    const reply = decode({ kind: "script-results", results: input.results });
+    if (reply.kind !== "script-results") throw new Error("Invalid SMT reply");
+    return {
+      kind: "incremental-script-results",
+      results: reply.results,
+      stats: cacheStats(input.stats),
+      cache: checkCache(input.cache),
+    };
+  }
+  if (input.kind === "incremental-solution")
+    return {
+      kind: "incremental-solution",
+      result: solution(decode({ kind: "solution", result: input.result })),
+      stats: cacheStats(input.stats),
+      cache: checkCache(input.cache),
+    };
   if (input.kind === "script-results") {
     if (!Array.isArray(input.results) || input.results.length > 256)
       throw new Error("Invalid SMT script results");

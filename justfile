@@ -894,6 +894,32 @@ smt-script-test: smt-build build
   node --test dist/tests/smt-scripts/contract-test.js
   pnpm exec vp test run --project=smt
 
+smt-cache-test: smt-build build
+  node --test dist/tests/smt-cache/contract-test.js
+
+# 0074: incremental contexts and the check cache against bcf018be1 and Z3.
+smt-incremental-test: smt-build build
+  node --test dist/tests/smt-incremental/records-test.js dist/tests/smt-incremental/contract-test.js
+
+smt-incremental-bench-build:
+  CARGO_PROFILE_BENCH_STRIP=none cargo bench --no-run --locked --manifest-path crates/rusmt/Cargo.toml --bench solver --bench cache
+
+smt-incremental-capture binary bench library output: build
+  node dist/evals/experiments/smt-incremental/capture.js {{quote(binary)}} {{quote(bench)}} {{quote(library)}} {{quote(output)}}
+
+smt-incremental-criterion stage provenance run: build
+  node dist/evals/experiments/smt-incremental/criterion.js {{quote(stage)}} {{quote(provenance)}} {{quote(run)}}
+
+[positional-arguments]
+smt-incremental-compare *args: build
+  node dist/evals/experiments/smt-incremental/compare.js "$@"
+
+smt-incremental-eval phase run baseline parent="": smt-build build
+  node dist/evals/experiments/smt-incremental/run.js {{quote(phase)}} {{quote(run)}} {{quote(baseline)}} {{quote(parent)}}
+
+smt-incremental-replay run: build
+  node dist/evals/experiments/smt-incremental/replay.js {{quote(run)}}
+
 smt-script-eval phase run baseline parent="": smt-build build
   node dist/evals/experiments/smt-scripts/run.js {{quote(phase)}} {{quote(run)}} {{quote(baseline)}} {{quote(parent)}}
 
@@ -996,3 +1022,6 @@ expansion-bench output baseline: build
 
 expansion-bench-replay output: build
   node dist/evals/experiments/cached-expansions/benchmark-replay.js {{quote(output)}}
+
+smt-incremental-equivalence full compact: build
+  node dist/evals/experiments/smt-incremental/equivalence.js {{quote(full)}} {{quote(compact)}}

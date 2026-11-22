@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0074: SMT contextの増分解析とcheck cache](iterations/0074-smt-incremental-cache.md)は、assertで追加した式だけを解析する変更と既定無効のcheck cacheを、bcf018be1との交互順Criterion、旧native/Wasmとの完全応答、Z3照合で評価する。保存runで見つけた2回の後退と追記plan、最終測定に残った`prepared-128`の1組の後退も記録した。
+
 [0074: 連言・選言とELSE IFの連鎖](iterations/0074-nesting-chains.md)は、Quint生成物の長い括弧つき連言とIF連鎖を、IR v2の両frontendで1段の入れ子として数える。44項の連言はTLCと同じ6状態・7生成で検査でき、連鎖をたどる処理は段ごとに再帰しなくなり、61段の連鎖もdebugの2 MiBのthreadでcompileできる。今受理される入力のIRは4,651入力・27,906セルで一致し、完全応答と時間論理の照合も一致した。Criterionに再現する後退はない。54枝のIF連鎖はcheckerの48で止まり、0075で扱う。
 
 [0073: 後続が読まない束縛の再利用](iterations/0073-dead-binding-reuse.md)は、`nondet` を重ねたQuint生成物で同じ後続を何度も評価する費用を除く。合成モデルのnative 1/2/4/8 workerで約0.48〜0.52倍、状態・生成数・反例は一致し、workは変更前を超えない。2回の独立レビューで見つかった6件と対応も記録した。既存corpusと14本のCriterionに後退はない。

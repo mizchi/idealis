@@ -1,0 +1,176 @@
+{
+  "status": "complete",
+  "plan": "0074b-smt-memoized-cache-keys",
+  "mode": "cache",
+  "decision": "adopt",
+  "warmBelowPrepared": [
+    {
+      "name": "repeat-64",
+      "ratios": [
+        0.061446558387464975,
+        0.0610965407426142
+      ]
+    },
+    {
+      "name": "scopes-32",
+      "ratios": [
+        0.38538280242325906,
+        0.39685564177612626
+      ]
+    },
+    {
+      "name": "ite-64",
+      "ratios": [
+        0.5206562420051782,
+        0.5347743325840055
+      ]
+    }
+  ],
+  "scope": "fixed cost of the opt-in cache within one candidate binary",
+  "runs": [
+    "evals/runs/0074b-smt-cache-development",
+    "evals/runs/0074b-smt-cache-confirmation"
+  ],
+  "rows": [
+    {
+      "reference": "prepared-4",
+      "cached": "cache-miss-4",
+      "referenceNs": [
+        564.2121589306519,
+        579.030828224124
+      ],
+      "cachedNs": [
+        3064.783004945756,
+        3023.258368482138
+      ],
+      "developmentRatio": 5.431969085449031,
+      "confirmationRatio": 5.221239044826699
+    },
+    {
+      "reference": "prepared-32",
+      "cached": "cache-miss-32",
+      "referenceNs": [
+        14088.913675213675,
+        14045.741271991708
+      ],
+      "cachedNs": [
+        18074.8193480834,
+        18065.30202020202
+      ],
+      "developmentRatio": 1.282910788209459,
+      "confirmationRatio": 1.2861764765826653
+    },
+    {
+      "reference": "prepared-128",
+      "cached": "cache-miss-128",
+      "referenceNs": [
+        187344.36133735545,
+        184022.06337412586
+      ],
+      "cachedNs": [
+        194711.8349339736,
+        196435.76687598115
+      ],
+      "developmentRatio": 1.039325835824604,
+      "confirmationRatio": 1.0674576910738014
+    },
+    {
+      "reference": "script-prepared-repeat-64",
+      "cached": "script-cache-cold-repeat-64",
+      "referenceNs": [
+        915025.7585858586,
+        918399.8251748251
+      ],
+      "cachedNs": [
+        74548.28690689156,
+        74162.82881136952
+      ],
+      "developmentRatio": 0.08147124406869531,
+      "confirmationRatio": 0.08075222444347918
+    },
+    {
+      "reference": "script-prepared-repeat-64",
+      "cached": "script-cache-warm-repeat-64",
+      "referenceNs": [
+        915025.7585858586,
+        918399.8251748251
+      ],
+      "cachedNs": [
+        56225.18370098039,
+        56111.05233680346
+      ],
+      "developmentRatio": 0.061446558387464975,
+      "confirmationRatio": 0.0610965407426142
+    },
+    {
+      "reference": "script-prepared-scopes-32",
+      "cached": "script-cache-cold-scopes-32",
+      "referenceNs": [
+        13220.100186219739,
+        13320.747844228095
+      ],
+      "cachedNs": [
+        8179.109757598129,
+        8075.030604503181
+      ],
+      "developmentRatio": 0.6186874261455146,
+      "confirmationRatio": 0.6061994941224045
+    },
+    {
+      "reference": "script-prepared-scopes-32",
+      "cached": "script-cache-warm-scopes-32",
+      "referenceNs": [
+        13220.100186219739,
+        13320.747844228095
+      ],
+      "cachedNs": [
+        5094.799258081612,
+        5286.413934659091
+      ],
+      "developmentRatio": 0.38538280242325906,
+      "confirmationRatio": 0.39685564177612626
+    },
+    {
+      "reference": "script-prepared-ite-64",
+      "cached": "script-cache-cold-ite-64",
+      "referenceNs": [
+        14137.385413105414,
+        13851.422937771345
+      ],
+      "cachedNs": [
+        11843.816830357144,
+        11636.715432098765
+      ],
+      "developmentRatio": 0.8377657172292889,
+      "confirmationRatio": 0.8401097478849403
+    },
+    {
+      "reference": "script-prepared-ite-64",
+      "cached": "script-cache-warm-ite-64",
+      "referenceNs": [
+        14137.385413105414,
+        13851.422937771345
+      ],
+      "cachedNs": [
+        7360.717960966289,
+        7407.385456885457
+      ],
+      "developmentRatio": 0.5206562420051782,
+      "confirmationRatio": 0.5347743325840055
+    }
+  ],
+  "warmNotSlower": [
+    {
+      "name": "repeat-64",
+      "holds": true
+    },
+    {
+      "name": "scopes-32",
+      "holds": true
+    },
+    {
+      "name": "ite-64",
+      "holds": true
+    }
+  ]
+}
