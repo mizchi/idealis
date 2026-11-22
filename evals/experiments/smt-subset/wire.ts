@@ -29,7 +29,13 @@ export interface CacheFields {
   readonly enabled?: boolean;
   readonly buildDigest?: string;
   readonly maxEntries?: number;
+  /** An engine-side store from `cache-open`; excludes the fields above. */
+  readonly cacheHandle?: number;
 }
+/** Where a reply leaves the cache: a snapshot, or the store it updated. */
+export type CacheLocation =
+  | { readonly cache: CheckCache; readonly cacheHandle?: never }
+  | { readonly cacheHandle: number; readonly cache?: never };
 export type Request =
   | ({
       readonly kind: "run-script-incremental";
@@ -69,20 +75,35 @@ export type Request =
       readonly handle: number;
       readonly count: number;
     }
-  | { readonly kind: "release"; readonly handle: number };
-export type Reply =
+  | { readonly kind: "release"; readonly handle: number }
   | {
+      readonly kind: "cache-open";
+      readonly buildDigest: string;
+      readonly maxEntries: number;
+      readonly cache?: CheckCache;
+    }
+  | {
+      readonly kind: "cache-export" | "cache-close";
+      readonly cacheHandle: number;
+    };
+export type Reply =
+  | ({
       readonly kind: "incremental-script-results";
       readonly results: readonly Solution[];
       readonly stats: CacheStats;
-      readonly cache: CheckCache;
-    }
-  | {
+    } & CacheLocation)
+  | ({
       readonly kind: "incremental-solution";
       readonly result: Solution;
       readonly stats: CacheStats;
-      readonly cache: CheckCache;
+    } & CacheLocation)
+  | {
+      readonly kind: "cache-opened";
+      readonly cacheHandle: number;
+      readonly entries: number;
+      readonly invalidated: boolean;
     }
+  | { readonly kind: "cache-snapshot"; readonly cache: CheckCache }
   | { readonly kind: "script-results"; readonly results: readonly Solution[] }
   | { readonly kind: "solution"; readonly result: Solution }
   | { readonly kind: "prepared"; readonly handle: number }
@@ -118,6 +139,19 @@ const checkCache = (input: unknown): CheckCache => {
   if (!isRecord(input)) throw new Error("Invalid SMT check cache");
   return input;
 };
+const count = (input: unknown, what: string): number => {
+  if (typeof input !== "number" || !Number.isSafeInteger(input) || input < 0)
+    throw new Error(`Invalid SMT ${what}`);
+  return input;
+};
+/** Exactly one of `cache` and `cacheHandle`. */
+const location = (input: Record<string, unknown>): CacheLocation => {
+  if ("cacheHandle" in input === "cache" in input)
+    throw new Error("Invalid SMT cache location");
+  return "cacheHandle" in input
+    ? { cacheHandle: count(input.cacheHandle, "cache handle") }
+    : { cache: checkCache(input.cache) };
+};
 export const decode = (input: unknown): Reply => {
   if (!isRecord(input)) throw new Error("Invalid SMT reply");
   if (input.kind === "incremental-script-results") {
@@ -127,7 +161,7 @@ export const decode = (input: unknown): Reply => {
       kind: "incremental-script-results",
       results: reply.results,
       stats: cacheStats(input.stats),
-      cache: checkCache(input.cache),
+      ...location(input),
     };
   }
   if (input.kind === "incremental-solution")
@@ -135,8 +169,20 @@ export const decode = (input: unknown): Reply => {
       kind: "incremental-solution",
       result: solution(decode({ kind: "solution", result: input.result })),
       stats: cacheStats(input.stats),
-      cache: checkCache(input.cache),
+      ...location(input),
     };
+  if (input.kind === "cache-opened") {
+    if (typeof input.invalidated !== "boolean")
+      throw new Error("Invalid SMT cache-opened reply");
+    return {
+      kind: "cache-opened",
+      cacheHandle: count(input.cacheHandle, "cache handle"),
+      entries: count(input.entries, "cache entries"),
+      invalidated: input.invalidated,
+    };
+  }
+  if (input.kind === "cache-snapshot")
+    return { kind: "cache-snapshot", cache: checkCache(input.cache) };
   if (input.kind === "script-results") {
     if (!Array.isArray(input.results) || input.results.length > 256)
       throw new Error("Invalid SMT script results");

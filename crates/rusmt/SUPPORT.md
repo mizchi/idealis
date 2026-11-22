@@ -39,6 +39,13 @@
 
 全再解析の参照実装と400系列・1000回超のcheckで結果・work/stats・errorを照合し、cacheのhitは無制限の新しい探索の回答と照合した。人工故障12件を検出した。確認seedでは旧native/Wasmとの完全応答、contextの153 checkのZ3照合と107モデルの再検査、cacheのhitを照合し、runを再生した。solver benchは0074bで`prepared-128`の1組が閾値を超えた。同じbinaryの再測定（0074d）では18ケースすべてが閾値内だった。[評価0074](../../evals/iterations/0074-smt-incremental-cache.md)を参照。cacheは回答の再利用で、学習状態・理論状態の再利用ではない。
 
+## 0076で追加した範囲
+
+- [x] engine側のcheck cache store。`cache-open` / `cache-export` / `cache-close`と、incremental requestの`cacheHandle`。snapshotの経路は変えない。
+- [x] snapshotを往復させた場合との結果・work/stats・cache stats・exportの一致（seedから生成した60系列・2400要求）。開く時のdigest検査、別build、容量、handleの独立、fieldの併用を拒否すること。native/Wasmの完全応答一致。
+
+人工故障3件（writeの消失、開いた時のoptionの無視、古い状態のexport）を検出した。
+
 ## 非対応・対象外
 
 - [ ] scope内や後続コマンドでの宣言、global-declarationsとoption変更。

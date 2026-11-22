@@ -139,6 +139,21 @@ impl CheckCache {
     pub(crate) fn stats(&self) -> CacheStats {
         self.stats
     }
+    pub(crate) fn len(&self) -> usize {
+        self.entries.len()
+    }
+    /// Binds a snapshot for in-place use, as the first request of the snapshot
+    /// path would, and rejects it whole if any entry digest is wrong.
+    pub(crate) fn open(snapshot: Option<Self>, options: &CacheOptions) -> Result<Self> {
+        let mut cache = snapshot.unwrap_or_default();
+        cache.bind(options)?;
+        for (key, entry) in &cache.entries {
+            if entry.digest != cache.digest(key, &entry.answer)? {
+                return Err(Error::new("protocol", "check cache digest mismatch"));
+            }
+        }
+        Ok(cache)
+    }
     fn digest(&self, key: &str, answer: &Answer) -> Result<String> {
         Ok(hex(&Sha256::digest(
             encode(&(FORMAT, VERSION, &self.build_digest, key, answer))?.as_bytes(),
