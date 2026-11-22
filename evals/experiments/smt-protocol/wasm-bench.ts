@@ -5,7 +5,7 @@ import { basename, dirname, join } from "node:path";
 import { digest, fingerprint } from "../smt-incremental/provenance.js";
 import { wasmPath } from "../smt-subset/paths.js";
 import { createWasm } from "../smt-subset/wasm.js";
-import { wasmCases } from "./cases.js";
+import { closeRequest, freshRequest, wasmCases } from "./cases.js";
 
 // wasm-bench <development|confirmation> <run-dir>
 // Conditions fixed in evals/plans/0075-smt-cache-transport.md.
@@ -48,6 +48,36 @@ await save("manifest.json", {
 const client = await createWasm(bytes);
 const results = [];
 for (const item of wasmCases(client)) {
+  if (item.fresh) {
+    // One untimed open and close around each single timed request.
+    const once = () => {
+      const request = freshRequest(client, item);
+      const begin = process.hrtime.bigint();
+      const reply = client.request(request);
+      const ns = Number(process.hrtime.bigint() - begin);
+      assert.ok(
+        reply.kind === "incremental-solution" && reply.stats.writes === 1,
+      );
+      closeRequest(client, request);
+      return ns;
+    };
+    for (let index = 0; index < 5; index++) once();
+    const raw = Array.from({ length: samples }, () => ({
+      iterations: 1,
+      ns: once(),
+    }));
+    const sorted = raw.map((value) => value.ns).sort((a, b) => a - b);
+    results.push({
+      name: item.name,
+      entries: item.entries,
+      cacheBytes: item.cacheBytes,
+      medianNs: (sorted[(samples >> 1) - 1]! + sorted[samples >> 1]!) / 2,
+      minimumNs: sorted[0],
+      maximumNs: sorted.at(-1),
+      raw,
+    });
+    continue;
+  }
   const run = () => client.request(item.request);
   const start = process.hrtime.bigint();
   let warm = 0;

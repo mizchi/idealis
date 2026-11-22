@@ -23,6 +23,11 @@ export interface ProtocolCase {
   /** Filler entries in the snapshot, excluding the measured query. */
   readonly entries: number;
   readonly cacheBytes: number;
+  /**
+   * Plan 0076 misses: a store opened before each timed request and closed
+   * after it, since a repeated miss would hit.
+   */
+  readonly fresh?: Request;
 }
 
 const handleOf = (client: Client, source: string) => {
@@ -42,6 +47,26 @@ const checked = (client: Client, handle: number, cache?: CheckCache) => {
   });
   assert.equal(reply.kind, "incremental-solution");
   return (reply as Extract<Reply, { kind: "incremental-solution" }>).cache;
+};
+
+/** Opens a store for a `fresh` case and returns its request. */
+export const freshRequest = (client: Client, item: ProtocolCase): Request => {
+  assert.ok(item.fresh && item.request.kind === "check-incremental");
+  const opened = client.request(item.fresh);
+  assert.equal(opened.kind, "cache-opened");
+  return {
+    ...item.request,
+    cacheHandle: (opened as Extract<Reply, { kind: "cache-opened" }>)
+      .cacheHandle,
+  };
+};
+export const closeRequest = (client: Client, request: Request) => {
+  assert.ok(request.kind === "check-incremental" && request.cacheHandle);
+  const reply = client.request({
+    kind: "cache-close",
+    cacheHandle: request.cacheHandle,
+  });
+  assert.equal(reply.kind, "released");
 };
 
 /** Builds every request once; the timed loop only repeats them. */
@@ -96,6 +121,42 @@ export const wasmCases = (
         entries: count,
         cacheBytes: JSON.stringify(cache ?? {}).length,
       });
+    // Plan 0076: the same snapshots kept in an engine-side store.
+    const opened = client.request({
+      kind: "cache-open",
+      buildDigest,
+      maxEntries,
+      ...(hit ? { cache: hit } : {}),
+    });
+    assert.equal(opened.kind, "cache-opened");
+    const byHandle = (cacheHandle: number): Request => ({
+      kind: "check-incremental",
+      handle,
+      maxWork,
+      cacheHandle,
+    });
+    cases.push(
+      {
+        name: `wasm-handle-hit-${count}`,
+        request: byHandle(
+          (opened as Extract<Reply, { kind: "cache-opened" }>).cacheHandle,
+        ),
+        entries: count,
+        cacheBytes: 0,
+      },
+      {
+        name: `wasm-handle-miss-${count}`,
+        request: byHandle(0),
+        entries: count,
+        cacheBytes: 0,
+        fresh: {
+          kind: "cache-open",
+          buildDigest,
+          maxEntries,
+          ...(fillers ? { cache: fillers } : {}),
+        },
+      },
+    );
   }
   return cases;
 };

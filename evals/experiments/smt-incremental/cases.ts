@@ -45,6 +45,8 @@ export const benches = {
       `protocol-hit-${count}`,
       `store-hit-${count}`,
       `store-miss-${count}`,
+      `handle-hit-${count}`,
+      `handle-miss-${count}`,
     ]),
   ],
 } as const;

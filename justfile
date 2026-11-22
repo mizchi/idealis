@@ -1034,3 +1034,6 @@ smt-protocol-wasm-bench stage run: smt-build build
 
 smt-protocol-compare native-dev native-conf wasm-dev wasm-conf output: build
   node dist/evals/experiments/smt-protocol/compare.js {{quote(native-dev)}} {{quote(native-conf)}} {{quote(wasm-dev)}} {{quote(wasm-conf)}} {{quote(output)}}
+
+smt-protocol-compare-store native-dev native-conf wasm-dev wasm-conf previous output: build
+  node dist/evals/experiments/smt-protocol/compare-store.js {{quote(native-dev)}} {{quote(native-conf)}} {{quote(wasm-dev)}} {{quote(wasm-conf)}} {{quote(previous)}} {{quote(output)}}

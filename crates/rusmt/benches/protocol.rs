@@ -47,6 +47,10 @@ fn request(handle: &Value, cache: Option<&CheckCache>) -> Vec<u8> {
     serde_json::to_vec(&json!({"version":1,"request":request})).unwrap()
 }
 
+fn command(request: Value) -> Vec<u8> {
+    serde_json::to_vec(&json!({"version":1,"request":request})).unwrap()
+}
+
 fn round_trip(engine: &mut Engine, bytes: &[u8]) -> Vec<u8> {
     serde_json::to_vec(&engine.dispatch(black_box(bytes))).unwrap()
 }
@@ -85,6 +89,43 @@ fn cases(criterion: &mut Criterion) {
                 bench.iter(|| round_trip(&mut engine, &bytes))
             });
         }
+        // Plan 0076: the same snapshots kept in an engine-side store.
+        let opened = engine.dispatch(&command(json!({
+            "kind":"cache-open","buildDigest":BUILD,"maxEntries":8192,"cache":hit,
+        })));
+        assert_eq!(opened["kind"], "cache-opened");
+        let by_handle = command(json!({
+            "kind":"check-incremental","handle":handle,"maxWork":2_000_000,
+            "cacheHandle":opened["cacheHandle"],
+        }));
+        let reply: Value = serde_json::from_slice(&round_trip(&mut engine, &by_handle)).unwrap();
+        assert_eq!(reply["stats"]["hits"], 1);
+        criterion.bench_function(&format!("handle-hit-{count}"), |bench| {
+            bench.iter(|| round_trip(&mut engine, &by_handle))
+        });
+        let open_miss = command(json!({
+            "kind":"cache-open","buildDigest":BUILD,"maxEntries":8192,"cache":miss,
+        }));
+        criterion.bench_function(&format!("handle-miss-{count}"), |bench| {
+            bench.iter_batched(
+                || {
+                    let mut fresh = Engine::default();
+                    let prepared =
+                        fresh.dispatch(&command(json!({"kind":"prepare","source":source})));
+                    let opened = fresh.dispatch(&open_miss);
+                    let request = command(json!({
+                        "kind":"check-incremental","handle":prepared["handle"],
+                        "maxWork":2_000_000,"cacheHandle":opened["cacheHandle"],
+                    }));
+                    (fresh, request)
+                },
+                |(mut fresh, request)| {
+                    let reply = round_trip(&mut fresh, &request);
+                    (reply, fresh)
+                },
+                BatchSize::LargeInput,
+            )
+        });
         let mut store = hit.clone();
         assert_eq!(
             solver
