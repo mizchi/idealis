@@ -37,7 +37,7 @@
 - [x] 既定無効のcheck cache。`sat`/`unsat`だけを保存し、build digest・保持上限・SHA-256付きsnapshot・merge・hit/miss/writeを扱う。
 - [x] Rust/JSONの`check-incremental`と`run-script-incremental`、native/Wasmの完全応答一致とChromium。
 
-全再解析の参照実装と400系列・1000回超のcheckで結果・work/stats・errorを照合し、cacheのhitは無制限の新しい探索の回答と照合した。人工故障12件を検出した。確認seedでは旧native/Wasmとの完全応答、contextの153 checkのZ3照合と107モデルの再検査、cacheのhitを照合し、runを再生した。solver benchの最終測定は`prepared-128`の1組で閾値を超え、後退として記録した。[評価0074](../../evals/iterations/0074-smt-incremental-cache.md)を参照。cacheは回答の再利用で、学習状態・理論状態の再利用ではない。
+全再解析の参照実装と400系列・1000回超のcheckで結果・work/stats・errorを照合し、cacheのhitは無制限の新しい探索の回答と照合した。人工故障12件を検出した。確認seedでは旧native/Wasmとの完全応答、contextの153 checkのZ3照合と107モデルの再検査、cacheのhitを照合し、runを再生した。solver benchは0074bで`prepared-128`の1組が閾値を超えた。同じbinaryの再測定（0074d）では18ケースすべてが閾値内だった。[評価0074](../../evals/iterations/0074-smt-incremental-cache.md)を参照。cacheは回答の再利用で、学習状態・理論状態の再利用ではない。
 
 ## 非対応・対象外
 
