@@ -1,6 +1,6 @@
 //! Incremental context updates must answer exactly like a full reparse of the
 //! accumulated source: same status, model, work/stats and error.
-use rusmt::{Assumption, Problem, Solver};
+use rusmt::{Assumption, CacheOptions, CheckCache, Problem, Solver};
 use serde_json::{Value, json};
 
 /// Reference semantics: rebuild the whole source on every change.
@@ -9,6 +9,11 @@ struct Reference {
     frames: Vec<usize>,
 }
 impl Reference {
+    /// Appends without reparsing. Limits only grow with the source, so one
+    /// later successful `assert` covers every appended prefix.
+    fn append(&mut self, expression: &str) {
+        self.source.push_str(&format!("\n(assert {expression})"));
+    }
     fn assert(&mut self, expression: &str) -> Result<(), String> {
         let source = format!("{}\n(assert {expression})", self.source);
         Problem::parse(&source).map_err(|error| error.to_string())?;
@@ -51,6 +56,7 @@ fn observed(solver: &Solver, assumptions: &[Assumption], budget: u32) -> Value {
     }
 }
 
+const BUILD: &str = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 const DECLARATIONS: &str = "(declare-const x Int)(declare-const y Int)(declare-const z Int)(declare-const p Bool)(declare-const q Bool)";
 const EXPRESSIONS: &[&str] = &[
     "(<= (- x y) 2)",
@@ -86,6 +92,8 @@ fn incremental_updates_match_full_reparse_on_generated_sequences() {
         (state >> 33) % bound
     };
     let mut compared = 0;
+    let mut hits = 0;
+    let mut cache = CheckCache::default();
     for _ in 0..400 {
         let mut solver = Solver::parse(DECLARATIONS).unwrap();
         let mut reference = Reference {
@@ -118,12 +126,38 @@ fn incremental_updates_match_full_reparse_on_generated_sequences() {
                         })
                         .collect();
                     let budget = [0, 7, 40, 100_000][next(4) as usize];
+                    let expected = reference.check(&assumptions, budget);
                     assert_eq!(
                         observed(&solver, &assumptions, budget),
-                        reference.check(&assumptions, budget),
+                        expected,
                         "{label} {budget}"
                     );
                     compared += 1;
+                    let options = CacheOptions {
+                        enabled: true,
+                        build_digest: BUILD,
+                        max_entries: 4096,
+                    };
+                    match solver.check_incremental(&assumptions, budget, &mut cache, options) {
+                        Err(error) => assert_eq!(json!(error.to_string()), expected),
+                        Ok(cached) if cached.stats.hits == 1 => {
+                            hits += 1;
+                            // A hit must be the answer an unbounded fresh search gives.
+                            let mut answer = serde_json::to_value(&cached.result).unwrap();
+                            let mut complete = reference.check(&assumptions, 100_000);
+                            assert_eq!(
+                                answer.as_object_mut().unwrap().remove("stats"),
+                                Some(json!({"work":0,"branches":0,"relaxations":0}))
+                            );
+                            complete.as_object_mut().unwrap().remove("stats");
+                            assert_eq!(answer, complete, "{label} cached");
+                        }
+                        Ok(cached) => assert_eq!(
+                            serde_json::to_value(&cached.result).unwrap(),
+                            expected,
+                            "{label} miss"
+                        ),
+                    }
                 }
             }
         }
@@ -133,6 +167,7 @@ fn incremental_updates_match_full_reparse_on_generated_sequences() {
         );
     }
     assert!(compared > 1_000, "{compared}");
+    assert!(hits > 200, "{hits}");
 }
 
 #[test]
@@ -165,8 +200,20 @@ fn accumulated_source_limits_fail_at_the_same_assertion_as_a_reparse() {
             source: declarations,
             frames: vec![],
         };
+        // Find the failing step on the solver, then replay the last steps
+        // against full reparses. The first replayed reparse must succeed, so a
+        // solver that fails late is caught as well as one that fails early.
+        let mut probe = Solver::parse(&reference.source).unwrap();
+        let limit = (0..20_000_usize)
+            .find(|_| probe.assert(&expression).is_err())
+            .expect("accumulated source must hit a limit");
+        let window = limit.saturating_sub(3);
+        for _ in 0..window {
+            solver.assert(&expression).unwrap();
+            reference.append(&expression);
+        }
         let mut failed_at = None;
-        for step in 0..20_000 {
+        for step in window..=limit {
             let left = solver
                 .assert(&expression)
                 .map_err(|error| error.to_string());
@@ -194,7 +241,7 @@ fn accumulated_source_limits_fail_at_the_same_assertion_as_a_reparse() {
     ] {
         while gap(&reference) > floor {
             solver.assert(&filler).unwrap();
-            reference.assert(&filler).unwrap();
+            reference.append(&filler);
         }
     }
     // "\n(assert (<= x 1D))" spends 17 bytes besides the digits D.

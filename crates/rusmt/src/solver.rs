@@ -1,4 +1,7 @@
-use crate::{Assumption, Error, Problem, Result, Solution, session::Session};
+use crate::{
+    Assumption, CacheOptions, CacheStats, CheckCache, Error, IncrementalCheck, Problem, Result,
+    Solution, cache, session::Session,
+};
 use std::sync::Arc;
 
 pub struct Solver {
@@ -45,7 +48,51 @@ impl Solver {
     pub fn check_assuming(&self, assumptions: &[Assumption], max_work: u32) -> Result<Solution> {
         self.session.problem().solve_assuming(assumptions, max_work)
     }
-    pub(super) fn snapshot(&self) -> Arc<Problem> {
-        self.session.problem().clone()
+    /// Checks like `check_assuming`, reusing complete answers from `cache` when
+    /// `options.enabled`. Disabled options neither read nor update the cache.
+    pub fn check_incremental(
+        &self,
+        assumptions: &[Assumption],
+        max_work: u32,
+        cache: &mut CheckCache,
+        options: CacheOptions,
+    ) -> Result<IncrementalCheck> {
+        if !options.enabled {
+            return Ok(IncrementalCheck {
+                result: self.check_assuming(assumptions, max_work)?,
+                stats: CacheStats::default(),
+            });
+        }
+        cache.bind(&options)?;
+        let todo = self.session.problem().assumption_todo(assumptions)?;
+        let result = cached_solve(
+            cache,
+            self.session.problem(),
+            cache::key(&self.session.source_digest(), assumptions),
+            todo,
+            max_work,
+        )?;
+        Ok(IncrementalCheck {
+            result,
+            stats: cache.stats(),
+        })
     }
+    pub(super) fn snapshot(&self) -> (Arc<Problem>, [u8; 32]) {
+        (self.session.problem().clone(), self.session.source_digest())
+    }
+}
+
+pub(crate) fn cached_solve(
+    cache: &mut CheckCache,
+    problem: &Problem,
+    key: String,
+    todo: Vec<(Arc<crate::Formula>, bool)>,
+    max_work: u32,
+) -> Result<Solution> {
+    if let Some(solution) = cache.lookup(&key, problem)? {
+        return Ok(solution);
+    }
+    let solution = problem.solve_with(max_work, todo);
+    cache.record(key, &solution)?;
+    Ok(solution)
 }

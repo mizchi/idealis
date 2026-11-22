@@ -74,7 +74,7 @@ JSONの`prepare {source}`はcontextのhandleを返す。次のリクエストを
 
 scopeとassumptionsはそれぞれ最大256件。pop underflow、未宣言/Intのassumption、不正shapeはerrorになる。assumptionsはそのcheckだけで有効。次のcheckや別handleへ持ち越さない。
 
-assert/pop時はsourceを再解析する。変更なしのcheckは解析結果を再利用するが、探索・学習状態や回答は再利用しない。SMT-LIB scriptの問い合わせ列は次のScript APIで扱う。
+assertは追加した式だけを解析・コンパイルする。無条件の整数定数は全assertionへ代入するので、新しい定数を束縛する式を追加した場合は、保持した構文木から全assertionをコンパイルし直す。popはpush時点の不変なsnapshotへ戻す。source長・token数・入れ子の上限は累積したsourceに対して、全体の再解析と同じ順で検査する。探索・学習状態は再利用しない。回答の再利用は既定無効の[check cache](#完了したcheckを再利用する)で行う。SMT-LIB scriptの問い合わせ列は次のScript APIで扱う。
 
 ### SMT-LIB scriptをまとめて実行する
 
@@ -97,6 +97,29 @@ Int/Boolの宣言と既存のlogic/optionは冒頭に固定する。assert/push/
 workは全checkで共有し、各結果の`stats.work`を差し引く。残り0のcheckはunknown/workと空モデルを返す。構文や型の不正は予算0でもerror。後続コマンドが不正なら部分的なSATを返さず、既存handleにも影響させない。checkのない入力は空の結果列で、仕様の検査が成功したとは扱わない。
 
 各checkは探索をやり直す。Scriptを再求解しても前回の消費やassumptionsを持ち越さず、学習状態や中断地点の再利用は行わない。
+
+### 完了したcheckを再利用する
+
+[rtlcの状態展開cache](safety-expansions.md)と同じく、明示的に有効にした場合だけ完了した回答を再利用する。`Solver::check_incremental`と`Script::solve_incremental`は`CheckCache`と`CacheOptions { enabled, build_digest, max_entries }`を受ける。`CacheOptions::default()`は無効で、通常のcheck/solveへ委譲し、cacheを参照・更新せず、hit/miss/writeを0で返す。
+
+| 項目      | 契約                                                                                                 |
+| --------- | ---------------------------------------------------------------------------------------------------- |
+| key       | 正規化したsource（各コマンドのrenderと改行）のSHA-256と、順序・極性・symbolを含むassumptions         |
+| 保存      | `sat`の全モデルと`unsat`。`unknown`・errorは保存しない                                               |
+| hit       | 新しい探索の回答と同じstatus/values/booleans。今回の`stats`は0で、予算0でも回答する                  |
+| namespace | format、version、`build_digest`。digestが変わると既存entryを捨て、`invalidated`を返す                |
+| 容量      | `max_entries`件。0なら書き込まない。満杯なら新しいentryを書かず、小さい上限ではkey順の末尾から落とす |
+| 検証      | entryごとのSHA-256と、問題の宣言に合うモデルの形を初回のlookupで検査する。不一致はprotocol error     |
+
+sourceのdigestはSessionがassertごとに増分で更新し、popではsnapshotと一緒に戻す。同じ正規化sourceなら、`Solver::parse`の空白・コメント・末尾の`check-sat`、assertで積んだcontext、Scriptの各checkの間でhitする。式の意味が同じでも、表記が違えば別のkeyになる。
+
+Scriptのwork予算は全checkで共有する。hitは予算を消費しないため、cacheなしの`solve`ではunknownになった後続checkが、cacheありでは解ける場合がある。これは今回実行した処理だけをworkに数える契約の結果で、hitしたcheckの探索費用を後から足さない。
+
+`build_digest`は実際のbinaryのbytesなど、意味に影響する依存を網羅したSHA-256を呼び出し側が渡す。nativeとWasmでbyteのdigestを使う場合、互いにはhitしない。snapshotはserdeで保存・復元し、`merge(other, max_entries)`で同じbuildのentryを統合する。同じkeyで異なる回答や、digestの壊れたentryがあればmergeを拒否する。SHA-256は偶発的な改変の検出用で、生成者の署名ではない。keyもSHA-256で、source全文は保持しない。digestの衝突がないことは前提とする。
+
+JSONは`run-script-incremental {source,maxWork,...}`と`check-incremental {handle,maxWork,assumptions?,...}`。共通の`cache?`、`enabled?`、`buildDigest?`、`maxEntries?`を受け、`incremental-script-results` / `incremental-solution`で`stats`と更新した`cache`を返す。`enabled`を省略した場合は無効で、渡したsnapshotをそのまま返す。
+
+missは新しい探索に加えて、keyの計算と書き込みの固定費（4〜128変数の整数chainで1 checkあたり約2.4〜4 µs）がかかる。4変数の問題では約5.4倍、128変数では約5%遅くなる。小さい問い合わせでは固定費が上回るため既定は無効にする。[評価0074](../evals/iterations/0074-smt-incremental-cache.md)を参照。
 
 [Wasm loader](../evals/experiments/smt-subset/wasm.ts)はNodeやZ3へ依存しない。実Chromiumで`crossOriginIsolated === false`のままSAT、UNSAT、unknown、未対応、再利用を検査した。0030で測定した生Wasmは330,749 bytesで、Z3 Wasmは39,205,260 bytesだった。対応機能が異なるため、汎用ソルバー同士の容量比較にはしない。
 
@@ -131,6 +154,6 @@ Z3 nativeは[公式5.4.1 release](https://github.com/Z3Prover/z3/releases/tag/z3
 
 ## 採否
 
-差分制約への限定経路は継続検討する。公開backendへの組み込みと自動fallbackは保留した。一般のLIAやBooleanが難しい問題でZ3を置き換える判断はしていない。context APIは追加したが、学習状態の再利用は未実装。
+差分制約への限定経路は継続検討する。公開backendへの組み込みと自動fallbackは保留した。一般のLIAやBooleanが難しい問題でZ3を置き換える判断はしていない。context APIと増分解析、完了した回答の任意cacheは追加したが、学習状態の再利用は未実装。
 
 次の実験は、既存のSMTオラクル用途から入力を集め、対応率と総実行時間を測る。サブセットの速さだけでなく、未対応やunknownでZ3へ戻る費用を含めて採否を決める。

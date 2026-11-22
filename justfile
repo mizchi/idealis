@@ -894,6 +894,9 @@ smt-script-test: smt-build build
   node --test dist/tests/smt-scripts/contract-test.js
   pnpm exec vp test run --project=smt
 
+smt-cache-test: smt-build build
+  node --test dist/tests/smt-cache/contract-test.js
+
 smt-script-eval phase run baseline parent="": smt-build build
   node dist/evals/experiments/smt-scripts/run.js {{quote(phase)}} {{quote(run)}} {{quote(baseline)}} {{quote(parent)}}
 

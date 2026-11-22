@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0074: SMT contextの増分解析とcheck cache](iterations/0074-smt-incremental-cache.md)は、assertで追加した式だけを解析し、全再解析の参照と400系列で結果・work・errorを照合する。既定無効のcheck cacheはhitを新しい探索の回答と照合し、missの固定費とWasmの容量増も記録する。
+
 [0073: 後続が読まない束縛の再利用](iterations/0073-dead-binding-reuse.md)は、`nondet` を重ねたQuint生成物で同じ後続を何度も評価する費用を除く。合成モデルのnative 1/2/4/8 workerで約0.48〜0.52倍、状態・生成数・反例は一致し、workは変更前を超えない。2回の独立レビューで見つかった6件と対応も記録した。既存corpusと14本のCriterionに後退はない。
 
 [0072: source level・遅延関数・template共有](iterations/0072-frontend-semantics.md)は、SANY/TLCの拒否・正常/故障対照とnative/Wasm/Chromiumを照合する。共有化前後の完全応答・workとCriterionのcompile/fresh/preparedを分け、入力条件の修正と失敗も保存する。

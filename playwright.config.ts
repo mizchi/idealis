@@ -55,6 +55,7 @@ export default defineConfig({
         "browser.spec.ts",
         "expansion-browser.spec.ts",
         "script-browser.spec.ts",
+        "cache-browser.spec.ts",
       ],
       workers: 1,
     },

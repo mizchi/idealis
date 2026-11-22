@@ -1,3 +1,4 @@
+mod cache;
 mod parser;
 mod protocol;
 mod script;
@@ -6,6 +7,7 @@ mod solver;
 #[cfg(target_arch = "wasm32")]
 mod wasm;
 
+pub use cache::{CacheOptions, CacheStats, CheckCache, IncrementalCheck, IncrementalScript};
 use num_bigint::BigInt;
 use num_traits::Zero;
 pub use protocol::Engine;

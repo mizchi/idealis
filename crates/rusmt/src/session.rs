@@ -9,6 +9,7 @@ use crate::{
     Edge, Error, Formula, Problem, Result,
     parser::{self, Asserted, Constants, Declarations},
 };
+use sha2::{Digest, Sha256};
 use std::sync::Arc;
 
 const SOURCE_LIMIT: usize = 1_048_576;
@@ -25,6 +26,8 @@ pub(crate) struct Session {
     /// Length and tokens of the normalized source the context stands for.
     length: usize,
     tokens: usize,
+    /// Running SHA-256 of the normalized commands, each followed by a newline.
+    source: Sha256,
     problem: Arc<Problem>,
 }
 impl Session {
@@ -49,6 +52,11 @@ impl Session {
             return Err(Error::new("resource", "normalized source exceeds 1 MiB"));
         }
         let tokens = nodes.iter().map(parser::token_count).sum();
+        let mut source = Sha256::new();
+        for node in &nodes {
+            source.update(parser::render(node).as_bytes());
+            source.update(b"\n");
+        }
         let anchors = parser::anchors(&declarations, &constants);
         let problem = Arc::new(parser::problem(
             &declarations,
@@ -63,6 +71,7 @@ impl Session {
             anchors,
             length,
             tokens,
+            source,
             problem,
         })
     }
@@ -74,7 +83,8 @@ impl Session {
         }
         let node = nodes.pop().expect("one expression");
         // Checked in the order a reparse of the accumulated source reports them.
-        let length = self.length + 1 + "(assert )".len() + parser::render(&node).len();
+        let rendered = format!("(assert {})", parser::render(&node));
+        let length = self.length + 1 + rendered.len();
         if length > SOURCE_LIMIT {
             return Err(Error::new("resource", "source exceeds 1 MiB"));
         }
@@ -107,6 +117,8 @@ impl Session {
         }
         self.length = length;
         self.tokens = tokens;
+        self.source.update(rendered.as_bytes());
+        self.source.update(b"\n");
         self.problem = Arc::new(parser::problem(
             &self.declarations,
             self.anchors.clone(),
@@ -116,6 +128,10 @@ impl Session {
     }
     pub(crate) fn problem(&self) -> &Arc<Problem> {
         &self.problem
+    }
+    /// SHA-256 of the normalized source this session stands for.
+    pub(crate) fn source_digest(&self) -> [u8; 32] {
+        self.source.clone().finalize().into()
     }
 }
 fn compile_all(

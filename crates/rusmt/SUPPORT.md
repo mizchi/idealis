@@ -30,6 +30,15 @@
 
 確認用67 scriptの588 checkでZ3と一致し、保存runを再生した。[評価0041](../../evals/iterations/0041-smt-scripts.md)を参照。checkなしの入力は空結果で、検査成功とは扱わない。
 
+## 0074で追加した範囲
+
+- [x] assertで追加した式だけを解析・コンパイルする増分context。新しい整数定数を束縛した場合は保持した構文木から全assertionを再コンパイルし、popはpush時のsnapshotへ戻す。
+- [x] 累積sourceの1 MiB・20万token・入れ子64の上限を、全体の再解析と同じ順・同じ境界で検査する。
+- [x] 既定無効のcheck cache。`sat`/`unsat`だけを保存し、build digest・保持上限・SHA-256付きsnapshot・merge・hit/miss/writeを扱う。
+- [x] Rust/JSONの`check-incremental`と`run-script-incremental`、native/Wasmの完全応答一致とChromium。
+
+全再解析の参照実装と400系列・1000回超のcheckで結果・work/stats・errorを照合し、cacheのhitは無制限の新しい探索の回答と照合した。人工故障12件を検出した。[評価0074](../../evals/iterations/0074-smt-incremental-cache.md)を参照。cacheは回答の再利用で、学習状態・理論状態の再利用ではない。
+
 ## 非対応・対象外
 
 - [ ] scope内や後続コマンドでの宣言、global-declarationsとoption変更。
