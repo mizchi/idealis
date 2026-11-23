@@ -132,3 +132,14 @@ run は追記のみ。`evals/runs/0075-*` に、source / binary / 入力・drive
 #83 の d が、すべての種類で深さ 127 の debug の最小 stack を 1,920 KiB 以下にできない場合は、#82 の部分だけを採否の対象にし、#83 は測った値と残る種類を iteration に記録して開いたままにする。採否と残る制約を iteration と README に戻す。
 
 この変更の後も IR の深さは連鎖の長さに比例するので、frontend の出力検査 128 と JSON・TS の decoder 128 を超える連鎖は型付きで拒否される。Rust の parser が最も外側まで括弧で囲んだ 62 段以上の連鎖を拒否し、TS が parse する差も、0074 から変えない。
+
+## 実装の段で変えた条件（評価の前に追記）
+
+評価を始める前に、実装とテストを置く段で次の条件を変えた。
+
+- **IR の深さの検査を v2 の検証に足した。** 連鎖を 1 段と数えると、Rust の API で直接組んだ IR では、連鎖の長さだけ IR が深くなっても検証を通る。検証の後には、IR を段ごとに再帰でたどる処理（clone、membership の登録、定数の判定など）が残る。そのため、既存の `deep_drop_expression_if_alternative`（10 万段の ELSE IF）は、検証を通った後にこれらの処理で stack を使い切りうる。v2 の構造の検証と metadata の解析で、式の木の根からの IR の深さも数え、128 を超えたら `Safety IR expression nesting exceeds 128` で拒否する。値は frontend の出力検査と同じ 128 で、frontend の出力と JSON・TS の decoder を通った IR はこの値を超えないため、どの経路の結果も変えない。上限の値は増やしていない。
+- **期待値が変わる既存のテストに 1 件を足した。** `crates/rtlc/tests/deep_drop.rs` の `deep_drop_expression_if_alternative` は連鎖の形なので、checker 48 の代わりに上の IR の深さの拒否を期待する。ほかの deep_drop と手書き IR の 48 / 49 は連鎖の形ではなく、期待値を変えない。
+- **既存のテストの分類。** 連鎖の形でないので期待値を変えないもの: rtlc の unit test（`v2_dynamic_call_depth_is_checked_before_exhausting_the_native_stack` の call の 127 / 128 / 129、`v2_enabled_subscripts_keep_the_depth_of_live_branch_steps`、action frame と ENABLED の frame の 48）、`crates/idealis-core/tests/deep_request_drop.rs` の action frame、`tests/tlc-differential/analysis-ir-corpus.ts` の `~` の 48 / 49、`tests/workspace-oracle/contract-test.ts` の snapshot の 48、deep_drop の連鎖でない 43 件。期待値を変えるもの: 上の 1 件、`crates/rtla-compiler/tests/nesting_chains.rs` の plan で宣言した 5 か所、`tests/nesting-chains/contract-test.ts` の同じ閾値と 54 枝の Quint の IF 連鎖の検査、`fixtures/nesting-chains/cases.json` の v2 の連鎖の綴りで checker 48 か動的評価 128 に拒否されていたセル。
+- **#83 の分割。** `eval_operator` の 26 の腕と `eval_scalar_operator` の 12 の腕を、それぞれ別の関数に分けた。`eval` の `#[inline(always)]` は変えない。
+- **置き場所。** rtlc の Red のテストは `crates/rtlc/tests/nesting_chains.rs`（IR を直接組む。共通の組み立ては `tests/chain_programs/`）、#83 は `crates/rtlc/tests/evaluation_stack.rs`（種類ごとの組み立ては `tests/stack_programs/`）。stack の harness は `evals/experiments/nesting-chains/stack-harness/`、0075 の入力は `evals/experiments/nesting-chains/sources-0075.ts`、期待値を導く規則は `expectations-0075.ts`。導いた期待値は `fixtures/nesting-chains/cases-0075.json` と `cases.json`、導くのに使った before と定数を外した before の複製の出力は `fixtures/nesting-chains/records-0075.json` に置く。
+- **#83 の種類の大きさ。** 9 種類の入れ子は、定義の呼び出しで区切って checker 48 を避ける。1 定義あたり、式の演算子（`-`）・membership（`Seq`）・量化の束縛・ENABLED の step・binder の locals・時間論理（`[]`）は 30 段、値の演算子（`Cardinality({...})`）と遅延関数（`<<...>>[1]`）は 2 段の組を 15 個、call は 1 段とした。release の before で受理される最大の大きさと次の大きさは、テストを書く前に 1 GiB の thread で測った。
