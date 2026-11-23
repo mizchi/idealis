@@ -1,0 +1,40 @@
+// roracle's compare(reference, actual) (plan 0094): failures win, heaviest
+// first (error, unknown, invalid); otherwise the actual observation must be
+// a value, compared for equality with a reference value or membership in a
+// nonempty allowed set; an empty allowed set is invalid.
+model OracleCompare
+enum Outcome = Matched | Mismatch | Invalid | Unknown | Error
+enum Observed = ValueOf | AllowedSet | UnknownObservation | InvalidObservation | ErrorObservation
+sig Value
+rel referenceKind: one Observed
+rel referenceValue: lone Value
+rel referenceAllowed: set Value
+rel actualKind: one Observed
+rel actualValue: lone Value
+rel actualAllowed: set Value
+rel outcome: one Outcome
+// Well-formed observations: a value only for ValueOf, a set only for
+// AllowedSet.
+fact { referenceKind = ValueOf implies one referenceValue }
+fact { referenceKind != ValueOf implies no referenceValue }
+fact { referenceKind != AllowedSet implies no referenceAllowed }
+fact { actualKind = ValueOf implies one actualValue }
+fact { actualKind != ValueOf implies no actualValue }
+fact { actualKind != AllowedSet implies no actualAllowed }
+// The rule.
+fact { ErrorObservation in referenceKind + actualKind implies outcome = Error }
+fact { ErrorObservation not in referenceKind + actualKind and UnknownObservation in referenceKind + actualKind implies outcome = Unknown }
+fact { no (referenceKind + actualKind) & (ErrorObservation + UnknownObservation) and InvalidObservation in referenceKind + actualKind implies outcome = Invalid }
+fact { referenceKind in ValueOf + AllowedSet and actualKind = AllowedSet implies outcome = Invalid }
+fact { referenceKind = ValueOf and actualKind = ValueOf and referenceValue = actualValue implies outcome = Matched }
+fact { referenceKind = ValueOf and actualKind = ValueOf and referenceValue != actualValue implies outcome = Mismatch }
+fact { referenceKind = AllowedSet and no referenceAllowed and actualKind = ValueOf implies outcome = Invalid }
+fact { referenceKind = AllowedSet and actualKind = ValueOf and actualValue in referenceAllowed implies outcome = Matched }
+fact { referenceKind = AllowedSet and some referenceAllowed and actualKind = ValueOf and actualValue not in referenceAllowed implies outcome = Mismatch }
+invariant MatchedNeedsActualValue { outcome = Matched implies actualKind = ValueOf }
+invariant FailureNeverMatched { some (referenceKind + actualKind) & (UnknownObservation + InvalidObservation + ErrorObservation) implies outcome != Matched }
+invariant ErrorDominates { ErrorObservation in referenceKind + actualKind implies outcome = Error }
+invariant ActualAllowedIsInvalid { referenceKind = ValueOf and actualKind = AllowedSet implies outcome = Invalid }
+reachable EmptyAllowedIsInvalid { referenceKind = AllowedSet and no referenceAllowed and actualKind = ValueOf and outcome = Invalid }
+reachable AllowedMismatch { referenceKind = AllowedSet and some referenceAllowed and outcome = Mismatch }
+scope Value = 2, steps = 1
