@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0082: ralloyの整数とcardinality](iterations/0082-ralloy-integers.md)は、整数・`#`・算術・比較を加えた。Alloy 6.2.0の既定の2の補数の桁あふれを答えから確かめて合わせ、31 commandすべてで一致した。速度は`adopt`。
+
 [0081: ralloyの引数付きpred/fun](iterations/0081-ralloy-parameterized-predicates.md)は、引数付きpred/fun、receiver形式の呼び出し、box join、引数付きpredの`run`を加え、23 commandすべてでAlloyと一致した。速度は`adopt`。
 
 [0080: ralloyのsig階層](iterations/0080-ralloy-sig-hierarchy.md)は、abstract・extends・subset sig・一括宣言・signature factを加え、40 commandすべてでAlloyと一致した。子のscopeの扱いはAlloyの答えから決めた。速度は小さいケース1つが2回とも閾値を超え、`hold`として記録した。

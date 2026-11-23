@@ -38,7 +38,8 @@ fn main() -> Result<(), ralloy::Error> {
 - fact、引数付きpred/fun（引数は既定の`one`）、名前付きassert、run/check、全体scopeと型ごとの上限・exactly。呼び出しは`P[a, b]`・`a.P[b]`・`p.f`、それ以外の`r[x]`はbox join。
 - 関係の和、差、交差、積、join、転置、推移閉包、反射推移閉包、domain/range制限。
 - 等価・包含、論理結合、単一atomを束縛するall/no/some/one/loneとdisj。
-- none、univ、iden、Int、String。noneは単項の空集合で、二項の空関係はnone -> noneと書く。整数演算は扱わないが、既定4-bitのInt atomはuniv/idenへ含める。0 Intも指定できる。
+- none、univ、iden、Int、String。noneは単項の空集合で、二項の空関係はnone -> noneと書く。既定4-bitのInt atomはuniv/idenへ含める。0 Intも指定できる。
+- 整数リテラル、`#e`、`plus`などの算術と比較。Int型の関係は値の和として整数になり、値はbit幅の2の補数で桁あふれする（Alloy 6.2.0の既定）。
 
 signatureは最大8個、fieldは最大8個、signatureのscopeは最大8、Intは0-5 bit、全体は64 atomまで。sourceは1 MiB、10万token、tokenは256 bytes、式の再帰は48段、同一式の連続演算は512 tokenまで。超える入力はresource errorにする。
 
