@@ -100,7 +100,6 @@ fn budget_and_unsupported_input_never_become_success() {
         "sig A {} sig B extends A {} run {}",
         "open util/ordering[A] sig A {} run {}",
         "sig A {} pred P[x: A] {} run {}",
-        "sig A { r: A -> A } run {}",
         "sig A {} run { #A = 1 }",
         "sig A {} pred P { P } run {}",
         "sig A {} fact { A } run {}",

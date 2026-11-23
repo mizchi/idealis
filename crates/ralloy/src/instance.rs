@@ -1,4 +1,4 @@
-use crate::eval::{Budget, Evaluator, World};
+use crate::eval::{Budget, Evaluator, World, admits, arrow_admits};
 use crate::syntax::{Expr, Module, Mult};
 use crate::{CheckReason, CheckStatus, Command, Error, ErrorKind, Instance, InstanceCheck, Stats};
 use std::collections::BTreeMap;
@@ -107,38 +107,69 @@ fn evaluate(
         },
     );
     for field in &module.fields {
+        let space = (field.columns.len() > 1).then(|| world.space(&field.columns));
         let mut rows = vec![0u64; world.names.len()];
-        for [source, target] in &instance.fields[&field.name] {
+        for tuple in &instance.fields[&field.name] {
             budget.tick()?;
-            let source = *atoms
-                .get(source)
-                .ok_or(Failure::Protocol("unknown field source atom"))?;
-            let target = *atoms
-                .get(target)
-                .ok_or(Failure::Protocol("unknown field target atom"))?;
+            if tuple.len() != 1 + field.columns.len() {
+                return Err(Failure::Protocol("field tuple arity"));
+            }
+            let atoms = tuple
+                .iter()
+                .map(|name| {
+                    atoms
+                        .get(name)
+                        .copied()
+                        .ok_or(Failure::Protocol("unknown field tuple atom"))
+                })
+                .collect::<Result<Vec<_>, _>>()?;
+            let source = atoms[0];
             if world.sets[&field.owner] & (1 << source) == 0
-                || world.sets[&field.target] & (1 << target) == 0
+                || field
+                    .columns
+                    .iter()
+                    .zip(&atoms[1..])
+                    .any(|(column, atom)| world.sets[column] & (1 << atom) == 0)
             {
                 return Err(Failure::Invalid(CheckReason::Declaration));
             }
-            if rows[source] & (1 << target) != 0 {
+            let bit = match &space {
+                None => atoms[1],
+                Some(space) => space
+                    .iter()
+                    .position(|candidate| {
+                        candidate
+                            .iter()
+                            .map(|atom| *atom as usize)
+                            .eq(atoms[1..].iter().copied())
+                    })
+                    .expect("member of the column product"),
+            };
+            if rows[source] & (1 << bit) != 0 {
                 return Err(Failure::Protocol("duplicate field tuple"));
             }
-            rows[source] |= 1 << target;
+            rows[source] |= 1 << bit;
         }
         for (source, row) in rows.iter().enumerate() {
             budget.tick()?;
             if world.sets[&field.owner] & (1 << source) != 0 {
-                let count = row.count_ones();
-                if field.mult == Mult::One && count != 1
-                    || field.mult == Mult::Lone && count > 1
-                    || field.mult == Mult::Some && count == 0
-                {
+                let admitted = match (&space, field.arrow) {
+                    (Some(space), Some(arrow)) => arrow_admits(
+                        *row,
+                        space,
+                        world.sets[&field.columns[0]],
+                        world.sets[&field.columns[1]],
+                        arrow,
+                    ),
+                    _ => admits(field.mult, row.count_ones()),
+                };
+                if !admitted {
                     return Err(Failure::Invalid(CheckReason::Declaration));
                 }
             }
         }
         world.fields.push(rows);
+        world.spaces.push(space);
     }
     budget.stats.candidates = 1;
     let mut evaluator = Evaluator {

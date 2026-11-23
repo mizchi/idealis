@@ -168,6 +168,16 @@ impl Parser {
         self.position += 1;
         Ok(result)
     }
+    /// A signature name in a field type, including the builtin Int and String.
+    fn column(&mut self) -> Result<String, Error> {
+        if ["Int", "String"].contains(&self.peek()) {
+            let name = self.peek().to_owned();
+            self.position += 1;
+            Ok(name)
+        } else {
+            self.name()
+        }
+    }
     fn mult(&mut self, default: Mult) -> Mult {
         if self.take("one") {
             Mult::One
@@ -201,20 +211,51 @@ impl Parser {
                         names.push(self.name()?);
                     }
                     self.expect(":")?;
+                    let explicit = ["one", "lone", "some", "set"].contains(&self.peek());
                     let field_mult = self.mult(Mult::One);
-                    let target = if ["Int", "String"].contains(&self.peek()) {
-                        let name = self.peek().to_owned();
-                        self.position += 1;
-                        name
-                    } else {
-                        self.name()?
-                    };
+                    let mut columns = vec![self.column()?];
+                    let mut arrows = Vec::new();
+                    loop {
+                        let left = ["one", "lone", "some", "set"].contains(&self.peek());
+                        let start = self.position;
+                        let left_mult = self.mult(Mult::Set);
+                        if !self.take("->") {
+                            if left {
+                                self.position = start;
+                            }
+                            break;
+                        }
+                        let right_mult = self.mult(Mult::Set);
+                        arrows.push((left_mult, right_mult));
+                        columns.push(self.column()?);
+                    }
+                    if !arrows.is_empty() && explicit {
+                        return Err(Error::new(
+                            ErrorKind::Unsupported,
+                            "multiplicity before an arrow field type",
+                        ));
+                    }
+                    if arrows.len() > 2
+                        || arrows.len() == 2
+                            && arrows.iter().any(|arrow| *arrow != (Mult::Set, Mult::Set))
+                    {
+                        return Err(Error::new(
+                            ErrorKind::Unsupported,
+                            "arrow multiplicities beyond one arrow, or fields above arity four",
+                        ));
+                    }
+                    let arrow = (arrows.len() == 1).then(|| arrows[0]);
                     for name in names {
                         module.fields.push(Field {
                             name,
                             owner: owner.clone(),
-                            target: target.clone(),
-                            mult: field_mult,
+                            columns: columns.clone(),
+                            mult: if arrows.is_empty() {
+                                field_mult
+                            } else {
+                                Mult::Set
+                            },
+                            arrow,
                         });
                     }
                     if self.take(",") {

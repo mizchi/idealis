@@ -12,11 +12,17 @@ pub(crate) struct Signature {
     pub name: String,
     pub mult: Mult,
 }
+/// `name: mult A` declares a binary field; `name: A m -> n B` and
+/// `name: A -> B -> C` declare fields of arity three and four (plan 0079).
 pub(crate) struct Field {
     pub name: String,
     pub owner: String,
-    pub target: String,
+    /// Signatures of the columns after the owner.
+    pub columns: Vec<String>,
+    /// Multiplicity of a single-column field.
     pub mult: Mult,
+    /// Multiplicities around the arrow of a two-column field.
+    pub arrow: Option<(Mult, Mult)>,
 }
 #[derive(Clone, Copy)]
 pub(crate) enum Unary {

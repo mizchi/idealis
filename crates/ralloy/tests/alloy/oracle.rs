@@ -45,6 +45,11 @@ pub fn models(group: &str) -> Vec<(String, AlloyModel)> {
 /// Analyzes every command. A found instance must also pass ralloy's own
 /// instance check, so an answer the evaluator cannot reproduce is invalid.
 pub fn ralloy(model: &AlloyModel) -> Observation<Outcomes> {
+    ralloy_except(model, &[])
+}
+
+/// Like `ralloy`, leaving out the commands labeled in `skipped`.
+pub fn ralloy_except(model: &AlloyModel, skipped: &[&str]) -> Observation<Outcomes> {
     let parsed = match Model::parse(&model.source) {
         Ok(parsed) => parsed,
         Err(error) => {
@@ -55,6 +60,9 @@ pub fn ralloy(model: &AlloyModel) -> Observation<Outcomes> {
     };
     let mut outcomes = Outcomes::new();
     for (index, command) in parsed.commands().iter().enumerate() {
+        if skipped.contains(&command.label.as_str()) {
+            continue;
+        }
         let analysis = match parsed.analyze(index, BUDGET) {
             Ok(analysis) => analysis,
             Err(error) => {

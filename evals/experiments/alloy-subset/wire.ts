@@ -10,9 +10,7 @@ export interface Scope {
 }
 export interface Instance {
   readonly signatures: Readonly<Record<string, readonly string[]>>;
-  readonly fields: Readonly<
-    Record<string, readonly (readonly [string, string])[]>
-  >;
+  readonly fields: Readonly<Record<string, readonly (readonly string[])[]>>;
 }
 export interface Analysis {
   readonly command: {
@@ -134,18 +132,15 @@ export const decode = (input: unknown): Reply => {
     const fieldEntries = Object.entries(witness.fields).map(
       ([name, tuples]) => {
         if (!Array.isArray(tuples)) throw new Error("Invalid ralloy field");
-        const pairs = tuples.map(
-          (tuple: unknown): readonly [string, string] => {
-            if (
-              !Array.isArray(tuple) ||
-              tuple.length !== 2 ||
-              typeof tuple[0] !== "string" ||
-              typeof tuple[1] !== "string"
-            )
-              throw new Error("Invalid ralloy tuple");
-            return [tuple[0], tuple[1]];
-          },
-        );
+        const pairs = tuples.map((tuple: unknown): readonly string[] => {
+          if (
+            !Array.isArray(tuple) ||
+            tuple.length < 2 ||
+            tuple.some((atom) => typeof atom !== "string")
+          )
+            throw new Error("Invalid ralloy tuple");
+          return tuple as string[];
+        });
         return [name, pairs] as const;
       },
     );

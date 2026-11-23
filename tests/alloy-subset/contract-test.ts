@@ -52,8 +52,8 @@ test("an Alloy counterexample reproduces a known cycle validation defect", async
         .some(
           (edge) =>
             edge[1] === start ||
-            (!visited.has(edge[1]) &&
-              reaches(start, edge[1], new Set([...visited, edge[1]]))),
+            (!visited.has(edge[1]!) &&
+              reaches(start, edge[1]!, new Set([...visited, edge[1]!]))),
         );
     const fixed = !nodes.some((node) => reaches(node, node, new Set([node])));
     assert.equal(broken, true);

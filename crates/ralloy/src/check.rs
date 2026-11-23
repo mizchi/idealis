@@ -23,6 +23,9 @@ impl Type {
     }
 }
 
+/// Relations of higher arity are rejected as unsupported.
+const MAX_ARITY: usize = 4;
+
 struct Checker<'a> {
     module: &'a Module,
     globals: BTreeMap<String, Type>,
@@ -68,34 +71,30 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
         .globals
         .insert("iden".into(), Type::Relation(vec![all, all]));
     for field in &module.fields {
-        if !module
-            .signatures
-            .iter()
-            .any(|signature| signature.name == field.target)
-            && !["Int", "String"].contains(&field.target.as_str())
-        {
-            return Err(Error::new(ErrorKind::Type, "unknown field range"));
-        }
         let owner = checker
             .globals
             .get(&field.owner)
             .cloned()
             .ok_or_else(|| Error::new(ErrorKind::Type, "unknown owner"))?
             .columns()?[0];
-        let target = checker
-            .globals
-            .get(&field.target)
-            .cloned()
-            .ok_or_else(|| {
-                Error::new(
+        let mut columns = vec![owner];
+        for column in &field.columns {
+            if !module
+                .signatures
+                .iter()
+                .any(|signature| &signature.name == column)
+                && !["Int", "String"].contains(&column.as_str())
+            {
+                return Err(Error::new(
                     ErrorKind::Type,
-                    format!("unknown field range {}", field.target),
-                )
-            })?
-            .columns()?[0];
+                    format!("unknown field range {column}"),
+                ));
+            }
+            columns.push(checker.globals[column].clone().columns()?[0]);
+        }
         if checker
             .globals
-            .insert(field.name.clone(), Type::Relation(vec![owner, target]))
+            .insert(field.name.clone(), Type::Relation(columns))
             .is_some()
         {
             return Err(Error::new(
@@ -191,6 +190,28 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
         } else {
             1 << command.scope.bitwidth
         };
+        // A field of several columns chooses, per owner atom, a subset of the
+        // product of its column signatures, kept as a 64-bit mask.
+        for field in module.fields.iter().filter(|field| field.columns.len() > 1) {
+            let space = field
+                .columns
+                .iter()
+                .map(|column| match column.as_str() {
+                    "Int" => integer_atoms,
+                    "String" => 0,
+                    name => signatures
+                        .iter()
+                        .find(|signature| signature.name == name)
+                        .map_or(0, |signature| signature.maximum),
+                })
+                .product::<usize>();
+            if space > 64 {
+                return Err(Error::new(
+                    ErrorKind::Resource,
+                    format!("field {} exceeds 64 tuples per owner atom", field.name),
+                ));
+            }
+        }
         if signatures
             .iter()
             .map(|signature| signature.maximum)
@@ -299,18 +320,20 @@ impl Checker<'_> {
                 let left_columns = left.columns()?;
                 let right_columns = right.columns()?;
                 if matches!(operator, Binary::Product) {
-                    if left_columns.len() != 1 || right_columns.len() != 1 {
+                    if left_columns.len() + right_columns.len() > MAX_ARITY {
                         return Err(Error::new(
                             ErrorKind::Unsupported,
-                            "relations above arity two",
+                            "relations above arity four",
                         ));
                     }
-                    return Ok(Type::Relation(vec![left_columns[0], right_columns[0]]));
+                    return Ok(Type::Relation(
+                        left_columns.into_iter().chain(right_columns).collect(),
+                    ));
                 }
                 if matches!(operator, Binary::Join) {
-                    if left_columns.len() + right_columns.len() <= 2
-                        || left_columns.last().unwrap() & right_columns[0] == 0
-                    {
+                    // Alloy accepts a join of disjoint column types; it is
+                    // empty. Only the arity is an error (plan 0079).
+                    if left_columns.len() + right_columns.len() <= 2 {
                         return Err(Error::new(ErrorKind::Type, "ill-typed join"));
                     }
                     return Ok(Type::Relation(
@@ -327,11 +350,8 @@ impl Checker<'_> {
                     } else {
                         (right_columns, left_columns)
                     };
-                    if set.len() != 1 || relation.len() != 2 {
-                        return Err(Error::new(
-                            ErrorKind::Type,
-                            "restriction requires a set and binary relation",
-                        ));
+                    if set.len() != 1 {
+                        return Err(Error::new(ErrorKind::Type, "restriction requires a set"));
                     }
                     return Ok(Type::Relation(relation));
                 }

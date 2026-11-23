@@ -1,13 +1,17 @@
+use crate::syntax::Mult;
 use crate::{
     Stats,
     syntax::{Binary, Declaration, Expr, Module, Quantifier, Unary},
 };
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
+/// Unary and binary relations keep their bit representations; relations of
+/// arity three and four are sets of atom-index tuples (plan 0079).
 #[derive(Clone)]
 pub(crate) enum Relation {
     Unary(u64),
     Binary(Vec<u64>),
+    Nary(usize, BTreeSet<Vec<u8>>),
 }
 enum Value {
     Formula(bool),
@@ -44,8 +48,84 @@ impl Relation {
         match self {
             Self::Unary(set) => set.count_ones(),
             Self::Binary(rows) => rows.iter().map(|row| row.count_ones()).sum(),
+            Self::Nary(_, tuples) => tuples.len() as u32,
         }
     }
+    fn arity(&self) -> usize {
+        match self {
+            Self::Unary(_) => 1,
+            Self::Binary(_) => 2,
+            Self::Nary(arity, _) => *arity,
+        }
+    }
+    /// The relation as a set of tuples, for operators across arities.
+    fn tuples(self) -> BTreeSet<Vec<u8>> {
+        match self {
+            Self::Unary(set) => bits(set).map(|atom| vec![atom]).collect(),
+            Self::Binary(rows) => rows
+                .into_iter()
+                .enumerate()
+                .flat_map(|(source, row)| bits(row).map(move |target| vec![source as u8, target]))
+                .collect(),
+            Self::Nary(_, tuples) => tuples,
+        }
+    }
+    /// Back to the bit representations when the arity allows it.
+    fn from_tuples(arity: usize, tuples: BTreeSet<Vec<u8>>, atoms: usize) -> Self {
+        match arity {
+            1 => Self::Unary(tuples.iter().fold(0, |set, tuple| set | 1 << tuple[0])),
+            2 => {
+                let mut rows = vec![0; atoms];
+                for tuple in &tuples {
+                    rows[tuple[0] as usize] |= 1 << tuple[1];
+                }
+                Self::Binary(rows)
+            }
+            _ => Self::Nary(arity, tuples),
+        }
+    }
+}
+/// Atom indices of the set bits, lowest first.
+pub(crate) fn bits(mut set: u64) -> impl Iterator<Item = u8> {
+    std::iter::from_fn(move || {
+        (set != 0).then(|| {
+            let atom = set.trailing_zeros() as u8;
+            set &= set - 1;
+            atom
+        })
+    })
+}
+/// Whether a multiplicity admits `count` related atoms.
+pub(crate) fn admits(mult: Mult, count: u32) -> bool {
+    match mult {
+        Mult::One => count == 1,
+        Mult::Lone => count <= 1,
+        Mult::Some => count >= 1,
+        Mult::Set => true,
+    }
+}
+/// Whether the tuples `mask` selects from `space` satisfy `A m -> n B`: every
+/// atom of `left` maps to `n` atoms of B, every atom of `right` is reached
+/// from `m` atoms of A.
+pub(crate) fn arrow_admits(
+    mask: u64,
+    space: &[Vec<u8>],
+    left: u64,
+    right: u64,
+    (m, n): (Mult, Mult),
+) -> bool {
+    let selected = || bits(mask).map(|index| &space[index as usize]);
+    bits(left).all(|atom| {
+        admits(
+            n,
+            selected().filter(|tuple| tuple[0] == atom).count() as u32,
+        )
+    }) && bits(right).all(|atom| {
+        admits(
+            m,
+            selected().filter(|tuple| tuple[1] == atom).count() as u32,
+        )
+    })
 }
 pub(crate) struct Budget {
     pub stats: Stats,
@@ -63,7 +143,11 @@ impl Budget {
 pub(crate) struct World {
     pub names: Vec<String>,
     pub sets: BTreeMap<String, u64>,
+    /// Per field and owner atom: the target set of a single-column field, or
+    /// a mask over `spaces` for a field of several columns.
     pub fields: Vec<Vec<u64>>,
+    /// The column tuples a field of several columns can relate an owner to.
+    pub spaces: Vec<Option<Vec<Vec<u8>>>>,
 }
 impl World {
     pub fn new(bitwidth: usize) -> Self {
@@ -80,6 +164,44 @@ impl World {
                 ("String".into(), 0),
             ]),
             fields: Vec::new(),
+            spaces: Vec::new(),
+        }
+    }
+    /// The product of the column signatures, in lexicographic order.
+    pub fn space(&self, columns: &[String]) -> Vec<Vec<u8>> {
+        let mut space = vec![vec![]];
+        for column in columns {
+            let set = self.sets[column];
+            space = space
+                .into_iter()
+                .flat_map(|prefix: Vec<u8>| {
+                    bits(set).map(move |atom| {
+                        let mut tuple = prefix.clone();
+                        tuple.push(atom);
+                        tuple
+                    })
+                })
+                .collect();
+        }
+        space
+    }
+    fn field(&self, index: usize, arity: usize) -> Relation {
+        match &self.spaces[index] {
+            None => Relation::Binary(self.fields[index].clone()),
+            Some(space) => Relation::Nary(
+                arity,
+                self.fields[index]
+                    .iter()
+                    .enumerate()
+                    .flat_map(|(owner, mask)| {
+                        bits(*mask).map(move |index| {
+                            let mut tuple = vec![owner as u8];
+                            tuple.extend(&space[index as usize]);
+                            tuple
+                        })
+                    })
+                    .collect(),
+            ),
         }
     }
 }
@@ -120,9 +242,8 @@ impl Evaluator<'_> {
                     .iter()
                     .position(|field| &field.name == name)
                 {
-                    return Ok(Value::Relation(Relation::Binary(
-                        self.world.fields[index].clone(),
-                    )));
+                    let arity = 1 + self.module.fields[index].columns.len();
+                    return Ok(Value::Relation(self.world.field(index, arity)));
                 }
                 self.expression(&self.module.predicates[name], &Environment::new())
             }
@@ -227,6 +348,14 @@ impl Evaluator<'_> {
         right: Relation,
     ) -> Result<Value, ()> {
         let count = self.world.names.len();
+        let across = matches!(left, Relation::Nary(..))
+            || matches!(right, Relation::Nary(..))
+            || matches!(operator, Binary::Product) && (left.arity(), right.arity()) != (1, 1)
+            || matches!(operator, Binary::Domain) && right.arity() == 1
+            || matches!(operator, Binary::Range) && left.arity() == 1;
+        if across {
+            return self.tuples(operator, left, right);
+        }
         if matches!(operator, Binary::Product) {
             let left = left.set();
             let right = right.set();
@@ -331,6 +460,76 @@ impl Evaluator<'_> {
         } else {
             Relation::Unary(output[0])
         }))
+    }
+    /// Operators on sets of tuples, for operands of arity above two or
+    /// results whose arity differs from the bit representations.
+    fn tuples(&mut self, operator: Binary, left: Relation, right: Relation) -> Result<Value, ()> {
+        let atoms = self.world.names.len();
+        let (left_arity, right_arity) = (left.arity(), right.arity());
+        let (left, right) = (left.tuples(), right.tuples());
+        for _ in 0..left.len() + right.len() {
+            self.budget.tick()?;
+        }
+        let (arity, output) = match operator {
+            Binary::Equal => return Ok(Value::Formula(left == right)),
+            Binary::NotEqual => return Ok(Value::Formula(left != right)),
+            Binary::In => return Ok(Value::Formula(left.is_subset(&right))),
+            Binary::NotIn => return Ok(Value::Formula(!left.is_subset(&right))),
+            Binary::Union => (left_arity, &left | &right),
+            Binary::Difference => (left_arity, &left - &right),
+            Binary::Intersection => (left_arity, &left & &right),
+            Binary::Product => {
+                let mut output = BTreeSet::new();
+                for prefix in &left {
+                    for suffix in &right {
+                        self.budget.tick()?;
+                        output.insert(prefix.iter().chain(suffix).copied().collect());
+                    }
+                }
+                (left_arity + right_arity, output)
+            }
+            Binary::Join => {
+                let mut heads: BTreeMap<u8, Vec<&Vec<u8>>> = BTreeMap::new();
+                for tuple in &right {
+                    heads.entry(tuple[0]).or_default().push(tuple);
+                }
+                let mut output = BTreeSet::new();
+                for prefix in &left {
+                    for suffix in heads.get(prefix.last().unwrap()).into_iter().flatten() {
+                        self.budget.tick()?;
+                        output.insert(
+                            prefix[..prefix.len() - 1]
+                                .iter()
+                                .chain(&suffix[1..])
+                                .copied()
+                                .collect(),
+                        );
+                    }
+                }
+                (left_arity + right_arity - 2, output)
+            }
+            Binary::Domain => {
+                let set: BTreeSet<u8> = left.iter().map(|tuple| tuple[0]).collect();
+                (
+                    right_arity,
+                    right
+                        .into_iter()
+                        .filter(|tuple| set.contains(&tuple[0]))
+                        .collect(),
+                )
+            }
+            Binary::Range => {
+                let set: BTreeSet<u8> = right.iter().map(|tuple| tuple[0]).collect();
+                (
+                    left_arity,
+                    left.into_iter()
+                        .filter(|tuple| set.contains(tuple.last().unwrap()))
+                        .collect(),
+                )
+            }
+            _ => unreachable!("validated relational operator"),
+        };
+        Ok(Value::Relation(Relation::from_tuples(arity, output, atoms)))
     }
     fn quantify(
         &mut self,

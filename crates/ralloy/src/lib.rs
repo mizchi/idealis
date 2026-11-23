@@ -110,7 +110,8 @@ pub struct Command {
 #[serde(deny_unknown_fields)]
 pub struct Instance {
     pub signatures: BTreeMap<String, Vec<String>>,
-    pub fields: BTreeMap<String, Vec<[String; 2]>>,
+    /// Tuples of each field, owner atom first; binary fields have pairs.
+    pub fields: BTreeMap<String, Vec<Vec<String>>>,
 }
 #[derive(Default, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]

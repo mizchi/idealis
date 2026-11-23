@@ -1,4 +1,4 @@
-use crate::eval::{Budget, Evaluator, World};
+use crate::eval::{Budget, Evaluator, World, arrow_admits, bits};
 use crate::syntax::{Expr, Module, Mult};
 use crate::{Analysis, Command, Error, Instance, Kind, Stats, Status};
 
@@ -45,8 +45,12 @@ struct Search<'a> {
 struct Slot {
     field: usize,
     source: usize,
+    /// Target atoms of a single-column field, or the mask of every tuple of
+    /// a multi-column field's space.
     target: u64,
     mult: Mult,
+    /// For `A m -> n B`: the atoms of A and B and the multiplicities.
+    arrow: Option<(u64, u64, (Mult, Mult))>,
 }
 
 impl Search<'_> {
@@ -93,30 +97,44 @@ impl Search<'_> {
                 (1u64 << names.len()) - 1
             },
         );
+        let mut world = World {
+            fields: vec![vec![0; names.len()]; self.module.fields.len()],
+            spaces: Vec::new(),
+            names,
+            sets,
+        };
         let mut slots = Vec::new();
         for (field_index, field) in self.module.fields.iter().enumerate() {
-            let mut owners = sets[&field.owner];
-            while owners != 0 {
-                let source = owners.trailing_zeros() as usize;
-                owners &= owners - 1;
+            let (target, space) = if let [column] = field.columns.as_slice() {
+                (world.sets[column], None)
+            } else {
+                let space = world.space(&field.columns);
+                let mask = if space.len() == 64 {
+                    u64::MAX
+                } else {
+                    (1u64 << space.len()) - 1
+                };
+                (mask, Some(space))
+            };
+            let arrow = field.arrow.map(|arrow| {
+                (
+                    world.sets[&field.columns[0]],
+                    world.sets[&field.columns[1]],
+                    arrow,
+                )
+            });
+            world.spaces.push(space);
+            for source in bits(world.sets[&field.owner]) {
                 slots.push(Slot {
                     field: field_index,
-                    source,
-                    target: sets[&field.target],
+                    source: source as usize,
+                    target,
                     mult: field.mult,
+                    arrow,
                 });
             }
         }
-        let fields = vec![vec![0; names.len()]; self.module.fields.len()];
-        self.assign(
-            &slots,
-            0,
-            &mut World {
-                names,
-                sets,
-                fields,
-            },
-        )
+        self.assign(&slots, 0, &mut world)
     }
     fn assign(&mut self, slots: &[Slot], index: usize, world: &mut World) -> Result<bool, ()> {
         self.budget.tick()?;
@@ -146,7 +164,13 @@ impl Search<'_> {
         let mut choice = 0;
         loop {
             self.budget.tick()?;
-            if slot.mult == Mult::Set || choice != 0 {
+            let admitted = slot.arrow.is_none_or(|(left, right, arrow)| {
+                let space = world.spaces[slot.field]
+                    .as_deref()
+                    .expect("arrow field space");
+                arrow_admits(choice, space, left, right, arrow)
+            });
+            if (slot.mult == Mult::Set || choice != 0) && admitted {
                 world.fields[slot.field][slot.source] = choice;
                 if self.assign(slots, index + 1, world)? {
                     return Ok(true);
@@ -199,11 +223,17 @@ impl Search<'_> {
             .map(|(index, field)| {
                 let mut tuples = Vec::new();
                 for (source, row) in world.fields[index].iter().enumerate() {
-                    let mut targets = *row;
-                    while targets != 0 {
-                        let target = targets.trailing_zeros() as usize;
-                        targets &= targets - 1;
-                        tuples.push([world.names[source].clone(), world.names[target].clone()]);
+                    for selected in bits(*row) {
+                        let mut tuple = vec![world.names[source].clone()];
+                        match &world.spaces[index] {
+                            None => tuple.push(world.names[selected as usize].clone()),
+                            Some(space) => tuple.extend(
+                                space[selected as usize]
+                                    .iter()
+                                    .map(|atom| world.names[*atom as usize].clone()),
+                            ),
+                        }
+                        tuples.push(tuple);
                     }
                 }
                 (field.name.clone(), tuples)

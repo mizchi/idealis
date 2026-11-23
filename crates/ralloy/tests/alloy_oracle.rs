@@ -6,7 +6,11 @@ mod oracle;
 use oracle::{AlloyModel, Outcomes};
 use roracle::{CheckReport, OracleGroup};
 
-fn replay(group: &str) {
+/// Replays a group. `pending` lists (model, command) pairs recorded as known
+/// gaps: such a model must stay `unknown` (budget exhausted), never a
+/// mismatch or a silent pass, and its other commands must still agree with
+/// Alloy one by one. Solving a gap forces this list to be updated.
+fn replay(group: &str, pending: &[(&str, &str)]) {
     let saved: CheckReport<AlloyModel, Outcomes> = serde_json::from_str(
         &std::fs::read_to_string(oracle::root().join(format!("{group}.json")))
             .unwrap_or_else(|error| panic!("{group}: record it first: {error}")),
@@ -21,10 +25,53 @@ fn replay(group: &str) {
     oracle_group
         .reference("alloy-6.2.0", |_| unreachable!("replay never runs Alloy"))
         .test_function("ralloy", oracle::ralloy);
-    oracle_group.replay(&saved).unwrap().assert_matched();
+    let report = oracle_group.replay(&saved).unwrap();
+    for case in &report.cases {
+        let skipped: Vec<&str> = pending
+            .iter()
+            .filter(|(model, _)| *model == case.case.id)
+            .map(|(_, command)| *command)
+            .collect();
+        let expected = if skipped.is_empty() {
+            roracle::Status::Matched
+        } else {
+            let roracle::Observation::Value { value: answers } = &case.reference else {
+                panic!("{group}/{}: no recorded answers", case.case.id);
+            };
+            let mut others = answers.clone();
+            others.retain(|label, _| !skipped.contains(&label.as_str()));
+            assert_eq!(
+                oracle::ralloy_except(&case.case.input, &skipped),
+                roracle::Observation::value(others),
+                "{group}/{}: commands besides the pending ones",
+                case.case.id
+            );
+            roracle::Status::Unknown
+        };
+        for comparison in &case.comparisons {
+            assert_eq!(
+                comparison.status, expected,
+                "{group}/{}: {:?}",
+                case.case.id, comparison.actual
+            );
+        }
+    }
+    for (id, _) in pending {
+        assert!(
+            report.cases.iter().any(|case| case.case.id == *id),
+            "{group}: unknown pending case {id}"
+        );
+    }
 }
 
 #[test]
 fn core_agrees_with_alloy() {
-    replay("core");
+    replay("core", &[]);
+}
+
+#[test]
+fn nary_agrees_with_alloy() {
+    // field-composition/CompositionHolds needs about 1.3e8 candidates at
+    // scope 3 and exhausts the budget (plan 0079); plan 0083 targets it.
+    replay("nary", &[("field-composition", "CompositionHolds")]);
 }

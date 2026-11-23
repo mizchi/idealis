@@ -2,10 +2,8 @@
   "version": 1,
   "group": "nary",
   "reference": "alloy-6.2.0",
-  "implementations": [
-    "ralloy"
-  ],
-  "status": "error",
+  "implementations": ["ralloy"],
+  "status": "unknown",
   "cases": [
     {
       "case": {
@@ -26,10 +24,15 @@
       "comparisons": [
         {
           "id": "ralloy",
-          "status": "error",
+          "status": "matched",
           "actual": {
-            "kind": "error",
-            "message": "Unsupported: only named unary field ranges are supported"
+            "kind": "value",
+            "value": {
+              "NoBButA": false,
+              "OneEveryAHolds": false,
+              "SomeEveryBHolds": false,
+              "SomeLeft": true
+            }
           }
         }
       ]
@@ -52,10 +55,14 @@
       "comparisons": [
         {
           "id": "ralloy",
-          "status": "error",
+          "status": "matched",
           "actual": {
-            "kind": "error",
-            "message": "Unsupported: only named unary field ranges are supported"
+            "kind": "value",
+            "value": {
+              "EachAOnceHolds": false,
+              "Functional": true,
+              "TotalHolds": false
+            }
           }
         }
       ]
@@ -81,10 +88,10 @@
       "comparisons": [
         {
           "id": "ralloy",
-          "status": "error",
+          "status": "unknown",
           "actual": {
-            "kind": "error",
-            "message": "Unsupported: only named unary field ranges are supported"
+            "kind": "unknown",
+            "reason": "CompositionHolds: work budget"
           }
         }
       ]
@@ -110,10 +117,51 @@
       "comparisons": [
         {
           "id": "ralloy",
-          "status": "error",
+          "status": "matched",
           "actual": {
-            "kind": "error",
-            "message": "Unsupported: only named unary field ranges are supported"
+            "kind": "value",
+            "value": {
+              "DomainRestrict": true,
+              "Intersection": true,
+              "JoinTwiceHolds": false,
+              "ProductArity": true,
+              "RangeRestrict": true,
+              "UnionDiff": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "right-joins",
+        "input": {
+          "source": "sig X {}\none sig R { t: X -> X -> X }\nsig Y { u: X -> X }\nRightJoin: run { some x: X | some (R.t).x and (R.t).x != x.(R.t) } for 2 but 0 Int\nFieldRightJoin: run { some x: X | some u.x and no x.u } for 2 but 0 Int\nMiddleJoin: run { some disj a, b: X | a.((R.t).b) != b.((R.t).a) } for 2 but 0 Int\nassert RightTyped { all x: X | (R.t).x in X -> X }\nRightTypedHolds: check RightTyped for 2 but 0 Int\nTernaryJoinBinary: run { some y: Y | some (R.t).(y.u) } for 2 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "FieldRightJoin": true,
+          "MiddleJoin": true,
+          "RightJoin": true,
+          "RightTypedHolds": false,
+          "TernaryJoinBinary": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "FieldRightJoin": true,
+              "MiddleJoin": true,
+              "RightJoin": true,
+              "RightTypedHolds": false,
+              "TernaryJoinBinary": true
+            }
           }
         }
       ]
@@ -139,10 +187,17 @@
       "comparisons": [
         {
           "id": "ralloy",
-          "status": "error",
+          "status": "matched",
           "actual": {
-            "kind": "error",
-            "message": "Unsupported: only named unary field ranges are supported"
+            "kind": "value",
+            "value": {
+              "AllPairsFails": true,
+              "Empty": true,
+              "Full": true,
+              "JoinLeft": true,
+              "JoinRight": true,
+              "TypedHolds": false
+            }
           }
         }
       ]
