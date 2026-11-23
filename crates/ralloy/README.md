@@ -35,7 +35,7 @@ fn main() -> Result<(), ralloy::Error> {
 ## 対応するサブセット
 
 - sigとone/lone/some、`abstract`、`extends`、親が1つの`in`、一括宣言、signature fact。名前が一意なfield。fieldの既定multiplicityはone。`A -> B`・`A -> B -> C`と`A m -> n B`で4項までのfieldを書ける。
-- fact、引数なしpred、名前付きassert、run/check、全体scopeと型ごとの上限・exactly。
+- fact、引数付きpred/fun（引数は既定の`one`）、名前付きassert、run/check、全体scopeと型ごとの上限・exactly。呼び出しは`P[a, b]`・`a.P[b]`・`p.f`、それ以外の`r[x]`はbox join。
 - 関係の和、差、交差、積、join、転置、推移閉包、反射推移閉包、domain/range制限。
 - 等価・包含、論理結合、単一atomを束縛するall/no/some/one/loneとdisj。
 - none、univ、iden、Int、String。noneは単項の空集合で、二項の空関係はnone -> noneと書く。整数演算は扱わないが、既定4-bitのInt atomはuniv/idenへ含める。0 Intも指定できる。
