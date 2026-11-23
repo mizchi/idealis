@@ -1,0 +1,250 @@
+// The ubiquitous language of idealis itself: what its engines report and
+// how its models are built (plan 0092). Each term lists the symbols the
+// crates use for it, so a crate that drifts from the shared meaning is
+// found against one definition.
+import "Schema.pkl" as s
+
+local ralloy = "crates/ralloy/src/lib.rs"
+local rtlc = "crates/rtlc/src/safety.rs"
+local roracle = "crates/roracle/src/report.rs"
+local rmodel = "crates/rmodel/src/syntax.rs"
+
+spec: s.Spec = new {
+  id = "idealis"
+  name = s.text("idealis の語彙", "The idealis vocabulary")
+  groups { "探索の範囲"; "判定"; "比較"; "モデル" }
+  terms {
+    new {
+      id = "search.complete"
+      kind = "result"
+      group = "探索の範囲"
+      name = s.text("完全", "complete")
+      definition = s.text(
+        "宣言した scope と上限の中で、到達できる状態や候補をすべて調べ終えたこと。その範囲の外については何も示さない。",
+        "Every reachable state or candidate within the declared scope and bounds was examined. It says nothing outside that range.",
+      )
+      avoid { "証明済み"; "proved" }
+      code { s.code(rtlc, "complete") }
+    }
+    new {
+      id = "search.bounded"
+      kind = "result"
+      group = "探索の範囲"
+      name = s.text("有界", "bounded")
+      definition = s.text(
+        "深さや steps などの上限で探索を打ち切ったこと。上限の外は調べていないので、違反がないことを完全な検査として扱わない。",
+        "The search stopped at a depth, step or similar bound. Beyond the bound nothing was examined, so finding no violation is not a complete check.",
+      )
+      avoid { "完全"; "網羅"; "exhaustive" }
+      code { s.code(rtlc, "bounded"); s.code(ralloy, "steps") }
+    }
+    new {
+      id = "search.empty"
+      kind = "result"
+      group = "探索の範囲"
+      name = s.text("空", "empty")
+      definition = s.text(
+        "初期状態や候補が 1 つもなく、検査する対象がなかったこと。合格ではない。",
+        "There was no initial state or candidate, so nothing was checked. It is not a pass.",
+      )
+      code { s.code(rtlc, "empty") }
+    }
+    new {
+      id = "search.unknown"
+      kind = "result"
+      group = "探索の範囲"
+      name = s.text("未確定", "unknown")
+      definition = s.text(
+        "work などの予算が尽きて、判定を出せなかったこと。合格にも不合格にも読み替えない。",
+        "A budget such as work ran out before a verdict. It is read as neither a pass nor a failure.",
+      )
+      aliases { "予算切れ" }
+      code { s.code(ralloy, "Unknown"); s.code(roracle, "Unknown") }
+    }
+    new {
+      id = "verdict.instance"
+      kind = "verdict"
+      group = "判定"
+      name = s.text("実例", "instance")
+      definition = s.text(
+        "run の条件と事実を満たす構造（時相モデルでは trace）が scope の中に見つかったこと。",
+        "A structure, or a trace in a temporal model, within the scope satisfies the facts and the run's condition.",
+      )
+      code { s.code(ralloy, "Instance") }
+    }
+    new {
+      id = "verdict.counterexample"
+      kind = "verdict"
+      group = "判定"
+      name = s.text("反例", "counterexample")
+      definition = s.text(
+        "事実を満たしながら、検査する性質を破る構造または trace が scope の中に見つかったこと。",
+        "A structure or trace within the scope satisfies the facts and violates the checked property.",
+      )
+      code { s.code(ralloy, "Counterexample") }
+    }
+    new {
+      id = "verdict.no-counterexample"
+      kind = "verdict"
+      group = "判定"
+      name = s.text("反例なし", "no counterexample")
+      definition = s.text(
+        "scope の中に反例がなかったこと。scope の外で性質が成り立つことの証明ではない。",
+        "No counterexample exists within the scope. It does not prove the property beyond the scope.",
+      )
+      avoid { "正しい"; "検証済み"; "verified" }
+      code { s.code(ralloy, "NoCounterexample") }
+    }
+    new {
+      id = "verdict.holds"
+      kind = "verdict"
+      group = "判定"
+      name = s.text("成り立つ", "holds")
+      definition = s.text(
+        "invariant が、検査した範囲で到達できるすべての状態で成り立つこと。範囲が有界か完全かを併せて示す。",
+        "An invariant is true in every reachable state within the checked range, which is stated as bounded or complete.",
+      )
+    }
+    new {
+      id = "verdict.violated"
+      kind = "verdict"
+      group = "判定"
+      name = s.text("破れる", "violated")
+      definition = s.text(
+        "invariant が偽になる状態に到達できること。到達する trace が witness になる。",
+        "A state where an invariant is false is reachable; the trace reaching it is the witness.",
+      )
+    }
+    new {
+      id = "verdict.reachable"
+      kind = "verdict"
+      group = "判定"
+      name = s.text("到達できる", "reachable")
+      definition = s.text(
+        "reachable の条件を満たす状態に、初期状態から到達できること。",
+        "A state satisfying a reachable check's condition can be reached from an initial state.",
+      )
+    }
+    new {
+      id = "verdict.unreachable"
+      kind = "verdict"
+      group = "判定"
+      name = s.text("到達できない", "unreachable")
+      definition = s.text(
+        "検査した範囲では、reachable の条件を満たす状態に到達できないこと。範囲が有界か完全かを併せて示す。",
+        "Within the checked range no state satisfying a reachable check's condition is reachable; the range is stated as bounded or complete.",
+      )
+    }
+    new {
+      id = "compare.matched"
+      kind = "result"
+      group = "比較"
+      name = s.text("一致", "matched")
+      definition = s.text(
+        "実装や engine の観測が、基準（oracle やモデル）の答えと同じだったこと。",
+        "An observation of an implementation or engine equals the reference answer of an oracle or model.",
+      )
+      code { s.code(roracle, "Matched"); s.code(ralloy, "Matched") }
+    }
+    new {
+      id = "compare.mismatch"
+      kind = "result"
+      group = "比較"
+      name = s.text("不一致", "mismatch")
+      definition = s.text(
+        "観測は正しく取れたうえで、基準の答えと異なったこと。",
+        "The observation was obtained correctly and differs from the reference answer.",
+      )
+      code { s.code(roracle, "Mismatch"); s.code(ralloy, "Mismatch") }
+    }
+    new {
+      id = "compare.invalid"
+      kind = "result"
+      group = "比較"
+      name = s.text("無効", "invalid")
+      definition = s.text(
+        "入力や観測が契約を満たさず、比較そのものが成立しなかったこと。不一致とは区別する。",
+        "An input or observation breaks its contract, so no comparison took place. It is distinct from a mismatch.",
+      )
+      code { s.code(roracle, "Invalid"); s.code(ralloy, "Invalid") }
+    }
+    new {
+      id = "compare.oracle"
+      kind = "concept"
+      group = "比較"
+      name = s.text("oracle", "oracle")
+      definition = s.text(
+        "比較の基準にする、別の道具（Alloy・TLC・Z3 など）の答え。記録して再生し、記録時の版と入力の digest を残す。",
+        "The reference answer from another tool such as Alloy, TLC or Z3, recorded and replayed with the tool version and input digests.",
+      )
+      code { s.code(roracle, "Status") }
+    }
+    new {
+      id = "model.configuration"
+      kind = "concept"
+      group = "モデル"
+      name = s.text("設定", "configuration")
+      definition = s.text(
+        "状態とともに変わらない関係（rmodel の rel）。solver はすべての候補を考え、明示状態の探索は初期状態で列挙する。",
+        "Relations that do not change with the state (rel in rmodel). A solver considers every candidate; the explicit search enumerates them in the initial states.",
+      )
+      code { s.code(rmodel, "Relation") }
+    }
+    new {
+      id = "model.state"
+      kind = "concept"
+      group = "モデル"
+      name = s.text("状態", "state")
+      definition = s.text(
+        "action によって変わる関係（rmodel の var、Alloy の var field）の、ある時点の値。",
+        "The value at one point in time of the relations actions change (var in rmodel, var fields in Alloy).",
+      )
+      code { s.code(rmodel, "var") }
+    }
+    new {
+      id = "model.action"
+      kind = "concept"
+      group = "モデル"
+      name = s.text("action", "action")
+      definition = s.text(
+        "状態を変える遷移。条件と代入を持ち、代入しない状態は変わらない（暗黙の frame）。",
+        "A transition that changes the state, with guards and assignments; state it does not assign is unchanged (the implicit frame).",
+      )
+      code { s.code(rmodel, "Action") }
+    }
+    new {
+      id = "model.trace"
+      kind = "concept"
+      group = "モデル"
+      name = s.text("trace", "trace")
+      definition = s.text(
+        "初期状態から始まる状態の列。有界な検査では、最後の状態から戻る位置を持つ lasso として表す。",
+        "A sequence of states from an initial one. Bounded checks represent it as a lasso whose last state goes back to an earlier position.",
+      )
+      aliases { "lasso" }
+      code { s.code(ralloy, "trace"); s.code(ralloy, "back") }
+    }
+    new {
+      id = "model.witness"
+      kind = "concept"
+      group = "モデル"
+      name = s.text("witness", "witness")
+      definition = s.text(
+        "判定を裏付ける具体的な実例・反例・trace。engine とは独立した評価器で検査し直せるもの。",
+        "A concrete instance, counterexample or trace backing a verdict, which an evaluator independent of the engine can check again.",
+      )
+      code { s.code(ralloy, "check_instance") }
+    }
+    new {
+      id = "model.scope"
+      kind = "concept"
+      group = "モデル"
+      name = s.text("scope", "scope")
+      definition = s.text(
+        "検査する atom の数・整数の bit 幅・steps などの範囲。判定はすべてこの範囲についてのもの。",
+        "The range checked: atom counts, integer bit width, steps. Every verdict is about this range.",
+      )
+      code { s.code(ralloy, "Scope"); s.code(rmodel, "Scope") }
+    }
+  }
+}

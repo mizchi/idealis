@@ -1,0 +1,126 @@
+// The domain of the rmodel corpus (plans 0091, 0092): its vocabulary bound
+// to the model declarations, and its rules grounded by claims. The claims
+// replace expected.json with the same verdicts.
+import "../../spec/Schema.pkl" as s
+
+local mutex = "fixtures/rmodel/mutex.model"
+local declared = "fixtures/rmodel/declared.model"
+local permissions = "fixtures/rmodel/permissions.model"
+local permissionsOpen = "fixtures/rmodel/permissions-open.model"
+local sessions = "fixtures/rmodel/sessions.model"
+
+local function term(termId: String, termKind: s.Kind, termGroup: String, ja: String, en: String, jaDefinition: String, enDefinition: String, refs: Listing<s.ModelRef>): s.Term = new {
+  id = termId
+  kind = termKind
+  group = termGroup
+  name = s.text(ja, en)
+  definition = s.text(jaDefinition, enDefinition)
+  model = refs
+}
+
+spec: s.Spec = new {
+  id = "rmodel-corpus"
+  name = s.text("rmodel の corpus の語彙と rule", "Vocabulary and rules of the rmodel corpus")
+  groups { "もの"; "設定"; "状態"; "操作" }
+  terms {
+    term("proc", "entity", "もの", "プロセス", "process", "ロックを取り合う実行の単位。", "A unit of execution competing for locks.", new Listing { s.model(mutex, "Proc"); s.model(declared, "Proc") })
+    term("lock", "entity", "もの", "ロック", "lock", "同時に 1 つのプロセスだけが持てる資源。", "A resource at most one process holds at a time.", new Listing { s.model(mutex, "Lock"); s.model(declared, "Lock") })
+    term("user", "entity", "もの", "利用者", "user", "文書を開き、ログインする人。", "A person who opens documents and logs in.", new Listing { s.model(permissions, "User"); s.model(permissionsOpen, "User"); s.model(sessions, "User") })
+    term("role", "entity", "もの", "ロール", "role", "利用者に付与され、読める文書を決める権限のまとまり。", "A bundle of permissions granted to users that decides which documents they can read.", new Listing { s.model(permissions, "Role"); s.model(permissionsOpen, "Role") })
+    term("doc", "entity", "もの", "文書", "document", "利用者が開く対象。", "What a user opens.", new Listing { s.model(permissions, "Doc"); s.model(permissionsOpen, "Doc") })
+    term("grants", "relation", "設定", "付与", "grant", "利用者にどのロールを与えたか。運用中は変わらない。", "Which roles each user was given. It does not change while the system runs.", new Listing { s.model(permissions, "grants"); s.model(permissionsOpen, "grants") })
+    term("reads", "relation", "設定", "閲覧権限", "read permission", "ロールが読める文書。", "The documents a role can read.", new Listing { s.model(permissions, "reads"); s.model(permissionsOpen, "reads") })
+    term("secret", "relation", "設定", "機密文書", "secret document", "許可を受けた利用者だけが開いてよい文書。", "A document only cleared users may open.", new Listing { s.model(permissions, "secret"); s.model(permissionsOpen, "secret") })
+    term("cleared", "relation", "設定", "許可を受けた利用者", "cleared user", "機密文書を開いてよいと認められた利用者。", "A user allowed to open secret documents.", new Listing { s.model(permissions, "cleared"); s.model(permissionsOpen, "cleared") })
+    term("admins", "relation", "設定", "管理者", "administrator", "システムをロックできる利用者。", "A user who may lock the system.", new Listing { s.model(sessions, "admins") })
+    term("holder", "state", "状態", "保持者", "holder", "いまロックを持っているプロセス。", "The process currently holding a lock.", new Listing { s.model(mutex, "holder"); s.model(declared, "holder") })
+    term("waiting", "state", "状態", "待機中のプロセス", "waiting process", "次にロックを待っているプロセス。常にちょうど 1 つ。", "The process waiting for a lock next; always exactly one.", new Listing { s.model(declared, "waiting") })
+    term("open", "state", "状態", "開いている文書", "open document", "利用者がいま開いている文書。", "The documents a user currently has open.", new Listing { s.model(permissions, "open"); s.model(permissionsOpen, "open") })
+    term("active", "state", "状態", "ログイン中の利用者", "active user", "いまログインしている利用者。", "The users currently logged in.", new Listing { s.model(sessions, "active") })
+    term("locked", "state", "状態", "ロックした利用者", "locking user", "システムをロックしている利用者。いないこともある。", "The user who has locked the system, if any.", new Listing { s.model(sessions, "locked") })
+    term("acquire", "action", "操作", "取得", "acquire", "空いているロックをプロセスが取る。", "A process takes a free lock.", new Listing { s.model(mutex, "acquire") })
+    term("release", "action", "操作", "解放", "release", "ロックを持つプロセスがそれを手放す。", "The process holding a lock gives it up.", new Listing { s.model(mutex, "release") })
+    term("grab", "action", "操作", "奪取の試み", "grab", "条件なしにロックを取ろうとする。宣言の多重度だけが、2 つ目の保持者を止める。", "Try to take a lock with no guard; only the declared multiplicity stops a second holder.", new Listing { s.model(declared, "grab") })
+    term("wait", "action", "操作", "待機", "wait", "待機中のプロセスを入れ替える。", "Replace the waiting process.", new Listing { s.model(declared, "wait") })
+    term("read", "action", "操作", "閲覧", "read", "付与されたロールが読める文書を、利用者が開く。", "A user opens a document a granted role can read.", new Listing { s.model(permissions, "read"); s.model(permissionsOpen, "read") })
+    term("close", "action", "操作", "閉じる", "close", "利用者が開いている文書を閉じる。", "A user closes an open document.", new Listing { s.model(permissions, "close"); s.model(permissionsOpen, "close") })
+    term("login", "action", "操作", "ログイン", "log in", "定員に空きがあるとき、利用者がログインする。", "A user logs in while there is room.", new Listing { s.model(sessions, "login") })
+    term("logout", "action", "操作", "ログアウト", "log out", "ログイン中の利用者がログアウトする。", "An active user logs out.", new Listing { s.model(sessions, "logout") })
+    term("lock-system", "action", "操作", "システムのロック", "lock the system", "ログイン中の管理者が、誰もロックしていないシステムをロックする。", "An active administrator locks the system when nobody has.", new Listing { s.model(sessions, "lock") })
+    term("unlock-system", "action", "操作", "ロックの解除", "unlock the system", "ロックしている利用者がロックを外す。", "The locking user removes the lock.", new Listing { s.model(sessions, "unlock") })
+  }
+  rules {
+    new {
+      id = "MUTEX-ONE-HOLDER"
+      text = s.text("1 つのロックを同時に持つプロセスは高々 1 つ。", "At most one process holds a lock at a time.")
+      terms { "lock"; "proc"; "holder" }
+      claims { s.claim(mutex, "OneHolder", "holds"); s.claim(declared, "OneHolder", "holds") }
+    }
+    new {
+      id = "MUTEX-USED"
+      text = s.text("ロックは実際に取得され、すべてのロックが同時に持たれることもある。", "Locks are actually acquired, and all of them can be held at once.")
+      terms { "lock"; "acquire"; "holder" }
+      claims { s.claim(mutex, "NeverHeld", "violated"); s.claim(mutex, "Handover", "reachable"); s.claim(declared, "BothHeld", "reachable") }
+    }
+    new {
+      id = "MUTEX-SEVERAL-LOCKS"
+      text = s.text("1 つのプロセスが複数のロックを同時に持てる。", "One process can hold several locks at once.")
+      terms { "proc"; "lock"; "holder" }
+      claims { s.claim(mutex, "TwoLocksOneProc", "reachable") }
+    }
+    new {
+      id = "WAIT-EXACTLY-ONE"
+      text = s.text("待機中のプロセスは常にちょうど 1 つ。", "There is always exactly one waiting process.")
+      terms { "waiting"; "wait" }
+      claims { s.claim(declared, "OneWaiting", "holds") }
+    }
+    new {
+      id = "PERM-NO-LEAK"
+      text = s.text("付与の方針の下では、機密文書を開いている利用者は、許可を受けた利用者だけ。", "Under the grant policy, only cleared users have secret documents open.")
+      terms { "secret"; "cleared"; "open"; "grants" }
+      claims { s.claim(permissions, "NoLeak", "holds"); s.claim(permissions, "UnclearedSecret", "unreachable") }
+    }
+    new {
+      id = "PERM-POLICY-NEEDED"
+      text = s.text("付与の方針がなければ、許可を受けていない利用者が機密文書を開けてしまう。", "Without the grant policy, a user who is not cleared can open a secret document.")
+      terms { "secret"; "cleared"; "grants" }
+      claims { s.claim(permissionsOpen, "NoLeak", "violated"); s.claim(permissionsOpen, "UnclearedSecret", "reachable") }
+    }
+    new {
+      id = "PERM-ONLY-GRANTED"
+      text = s.text("利用者が開いている文書は、付与されたロールが読める文書だけ。", "A user has open only documents a granted role can read.")
+      terms { "open"; "grants"; "reads" }
+      claims { s.claim(permissions, "OnlyGranted", "holds"); s.claim(permissionsOpen, "OnlyGranted", "holds") }
+    }
+    new {
+      id = "PERM-SECRET-USABLE"
+      text = s.text("付与の方針があっても、機密文書を開ける場合がある。", "Even under the grant policy, a secret document can be opened.")
+      terms { "secret"; "read" }
+      claims { s.claim(permissions, "SecretRead", "reachable"); s.claim(permissionsOpen, "SecretRead", "reachable") }
+    }
+    new {
+      id = "SESS-CAPACITY"
+      text = s.text("同時にログインしている利用者は 2 人まで。", "At most two users are logged in at once.")
+      terms { "active"; "login" }
+      claims { s.claim(sessions, "Capacity", "holds"); s.claim(sessions, "ThreeActive", "unreachable") }
+    }
+    new {
+      id = "SESS-FULL-AND-LOCKED"
+      text = s.text("定員いっぱいで、かつロックされた状態になりうる。", "The system can be full and locked at the same time.")
+      terms { "active"; "locked" }
+      claims { s.claim(sessions, "Full", "reachable") }
+    }
+    new {
+      id = "SESS-LOCK-BY-ADMIN"
+      text = s.text("システムをロックしているのは管理者だけ。", "Only an administrator has the system locked.")
+      terms { "locked"; "admins"; "lock-system" }
+      claims { s.claim(sessions, "LockedByAdmin", "holds") }
+    }
+    new {
+      id = "SESS-LOCK-OUTLIVES-LOGOUT"
+      text = s.text("ロックした利用者がログアウトしても、ロックは残る。", "The lock remains after the locking user logs out.")
+      terms { "locked"; "logout"; "active" }
+      claims { s.claim(sessions, "LockedIsActive", "violated") }
+    }
+  }
+}

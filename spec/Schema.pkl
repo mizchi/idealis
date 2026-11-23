@@ -1,0 +1,76 @@
+/// Ubiquitous language and rules linked to models and code (plan 0092).
+///
+/// A term names one meaning, the words allowed and avoided for it, and the
+/// model declarations and code symbols that denote it. A rule states a
+/// requirement in prose and is grounded by claims about model checks.
+module idealis.spec.Schema
+
+typealias Id = String(matches(Regex(#"^[a-z][a-z0-9-]*(\.[a-z0-9-]+)*$"#)))
+typealias RuleId = String(matches(Regex(#"^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*$"#)))
+typealias Kind = "entity" | "relation" | "state" | "action" | "check" | "verdict" | "result" | "concept"
+typealias Expectation = "holds" | "violated" | "reachable" | "unreachable"
+
+class Text {
+  ja: String(!isEmpty)
+  en: String(!isEmpty)
+}
+
+/// A declaration or check name in a `.model` file.
+class ModelRef {
+  path: String(!isEmpty)
+  name: String(!isEmpty)
+}
+
+/// An identifier that occurs as a word in a source file.
+class CodeRef {
+  path: String(!isEmpty)
+  symbol: String(!isEmpty)
+}
+
+class Term {
+  id: Id
+  kind: Kind
+  /// The heading of the glossary section the term is rendered in.
+  group: String(!isEmpty)
+  name: Text
+  definition: Text
+  /// Other words that mean exactly this term.
+  aliases: Listing<String> = new {}
+  /// Words that must not be used for this term.
+  avoid: Listing<String> = new {}
+  model: Listing<ModelRef> = new {}
+  code: Listing<CodeRef> = new {}
+}
+
+class Claim {
+  model: String(!isEmpty)
+  check: String(!isEmpty)
+  expect: Expectation
+}
+
+class Rule {
+  id: RuleId
+  text: Text
+  terms: Listing<Id>(!isEmpty)
+  claims: Listing<Claim> = new {}
+  /// Why a rule has no claim; a rule needs claims or this reason.
+  unformalized: String? = null
+}
+
+class Spec {
+  id: Id
+  name: Text
+  /// Glossary groups in rendering order.
+  groups: Listing<String>(!isEmpty)
+  terms: Listing<Term>(!isEmpty)
+  rules: Listing<Rule> = new {}
+}
+
+function text(japanese: String, english: String): Text = new { ja = japanese; en = english }
+function model(file: String, declaration: String): ModelRef = new { path = file; name = declaration }
+function code(file: String, identifier: String): CodeRef = new { path = file; symbol = identifier }
+function claim(file: String, name: String, expectation: Expectation): Claim = new {
+  model = file
+  check = name
+  expect = expectation
+}
