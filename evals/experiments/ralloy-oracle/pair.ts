@@ -17,6 +17,8 @@ const thresholds: Record<string, (name: string) => number> = {
   "0080a-ralloy-hierarchy-indices": () => 1.1,
   // evals/plans/0081-ralloy-parameterized-predicates.md
   "0081-ralloy-parameterized-predicates": () => 1.1,
+  // evals/plans/0082-ralloy-integers.md
+  "0082-ralloy-integers": () => 1.1,
 };
 const required = thresholds[plan];
 assert.ok(required, plan);
