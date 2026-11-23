@@ -1,0 +1,157 @@
+{
+  "version": 1,
+  "group": "integers",
+  "reference": "alloy-6.2.0",
+  "implementations": [
+    "ralloy"
+  ],
+  "status": "error",
+  "cases": [
+    {
+      "case": {
+        "id": "arithmetic",
+        "input": {
+          "source": "sig A {}\nPlus: run { #A = plus[1, 1] } for 3\nMinus: run { #A = minus[3, 1] and some A } for 3\nMul: run { #A = mul[2, 2] } for 4\nNeg: run { negate[#A] = -2 } for 3\nDiv: run { div[#A, 2] = 1 and #A = 3 } for 3\nRem: run { rem[#A, 2] = 1 and #A > 1 } for 3\nImpossible: run { plus[#A, 1] = 0 } for 3\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "Div": true,
+          "Impossible": false,
+          "Minus": true,
+          "Mul": true,
+          "Neg": true,
+          "Plus": true,
+          "Rem": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "error",
+          "actual": {
+            "kind": "error",
+            "message": "Unsupported: token at byte 21"
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "cardinality",
+        "input": {
+          "source": "sig A {}\nsig B { f: set A }\nTwoA: run { #A = 2 } for 3\nNoFour: run { #A = 4 } for 3\nCompareCounts: run { #A > #B and some B } for 3\nFieldCount: run { some b: B | #b.f = 3 } for 3\nLessEq: run { #A <= 1 and #B >= 2 } for 3\nOtherLessEq: run { #A =< 0 and #B > 2 } for 3\nassert CountBound { #A <= 3 }\nCountHolds: check CountBound for 3\nassert CountPositive { #A > 0 }\nCountFails: check CountPositive for 3\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "CompareCounts": true,
+          "CountFails": true,
+          "CountHolds": false,
+          "FieldCount": true,
+          "LessEq": true,
+          "NoFour": false,
+          "OtherLessEq": true,
+          "TwoA": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "error",
+          "actual": {
+            "kind": "error",
+            "message": "Unsupported: token at byte 40"
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "int-fields",
+        "input": {
+          "source": "sig Account { balance: one Int }\nPositive: run { some Account and all a: Account | a.balance > 0 } for 2 but 3 Int\nSumFive: run { some disj a, b: Account | plus[a.balance, b.balance] = 5 } for 2 but 4 Int\nZero: run { some a: Account | a.balance = 0 } for 1 but 3 Int\nTooLarge: run { some a: Account | a.balance > 7 } for 1 but 4 Int\nassert Bounded { all a: Account | a.balance <= 7 }\nBoundedHolds: check Bounded for 2 but 4 Int\nDistinct: run { #Account = 2 and #Account.balance = 1 } for 2 but 3 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "BoundedHolds": false,
+          "Distinct": true,
+          "Positive": true,
+          "SumFive": true,
+          "TooLarge": false,
+          "Zero": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "error",
+          "actual": {
+            "kind": "error",
+            "message": "Unsupported: token at byte 93"
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "int-quantifiers",
+        "input": {
+          "source": "sig A {}\nIntSize: run { #Int = 16 } for 1\nSomeBetween: run { some i: Int | i > 2 and i < 4 } for 1 but 4 Int\nNoneBetween: run { some i: Int | i > 2 and i < 3 } for 1 but 4 Int\nTooNegative: run { some i: Int | i < -8 } for 1 but 4 Int\nCountMatches: run { some i: Int | i = #A and i > 1 } for 3\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "CountMatches": true,
+          "IntSize": true,
+          "NoneBetween": false,
+          "SomeBetween": true,
+          "TooNegative": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "error",
+          "actual": {
+            "kind": "error",
+            "message": "Unsupported: token at byte 24"
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "overflow",
+        "input": {
+          "source": "sig A {}\nOverflow: run { #A = 4 } for 4 but 3 Int\nWrap: run { plus[3, 1] = -4 } for 1 but 3 Int\nMax: run { plus[2, 1] = 3 } for 1 but 3 Int\nCountWrap: run { some A and #A < 0 } for 5 but 3 Int\nNegWrap: run { minus[-4, 1] = 3 } for 1 but 3 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "CountWrap": true,
+          "Max": true,
+          "NegWrap": true,
+          "Overflow": true,
+          "Wrap": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "error",
+          "actual": {
+            "kind": "error",
+            "message": "Unsupported: token at byte 25"
+          }
+        }
+      ]
+    }
+  ]
+}
