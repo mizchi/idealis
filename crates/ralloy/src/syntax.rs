@@ -130,4 +130,6 @@ pub(crate) struct Module {
     pub predicates: BTreeMap<String, Predicate>,
     pub assertions: BTreeMap<String, Expr>,
     pub commands: Vec<RawCommand>,
+    /// Signature indices, parents first; set once by `Model::parse`.
+    pub hierarchy: Vec<usize>,
 }

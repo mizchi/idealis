@@ -135,8 +135,9 @@ pub struct Model {
 }
 impl Model {
     pub fn parse(source: &str) -> Result<Self, Error> {
-        let syntax = parser::parse(source)?;
+        let mut syntax = parser::parse(source)?;
         let commands = check::validate(&syntax)?;
+        syntax.hierarchy = check::hierarchy(&syntax)?;
         Ok(Self { syntax, commands })
     }
     pub fn commands(&self) -> &[Command] {

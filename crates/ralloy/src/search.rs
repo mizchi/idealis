@@ -22,6 +22,7 @@ pub(crate) fn analyze(
         subset_order: Vec::new(),
         parents: Vec::new(),
         children: vec![Vec::new(); module.signatures.len()],
+        swaps: Vec::new(),
     };
     search.parents = module
         .signatures
@@ -39,9 +40,10 @@ pub(crate) fn analyze(
             search.children[*parent].push(child);
         }
     }
-    let order = crate::check::hierarchy(module).expect("validated hierarchy");
-    let (subsets, own): (Vec<usize>, Vec<usize>) = order
-        .into_iter()
+    let (subsets, own): (Vec<usize>, Vec<usize>) = module
+        .hierarchy
+        .iter()
+        .copied()
         .partition(|index| matches!(module.signatures[*index].parent, Some((Parent::In, _))));
     search.order = own;
     search.subset_order = subsets;
@@ -75,6 +77,9 @@ struct Search<'a> {
     /// computed once per analysis (plan 0080a).
     parents: Vec<Option<usize>>,
     children: Vec<Vec<usize>>,
+    /// Adjacent atoms that every signature treats alike, for symmetry
+    /// breaking in the current world (plan 0083).
+    swaps: Vec<(usize, usize)>,
 }
 struct Slot {
     field: usize,
@@ -242,6 +247,30 @@ impl Search<'_> {
                 });
             }
         }
+        // Formulas see atoms only through signatures and fields, so swapping
+        // two atoms of identical signature membership maps solutions to
+        // solutions. Fields of several columns would also permute their tuple
+        // spaces; their commands keep every candidate.
+        self.swaps.clear();
+        if world.spaces.iter().all(Option::is_none) {
+            let integers = if world.bitwidth == 0 {
+                0
+            } else {
+                1 << world.bitwidth
+            };
+            let membership = |atom: usize| -> Vec<bool> {
+                world
+                    .sets
+                    .values()
+                    .map(|set| set & (1 << atom) != 0)
+                    .collect()
+            };
+            for atom in integers..world.names.len().saturating_sub(1) {
+                if membership(atom) == membership(atom + 1) {
+                    self.swaps.push((atom, atom + 1));
+                }
+            }
+        }
         self.assign(&slots, 0, &mut world)
     }
     fn assign(&mut self, slots: &[Slot], index: usize, world: &mut World) -> Result<bool, ()> {
@@ -290,8 +319,46 @@ impl Search<'_> {
             }
         }
     }
+    /// Whether swapping some interchangeable pair gives a lexicographically
+    /// smaller assignment; the least member of every orbit is kept.
+    fn redundant(&mut self, world: &World) -> Result<bool, ()> {
+        let swap_bits = |row: u64, first: usize, second: usize| {
+            if (row >> first) & 1 == (row >> second) & 1 {
+                row
+            } else {
+                row ^ (1 << first | 1 << second)
+            }
+        };
+        for &(first, second) in &self.swaps {
+            self.budget.tick()?;
+            let mut order = std::cmp::Ordering::Equal;
+            'rows: for rows in &world.fields {
+                for (owner, row) in rows.iter().enumerate() {
+                    let source = if owner == first {
+                        second
+                    } else if owner == second {
+                        first
+                    } else {
+                        owner
+                    };
+                    let swapped = swap_bits(rows[source], first, second);
+                    order = swapped.cmp(row);
+                    if order.is_ne() {
+                        break 'rows;
+                    }
+                }
+            }
+            if order.is_lt() {
+                return Ok(true);
+            }
+        }
+        Ok(false)
+    }
     fn candidate(&mut self, world: &World) -> Result<bool, ()> {
         self.budget.tick()?;
+        if self.redundant(world)? {
+            return Ok(false);
+        }
         self.budget.stats.candidates += 1;
         let mut evaluator = Evaluator {
             module: self.module,

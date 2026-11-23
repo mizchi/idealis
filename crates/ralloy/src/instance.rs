@@ -72,8 +72,7 @@ fn evaluate(
         .collect();
     // Top-level signatures own the atoms; the others name atoms of their
     // parent (plan 0080).
-    let order = crate::check::hierarchy(module).map_err(|_| Failure::Protocol("hierarchy"))?;
-    for &index in &order {
+    for &index in &module.hierarchy {
         let signature = &module.signatures[index];
         let bound = &command.scope.signatures[index];
         budget.tick()?;
