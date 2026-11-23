@@ -5,8 +5,40 @@
   "implementations": [
     "ralloy"
   ],
-  "status": "error",
+  "status": "matched",
   "cases": [
+    {
+      "case": {
+        "id": "child-bounds",
+        "input": {
+          "source": "sig Person {}\nsig Student extends Person {}\nabstract sig Shape {}\nsig Circle, Square extends Shape {}\nTwoStudents: run { some disj a, b: Student | a in Student } for 3 but 1 Student, 0 Int\nOneStudent: run { some Student and some Person - Student } for 3 but 1 Student, 0 Int\nTwoCircles: run { some disj a, b: Circle | a in Circle } for 3 but 1 Circle, 0 Int\nSquaresFill: run { #Square = 2 and some Circle } for 3 but 1 Circle\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "OneStudent": true,
+          "SquaresFill": true,
+          "TwoCircles": false,
+          "TwoStudents": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "OneStudent": true,
+              "SquaresFill": true,
+              "TwoCircles": false,
+              "TwoStudents": false
+            }
+          }
+        }
+      ]
+    },
     {
       "case": {
         "id": "concrete-parent",
@@ -28,10 +60,17 @@
       "comparisons": [
         {
           "id": "ralloy",
-          "status": "error",
+          "status": "matched",
           "actual": {
-            "kind": "error",
-            "message": "Syntax: expected {, got extends at token 6"
+            "kind": "value",
+            "value": {
+              "AllStudents": true,
+              "ChildFillsParent": false,
+              "ExactChild": true,
+              "ExactParent": true,
+              "PlainPerson": true,
+              "StudentsHold": false
+            }
           }
         }
       ]
@@ -86,10 +125,16 @@
       "comparisons": [
         {
           "id": "ralloy",
-          "status": "error",
+          "status": "matched",
           "actual": {
-            "kind": "error",
-            "message": "Unsupported: paragraph abstract"
+            "kind": "value",
+            "value": {
+              "BulbsAndLamps": true,
+              "Enum": true,
+              "Merged": false,
+              "NoOther": false,
+              "TwoLights": true
+            }
           }
         }
       ]
@@ -115,10 +160,17 @@
       "comparisons": [
         {
           "id": "ralloy",
-          "status": "error",
+          "status": "matched",
           "actual": {
-            "kind": "error",
-            "message": "Unsupported: paragraph abstract"
+            "kind": "value",
+            "value": {
+              "ChildScope": false,
+              "DisjointHolds": false,
+              "EatsDogs": true,
+              "NoPlain": false,
+              "Partition": true,
+              "ThreeCats": false
+            }
           }
         }
       ]
@@ -142,10 +194,15 @@
       "comparisons": [
         {
           "id": "ralloy",
-          "status": "error",
+          "status": "matched",
           "actual": {
-            "kind": "error",
-            "message": "Unsupported: paragraph abstract"
+            "kind": "value",
+            "value": {
+              "AccountsFail": true,
+              "Consistent": true,
+              "OwnerHolds": false,
+              "StaffOwns": true
+            }
           }
         }
       ]
@@ -170,10 +227,16 @@
       "comparisons": [
         {
           "id": "ralloy",
-          "status": "error",
+          "status": "matched",
           "actual": {
-            "kind": "error",
-            "message": "Unsupported: paragraph abstract"
+            "kind": "value",
+            "value": {
+              "Bounded": false,
+              "ExactSquares": true,
+              "LayersHold": false,
+              "Levels": true,
+              "PolygonOnly": false
+            }
           }
         }
       ]
@@ -198,10 +261,16 @@
       "comparisons": [
         {
           "id": "ralloy",
-          "status": "error",
+          "status": "matched",
           "actual": {
-            "kind": "error",
-            "message": "Unsupported: paragraph {"
+            "kind": "value",
+            "value": {
+              "BoxesNeedItems": false,
+              "Chained": true,
+              "EmptyBox": false,
+              "NoLoopsHolds": false,
+              "SelfLoop": false
+            }
           }
         }
       ]
@@ -227,10 +296,17 @@
       "comparisons": [
         {
           "id": "ralloy",
-          "status": "error",
+          "status": "matched",
           "actual": {
-            "kind": "error",
-            "message": "Syntax: expected {, got in at token 10"
+            "kind": "value",
+            "value": {
+              "HeadAlone": true,
+              "HeadMarked": true,
+              "MarkedAll": true,
+              "MarkedHolds": false,
+              "NoHead": false,
+              "Overlap": true
+            }
           }
         }
       ]
