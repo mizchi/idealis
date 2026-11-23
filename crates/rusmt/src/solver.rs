@@ -1,6 +1,6 @@
 use crate::{
     Assumption, CacheOptions, CacheStats, CheckCache, Error, IncrementalCheck, Problem, Result,
-    Solution, cache, session::Session,
+    Solution, cache, session::Session, source::SourceHash,
 };
 use std::sync::Arc;
 
@@ -68,7 +68,7 @@ impl Solver {
         let result = cached_solve(
             cache,
             self.session.problem(),
-            cache::key(&self.session.source_digest(), assumptions),
+            cache::key(&self.session.source().digest(), assumptions),
             todo,
             max_work,
         )?;
@@ -77,8 +77,11 @@ impl Solver {
             stats: cache.stats(),
         })
     }
-    pub(super) fn snapshot(&self) -> (Arc<Problem>, sha2::Sha256) {
-        (self.session.problem().clone(), self.session.source_state())
+    pub(super) fn snapshot(&self) -> (Arc<Problem>, SourceHash) {
+        (
+            self.session.problem().clone(),
+            self.session.source().clone(),
+        )
     }
 }
 

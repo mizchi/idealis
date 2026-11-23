@@ -849,6 +849,46 @@ pub(super) fn render(node: &Node) -> String {
         ),
     }
 }
+/// Length of `render(node)` without building the string.
+pub(super) fn rendered_len(node: &Node) -> usize {
+    match node {
+        Node::Atom(value, true) => value.len() + 2,
+        Node::Atom(value, false) => value.len(),
+        Node::List(nodes) => {
+            2 + nodes.iter().map(rendered_len).sum::<usize>() + nodes.len().saturating_sub(1)
+        }
+    }
+}
+/// Feeds the bytes of `render(node)` to `hasher` without building the string.
+pub(super) fn feed(node: &Node, hasher: &mut sha2::Sha256) {
+    use sha2::Digest;
+    match node {
+        Node::Atom(value, true) => {
+            hasher.update(b"|");
+            hasher.update(value.as_bytes());
+            hasher.update(b"|");
+        }
+        Node::Atom(value, false) => hasher.update(value.as_bytes()),
+        Node::List(nodes) => {
+            hasher.update(b"(");
+            for (index, child) in nodes.iter().enumerate() {
+                if index > 0 {
+                    hasher.update(b" ");
+                }
+                feed(child, hasher);
+            }
+            hasher.update(b")");
+        }
+    }
+}
+/// Whether any atom of `node` names one of `names`; an over-approximation of
+/// the symbols the node refers to.
+pub(super) fn mentions(node: &Node, names: &Constants) -> bool {
+    match node {
+        Node::Atom(value, _) => names.contains_key(value),
+        Node::List(nodes) => nodes.iter().any(|child| mentions(child, names)),
+    }
+}
 /// Tokens the tokenizer produces for `node`, counting both parentheses of a list.
 pub(super) fn token_count(node: &Node) -> usize {
     match node {
@@ -867,7 +907,7 @@ pub(super) fn is_check(node: &Node) -> bool {
     matches!(node, Node::List(command) if matches!(command.first(), Some(Node::Atom(name,false)) if name == "check-sat"))
 }
 
-pub(super) type Snapshot = (Arc<Problem>, sha2::Sha256);
+pub(super) type Snapshot = (Arc<Problem>, crate::source::SourceHash);
 pub(super) fn script(source: &str) -> Result<Vec<(Snapshot, Vec<Assumption>)>> {
     let nodes = parse(source)?;
     let mut prefix = String::new();

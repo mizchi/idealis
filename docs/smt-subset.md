@@ -111,7 +111,7 @@ workは全checkで共有し、各結果の`stats.work`を差し引く。残り0�
 | 容量      | `max_entries`件。0なら書き込まない。満杯なら新しいentryを書かず、小さい上限ではkey順の末尾から落とす |
 | 検証      | entryごとのSHA-256と、問題の宣言に合うモデルの形を初回のlookupで検査する。不一致はprotocol error     |
 
-sourceのdigestはSessionがassertごとに増分で更新し、popではsnapshotと一緒に戻す。同じ正規化sourceなら、`Solver::parse`の空白・コメント・末尾の`check-sat`、assertで積んだcontext、Scriptの各checkの間でhitする。式の意味が同じでも、表記が違えば別のkeyになる。
+sourceのdigestは、assertごとに親へつないだリンクから、cacheのkeyが必要になった時に、計算済みの最も近い祖先から計算する。popではsnapshotと一緒に戻す。同じ正規化sourceなら、`Solver::parse`の空白・コメント・末尾の`check-sat`、assertで積んだcontext、Scriptの各checkの間でhitする。式の意味が同じでも、表記が違えば別のkeyになる。
 
 Scriptのwork予算は全checkで共有する。hitは予算を消費しないため、cacheなしの`solve`ではunknownになった後続checkが、cacheありでは解ける場合がある。これは今回実行した処理だけをworkに数える契約の結果で、hitしたcheckの探索費用を後から足さない。
 

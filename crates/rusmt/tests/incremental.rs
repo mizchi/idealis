@@ -80,6 +80,10 @@ const EXPRESSIONS: &[&str] = &[
     "(+ x 1)",
     "(and)",
     "(< x undeclared)",
+    // Quoted symbols and a let that shadows a later constant (plan 0077).
+    "(<= |x| |y|)",
+    "(= |z| 2)",
+    "(let ((y 1)) (<= x y))",
 ];
 
 #[test]
@@ -93,6 +97,7 @@ fn incremental_updates_match_full_reparse_on_generated_sequences() {
     };
     let mut compared = 0;
     let mut hits = 0;
+    let mut shared_keys = 0;
     let mut cache = CheckCache::default();
     for _ in 0..400 {
         let mut solver = Solver::parse(DECLARATIONS).unwrap();
@@ -138,6 +143,19 @@ fn incremental_updates_match_full_reparse_on_generated_sequences() {
                         build_digest: BUILD,
                         max_entries: 4096,
                     };
+                    // The incremental key must be the key of a full reparse.
+                    let mut fresh = CheckCache::default();
+                    let full = Solver::parse(&reference.source).unwrap();
+                    if let Ok(written) =
+                        full.check_incremental(&assumptions, budget, &mut fresh, options)
+                        && written.stats.writes == 1
+                    {
+                        let read = solver
+                            .check_incremental(&assumptions, budget, &mut fresh, options)
+                            .unwrap();
+                        assert_eq!(read.stats.hits, 1, "{label} key");
+                        shared_keys += 1;
+                    }
                     match solver.check_incremental(&assumptions, budget, &mut cache, options) {
                         Err(error) => assert_eq!(json!(error.to_string()), expected),
                         Ok(cached) if cached.stats.hits == 1 => {
@@ -168,6 +186,7 @@ fn incremental_updates_match_full_reparse_on_generated_sequences() {
     }
     assert!(compared > 1_000, "{compared}");
     assert!(hits > 200, "{hits}");
+    assert!(shared_keys > 500, "{shared_keys}");
 }
 
 #[test]
@@ -260,4 +279,37 @@ fn accumulated_source_limits_fail_at_the_same_assertion_as_a_reparse() {
     let deep = format!("{}true{}", "(not ".repeat(64), ")".repeat(64));
     let error = Solver::parse("").unwrap().assert(&deep).err().unwrap();
     assert_eq!(error.to_string(), "resource: nesting exceeds 64");
+}
+
+#[test]
+fn a_long_assertion_chain_hashes_and_drops_without_recursion() {
+    // Each "(assert true)" spends 4 tokens; stay below the 200,000 limit.
+    let mut solver = Solver::parse("(declare-const x Int)").unwrap();
+    let mut source = String::from("(declare-const x Int)");
+    for _ in 0..49_000 {
+        solver.assert("true").unwrap();
+        source.push_str("(assert true)");
+    }
+    let options = CacheOptions {
+        enabled: true,
+        build_digest: BUILD,
+        max_entries: 8,
+    };
+    let mut cache = CheckCache::default();
+    let written = Solver::parse(&source)
+        .unwrap()
+        .check_incremental(&[], 100_000, &mut cache, options)
+        .unwrap();
+    assert_eq!(written.stats.writes, 1);
+    let read = solver
+        .check_incremental(&[], 100_000, &mut cache, options)
+        .unwrap();
+    assert_eq!(read.stats.hits, 1);
+    // Dropping on a small stack must not recurse through every link.
+    std::thread::Builder::new()
+        .stack_size(256 * 1024)
+        .spawn(move || drop(solver))
+        .unwrap()
+        .join()
+        .unwrap();
 }
