@@ -46,6 +46,12 @@
 
 人工故障3件（writeの消失、開いた時のoptionの無視、古い状態のexport）を検出した。32変数のchainでは、storeのhitはNによらずnative 4.6 µs・Wasm 9.9 µsで、4096 entryのsnapshotを往復させる場合の約1/600だった。[評価0076](../../evals/iterations/0076-smt-cache-store.md)を参照。
 
+## 0077で変更した範囲
+
+- [x] 増分contextの長さ計算・source hash・`Problem`の構築を遅延させ、定数の束縛ではその名前を含むassertionだけを再コンパイルする。応答・work/stats・cacheのkeyは変えない。
+
+全再解析の参照実装と400系列で照合し、各checkで全再解析とkeyが一致することを検査した。人工故障3件を検出した。3dd74cb5bのnative/Wasmとの完全応答とZ3照合を、確認seedで記録した。`context-assert-256`は0.59倍、`context-constant-256`は0.47倍。cache benchの`prepared-4`は1組で1.127倍の後退として記録した。[評価0077](../../evals/iterations/0077-smt-lean-context.md)を参照。
+
 ## 非対応・対象外
 
 - [ ] scope内や後続コマンドでの宣言、global-declarationsとoption変更。
