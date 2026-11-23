@@ -31,6 +31,22 @@
       "source": "fixtures/quint-generated/SetFold.qnt",
       "sourceSha256": "f565a2f304287846bb6abcf5647f0c38c21e14cb415f4780462add1c250f4dbf",
       "irSha256": "0dbdf99cf1db79b3acd78ae67194c6d4b7a7ef7888dc8b1d8fd69207726c2c7d"
+    },
+    "Coverage": {
+      "source": "fixtures/quint-ir/Coverage.qnt",
+      "sourceSha256": "977fbd2ef4993eb097baea2e78911541adfb06e9552b3228944a3b4cccedf5f8",
+      "irSha256": "6e4ed368ee1267a66bff69b08aa74b3f9572bc6780c45d6258fe2310234a210b",
+      "simulator": {
+        "command": "quint run Coverage.qnt --invariant <name> --max-steps 10 --max-samples 50",
+        "all_facts": "no violation",
+        "broken_index": "violation"
+      }
     }
+  },
+  "tlc": {
+    "file": "fixtures/quint-ir/tlc-rquint.json",
+    "command": "evals/experiments/quint-ir/tlc.sh <java> <tla2tools.jar> <output>",
+    "jar": ".artifacts/0068-tlc-1.8.0.jar",
+    "java": "Temurin JRE 21.0.13+9"
   }
 }

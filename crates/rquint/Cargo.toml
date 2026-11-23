@@ -1,0 +1,19 @@
+[package]
+name = "rquint"
+version = "0.1.0-alpha.0"
+edition = "2024"
+description = "Quint JSON IR to standard TLA+ for rtlc, without Apalache"
+repository = "https://github.com/mizchi/idealis"
+license = "MIT"
+readme = "README.md"
+include = ["src/**", "tests/**", "Cargo.toml", "Cargo.lock", "README.md", "SUPPORT.md", "LICENSE"]
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+serde_json = "1.0"
+
+[dev-dependencies]
+sha2 = "0.10.9"
+idealis-core = { path = "../idealis-core" }

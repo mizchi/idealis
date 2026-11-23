@@ -266,6 +266,15 @@ ralloy-build: oracle-wire-build
   cargo build --release --locked --manifest-path crates/ralloy/Cargo.toml
   cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/ralloy/Cargo.toml
 
+rquint-tlc output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" jar=".artifacts/0068-tlc-1.8.0.jar":
+  evals/experiments/quint-ir/tlc.sh {{quote(absolute_path(java))}} {{quote(absolute_path(jar))}} {{quote(absolute_path(output))}}
+
+rquint-test:
+  cargo fmt --manifest-path crates/rquint/Cargo.toml -- --check
+  cargo clippy --all-targets --locked --manifest-path crates/rquint/Cargo.toml -- -D warnings
+  cargo test --all-targets --locked --manifest-path crates/rquint/Cargo.toml
+  cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/rquint/Cargo.toml
+
 ralloy-test:
   cargo fmt --manifest-path crates/ralloy/Cargo.toml -- --check
   cargo clippy --all-targets --locked --manifest-path crates/ralloy/Cargo.toml -- -D warnings

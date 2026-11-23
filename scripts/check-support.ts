@@ -428,6 +428,15 @@ const scopes: readonly CrateScope[] = [
     ],
   },
   {
+    name: "rquint",
+    evidence: [
+      {
+        path: "src/lib.rs",
+        topic: "受理するQuint IRのopcode・宣言、TLA+への写し方、拒否する構文",
+      },
+    ],
+  },
+  {
     name: "idealis-cli",
     evidence: [
       {
