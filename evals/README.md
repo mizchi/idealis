@@ -2,6 +2,10 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0079: ralloyのn項関係](iterations/0079-ralloy-nary-relations.md)は、4項までの関係と矢印の多重度を加え、Alloyとの差分で型の交わらないjoinの非互換を見つけて直した。`nary`は30 commandのうち29でAlloyと一致し、1件は予算切れとして残した。速度は二項以下で5〜13%遅くなり、`hold`として記録した。
+
+[0078: ralloyとAlloyの差分テスト](iterations/0078-ralloy-alloy-oracle.md)は、公式Alloy 6.2.0の答えをroracleの`CheckReport`として保存し、`cargo test`で再生する。今の対応範囲の13モデル・50 commandがすべて一致し、評価器の人工故障6件を検出した。
+
 [0077: 増分contextの固定費の削減](iterations/0077-smt-lean-context.md)は、profileに合わせて、文字列を作らない長さの計算、遅延したsource hash、遅延したProblem、名前を含む式だけの再コンパイルを入れた。`context-assert-256`は0.59倍、`context-constant-256`は0.47倍。単発の小さいparseの後退も戻った。旧版との完全応答一致とZ3照合を記録し、cache benchの`prepared-4`の1組の後退も残した。
 
 [0075/0076: check cacheの往復費用とengine側のstore](iterations/0076-smt-cache-store.md)は、JSON/Wasm protocolでsnapshotを往復させる費用を測り、N=512でhitがcacheなしのcheckの21〜28倍になることを確かめた。engine側のstoreを追加し、hitはNによらずnative 4.6 µs・Wasm 9.9 µsになった。snapshotを往復させた場合との2400要求の完全応答一致も記録した。

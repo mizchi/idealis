@@ -5,6 +5,8 @@
 ## 対応済み
 
 - [x] トップレベルsig、one/lone/some、名前が一意な二項fieldとmultiplicity。
+- [x] 3項・4項のfield（`A -> B`、`A -> B -> C`）と、1本の矢印の多重度`A m -> n B`。ownerのatomごとのtuple空間は64以下（0079）。
+- [x] 4項までの関係の和・差・交差・積・join・domain/range制限・比較。型の交わらないjoinはAlloyと同じく空集合。
 - [x] fact、引数なしpred、名前付きassert、run/check、全体scopeと型ごとの上限・exactly。
 - [x] 関係の和・差・交差・積・join・転置・推移閉包・反射推移閉包・domain/range制限。
 - [x] 等価・包含・論理結合、単一atomを束縛するall/no/some/one/loneとdisj。
@@ -24,7 +26,7 @@
 ## 非対応・対象外
 
 - [ ] sigの継承・subset、一括宣言、signature fact、moduleの読み込み。
-- [ ] 引数付きpred/function、setを束縛する高階量化、3項以上の関係。
+- [ ] 引数付きpred/function、setを束縛する高階量化、5項以上の関係、2本以上の矢印の多重度。
 - [ ] 整数演算・cardinality、時間・varを使うAlloy 6の振る舞い。
 - [ ] Alloy全体の構文・型検査、SAT符号化、節学習、一般的な対称性除去。
 - [ ] 固定instanceの一致だけから未観測の実装履歴を保証すること。
