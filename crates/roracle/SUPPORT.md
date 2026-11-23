@@ -6,6 +6,7 @@
 - [x] genericな入力・観測、PartialEqによる等値と有限許容値集合、serdeのreport保存。
 - [x] matched/mismatch/invalid/unknown/errorの区別、空suite・空許容値・重複IDの非成功扱い。
 - [x] 比較の集約（重い順にerror・mismatch・unknown・invalid・matched、空はinvalid）を`spec/models/roracle-report.model`に記述し、比較0〜3件の156通りで実装がモデルの事実を満たすことをテストで照合する（0093）。
+- [x] 観測の組から比較の結果を出す`compare`を`spec/models/roracle-compare.model`に記述し、値{0, 1}の上の観測9種の組81通りで照合する（0094）。
 - [x] 保存入力と保存referenceを使い、reference callbackを呼ばないreplay。ID・件数・保存判定の整合性検査。
 - [x] referenceと速度baselineの分離、preflight後のwarmup・全測定呼び出しの照合と失敗時の全速度比無効化。
 - [x] 固定sample/iteration、予定呼び出し数予算、開始順回転と逆順、raw ns・実行順・mean/median/min/max・median比の保存。

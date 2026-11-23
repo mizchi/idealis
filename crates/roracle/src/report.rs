@@ -225,4 +225,111 @@ mod tests {
         }
         assert_eq!(checked, 156);
     }
+
+    /// Every pair of nine observations over the values {0, 1}, compared by
+    /// `compare`, is an instance of spec/models/roracle-compare.model that
+    /// satisfies its facts (plan 0094).
+    #[test]
+    fn compare_conforms_to_the_compare_model() {
+        use super::{Observation, compare};
+        let root = std::path::Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
+        let model = rmodel::parse(
+            &std::fs::read_to_string(root.join("spec/models/roracle-compare.model")).unwrap(),
+        )
+        .unwrap();
+        let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
+        let observations: Vec<Observation<u8>> = vec![
+            Observation::value(0),
+            Observation::value(1),
+            Observation::Allowed { values: vec![] },
+            Observation::Allowed { values: vec![0] },
+            Observation::Allowed { values: vec![1] },
+            Observation::Allowed { values: vec![0, 1] },
+            Observation::Unknown {
+                reason: "budget".into(),
+            },
+            Observation::Invalid {
+                reason: "contract".into(),
+            },
+            Observation::Error {
+                message: "crash".into(),
+            },
+        ];
+        let value = |value: &u8| format!("V{value}");
+        // (kind, value, allowed) of an observation as model atoms.
+        let parts = |observation: &Observation<u8>| -> (&'static str, Vec<String>, Vec<String>) {
+            match observation {
+                Observation::Value { value: v } => ("ValueOf", vec![value(v)], vec![]),
+                Observation::Allowed { values } => {
+                    ("AllowedSet", vec![], values.iter().map(value).collect())
+                }
+                Observation::Unknown { .. } => ("UnknownObservation", vec![], vec![]),
+                Observation::Invalid { .. } => ("InvalidObservation", vec![], vec![]),
+                Observation::Error { .. } => ("ErrorObservation", vec![], vec![]),
+            }
+        };
+        let outcomes = ["Matched", "Mismatch", "Invalid", "Unknown", "Error"];
+        let kinds = [
+            "ValueOf",
+            "AllowedSet",
+            "UnknownObservation",
+            "InvalidObservation",
+            "ErrorObservation",
+        ];
+        let mut checked = 0;
+        for reference in &observations {
+            for actual in &observations {
+                let outcome = format!("{:?}", compare(reference, actual));
+                let mut signatures = BTreeMap::from([
+                    ("World".to_owned(), vec!["World".to_owned()]),
+                    ("s_Value".to_owned(), vec!["V0".to_owned(), "V1".to_owned()]),
+                    ("s_Outcome".to_owned(), outcomes.map(String::from).to_vec()),
+                    ("s_Observed".to_owned(), kinds.map(String::from).to_vec()),
+                ]);
+                for member in outcomes.iter().chain(&kinds) {
+                    signatures.insert(format!("e_{member}"), vec![member.to_string()]);
+                }
+                let world = |atoms: Vec<String>| -> Vec<Vec<String>> {
+                    atoms
+                        .into_iter()
+                        .map(|atom| vec!["World".to_owned(), atom])
+                        .collect()
+                };
+                let (reference_kind, reference_value, reference_allowed) = parts(reference);
+                let (actual_kind, actual_value, actual_allowed) = parts(actual);
+                let instance = ralloy::Instance {
+                    signatures,
+                    fields: BTreeMap::from([
+                        (
+                            "r_referenceKind".to_owned(),
+                            world(vec![reference_kind.to_owned()]),
+                        ),
+                        ("r_referenceValue".to_owned(), world(reference_value)),
+                        ("r_referenceAllowed".to_owned(), world(reference_allowed)),
+                        (
+                            "r_actualKind".to_owned(),
+                            world(vec![actual_kind.to_owned()]),
+                        ),
+                        ("r_actualValue".to_owned(), world(actual_value)),
+                        ("r_actualAllowed".to_owned(), world(actual_allowed)),
+                        ("r_outcome".to_owned(), world(vec![outcome.clone()])),
+                    ]),
+                    trace: vec![BTreeMap::new()],
+                    back: Some(0),
+                };
+                let result = alloy.check_instance(0, &instance, 10_000_000).unwrap();
+                assert!(
+                    !matches!(
+                        result.status,
+                        ralloy::CheckStatus::Invalid | ralloy::CheckStatus::Unknown
+                    ),
+                    "{reference:?} vs {actual:?} -> {outcome}: {:?} {:?}",
+                    result.status,
+                    result.reason
+                );
+                checked += 1;
+            }
+        }
+        assert_eq!(checked, 81);
+    }
 }

@@ -34,6 +34,8 @@
 
 - id: `search.unknown`
 - モデル: `spec/models/roracle-report.model` の `Unknown`
+- モデル: `spec/models/roracle-compare.model` の `Unknown`
+- モデル: `spec/models/roracle-compare.model` の `UnknownObservation`
 - コード: `crates/ralloy/src/lib.rs` の `Unknown`
 - コード: `crates/roracle/src/report.rs` の `Unknown`
 
@@ -93,6 +95,7 @@ reachable の条件を満たす状態に、初期状態から到達できるこ�
 
 - id: `compare.matched`
 - モデル: `spec/models/roracle-report.model` の `Matched`
+- モデル: `spec/models/roracle-compare.model` の `Matched`
 - コード: `crates/roracle/src/report.rs` の `Matched`
 - コード: `crates/ralloy/src/lib.rs` の `Matched`
 
@@ -102,6 +105,7 @@ reachable の条件を満たす状態に、初期状態から到達できるこ�
 
 - id: `compare.mismatch`
 - モデル: `spec/models/roracle-report.model` の `Mismatch`
+- モデル: `spec/models/roracle-compare.model` の `Mismatch`
 - コード: `crates/roracle/src/report.rs` の `Mismatch`
 - コード: `crates/ralloy/src/lib.rs` の `Mismatch`
 
@@ -111,6 +115,8 @@ reachable の条件を満たす状態に、初期状態から到達できるこ�
 
 - id: `compare.invalid`
 - モデル: `spec/models/roracle-report.model` の `Invalid`
+- モデル: `spec/models/roracle-compare.model` の `Invalid`
+- モデル: `spec/models/roracle-compare.model` の `InvalidObservation`
 - コード: `crates/roracle/src/report.rs` の `Invalid`
 - コード: `crates/ralloy/src/lib.rs` の `Invalid`
 
@@ -120,6 +126,8 @@ reachable の条件を満たす状態に、初期状態から到達できるこ�
 
 - id: `compare.error`
 - モデル: `spec/models/roracle-report.model` の `Error`
+- モデル: `spec/models/roracle-compare.model` の `Error`
+- モデル: `spec/models/roracle-compare.model` の `ErrorObservation`
 - コード: `crates/roracle/src/report.rs` の `Error`
 
 ### 比較の結果（comparison status）
@@ -129,7 +137,54 @@ reachable の条件を満たす状態に、初期状態から到達できるこ�
 - id: `compare.status`
 - モデル: `spec/models/roracle-report.model` の `Status`
 - モデル: `spec/models/roracle-report.model` の `status`
+- モデル: `spec/models/roracle-compare.model` の `Outcome`
+- モデル: `spec/models/roracle-compare.model` の `outcome`
 - コード: `crates/roracle/src/report.rs` の `Status`
+
+### 観測（observation）
+
+実装や oracle から得た 1 回分の答え。値・許容値の集合・未確定・無効・エラーのいずれか。
+
+- id: `compare.observation`
+- モデル: `spec/models/roracle-compare.model` の `Observed`
+- コード: `crates/roracle/src/report.rs` の `Observation`
+
+### 値（value）
+
+正しく得られた観測の中身。基準の値とは等しさで比べる。
+
+- id: `compare.value`
+- モデル: `spec/models/roracle-compare.model` の `ValueOf`
+- モデル: `spec/models/roracle-compare.model` の `Value`
+- コード: `crates/roracle/src/report.rs` の `Value`
+
+### 許容値の集合（allowed set）
+
+基準が 1 つの値に決まらないときに、受け入れる値をすべて並べたもの。空の集合とは比較が成立しない。
+
+- id: `compare.allowed`
+- モデル: `spec/models/roracle-compare.model` の `AllowedSet`
+- コード: `crates/roracle/src/report.rs` の `Allowed`
+
+### 基準の観測（reference observation）
+
+比較の基準になる、oracle やモデルの観測。
+
+- id: `compare.reference`
+- モデル: `spec/models/roracle-compare.model` の `referenceKind`
+- モデル: `spec/models/roracle-compare.model` の `referenceValue`
+- モデル: `spec/models/roracle-compare.model` の `referenceAllowed`
+- コード: `crates/roracle/src/report.rs` の `reference`
+
+### 実装の観測（actual observation）
+
+検査する実装から得た観測。値でなければ一致にならない。
+
+- id: `compare.actual`
+- モデル: `spec/models/roracle-compare.model` の `actualKind`
+- モデル: `spec/models/roracle-compare.model` の `actualValue`
+- モデル: `spec/models/roracle-compare.model` の `actualAllowed`
+- コード: `crates/roracle/src/report.rs` の `actual`
 
 ### 比較の枠（comparison slot）
 
@@ -203,6 +258,7 @@ action によって変わる関係（rmodel の var、Alloy の var field）の�
 
 ## 実装の照合
 
+- `crates/roracle/src/report.rs` の `compare` を、`crates/roracle/src/report.rs` の `compare_conforms_to_the_compare_model` がモデル `spec/models/roracle-compare.model` と照合する
 - `crates/roracle/src/report.rs` の `aggregate` を、`crates/roracle/src/report.rs` の `aggregate_conforms_to_the_report_model` がモデル `spec/models/roracle-report.model` と照合する
 
 ## rule
@@ -226,6 +282,27 @@ action によって変わる関係（rmodel の var、Alloy の var field）の�
 無効の比較は、不一致の比較がない限り、報告を不一致にしない。
 
 - `spec/models/roracle-report.model` の `InvalidNotMismatch` は holds
+
+### ORACLE-FAILURES-FIRST
+
+基準か実装の観測が未確定・無効・エラーなら、比較は一致にならず、エラーがあれば必ずエラーになる。
+
+- `spec/models/roracle-compare.model` の `FailureNeverMatched` は holds
+- `spec/models/roracle-compare.model` の `ErrorDominates` は holds
+
+### ORACLE-ACTUAL-IS-A-VALUE
+
+一致するのは実装の観測が値のときだけ。実装が許容値の集合を返したら、比較は無効。
+
+- `spec/models/roracle-compare.model` の `MatchedNeedsActualValue` は holds
+- `spec/models/roracle-compare.model` の `ActualAllowedIsInvalid` は holds
+
+### ORACLE-ALLOWED-SETS
+
+基準が許容値の集合なら、含まれる値は一致、含まれない値は不一致。空の集合との比較は無効。
+
+- `spec/models/roracle-compare.model` の `EmptyAllowedIsInvalid` は reachable
+- `spec/models/roracle-compare.model` の `AllowedMismatch` は reachable
 
 ### ORACLE-EMPTY-IS-INVALID
 

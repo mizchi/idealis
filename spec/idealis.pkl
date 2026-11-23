@@ -9,6 +9,7 @@ local rtlc = "crates/rtlc/src/safety.rs"
 local roracle = "crates/roracle/src/report.rs"
 local rmodel = "crates/rmodel/src/syntax.rs"
 local report = "spec/models/roracle-report.model"
+local compare = "spec/models/roracle-compare.model"
 
 spec: s.Spec = new {
   id = "idealis"
@@ -59,7 +60,7 @@ spec: s.Spec = new {
         "予算が尽きて、実例・反例の有無という判定そのものを出せなかったこと。合格にも不合格にも読み替えない。work の予算切れは、ralloy では unknown、rtlc では理由 work の bounded になる（0092 で記録した語の違い）。",
         "A budget ran out before the verdict itself, whether an instance or counterexample exists, could be given. It is read as neither a pass nor a failure. Running out of work is unknown in ralloy and bounded with reason work in rtlc (a difference in wording recorded in 0092).",
       )
-      model { s.model(report, "Unknown") }
+      model { s.model(report, "Unknown"); s.model(compare, "Unknown"); s.model(compare, "UnknownObservation") }
       code { s.code(ralloy, "Unknown"); s.code(roracle, "Unknown") }
     }
     new {
@@ -145,7 +146,7 @@ spec: s.Spec = new {
         "実装や engine の観測が、基準（oracle やモデル）の答えと同じだったこと。",
         "An observation of an implementation or engine equals the reference answer of an oracle or model.",
       )
-      model { s.model(report, "Matched") }
+      model { s.model(report, "Matched"); s.model(compare, "Matched") }
       code { s.code(roracle, "Matched"); s.code(ralloy, "Matched") }
     }
     new {
@@ -157,7 +158,7 @@ spec: s.Spec = new {
         "観測は正しく取れたうえで、基準の答えと異なったこと。",
         "The observation was obtained correctly and differs from the reference answer.",
       )
-      model { s.model(report, "Mismatch") }
+      model { s.model(report, "Mismatch"); s.model(compare, "Mismatch") }
       code { s.code(roracle, "Mismatch"); s.code(ralloy, "Mismatch") }
     }
     new {
@@ -169,7 +170,7 @@ spec: s.Spec = new {
         "入力や観測が契約を満たさず、比較そのものが成立しなかったこと。不一致とは区別する。",
         "An input or observation breaks its contract, so no comparison took place. It is distinct from a mismatch.",
       )
-      model { s.model(report, "Invalid") }
+      model { s.model(report, "Invalid"); s.model(compare, "Invalid"); s.model(compare, "InvalidObservation") }
       code { s.code(roracle, "Invalid"); s.code(ralloy, "Invalid") }
     }
     new {
@@ -181,7 +182,7 @@ spec: s.Spec = new {
         "実装・oracle・基盤が失敗して、比較する観測そのものが得られなかったこと。不一致とも未確定とも区別する。",
         "The implementation, oracle or infrastructure failed, so there was no observation to compare. It is distinct from a mismatch and from unknown.",
       )
-      model { s.model(report, "Error") }
+      model { s.model(report, "Error"); s.model(compare, "Error"); s.model(compare, "ErrorObservation") }
       code { s.code(roracle, "Error") }
     }
     new {
@@ -193,8 +194,81 @@ spec: s.Spec = new {
         "1 つの比較が一致・不一致・無効・未確定・エラーのどれだったか。",
         "Whether one comparison matched, mismatched, was invalid, unknown or an error.",
       )
-      model { s.model(report, "Status"); s.model(report, "status") }
+      model {
+        s.model(report, "Status")
+        s.model(report, "status")
+        s.model(compare, "Outcome")
+        s.model(compare, "outcome")
+      }
       code { s.code(roracle, "Status") }
+    }
+    new {
+      id = "compare.observation"
+      kind = "concept"
+      group = "比較"
+      name = s.text("観測", "observation")
+      definition = s.text(
+        "実装や oracle から得た 1 回分の答え。値・許容値の集合・未確定・無効・エラーのいずれか。",
+        "One answer from an implementation or oracle: a value, an allowed set, unknown, invalid or an error.",
+      )
+      model { s.model(compare, "Observed") }
+      code { s.code(roracle, "Observation") }
+    }
+    new {
+      id = "compare.value"
+      kind = "concept"
+      group = "比較"
+      name = s.text("値", "value")
+      definition = s.text(
+        "正しく得られた観測の中身。基準の値とは等しさで比べる。",
+        "The content of an observation obtained correctly, compared with a reference value for equality.",
+      )
+      model { s.model(compare, "ValueOf"); s.model(compare, "Value") }
+      code { s.code(roracle, "Value") }
+    }
+    new {
+      id = "compare.allowed"
+      kind = "concept"
+      group = "比較"
+      name = s.text("許容値の集合", "allowed set")
+      definition = s.text(
+        "基準が 1 つの値に決まらないときに、受け入れる値をすべて並べたもの。空の集合とは比較が成立しない。",
+        "Every value accepted when the reference is not a single value. Nothing can be compared with an empty set.",
+      )
+      model { s.model(compare, "AllowedSet") }
+      code { s.code(roracle, "Allowed") }
+    }
+    new {
+      id = "compare.reference"
+      kind = "concept"
+      group = "比較"
+      name = s.text("基準の観測", "reference observation")
+      definition = s.text(
+        "比較の基準になる、oracle やモデルの観測。",
+        "The observation of an oracle or model that a comparison is measured against.",
+      )
+      model {
+        s.model(compare, "referenceKind")
+        s.model(compare, "referenceValue")
+        s.model(compare, "referenceAllowed")
+      }
+      code { s.code(roracle, "reference") }
+    }
+    new {
+      id = "compare.actual"
+      kind = "concept"
+      group = "比較"
+      name = s.text("実装の観測", "actual observation")
+      definition = s.text(
+        "検査する実装から得た観測。値でなければ一致にならない。",
+        "The observation from the implementation under test. It never matches unless it is a value.",
+      )
+      model {
+        s.model(compare, "actualKind")
+        s.model(compare, "actualValue")
+        s.model(compare, "actualAllowed")
+      }
+      code { s.code(roracle, "actual") }
     }
     new {
       id = "compare.slot"
@@ -327,6 +401,33 @@ spec: s.Spec = new {
       claims { s.claim(report, "InvalidNotMismatch", "holds") }
     }
     new {
+      id = "ORACLE-FAILURES-FIRST"
+      text = s.text(
+        "基準か実装の観測が未確定・無効・エラーなら、比較は一致にならず、エラーがあれば必ずエラーになる。",
+        "If the reference or actual observation is unknown, invalid or an error, the comparison never matches, and any error makes it an error.",
+      )
+      terms { "compare.observation"; "compare.error"; "search.unknown"; "compare.invalid" }
+      claims { s.claim(compare, "FailureNeverMatched", "holds"); s.claim(compare, "ErrorDominates", "holds") }
+    }
+    new {
+      id = "ORACLE-ACTUAL-IS-A-VALUE"
+      text = s.text(
+        "一致するのは実装の観測が値のときだけ。実装が許容値の集合を返したら、比較は無効。",
+        "A comparison matches only when the actual observation is a value; an actual allowed set makes it invalid.",
+      )
+      terms { "compare.actual"; "compare.value"; "compare.allowed"; "compare.invalid" }
+      claims { s.claim(compare, "MatchedNeedsActualValue", "holds"); s.claim(compare, "ActualAllowedIsInvalid", "holds") }
+    }
+    new {
+      id = "ORACLE-ALLOWED-SETS"
+      text = s.text(
+        "基準が許容値の集合なら、含まれる値は一致、含まれない値は不一致。空の集合との比較は無効。",
+        "Against an allowed set, a member matches and a non-member mismatches; comparing with an empty set is invalid.",
+      )
+      terms { "compare.allowed"; "compare.reference"; "compare.mismatch"; "compare.invalid" }
+      claims { s.claim(compare, "EmptyAllowedIsInvalid", "reachable"); s.claim(compare, "AllowedMismatch", "reachable") }
+    }
+    new {
       id = "ORACLE-EMPTY-IS-INVALID"
       text = s.text("比較が 1 つもない報告は無効。", "A report without comparisons is invalid.")
       terms { "compare.report"; "compare.invalid" }
@@ -334,6 +435,11 @@ spec: s.Spec = new {
     }
   }
   groundings {
+    new {
+      model = compare
+      implementation = s.code(roracle, "compare")
+      test = s.code(roracle, "compare_conforms_to_the_compare_model")
+    }
     new {
       model = report
       implementation = s.code(roracle, "aggregate")

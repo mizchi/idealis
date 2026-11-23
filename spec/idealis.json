@@ -107,6 +107,14 @@
           {
             "path": "spec/models/roracle-report.model",
             "name": "Unknown"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "Unknown"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "UnknownObservation"
           }
         ],
         "code": [
@@ -276,6 +284,10 @@
           {
             "path": "spec/models/roracle-report.model",
             "name": "Matched"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "Matched"
           }
         ],
         "code": [
@@ -306,6 +318,10 @@
         "model": [
           {
             "path": "spec/models/roracle-report.model",
+            "name": "Mismatch"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
             "name": "Mismatch"
           }
         ],
@@ -338,6 +354,14 @@
           {
             "path": "spec/models/roracle-report.model",
             "name": "Invalid"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "Invalid"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "InvalidObservation"
           }
         ],
         "code": [
@@ -369,6 +393,14 @@
           {
             "path": "spec/models/roracle-report.model",
             "name": "Error"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "Error"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "ErrorObservation"
           }
         ],
         "code": [
@@ -400,12 +432,175 @@
           {
             "path": "spec/models/roracle-report.model",
             "name": "status"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "Outcome"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "outcome"
           }
         ],
         "code": [
           {
             "path": "crates/roracle/src/report.rs",
             "symbol": "Status"
+          }
+        ]
+      },
+      {
+        "id": "compare.observation",
+        "kind": "concept",
+        "group": "比較",
+        "name": {
+          "ja": "観測",
+          "en": "observation"
+        },
+        "definition": {
+          "ja": "実装や oracle から得た 1 回分の答え。値・許容値の集合・未確定・無効・エラーのいずれか。",
+          "en": "One answer from an implementation or oracle: a value, an allowed set, unknown, invalid or an error."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "Observed"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "Observation"
+          }
+        ]
+      },
+      {
+        "id": "compare.value",
+        "kind": "concept",
+        "group": "比較",
+        "name": {
+          "ja": "値",
+          "en": "value"
+        },
+        "definition": {
+          "ja": "正しく得られた観測の中身。基準の値とは等しさで比べる。",
+          "en": "The content of an observation obtained correctly, compared with a reference value for equality."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "ValueOf"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "Value"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "Value"
+          }
+        ]
+      },
+      {
+        "id": "compare.allowed",
+        "kind": "concept",
+        "group": "比較",
+        "name": {
+          "ja": "許容値の集合",
+          "en": "allowed set"
+        },
+        "definition": {
+          "ja": "基準が 1 つの値に決まらないときに、受け入れる値をすべて並べたもの。空の集合とは比較が成立しない。",
+          "en": "Every value accepted when the reference is not a single value. Nothing can be compared with an empty set."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "AllowedSet"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "Allowed"
+          }
+        ]
+      },
+      {
+        "id": "compare.reference",
+        "kind": "concept",
+        "group": "比較",
+        "name": {
+          "ja": "基準の観測",
+          "en": "reference observation"
+        },
+        "definition": {
+          "ja": "比較の基準になる、oracle やモデルの観測。",
+          "en": "The observation of an oracle or model that a comparison is measured against."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "referenceKind"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "referenceValue"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "referenceAllowed"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "reference"
+          }
+        ]
+      },
+      {
+        "id": "compare.actual",
+        "kind": "concept",
+        "group": "比較",
+        "name": {
+          "ja": "実装の観測",
+          "en": "actual observation"
+        },
+        "definition": {
+          "ja": "検査する実装から得た観測。値でなければ一致にならない。",
+          "en": "The observation from the implementation under test. It never matches unless it is a value."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "actualKind"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "actualValue"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "actualAllowed"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "actual"
           }
         ]
       },
@@ -697,6 +892,81 @@
         ]
       },
       {
+        "id": "ORACLE-FAILURES-FIRST",
+        "text": {
+          "ja": "基準か実装の観測が未確定・無効・エラーなら、比較は一致にならず、エラーがあれば必ずエラーになる。",
+          "en": "If the reference or actual observation is unknown, invalid or an error, the comparison never matches, and any error makes it an error."
+        },
+        "terms": [
+          "compare.observation",
+          "compare.error",
+          "search.unknown",
+          "compare.invalid"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/roracle-compare.model",
+            "check": "FailureNeverMatched",
+            "expect": "holds"
+          },
+          {
+            "model": "spec/models/roracle-compare.model",
+            "check": "ErrorDominates",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "ORACLE-ACTUAL-IS-A-VALUE",
+        "text": {
+          "ja": "一致するのは実装の観測が値のときだけ。実装が許容値の集合を返したら、比較は無効。",
+          "en": "A comparison matches only when the actual observation is a value; an actual allowed set makes it invalid."
+        },
+        "terms": [
+          "compare.actual",
+          "compare.value",
+          "compare.allowed",
+          "compare.invalid"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/roracle-compare.model",
+            "check": "MatchedNeedsActualValue",
+            "expect": "holds"
+          },
+          {
+            "model": "spec/models/roracle-compare.model",
+            "check": "ActualAllowedIsInvalid",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "ORACLE-ALLOWED-SETS",
+        "text": {
+          "ja": "基準が許容値の集合なら、含まれる値は一致、含まれない値は不一致。空の集合との比較は無効。",
+          "en": "Against an allowed set, a member matches and a non-member mismatches; comparing with an empty set is invalid."
+        },
+        "terms": [
+          "compare.allowed",
+          "compare.reference",
+          "compare.mismatch",
+          "compare.invalid"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/roracle-compare.model",
+            "check": "EmptyAllowedIsInvalid",
+            "expect": "reachable"
+          },
+          {
+            "model": "spec/models/roracle-compare.model",
+            "check": "AllowedMismatch",
+            "expect": "reachable"
+          }
+        ]
+      },
+      {
         "id": "ORACLE-EMPTY-IS-INVALID",
         "text": {
           "ja": "比較が 1 つもない報告は無効。",
@@ -716,6 +986,17 @@
       }
     ],
     "groundings": [
+      {
+        "model": "spec/models/roracle-compare.model",
+        "implementation": {
+          "path": "crates/roracle/src/report.rs",
+          "symbol": "compare"
+        },
+        "test": {
+          "path": "crates/roracle/src/report.rs",
+          "symbol": "compare_conforms_to_the_compare_model"
+        }
+      },
       {
         "model": "spec/models/roracle-report.model",
         "implementation": {
