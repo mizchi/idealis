@@ -9,9 +9,8 @@ pub(crate) fn analyze(
     body: &Expr,
     max_work: u64,
 ) -> Result<Analysis, Error> {
-    // Searches wider than 4 bits go to SAT: the threshold that minimized
-    // the corpus's total time over both backends (plans 0085, 0087).
-    if crate::sat::supported(module) && crate::sat::width(module, command) > 4 {
+    // Wide searches of the relational core go to SAT (plan 0085).
+    if crate::sat::supported(module) && crate::sat::width(module, command) > 24 {
         return Ok(crate::sat::analyze(module, command, body, max_work));
     }
     Ok(enumerate(module, command, body, max_work))

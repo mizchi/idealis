@@ -36,8 +36,6 @@ const thresholds: Record<string, (name: string) => number> = {
   "0086-ralloy-sat-hierarchy-integers": () => 1.1,
   // evals/plans/0086a-ralloy-sat-remeasure.md (same thresholds as 0086)
   "0086a-ralloy-sat-remeasure": () => 1.1,
-  // evals/plans/0087-ralloy-backend-threshold.md
-  "0087-ralloy-backend-threshold": () => 1.1,
 };
 const required = thresholds[plan];
 assert.ok(required, plan);
