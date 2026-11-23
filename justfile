@@ -299,6 +299,9 @@ rmodel-oracle output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/
 rquint-tlc output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" jar=".artifacts/0068-tlc-1.8.0.jar":
   evals/experiments/quint-ir/tlc.sh {{quote(absolute_path(java))}} {{quote(absolute_path(jar))}} {{quote(absolute_path(output))}}
 
+rquint-alloy output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" jar=".artifacts/alloy-subset/org.alloytools.alloy.dist.jar":
+  evals/experiments/quint-ir/alloy.sh {{quote(absolute_path(java))}} {{quote(absolute_path(jar))}} {{quote(absolute_path(output))}}
+
 rquint-test:
   cargo fmt --manifest-path crates/rquint/Cargo.toml -- --check
   cargo clippy --all-targets --locked --manifest-path crates/rquint/Cargo.toml -- -D warnings

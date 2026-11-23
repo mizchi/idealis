@@ -7,6 +7,8 @@
 //! `[tag |-> "Name", value |-> v]`; Quint's 0-based list indices become
 //! TLA+'s 1-based ones. Constructs outside the subset are rejected, never
 //! given another meaning.
+mod alloy;
+pub use alloy::{Bounds, to_alloy};
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
@@ -19,8 +21,8 @@ impl fmt::Display for Error {
     }
 }
 impl std::error::Error for Error {}
-type Result<T> = std::result::Result<T, Error>;
-fn unsupported<T>(what: impl fmt::Display) -> Result<T> {
+pub(crate) type Result<T> = std::result::Result<T, Error>;
+pub(crate) fn unsupported<T>(what: impl fmt::Display) -> Result<T> {
     Err(Error(format!("unsupported Quint construct: {what}")))
 }
 
@@ -134,7 +136,7 @@ pub fn translate(ir: &str, options: &Options) -> Result<Translation> {
     Ok(Translation { source, config })
 }
 
-fn text(value: &Value) -> Result<&str> {
+pub(crate) fn text(value: &Value) -> Result<&str> {
     value
         .as_str()
         .ok_or_else(|| Error(format!("expected a string, got {value}")))
