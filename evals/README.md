@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0085: ralloyのSAT backend](iterations/0085-ralloy-sat-backend.md)は、関係の中核をAIGとTseitin変換でCNFにし、ralloyの中に書いた小さなCDCLで解く。総当たりでwork 25.6億だった`CompositionHolds`がwork 1,910で解け、174 commandすべてでAlloyと一致した。
+
 [0084: ralloyの対称性の除去を探索の途中で行う](iterations/0084-ralloy-incremental-symmetry.md)は、枝を途中で刈り、2列以上のfieldとsubset sigにも広げた。`CompositionHolds`の候補は約15分の1になったが、予算内では解けない。数µsのケースが最大1.22倍で`hold`。
 
 [0083: ralloyの対称性の除去](iterations/0083-ralloy-symmetry.md)は、lex-leaderで入れ替えられるatomの重複した候補を評価前に除き、`core-set-algebra`を128 msから34 msにした。0078からの累積では8ケースが0.30〜0.64倍になり、数µsの4ケースは最大1.17倍のまま残る。
