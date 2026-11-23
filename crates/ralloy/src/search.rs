@@ -9,11 +9,31 @@ pub(crate) fn analyze(
     body: &Expr,
     max_work: u64,
 ) -> Result<Analysis, Error> {
-    // Wide searches of the relational core go to SAT (plan 0085).
-    if crate::sat::supported(module) && crate::sat::width(module, command) > 24 {
-        return Ok(crate::sat::analyze(module, command, body, max_work));
+    Ok(portfolio(module, command, body, max_work))
+}
+/// Work the enumerator gets before a command moves to SAT: about the fixed
+/// cost of a small SAT translation (plan 0088).
+pub(crate) const ENUMERATION_SLICE: u64 = 5_000;
+/// Enumerates under a small budget first, so commands with quick answers
+/// stay fast, and hands what it cannot finish to SAT with the rest of the
+/// budget (plan 0088). Models the SAT backend does not cover only enumerate.
+pub(crate) fn portfolio(
+    module: &Module,
+    command: &Command,
+    body: &Expr,
+    max_work: u64,
+) -> Analysis {
+    if !crate::sat::supported(module) {
+        return enumerate(module, command, body, max_work);
     }
-    Ok(enumerate(module, command, body, max_work))
+    let slice = ENUMERATION_SLICE.min(max_work);
+    let first = enumerate(module, command, body, slice);
+    if first.status != Status::Unknown || slice == max_work {
+        return first;
+    }
+    let mut second = crate::sat::analyze(module, command, body, max_work - slice);
+    second.stats.work += first.stats.work;
+    second
 }
 /// The enumerator alone, whatever the width.
 pub(crate) fn enumerate(
@@ -605,6 +625,42 @@ impl Search<'_> {
             .collect();
         self.found = Some(Instance { signatures, fields });
         Ok(true)
+    }
+}
+
+#[cfg(test)]
+mod portfolio_tests {
+    use super::{ENUMERATION_SLICE, portfolio};
+    use crate::{Model, Status};
+
+    /// The enumerator cannot finish this check within the slice.
+    const WIDE: &str =
+        "sig S { a: set S, b: set S } assert A { a + b = b + a } check A for 3 but 0 Int";
+
+    #[test]
+    fn work_never_exceeds_the_budget_across_both_backends() {
+        let model = Model::parse(WIDE).unwrap();
+        let (command, body) = model.get_command(0).unwrap();
+        for budget in [ENUMERATION_SLICE + 1, ENUMERATION_SLICE * 3, 50_000_000] {
+            let analysis = portfolio(&model.syntax, command, body, budget);
+            assert!(
+                analysis.stats.work <= budget,
+                "{budget}: {}",
+                analysis.stats.work
+            );
+        }
+        let solved = portfolio(&model.syntax, command, body, 50_000_000);
+        assert_eq!(solved.status, Status::NoCounterexample);
+        assert!(solved.stats.work > ENUMERATION_SLICE);
+    }
+
+    #[test]
+    fn budgets_within_the_slice_only_enumerate() {
+        let model = Model::parse(WIDE).unwrap();
+        let (command, body) = model.get_command(0).unwrap();
+        let analysis = portfolio(&model.syntax, command, body, ENUMERATION_SLICE);
+        assert_eq!(analysis.status, Status::Unknown);
+        assert_eq!(analysis.stats.work, ENUMERATION_SLICE);
     }
 }
 
