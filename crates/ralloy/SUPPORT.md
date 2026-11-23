@@ -8,7 +8,7 @@
 - [x] field: 名前が一意で4項まで、`A m -> n B`。fact、assert、run/check、全体scope・型ごとの上限・exactly、`for`なしの既定3（0079、0080）。
 - [x] 式: 4項までの和・差・交差・積・join・domain/range制限、転置・閉包、比較・論理結合、atomを束縛する量化とdisj、none/univ/iden/Int/String、引数付きpred/funとbox join（0079、0081）。
 - [x] 整数: リテラル、`#e`、`plus`などの算術、比較。Int型の関係は値の和になり、bit幅の2の補数で桁あふれする（0082）。
-- [x] 同じsigに属する入れ替えられるatomの対称性を、lex-leaderで評価前に除く。2列以上のfieldがあるcommandでは除かない（0083）。
+- [x] 入れ替えられるatomの対称性を、lex-leaderで探索の途中で除く。2列以上のfieldとsubset sigも扱う（0083、0084）。
 - [x] 有限構造の全列挙、`check_instance`、matched/mismatch/invalid/unknownとstatusの区別、native JSONLとホストimport不要のWasm ABI v1。
 
 ## Alloyとの差分テスト
@@ -20,7 +20,7 @@
 ## 非対応・対象外
 
 - [ ] 親が複数の`in`、`@field`、module、`set`などの引数、高階量化、5項以上の関係、`sum`、整数を関係として使う式、0による割り算、時間・var。
-- [ ] Alloy全体の構文・型検査、SAT符号化、節学習、2列以上のfieldを含む対称性の除去。
+- [ ] Alloy全体の構文・型検査、SAT符号化、節学習。
 - [ ] 固定instanceの一致だけから未観測の実装履歴を保証すること。
 
 ## 制約と根拠
