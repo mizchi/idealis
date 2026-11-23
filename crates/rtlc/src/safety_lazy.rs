@@ -108,18 +108,21 @@ impl Expression {
                     arena,
                 )
             }
-            Self::If {
-                condition,
-                consequent,
-                alternative,
-            } => {
+            Self::If { .. } => {
                 context.descend(arena)?;
-                if condition.eval(context, arena)?.boolean()? {
-                    consequent
-                } else {
-                    alternative
+                let mut node = self;
+                while let Self::If {
+                    condition,
+                    consequent,
+                    alternative,
+                } = node
+                {
+                    if condition.eval(context, arena)?.boolean()? {
+                        return consequent.eval_function(context, arena);
+                    }
+                    node = alternative;
                 }
-                .eval_function(context, arena)
+                node.eval_function(context, arena)
             }
             Self::Function { bounds, body } => {
                 context.descend(arena)?;

@@ -58,6 +58,22 @@ fn measurements(criterion: &mut Criterion) {
                 },
             );
         }
+        for length in [3, 8, 47] {
+            let module = rtla::parse_module(&build(length)).unwrap();
+            let program = compile_with_options(&module, &config, options)
+                .unwrap()
+                .prepare()
+                .unwrap();
+            assert_eq!(
+                program.check(bounds).unwrap().status,
+                "complete",
+                "{form}-{length}"
+            );
+            criterion.bench_function(
+                &format!("nesting-chains-check/{form}-{length}"),
+                |bencher| bencher.iter(|| black_box(&program).check(black_box(bounds)).unwrap()),
+            );
+        }
     }
 }
 criterion_group! {name=benches; config=Criterion::default().sample_size(20).warm_up_time(Duration::from_millis(500)).measurement_time(Duration::from_secs(1));targets=measurements}

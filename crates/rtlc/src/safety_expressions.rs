@@ -2,6 +2,7 @@ use crate::CoreError;
 use crate::ir::{
     Binding, Branch, DefinitionBody, Domain, Expression, FoldOrder, Scalar, Step, TemporalFormula,
 };
+use crate::safety_chains::Junction;
 use crate::safety_values::Arena;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::safety_values::ValueRemap;
@@ -943,105 +944,229 @@ impl Expression {
         Ok(match self {
             Self::Prime { argument } => argument.eval(EvalContext { prime: true, ..ctx }, arena)?,
             Self::Not { argument } => Scalar::Bool(!argument.eval(ctx, arena)?.boolean()?),
-            Self::Neg { argument } => Scalar::Int(
-                argument
-                    .eval(ctx, arena)?
-                    .integer()?
-                    .checked_neg()
-                    .ok_or_else(|| CoreError::protocol("Safety integer overflow"))?,
-            ),
-            Self::Add { left, right } | Self::Sub { left, right } | Self::Mul { left, right } => {
-                let left = left.eval(ctx, arena)?.integer()?;
-                let right = right.eval(ctx, arena)?.integer()?;
-                Scalar::Int(
-                    match self {
-                        Self::Add { .. } => left.checked_add(right),
-                        Self::Sub { .. } => left.checked_sub(right),
-                        _ => left.checked_mul(right),
-                    }
-                    .ok_or_else(|| CoreError::protocol("Safety integer overflow"))?,
-                )
+            Self::Neg { .. } => return self.eval_neg(ctx, arena),
+            Self::Add { .. } | Self::Sub { .. } | Self::Mul { .. } => {
+                return self.eval_arithmetic(ctx, arena);
             }
-            Self::Div { left, right } => {
-                let left = left.eval(ctx, arena)?.integer()?;
-                let right = right.eval(ctx, arena)?.integer()?;
-                if right == 0 {
-                    return Err(CoreError::protocol("Integer division by zero"));
-                }
-                let quotient = left
-                    .checked_div(right)
-                    .ok_or_else(|| CoreError::protocol("Safety integer overflow"))?;
-                Scalar::Int(if left % right != 0 && (left < 0) != (right < 0) {
-                    quotient - 1
-                } else {
-                    quotient
-                })
+            Self::Div { .. } => return self.eval_div(ctx, arena),
+            Self::Mod { .. } => return self.eval_mod(ctx, arena),
+            Self::Pow { .. } => return self.eval_pow(ctx, arena),
+            Self::Eq { .. } | Self::Ne { .. } => return self.eval_equality(ctx, arena),
+            Self::Lt { .. } | Self::Le { .. } | Self::Gt { .. } | Self::Ge { .. } => {
+                return self.eval_comparison(ctx, arena);
             }
-            Self::Mod { left, right } => {
-                let left = left.eval(ctx, arena)?.integer()?;
-                let right = right.eval(ctx, arena)?.integer()?;
-                if right <= 0 {
-                    return Err(CoreError::protocol("Modulo requires a positive divisor"));
-                }
-                Scalar::Int(left.rem_euclid(right))
+            Self::And { left, .. } if matches!(**left, Self::And { .. }) => {
+                return self.eval_junction(Junction::And, ctx, arena);
             }
-            Self::Pow { left, right } => {
-                let left = left.eval(ctx, arena)?.integer()?;
-                let right = right.eval(ctx, arena)?.integer()?;
-                if right < 0 {
-                    return Err(CoreError::protocol("Power requires a natural exponent"));
-                }
-                if left == 0 && right == 0 {
-                    return Err(CoreError::protocol("Undefined 0^0"));
-                }
-                Scalar::Int(
-                    left.checked_pow(right as u32)
-                        .ok_or_else(|| CoreError::protocol("Safety integer overflow"))?,
-                )
+            Self::Or { left, .. } if matches!(**left, Self::Or { .. }) => {
+                return self.eval_junction(Junction::Or, ctx, arena);
             }
-            Self::Eq { left, right } | Self::Ne { left, right } => {
-                let left = left.eval(ctx, arena)?;
-                let right = right.eval(ctx, arena)?;
-                Scalar::Bool(arena.equal(left, right)? == matches!(self, Self::Eq { .. }))
-            }
-            Self::Lt { left, right }
-            | Self::Le { left, right }
-            | Self::Gt { left, right }
-            | Self::Ge { left, right } => {
-                let left = left.eval(ctx, arena)?.integer()?;
-                let right = right.eval(ctx, arena)?.integer()?;
-                Scalar::Bool(match self {
-                    Self::Lt { .. } => left < right,
-                    Self::Le { .. } => left <= right,
-                    Self::Gt { .. } => left > right,
-                    _ => left >= right,
-                })
-            }
-            Self::And { left, right } => Scalar::Bool(
-                left.eval(ctx, arena)?.boolean()? && right.eval(ctx, arena)?.boolean()?,
-            ),
-            Self::Or { left, right } => Scalar::Bool(
-                left.eval(ctx, arena)?.boolean()? || right.eval(ctx, arena)?.boolean()?,
-            ),
-            Self::Implies { left, right } => Scalar::Bool(
-                !left.eval(ctx, arena)?.boolean()? || right.eval(ctx, arena)?.boolean()?,
-            ),
-            Self::If {
-                condition,
-                consequent,
-                alternative,
-            } => if condition.eval(ctx, arena)?.boolean()? {
-                consequent
-            } else {
-                alternative
-            }
-            .eval(ctx, arena)?,
-            Self::In { value, domain } => {
-                let value = value.eval(ctx, arena)?;
-                Scalar::Bool(domain.contains(value, ctx, arena)?)
-            }
+            Self::And { .. } => return self.eval_and(ctx, arena),
+            Self::Or { .. } => return self.eval_or(ctx, arena),
+            Self::Implies { .. } => return self.eval_implies(ctx, arena),
+            Self::If { .. } => return self.eval_if(ctx, arena),
+            Self::In { .. } => return self.eval_in(ctx, arena),
             _ => return Err(CoreError::protocol("Expected a scalar operator")),
         })
+    }
+    #[inline]
+    fn eval_neg(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::Neg { argument } = self else {
+            return Err(CoreError::protocol("Expected neg"));
+        };
+        Ok(Scalar::Int(
+            argument
+                .eval(ctx, arena)?
+                .integer()?
+                .checked_neg()
+                .ok_or_else(|| CoreError::protocol("Safety integer overflow"))?,
+        ))
+    }
+    #[inline]
+    fn eval_arithmetic(
+        &self,
+        ctx: EvalContext<'_>,
+        arena: &mut Arena,
+    ) -> Result<Scalar, CoreError> {
+        let (Self::Add { left, right } | Self::Sub { left, right } | Self::Mul { left, right }) =
+            self
+        else {
+            return Err(CoreError::protocol("Expected an arithmetic operator"));
+        };
+        Ok({
+            let left = left.eval(ctx, arena)?.integer()?;
+            let right = right.eval(ctx, arena)?.integer()?;
+            Scalar::Int(
+                match self {
+                    Self::Add { .. } => left.checked_add(right),
+                    Self::Sub { .. } => left.checked_sub(right),
+                    _ => left.checked_mul(right),
+                }
+                .ok_or_else(|| CoreError::protocol("Safety integer overflow"))?,
+            )
+        })
+    }
+    #[inline]
+    fn eval_div(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::Div { left, right } = self else {
+            return Err(CoreError::protocol("Expected div"));
+        };
+        Ok({
+            let left = left.eval(ctx, arena)?.integer()?;
+            let right = right.eval(ctx, arena)?.integer()?;
+            if right == 0 {
+                return Err(CoreError::protocol("Integer division by zero"));
+            }
+            let quotient = left
+                .checked_div(right)
+                .ok_or_else(|| CoreError::protocol("Safety integer overflow"))?;
+            Scalar::Int(if left % right != 0 && (left < 0) != (right < 0) {
+                quotient - 1
+            } else {
+                quotient
+            })
+        })
+    }
+    #[inline]
+    fn eval_mod(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::Mod { left, right } = self else {
+            return Err(CoreError::protocol("Expected mod"));
+        };
+        Ok({
+            let left = left.eval(ctx, arena)?.integer()?;
+            let right = right.eval(ctx, arena)?.integer()?;
+            if right <= 0 {
+                return Err(CoreError::protocol("Modulo requires a positive divisor"));
+            }
+            Scalar::Int(left.rem_euclid(right))
+        })
+    }
+    #[inline]
+    fn eval_pow(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::Pow { left, right } = self else {
+            return Err(CoreError::protocol("Expected pow"));
+        };
+        Ok({
+            let left = left.eval(ctx, arena)?.integer()?;
+            let right = right.eval(ctx, arena)?.integer()?;
+            if right < 0 {
+                return Err(CoreError::protocol("Power requires a natural exponent"));
+            }
+            if left == 0 && right == 0 {
+                return Err(CoreError::protocol("Undefined 0^0"));
+            }
+            Scalar::Int(
+                left.checked_pow(right as u32)
+                    .ok_or_else(|| CoreError::protocol("Safety integer overflow"))?,
+            )
+        })
+    }
+    #[inline]
+    fn eval_equality(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let (Self::Eq { left, right } | Self::Ne { left, right }) = self else {
+            return Err(CoreError::protocol("Expected an equality"));
+        };
+        Ok({
+            let left = left.eval(ctx, arena)?;
+            let right = right.eval(ctx, arena)?;
+            Scalar::Bool(arena.equal(left, right)? == matches!(self, Self::Eq { .. }))
+        })
+    }
+    #[inline]
+    fn eval_comparison(
+        &self,
+        ctx: EvalContext<'_>,
+        arena: &mut Arena,
+    ) -> Result<Scalar, CoreError> {
+        let (Self::Lt { left, right }
+        | Self::Le { left, right }
+        | Self::Gt { left, right }
+        | Self::Ge { left, right }) = self
+        else {
+            return Err(CoreError::protocol("Expected a comparison"));
+        };
+        Ok({
+            let left = left.eval(ctx, arena)?.integer()?;
+            let right = right.eval(ctx, arena)?.integer()?;
+            Scalar::Bool(match self {
+                Self::Lt { .. } => left < right,
+                Self::Le { .. } => left <= right,
+                Self::Gt { .. } => left > right,
+                _ => left >= right,
+            })
+        })
+    }
+    #[inline]
+    fn eval_and(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::And { left, right } = self else {
+            return Err(CoreError::protocol("Expected and"));
+        };
+        Ok(Scalar::Bool(
+            left.eval(ctx, arena)?.boolean()? && right.eval(ctx, arena)?.boolean()?,
+        ))
+    }
+    #[inline]
+    fn eval_or(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::Or { left, right } = self else {
+            return Err(CoreError::protocol("Expected or"));
+        };
+        Ok(Scalar::Bool(
+            left.eval(ctx, arena)?.boolean()? || right.eval(ctx, arena)?.boolean()?,
+        ))
+    }
+    #[inline]
+    fn eval_implies(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::Implies { left, right } = self else {
+            return Err(CoreError::protocol("Expected implies"));
+        };
+        Ok(Scalar::Bool(
+            !left.eval(ctx, arena)?.boolean()? || right.eval(ctx, arena)?.boolean()?,
+        ))
+    }
+    #[inline]
+    fn eval_if(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let mut node = self;
+        while let Self::If {
+            condition,
+            consequent,
+            alternative,
+        } = node
+        {
+            if condition.eval(ctx, arena)?.boolean()? {
+                return consequent.eval(ctx, arena);
+            }
+            node = alternative;
+        }
+        node.eval(ctx, arena)
+    }
+    #[inline]
+    fn eval_in(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::In { value, domain } = self else {
+            return Err(CoreError::protocol("Expected in"));
+        };
+        Ok({
+            let value = value.eval(ctx, arena)?;
+            Scalar::Bool(domain.contains(value, ctx, arena)?)
+        })
+    }
+    #[inline(never)]
+    fn eval_junction(
+        &self,
+        junction: Junction,
+        ctx: EvalContext<'_>,
+        arena: &mut Arena,
+    ) -> Result<Scalar, CoreError> {
+        let decisive = junction == Junction::Or;
+        let mut result = !decisive;
+        junction.visit_terms(self, |term, _| {
+            if term.eval(ctx, arena)?.boolean()? == decisive {
+                result = decisive;
+                Ok(false)
+            } else {
+                Ok(true)
+            }
+        })?;
+        Ok(Scalar::Bool(result))
     }
     fn eval_enabled(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
         let old = if arena.metadata.is_some() || !arena.definitions.is_empty() {
@@ -1133,22 +1258,8 @@ impl Expression {
                 return self.eval_reference(ctx, arena, Self::eval);
             }
             Self::Data { value } => arena.data_expression(self, value)?,
-            Self::Assert { condition, message } => {
-                let condition = condition.eval(ctx, arena)?;
-                let message = message.eval(ctx, arena)?;
-                if condition != Scalar::Bool(true) {
-                    return Err(CoreError::protocol(&format!(
-                        "TLC assertion failed: {:?}",
-                        arena.portable(message)?
-                    )));
-                }
-                Scalar::Bool(true)
-            }
-            Self::UnmatchedCase { location } => {
-                return Err(CoreError::protocol(&format!(
-                    "Attempted to evaluate a CASE with no conditions true at {location}"
-                )));
-            }
+            Self::Assert { .. } => return self.eval_assert(ctx, arena),
+            Self::UnmatchedCase { .. } => return self.eval_unmatched_case(ctx, arena),
             Self::Prime { .. }
             | Self::Not { .. }
             | Self::Neg { .. }
@@ -1169,179 +1280,364 @@ impl Expression {
             | Self::Implies { .. }
             | Self::If { .. }
             | Self::In { .. } => self.eval_scalar_operator(ctx, arena)?,
-            Self::Set { values } | Self::Tuple { values } => {
-                let mut result = vec![];
-                for value in values {
-                    arena.tick()?;
-                    result.push(value.eval(ctx, arena)?);
-                }
-                if matches!(self, Self::Set { .. }) {
-                    arena.set(result)?
-                } else {
-                    arena.tuple(result)?
-                }
+            Self::Set { .. } | Self::Tuple { .. } => return self.eval_set_or_tuple(ctx, arena),
+            Self::Record { .. } => return self.eval_record(ctx, arena),
+            Self::At { .. } => return self.eval_at(ctx, arena),
+            Self::Update { .. } => return self.eval_update(ctx, arena),
+            Self::Forall { .. } | Self::Exists { .. } => return self.eval_quantifier(ctx, arena),
+            Self::Choose { .. } => return self.eval_choose(ctx, arena),
+            Self::Function { .. } | Self::Filter { .. } | Self::MapSet { .. } => {
+                return self.eval_comprehension(ctx, arena);
             }
-            Self::Record { fields } => {
-                let mut result = vec![];
-                for (name, value) in fields {
-                    arena.tick()?;
-                    let name = arena.string(name.clone())?;
-                    let value = value.eval(ctx, arena)?;
-                    result.push((name, value));
-                }
-                arena.function(result)?
+            Self::Fold { .. } => return self.eval_fold(ctx, arena),
+            Self::SelectSeq { .. } => return self.eval_select_seq(ctx, arena),
+            Self::SortSeq { .. } => return self.eval_sort_seq(ctx, arena),
+            Self::Domain { .. } => return self.eval_domain(ctx, arena),
+            Self::VariantTag { .. } => return self.eval_variant_tag(ctx, arena),
+            Self::Cardinality { .. } => return self.eval_cardinality(ctx, arena),
+            Self::Len { .. } | Self::Head { .. } | Self::Tail { .. } => {
+                return self.eval_len_head_tail(ctx, arena);
             }
-            Self::At { target, key } => {
-                if arena.metadata.is_some() {
-                    let target = target.eval_function(ctx, arena)?;
-                    let key = key.eval(ctx, arena)?;
-                    return target.at(key, arena);
-                }
-                let target = target.eval(ctx, arena)?;
+            Self::Append { .. } | Self::Concat { .. } => {
+                return self.eval_append_or_concat(ctx, arena);
+            }
+            Self::Subseq { .. } => return self.eval_subseq(ctx, arena),
+            Self::Cup { .. }
+            | Self::Cap { .. }
+            | Self::Difference { .. }
+            | Self::SubsetEq { .. } => return self.eval_set_operator(ctx, arena),
+            Self::Union { .. } => return self.eval_union(ctx, arena),
+            Self::Powerset { .. } => return self.eval_powerset(ctx, arena),
+            Self::FunctionSet { .. } => return self.eval_function_set(ctx, arena),
+            Self::RecordSet { .. } => return self.eval_record_set(ctx, arena),
+            Self::FunctionIn { .. } => return self.eval_function_in(ctx, arena),
+            Self::SequenceIn { .. } => return self.eval_sequence_in(ctx, arena),
+            Self::SequenceSet { .. } => {
+                return Err(CoreError::protocol("Sequence sets cannot be enumerated"));
+            }
+            Self::Enabled { .. } => self.eval_enabled(ctx, arena)?,
+        })
+    }
+    #[inline]
+    fn eval_assert(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::Assert { condition, message } = self else {
+            return Err(CoreError::protocol("Expected assert"));
+        };
+        Ok({
+            let condition = condition.eval(ctx, arena)?;
+            let message = message.eval(ctx, arena)?;
+            if condition != Scalar::Bool(true) {
+                return Err(CoreError::protocol(&format!(
+                    "TLC assertion failed: {:?}",
+                    arena.portable(message)?
+                )));
+            }
+            Scalar::Bool(true)
+        })
+    }
+    #[inline]
+    fn eval_unmatched_case(
+        &self,
+        _ctx: EvalContext<'_>,
+        _arena: &mut Arena,
+    ) -> Result<Scalar, CoreError> {
+        let Self::UnmatchedCase { location } = self else {
+            return Err(CoreError::protocol("Expected unmatched case"));
+        };
+        Err(CoreError::protocol(&format!(
+            "Attempted to evaluate a CASE with no conditions true at {location}"
+        )))
+    }
+    #[inline]
+    fn eval_set_or_tuple(
+        &self,
+        ctx: EvalContext<'_>,
+        arena: &mut Arena,
+    ) -> Result<Scalar, CoreError> {
+        let (Self::Set { values } | Self::Tuple { values }) = self else {
+            return Err(CoreError::protocol("Expected a set or tuple"));
+        };
+        Ok({
+            let mut result = vec![];
+            for value in values {
+                arena.tick()?;
+                result.push(value.eval(ctx, arena)?);
+            }
+            if matches!(self, Self::Set { .. }) {
+                arena.set(result)?
+            } else {
+                arena.tuple(result)?
+            }
+        })
+    }
+    #[inline]
+    fn eval_record(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::Record { fields } = self else {
+            return Err(CoreError::protocol("Expected record"));
+        };
+        Ok({
+            let mut result = vec![];
+            for (name, value) in fields {
+                arena.tick()?;
+                let name = arena.string(name.clone())?;
+                let value = value.eval(ctx, arena)?;
+                result.push((name, value));
+            }
+            arena.function(result)?
+        })
+    }
+    #[inline]
+    fn eval_at(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::At { target, key } = self else {
+            return Err(CoreError::protocol("Expected at"));
+        };
+        Ok({
+            if arena.metadata.is_some() {
+                let target = target.eval_function(ctx, arena)?;
                 let key = key.eval(ctx, arena)?;
-                arena.at(target, key)?
+                return target.at(key, arena);
             }
-            Self::Update { target, updates } => {
-                let mut result = target.eval(ctx, arena)?;
-                for update in updates {
-                    arena.tick()?;
-                    let path = update
-                        .path
-                        .iter()
-                        .map(|part| part.eval(ctx, arena))
-                        .collect::<Result<Vec<_>, _>>()?;
-                    if let Some(old) = arena.path(result, &path)? {
-                        let value = update.value.eval(
-                            EvalContext {
-                                old: Some(old),
-                                ..ctx
-                            },
-                            arena,
-                        )?;
-                        result = arena.replace(result, &path, value)?;
-                    }
+            let target = target.eval(ctx, arena)?;
+            let key = key.eval(ctx, arena)?;
+            arena.at(target, key)?
+        })
+    }
+    #[inline]
+    fn eval_update(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::Update { target, updates } = self else {
+            return Err(CoreError::protocol("Expected update"));
+        };
+        Ok({
+            let mut result = target.eval(ctx, arena)?;
+            for update in updates {
+                arena.tick()?;
+                let path = update
+                    .path
+                    .iter()
+                    .map(|part| part.eval(ctx, arena))
+                    .collect::<Result<Vec<_>, _>>()?;
+                if let Some(old) = arena.path(result, &path)? {
+                    let value = update.value.eval(
+                        EvalContext {
+                            old: Some(old),
+                            ..ctx
+                        },
+                        arena,
+                    )?;
+                    result = arena.replace(result, &path, value)?;
                 }
-                result
             }
-            Self::Forall { bounds, body } | Self::Exists { bounds, body } => {
-                let forall = matches!(self, Self::Forall { .. });
-                let mut result = forall;
-                visit_bindings(bounds, 0, ctx, arena, &mut |ctx, arena| {
-                    let value = body.eval(ctx, arena)?.boolean()?;
-                    if value != forall {
-                        result = value;
+            result
+        })
+    }
+    #[inline]
+    fn eval_quantifier(
+        &self,
+        ctx: EvalContext<'_>,
+        arena: &mut Arena,
+    ) -> Result<Scalar, CoreError> {
+        let (Self::Forall { bounds, body } | Self::Exists { bounds, body }) = self else {
+            return Err(CoreError::protocol("Expected a quantifier"));
+        };
+        Ok({
+            let forall = matches!(self, Self::Forall { .. });
+            let mut result = forall;
+            visit_bindings(bounds, 0, ctx, arena, &mut |ctx, arena| {
+                let value = body.eval(ctx, arena)?.boolean()?;
+                if value != forall {
+                    result = value;
+                    Ok(false)
+                } else {
+                    Ok(true)
+                }
+            })?;
+            Scalar::Bool(result)
+        })
+    }
+    #[inline]
+    fn eval_choose(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::Choose { binding, body } = self else {
+            return Err(CoreError::protocol("Expected choose"));
+        };
+        Ok({
+            let mut selected = None;
+            visit_bindings(
+                std::slice::from_ref(binding),
+                0,
+                ctx,
+                arena,
+                &mut |bound, arena| {
+                    if body.eval(bound, arena)?.boolean()? {
+                        selected = bound.locals.last().copied();
                         Ok(false)
                     } else {
                         Ok(true)
                     }
-                })?;
-                Scalar::Bool(result)
-            }
-            Self::Choose { binding, body } => {
-                let mut selected = None;
-                visit_bindings(
-                    std::slice::from_ref(binding),
-                    0,
-                    ctx,
-                    arena,
-                    &mut |bound, arena| {
-                        if body.eval(bound, arena)?.boolean()? {
-                            selected = bound.locals.last().copied();
-                            Ok(false)
-                        } else {
-                            Ok(true)
-                        }
-                    },
-                )?;
-                selected.ok_or_else(|| {
-                    CoreError::protocol("CHOOSE: no element of the domain satisfied the predicate")
-                })?
-            }
-            Self::Function { bounds, body }
-            | Self::Filter { bounds, body }
-            | Self::MapSet { bounds, body } => {
-                let mut values = vec![];
-                let mut entries = vec![];
-                visit_bindings(bounds, 0, ctx, arena, &mut |inner, arena| {
-                    let value = body.eval(inner, arena)?;
-                    if matches!(self, Self::Function { .. }) {
-                        let keys = inner.locals[ctx.locals.len()..].to_vec();
-                        let key = if keys.len() == 1 {
-                            keys[0]
-                        } else {
-                            arena.tuple(keys)?
-                        };
-                        entries.push((key, value));
-                    } else if matches!(self, Self::Filter { .. }) {
-                        if value.boolean()? {
-                            if bounds.len() != 1 {
-                                return Err(CoreError::protocol("Filter requires one bound"));
-                            }
-                            values.push(inner.locals[ctx.locals.len()]);
-                        }
-                    } else {
-                        values.push(value);
-                    }
-                    Ok(true)
-                })?;
+                },
+            )?;
+            selected.ok_or_else(|| {
+                CoreError::protocol("CHOOSE: no element of the domain satisfied the predicate")
+            })?
+        })
+    }
+    #[inline]
+    fn eval_comprehension(
+        &self,
+        ctx: EvalContext<'_>,
+        arena: &mut Arena,
+    ) -> Result<Scalar, CoreError> {
+        let (Self::Function { bounds, body }
+        | Self::Filter { bounds, body }
+        | Self::MapSet { bounds, body }) = self
+        else {
+            return Err(CoreError::protocol("Expected a comprehension"));
+        };
+        Ok({
+            let mut values = vec![];
+            let mut entries = vec![];
+            visit_bindings(bounds, 0, ctx, arena, &mut |inner, arena| {
+                let value = body.eval(inner, arena)?;
                 if matches!(self, Self::Function { .. }) {
-                    arena.function(entries)?
+                    let keys = inner.locals[ctx.locals.len()..].to_vec();
+                    let key = if keys.len() == 1 {
+                        keys[0]
+                    } else {
+                        arena.tuple(keys)?
+                    };
+                    entries.push((key, value));
+                } else if matches!(self, Self::Filter { .. }) {
+                    if value.boolean()? {
+                        if bounds.len() != 1 {
+                            return Err(CoreError::protocol("Filter requires one bound"));
+                        }
+                        values.push(inner.locals[ctx.locals.len()]);
+                    }
                 } else {
-                    arena.set(values)?
+                    values.push(value);
                 }
+                Ok(true)
+            })?;
+            if matches!(self, Self::Function { .. }) {
+                arena.function(entries)?
+            } else {
+                arena.set(values)?
             }
-            Self::Fold {
-                accumulator,
-                initial,
-                collection,
-                order,
-                body,
-            } => {
-                if *accumulator != ctx.locals.len() {
-                    return Err(CoreError::protocol("Invalid fold variable slot"));
-                }
-                let mut result = initial.eval(ctx, arena)?;
-                let source = collection.eval(ctx, arena)?;
-                let elements = match order {
-                    FoldOrder::SetMembers => arena.fold_members(source)?,
-                    FoldOrder::SequenceLeft => arena.sequence(source)?,
-                };
-                let mut locals = ctx.locals.to_vec();
-                for element in elements {
-                    arena.tick()?;
-                    locals.push(result);
-                    locals.push(element);
-                    result = body.eval(
+        })
+    }
+    #[inline]
+    fn eval_fold(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::Fold {
+            accumulator,
+            initial,
+            collection,
+            order,
+            body,
+        } = self
+        else {
+            return Err(CoreError::protocol("Expected fold"));
+        };
+        Ok({
+            if *accumulator != ctx.locals.len() {
+                return Err(CoreError::protocol("Invalid fold variable slot"));
+            }
+            let mut result = initial.eval(ctx, arena)?;
+            let source = collection.eval(ctx, arena)?;
+            let elements = match order {
+                FoldOrder::SetMembers => arena.fold_members(source)?,
+                FoldOrder::SequenceLeft => arena.sequence(source)?,
+            };
+            let mut locals = ctx.locals.to_vec();
+            for element in elements {
+                arena.tick()?;
+                locals.push(result);
+                locals.push(element);
+                result = body.eval(
+                    EvalContext {
+                        locals: &locals,
+                        ..ctx
+                    },
+                    arena,
+                )?;
+                locals.truncate(ctx.locals.len());
+            }
+            result
+        })
+    }
+    #[inline]
+    fn eval_select_seq(
+        &self,
+        ctx: EvalContext<'_>,
+        arena: &mut Arena,
+    ) -> Result<Scalar, CoreError> {
+        let Self::SelectSeq {
+            slot,
+            sequence,
+            body,
+        } = self
+        else {
+            return Err(CoreError::protocol("Expected select seq"));
+        };
+        Ok({
+            if *slot != ctx.locals.len() {
+                return Err(CoreError::protocol(
+                    "Invalid sequence callback variable slot",
+                ));
+            }
+            let source = sequence.eval(ctx, arena)?;
+            let elements = arena.sequence(source)?;
+            arena.consume(elements.len())?;
+            let mut locals = ctx.locals.to_vec();
+            locals.push(Scalar::Bool(false));
+            let mut selected = vec![];
+            for element in elements {
+                arena.tick()?;
+                locals[*slot] = element;
+                if body
+                    .eval(
                         EvalContext {
                             locals: &locals,
                             ..ctx
                         },
                         arena,
-                    )?;
-                    locals.truncate(ctx.locals.len());
+                    )?
+                    .boolean()?
+                {
+                    selected.push(element);
                 }
-                result
             }
-            Self::SelectSeq {
-                slot,
-                sequence,
-                body,
-            } => {
-                if *slot != ctx.locals.len() {
-                    return Err(CoreError::protocol(
-                        "Invalid sequence callback variable slot",
-                    ));
-                }
-                let source = sequence.eval(ctx, arena)?;
-                let elements = arena.sequence(source)?;
-                arena.consume(elements.len())?;
-                let mut locals = ctx.locals.to_vec();
-                locals.push(Scalar::Bool(false));
-                let mut selected = vec![];
-                for element in elements {
+            arena.tuple(selected)?
+        })
+    }
+    #[inline]
+    fn eval_sort_seq(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::SortSeq {
+            slot,
+            sequence,
+            body,
+        } = self
+        else {
+            return Err(CoreError::protocol("Expected sort seq"));
+        };
+        Ok({
+            if *slot != ctx.locals.len() {
+                return Err(CoreError::protocol(
+                    "Invalid sequence callback variable slot",
+                ));
+            }
+            let source = sequence.eval(ctx, arena)?;
+            let mut elements = arena.sequence(source)?;
+            arena.consume(elements.len())?;
+            let mut locals = ctx.locals.to_vec();
+            locals.extend([Scalar::Bool(false); 2]);
+            for index in 1..elements.len() {
+                arena.tick()?;
+                let element = elements[index];
+                let mut position = index;
+                while position > 0 {
                     arena.tick()?;
                     locals[*slot] = element;
-                    if body
+                    locals[*slot + 1] = elements[position - 1];
+                    if !body
                         .eval(
                             EvalContext {
                                 locals: &locals,
@@ -1351,272 +1647,345 @@ impl Expression {
                         )?
                         .boolean()?
                     {
-                        selected.push(element);
+                        break;
                     }
+                    elements[position] = elements[position - 1];
+                    position -= 1;
                 }
-                arena.tuple(selected)?
+                elements[position] = element;
             }
-            Self::SortSeq {
-                slot,
-                sequence,
-                body,
-            } => {
-                if *slot != ctx.locals.len() {
-                    return Err(CoreError::protocol(
-                        "Invalid sequence callback variable slot",
-                    ));
-                }
-                let source = sequence.eval(ctx, arena)?;
-                let mut elements = arena.sequence(source)?;
-                arena.consume(elements.len())?;
-                let mut locals = ctx.locals.to_vec();
-                locals.extend([Scalar::Bool(false); 2]);
-                for index in 1..elements.len() {
-                    arena.tick()?;
-                    let element = elements[index];
-                    let mut position = index;
-                    while position > 0 {
-                        arena.tick()?;
-                        locals[*slot] = element;
-                        locals[*slot + 1] = elements[position - 1];
-                        if !body
-                            .eval(
-                                EvalContext {
-                                    locals: &locals,
-                                    ..ctx
-                                },
-                                arena,
-                            )?
-                            .boolean()?
-                        {
-                            break;
-                        }
-                        elements[position] = elements[position - 1];
-                        position -= 1;
+            arena.tuple(elements)?
+        })
+    }
+    #[inline]
+    fn eval_domain(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::Domain { argument } = self else {
+            return Err(CoreError::protocol("Expected domain"));
+        };
+        Ok({
+            if arena.metadata.is_some() {
+                return argument.eval_function(ctx, arena)?.domain(arena);
+            }
+            let value = argument.eval(ctx, arena)?;
+            arena.domain(value)?
+        })
+    }
+    #[inline]
+    fn eval_variant_tag(
+        &self,
+        ctx: EvalContext<'_>,
+        arena: &mut Arena,
+    ) -> Result<Scalar, CoreError> {
+        let Self::VariantTag { argument } = self else {
+            return Err(CoreError::protocol("Expected variant tag"));
+        };
+        Ok({
+            let value = argument.eval(ctx, arena)?;
+            let entries = arena.entries(value)?;
+            if entries.len() != 1 || arena.text(entries[0].0).is_none() {
+                return Err(CoreError::protocol(
+                    "Unsupported TLA input: VariantTag requires a singleton string domain",
+                ));
+            }
+            entries[0].0
+        })
+    }
+    #[inline]
+    fn eval_cardinality(
+        &self,
+        ctx: EvalContext<'_>,
+        arena: &mut Arena,
+    ) -> Result<Scalar, CoreError> {
+        let Self::Cardinality { argument } = self else {
+            return Err(CoreError::protocol("Expected cardinality"));
+        };
+        Ok({
+            let value = argument.eval(ctx, arena)?;
+            Scalar::Int(
+                i32::try_from(arena.members(value)?.len())
+                    .map_err(|_| CoreError::protocol("Set cardinality overflow"))?,
+            )
+        })
+    }
+    #[inline]
+    fn eval_len_head_tail(
+        &self,
+        ctx: EvalContext<'_>,
+        arena: &mut Arena,
+    ) -> Result<Scalar, CoreError> {
+        let (Self::Len { argument } | Self::Head { argument } | Self::Tail { argument }) = self
+        else {
+            return Err(CoreError::protocol("Expected Len, Head or Tail"));
+        };
+        Ok({
+            let value = argument.eval(ctx, arena)?;
+            if let Some(text) = arena.text(value) {
+                let units = text.encode_utf16().collect::<Vec<_>>();
+                return Ok(match self {
+                    Self::Len { .. } => Scalar::Int(
+                        i32::try_from(units.len())
+                            .map_err(|_| CoreError::protocol("String length overflow"))?,
+                    ),
+                    Self::Head { .. } => {
+                        let first = units
+                            .first()
+                            .ok_or_else(|| CoreError::protocol("Head of an empty string"))?;
+                        arena.string_utf16(&[*first])?
                     }
-                    elements[position] = element;
-                }
-                arena.tuple(elements)?
-            }
-            Self::Domain { argument } => {
-                if arena.metadata.is_some() {
-                    return argument.eval_function(ctx, arena)?.domain(arena);
-                }
-                let value = argument.eval(ctx, arena)?;
-                arena.domain(value)?
-            }
-            Self::VariantTag { argument } => {
-                let value = argument.eval(ctx, arena)?;
-                let entries = arena.entries(value)?;
-                if entries.len() != 1 || arena.text(entries[0].0).is_none() {
-                    return Err(CoreError::protocol(
-                        "Unsupported TLA input: VariantTag requires a singleton string domain",
-                    ));
-                }
-                entries[0].0
-            }
-            Self::Cardinality { argument } => {
-                let value = argument.eval(ctx, arena)?;
-                Scalar::Int(
-                    i32::try_from(arena.members(value)?.len())
-                        .map_err(|_| CoreError::protocol("Set cardinality overflow"))?,
-                )
-            }
-            Self::Len { argument } | Self::Head { argument } | Self::Tail { argument } => {
-                let value = argument.eval(ctx, arena)?;
-                if let Some(text) = arena.text(value) {
-                    let units = text.encode_utf16().collect::<Vec<_>>();
-                    return Ok(match self {
-                        Self::Len { .. } => Scalar::Int(
-                            i32::try_from(units.len())
-                                .map_err(|_| CoreError::protocol("String length overflow"))?,
-                        ),
-                        Self::Head { .. } => {
-                            let first = units
-                                .first()
-                                .ok_or_else(|| CoreError::protocol("Head of an empty string"))?;
-                            arena.string_utf16(&[*first])?
-                        }
-                        _ => {
-                            if units.is_empty() {
-                                return Err(CoreError::protocol("Tail of an empty string"));
-                            }
-                            arena.string_utf16(&units[1..])?
-                        }
-                    });
-                }
-                let mut values = arena.sequence(value)?;
-                match self {
-                    Self::Len { .. } => Scalar::Int(values.len() as i32),
-                    Self::Head { .. } => *values
-                        .first()
-                        .ok_or_else(|| CoreError::protocol("Head of an empty sequence"))?,
                     _ => {
-                        if values.is_empty() {
-                            return Err(CoreError::protocol("Tail of an empty sequence"));
+                        if units.is_empty() {
+                            return Err(CoreError::protocol("Tail of an empty string"));
                         }
-                        values.remove(0);
-                        arena.tuple(values)?
+                        arena.string_utf16(&units[1..])?
                     }
+                });
+            }
+            let mut values = arena.sequence(value)?;
+            match self {
+                Self::Len { .. } => Scalar::Int(values.len() as i32),
+                Self::Head { .. } => *values
+                    .first()
+                    .ok_or_else(|| CoreError::protocol("Head of an empty sequence"))?,
+                _ => {
+                    if values.is_empty() {
+                        return Err(CoreError::protocol("Tail of an empty sequence"));
+                    }
+                    values.remove(0);
+                    arena.tuple(values)?
                 }
             }
-            Self::Append { left, right } | Self::Concat { left, right } => {
-                let left = left.eval(ctx, arena)?;
-                let right = right.eval(ctx, arena)?;
-                if let Some(text) = arena.text(left) {
-                    let suffix = arena.text(right).ok_or_else(|| {
-                        CoreError::protocol("String concatenation requires strings")
-                    })?;
-                    let size = text
-                        .len()
-                        .checked_add(suffix.len())
-                        .ok_or_else(|| CoreError::protocol("String length overflow"))?;
-                    arena.consume(size)?;
-                    let text = arena
-                        .text(left)
-                        .ok_or_else(|| CoreError::protocol("Expected a string"))?;
-                    let suffix = arena
-                        .text(right)
-                        .ok_or_else(|| CoreError::protocol("Expected a string"))?;
-                    let value = format!("{text}{suffix}");
-                    return arena.string(value);
-                }
-                let mut values = arena.sequence_values(left)?;
-                if matches!(self, Self::Append { .. }) {
-                    values.push(right);
-                } else {
-                    values.extend(arena.sequence_values(right)?);
-                }
-                arena.tuple(values)?
+        })
+    }
+    #[inline]
+    fn eval_append_or_concat(
+        &self,
+        ctx: EvalContext<'_>,
+        arena: &mut Arena,
+    ) -> Result<Scalar, CoreError> {
+        let (Self::Append { left, right } | Self::Concat { left, right }) = self else {
+            return Err(CoreError::protocol("Expected Append or concatenation"));
+        };
+        Ok({
+            let left = left.eval(ctx, arena)?;
+            let right = right.eval(ctx, arena)?;
+            if let Some(text) = arena.text(left) {
+                let suffix = arena
+                    .text(right)
+                    .ok_or_else(|| CoreError::protocol("String concatenation requires strings"))?;
+                let size = text
+                    .len()
+                    .checked_add(suffix.len())
+                    .ok_or_else(|| CoreError::protocol("String length overflow"))?;
+                arena.consume(size)?;
+                let text = arena
+                    .text(left)
+                    .ok_or_else(|| CoreError::protocol("Expected a string"))?;
+                let suffix = arena
+                    .text(right)
+                    .ok_or_else(|| CoreError::protocol("Expected a string"))?;
+                let value = format!("{text}{suffix}");
+                return arena.string(value);
             }
-            Self::Subseq { sequence, from, to } => {
-                let sequence = sequence.eval(ctx, arena)?;
-                let from = from.eval(ctx, arena)?.integer()?;
-                let to = to.eval(ctx, arena)?.integer()?;
-                if let Some(text) = arena.text(sequence) {
-                    let units = text.encode_utf16().collect::<Vec<_>>();
-                    if from > to {
-                        return arena.string(String::new());
-                    }
-                    if from < 1 || to as usize > units.len() {
-                        return Err(CoreError::protocol("SubSeq bounds are outside the string"));
-                    }
-                    return arena.string_utf16(&units[(from - 1) as usize..to as usize]);
-                }
-                let values = arena.sequence(sequence)?;
+            let mut values = arena.sequence_values(left)?;
+            if matches!(self, Self::Append { .. }) {
+                values.push(right);
+            } else {
+                values.extend(arena.sequence_values(right)?);
+            }
+            arena.tuple(values)?
+        })
+    }
+    #[inline]
+    fn eval_subseq(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::Subseq { sequence, from, to } = self else {
+            return Err(CoreError::protocol("Expected subseq"));
+        };
+        Ok({
+            let sequence = sequence.eval(ctx, arena)?;
+            let from = from.eval(ctx, arena)?.integer()?;
+            let to = to.eval(ctx, arena)?.integer()?;
+            if let Some(text) = arena.text(sequence) {
+                let units = text.encode_utf16().collect::<Vec<_>>();
                 if from > to {
-                    arena.tuple(vec![])?
-                } else {
-                    if from < 1 || to as usize > values.len() {
-                        return Err(CoreError::protocol(
-                            "SubSeq bounds are outside the sequence",
-                        ));
-                    }
-                    arena.tuple(values[(from - 1) as usize..to as usize].to_vec())?
+                    return arena.string(String::new());
+                }
+                if from < 1 || to as usize > units.len() {
+                    return Err(CoreError::protocol("SubSeq bounds are outside the string"));
+                }
+                return arena.string_utf16(&units[(from - 1) as usize..to as usize]);
+            }
+            let values = arena.sequence(sequence)?;
+            if from > to {
+                arena.tuple(vec![])?
+            } else {
+                if from < 1 || to as usize > values.len() {
+                    return Err(CoreError::protocol(
+                        "SubSeq bounds are outside the sequence",
+                    ));
+                }
+                arena.tuple(values[(from - 1) as usize..to as usize].to_vec())?
+            }
+        })
+    }
+    #[inline]
+    fn eval_set_operator(
+        &self,
+        ctx: EvalContext<'_>,
+        arena: &mut Arena,
+    ) -> Result<Scalar, CoreError> {
+        let (Self::Cup { left, right }
+        | Self::Cap { left, right }
+        | Self::Difference { left, right }
+        | Self::SubsetEq { left, right }) = self
+        else {
+            return Err(CoreError::protocol("Expected a set operator"));
+        };
+        Ok({
+            let left = left.eval(ctx, arena)?;
+            let right = right.eval(ctx, arena)?;
+            let mut result = vec![];
+            for value in arena.members(left)? {
+                arena.tick()?;
+                let contains = arena.contains(value, right)?;
+                if matches!(self, Self::SubsetEq { .. }) && !contains {
+                    return Ok(Scalar::Bool(false));
+                }
+                if matches!(self, Self::Cup { .. })
+                    || (matches!(self, Self::Cap { .. }) && contains)
+                    || (matches!(self, Self::Difference { .. }) && !contains)
+                {
+                    result.push(value);
                 }
             }
-            Self::Cup { left, right }
-            | Self::Cap { left, right }
-            | Self::Difference { left, right }
-            | Self::SubsetEq { left, right } => {
-                let left = left.eval(ctx, arena)?;
-                let right = right.eval(ctx, arena)?;
-                let mut result = vec![];
-                for value in arena.members(left)? {
+            if matches!(self, Self::SubsetEq { .. }) {
+                Scalar::Bool(true)
+            } else {
+                if matches!(self, Self::Cup { .. }) {
+                    result.extend(arena.members(right)?);
+                }
+                arena.set(result)?
+            }
+        })
+    }
+    #[inline]
+    fn eval_union(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::Union { argument } = self else {
+            return Err(CoreError::protocol("Expected union"));
+        };
+        Ok({
+            let outer = argument.eval(ctx, arena)?;
+            let mut values = vec![];
+            for set in arena.members(outer)? {
+                arena.tick()?;
+                values.extend(arena.members(set)?);
+            }
+            arena.set(values)?
+        })
+    }
+    #[inline]
+    fn eval_powerset(&self, ctx: EvalContext<'_>, arena: &mut Arena) -> Result<Scalar, CoreError> {
+        let Self::Powerset { argument } = self else {
+            return Err(CoreError::protocol("Expected powerset"));
+        };
+        Ok({
+            let set = argument.eval(ctx, arena)?;
+            let members = arena.members(set)?;
+            let mut sets = vec![arena.set(vec![])?];
+            for value in members {
+                let mut additions = vec![];
+                for set in &sets {
                     arena.tick()?;
-                    let contains = arena.contains(value, right)?;
-                    if matches!(self, Self::SubsetEq { .. }) && !contains {
-                        return Ok(Scalar::Bool(false));
-                    }
-                    if matches!(self, Self::Cup { .. })
-                        || (matches!(self, Self::Cap { .. }) && contains)
-                        || (matches!(self, Self::Difference { .. }) && !contains)
-                    {
-                        result.push(value);
-                    }
+                    let mut members = arena.members(*set)?;
+                    members.push(value);
+                    additions.push(arena.set(members)?);
                 }
-                if matches!(self, Self::SubsetEq { .. }) {
-                    Scalar::Bool(true)
-                } else {
-                    if matches!(self, Self::Cup { .. }) {
-                        result.extend(arena.members(right)?);
-                    }
-                    arena.set(result)?
-                }
+                sets.extend(additions);
             }
-            Self::Union { argument } => {
-                let outer = argument.eval(ctx, arena)?;
-                let mut values = vec![];
-                for set in arena.members(outer)? {
-                    arena.tick()?;
-                    values.extend(arena.members(set)?);
-                }
-                arena.set(values)?
+            arena.set(sets)?
+        })
+    }
+    #[inline]
+    fn eval_function_set(
+        &self,
+        ctx: EvalContext<'_>,
+        arena: &mut Arena,
+    ) -> Result<Scalar, CoreError> {
+        let Self::FunctionSet { left, right } = self else {
+            return Err(CoreError::protocol("Expected function set"));
+        };
+        Ok({
+            let domain = left.eval(ctx, arena)?;
+            let range = right.eval(ctx, arena)?;
+            let keys = arena.members(domain)?;
+            let values = arena.members(range)?;
+            let mut functions = vec![];
+            enumerate_functions(
+                &keys,
+                &vec![values.as_slice(); keys.len()],
+                arena,
+                &mut functions,
+            )?;
+            arena.set(functions)?
+        })
+    }
+    #[inline]
+    fn eval_record_set(
+        &self,
+        ctx: EvalContext<'_>,
+        arena: &mut Arena,
+    ) -> Result<Scalar, CoreError> {
+        let Self::RecordSet { fields } = self else {
+            return Err(CoreError::protocol("Expected record set"));
+        };
+        Ok({
+            let mut keys = vec![];
+            let mut ranges = vec![];
+            for (name, set) in fields {
+                keys.push(arena.string(name.clone())?);
+                let set = set.eval(ctx, arena)?;
+                ranges.push(arena.members(set)?);
             }
-            Self::Powerset { argument } => {
-                let set = argument.eval(ctx, arena)?;
-                let members = arena.members(set)?;
-                let mut sets = vec![arena.set(vec![])?];
-                for value in members {
-                    let mut additions = vec![];
-                    for set in &sets {
-                        arena.tick()?;
-                        let mut members = arena.members(*set)?;
-                        members.push(value);
-                        additions.push(arena.set(members)?);
-                    }
-                    sets.extend(additions);
-                }
-                arena.set(sets)?
-            }
-            Self::FunctionSet { left, right } => {
-                let domain = left.eval(ctx, arena)?;
-                let range = right.eval(ctx, arena)?;
-                let keys = arena.members(domain)?;
-                let values = arena.members(range)?;
-                let mut functions = vec![];
-                enumerate_functions(
-                    &keys,
-                    &vec![values.as_slice(); keys.len()],
-                    arena,
-                    &mut functions,
-                )?;
-                arena.set(functions)?
-            }
-            Self::RecordSet { fields } => {
-                let mut keys = vec![];
-                let mut ranges = vec![];
-                for (name, set) in fields {
-                    keys.push(arena.string(name.clone())?);
-                    let set = set.eval(ctx, arena)?;
-                    ranges.push(arena.members(set)?);
-                }
-                let mut functions = vec![];
-                enumerate_functions(
-                    &keys,
-                    &ranges.iter().map(Vec::as_slice).collect::<Vec<_>>(),
-                    arena,
-                    &mut functions,
-                )?;
-                arena.set(functions)?
-            }
-            Self::FunctionIn { left, right } => {
-                let value = left.eval(ctx, arena)?;
-                let set = MembershipSet::eval(right, ctx, arena)?;
-                Scalar::Bool(set.contains(value, arena)?)
-            }
-            Self::SequenceIn { left, right } => {
-                let value = left.eval(ctx, arena)?;
-                let set = MembershipSet::new(
-                    MembershipKind::Sequences(MembershipSet::eval(right, ctx, arena)?),
-                    false,
-                );
-                Scalar::Bool(set.contains(value, arena)?)
-            }
-            Self::SequenceSet { .. } => {
-                return Err(CoreError::protocol("Sequence sets cannot be enumerated"));
-            }
-            Self::Enabled { .. } => self.eval_enabled(ctx, arena)?,
+            let mut functions = vec![];
+            enumerate_functions(
+                &keys,
+                &ranges.iter().map(Vec::as_slice).collect::<Vec<_>>(),
+                arena,
+                &mut functions,
+            )?;
+            arena.set(functions)?
+        })
+    }
+    #[inline]
+    fn eval_function_in(
+        &self,
+        ctx: EvalContext<'_>,
+        arena: &mut Arena,
+    ) -> Result<Scalar, CoreError> {
+        let Self::FunctionIn { left, right } = self else {
+            return Err(CoreError::protocol("Expected function in"));
+        };
+        Ok({
+            let value = left.eval(ctx, arena)?;
+            let set = MembershipSet::eval(right, ctx, arena)?;
+            Scalar::Bool(set.contains(value, arena)?)
+        })
+    }
+    #[inline]
+    fn eval_sequence_in(
+        &self,
+        ctx: EvalContext<'_>,
+        arena: &mut Arena,
+    ) -> Result<Scalar, CoreError> {
+        let Self::SequenceIn { left, right } = self else {
+            return Err(CoreError::protocol("Expected sequence in"));
+        };
+        Ok({
+            let value = left.eval(ctx, arena)?;
+            let set = MembershipSet::new(
+                MembershipKind::Sequences(MembershipSet::eval(right, ctx, arena)?),
+                false,
+            );
+            Scalar::Bool(set.contains(value, arena)?)
         })
     }
 }
@@ -1676,22 +2045,20 @@ impl MembershipSet {
         ) {
             return expression.eval_reference(ctx, arena, Self::eval);
         }
-        if arena.metadata.is_some()
-            && let Expression::If {
+        if arena.metadata.is_some() && matches!(expression, Expression::If { .. }) {
+            let mut node = expression;
+            while let Expression::If {
                 condition,
                 consequent,
                 alternative,
-            } = expression
-        {
-            return Self::eval(
+            } = node
+            {
                 if condition.eval(ctx, arena)?.boolean()? {
-                    consequent
-                } else {
-                    alternative
-                },
-                ctx,
-                arena,
-            );
+                    return Self::eval(consequent, ctx, arena);
+                }
+                node = alternative;
+            }
+            return Self::eval(node, ctx, arena);
         }
         let cached = arena.prepared_membership(expression);
         if let Some(Some(prepared)) = &cached {
