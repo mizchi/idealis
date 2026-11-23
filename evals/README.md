@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0088: 総当たりとSATのportfolio](iterations/0088-ralloy-portfolio.md)は、総当たりを5000 workで先に走らせてSATへ切り替える方法を実装し、正しさの検査を通した。速度の2回の測定は関係のないプロセスの負荷（8〜22）に埋もれて`hold`になり、変更を戻した。
+
 [0087: SATと総当たりの切り替えの境界](iterations/0087-ralloy-backend-threshold.md)は、171 commandで両backendを測った。合計が最小の4 bitは、小さい探索を2〜13倍遅くして`hold`になり、24 bitに戻した。幅は、解がすぐ見つかるかを表さないため、backendの選択の目安にならなかった。
 
 [0086: SAT backendでsigの階層と整数を扱う](iterations/0086-ralloy-sat-hierarchy-integers.md)は、階層を所属の変数と加算回路の数の制約で、整数をbit幅のbitベクトルで符号化した。`div`・`rem`以外のモデルをSATで解け、166 commandで総当たりと一致した。速度は負荷の中で2回とも`hold`。
