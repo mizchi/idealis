@@ -40,6 +40,7 @@ fn analyze_with(
         lex: Vec::new(),
         undo: Vec::new(),
         incremental,
+        separating: Vec::new(),
         positions: Vec::new(),
         trace: tracing.then(Vec::new),
     };
@@ -107,6 +108,8 @@ struct Search<'a> {
     lex: Vec<(usize, bool)>,
     undo: Vec<(usize, (usize, bool))>,
     incremental: bool,
+    /// Per sorted set name: whether membership separates atoms.
+    separating: Vec<bool>,
     /// (field, owner atom) of each slot, in search order.
     positions: Vec<(usize, usize)>,
     trace: Option<Trace>,
@@ -376,39 +379,49 @@ impl Search<'_> {
     fn symmetries(&mut self, slots: &[Slot], world: &World) {
         self.symmetry.clear();
         self.lex.clear();
-        self.positions = slots.iter().map(|slot| (slot.field, slot.source)).collect();
-        let fixed: Vec<u64> = world
-            .sets
-            .iter()
-            .filter(|(name, _)| {
-                let subset = self.module.signatures.iter().any(|signature| {
-                    &signature.name == *name && matches!(signature.parent, Some((Parent::In, _)))
-                });
-                let used = self.module.fields.iter().any(|field| {
-                    &field.owner == *name || field.columns.iter().any(|column| column == *name)
-                });
-                !subset || used
-            })
-            .map(|(_, set)| *set)
-            .collect();
+        // Which sets separate atoms, aligned with the sorted set names; the
+        // names are the same in every world of one analysis (plan 0084a).
+        if self.separating.len() != world.sets.len() {
+            self.separating = world
+                .sets
+                .keys()
+                .map(|name| {
+                    let subset = self.module.signatures.iter().any(|signature| {
+                        &signature.name == name && matches!(signature.parent, Some((Parent::In, _)))
+                    });
+                    let used = self.module.fields.iter().any(|field| {
+                        &field.owner == name || field.columns.iter().any(|column| column == name)
+                    });
+                    !subset || used
+                })
+                .collect();
+        }
         let integers = if world.bitwidth == 0 {
             0
         } else {
             1 << world.bitwidth
         };
-        let position: BTreeMap<(usize, usize), usize> = slots
-            .iter()
-            .enumerate()
-            .map(|(index, slot)| ((slot.field, slot.source), index))
+        let atoms = world.names.len();
+        let pairs: Vec<usize> = (integers..atoms.saturating_sub(1))
+            .filter(|&first| {
+                world
+                    .sets
+                    .values()
+                    .zip(&self.separating)
+                    .filter(|(_, separating)| **separating)
+                    .all(|(set, _)| (set >> first) & 1 == (set >> (first + 1)) & 1)
+            })
             .collect();
-        for first in integers..world.names.len().saturating_sub(1) {
+        if pairs.is_empty() {
+            return;
+        }
+        self.positions = slots.iter().map(|slot| (slot.field, slot.source)).collect();
+        let mut position = vec![usize::MAX; self.module.fields.len() * atoms];
+        for (index, slot) in slots.iter().enumerate() {
+            position[slot.field * atoms + slot.source] = index;
+        }
+        for first in pairs {
             let second = first + 1;
-            if !fixed
-                .iter()
-                .all(|set| (set >> first) & 1 == (set >> second) & 1)
-            {
-                continue;
-            }
             let swap = |atom: usize| match atom {
                 atom if atom == first => second,
                 atom if atom == second => first,
@@ -416,7 +429,7 @@ impl Search<'_> {
             };
             let partner = slots
                 .iter()
-                .map(|slot| position[&(slot.field, swap(slot.source))])
+                .map(|slot| position[slot.field * atoms + swap(slot.source)])
                 .collect();
             let permutations = world
                 .spaces
