@@ -72,6 +72,7 @@ jobs:
       - run: cargo clippy --all-targets --locked --manifest-path crates/ralloy/Cargo.toml -- -D warnings
       - run: cargo test --all-targets --locked --manifest-path crates/ralloy/Cargo.toml
       - run: just rquint-test
+      - run: just rmodel-test
       - run: cargo fmt --manifest-path crates/rusmt/Cargo.toml -- --check
       - run: cargo clippy --all-targets --locked --manifest-path crates/rusmt/Cargo.toml -- -D warnings
       - run: cargo test --all-targets --locked --manifest-path crates/rusmt/Cargo.toml
