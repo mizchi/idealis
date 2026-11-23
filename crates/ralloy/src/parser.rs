@@ -50,7 +50,7 @@ pub(crate) fn parse(source: &str) -> Result<Module, Error> {
         .find(|operator| source[position..].starts_with(operator))
         {
             position += operator.len();
-        } else if b"{}()[],:|.+-&=~^*!;<>#".contains(&bytes[position]) {
+        } else if b"{}()[],:|.+-&=~^*!;<>#'".contains(&bytes[position]) {
             position += 1;
         } else {
             return Err(Error::new(
@@ -419,6 +419,7 @@ impl Parser {
                 self.expect("{")?;
                 let first = module.fields.len();
                 while !self.take("}") {
+                    let var = self.take("var");
                     let mut names = vec![self.name()?];
                     while self.take(",") {
                         names.push(self.name()?);
@@ -469,6 +470,7 @@ impl Parser {
                                 Mult::Set
                             },
                             arrow,
+                            var,
                         });
                     }
                     if self.take(",") {
@@ -491,17 +493,19 @@ impl Parser {
                             field.columns.clone(),
                             field.mult,
                             field.arrow,
+                            field.var,
                         )
                     })
                     .collect();
                 for owner in &owners[1..] {
-                    for (name, columns, mult, arrow) in &declared {
+                    for (name, columns, mult, arrow, var) in &declared {
                         module.fields.push(Field {
                             name: name.clone(),
                             owner: owner.clone(),
                             columns: columns.clone(),
                             mult: *mult,
                             arrow: *arrow,
+                            var: *var,
                         });
                     }
                 }
@@ -627,6 +631,7 @@ impl Parser {
             overall: Some(3),
             entries: Vec::new(),
             bitwidth: 4,
+            steps: None,
         };
         if !self.take("for") {
             return Ok(scope);
@@ -668,6 +673,11 @@ impl Parser {
                 }
                 scope.bitwidth = number;
                 seen_int = true;
+            } else if self.take("steps") {
+                if scope.steps.is_some() || exact {
+                    return Err(Error::new(ErrorKind::Scope, "duplicate or exact steps"));
+                }
+                scope.steps = Some(number);
             } else {
                 scope.entries.push((self.name()?, number, exact));
             }
@@ -785,6 +795,14 @@ impl Parser {
             }
         } else if self.take("not") || self.take("!") {
             Expr::Unary(Unary::Not, Box::new(self.expression(5)?))
+        } else if ["always", "eventually", "after"].contains(&self.peek()) {
+            let operator = match self.peek() {
+                "always" => Unary::Always,
+                "eventually" => Unary::Eventually,
+                _ => Unary::After,
+            };
+            self.position += 1;
+            Expr::Unary(operator, Box::new(self.expression(5)?))
         } else if ["~", "^", "*"].contains(&self.peek()) {
             let operator = match self.peek() {
                 "~" => Unary::Transpose,
@@ -821,6 +839,10 @@ impl Parser {
                     ErrorKind::Resource,
                     "expression exceeds 512 tokens",
                 ));
+            }
+            if self.take("'") {
+                left = Expr::Unary(Unary::Prime, Box::new(left));
+                continue;
             }
             if self.take("[") {
                 let Expr::Name(name) = left else {

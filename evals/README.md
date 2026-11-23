@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0090: ralloyの時相をSATで有界に検査する](iterations/0090-ralloy-temporal-bmc.md)は、Alloy 6のvarと`always`・`eventually`・`after`・primeを、長さstepsのlassoとしてSATへ展開した。時相の25 commandがAlloy 6.2.0と一致し、SATのtraceはすべて評価器の検査を通った。
+
 [0089: Quint IRを直接読むfrontend](iterations/0089-quint-ir-frontend.md)は、Quint CLIのJSON IRを標準のTLA+へ写すcrate rquintを作った。Apalacheを経由せずに、0044の12件でTLCと判定・状態数・生成数が一致し、builtinの事実もQuintのsimulatorと同じ判定になった。
 
 [0088: 総当たりとSATのportfolio](iterations/0088-ralloy-portfolio.md)は、総当たりを5000 workで先に走らせてSATへ切り替える方法を実装し、正しさの検査を通した。速度の2回の測定は関係のないプロセスの負荷（8〜22）に埋もれて`hold`になり、変更を戻した。

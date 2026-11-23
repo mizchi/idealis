@@ -10,17 +10,19 @@
 - [x] 整数: リテラル、`#e`、`plus`などの算術、比較。Int型の関係は値の和になり、bit幅の2の補数で桁あふれする（0082）。
 - [x] 入れ替えられるatomの対称性を、lex-leaderで探索の途中で除く。2列以上のfieldとsubset sigも扱う（0083、0084）。
 - [x] `div`・`rem`を含まないモデルで、fieldのslotの幅が24 bitを超えるcommandは、関係・階層・整数をSATへ符号化してralloy内のCDCLで解く（0085、0086）。
+- [x] 時相（Alloy 6）: fieldの`var`、`always`・`eventually`・`after`、prime、`N steps`（既定10）。長さstepsのlassoをSATへ展開して解き、traceを評価器で検査し直す。時相の演算子のないfactとcommandは最初の状態で、fieldの宣言は全状態で成り立つ（0090）。
 - [x] 有限構造の全列挙、`check_instance`、matched/mismatch/invalid/unknownとstatusの区別、native JSONLとホストimport不要のWasm ABI v1。
 
 ## Alloyとの差分テスト
 
-- [x] 公式Alloy 6.2.0の答えをroracleの`CheckReport`として保存し、`cargo test`で再生する。5 group・38モデル・178 commandすべてで一致する（0078〜0086）。
+- [x] 公式Alloy 6.2.0の答えをroracleの`CheckReport`として保存し、`cargo test`で再生する。5 group・38モデル・178 commandすべてで一致する（0078〜0086）。時相の5モデル・25 commandも一致する（0090）。
 
 [評価0078](../../evals/iterations/0078-ralloy-alloy-oracle.md)から[0086](../../evals/iterations/0086-ralloy-sat-hierarchy-integers.md)を参照。
 
 ## 非対応・対象外
 
-- [ ] 親が複数の`in`、`@field`、module、`set`などの引数、高階量化、5項以上の関係、`sum`、整数を関係として使う式、0による割り算、時間・var。
+- [ ] 親が複数の`in`、`@field`、module、`set`などの引数、高階量化、5項以上の関係、`sum`、整数を関係として使う式、0による割り算。
+- [ ] 時相: var sig、`until`・`releases`・`;`、過去の演算子、`1..N steps`の下限、無限の検査、TSのcontractでのtraceの受け渡し。
 - [ ] Alloy全体の構文・型検査、`div`・`rem`のSAT符号化。
 - [ ] 固定instanceの一致だけから未観測の実装履歴を保証すること。
 

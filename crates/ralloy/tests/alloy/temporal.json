@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "group": "temporal",
+  "reference": "alloy-6.2.0",
+  "implementations": [
+    "ralloy"
+  ],
+  "status": "matched",
+  "cases": [
+    {
+      "case": {
+        "id": "counter",
+        "input": {
+          "source": "one sig Counter { var n: one Int }\nfact { Counter.n = 0 }\nfact { always { Counter.n' = plus[Counter.n, 1] } }\nWraps: run { eventually { Counter.n = -1 } } for 3 but 3 Int, 8 steps\nNoLasso: run {} for 3 but 3 Int, 7 steps\nAfterOne: check { after { Counter.n = 1 } } for 3 but 3 Int, 8 steps\nSettles: check { eventually { always { Counter.n = 0 } } } for 3 but 3 Int, 8 steps\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "AfterOne": false,
+          "NoLasso": false,
+          "Settles": true,
+          "Wraps": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "AfterOne": false,
+              "NoLasso": false,
+              "Settles": true,
+              "Wraps": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "growth",
+        "input": {
+          "source": "sig Item {}\none sig Box { var items: set Item }\npred grow { some i: Item - Box.items | Box.items' = Box.items + i }\npred stay { Box.items' = Box.items }\nGrow: run { no Box.items and always { grow } } for 3 but 5 steps\nGrowOrStay: run { no Box.items and always { grow or stay } and eventually { #Box.items = 3 } } for 3 but 5 steps\nTooFew: run { no Box.items and always { grow or stay } and eventually { #Box.items = 3 } } for 3 but exactly 2 Item, 5 steps\nShortTrace: run { no Box.items and always { grow or stay } and eventually { #Box.items = 3 } } for 3 but 2 steps\nMonotone: check { (no Box.items and always { grow or stay }) implies always { Box.items in Box.items' } } for 3 but 5 steps\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "Grow": false,
+          "GrowOrStay": true,
+          "Monotone": false,
+          "ShortTrace": false,
+          "TooFew": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "Grow": false,
+              "GrowOrStay": true,
+              "Monotone": false,
+              "ShortTrace": false,
+              "TooFew": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "lights",
+        "input": {
+          "source": "abstract sig Color {}\none sig Red, Green extends Color {}\none sig Light { var color: one Color }\nfact { Light.color = Red }\nfact { always { Light.color' != Light.color } }\nAlternates: check { always { Light.color = Red implies after { Light.color = Green } } } for 3 but 4 steps\nStaysRed: check { always { Light.color = Red } } for 3 but 4 steps\nGreenEventually: check { eventually { Light.color = Green } } for 3 but 4 steps\nSomeTrace: run {} for 3 but 4 steps\nInitialOnly: run { Light.color = Green } for 3 but 4 steps\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "Alternates": false,
+          "GreenEventually": false,
+          "InitialOnly": false,
+          "SomeTrace": true,
+          "StaysRed": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "Alternates": false,
+              "GreenEventually": false,
+              "InitialOnly": false,
+              "SomeTrace": true,
+              "StaysRed": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "mutex",
+        "input": {
+          "source": "sig Proc {}\none sig Lock { var holder: lone Proc }\npred acquire[p: Proc] { no Lock.holder and Lock.holder' = p }\npred release[p: Proc] { Lock.holder = p and no Lock.holder' }\npred skip { Lock.holder' = Lock.holder }\nfact { no Lock.holder }\nfact { always { skip or (some p: Proc | acquire[p] or release[p]) } }\nSafe: check { always { lone Lock.holder } } for 3 but 6 steps\nHandover: run { some p, q: Proc | p != q and eventually { Lock.holder = p and eventually { Lock.holder = q } } } for 3 but 6 steps\nNoHandoverWithOne: run { some p, q: Proc | p != q and eventually { Lock.holder = p and eventually { Lock.holder = q } } } for 3 but exactly 1 Proc, 6 steps\nReleased: check { all p: Proc | always { Lock.holder = p implies eventually { no Lock.holder } } } for 3 but 4 steps\nOnlyFromFree: check { always { (some Lock.holder' and Lock.holder' != Lock.holder) implies no Lock.holder } } for 3 but 6 steps\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "Handover": true,
+          "NoHandoverWithOne": false,
+          "OnlyFromFree": false,
+          "Released": true,
+          "Safe": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "Handover": true,
+              "NoHandoverWithOne": false,
+              "OnlyFromFree": false,
+              "Released": true,
+              "Safe": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "token",
+        "input": {
+          "source": "sig Node { edges: set Node }\none sig Token { var at: one Node }\nfact { always { Token.at' in Token.at.edges } }\nCycle: run { some n: Node | always { eventually { Token.at = n } } } for 3 but 4 steps\nVisitAll: run { #Node = 3 and (all n: Node | eventually { Token.at = n }) } for 3 but 3 steps\nVisitAllShort: run { #Node = 3 and (all n: Node | eventually { Token.at = n }) } for 3 but 2 steps\nStuck: run { no edges } for 3 but 4 steps\nReachable: check { all n: Node | Token.at = n implies always { Token.at in n.*edges } } for 3 but 4 steps\nUnreachable: check { all n: Node | Token.at = n implies always { Token.at in n.^edges } } for 3 but 4 steps\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "Cycle": true,
+          "Reachable": false,
+          "Stuck": false,
+          "Unreachable": true,
+          "VisitAll": true,
+          "VisitAllShort": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "Cycle": true,
+              "Reachable": false,
+              "Stuck": false,
+              "Unreachable": true,
+              "VisitAll": true,
+              "VisitAllShort": false
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -32,6 +32,8 @@ pub(crate) struct Field {
     pub mult: Mult,
     /// Multiplicities around the arrow of a two-column field.
     pub arrow: Option<(Mult, Mult)>,
+    /// `var`: the field changes from state to state (plan 0090).
+    pub var: bool,
 }
 #[derive(Clone, Copy)]
 pub(crate) enum Unary {
@@ -45,6 +47,12 @@ pub(crate) enum Unary {
     Reflexive,
     /// `#e`, an integer (plan 0082).
     Cardinality,
+    /// Temporal formulas over a lasso trace and the postfix prime `e'`,
+    /// the value of `e` in the next state (plan 0090).
+    Always,
+    Eventually,
+    After,
+    Prime,
 }
 #[derive(Clone, Copy)]
 pub(crate) enum Binary {
@@ -100,6 +108,8 @@ pub(crate) struct RawScope {
     pub overall: Option<usize>,
     pub entries: Vec<(String, usize, bool)>,
     pub bitwidth: usize,
+    /// `N steps`: the trace length (plan 0090).
+    pub steps: Option<usize>,
 }
 pub(crate) struct RawCommand {
     pub label: String,
@@ -113,6 +123,38 @@ pub(crate) struct Predicate {
     pub params: Vec<Declaration>,
     pub body: Expr,
     pub function: bool,
+}
+impl Module {
+    /// Whether any field is `var` or any formula is temporal (plan 0090).
+    pub fn temporal(&self) -> bool {
+        fn uses(expression: &Expr) -> bool {
+            match expression {
+                Expr::Name(_) | Expr::Number(_) => false,
+                Expr::Apply(_, arguments) => arguments.iter().any(uses),
+                Expr::Block(expressions) => expressions.iter().any(uses),
+                Expr::Unary(operator, child) => {
+                    matches!(
+                        operator,
+                        Unary::Always | Unary::Eventually | Unary::After | Unary::Prime
+                    ) || uses(child)
+                }
+                Expr::Binary(_, left, right) => uses(left) || uses(right),
+                Expr::Quantified(_, declarations, body) => {
+                    declarations
+                        .iter()
+                        .any(|declaration| uses(&declaration.domain))
+                        || uses(body)
+                }
+            }
+        }
+        self.fields.iter().any(|field| field.var)
+            || self.facts.iter().any(uses)
+            || self.assertions.values().any(uses)
+            || self.predicates.values().any(|predicate| {
+                uses(&predicate.body) || predicate.params.iter().any(|param| uses(&param.domain))
+            })
+            || self.commands.iter().any(|command| uses(&command.body))
+    }
 }
 impl Predicate {
     pub fn arity(&self) -> usize {

@@ -133,6 +133,7 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
             .expression(expression, &BTreeMap::new(), 0)?
             .boolean()?;
     }
+    let temporal = module.temporal();
     let mut commands = Vec::new();
     for command in &module.commands {
         let body = if let (Kind::Check, Expr::Name(name)) = (command.kind, &command.body) {
@@ -286,12 +287,18 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
         {
             return Err(Error::new(ErrorKind::Resource, "universe exceeds 64 atoms"));
         }
+        // Alloy's default trace bound is 10 steps (plan 0090).
+        let steps = temporal.then(|| command.scope.steps.unwrap_or(10));
+        if steps.is_some_and(|steps| steps == 0 || steps > 32) {
+            return Err(Error::new(ErrorKind::Resource, "supported steps: 1-32"));
+        }
         commands.push(Command {
             label: command.label.clone(),
             kind: command.kind,
             scope: Scope {
                 signatures,
                 integer_bitwidth: command.scope.bitwidth,
+                steps,
             },
         });
     }
@@ -476,6 +483,14 @@ impl Checker<'_> {
                     Unary::Cardinality => {
                         kind.columns()?;
                         Ok(Type::Integer)
+                    }
+                    Unary::Always | Unary::Eventually | Unary::After => {
+                        kind.boolean()?;
+                        Ok(Type::Boolean)
+                    }
+                    Unary::Prime => {
+                        kind.clone().columns()?;
+                        Ok(kind)
                     }
                     Unary::Transpose | Unary::Closure | Unary::Reflexive => {
                         let mut columns = kind.columns()?;

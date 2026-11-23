@@ -53,11 +53,16 @@ fn evaluate(
             .signatures
             .iter()
             .any(|signature| !instance.signatures.contains_key(&signature.name))
-        || instance.fields.len() != module.fields.len()
-        || module
-            .fields
-            .iter()
-            .any(|field| !instance.fields.contains_key(&field.name))
+        || instance.fields.len()
+            != module
+                .fields
+                .iter()
+                .filter(|field| command.scope.steps.is_none() || !field.var)
+                .count()
+        || module.fields.iter().any(|field| {
+            (command.scope.steps.is_none() || !field.var)
+                && !instance.fields.contains_key(&field.name)
+        })
     {
         return Err(Failure::Protocol(
             "instance must specify exactly the declared signatures and fields",
@@ -144,76 +149,59 @@ fn evaluate(
             (1u64 << world.names.len()) - 1
         },
     );
-    for field in &module.fields {
-        let space = (field.columns.len() > 1).then(|| world.space(&field.columns));
-        let mut rows = vec![0u64; world.names.len()];
-        for tuple in &instance.fields[&field.name] {
-            budget.tick()?;
-            if tuple.len() != 1 + field.columns.len() {
-                return Err(Failure::Protocol("field tuple arity"));
-            }
-            let atoms = tuple
-                .iter()
-                .map(|name| {
-                    atoms
-                        .get(name)
-                        .copied()
-                        .ok_or(Failure::Protocol("unknown field tuple atom"))
-                })
-                .collect::<Result<Vec<_>, _>>()?;
-            let source = atoms[0];
-            if world.sets[&field.owner] & (1 << source) == 0
-                || field
-                    .columns
-                    .iter()
-                    .zip(&atoms[1..])
-                    .any(|(column, atom)| world.sets[column] & (1 << atom) == 0)
-            {
-                return Err(Failure::Invalid(CheckReason::Declaration));
-            }
-            let bit = match &space {
-                None => atoms[1],
-                Some(space) => space
-                    .iter()
-                    .position(|candidate| {
-                        candidate
-                            .iter()
-                            .map(|atom| *atom as usize)
-                            .eq(atoms[1..].iter().copied())
-                    })
-                    .expect("member of the column product"),
+    // A temporal instance names the static fields once and the `var`
+    // fields in every state of a lasso (plan 0090).
+    let temporal = command.scope.steps.is_some();
+    let states = if temporal {
+        let steps = command.scope.steps.unwrap_or(0);
+        if instance.trace.is_empty()
+            || instance.trace.len() > steps
+            || instance
+                .back
+                .is_none_or(|back| back >= instance.trace.len())
+            || instance.trace.iter().any(|state| {
+                state.len() != module.fields.iter().filter(|field| field.var).count()
+                    || module
+                        .fields
+                        .iter()
+                        .any(|field| field.var && !state.contains_key(&field.name))
+            })
+        {
+            return Err(Failure::Protocol(
+                "a temporal instance needs 1..=steps states of exactly the var fields and a back state",
+            ));
+        }
+        instance.trace.len()
+    } else {
+        if !instance.trace.is_empty() || instance.back.is_some() {
+            return Err(Failure::Protocol("trace for a static model"));
+        }
+        1
+    };
+    let base = world;
+    let mut trace = Vec::with_capacity(states);
+    for state in 0..states {
+        let mut world = base.clone();
+        for field in &module.fields {
+            let tuples = if field.var {
+                &instance.trace[state][&field.name]
+            } else {
+                &instance.fields[&field.name]
             };
-            if rows[source] & (1 << bit) != 0 {
-                return Err(Failure::Protocol("duplicate field tuple"));
-            }
-            rows[source] |= 1 << bit;
+            let (rows, space) = field_rows(field, tuples, &world, &atoms, budget)?;
+            world.fields.push(rows);
+            world.spaces.push(space);
         }
-        for (source, row) in rows.iter().enumerate() {
-            budget.tick()?;
-            if world.sets[&field.owner] & (1 << source) != 0 {
-                let admitted = match (&space, field.arrow) {
-                    (Some(space), Some(arrow)) => arrow_admits(
-                        *row,
-                        space,
-                        world.sets[&field.columns[0]],
-                        world.sets[&field.columns[1]],
-                        arrow,
-                    ),
-                    _ => admits(field.mult, row.count_ones()),
-                };
-                if !admitted {
-                    return Err(Failure::Invalid(CheckReason::Declaration));
-                }
-            }
-        }
-        world.fields.push(rows);
-        world.spaces.push(space);
+        trace.push(world);
     }
     budget.stats.candidates = 1;
     let mut evaluator = Evaluator {
         module,
-        world: &world,
+        world: &trace[0],
         budget,
+        trace: &trace,
+        time: 0,
+        back: instance.back.unwrap_or(0),
     };
     for fact in &module.facts {
         if !evaluator.formula(fact)? {
@@ -225,4 +213,80 @@ fn evaluate(
         return Err(Failure::Mismatch);
     }
     Ok(())
+}
+
+/// Per owner atom the target set or column-product mask, and the product.
+type FieldRows = (Vec<u64>, Option<Vec<Vec<u8>>>);
+/// One field's rows in a world whose signatures are set: per owner atom, the
+/// target set or a mask over the column product, checked against the
+/// declaration.
+fn field_rows(
+    field: &crate::syntax::Field,
+    tuples: &[Vec<String>],
+    world: &World,
+    atoms: &BTreeMap<String, usize>,
+    budget: &mut Budget,
+) -> Result<FieldRows, Failure> {
+    let space = (field.columns.len() > 1).then(|| world.space(&field.columns));
+    let mut rows = vec![0u64; world.names.len()];
+    for tuple in tuples {
+        budget.tick()?;
+        if tuple.len() != 1 + field.columns.len() {
+            return Err(Failure::Protocol("field tuple arity"));
+        }
+        let atoms = tuple
+            .iter()
+            .map(|name| {
+                atoms
+                    .get(name)
+                    .copied()
+                    .ok_or(Failure::Protocol("unknown field tuple atom"))
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        let source = atoms[0];
+        if world.sets[&field.owner] & (1 << source) == 0
+            || field
+                .columns
+                .iter()
+                .zip(&atoms[1..])
+                .any(|(column, atom)| world.sets[column] & (1 << atom) == 0)
+        {
+            return Err(Failure::Invalid(CheckReason::Declaration));
+        }
+        let bit = match &space {
+            None => atoms[1],
+            Some(space) => space
+                .iter()
+                .position(|candidate| {
+                    candidate
+                        .iter()
+                        .map(|atom| *atom as usize)
+                        .eq(atoms[1..].iter().copied())
+                })
+                .expect("member of the column product"),
+        };
+        if rows[source] & (1 << bit) != 0 {
+            return Err(Failure::Protocol("duplicate field tuple"));
+        }
+        rows[source] |= 1 << bit;
+    }
+    for (source, row) in rows.iter().enumerate() {
+        budget.tick()?;
+        if world.sets[&field.owner] & (1 << source) != 0 {
+            let admitted = match (&space, field.arrow) {
+                (Some(space), Some(arrow)) => arrow_admits(
+                    *row,
+                    space,
+                    world.sets[&field.columns[0]],
+                    world.sets[&field.columns[1]],
+                    arrow,
+                ),
+                _ => admits(field.mult, row.count_ones()),
+            };
+            if !admitted {
+                return Err(Failure::Invalid(CheckReason::Declaration));
+            }
+        }
+    }
+    Ok((rows, space))
 }
