@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0083: ralloyの対称性の除去](iterations/0083-ralloy-symmetry.md)は、lex-leaderで入れ替えられるatomの重複した候補を評価前に除き、`core-set-algebra`を128 msから34 msにした。0078からの累積では8ケースが0.30〜0.64倍になり、数µsの4ケースは最大1.17倍のまま残る。
+
 [0082: ralloyの整数とcardinality](iterations/0082-ralloy-integers.md)は、整数・`#`・算術・比較を加えた。Alloy 6.2.0の既定の2の補数の桁あふれを答えから確かめて合わせ、31 commandすべてで一致した。速度は`adopt`。
 
 [0081: ralloyの引数付きpred/fun](iterations/0081-ralloy-parameterized-predicates.md)は、引数付きpred/fun、receiver形式の呼び出し、box join、引数付きpredの`run`を加え、23 commandすべてでAlloyと一致した。速度は`adopt`。

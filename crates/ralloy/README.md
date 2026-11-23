@@ -57,7 +57,7 @@ sigの継承・subset、複数sigの一括宣言、signature fact、module読込
 
 no-counterexampleはスコープ外の証明ではない。no-instanceもスコープ外の不整合を意味しない。未対応、構文・型・scope・protocol違反は`Error`として返し、検査成功へ変換しない。
 
-関係をbit matrixとして評価し、signatureの個数とfieldを列挙する。atom名で区別できないモデルでは、signatureごとに標準のatom名を使う。SAT符号化、節学習、一般的な対称性除去は実装していないため、小さいscope向けの試作。workは列挙と式の評価を数え、parserの費用やwall clockの上限ではない。
+関係をbit matrixとして評価し、signatureの個数とfieldを列挙する。atom名で区別できないモデルでは、signatureごとに標準のatom名を使う。同じsigに属する入れ替えられるatomの重複した候補は、lex-leaderで評価前に除く（2列以上のfieldがあるcommandは除かない）。SAT符号化と節学習は実装していないため、小さいscope向けの試作。workは列挙と式の評価を数え、parserの費用やwall clockの上限ではない。
 
 ## nativeとWasm
 
