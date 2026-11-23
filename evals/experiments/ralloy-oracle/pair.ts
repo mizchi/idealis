@@ -24,6 +24,8 @@ const thresholds: Record<string, (name: string) => number> = {
   // evals/plans/0083a-ralloy-symmetry-setup.md (same thresholds as 0083)
   "0083a-ralloy-symmetry-setup": (name) =>
     name === "core-set-algebra" ? 0.5 : 1.1,
+  // evals/plans/0083b-ralloy-cumulative.md: report only, no threshold.
+  "0083b-ralloy-cumulative": () => Number.POSITIVE_INFINITY,
 };
 const required = thresholds[plan];
 assert.ok(required, plan);
