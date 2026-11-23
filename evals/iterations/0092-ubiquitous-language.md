@@ -26,7 +26,7 @@
 
 直した後の2回目でも、2件は0.55と0.54で矛盾のまま残った。skillの指示どおり繰り返し追わず、残った候補として記録する。ほかに、語彙と関係しない文書3件が`unrelated`、ruleとモデルの4組が`insufficient_context`で、どちらも一致には数えない。
 
-[1回目](../runs/0092-ubiquitous-language/run-1.json)・[2回目](../runs/0092-ubiquitous-language/run-2.json)・[3回目（rspecの文書を追加）](../runs/0092-ubiquitous-language/run-3.json)。答えは`.jev-lint/judgments/spec`のledgerにあり、`just spec-drift-replay`でAPI keyなしに再生できる。
+[1回目](../runs/0092-ubiquitous-language/run-1.json)・[2回目](../runs/0092-ubiquitous-language/run-2.json)・[3回目（rspecの文書を追加）](../runs/0092-ubiquitous-language/run-3.json)。rspecの文書へformatterをかけた後に2件を聞き直した[4回目](../runs/0092-ubiquitous-language/run-4.json)が、ledgerの現在の答え。答えは`.jev-lint/judgments/spec`のledgerにあり、`just spec-drift-replay`でAPI keyなしに再生できる。
 
 ## 分かった語の違い
 

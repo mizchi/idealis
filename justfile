@@ -285,7 +285,7 @@ spec-drift:
   env -u OPENROUTER_API_KEY pnpm exec jev-lint docs --model jev-1.14.0 --document-manifest spec/documents.json --ledger .jev-lint/judgments/spec
 
 spec-drift-replay:
-  pnpm exec jev-lint docs --replay --model jev-1.14.0 --document-manifest spec/documents.json --ledger .jev-lint/judgments/spec
+  env -u OPENROUTER_API_KEY pnpm exec jev-lint docs --replay --model jev-1.14.0 --document-manifest spec/documents.json --ledger .jev-lint/judgments/spec
 
 rmodel-test:
   cargo fmt --manifest-path crates/rmodel/Cargo.toml -- --check
