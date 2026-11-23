@@ -30,6 +30,8 @@ const thresholds: Record<string, (name: string) => number> = {
   "0084-ralloy-incremental-symmetry": () => 1.1,
   // evals/plans/0084a-ralloy-symmetry-tables.md (same thresholds as 0084)
   "0084a-ralloy-symmetry-tables": () => 1.1,
+  // evals/plans/0085-ralloy-sat-backend.md
+  "0085-ralloy-sat-backend": () => 1.1,
 };
 const required = thresholds[plan];
 assert.ok(required, plan);
