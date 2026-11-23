@@ -1,0 +1,421 @@
+{
+  "status": "complete",
+  "plan": "0086a-ralloy-sat-remeasure",
+  "decision": "hold",
+  "rejected": [
+    "core-cardinality-formulas",
+    "core-dag-closure",
+    "core-dense-graph"
+  ],
+  "runs": [
+    "evals/runs/0086a-ralloy-baseline-development",
+    "evals/runs/0086a-ralloy-candidate-development",
+    "evals/runs/0086a-ralloy-candidate-confirmation",
+    "evals/runs/0086a-ralloy-baseline-confirmation"
+  ],
+  "rows": [
+    {
+      "name": "core-cardinality-formulas",
+      "baselineNs": 4352.478857201742,
+      "candidateNs": 4215.370877747072,
+      "developmentRatio": 0.9684988752494897,
+      "confirmationRatio": 1.1120862986575268,
+      "confidenceIntervals": [
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 4309.397699461576,
+          "upper_bound": 4371.846095314377
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 4206.467747949291,
+          "upper_bound": 4237.535421327368
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 4962.942930014283,
+          "upper_bound": 5037.731732979664
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 4415.840068999507,
+          "upper_bound": 4685.2211834647605
+        }
+      ],
+      "requiredRatio": 1.1,
+      "accepted": false
+    },
+    {
+      "name": "core-dag-closure",
+      "baselineNs": 71171.72203654189,
+      "candidateNs": 69495.43228088337,
+      "developmentRatio": 0.9764472502885646,
+      "confirmationRatio": 1.1050399651667497,
+      "confidenceIntervals": [
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 69942.54187287897,
+          "upper_bound": 71837.71507352941
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 69243.2820652174,
+          "upper_bound": 69679.49642713365
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 76246.53572084481,
+          "upper_bound": 78468.74845041323
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 69329.88315217392,
+          "upper_bound": 70357.5133738278
+        }
+      ],
+      "requiredRatio": 1.1,
+      "accepted": false
+    },
+    {
+      "name": "core-dense-graph",
+      "baselineNs": 274393.86160714284,
+      "candidateNs": 278253.61190476187,
+      "developmentRatio": 1.0140664600695228,
+      "confirmationRatio": 1.112070931438917,
+      "confidenceIntervals": [
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 272305.6873015873,
+          "upper_bound": 279229.1244897959
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 277493.54214285716,
+          "upper_bound": 278762.4337301587
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 298393.6426532452,
+          "upper_bound": 309706.7057291666
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 271918.29963235295,
+          "upper_bound": 284928.0787377451
+        }
+      ],
+      "requiredRatio": 1.1,
+      "accepted": false
+    },
+    {
+      "name": "core-exact-scopes",
+      "baselineNs": 4660.768539619681,
+      "candidateNs": 4566.49406024109,
+      "developmentRatio": 0.9797727609562255,
+      "confirmationRatio": 0.9896792244997643,
+      "confidenceIntervals": [
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 4630.470616804274,
+          "upper_bound": 4680.536325616535
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 4553.487426546837,
+          "upper_bound": 4576.34392823194
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 5116.964870292426,
+          "upper_bound": 5276.017475447718
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 5186.68810423588,
+          "upper_bound": 5236.810382879437
+        }
+      ],
+      "requiredRatio": 1.1,
+      "accepted": true
+    },
+    {
+      "name": "core-graph-cycles",
+      "baselineNs": 6476.327376760563,
+      "candidateNs": 6488.019022295499,
+      "developmentRatio": 1.0018052894572453,
+      "confirmationRatio": 1.0211540148242024,
+      "confidenceIntervals": [
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 6442.749178403756,
+          "upper_bound": 6539.146658381663
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 6452.966129214754,
+          "upper_bound": 6529.24289054839
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 7423.867010145027,
+          "upper_bound": 7511.757881518952
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 7280.5808912113735,
+          "upper_bound": 7466.05876403028
+        }
+      ],
+      "requiredRatio": 1.1,
+      "accepted": true
+    },
+    {
+      "name": "core-iff-implies",
+      "baselineNs": 15276.404193205944,
+      "candidateNs": 14929.283402050369,
+      "developmentRatio": 0.9772773234613709,
+      "confirmationRatio": 1.0265419925825883,
+      "confidenceIntervals": [
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 15262.984554140126,
+          "upper_bound": 15449.218091621755
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 14905.881996332486,
+          "upper_bound": 15036.4875975039
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 17440.39351851852,
+          "upper_bound": 17790.274476320585
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 17046.40075893099,
+          "upper_bound": 17373.6457960644
+        }
+      ],
+      "requiredRatio": 1.1,
+      "accepted": true
+    },
+    {
+      "name": "core-multiplicity",
+      "baselineNs": 39516.95831494325,
+      "candidateNs": 38826.64856557377,
+      "developmentRatio": 0.9825313035515579,
+      "confirmationRatio": 1.0277912636262787,
+      "confidenceIntervals": [
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 39206.9228645384,
+          "upper_bound": 39805.16318926975
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 38656.19655953409,
+          "upper_bound": 39127.82986111111
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 44670.43478354978,
+          "upper_bound": 45704.357738095234
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 43396.629595494116,
+          "upper_bound": 44316.880705083386
+        }
+      ],
+      "requiredRatio": 1.1,
+      "accepted": true
+    },
+    {
+      "name": "core-pigeonhole",
+      "baselineNs": 19962.050816642823,
+      "candidateNs": 19688.708786519313,
+      "developmentRatio": 0.9863069164268624,
+      "confirmationRatio": 1.0053369111372494,
+      "confidenceIntervals": [
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 19877.883583690986,
+          "upper_bound": 20107.87804005722
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 19581.27522318699,
+          "upper_bound": 19757.528846153848
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 22833.651271753683,
+          "upper_bound": 23030.438769363165
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 22501.11981292517,
+          "upper_bound": 22946.302023809523
+        }
+      ],
+      "requiredRatio": 1.1,
+      "accepted": true
+    },
+    {
+      "name": "core-preds",
+      "baselineNs": 10062.752721451441,
+      "candidateNs": 9795.65652173913,
+      "developmentRatio": 0.9734569449229411,
+      "confirmationRatio": 1.0043071168736692,
+      "confidenceIntervals": [
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 9945.036362250343,
+          "upper_bound": 10180.952241195304
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 9748.519715791455,
+          "upper_bound": 9846.567714803314
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 11434.252268261673,
+          "upper_bound": 11666.343712075242
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 11335.515901667526,
+          "upper_bound": 11507.370644623126
+        }
+      ],
+      "requiredRatio": 1.1,
+      "accepted": true
+    },
+    {
+      "name": "core-quantifiers",
+      "baselineNs": 8909.83907392545,
+      "candidateNs": 8852.112936580881,
+      "developmentRatio": 0.9935210796889133,
+      "confirmationRatio": 0.9916558733159488,
+      "confidenceIntervals": [
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 8826.97604556804,
+          "upper_bound": 8986.763030586766
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 8808.570772058823,
+          "upper_bound": 8891.702774859943
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 9650.861666552535,
+          "upper_bound": 10397.317811408615
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 10146.291287974418,
+          "upper_bound": 10278.052188493682
+        }
+      ],
+      "requiredRatio": 1.1,
+      "accepted": true
+    },
+    {
+      "name": "core-restrictions",
+      "baselineNs": 10363.948282163743,
+      "candidateNs": 10513.722509398496,
+      "developmentRatio": 1.0144514641676197,
+      "confirmationRatio": 0.9341109180271484,
+      "confidenceIntervals": [
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 10311.625391604011,
+          "upper_bound": 10436.386636513158
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 10424.651360939111,
+          "upper_bound": 10570.673062865497
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 11001.93557985339,
+          "upper_bound": 11326.242214397496
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 11984.809664786968,
+          "upper_bound": 12077.109841912472
+        }
+      ],
+      "requiredRatio": 1.1,
+      "accepted": true
+    },
+    {
+      "name": "core-set-algebra",
+      "baselineNs": 33384317.75,
+      "candidateNs": 34037807.25,
+      "developmentRatio": 1.0195747447916619,
+      "confirmationRatio": 0.9185723313566471,
+      "confidenceIntervals": [
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 32956437.5,
+          "upper_bound": 33659791.75
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 33353270.875,
+          "upper_bound": 35617197.875
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 33383895.833333336,
+          "upper_bound": 34252166.5
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 36432312.66666667,
+          "upper_bound": 37107111
+        }
+      ],
+      "requiredRatio": 1.1,
+      "accepted": true
+    },
+    {
+      "name": "core-sig-multiplicity",
+      "baselineNs": 4590.1746642246635,
+      "candidateNs": 4980.34244519833,
+      "developmentRatio": 1.0850006393034655,
+      "confirmationRatio": 0.9113306799800102,
+      "confidenceIntervals": [
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 4568.840101670297,
+          "upper_bound": 4615.766296296297
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 4925.013746170322,
+          "upper_bound": 5063.85714052714
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 4609.107647753222,
+          "upper_bound": 4802.100685938265
+        },
+        {
+          "confidence_level": 0.95,
+          "lower_bound": 4822.9357210471335,
+          "upper_bound": 5361.91088915002
+        }
+      ],
+      "requiredRatio": 1.1,
+      "accepted": true
+    }
+  ]
+}

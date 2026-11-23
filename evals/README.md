@@ -2,6 +2,10 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0087: SATと総当たりの切り替えの境界](iterations/0087-ralloy-backend-threshold.md)は、171 commandで両backendを測った。合計が最小の4 bitは、小さい探索を2〜13倍遅くして`hold`になり、24 bitに戻した。幅は、解がすぐ見つかるかを表さないため、backendの選択の目安にならなかった。
+
+[0086: SAT backendでsigの階層と整数を扱う](iterations/0086-ralloy-sat-hierarchy-integers.md)は、階層を所属の変数と加算回路の数の制約で、整数をbit幅のbitベクトルで符号化した。`div`・`rem`以外のモデルをSATで解け、166 commandで総当たりと一致した。速度は負荷の中で2回とも`hold`。
+
 [0085: ralloyのSAT backend](iterations/0085-ralloy-sat-backend.md)は、関係の中核をAIGとTseitin変換でCNFにし、ralloyの中に書いた小さなCDCLで解く。総当たりでwork 25.6億だった`CompositionHolds`がwork 1,910で解け、174 commandすべてでAlloyと一致した。
 
 [0084: ralloyの対称性の除去を探索の途中で行う](iterations/0084-ralloy-incremental-symmetry.md)は、枝を途中で刈り、2列以上のfieldとsubset sigにも広げた。`CompositionHolds`の候補は約15分の1になったが、予算内では解けない。数µsのケースが最大1.22倍で`hold`。

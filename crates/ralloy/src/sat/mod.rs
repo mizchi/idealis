@@ -6,7 +6,7 @@ pub(crate) mod cdcl;
 pub(crate) mod circuit;
 
 use crate::eval::Budget;
-use crate::syntax::{Binary, Declaration, Expr, Module, Mult, Quantifier, Unary};
+use crate::syntax::{Binary, Declaration, Expr, Module, Mult, Parent, Quantifier, Unary};
 use crate::{Analysis, Command, Instance, Kind, Stats, Status};
 use circuit::{Circuit, FALSE, Gate, TRUE};
 use std::collections::{BTreeMap, BTreeSet};
@@ -32,54 +32,45 @@ impl Relation {
 enum Value {
     Formula(Gate),
     Relation(Relation),
+    /// Two's complement at the command's bitwidth (plan 0086).
+    Integer(Vec<Gate>),
 }
 impl Value {
     fn formula(self) -> Gate {
         match self {
             Self::Formula(gate) => gate,
-            Self::Relation(_) => unreachable!("validated formula"),
+            _ => unreachable!("validated formula"),
         }
     }
     fn relation(self) -> Relation {
         match self {
             Self::Relation(relation) => relation,
-            Self::Formula(_) => unreachable!("validated relation"),
+            _ => unreachable!("validated relation"),
         }
     }
 }
 
-/// Whether the SAT backend covers a command: no signature hierarchy and no
-/// integer expression anywhere in the model.
+/// Whether the SAT backend covers a model: everything but integer division
+/// and remainder (plans 0085, 0086).
 pub(crate) fn supported(module: &Module) -> bool {
     fn plain(expression: &Expr, module: &Module) -> bool {
         match expression {
-            Expr::Number(_) => false,
-            Expr::Name(_) => true,
+            Expr::Number(_) | Expr::Name(_) => true,
+            // Division by zero is unknown in the enumerator; SAT cannot
+            // reproduce that conditional outcome.
             Expr::Apply(name, arguments) => {
-                module.predicates.contains_key(name)
+                (module.predicates.contains_key(name) || !matches!(name.as_str(), "div" | "rem"))
                     && arguments.iter().all(|argument| plain(argument, module))
             }
             Expr::Block(expressions) => expressions.iter().all(|e| plain(e, module)),
-            Expr::Unary(operator, child) => {
-                !matches!(operator, Unary::Cardinality) && plain(child, module)
-            }
-            Expr::Binary(operator, left, right) => {
-                !matches!(
-                    operator,
-                    Binary::Less | Binary::LessEqual | Binary::Greater | Binary::GreaterEqual
-                ) && plain(left, module)
-                    && plain(right, module)
-            }
+            Expr::Unary(_, child) => plain(child, module),
+            Expr::Binary(_, left, right) => plain(left, module) && plain(right, module),
             Expr::Quantified(_, declarations, body) => {
                 declarations.iter().all(|d| plain(&d.domain, module)) && plain(body, module)
             }
         }
     }
-    module
-        .signatures
-        .iter()
-        .all(|signature| signature.parent.is_none() && !signature.abstract_)
-        && module.facts.iter().all(|fact| plain(fact, module))
+    module.facts.iter().all(|fact| plain(fact, module))
         && module.assertions.values().all(|body| plain(body, module))
         && module.predicates.values().all(|predicate| {
             plain(&predicate.body, module)
@@ -133,6 +124,10 @@ struct Translator<'a> {
     signatures: BTreeMap<String, Relation>,
     fields: BTreeMap<String, Relation>,
     universe: Relation,
+    /// Each signature's bound and exactness in this command.
+    scopes: BTreeMap<String, (usize, bool)>,
+    /// Integer bitwidth; Int atoms are the first 2^bitwidth.
+    bitwidth: usize,
 }
 
 pub(crate) fn analyze(module: &Module, command: &Command, body: &Expr, max_work: u64) -> Analysis {
@@ -173,14 +168,28 @@ impl<'a> Translator<'a> {
         ints.tuples = universe.tuples.clone();
         signatures.insert("Int".to_owned(), ints);
         signatures.insert("String".to_owned(), Relation::new(1));
-        for (signature, scope) in module.signatures.iter().zip(&command.scope.signatures) {
+        // Top-level signatures own blocks of atoms; the others choose among
+        // their parent's atoms (plan 0086).
+        for &index in &module.hierarchy {
+            let signature = &module.signatures[index];
+            let scope = &command.scope.signatures[index];
             let mut relation = Relation::new(1);
-            for index in 0..scope.maximum {
-                let atom = names.len() as u8;
-                names.push(format!("{}${index}", signature.name));
-                let gate = if scope.exact { TRUE } else { circuit.input() };
-                relation.tuples.insert(vec![atom], gate);
-                universe.tuples.insert(vec![atom], gate);
+            match &signature.parent {
+                None => {
+                    for position in 0..scope.maximum {
+                        let atom = names.len() as u8;
+                        names.push(format!("{}${position}", signature.name));
+                        let gate = if scope.exact { TRUE } else { circuit.input() };
+                        relation.tuples.insert(vec![atom], gate);
+                        universe.tuples.insert(vec![atom], gate);
+                    }
+                }
+                Some((_, parent)) => {
+                    let atoms: Vec<Vec<u8>> = signatures[parent].tuples.keys().cloned().collect();
+                    for atom in atoms {
+                        relation.tuples.insert(atom, circuit.input());
+                    }
+                }
             }
             signatures.insert(signature.name.clone(), relation);
         }
@@ -195,6 +204,13 @@ impl<'a> Translator<'a> {
             signatures,
             fields: BTreeMap::new(),
             universe,
+            scopes: command
+                .scope
+                .signatures
+                .iter()
+                .map(|scope| (scope.name.clone(), (scope.maximum, scope.exact)))
+                .collect(),
+            bitwidth: command.scope.integer_bitwidth,
         };
         for field in &module.fields {
             let owner = translator.signatures[&field.owner].clone();
@@ -243,9 +259,53 @@ impl<'a> Translator<'a> {
             constraints.push(match signature.mult {
                 Mult::One => self.circuit.exactly_one(&members),
                 Mult::Lone => self.circuit.at_most_one(&members),
-                Mult::Some => self.circuit.any(members),
+                Mult::Some => self.circuit.any(members.iter().copied()),
                 Mult::Set => TRUE,
             });
+            let Some((_, parent)) = &signature.parent else {
+                continue;
+            };
+            // Within the parent, at most the scope's bound, exactly it when
+            // exact (plan 0086).
+            let (maximum, exact) = self.scopes[&signature.name];
+            constraints.push(if exact {
+                self.circuit.exactly(&members, maximum)
+            } else {
+                self.circuit.at_most(&members, maximum)
+            });
+            for (atom, &gate) in &self.signatures[&signature.name].tuples.clone() {
+                let inside = self.signatures[parent].get(atom);
+                constraints.push(self.circuit.implies(gate, inside));
+            }
+        }
+        // `extends` children of one parent are disjoint, and an abstract
+        // parent with children has no atoms of its own.
+        for parent in &self.module.signatures {
+            let children: Vec<&String> = self
+                .module
+                .signatures
+                .iter()
+                .filter(|child| {
+                    child.parent.as_ref().is_some_and(|(kind, name)| {
+                        *kind == Parent::Extends && *name == parent.name
+                    })
+                })
+                .map(|child| &child.name)
+                .collect();
+            if children.is_empty() {
+                continue;
+            }
+            for (atom, &member) in &self.signatures[&parent.name].tuples.clone() {
+                let gates: Vec<Gate> = children
+                    .iter()
+                    .map(|child| self.signatures[*child].get(atom))
+                    .collect();
+                constraints.push(self.circuit.at_most_one(&gates));
+                if parent.abstract_ {
+                    let some = self.circuit.any(gates);
+                    constraints.push(self.circuit.implies(member, some));
+                }
+            }
         }
         for field in &self.module.fields {
             let relation = self.fields[&field.name].clone();
@@ -355,8 +415,14 @@ impl<'a> Translator<'a> {
         value != (gate & 1 == 1)
     }
     fn instance(&self, model: &[bool]) -> Instance {
+        // Parents first, so an atom keeps the name of its most specific
+        // `extends` signature; subset signatures do not rename.
         let mut renamed = BTreeMap::new();
-        for signature in &self.module.signatures {
+        for &position in &self.module.hierarchy {
+            let signature = &self.module.signatures[position];
+            if matches!(signature.parent, Some((Parent::In, _))) {
+                continue;
+            }
             let mut index = 0;
             for (tuple, &gate) in &self.signatures[&signature.name].tuples {
                 if self.holds(gate, model) {
@@ -431,6 +497,20 @@ impl<'a> Translator<'a> {
                     self.expression(body, &BTreeMap::new())?
                 }
             }
+            Expr::Apply(name, arguments) if !self.module.predicates.contains_key(name) => {
+                let mut values = Vec::new();
+                for argument in arguments {
+                    let value = self.expression(argument, locals)?;
+                    values.push(self.integer(value));
+                }
+                Value::Integer(match name.as_str() {
+                    "plus" => self.circuit.add(&values[0], &values[1]),
+                    "minus" => self.circuit.subtract(&values[0], &values[1]),
+                    "mul" => self.circuit.multiply(&values[0], &values[1]),
+                    "negate" => self.circuit.negative(&values[0]),
+                    _ => unreachable!("unsupported division"),
+                })
+            }
             Expr::Apply(name, arguments) => {
                 let predicate = &self.module.predicates[name];
                 let mut parameters = BTreeMap::new();
@@ -441,7 +521,7 @@ impl<'a> Translator<'a> {
                 }
                 self.expression(&predicate.body, &parameters)?
             }
-            Expr::Number(_) => unreachable!("unsupported integers"),
+            Expr::Number(value) => Value::Integer(Circuit::constant(*value, self.bitwidth)),
             Expr::Block(expressions) => {
                 let mut all = TRUE;
                 for expression in expressions {
@@ -489,7 +569,10 @@ impl<'a> Translator<'a> {
                         }
                         Value::Relation(closure)
                     }
-                    Unary::Cardinality => unreachable!("unsupported integers"),
+                    Unary::Cardinality => {
+                        let gates: Vec<Gate> = value.relation().tuples.into_values().collect();
+                        Value::Integer(self.circuit.count(&gates, self.bitwidth))
+                    }
                 }
             }
             Expr::Binary(operator, left, right) => {
@@ -505,6 +588,23 @@ impl<'a> Translator<'a> {
                         Binary::Or => self.circuit.or(left, right),
                         Binary::Implies => self.circuit.implies(left, right),
                         _ => self.circuit.iff(left, right),
+                    }));
+                }
+                let integers =
+                    matches!(left, Value::Integer(_)) || matches!(right, Value::Integer(_));
+                if matches!(
+                    operator,
+                    Binary::Less | Binary::LessEqual | Binary::Greater | Binary::GreaterEqual
+                ) || integers && matches!(operator, Binary::Equal | Binary::NotEqual)
+                {
+                    let (left, right) = (self.integer(left), self.integer(right));
+                    return Ok(Value::Formula(match operator {
+                        Binary::Less => self.circuit.less(&left, &right),
+                        Binary::Greater => self.circuit.less(&right, &left),
+                        Binary::LessEqual => self.circuit.less(&right, &left) ^ 1,
+                        Binary::GreaterEqual => self.circuit.less(&left, &right) ^ 1,
+                        Binary::Equal => self.circuit.equal(&left, &right),
+                        _ => self.circuit.equal(&left, &right) ^ 1,
                     }));
                 }
                 let (left, right) = (left.relation(), right.relation());
@@ -681,6 +781,33 @@ impl<'a> Translator<'a> {
         }
         Ok(())
     }
+    /// An integer, or the sum of the Int atoms of a unary relation.
+    fn integer(&mut self, value: Value) -> Vec<Gate> {
+        match value {
+            Value::Integer(bits) => bits,
+            Value::Relation(relation) => {
+                let integers = if self.bitwidth == 0 {
+                    0
+                } else {
+                    1i64 << self.bitwidth
+                };
+                let mut sum = Circuit::constant(0, self.bitwidth);
+                for (tuple, &gate) in &relation.tuples {
+                    let atom = i64::from(tuple[0]);
+                    if atom >= integers {
+                        continue;
+                    }
+                    let term: Vec<Gate> = Circuit::constant(atom - integers / 2, self.bitwidth)
+                        .into_iter()
+                        .map(|bit| self.circuit.and(bit, gate))
+                        .collect();
+                    sum = self.circuit.add(&sum, &term);
+                }
+                sum
+            }
+            Value::Formula(_) => unreachable!("validated integer"),
+        }
+    }
     fn union(&mut self, left: &Relation, right: &Relation) -> Result<Relation, ()> {
         let mut output = left.clone();
         for (tuple, &gate) in &right.tuples {
@@ -766,8 +893,9 @@ mod tests {
                 compared += 1;
             }
         }
+        eprintln!("sat differential: {compared} compared, {instances} instances, {beyond} beyond");
         assert!(
-            compared > 80 && instances > 50,
+            compared > 150 && instances > 90,
             "{compared} {instances} {beyond}"
         );
     }

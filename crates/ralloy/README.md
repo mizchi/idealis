@@ -57,7 +57,7 @@ sigの継承・subset、複数sigの一括宣言、signature fact、module読込
 
 no-counterexampleはスコープ外の証明ではない。no-instanceもスコープ外の不整合を意味しない。未対応、構文・型・scope・protocol違反は`Error`として返し、検査成功へ変換しない。
 
-関係をbit matrixとして評価し、signatureの個数とfieldを列挙する。atom名で区別できないモデルでは、signatureごとに標準のatom名を使う。入れ替えられるatomの重複した枝は、lex-leaderで探索の途中で刈る。sigの階層も整数式もないモデルで、fieldのslotの幅が24 bitを超えるcommandは、関係をAIGとTseitin変換でCNFにし、ralloyの中のCDCLで解く。workは列挙と式の評価を数え、parserの費用やwall clockの上限ではない。
+関係をbit matrixとして評価し、signatureの個数とfieldを列挙する。atom名で区別できないモデルでは、signatureごとに標準のatom名を使う。入れ替えられるatomの重複した枝は、lex-leaderで探索の途中で刈る。`div`・`rem`を含まないモデルで、fieldのslotの幅が24 bitを超えるcommandは、関係・sigの階層・整数（bitベクトル）をAIGとTseitin変換でCNFにし、ralloyの中のCDCLで解く。workは列挙と式の評価を数え、parserの費用やwall clockの上限ではない。
 
 ## nativeとWasm
 

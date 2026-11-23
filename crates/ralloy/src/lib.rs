@@ -157,6 +157,31 @@ impl Model {
         let (metadata, body) = self.get_command(command)?;
         search::analyze(&self.syntax, metadata, body, max_work)
     }
+    /// Measurement hook (plan 0087): one backend regardless of width, or
+    /// `None` when the SAT backend does not cover the model. Not a stable API.
+    #[doc(hidden)]
+    pub fn analyze_backend(
+        &self,
+        command: usize,
+        max_work: u64,
+        sat: bool,
+    ) -> Result<Option<Analysis>, Error> {
+        let (metadata, body) = self.get_command(command)?;
+        if !sat::supported(&self.syntax) {
+            return Ok(None);
+        }
+        Ok(Some(if sat {
+            sat::analyze(&self.syntax, metadata, body, max_work)
+        } else {
+            search::enumerate(&self.syntax, metadata, body, max_work)
+        }))
+    }
+    /// The bits the enumerator's field slots choose for a command (plan 0087).
+    #[doc(hidden)]
+    pub fn search_width(&self, command: usize) -> Result<usize, Error> {
+        let (metadata, _) = self.get_command(command)?;
+        Ok(sat::width(&self.syntax, metadata))
+    }
     fn get_command(&self, command: usize) -> Result<(&Command, &syntax::Expr), Error> {
         let metadata = self
             .commands
