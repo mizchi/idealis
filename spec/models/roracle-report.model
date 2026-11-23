@@ -1,0 +1,21 @@
+// roracle's aggregation of comparison statuses into one report status
+// (Status::aggregate, plan 0093): the heaviest status wins, in the order
+// error, mismatch, unknown, invalid, matched; no comparison is invalid.
+model OracleReport
+enum Status = Matched | Mismatch | Invalid | Unknown | Error
+sig Comparison
+rel status: Comparison -> one Status
+rel report: one Status
+fact { no Comparison implies report = Invalid }
+fact { some status.Error implies report = Error }
+fact { no status.Error and some status.Mismatch implies report = Mismatch }
+fact { no status.Error and no status.Mismatch and some status.Unknown implies report = Unknown }
+fact { no status.Error and no status.Mismatch and no status.Unknown and some status.Invalid implies report = Invalid }
+fact { some Comparison and Comparison.status in Matched implies report = Matched }
+invariant MatchedOnlyIfAllMatched { report = Matched implies some Comparison and Comparison.status in Matched }
+invariant UnknownNeverMatched { some status.Unknown implies report != Matched }
+invariant InvalidNotMismatch { some status.Invalid and no status.Mismatch implies report != Mismatch }
+invariant UnknownOverInvalid { no status.Error and no status.Mismatch and some status.Unknown and some status.Invalid implies report = Unknown }
+reachable InvalidHiddenByMismatch { some status.Invalid and report = Mismatch }
+reachable EmptyIsInvalid { no Comparison and report = Invalid }
+scope Comparison = 3, steps = 1
