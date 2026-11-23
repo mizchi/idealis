@@ -1,0 +1,298 @@
+{
+  "status": "complete",
+  "plan": "0076-smt-cache-store",
+  "decision": "adopt",
+  "scope": "transport cost of one chain-32 query; no claim about other problems",
+  "runs": [
+    "evals/runs/0076-smt-store-native-development",
+    "evals/runs/0076-smt-store-native-confirmation",
+    "evals/runs/0076-smt-store-wasm-development",
+    "evals/runs/0076-smt-store-wasm-confirmation"
+  ],
+  "previous": "evals/runs/0075-smt-protocol-comparison",
+  "native": [
+    {
+      "run": "evals/runs/0076-smt-store-native-development",
+      "checkNs": 16772.335511947585,
+      "rows": [
+        {
+          "entries": 0,
+          "hitNs": 4635.275242718446,
+          "missNs": 21091.506466729144,
+          "hitOverCheck": 0.27636432859434273,
+          "missOverCheck": 1.2575175622801515
+        },
+        {
+          "entries": 64,
+          "hitNs": 4663.899685746353,
+          "missNs": 21430.389941690963,
+          "hitOverCheck": 0.2780709748158851,
+          "missOverCheck": 1.2777224690279576
+        },
+        {
+          "entries": 512,
+          "hitNs": 4672.766383677299,
+          "missNs": 21846.95075757576,
+          "hitOverCheck": 0.27859962498059415,
+          "missOverCheck": 1.3025586533260873
+        },
+        {
+          "entries": 4096,
+          "hitNs": 4735.023667377398,
+          "missNs": 21947.567857142858,
+          "hitOverCheck": 0.2823115280519196,
+          "missOverCheck": 1.3085576449093064
+        }
+      ],
+      "hitFlatness": 1.0215194178200413,
+      "hitNotSlower": true,
+      "hitIndependentOfN": true,
+      "missBounded": true
+    },
+    {
+      "run": "evals/runs/0076-smt-store-native-confirmation",
+      "checkNs": 16505.6199009324,
+      "rows": [
+        {
+          "entries": 0,
+          "hitNs": 4537.957770422348,
+          "missNs": 21014.014965986396,
+          "hitOverCheck": 0.27493410109159244,
+          "missOverCheck": 1.273143032016587
+        },
+        {
+          "entries": 64,
+          "hitNs": 4568.93005786484,
+          "missNs": 21020.497599039616,
+          "hitOverCheck": 0.2768105702959234,
+          "missOverCheck": 1.273535785096576
+        },
+        {
+          "entries": 512,
+          "hitNs": 4585.904312297735,
+          "missNs": 21227.5,
+          "hitOverCheck": 0.2778389627183089,
+          "missOverCheck": 1.286077113577592
+        },
+        {
+          "entries": 4096,
+          "hitNs": 4670.036416323731,
+          "missNs": 22139.51923076923,
+          "hitOverCheck": 0.2829361420142676,
+          "missOverCheck": 1.3413321864705348
+        }
+      ],
+      "hitFlatness": 1.0291053052018795,
+      "hitNotSlower": true,
+      "hitIndependentOfN": true,
+      "missBounded": true
+    }
+  ],
+  "wasm": [
+    {
+      "run": "evals/runs/0076-smt-store-wasm-development",
+      "checkNs": 25581.591954022988,
+      "rows": [
+        {
+          "entries": 0,
+          "hitNs": 9833.74554808073,
+          "missNs": 31813,
+          "hitOverCheck": 0.3844070988918367,
+          "missOverCheck": 1.24358953333227
+        },
+        {
+          "entries": 64,
+          "hitNs": 9890.362445414847,
+          "missNs": 32104,
+          "hitOverCheck": 0.3866202878691245,
+          "missOverCheck": 1.2549649004526198
+        },
+        {
+          "entries": 512,
+          "hitNs": 9902.794358054227,
+          "missNs": 33333,
+          "hitOverCheck": 0.3871062589010182,
+          "missOverCheck": 1.303007258496984
+        },
+        {
+          "entries": 4096,
+          "hitNs": 9950.085305229668,
+          "missNs": 34208,
+          "hitOverCheck": 0.3889548908102612,
+          "missOverCheck": 1.3372115410753558
+        }
+      ],
+      "hitFlatness": 1.011830665800748,
+      "hitNotSlower": true,
+      "hitIndependentOfN": true,
+      "missBounded": true
+    },
+    {
+      "run": "evals/runs/0076-smt-store-wasm-confirmation",
+      "checkNs": 25881.77953586498,
+      "rows": [
+        {
+          "entries": 0,
+          "hitNs": 9709.259498629064,
+          "missNs": 31166.5,
+          "hitOverCheck": 0.37513879156472685,
+          "missOverCheck": 1.2041869051860157
+        },
+        {
+          "entries": 64,
+          "hitNs": 9743.390851982724,
+          "missNs": 32041.5,
+          "hitOverCheck": 0.3764575321600697,
+          "missOverCheck": 1.2379944723506882
+        },
+        {
+          "entries": 512,
+          "hitNs": 9859.09427443238,
+          "missNs": 33875,
+          "hitOverCheck": 0.38092799070366884,
+          "missOverCheck": 1.3088358145180332
+        },
+        {
+          "entries": 4096,
+          "hitNs": 9801.664795114262,
+          "missNs": 34604,
+          "hitOverCheck": 0.378709075298778,
+          "missOverCheck": 1.3370023476186574
+        }
+      ],
+      "hitFlatness": 1.009517234192602,
+      "hitNotSlower": true,
+      "hitIndependentOfN": true,
+      "missBounded": true
+    }
+  ],
+  "snapshotPath": [
+    {
+      "name": "protocol-check",
+      "ratiosTo0075": [
+        1.0025330969521893,
+        0.9873011392953862
+      ]
+    },
+    {
+      "name": "protocol-hit-0",
+      "ratiosTo0075": [
+        1.0122129997848452,
+        1.0055226810557614
+      ]
+    },
+    {
+      "name": "protocol-miss-0",
+      "ratiosTo0075": [
+        1.0176176312554681,
+        0.996180162889008
+      ]
+    },
+    {
+      "name": "protocol-hit-64",
+      "ratiosTo0075": [
+        1.0001556234318958,
+        0.9992147439777613
+      ]
+    },
+    {
+      "name": "protocol-miss-64",
+      "ratiosTo0075": [
+        1.0043212812170879,
+        1.0066809267052876
+      ]
+    },
+    {
+      "name": "protocol-hit-512",
+      "ratiosTo0075": [
+        1.0042889931613583,
+        0.9988655334183466
+      ]
+    },
+    {
+      "name": "protocol-miss-512",
+      "ratiosTo0075": [
+        1.0059248997213428,
+        1.010387655711959
+      ]
+    },
+    {
+      "name": "protocol-hit-4096",
+      "ratiosTo0075": [
+        1.027707550426514,
+        1.0134833535300545
+      ]
+    },
+    {
+      "name": "protocol-miss-4096",
+      "ratiosTo0075": [
+        1.0349296242627433,
+        0.9768703610603606
+      ]
+    },
+    {
+      "name": "wasm-check",
+      "ratiosTo0075": [
+        0.9720067455355733,
+        1.0022617128884368
+      ]
+    },
+    {
+      "name": "wasm-hit-0",
+      "ratiosTo0075": [
+        1.0240704532798468,
+        1.006221167029587
+      ]
+    },
+    {
+      "name": "wasm-miss-0",
+      "ratiosTo0075": [
+        1.0009190529579575,
+        1.0032923751341536
+      ]
+    },
+    {
+      "name": "wasm-hit-64",
+      "ratiosTo0075": [
+        1.0129875259006003,
+        1.0145515513129197
+      ]
+    },
+    {
+      "name": "wasm-miss-64",
+      "ratiosTo0075": [
+        1.0227398949612359,
+        1.0104306640734249
+      ]
+    },
+    {
+      "name": "wasm-hit-512",
+      "ratiosTo0075": [
+        1.0027830336277894,
+        1.0030022229815443
+      ]
+    },
+    {
+      "name": "wasm-miss-512",
+      "ratiosTo0075": [
+        1.0081024803290783,
+        1.0092100102403596
+      ]
+    },
+    {
+      "name": "wasm-hit-4096",
+      "ratiosTo0075": [
+        0.9979817089781021,
+        0.9869839813094926
+      ]
+    },
+    {
+      "name": "wasm-miss-4096",
+      "ratiosTo0075": [
+        1.0029813333547812,
+        1.0001041958634844
+      ]
+    }
+  ],
+  "wasmBytes": 520271
+}

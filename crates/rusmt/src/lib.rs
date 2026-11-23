@@ -4,6 +4,7 @@ mod protocol;
 mod script;
 mod session;
 mod solver;
+mod source;
 #[cfg(target_arch = "wasm32")]
 mod wasm;
 

@@ -902,7 +902,7 @@ smt-incremental-test: smt-build build
   node --test dist/tests/smt-incremental/records-test.js dist/tests/smt-incremental/contract-test.js
 
 smt-incremental-bench-build:
-  CARGO_PROFILE_BENCH_STRIP=none cargo bench --no-run --locked --manifest-path crates/rusmt/Cargo.toml --bench solver --bench cache
+  CARGO_PROFILE_BENCH_STRIP=none cargo bench --no-run --locked --manifest-path crates/rusmt/Cargo.toml --bench solver --bench cache --bench protocol
 
 smt-incremental-capture binary bench library output: build
   node dist/evals/experiments/smt-incremental/capture.js {{quote(binary)}} {{quote(bench)}} {{quote(library)}} {{quote(output)}}
@@ -914,8 +914,8 @@ smt-incremental-criterion stage provenance run: build
 smt-incremental-compare *args: build
   node dist/evals/experiments/smt-incremental/compare.js "$@"
 
-smt-incremental-eval phase run baseline parent="": smt-build build
-  node dist/evals/experiments/smt-incremental/run.js {{quote(phase)}} {{quote(run)}} {{quote(baseline)}} {{quote(parent)}}
+smt-incremental-eval phase run baseline parent="" plan="": smt-build build
+  node dist/evals/experiments/smt-incremental/run.js {{quote(phase)}} {{quote(run)}} {{quote(baseline)}} {{quote(parent)}} {{quote(plan)}}
 
 smt-incremental-replay run: build
   node dist/evals/experiments/smt-incremental/replay.js {{quote(run)}}
@@ -1025,3 +1025,19 @@ expansion-bench-replay output: build
 
 smt-incremental-equivalence full compact: build
   node dist/evals/experiments/smt-incremental/equivalence.js {{quote(full)}} {{quote(compact)}}
+
+smt-protocol-test: smt-build build
+  node --test dist/tests/smt-protocol/contract-test.js
+
+smt-protocol-wasm-bench stage run: smt-build build
+  node dist/evals/experiments/smt-protocol/wasm-bench.js {{quote(stage)}} {{quote(run)}}
+
+smt-protocol-compare native-dev native-conf wasm-dev wasm-conf output: build
+  node dist/evals/experiments/smt-protocol/compare.js {{quote(native-dev)}} {{quote(native-conf)}} {{quote(wasm-dev)}} {{quote(wasm-conf)}} {{quote(output)}}
+
+smt-protocol-compare-store native-dev native-conf wasm-dev wasm-conf previous output: build
+  node dist/evals/experiments/smt-protocol/compare-store.js {{quote(native-dev)}} {{quote(native-conf)}} {{quote(wasm-dev)}} {{quote(wasm-conf)}} {{quote(previous)}} {{quote(output)}}
+
+[positional-arguments]
+smt-incremental-pair *args: build
+  node dist/evals/experiments/smt-incremental/pair.js "$@"

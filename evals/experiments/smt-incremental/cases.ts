@@ -37,7 +37,19 @@ export const benches = {
     "script-cache-cold-ite-64",
     "script-cache-warm-ite-64",
   ],
+  // Plan 0075: the cache snapshot passed through the JSON protocol.
+  protocol: [
+    "protocol-check",
+    ...[0, 64, 512, 4096].flatMap((count) => [
+      `protocol-miss-${count}`,
+      `protocol-hit-${count}`,
+      `store-hit-${count}`,
+      `store-miss-${count}`,
+      `handle-hit-${count}`,
+      `handle-miss-${count}`,
+    ]),
+  ],
 } as const;
 export type Bench = keyof typeof benches;
 export const isBench = (value: unknown): value is Bench =>
-  value === "solver" || value === "cache";
+  value === "solver" || value === "cache" || value === "protocol";

@@ -21,6 +21,9 @@ struct CacheRequest {
     build_digest: String,
     #[serde(default)]
     max_entries: u32,
+    /// An engine-side store; excludes the snapshot fields above.
+    #[serde(default)]
+    cache_handle: Option<u32>,
 }
 impl CacheRequest {
     fn options(&self) -> CacheOptions<'_> {
@@ -28,6 +31,42 @@ impl CacheRequest {
             enabled: self.enabled,
             build_digest: &self.build_digest,
             max_entries: self.max_entries,
+        }
+    }
+}
+/// A cache kept between requests with the options it was opened with.
+struct Store {
+    cache: CheckCache,
+    build_digest: String,
+    max_entries: u32,
+}
+/// The cache a request uses: its own snapshot, or a store kept in place.
+enum Target<'a> {
+    Snapshot(Box<(CheckCache, CacheRequest)>),
+    Store(u32, &'a mut Store),
+}
+impl Target<'_> {
+    fn parts(&mut self) -> (&mut CheckCache, CacheOptions<'_>) {
+        match self {
+            Self::Snapshot(snapshot) => {
+                let (cache, request) = &mut **snapshot;
+                (cache, request.options())
+            }
+            Self::Store(_, store) => (
+                &mut store.cache,
+                CacheOptions {
+                    enabled: true,
+                    build_digest: &store.build_digest,
+                    max_entries: store.max_entries,
+                },
+            ),
+        }
+    }
+    /// The reply field naming the cache after the request.
+    fn reply(self) -> (&'static str, Value) {
+        match self {
+            Self::Snapshot(snapshot) => ("cache", json!(snapshot.0)),
+            Self::Store(handle, _) => ("cacheHandle", json!(handle)),
         }
     }
 }
@@ -85,11 +124,51 @@ enum Request {
     Release {
         handle: u32,
     },
+    #[serde(rename_all = "camelCase")]
+    CacheOpen {
+        build_digest: String,
+        max_entries: u32,
+        #[serde(default)]
+        cache: Option<CheckCache>,
+    },
+    #[serde(rename_all = "camelCase")]
+    CacheExport {
+        cache_handle: u32,
+    },
+    #[serde(rename_all = "camelCase")]
+    CacheClose {
+        cache_handle: u32,
+    },
 }
 #[derive(Default)]
 pub struct Engine {
     next: u32,
     problems: BTreeMap<u32, Solver>,
+    next_cache: u32,
+    caches: BTreeMap<u32, Store>,
+}
+fn target(
+    caches: &mut BTreeMap<u32, Store>,
+    mut request: CacheRequest,
+) -> Result<Target<'_>, Error> {
+    let Some(handle) = request.cache_handle else {
+        let cache = request.cache.take().unwrap_or_default();
+        return Ok(Target::Snapshot(Box::new((cache, request))));
+    };
+    if request.cache.is_some()
+        || request.enabled
+        || !request.build_digest.is_empty()
+        || request.max_entries != 0
+    {
+        return Err(Error::new(
+            "protocol",
+            "cacheHandle excludes snapshot fields",
+        ));
+    }
+    let store = caches
+        .get_mut(&handle)
+        .ok_or_else(|| Error::new("protocol", "unknown cache handle"))?;
+    Ok(Target::Store(handle, store))
 }
 impl Engine {
     pub fn dispatch(&mut self, bytes: &[u8]) -> Value {
@@ -157,48 +236,91 @@ impl Engine {
             Request::RunScriptIncremental {
                 source,
                 max_work,
-                mut cache,
+                cache,
             } => {
-                let mut store = cache.cache.take().unwrap_or_default();
-                let reply = Script::parse(&source)?.solve_incremental(
-                    max_work,
-                    &mut store,
-                    cache.options(),
-                )?;
-                Ok(json!({
+                let mut target = target(&mut self.caches, cache)?;
+                let script = Script::parse(&source)?;
+                let (store, options) = target.parts();
+                let reply = script.solve_incremental(max_work, store, options)?;
+                let (field, value) = target.reply();
+                let mut reply = json!({
                     "kind": "incremental-script-results",
                     "results": reply.results,
                     "stats": reply.stats,
-                    "cache": store,
-                }))
+                });
+                reply[field] = value;
+                Ok(reply)
             }
             Request::CheckIncremental {
                 handle,
                 max_work,
                 assumptions,
-                mut cache,
+                cache,
             } => {
                 let problem = self
                     .problems
                     .get(&handle)
                     .ok_or_else(|| Error::new("protocol", "unknown handle"))?;
-                let mut store = cache.cache.take().unwrap_or_default();
-                let reply = problem.check_incremental(
-                    &assumptions,
-                    max_work,
-                    &mut store,
-                    cache.options(),
-                )?;
-                Ok(json!({
+                let mut target = target(&mut self.caches, cache)?;
+                let (store, options) = target.parts();
+                let reply = problem.check_incremental(&assumptions, max_work, store, options)?;
+                let (field, value) = target.reply();
+                let mut reply = json!({
                     "kind": "incremental-solution",
                     "result": reply.result,
                     "stats": reply.stats,
-                    "cache": store,
-                }))
+                });
+                reply[field] = value;
+                Ok(reply)
             }
             Request::Release { handle } => {
                 if self.problems.remove(&handle).is_none() {
                     return Err(Error::new("protocol", "unknown handle"));
+                }
+                Ok(json!({"kind":"released"}))
+            }
+            Request::CacheOpen {
+                build_digest,
+                max_entries,
+                cache,
+            } => {
+                let options = CacheOptions {
+                    enabled: true,
+                    build_digest: &build_digest,
+                    max_entries,
+                };
+                let cache = CheckCache::open(cache, &options)?;
+                let next = self
+                    .next_cache
+                    .checked_add(1)
+                    .ok_or_else(|| Error::new("resource", "cache handles exhausted"))?;
+                let reply = json!({
+                    "kind": "cache-opened",
+                    "cacheHandle": next,
+                    "entries": cache.len(),
+                    "invalidated": cache.stats().invalidated,
+                });
+                self.next_cache = next;
+                self.caches.insert(
+                    next,
+                    Store {
+                        cache,
+                        build_digest,
+                        max_entries,
+                    },
+                );
+                Ok(reply)
+            }
+            Request::CacheExport { cache_handle } => {
+                let store = self
+                    .caches
+                    .get(&cache_handle)
+                    .ok_or_else(|| Error::new("protocol", "unknown cache handle"))?;
+                Ok(json!({"kind":"cache-snapshot","cache":store.cache}))
+            }
+            Request::CacheClose { cache_handle } => {
+                if self.caches.remove(&cache_handle).is_none() {
+                    return Err(Error::new("protocol", "unknown cache handle"));
                 }
                 Ok(json!({"kind":"released"}))
             }

@@ -1,6 +1,6 @@
 # 0074: SMT contextの増分解析とcheck cache
 
-0042で次の候補に残した、assertごとの全体再解析を除いた。assertは追加した式だけを解析・コンパイルし、popはpush時のsnapshotへ戻す。その上に、rtlcの状態展開cacheと同じ形の既定無効のcheck cacheを追加した。増分解析は応答を変えない変更として採用し、cacheは明示的に有効にした場合だけ使う任意機能として採用する。solver benchの最終測定（0074b）は`prepared-128`の1組で閾値を超え、`hold`のまま記録した。
+0042で次の候補に残した、assertごとの全体再解析を除いた。assertは追加した式だけを解析・コンパイルし、popはpush時のsnapshotへ戻す。その上に、rtlcの状態展開cacheと同じ形の既定無効のcheck cacheを追加した。増分解析は応答を変えない変更として採用し、cacheは明示的に有効にした場合だけ使う任意機能として採用する。solver benchは0074bで`prepared-128`の1組が閾値を超えて`hold`になった。同じbinaryで再測定した0074dでは18ケースすべてが閾値内になった。
 
 ## 経過
 
@@ -11,10 +11,11 @@
 | 0074  | 増分解析とcache（32fcaca19）         | `hold`: `script-parse-ite-64` 3.52/3.71倍 | 合否なし                               |
 | 0074a | keyを使う時だけ計算（fbbaf5f19）     | `adopt`: 全18ケース                       | warmがcacheなしの4.6〜4.8倍に後退      |
 | 0074b | 初回に計算したkeyを保持（8c134bd7f） | `hold`: `prepared-128` 確認組1.235倍      | `adopt`: warmはcacheなしの0.06〜0.53倍 |
+| 0074d | 変更なし。0074bのbinaryを再測定      | `adopt`: 全18ケース                       | 測定なし                               |
 
 0074の後退は、cacheを使わない`Script::parse`でも各checkのsource digestとkeyのSHA-256を作っていたことによる。ite-64はassertが少なくcheckが64回あるため、この固定費が支配的になった。[0074a](../plans/0074a-smt-lazy-cache-keys.md)でkeyの計算を`solve_incremental`へ移すと、parseは戻った。しかし反復のたびにkeyを作り直すようになり、warmのcacheがcacheなしより遅くなった。0074はcache benchを合否にしていなかったので、[0074b](../plans/0074b-smt-memoized-cache-keys.md)でwarmをcacheなしの1.0倍以下とする条件を測定前に加え、queryごとに初回のkeyを保持した。
 
-0074bの`prepared-128`は、開発組0.965倍、確認組1.235倍だった。確認組のcandidate runは中央値の95%区間が202〜256 µsと広く、最小値187.5 µsは開発組の中央値185.6 µsと同程度だった。0074bの変更は`Script`のkey保持だけで、`Problem::solve`の経路にはない。0074と0074aでは同じケースが0.94〜0.97倍だった。ただしplanで再測定しないと決めたので、この1組を後退として記録する。
+0074bの`prepared-128`は、開発組0.965倍、確認組1.235倍だった。確認組のcandidate runは中央値の95%区間が202〜256 µsと広く、最小値187.5 µsは開発組の中央値185.6 µsと同程度だった。0074bの変更は`Script`のkey保持だけで、`Problem::solve`の経路にはない。0074と0074aでは同じケースが0.94〜0.97倍だった。0074bのplanはこの後の再測定をしないと決めていた。mizchiの指示で、[0074d](../plans/0074d-smt-prepared-remeasure.md)に追記planを書いてその決定を変えた。条件は、bench binaryを再ビルドしないこと、18ケースすべてを同じ順序で1組だけ測ること、判断をこの4 runだけで行うこと。[0074dの比較](../runs/0074d-smt-comparison/result.json)では`prepared-128`が1.037/0.992倍、18ケースすべてが閾値内で`adopt`になった。0074bの1.235倍は再現しなかったが、0074bのrunは`hold`の記録として残す。
 
 ## 条件
 
@@ -39,7 +40,7 @@ Criterion 0.8.2、20 samples、warmup 1秒、measurement 2秒、median、95%区�
 | `parse-solve-4`          |     5.43 |      5.77 |  1.062 |  1.029 |  1.1 |
 | `prepared-128`           |   192.30 |    185.58 |  0.965 |  1.235 |  1.1 |
 
-残る8ケースは0.961〜1.023倍。0074aでも全18ケースが閾値内で、`parse-solve-4`は1.037/1.037倍だった。単発の小さいparseは数%遅い傾向が3段階で続いた。
+残る8ケースは0.961〜1.023倍。0074aでも全18ケースが閾値内で、`parse-solve-4`は1.037/1.037倍だった。0074dでは`parse-solve-32`が1.062/1.039倍、`script-parse-ite-64`が1.065/1.032倍、`parse-solve-4`が1.047/1.023倍だった。単発の小さいparseは閾値内ながら数%遅い傾向が4回の測定で続いた。0074dの負荷平均は1.9〜3.8で、専用ホストではない。
 
 ## check cache
 
@@ -87,7 +88,6 @@ native/WasmとChromiumでは、cold・warm・無効の統計と回答を確認�
 
 増分解析は既定の経路として採用する。check cacheは任意機能として既定無効で採用する。回答の再利用で、学習状態・理論状態の再利用や探索の中断・再開ではない。keyはSHA-256のみでsource全文を保持しないため、衝突がないことは前提とする。entryのdigestは破損検出で、署名ではない。公開backendへの接続、永続storeとCASは扱っていない。
 
-- 0074bの`prepared-128`は後退として記録したまま。追加で判断するなら、新しい追記planで再測定する。
 - Jevのrusmt 4比較は、最初はAPI keyのない環境で実行したため未記録だった。keyを設定した`support-sync`で4/4が`supports`、矛盾0になった。
 - 0074bの記録は確認19 MB、開発5.7 MB。check-incrementalの各応答が成長するcache snapshotを含み、総量がcheck数の2乗で増えていた。[0074c](../plans/0074c-smt-compact-cache-records.md)でsnapshotを流れごとの差分（digest・entry数・追加・削除）へ変えた。同じbinaryで両seedを再実行し、要約が0074bと一致し、0074bの記録を圧縮すると新しい記録と一致し、差分から全snapshotを復元できることを確かめた。確認runは18.9 MBから2.24 MB（0.118倍）、開発runは5.6 MBから1.34 MB（0.238倍）。planで決めた目標2 MB以下には届かなかった。cacheの記録は0.76 MBまで減り、残りは差分化の対象外の既存記録（約1.5 MB）。runは[開発](../runs/0074c-smt-correctness-development/result.json)と[確認](../runs/0074c-smt-correctness-confirmation/result.json)。
 

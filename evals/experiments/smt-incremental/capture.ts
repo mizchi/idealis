@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { isBench } from "./cases.js";
 import { digest, fingerprint } from "./provenance.js";
 
-// capture <bench-binary> <solver|cache> <library-commit> <output.json>
+// capture <bench-binary> <solver|cache|protocol> <library-commit> <output.json>
 const [binary, bench, library, output] = process.argv.slice(2);
 assert.ok(binary && isBench(bench) && library && output);
 const source = await fingerprint();

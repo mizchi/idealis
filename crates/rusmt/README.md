@@ -86,7 +86,7 @@ keyは正規化したsourceのSHA-256と、順序・極性を含むassumptions�
 
 ## nativeとWasm
 
-`rusmt` binaryはstdin/stdoutでJSONLを扱う。requestにはversion 1と、`run-script` / `solve` / `prepare` / `assert` / `push` / `pop` / `check` / `release`、`run-script-incremental` / `check-incremental`を指定する。prepareは解析結果を保持し、回答はcacheしない。incremental requestは`cache`・`enabled`・`buildDigest`・`maxEntries`を受け、更新したsnapshotを`cache`で返す。run-scriptは`{source,maxWork}`を受け、`{kind:"script-results",results:[...]}`を返す。結果の整数値は文字列。
+`rusmt` binaryはstdin/stdoutでJSONLを扱う。requestにはversion 1と、`run-script` / `solve` / `prepare` / `assert` / `push` / `pop` / `check` / `release`、`run-script-incremental` / `check-incremental`を指定する。prepareは解析結果を保持し、回答はcacheしない。incremental requestは`cache`・`enabled`・`buildDigest`・`maxEntries`を受け、更新したsnapshotを`cache`で返す。`cache-open`で開いたengine側のstoreを`cacheHandle`で渡すと、snapshotを往復させずに使える（`cache-export` / `cache-close`）。run-scriptは`{source,maxWork}`を受け、`{kind:"script-results",results:[...]}`を返す。結果の整数値は文字列。
 
 ```sh
 just rusmt-build

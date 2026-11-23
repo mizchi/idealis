@@ -1,16 +1,15 @@
 use crate::{
     Assumption, CacheOptions, CacheStats, CheckCache, Formula, IncrementalScript, Problem, Result,
-    Solution, cache, parser, solver::cached_solve,
+    Solution, cache, parser, solver::cached_solve, source::SourceHash,
 };
-use sha2::{Digest, Sha256};
 use std::sync::{Arc, OnceLock};
 
 struct Query {
     problem: Arc<Problem>,
     todo: Vec<(Arc<Formula>, bool)>,
-    /// Hash state of the normalized source; finalized only when caching, so
-    /// plain parsing and solving pay nothing for the cache key.
-    source: Sha256,
+    /// The normalized source, hashed only when caching, so plain parsing and
+    /// solving pay nothing for the cache key.
+    source: SourceHash,
     assumptions: Vec<Assumption>,
     /// The cache key, computed on the first cached solve and kept afterwards.
     key: OnceLock<String>,
@@ -18,7 +17,7 @@ struct Query {
 impl Query {
     fn key(&self) -> &str {
         self.key
-            .get_or_init(|| cache::key(&self.source.clone().finalize().into(), &self.assumptions))
+            .get_or_init(|| cache::key(&self.source.digest(), &self.assumptions))
     }
 }
 pub struct Script {

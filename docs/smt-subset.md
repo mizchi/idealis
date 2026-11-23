@@ -111,13 +111,17 @@ workは全checkで共有し、各結果の`stats.work`を差し引く。残り0�
 | 容量      | `max_entries`件。0なら書き込まない。満杯なら新しいentryを書かず、小さい上限ではkey順の末尾から落とす |
 | 検証      | entryごとのSHA-256と、問題の宣言に合うモデルの形を初回のlookupで検査する。不一致はprotocol error     |
 
-sourceのdigestはSessionがassertごとに増分で更新し、popではsnapshotと一緒に戻す。同じ正規化sourceなら、`Solver::parse`の空白・コメント・末尾の`check-sat`、assertで積んだcontext、Scriptの各checkの間でhitする。式の意味が同じでも、表記が違えば別のkeyになる。
+sourceのdigestは、assertごとに親へつないだリンクから、cacheのkeyが必要になった時に、計算済みの最も近い祖先から計算する。popではsnapshotと一緒に戻す。同じ正規化sourceなら、`Solver::parse`の空白・コメント・末尾の`check-sat`、assertで積んだcontext、Scriptの各checkの間でhitする。式の意味が同じでも、表記が違えば別のkeyになる。
 
 Scriptのwork予算は全checkで共有する。hitは予算を消費しないため、cacheなしの`solve`ではunknownになった後続checkが、cacheありでは解ける場合がある。これは今回実行した処理だけをworkに数える契約の結果で、hitしたcheckの探索費用を後から足さない。
 
 `build_digest`は実際のbinaryのbytesなど、意味に影響する依存を網羅したSHA-256を呼び出し側が渡す。nativeとWasmでbyteのdigestを使う場合、互いにはhitしない。snapshotはserdeで保存・復元し、`merge(other, max_entries)`で同じbuildのentryを統合する。同じkeyで異なる回答や、digestの壊れたentryがあればmergeを拒否する。SHA-256は偶発的な改変の検出用で、生成者の署名ではない。keyもSHA-256で、source全文は保持しない。digestの衝突がないことは前提とする。
 
 JSONは`run-script-incremental {source,maxWork,...}`と`check-incremental {handle,maxWork,assumptions?,...}`。共通の`cache?`、`enabled?`、`buildDigest?`、`maxEntries?`を受け、`incremental-script-results` / `incremental-solution`で`stats`と更新した`cache`を返す。`enabled`を省略した場合は無効で、渡したsnapshotをそのまま返す。
+
+snapshotを要求ごとに往復させる代わりに、engine側のstoreを使える。`cache-open {buildDigest,maxEntries,cache?}`は渡したsnapshotを取り込み、`cache-opened {cacheHandle,entries,invalidated}`を返す。取り込む時のbindは、snapshotの経路の最初の要求と同じ。加えて全entryのdigestを開く時に検査し、壊れたentryがあれば要求ごと拒否する。incremental requestに`cacheHandle`だけを渡すと、storeをその場で使い、応答は`cache`の代わりに`cacheHandle`を返す。`cache`・`enabled`・`buildDigest`・`maxEntries`との併用はprotocol errorになる。`cache-export {cacheHandle}`は同じ形式のsnapshotを`cache-snapshot`で返し、`cache-close`で閉じる。cache handleは問題のhandleとは別に採番する。
+
+開いた直後にexportしたsnapshotを往復させた場合と、結果・work/stats・cache stats・exportしたsnapshotが一致する。違いは2点ある。壊れたentryは開く時に拒否する（snapshotの経路ではそのkeyを引いた時に失敗する）。scriptの途中でerrorになった場合、storeにはそれまでに書いた新しい回答が残る（snapshotの経路ではcacheが返らない）。[plan 0076](../evals/plans/0076-smt-cache-store.md)を参照。
 
 missは新しい探索に加えて、keyの計算と書き込みの固定費（4〜128変数の整数chainで1 checkあたり約2.5〜12 µs）がかかる。4変数の問題では約5.2〜5.4倍、128変数では約4〜7%遅くなる。小さい問い合わせでは固定費が上回るため既定は無効にする。Scriptはqueryごとに最初のcached solveでkeyを作って保持し、cacheを使わないparse/solveはkeyを作らない。[評価0074](../evals/iterations/0074-smt-incremental-cache.md)を参照。
 
