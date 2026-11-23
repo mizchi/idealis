@@ -41,7 +41,7 @@ fn main() -> Result<(), ralloy::Error> {
 - none、univ、iden、Int、String。noneは単項の空集合で、二項の空関係はnone -> noneと書く。既定4-bitのInt atomはuniv/idenへ含める。0 Intも指定できる。
 - 整数リテラル、`#e`、`plus`などの算術と比較。Int型の関係は値の和として整数になり、値はbit幅の2の補数で桁あふれする（Alloy 6.2.0の既定）。
 
-signatureは最大8個、fieldは最大8個、signatureのscopeは最大8、Intは0-5 bit、全体は64 atomまで。sourceは1 MiB、10万token、tokenは256 bytes、式の再帰は48段、同一式の連続演算は512 tokenまで。超える入力はresource errorにする。
+signatureは最大16個、fieldは最大8個、signatureのscopeは最大8、Intは0-5 bit、全体は64 atomまで。2列以上のfieldは、ownerのatomごとのtuple空間が64まで。sourceは1 MiB、10万token、tokenは256 bytes、式の再帰は48段、同一式の連続演算は512 tokenまで。超える入力はresource errorにする。
 
 sigの継承・subset、複数sigの一括宣言、signature fact、module読込、引数付きpred/function、setを束縛する高階量化、整数演算・cardinality、3項以上の関係、時間・varは未対応として拒否する。Alloyの型検査全体や全構文の互換性は示さない。
 

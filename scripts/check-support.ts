@@ -411,7 +411,10 @@ const scopes: readonly CrateScope[] = [
       {
         path: "src/parser.rs",
         topic: "静的なAlloyの受理する構文と有限scope、未対応構文",
-        context: ["src/syntax.rs", "src/eval.rs", "src/lib.rs"],
+        // The parser and evaluator outgrew the 20-excerpt context budget once
+        // ralloy covered more of Alloy (plans 0079-0082); the syntax tree
+        // alone states what is accepted.
+        context: ["src/syntax.rs"],
       },
       {
         path: "src/lib.rs",

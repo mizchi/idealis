@@ -4,40 +4,27 @@
 
 ## 対応済み
 
-- [x] トップレベルsig、one/lone/some、名前が一意な二項fieldとmultiplicity。
-- [x] `abstract sig`、`extends`、親が1つのsubset sig（`in`）、`sig A, B {}`、signature fact。子の明示scopeは親の上限を超えず、one/exactlyの子は親を広げる（0080、Alloy 6.2.0の答えで決めた）。
-- [x] 3項・4項のfield（`A -> B`、`A -> B -> C`）と、1本の矢印の多重度`A m -> n B`。ownerのatomごとのtuple空間は64以下（0079）。
-- [x] 4項までの関係の和・差・交差・積・join・domain/range制限・比較。型の交わらないjoinはAlloyと同じく空集合。
-- [x] fact、名前付きassert、run/check、全体scopeと型ごとの上限・exactly。
-- [x] 引数付きpred/fun（引数は既定の`one`）、`P[a, b]`・`a.P[b]`・`p.f`の呼び出し、box join `r[x]`、引数付きpredの`run`（0081）。
-- [x] 関係の和・差・交差・積・join・転置・推移閉包・反射推移閉包・domain/range制限。
-- [x] 等価・包含・論理結合、単一atomを束縛するall/no/some/one/loneとdisj。
-- [x] none/univ/iden/Int/String。
-- [x] 整数リテラル、`#e`、`plus`・`minus`・`mul`・`div`・`rem`・`negate`、`<`・`>`・`<=`・`=<`・`>=`。Int型の関係は値の和として整数になり、すべての値はbit幅の2の補数で桁あふれする（0082、Alloy 6.2.0の既定と一致）。
-- [x] bit matrixで関係を評価し、有限構造を列挙してinstanceやcounterexampleを返す。
-- [x] check_instanceで渡されたsig/fieldを固定し、scope・宣言・fact・性質を検査する。
-- [x] matched / mismatch / invalid / unknownと、探索結果の各statusを区別する。
-- [x] native JSONLとホストimport不要のWasm ABI v1。JVM・Z3・idealisの他crateに依存しない。
+- [x] sig: トップレベル・`abstract`・`extends`・親が1つの`in`、one/lone/some、`sig A, B {}`、signature fact。子の明示scopeは親を超えず、one/exactlyの子は親を広げる（0080）。
+- [x] field: 名前が一意で4項まで、`A m -> n B`。fact、assert、run/check、全体scope・型ごとの上限・exactly、`for`なしの既定3（0079、0080）。
+- [x] 式: 4項までの和・差・交差・積・join・domain/range制限、転置・閉包、比較・論理結合、atomを束縛する量化とdisj、none/univ/iden/Int/String、引数付きpred/funとbox join（0079、0081）。
+- [x] 整数: リテラル、`#e`、`plus`などの算術、比較。Int型の関係は値の和になり、bit幅の2の補数で桁あふれする（0082）。
+- [x] 有限構造の全列挙、`check_instance`、matched/mismatch/invalid/unknownとstatusの区別、native JSONLとホストimport不要のWasm ABI v1。
 
-## Alloyとの差分テスト（0078）
+## Alloyとの差分テスト
 
-- [x] 公式Alloy 6.2.0の答えをroracleの`CheckReport`として保存し、`cargo test`で再生する。group `core`は今の対応範囲だけで書いた13モデル・50 commandで、記録時に全commandがAlloyと一致した。
-- [x] 評価器の人工故障6件（`one`/`lone`の数え方、閉包、反射閉包、転置、含意）を再生テストで検出する。
+- [x] 公式Alloy 6.2.0の答えをroracleの`CheckReport`として保存し、`cargo test`で再生する。5 group・37モデル・174 commandのうち173で一致し、1件は予算切れの`unknown`として明示的に残す（0078〜0082）。
 
-[評価0078](../../evals/iterations/0078-ralloy-alloy-oracle.md)を参照。
+[評価0078](../../evals/iterations/0078-ralloy-alloy-oracle.md)から[0082](../../evals/iterations/0082-ralloy-integers.md)を参照。
 
 ## 非対応・対象外
 
-- [ ] 親が複数のsubset sig（`in A + B`）、`@field`、moduleの読み込み。
-- [ ] `set`・`lone`・`some`の引数、setを束縛する高階量化、5項以上の関係、2本以上の矢印の多重度。
-- [ ] `sum`による量化、整数を関係として使う式、0による割り算、時間・varを使うAlloy 6の振る舞い。
+- [ ] 親が複数の`in`、`@field`、module、`set`などの引数、高階量化、5項以上の関係、`sum`、整数を関係として使う式、0による割り算、時間・var。
 - [ ] Alloy全体の構文・型検査、SAT符号化、節学習、一般的な対称性除去。
 - [ ] 固定instanceの一致だけから未観測の実装履歴を保証すること。
 
 ## 制約と根拠
 
-- [x] sig/field各8、sig scope各8、Int 0〜5 bit、全体64 atom等の上限とwork予算を検査する。
+- [x] sig 16・field 8、sig scope各8、Int 0〜5 bit、全体64 atom、fieldのtuple空間64とwork予算を検査する。
 - [x] no-counterexampleはscope外の証明ではない。no-instance、unknown、エラーを合格に読み替えない。
-- [x] noneは単項の空集合で、二項の空関係はnone -> noneで表す。
 
-[README](README.md)、[parser](src/parser.rs)、[公開境界](src/lib.rs)、[固定instance](src/check.rs)、[評価](../../evals/iterations/0035-alloy-instance.md)を参照。
+[README](README.md)、[parser](src/parser.rs)、[公開境界](src/lib.rs)、[固定instance](src/check.rs)を参照。
