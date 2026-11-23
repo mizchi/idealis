@@ -20,7 +20,25 @@ pub(crate) fn analyze(
         found: None,
         order: Vec::new(),
         subset_order: Vec::new(),
+        parents: Vec::new(),
+        children: vec![Vec::new(); module.signatures.len()],
     };
+    search.parents = module
+        .signatures
+        .iter()
+        .map(|signature| match &signature.parent {
+            Some((Parent::Extends, parent)) => module
+                .signatures
+                .iter()
+                .position(|candidate| candidate.name == *parent),
+            _ => None,
+        })
+        .collect();
+    for (child, parent) in search.parents.iter().enumerate() {
+        if let Some(parent) = parent {
+            search.children[*parent].push(child);
+        }
+    }
     let order = crate::check::hierarchy(module).expect("validated hierarchy");
     let (subsets, own): (Vec<usize>, Vec<usize>) = order
         .into_iter()
@@ -53,6 +71,10 @@ struct Search<'a> {
     /// Signatures with their own atoms, parents first; then subset ones.
     order: Vec<usize>,
     subset_order: Vec<usize>,
+    /// The `extends` parent of each signature and the children of each,
+    /// computed once per analysis (plan 0080a).
+    parents: Vec<Option<usize>>,
+    children: Vec<Vec<usize>>,
 }
 struct Slot {
     field: usize,
@@ -83,18 +105,17 @@ impl Search<'_> {
                 0
             };
             let mut maximum = bound.maximum;
-            if let Some((Parent::Extends, parent)) = &signature.parent {
-                let parent = self.index(parent);
+            if let Some(parent) = self.parents[index] {
                 let siblings = self.order[..position]
                     .iter()
-                    .filter(|other| self.extends(**other) == Some(parent))
+                    .filter(|other| self.parents[**other] == Some(parent))
                     .map(|other| counts[*other])
                     .sum::<usize>();
                 let room = counts[parent].saturating_sub(siblings);
                 maximum = maximum.min(room);
                 let last = !self.order[position + 1..]
                     .iter()
-                    .any(|other| self.extends(*other) == Some(parent));
+                    .any(|other| self.parents[*other] == Some(parent));
                 if last && self.module.signatures[parent].abstract_ {
                     minimum = minimum.max(room);
                 }
@@ -129,19 +150,6 @@ impl Search<'_> {
         );
         self.subsets(0, names, sets)
     }
-    fn index(&self, name: &str) -> usize {
-        self.module
-            .signatures
-            .iter()
-            .position(|signature| signature.name == name)
-            .expect("validated signature")
-    }
-    fn extends(&self, index: usize) -> Option<usize> {
-        match &self.module.signatures[index].parent {
-            Some((Parent::Extends, parent)) => Some(self.index(parent)),
-            _ => None,
-        }
-    }
     /// Gives a signature a contiguous block of atoms: its `extends` children
     /// first, then the atoms that belong to it alone.
     fn allocate(
@@ -152,11 +160,8 @@ impl Search<'_> {
         sets: &mut BTreeMap<String, u64>,
     ) {
         let start = names.len();
-        let children: Vec<usize> = (0..self.module.signatures.len())
-            .filter(|child| self.extends(*child) == Some(index))
-            .collect();
         let mut used = 0;
-        for child in children {
+        for &child in &self.children[index] {
             used += counts[child];
             self.allocate(child, counts, names, sets);
         }

@@ -13,6 +13,8 @@ const thresholds: Record<string, (name: string) => number> = {
   "0079-ralloy-nary-relations": () => 1.1,
   // evals/plans/0080-ralloy-sig-hierarchy.md
   "0080-ralloy-sig-hierarchy": () => 1.1,
+  // evals/plans/0080a-ralloy-hierarchy-indices.md (same thresholds as 0080)
+  "0080a-ralloy-hierarchy-indices": () => 1.1,
 };
 const required = thresholds[plan];
 assert.ok(required, plan);
