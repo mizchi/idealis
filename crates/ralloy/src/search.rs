@@ -9,7 +9,20 @@ pub(crate) fn analyze(
     body: &Expr,
     max_work: u64,
 ) -> Result<Analysis, Error> {
-    Ok(analyze_with(module, command, body, max_work, true, false).0)
+    // Wide searches of the relational core go to SAT (plan 0085).
+    if crate::sat::supported(module) && crate::sat::width(module, command) > 24 {
+        return Ok(crate::sat::analyze(module, command, body, max_work));
+    }
+    Ok(enumerate(module, command, body, max_work))
+}
+/// The enumerator alone, whatever the width.
+pub(crate) fn enumerate(
+    module: &Module,
+    command: &Command,
+    body: &Expr,
+    max_work: u64,
+) -> Analysis {
+    analyze_with(module, command, body, max_work, true, false).0
 }
 /// The fields and signature sets of each candidate that reached evaluation.
 type Trace = Vec<(Vec<u64>, Vec<Vec<u64>>)>;
