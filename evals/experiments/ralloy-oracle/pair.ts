@@ -21,6 +21,9 @@ const thresholds: Record<string, (name: string) => number> = {
   "0082-ralloy-integers": () => 1.1,
   // evals/plans/0083-ralloy-symmetry.md
   "0083-ralloy-symmetry": (name) => (name === "core-set-algebra" ? 0.5 : 1.1),
+  // evals/plans/0083a-ralloy-symmetry-setup.md (same thresholds as 0083)
+  "0083a-ralloy-symmetry-setup": (name) =>
+    name === "core-set-algebra" ? 0.5 : 1.1,
 };
 const required = thresholds[plan];
 assert.ok(required, plan);

@@ -258,15 +258,13 @@ impl Search<'_> {
             } else {
                 1 << world.bitwidth
             };
-            let membership = |atom: usize| -> Vec<bool> {
-                world
+            for atom in integers..world.names.len().saturating_sub(1) {
+                // Same membership: no set tells the two bits apart.
+                if world
                     .sets
                     .values()
-                    .map(|set| set & (1 << atom) != 0)
-                    .collect()
-            };
-            for atom in integers..world.names.len().saturating_sub(1) {
-                if membership(atom) == membership(atom + 1) {
+                    .all(|set| (set >> atom) & 1 == (set >> (atom + 1)) & 1)
+                {
                     self.swaps.push((atom, atom + 1));
                 }
             }
