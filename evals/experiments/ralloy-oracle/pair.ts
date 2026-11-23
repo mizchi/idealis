@@ -11,6 +11,8 @@ assert.ok(plan && output && paths.length === 4);
 const thresholds: Record<string, (name: string) => number> = {
   // evals/plans/0079-ralloy-nary-relations.md
   "0079-ralloy-nary-relations": () => 1.1,
+  // evals/plans/0080-ralloy-sig-hierarchy.md
+  "0080-ralloy-sig-hierarchy": () => 1.1,
 };
 const required = thresholds[plan];
 assert.ok(required, plan);
