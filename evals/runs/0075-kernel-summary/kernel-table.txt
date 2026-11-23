@@ -1,0 +1,17 @@
+binarySha256 ['96181c5f38a0', 'f8880c4e29ee'] order ['before', 'after', 'after', 'before'] sampleSize 20 warmupMs 500 measurementMs 1000
+kernel                                 before ns    after ns change %  rep0(B) rep1(A) rep2(A) rep3(B) ns  flagged>=10%  spreadB spreadA  r2 change %
+membership/function-cube                 1486073     1407596    -5.28  1486250 1407601 1407592 1485895     no    0.0%   0.0%  
+membership/parallel-channels              835500      825982    -1.14  835566 827481 824483 835434     no    0.0%   0.4%  
+search/counter-product/1                 9379581     9040892    -3.61  9372818 9076800 9004984 9386344     no    0.1%   0.8%  
+search/counter-product/8                 9391650     9062439    -3.51  9385083 9084846 9040032 9398218     no    0.1%   0.5%  
+search/function-cube/1                   5500801     5376172    -2.27  5507985 5353498 5398846 5493616     no    0.3%   0.8%  
+search/function-cube/8                   5256132     5243064    -0.25  5361657 5213271 5272858 5150608     no    4.0%   1.1%  
+search/linear-ring/1                      939454      910011    -3.13  940134 909381 910641 938774     no    0.1%   0.1%  
+search/linear-ring/8                      945156      916931    -2.99  946628 918244 915618 943683     no    0.3%   0.3%  
+search/parallel-channels/1              10377587     9419861    -9.23  10362229 9398504 9441218 10392945     no    0.3%   0.5%  
+search/parallel-channels/8               5696467     5612152    -1.48  5764137 5551729 5672574 5628796     no    2.4%   2.2%  
+values/except-function                    380996      381072    +0.02  381199 381200 380944 380794     no    0.1%   0.1%  
+values/except-record                     3806702     3746169    -1.59  3815573 3752600 3739739 3797830     no    0.5%   0.3%  
+values/intern-existing-functions          323140      308877    -4.41  324092 309423 308330 322189     no    0.6%   0.4%  
+values/intern-new-functions               365460      362942    -0.69  366875 362655 363230 364045     no    0.8%   0.2%  
+count 14 max change 0.01997626379994788 min change -9.228794660620798 flagged 0

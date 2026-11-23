@@ -1,0 +1,33 @@
+[before] cells: 2800; wasm vs native outcome differs: 5; exceptions: 0
+[after] cells: 2800; wasm vs native outcome differs: 5; exceptions: 0
+[oracle] cells: 2800; wasm vs native outcome differs: 5; exceptions: 0
+before vs after IR sha256 differs (all cells incl. refusals as null): 0
+TS vs Rust normalized IR where both compile: {('before', 'equal'): 337, ('after', 'equal'): 337}
+v1 before vs after outcome differs: 0
+v2 before vs after differing cells: 222
+  12 allowed: Safety evaluation nesting exceeds 128 -> result complete
+  24 allowed: Safety expression nesting exceeds 48 -> check Expected a boolean
+  16 allowed: Safety expression nesting exceeds 48 -> check Integer division by zero
+  4 allowed: Safety expression nesting exceeds 48 -> result bounded
+  132 allowed: Safety expression nesting exceeds 48 -> result complete
+  34 allowed: Safety expression nesting exceeds 48 -> result invariant-violation
+OTHER differences: 0
+changed cells where after differs from the oracle: 8
+  ('recursive-if-54-from-3', 'rust-wasm', 'complete', 'bounded', 110, 10)
+  ('recursive-if-54-from-3', 'rust-native', 'complete', 'bounded', 110, 10)
+  ('recursive-if-54-from-30', 'rust-wasm', 'complete', 'bounded', 3188, 10)
+  ('recursive-if-54-from-30', 'rust-native', 'complete', 'bounded', 3188, 10)
+  ('recursive-if-54-from-40', 'rust-wasm', 'bounded', 'bounded', 563, 10)
+  ('recursive-if-54-from-40', 'rust-native', 'bounded', 'bounded', 563, 10)
+  ('recursive-if-54-from-60', 'rust-wasm', 'bounded', 'bounded', 563, 10)
+  ('recursive-if-54-from-60', 'rust-native', 'bounded', 'bounded', 563, 10)
+after vs recorded expectations mismatches: 5
+  ('flat-and-128', 'v1', 'rust-wasm', {'stage': 'compile', 'message': 'Invalid compiled expression'}, {'stage': 'check', 'message': 'recursion limit exceeded at line 1 column 3032'})
+  ('flat-or-128', 'v1', 'rust-wasm', {'stage': 'compile', 'message': 'Invalid compiled expression'}, {'stage': 'check', 'message': 'recursion limit exceeded at line 1 column 2910'})
+  ('flat-and-129', 'v1', 'rust-wasm', {'stage': 'compile', 'message': 'Invalid compiled expression'}, {'stage': 'check', 'message': 'recursion limit exceeded at line 1 column 3032'})
+  ('flat-or-129', 'v1', 'rust-wasm', {'stage': 'compile', 'message': 'Invalid compiled expression'}, {'stage': 'check', 'message': 'recursion limit exceeded at line 1 column 2910'})
+  ('case-other-128', 'v1', 'rust-wasm', {'stage': 'compile', 'message': 'Invalid compiled expression'}, {'stage': 'check', 'message': 'recursion limit exceeded at line 1 column 27161'})
+quint:LongConjunction-broken: before {"stage": "result", "status": "invariant-violation", "trace": 5, "work": 15} | oracle {"stage": "result", "status": "invariant-violation", "trace": 5, "work": 15} | after {"stage": "result", "status": "invariant-violation", "trace": 5, "work": 15}
+quint:LongConjunction-safety: before {"stage": "result", "status": "complete", "states": 6, "generated": 7, "work": 20} | oracle {"stage": "result", "status": "complete", "states": 6, "generated": 7, "work": 20} | after {"stage": "result", "status": "complete", "states": 6, "generated": 7, "work": 20}
+quint:LongIfChain-broken: before {"stage": "check", "message": "Safety expression nesting exceeds 48"} | oracle {"stage": "result", "status": "invariant-violation", "trace": 54, "work": 216} | after {"stage": "result", "status": "invariant-violation", "trace": 54, "work": 216}
+quint:LongIfChain-safety: before {"stage": "check", "message": "Safety expression nesting exceeds 48"} | oracle {"stage": "result", "status": "complete", "states": 56, "generated": 57, "work": 226} | after {"stage": "result", "status": "complete", "states": 56, "generated": 57, "work": 226}

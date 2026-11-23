@@ -1,0 +1,67 @@
+diff --git i/crates/rtlc/src/safety_definitions.rs w/crates/rtlc/src/safety_definitions.rs
+index 89f906103..a7ac995a5 100644
+--- i/crates/rtlc/src/safety_definitions.rs
++++ w/crates/rtlc/src/safety_definitions.rs
+@@ -77,7 +77,7 @@ fn invalid(message: &str) -> CoreError {
+ }
+ 
+ fn branch_expansion(branches: &[Branch], depth: usize) -> Result<(usize, usize), CoreError> {
+-    if depth > 48 {
++    if depth > usize::MAX - 1 {
+         return Err(invalid("Safety expression nesting exceeds 48"));
+     }
+     let mut count = 0usize;
+@@ -221,7 +221,7 @@ fn definition_order(definitions: &[Definition]) -> Result<Vec<(Vec<usize>, bool)
+                     }
+                 }
+                 Node::Expression(expression, depth) => {
+-                    if depth > 48 {
++                    if depth > usize::MAX - 1 {
+                         return Err(invalid("Safety expression nesting exceeds 48"));
+                     }
+                     if let Expression::Call {
+@@ -257,7 +257,7 @@ fn definition_order(definitions: &[Definition]) -> Result<Vec<(Vec<usize>, bool)
+                     }
+                 }
+                 Node::Branch(branch, depth) => {
+-                    if depth > 48 {
++                    if depth > usize::MAX - 1 {
+                         return Err(invalid("Safety expression nesting exceeds 48"));
+                     }
+                     for step in &branch.steps {
+@@ -644,7 +644,7 @@ impl Analyzer<'_> {
+         expression: &Expression,
+         context: Context,
+     ) -> Result<Summary, CoreError> {
+-        if context.depth > 48 {
++        if context.depth > usize::MAX - 1 {
+             return Err(invalid("Safety expression nesting exceeds 48"));
+         }
+         match expression {
+diff --git i/crates/rtlc/src/safety_expressions.rs w/crates/rtlc/src/safety_expressions.rs
+index b366ea90e..708cc472d 100644
+--- i/crates/rtlc/src/safety_expressions.rs
++++ w/crates/rtlc/src/safety_expressions.rs
+@@ -114,16 +114,13 @@ impl<'a> EvalContext<'a> {
+         if arena.metadata.is_none() && arena.definitions.is_empty() && self.frame.is_none() {
+             return Ok(());
+         }
+-        if self.evaluation_depth >= 128 {
+-            if self.recursive {
+-                return Err(CoreError {
+-                    code: "evaluation-budget",
+-                    message: "Recursive safety evaluation nesting exceeds 128".into(),
+-                });
+-            }
+-            return Err(CoreError::protocol("Safety evaluation nesting exceeds 128"));
++        if self.evaluation_depth >= 128 && self.recursive {
++            return Err(CoreError {
++                code: "evaluation-budget",
++                message: "Recursive safety evaluation nesting exceeds 128".into(),
++            });
+         }
+-        self.evaluation_depth += 1;
++        self.evaluation_depth = self.evaluation_depth.saturating_add(1);
+         Ok(())
+     }
+     fn read(self, slot: usize, next: bool) -> Result<Scalar, CoreError> {

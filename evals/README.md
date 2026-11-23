@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0075: 連鎖をcheckerの検証と評価でも1段と数える](iterations/0075-nesting-chains-ir-eval.md)は、rtlcのv2で連言・選言とELSE IFの連鎖を明示的なloopでたどり、checker 48と動的評価128の1段と数える。54枝のLongIfChainはTLCと同じ56状態・57生成で検査でき、今受理される入力のIR・結果・workは変えない。評価の再帰の腕を分け、9種類の入れ子がdebugの2 MiBのthreadで動的評価128に届くようにした（#83）。JSONの要求のdecoder 128により、平たい連言127項とCASE 126枝からは型付きで拒否される。
+
 [0077: 増分contextの固定費の削減](iterations/0077-smt-lean-context.md)は、profileに合わせて、文字列を作らない長さの計算、遅延したsource hash、遅延したProblem、名前を含む式だけの再コンパイルを入れた。`context-assert-256`は0.59倍、`context-constant-256`は0.47倍。単発の小さいparseの後退も戻った。旧版との完全応答一致とZ3照合を記録し、cache benchの`prepared-4`の1組の後退も残した。
 
 [0075/0076: check cacheの往復費用とengine側のstore](iterations/0076-smt-cache-store.md)は、JSON/Wasm protocolでsnapshotを往復させる費用を測り、N=512でhitがcacheなしのcheckの21〜28倍になることを確かめた。engine側のstoreを追加し、hitはNによらずnative 4.6 µs・Wasm 9.9 µsになった。snapshotを往復させた場合との2400要求の完全応答一致も記録した。
