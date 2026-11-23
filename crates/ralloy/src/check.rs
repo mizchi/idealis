@@ -6,12 +6,22 @@ use std::collections::{BTreeMap, BTreeSet};
 enum Type {
     Boolean,
     Relation(Vec<u16>),
+    /// An integer value (plan 0082).
+    Integer,
 }
 impl Type {
     fn columns(self) -> Result<Vec<u16>, Error> {
         match self {
             Self::Relation(columns) => Ok(columns),
             _ => Err(Error::new(ErrorKind::Type, "expected relation")),
+        }
+    }
+    /// An integer, or a unary relation summed into one.
+    fn integer(self) -> Result<(), Error> {
+        match self {
+            Self::Integer => Ok(()),
+            Self::Relation(columns) if columns.len() == 1 => Ok(()),
+            _ => Err(Error::new(ErrorKind::Type, "expected integer")),
         }
     }
     fn boolean(self) -> Result<(), Error> {
@@ -408,6 +418,23 @@ impl Checker<'_> {
                     self.predicate(name, depth)
                 }
             }
+            Expr::Number(_) => Ok(Type::Integer),
+            Expr::Apply(name, arguments)
+                if !self.module.predicates.contains_key(name)
+                    && crate::parser::BUILTINS.contains(&name.as_str()) =>
+            {
+                let expected = if name == "negate" { 1 } else { 2 };
+                if arguments.len() != expected {
+                    return Err(Error::new(
+                        ErrorKind::Type,
+                        format!("{name} takes {expected} arguments"),
+                    ));
+                }
+                for argument in arguments {
+                    self.expression(argument, locals, depth + 1)?.integer()?;
+                }
+                Ok(Type::Integer)
+            }
             Expr::Apply(name, arguments) => {
                 let kind = self.predicate(name, depth)?;
                 let parameters = self.parameters(name, depth)?;
@@ -446,6 +473,10 @@ impl Checker<'_> {
                         kind.columns()?;
                         Ok(Type::Boolean)
                     }
+                    Unary::Cardinality => {
+                        kind.columns()?;
+                        Ok(Type::Integer)
+                    }
                     Unary::Transpose | Unary::Closure | Unary::Reflexive => {
                         let mut columns = kind.columns()?;
                         if columns.len() != 2 {
@@ -473,6 +504,16 @@ impl Checker<'_> {
                 ) {
                     left.boolean()?;
                     right.boolean()?;
+                    return Ok(Type::Boolean);
+                }
+                let integers = matches!(left, Type::Integer) || matches!(right, Type::Integer);
+                if matches!(
+                    operator,
+                    Binary::Less | Binary::LessEqual | Binary::Greater | Binary::GreaterEqual
+                ) || integers && matches!(operator, Binary::Equal | Binary::NotEqual)
+                {
+                    left.integer()?;
+                    right.integer()?;
                     return Ok(Type::Boolean);
                 }
                 let left_columns = left.columns()?;

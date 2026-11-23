@@ -85,3 +85,8 @@ fn hierarchy_agrees_with_alloy() {
 fn predicates_agree_with_alloy() {
     replay("predicates", &[]);
 }
+
+#[test]
+fn integers_agree_with_alloy() {
+    replay("integers", &[]);
+}

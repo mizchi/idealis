@@ -43,6 +43,8 @@ pub(crate) enum Unary {
     Transpose,
     Closure,
     Reflexive,
+    /// `#e`, an integer (plan 0082).
+    Cardinality,
 }
 #[derive(Clone, Copy)]
 pub(crate) enum Binary {
@@ -61,6 +63,11 @@ pub(crate) enum Binary {
     Join,
     Domain,
     Range,
+    /// Integer comparisons (plan 0082).
+    Less,
+    LessEqual,
+    Greater,
+    GreaterEqual,
 }
 #[derive(Clone, Copy)]
 pub(crate) enum Quantifier {
@@ -82,6 +89,8 @@ pub(crate) enum Expr {
     /// `name[arguments]`: a pred/fun call, resolved after parsing; other
     /// names become box joins (plan 0081).
     Apply(String, Vec<Self>),
+    /// An integer literal (plan 0082).
+    Number(i64),
     Block(Vec<Self>),
     Unary(Unary, Box<Self>),
     Binary(Binary, Box<Self>, Box<Self>),

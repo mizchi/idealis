@@ -516,7 +516,6 @@ export const controls = [
   "sig A {} run { no ^none }",
   "var sig A {} run {}",
   "open util/ordering[A] sig A {} run {}",
-  "sig A {} run { #A = 1 }",
   "sig A {} pred P { P } run {}",
   "sig A {} pred P { unknown in A } run {}",
   "sig A {} fact { A } run {}",

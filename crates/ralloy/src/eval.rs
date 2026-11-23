@@ -16,6 +16,8 @@ pub(crate) enum Relation {
 enum Value {
     Formula(bool),
     Relation(Relation),
+    /// Already wrapped to the command's bitwidth (plan 0082).
+    Integer(i64),
 }
 impl Value {
     fn formula(self) -> bool {
@@ -141,6 +143,8 @@ impl Budget {
     }
 }
 pub(crate) struct World {
+    /// Integer bitwidth; Int atoms are the first 2^bitwidth names.
+    pub bitwidth: usize,
     pub names: Vec<String>,
     pub sets: BTreeMap<String, u64>,
     /// Per field and owner atom: the target set of a single-column field, or
@@ -153,6 +157,7 @@ impl World {
     pub fn new(bitwidth: usize) -> Self {
         let count = if bitwidth == 0 { 0 } else { 1i32 << bitwidth };
         Self {
+            bitwidth,
             names: (0..count)
                 .map(|integer| (integer - count / 2).to_string())
                 .collect(),
@@ -249,6 +254,27 @@ impl Evaluator<'_> {
             }
             // Arguments are evaluated where the call is; the body sees only
             // the parameters (plan 0081).
+            Expr::Apply(name, arguments) if !self.module.predicates.contains_key(name) => {
+                let mut values = Vec::new();
+                for argument in arguments {
+                    let value = self.expression(argument, locals)?;
+                    values.push(self.integer(value));
+                }
+                let (left, right) = (values[0], values.get(1).copied().unwrap_or(0));
+                // Division and remainder by zero are not modeled: unknown.
+                if matches!(name.as_str(), "div" | "rem") && right == 0 {
+                    return Err(());
+                }
+                let value = match name.as_str() {
+                    "plus" => left.wrapping_add(right),
+                    "minus" => left.wrapping_sub(right),
+                    "mul" => left.wrapping_mul(right),
+                    "div" => left.wrapping_div(right),
+                    "rem" => left.wrapping_rem(right),
+                    _ => left.wrapping_neg(),
+                };
+                Ok(Value::Integer(self.wrap(value)))
+            }
             Expr::Apply(name, arguments) => {
                 let predicate = &self.module.predicates[name];
                 let mut parameters = Environment::new();
@@ -273,6 +299,9 @@ impl Evaluator<'_> {
                     return Ok(Value::Formula(!value.formula()));
                 }
                 let relation = value.relation();
+                if matches!(operator, Unary::Cardinality) {
+                    return Ok(Value::Integer(self.wrap(i64::from(relation.count()))));
+                }
                 if matches!(operator, Unary::No | Unary::Some | Unary::One | Unary::Lone) {
                     let count = relation.count();
                     return Ok(Value::Formula(match operator {
@@ -336,10 +365,28 @@ impl Evaluator<'_> {
                         _ => left == right,
                     }));
                 }
+                let integers =
+                    matches!(left, Value::Integer(_)) || matches!(right, Value::Integer(_));
+                if matches!(
+                    operator,
+                    Binary::Less | Binary::LessEqual | Binary::Greater | Binary::GreaterEqual
+                ) || integers && matches!(operator, Binary::Equal | Binary::NotEqual)
+                {
+                    let (left, right) = (self.integer(left), self.integer(right));
+                    return Ok(Value::Formula(match operator {
+                        Binary::Less => left < right,
+                        Binary::LessEqual => left <= right,
+                        Binary::Greater => left > right,
+                        Binary::GreaterEqual => left >= right,
+                        Binary::Equal => left == right,
+                        _ => left != right,
+                    }));
+                }
                 let left = left.relation();
                 let right = right.relation();
                 self.relations(*operator, left, right)
             }
+            Expr::Number(value) => Ok(Value::Integer(self.wrap(*value))),
             Expr::Quantified(quantifier, declarations, body) => {
                 let mut matched = 0;
                 self.quantify(*quantifier, declarations, 0, body, locals, &mut matched)?;
@@ -541,6 +588,35 @@ impl Evaluator<'_> {
             _ => unreachable!("validated relational operator"),
         };
         Ok(Value::Relation(Relation::from_tuples(arity, output, atoms)))
+    }
+    /// Two's complement at the command's bitwidth, as Alloy 6.2.0 answers.
+    fn wrap(&self, value: i64) -> i64 {
+        let bitwidth = self.world.bitwidth;
+        if bitwidth == 0 {
+            return 0;
+        }
+        let modulus = 1i64 << bitwidth;
+        (value + modulus / 2).rem_euclid(modulus) - modulus / 2
+    }
+    /// An integer, or the sum of the Int atoms of a unary relation.
+    fn integer(&self, value: Value) -> i64 {
+        match value {
+            Value::Integer(value) => value,
+            Value::Relation(Relation::Unary(set)) => {
+                let integers = if self.world.bitwidth == 0 {
+                    0
+                } else {
+                    1i64 << self.world.bitwidth
+                };
+                let sum = bits(set)
+                    .map(i64::from)
+                    .filter(|atom| *atom < integers)
+                    .map(|atom| atom - integers / 2)
+                    .sum();
+                self.wrap(sum)
+            }
+            _ => unreachable!("validated integer"),
+        }
     }
     fn quantify(
         &mut self,

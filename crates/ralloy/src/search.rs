@@ -205,6 +205,7 @@ impl Search<'_> {
     }
     fn fields(&mut self, names: Vec<String>, sets: BTreeMap<String, u64>) -> Result<bool, ()> {
         let mut world = World {
+            bitwidth: self.command.scope.integer_bitwidth,
             fields: vec![vec![0; names.len()]; self.module.fields.len()],
             spaces: Vec::new(),
             names,

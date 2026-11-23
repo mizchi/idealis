@@ -43,12 +43,14 @@ pub(crate) fn parse(source: &str) -> Result<Module, Error> {
             {
                 position += 1;
             }
-        } else if let Some(operator) = ["<=>", "=>", "->", "<:", ":>", "&&", "||", "!=", "!in"]
-            .into_iter()
-            .find(|operator| source[position..].starts_with(operator))
+        } else if let Some(operator) = [
+            "<=>", "=>", "=<", "<=", ">=", "->", "<:", ":>", "&&", "||", "!=", "!in",
+        ]
+        .into_iter()
+        .find(|operator| source[position..].starts_with(operator))
         {
             position += operator.len();
-        } else if b"{}()[],:|.+-&=~^*!;".contains(&bytes[position]) {
+        } else if b"{}()[],:|.+-&=~^*!;<>#".contains(&bytes[position]) {
             position += 1;
         } else {
             return Err(Error::new(
@@ -124,12 +126,14 @@ fn resolve_calls(module: &mut Module) {
         };
     }
 }
+/// Integer functions that are calls rather than box joins (plan 0082).
+pub(crate) const BUILTINS: [&str; 6] = ["plus", "minus", "mul", "div", "rem", "negate"];
 fn resolve(expression: Expr, arities: &std::collections::BTreeMap<String, usize>) -> Expr {
     let go = |expression: Expr| resolve(expression, arities);
     match expression {
         Expr::Apply(name, arguments) => {
             let arguments: Vec<Expr> = arguments.into_iter().map(go).collect();
-            if arities.contains_key(&name) {
+            if arities.contains_key(&name) || BUILTINS.contains(&name.as_str()) {
                 Expr::Apply(name, arguments)
             } else {
                 arguments
@@ -153,7 +157,7 @@ fn resolve(expression: Expr, arities: &std::collections::BTreeMap<String, usize>
                 right => Expr::Binary(Binary::Join, Box::new(left), Box::new(go(right))),
             }
         }
-        Expr::Name(_) => expression,
+        Expr::Name(_) | Expr::Number(_) => expression,
         Expr::Block(expressions) => Expr::Block(expressions.into_iter().map(go).collect()),
         Expr::Unary(operator, child) => Expr::Unary(operator, Box::new(go(*child))),
         Expr::Binary(operator, left, right) => {
@@ -212,7 +216,7 @@ fn implicit_this(expression: Expr, fields: &BTreeSet<String>) -> Expr {
             Box::new(Expr::Name("this".into())),
             Box::new(Expr::Name(name)),
         ),
-        Expr::Name(_) => expression,
+        Expr::Name(_) | Expr::Number(_) => expression,
         Expr::Apply(name, arguments) => Expr::Apply(
             name,
             arguments
@@ -789,6 +793,21 @@ impl Parser {
             };
             self.position += 1;
             Expr::Unary(operator, Box::new(self.expression(15)?))
+        } else if self.peek().bytes().all(|byte| byte.is_ascii_digit()) && !self.peek().is_empty()
+            || self.peek() == "-"
+                && self.tokens.get(self.position + 1).is_some_and(|token| {
+                    !token.is_empty() && token.bytes().all(|byte| byte.is_ascii_digit())
+                })
+        {
+            let negative = self.take("-");
+            let value: i64 = self
+                .peek()
+                .parse()
+                .map_err(|_| Error::new(ErrorKind::Resource, "integer literal too large"))?;
+            self.position += 1;
+            Expr::Number(if negative { -value } else { value })
+        } else if self.take("#") {
+            Expr::Unary(Unary::Cardinality, Box::new(self.expression(14)?))
         } else if ["none", "univ", "iden", "Int", "String"].contains(&self.peek()) {
             let name = self.peek().to_owned();
             self.position += 1;
@@ -831,6 +850,10 @@ impl Parser {
                 "=" => (Binary::Equal, 6, false),
                 "!=" => (Binary::NotEqual, 6, false),
                 "in" => (Binary::In, 6, false),
+                "<" => (Binary::Less, 6, false),
+                ">" => (Binary::Greater, 6, false),
+                "<=" | "=<" => (Binary::LessEqual, 6, false),
+                ">=" => (Binary::GreaterEqual, 6, false),
                 "!in" => (Binary::NotIn, 6, false),
                 "not"
                     if self
