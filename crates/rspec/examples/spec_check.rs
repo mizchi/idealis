@@ -33,7 +33,6 @@ pub fn drift_manifest(root: &Path) -> serde_json::Value {
     documents.sort();
     let specs: Vec<(String, rspec::Spec)> = SPECS
         .iter()
-        .filter(|(_, _, markdown)| *markdown != "docs/glossary.md")
         .map(|(_, json, markdown)| {
             let spec =
                 rspec::from_json(&std::fs::read_to_string(root.join(json)).unwrap()).unwrap();

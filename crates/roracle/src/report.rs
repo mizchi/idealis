@@ -148,3 +148,81 @@ pub(crate) fn identities<'a>(ids: impl Iterator<Item = &'a str>) -> Result<(), E
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Status;
+    use std::collections::BTreeMap;
+
+    /// Every combination of zero to three comparison statuses, folded by
+    /// `Status::aggregate`, is an instance of spec/models/roracle-report.model
+    /// that satisfies its facts (plan 0093).
+    #[test]
+    fn aggregate_conforms_to_the_report_model() {
+        let root = std::path::Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
+        let model = rmodel::parse(
+            &std::fs::read_to_string(root.join("spec/models/roracle-report.model")).unwrap(),
+        )
+        .unwrap();
+        let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
+        let all = [
+            Status::Matched,
+            Status::Mismatch,
+            Status::Invalid,
+            Status::Unknown,
+            Status::Error,
+        ];
+        let name = |status: Status| format!("{status:?}");
+        let slots = ["Slot0", "Slot1", "Slot2"];
+        let mut checked = 0;
+        for count in 0..=slots.len() {
+            for code in 0..all.len().pow(count as u32) {
+                let statuses: Vec<Status> = (0..count)
+                    .map(|position| all[code / all.len().pow(position as u32) % all.len()])
+                    .collect();
+                let report = Status::aggregate(statuses.iter().copied());
+                let mut signatures = BTreeMap::from([
+                    ("World".to_owned(), vec!["World".to_owned()]),
+                    ("s_Slot".to_owned(), slots.map(String::from).to_vec()),
+                    ("s_Status".to_owned(), all.map(name).to_vec()),
+                ]);
+                for status in all {
+                    signatures.insert(format!("e_{}", name(status)), vec![name(status)]);
+                }
+                let instance = ralloy::Instance {
+                    signatures,
+                    fields: BTreeMap::from([
+                        (
+                            "r_status".to_owned(),
+                            statuses
+                                .iter()
+                                .zip(slots)
+                                .map(|(status, slot)| {
+                                    vec!["World".into(), slot.into(), name(*status)]
+                                })
+                                .collect(),
+                        ),
+                        (
+                            "r_report".to_owned(),
+                            vec![vec!["World".into(), name(report)]],
+                        ),
+                    ]),
+                    trace: vec![BTreeMap::new()],
+                    back: Some(0),
+                };
+                let checked_instance = alloy.check_instance(0, &instance, 10_000_000).unwrap();
+                assert!(
+                    !matches!(
+                        checked_instance.status,
+                        ralloy::CheckStatus::Invalid | ralloy::CheckStatus::Unknown
+                    ),
+                    "{statuses:?} -> {report:?}: {:?} {:?}",
+                    checked_instance.status,
+                    checked_instance.reason
+                );
+                checked += 1;
+            }
+        }
+        assert_eq!(checked, 156);
+    }
+}

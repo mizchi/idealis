@@ -103,7 +103,12 @@
         },
         "aliases": [],
         "avoid": [],
-        "model": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-report.model",
+            "name": "Unknown"
+          }
+        ],
         "code": [
           {
             "path": "crates/ralloy/src/lib.rs",
@@ -267,7 +272,12 @@
         },
         "aliases": [],
         "avoid": [],
-        "model": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-report.model",
+            "name": "Matched"
+          }
+        ],
         "code": [
           {
             "path": "crates/roracle/src/report.rs",
@@ -293,7 +303,12 @@
         },
         "aliases": [],
         "avoid": [],
-        "model": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-report.model",
+            "name": "Mismatch"
+          }
+        ],
         "code": [
           {
             "path": "crates/roracle/src/report.rs",
@@ -319,7 +334,12 @@
         },
         "aliases": [],
         "avoid": [],
-        "model": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-report.model",
+            "name": "Invalid"
+          }
+        ],
         "code": [
           {
             "path": "crates/roracle/src/report.rs",
@@ -328,6 +348,117 @@
           {
             "path": "crates/ralloy/src/lib.rs",
             "symbol": "Invalid"
+          }
+        ]
+      },
+      {
+        "id": "compare.error",
+        "kind": "result",
+        "group": "比較",
+        "name": {
+          "ja": "エラー",
+          "en": "error"
+        },
+        "definition": {
+          "ja": "実装・oracle・基盤が失敗して、比較する観測そのものが得られなかったこと。不一致とも未確定とも区別する。",
+          "en": "The implementation, oracle or infrastructure failed, so there was no observation to compare. It is distinct from a mismatch and from unknown."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-report.model",
+            "name": "Error"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "Error"
+          }
+        ]
+      },
+      {
+        "id": "compare.status",
+        "kind": "concept",
+        "group": "比較",
+        "name": {
+          "ja": "比較の結果",
+          "en": "comparison status"
+        },
+        "definition": {
+          "ja": "1 つの比較が一致・不一致・無効・未確定・エラーのどれだったか。",
+          "en": "Whether one comparison matched, mismatched, was invalid, unknown or an error."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-report.model",
+            "name": "Status"
+          },
+          {
+            "path": "spec/models/roracle-report.model",
+            "name": "status"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "Status"
+          }
+        ]
+      },
+      {
+        "id": "compare.slot",
+        "kind": "concept",
+        "group": "比較",
+        "name": {
+          "ja": "比較の枠",
+          "en": "comparison slot"
+        },
+        "definition": {
+          "ja": "モデルで比較の数を変えるための枠。結果を持つ枠だけが比較になる。",
+          "en": "A slot that lets a model vary the number of comparisons; only slots with a status are comparisons."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-report.model",
+            "name": "Slot"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "compare.report",
+        "kind": "concept",
+        "group": "比較",
+        "name": {
+          "ja": "報告の結果",
+          "en": "report status"
+        },
+        "definition": {
+          "ja": "比較の結果を 1 つにまとめた結果。最も重いものを示し、重い順にエラー・不一致・未確定・無効・一致。比較が 1 つもなければ無効。",
+          "en": "The comparison statuses folded into one: the heaviest, in the order error, mismatch, unknown, invalid, matched. With no comparison it is invalid."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-report.model",
+            "name": "report"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "CheckReport"
+          },
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "aggregate"
           }
         ]
       },
@@ -496,6 +627,106 @@
         ]
       }
     ],
-    "rules": []
+    "rules": [
+      {
+        "id": "ORACLE-NO-FALSE-MATCH",
+        "text": {
+          "ja": "報告が一致になるのは、比較が 1 つ以上あり、そのすべてが一致したときだけ。未確定の比較があれば一致にならない。",
+          "en": "A report is matched only when there is at least one comparison and every one matched; an unknown comparison keeps it from being matched."
+        },
+        "terms": [
+          "compare.report",
+          "compare.matched",
+          "search.unknown"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/roracle-report.model",
+            "check": "MatchedOnlyIfAllMatched",
+            "expect": "holds"
+          },
+          {
+            "model": "spec/models/roracle-report.model",
+            "check": "UnknownNeverMatched",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "ORACLE-HEAVIEST-WINS",
+        "text": {
+          "ja": "報告は最も重い比較の結果を示す。不一致があれば、無効の比較があっても不一致になり、エラーと不一致がなければ未確定が無効より重い。",
+          "en": "A report shows the heaviest comparison status: a mismatch wins over an invalid comparison, and without errors or mismatches unknown wins over invalid."
+        },
+        "terms": [
+          "compare.report",
+          "compare.mismatch",
+          "compare.invalid",
+          "search.unknown"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/roracle-report.model",
+            "check": "InvalidHiddenByMismatch",
+            "expect": "reachable"
+          },
+          {
+            "model": "spec/models/roracle-report.model",
+            "check": "UnknownOverInvalid",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "ORACLE-INVALID-IS-NOT-MISMATCH",
+        "text": {
+          "ja": "無効の比較は、不一致の比較がない限り、報告を不一致にしない。",
+          "en": "An invalid comparison does not make the report a mismatch unless some comparison mismatched."
+        },
+        "terms": [
+          "compare.invalid",
+          "compare.mismatch",
+          "compare.report"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/roracle-report.model",
+            "check": "InvalidNotMismatch",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "ORACLE-EMPTY-IS-INVALID",
+        "text": {
+          "ja": "比較が 1 つもない報告は無効。",
+          "en": "A report without comparisons is invalid."
+        },
+        "terms": [
+          "compare.report",
+          "compare.invalid"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/roracle-report.model",
+            "check": "EmptyIsInvalid",
+            "expect": "reachable"
+          }
+        ]
+      }
+    ],
+    "groundings": [
+      {
+        "model": "spec/models/roracle-report.model",
+        "implementation": {
+          "path": "crates/roracle/src/report.rs",
+          "symbol": "aggregate"
+        },
+        "test": {
+          "path": "crates/roracle/src/report.rs",
+          "symbol": "aggregate_conforms_to_the_report_model"
+        }
+      }
+    ]
   }
 }

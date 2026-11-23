@@ -168,6 +168,36 @@ fn broken_links_are_reported() {
     );
 }
 
+/// A grounding names an implementation and a test that exist (plan 0093).
+#[test]
+fn broken_groundings_are_reported() {
+    let base = load("spec/idealis.json");
+    for (field, needle) in [
+        ("implementation", "has no identifier ghost_fn"),
+        ("test", "has no identifier ghost_fn"),
+    ] {
+        let mut spec = base.clone();
+        spec["spec"]["groundings"][0][field]["symbol"] = json!("ghost_fn");
+        let found = problems(&spec);
+        assert!(
+            found
+                .iter()
+                .any(|(kind, message)| kind == "D2" && message.contains(needle)),
+            "{field}: {found:?}"
+        );
+    }
+    let mut spec = base.clone();
+    spec["spec"]["terms"]
+        .as_array_mut()
+        .unwrap()
+        .retain(|term| term["id"] != "compare.slot");
+    assert!(
+        problems(&spec)
+            .iter()
+            .any(|(kind, message)| kind == "D3" && message.contains("Slot is bound to no term"))
+    );
+}
+
 /// D6: the Markdown is a function of the evaluated JSON.
 #[test]
 fn stale_markdown_is_detected() {

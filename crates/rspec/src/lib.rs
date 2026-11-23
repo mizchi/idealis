@@ -51,6 +51,13 @@ pub struct Rule {
     pub claims: Vec<Claim>,
     pub unformalized: Option<String>,
 }
+/// An implementation checked against a model by a named test (plan 0093).
+#[derive(Clone, Debug, Deserialize)]
+pub struct Grounding {
+    pub model: String,
+    pub implementation: CodeRef,
+    pub test: CodeRef,
+}
 #[derive(Clone, Debug, Deserialize)]
 pub struct Spec {
     pub id: String,
@@ -58,6 +65,8 @@ pub struct Spec {
     pub groups: Vec<String>,
     pub terms: Vec<Term>,
     pub rules: Vec<Rule>,
+    #[serde(default)]
+    pub groundings: Vec<Grounding>,
 }
 
 /// Reads the JSON of `pkl eval -f json`, whose module has a `spec` property.
@@ -133,6 +142,11 @@ pub fn links(spec: &Spec, root: &Path) -> Vec<Problem> {
             spec.rules
                 .iter()
                 .flat_map(|rule| rule.claims.iter().map(|claim| claim.model.as_str())),
+        )
+        .chain(
+            spec.groundings
+                .iter()
+                .map(|grounding| grounding.model.as_str()),
         );
     for path in paths {
         models
@@ -156,6 +170,12 @@ pub fn links(spec: &Spec, root: &Path) -> Vec<Problem> {
             .sigs
             .iter()
             .cloned()
+            .chain(
+                model
+                    .enums
+                    .iter()
+                    .flat_map(|(name, members)| std::iter::once(name).chain(members).cloned()),
+            )
             .chain(model.relations.iter().map(|relation| relation.name.clone()))
             .chain(model.actions.iter().map(|action| action.name.clone()))
             .collect()
@@ -198,6 +218,27 @@ pub fn links(spec: &Spec, root: &Path) -> Vec<Problem> {
                 Err(error) => problems.push(problem(
                     "D2",
                     format!("{}: {}: {error}", term.id, reference.path),
+                )),
+            }
+        }
+    }
+    for grounding in &spec.groundings {
+        for reference in [&grounding.implementation, &grounding.test] {
+            match std::fs::read_to_string(root.join(&reference.path)) {
+                Ok(source) if occurs(&source, &reference.symbol) => {}
+                Ok(_) => problems.push(problem(
+                    "D2",
+                    format!(
+                        "grounding of {}: {} has no identifier {}",
+                        grounding.model, reference.path, reference.symbol
+                    ),
+                )),
+                Err(error) => problems.push(problem(
+                    "D2",
+                    format!(
+                        "grounding of {}: {}: {error}",
+                        grounding.model, reference.path
+                    ),
                 )),
             }
         }
@@ -313,6 +354,19 @@ pub fn render(spec: &Spec, source: &str) -> String {
                     reference.path, reference.symbol
                 ));
             }
+        }
+    }
+    if !spec.groundings.is_empty() {
+        out.push_str("\n## 実装の照合\n\n");
+        for grounding in &spec.groundings {
+            out.push_str(&format!(
+                "- `{}` の `{}` を、`{}` の `{}` がモデル `{}` と照合する\n",
+                grounding.implementation.path,
+                grounding.implementation.symbol,
+                grounding.test.path,
+                grounding.test.symbol,
+                grounding.model
+            ));
         }
     }
     if !spec.rules.is_empty() {

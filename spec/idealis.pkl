@@ -8,6 +8,7 @@ local ralloy = "crates/ralloy/src/lib.rs"
 local rtlc = "crates/rtlc/src/safety.rs"
 local roracle = "crates/roracle/src/report.rs"
 local rmodel = "crates/rmodel/src/syntax.rs"
+local report = "spec/models/roracle-report.model"
 
 spec: s.Spec = new {
   id = "idealis"
@@ -58,6 +59,7 @@ spec: s.Spec = new {
         "予算が尽きて、実例・反例の有無という判定そのものを出せなかったこと。合格にも不合格にも読み替えない。work の予算切れは、ralloy では unknown、rtlc では理由 work の bounded になる（0092 で記録した語の違い）。",
         "A budget ran out before the verdict itself, whether an instance or counterexample exists, could be given. It is read as neither a pass nor a failure. Running out of work is unknown in ralloy and bounded with reason work in rtlc (a difference in wording recorded in 0092).",
       )
+      model { s.model(report, "Unknown") }
       code { s.code(ralloy, "Unknown"); s.code(roracle, "Unknown") }
     }
     new {
@@ -143,6 +145,7 @@ spec: s.Spec = new {
         "実装や engine の観測が、基準（oracle やモデル）の答えと同じだったこと。",
         "An observation of an implementation or engine equals the reference answer of an oracle or model.",
       )
+      model { s.model(report, "Matched") }
       code { s.code(roracle, "Matched"); s.code(ralloy, "Matched") }
     }
     new {
@@ -154,6 +157,7 @@ spec: s.Spec = new {
         "観測は正しく取れたうえで、基準の答えと異なったこと。",
         "The observation was obtained correctly and differs from the reference answer.",
       )
+      model { s.model(report, "Mismatch") }
       code { s.code(roracle, "Mismatch"); s.code(ralloy, "Mismatch") }
     }
     new {
@@ -165,7 +169,55 @@ spec: s.Spec = new {
         "入力や観測が契約を満たさず、比較そのものが成立しなかったこと。不一致とは区別する。",
         "An input or observation breaks its contract, so no comparison took place. It is distinct from a mismatch.",
       )
+      model { s.model(report, "Invalid") }
       code { s.code(roracle, "Invalid"); s.code(ralloy, "Invalid") }
+    }
+    new {
+      id = "compare.error"
+      kind = "result"
+      group = "比較"
+      name = s.text("エラー", "error")
+      definition = s.text(
+        "実装・oracle・基盤が失敗して、比較する観測そのものが得られなかったこと。不一致とも未確定とも区別する。",
+        "The implementation, oracle or infrastructure failed, so there was no observation to compare. It is distinct from a mismatch and from unknown.",
+      )
+      model { s.model(report, "Error") }
+      code { s.code(roracle, "Error") }
+    }
+    new {
+      id = "compare.status"
+      kind = "concept"
+      group = "比較"
+      name = s.text("比較の結果", "comparison status")
+      definition = s.text(
+        "1 つの比較が一致・不一致・無効・未確定・エラーのどれだったか。",
+        "Whether one comparison matched, mismatched, was invalid, unknown or an error.",
+      )
+      model { s.model(report, "Status"); s.model(report, "status") }
+      code { s.code(roracle, "Status") }
+    }
+    new {
+      id = "compare.slot"
+      kind = "concept"
+      group = "比較"
+      name = s.text("比較の枠", "comparison slot")
+      definition = s.text(
+        "モデルで比較の数を変えるための枠。結果を持つ枠だけが比較になる。",
+        "A slot that lets a model vary the number of comparisons; only slots with a status are comparisons.",
+      )
+      model { s.model(report, "Slot") }
+    }
+    new {
+      id = "compare.report"
+      kind = "concept"
+      group = "比較"
+      name = s.text("報告の結果", "report status")
+      definition = s.text(
+        "比較の結果を 1 つにまとめた結果。最も重いものを示し、重い順にエラー・不一致・未確定・無効・一致。比較が 1 つもなければ無効。",
+        "The comparison statuses folded into one: the heaviest, in the order error, mismatch, unknown, invalid, matched. With no comparison it is invalid.",
+      )
+      model { s.model(report, "report") }
+      code { s.code(roracle, "CheckReport"); s.code(roracle, "aggregate") }
     }
     new {
       id = "compare.oracle"
@@ -244,6 +296,48 @@ spec: s.Spec = new {
         "The range checked: atom counts, integer bit width, steps. Every verdict is about this range.",
       )
       code { s.code(ralloy, "Scope"); s.code(rmodel, "Scope") }
+    }
+  }
+  rules {
+    new {
+      id = "ORACLE-NO-FALSE-MATCH"
+      text = s.text(
+        "報告が一致になるのは、比較が 1 つ以上あり、そのすべてが一致したときだけ。未確定の比較があれば一致にならない。",
+        "A report is matched only when there is at least one comparison and every one matched; an unknown comparison keeps it from being matched.",
+      )
+      terms { "compare.report"; "compare.matched"; "search.unknown" }
+      claims { s.claim(report, "MatchedOnlyIfAllMatched", "holds"); s.claim(report, "UnknownNeverMatched", "holds") }
+    }
+    new {
+      id = "ORACLE-HEAVIEST-WINS"
+      text = s.text(
+        "報告は最も重い比較の結果を示す。不一致があれば、無効の比較があっても不一致になり、エラーと不一致がなければ未確定が無効より重い。",
+        "A report shows the heaviest comparison status: a mismatch wins over an invalid comparison, and without errors or mismatches unknown wins over invalid.",
+      )
+      terms { "compare.report"; "compare.mismatch"; "compare.invalid"; "search.unknown" }
+      claims { s.claim(report, "InvalidHiddenByMismatch", "reachable"); s.claim(report, "UnknownOverInvalid", "holds") }
+    }
+    new {
+      id = "ORACLE-INVALID-IS-NOT-MISMATCH"
+      text = s.text(
+        "無効の比較は、不一致の比較がない限り、報告を不一致にしない。",
+        "An invalid comparison does not make the report a mismatch unless some comparison mismatched.",
+      )
+      terms { "compare.invalid"; "compare.mismatch"; "compare.report" }
+      claims { s.claim(report, "InvalidNotMismatch", "holds") }
+    }
+    new {
+      id = "ORACLE-EMPTY-IS-INVALID"
+      text = s.text("比較が 1 つもない報告は無効。", "A report without comparisons is invalid.")
+      terms { "compare.report"; "compare.invalid" }
+      claims { s.claim(report, "EmptyIsInvalid", "reachable") }
+    }
+  }
+  groundings {
+    new {
+      model = report
+      implementation = s.code(roracle, "aggregate")
+      test = s.code(roracle, "aggregate_conforms_to_the_report_model")
     }
   }
 }

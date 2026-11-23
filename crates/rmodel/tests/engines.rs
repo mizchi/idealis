@@ -265,3 +265,72 @@ fn malformed_models_are_rejected() {
     assert!(rmodel::parse("model M\nsig A\nscope A = 2").is_err());
     assert!(rmodel::parse("model M\nsig A\nsig B\nscope A = 2, steps = 3").is_err());
 }
+
+/// Enums name their atoms in both lowerings (plan 0093).
+#[test]
+fn enums_agree() {
+    let model = rmodel::parse(
+        "model Light
+enum Color = Red | Green | Amber
+sig Lamp
+var shows: Lamp -> one Color
+init { Lamp.shows in Red }
+action next(l: Lamp) { Red in l.shows  shows' = shows - l -> Red + l -> Green }
+action caution(l: Lamp) { Green in l.shows  shows' = shows - l -> Green + l -> Amber }
+action stop(l: Lamp) { Amber in l.shows  shows' = shows - l -> Amber + l -> Red }
+invariant OneColor { all l: Lamp | one l.shows }
+reachable AllGreen { Lamp.shows = Green }
+reachable Mixed { some shows.Red and some shows.Amber }
+invariant NeverAmber { no shows.Amber }
+reachable AmberAfterRed { all c: Color | c in Lamp.shows }
+scope Lamp = 2, steps = 6",
+    )
+    .unwrap();
+    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model))
+        .unwrap_or_else(|error| panic!("{error}\n{}", rmodel::to_alloy(&model)));
+    for (check, want) in [
+        ("OneColor", "holds"),
+        ("AllGreen", "reachable"),
+        ("Mixed", "reachable"),
+        ("NeverAmber", "violated"),
+        ("AmberAfterRed", "unreachable"),
+    ] {
+        let check = model
+            .checks
+            .iter()
+            .find(|candidate| candidate.name == check)
+            .unwrap();
+        assert_eq!(
+            explicit(&model, check).verdict,
+            want,
+            "{} explicit",
+            check.name
+        );
+        assert_eq!(sat(&model, &alloy, check), want, "{} SAT", check.name);
+    }
+}
+
+#[test]
+fn malformed_enums_are_rejected() {
+    for (source, needle) in [
+        (
+            "model M\nenum E = A | A\nscope steps = 1",
+            "duplicate name A",
+        ),
+        (
+            "model M\nenum E = A\nsig S\nscope S = 1, E = 1, steps = 1",
+            "scope for unknown sig E",
+        ),
+        (
+            "model M\nenum E = A\nrel r: set E\ninvariant I { r in B }\nscope steps = 1",
+            "unknown name B",
+        ),
+        (
+            "model M\nenum E = A\nsig A\nscope A = 1, steps = 1",
+            "duplicate name A",
+        ),
+    ] {
+        let error = rmodel::parse(source).unwrap_err();
+        assert!(error.message.contains(needle), "{source}: {error}");
+    }
+}

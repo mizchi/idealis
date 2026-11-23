@@ -33,6 +33,7 @@
 予算が尽きて、実例・反例の有無という判定そのものを出せなかったこと。合格にも不合格にも読み替えない。work の予算切れは、ralloy では unknown、rtlc では理由 work の bounded になる（0092 で記録した語の違い）。
 
 - id: `search.unknown`
+- モデル: `spec/models/roracle-report.model` の `Unknown`
 - コード: `crates/ralloy/src/lib.rs` の `Unknown`
 - コード: `crates/roracle/src/report.rs` の `Unknown`
 
@@ -91,6 +92,7 @@ reachable の条件を満たす状態に、初期状態から到達できるこ�
 実装や engine の観測が、基準（oracle やモデル）の答えと同じだったこと。
 
 - id: `compare.matched`
+- モデル: `spec/models/roracle-report.model` の `Matched`
 - コード: `crates/roracle/src/report.rs` の `Matched`
 - コード: `crates/ralloy/src/lib.rs` の `Matched`
 
@@ -99,6 +101,7 @@ reachable の条件を満たす状態に、初期状態から到達できるこ�
 観測は正しく取れたうえで、基準の答えと異なったこと。
 
 - id: `compare.mismatch`
+- モデル: `spec/models/roracle-report.model` の `Mismatch`
 - コード: `crates/roracle/src/report.rs` の `Mismatch`
 - コード: `crates/ralloy/src/lib.rs` の `Mismatch`
 
@@ -107,8 +110,42 @@ reachable の条件を満たす状態に、初期状態から到達できるこ�
 入力や観測が契約を満たさず、比較そのものが成立しなかったこと。不一致とは区別する。
 
 - id: `compare.invalid`
+- モデル: `spec/models/roracle-report.model` の `Invalid`
 - コード: `crates/roracle/src/report.rs` の `Invalid`
 - コード: `crates/ralloy/src/lib.rs` の `Invalid`
+
+### エラー（error）
+
+実装・oracle・基盤が失敗して、比較する観測そのものが得られなかったこと。不一致とも未確定とも区別する。
+
+- id: `compare.error`
+- モデル: `spec/models/roracle-report.model` の `Error`
+- コード: `crates/roracle/src/report.rs` の `Error`
+
+### 比較の結果（comparison status）
+
+1 つの比較が一致・不一致・無効・未確定・エラーのどれだったか。
+
+- id: `compare.status`
+- モデル: `spec/models/roracle-report.model` の `Status`
+- モデル: `spec/models/roracle-report.model` の `status`
+- コード: `crates/roracle/src/report.rs` の `Status`
+
+### 比較の枠（comparison slot）
+
+モデルで比較の数を変えるための枠。結果を持つ枠だけが比較になる。
+
+- id: `compare.slot`
+- モデル: `spec/models/roracle-report.model` の `Slot`
+
+### 報告の結果（report status）
+
+比較の結果を 1 つにまとめた結果。最も重いものを示し、重い順にエラー・不一致・未確定・無効・一致。比較が 1 つもなければ無効。
+
+- id: `compare.report`
+- モデル: `spec/models/roracle-report.model` の `report`
+- コード: `crates/roracle/src/report.rs` の `CheckReport`
+- コード: `crates/roracle/src/report.rs` の `aggregate`
 
 ### oracle（oracle）
 
@@ -163,3 +200,35 @@ action によって変わる関係（rmodel の var、Alloy の var field）の�
 - id: `model.scope`
 - コード: `crates/ralloy/src/lib.rs` の `Scope`
 - コード: `crates/rmodel/src/syntax.rs` の `Scope`
+
+## 実装の照合
+
+- `crates/roracle/src/report.rs` の `aggregate` を、`crates/roracle/src/report.rs` の `aggregate_conforms_to_the_report_model` がモデル `spec/models/roracle-report.model` と照合する
+
+## rule
+
+### ORACLE-NO-FALSE-MATCH
+
+報告が一致になるのは、比較が 1 つ以上あり、そのすべてが一致したときだけ。未確定の比較があれば一致にならない。
+
+- `spec/models/roracle-report.model` の `MatchedOnlyIfAllMatched` は holds
+- `spec/models/roracle-report.model` の `UnknownNeverMatched` は holds
+
+### ORACLE-HEAVIEST-WINS
+
+報告は最も重い比較の結果を示す。不一致があれば、無効の比較があっても不一致になり、エラーと不一致がなければ未確定が無効より重い。
+
+- `spec/models/roracle-report.model` の `InvalidHiddenByMismatch` は reachable
+- `spec/models/roracle-report.model` の `UnknownOverInvalid` は holds
+
+### ORACLE-INVALID-IS-NOT-MISMATCH
+
+無効の比較は、不一致の比較がない限り、報告を不一致にしない。
+
+- `spec/models/roracle-report.model` の `InvalidNotMismatch` は holds
+
+### ORACLE-EMPTY-IS-INVALID
+
+比較が 1 つもない報告は無効。
+
+- `spec/models/roracle-report.model` の `EmptyIsInvalid` は reachable

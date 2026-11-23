@@ -57,6 +57,14 @@ class Rule {
   unformalized: String? = null
 }
 
+/// An implementation checked against a model: the test that feeds the
+/// implementation's results to the model's evaluator (plan 0093).
+class Grounding {
+  model: String(!isEmpty)
+  implementation: CodeRef
+  test: CodeRef
+}
+
 class Spec {
   id: Id
   name: Text
@@ -64,6 +72,7 @@ class Spec {
   groups: Listing<String>(!isEmpty)
   terms: Listing<Term>(!isEmpty)
   rules: Listing<Rule> = new {}
+  groundings: Listing<Grounding> = new {}
 }
 
 function text(japanese: String, english: String): Text = new { ja = japanese; en = english }

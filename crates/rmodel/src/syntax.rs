@@ -117,6 +117,8 @@ pub struct Scope {
 pub struct Model {
     pub name: String,
     pub sigs: Vec<String>,
+    /// `enum Name = A | B`: named atoms, one each, with no scope (0093).
+    pub enums: Vec<(String, Vec<String>)>,
     pub relations: Vec<Relation>,
     pub facts: Vec<Formula>,
     pub init: Vec<Formula>,
@@ -128,6 +130,18 @@ impl Model {
     pub fn relation(&self, name: &str) -> Option<&Relation> {
         self.relations.iter().find(|relation| relation.name == name)
     }
+    /// The enum a member name belongs to.
+    pub fn member(&self, name: &str) -> Option<&str> {
+        self.enums
+            .iter()
+            .find(|(_, members)| members.iter().any(|member| member == name))
+            .map(|(enumeration, _)| enumeration.as_str())
+    }
+    pub fn is_enum(&self, name: &str) -> bool {
+        self.enums
+            .iter()
+            .any(|(enumeration, _)| enumeration == name)
+    }
     pub fn vars(&self) -> impl Iterator<Item = &Relation> {
         self.relations.iter().filter(|relation| relation.var)
     }
@@ -135,6 +149,7 @@ impl Model {
 
 const KEYWORDS: &[&str] = &[
     "model",
+    "enum",
     "sig",
     "rel",
     "var",
@@ -267,6 +282,7 @@ impl Parser {
         let mut model = Model {
             name: self.name()?,
             sigs: Vec::new(),
+            enums: Vec::new(),
             relations: Vec::new(),
             facts: Vec::new(),
             init: Vec::new(),
@@ -280,6 +296,16 @@ impl Parser {
         let mut scoped = false;
         while !self.peek().is_empty() {
             match self.peek() {
+                "enum" => {
+                    self.position += 1;
+                    let name = self.name()?;
+                    self.expect("=")?;
+                    let mut members = vec![self.name()?];
+                    while self.take("|") {
+                        members.push(self.name()?);
+                    }
+                    model.enums.push((name, members));
+                }
                 "sig" => {
                     self.position += 1;
                     model.sigs.push(self.name()?);
@@ -599,7 +625,10 @@ impl Checker<'_> {
         Ok(match expression {
             Expr::None => Arity::Any,
             Expr::Name(name) => {
-                if bound.contains(name) || self.sigs.contains(name.as_str()) {
+                if bound.contains(name)
+                    || self.sigs.contains(name.as_str())
+                    || self.model.member(name).is_some()
+                {
                     Arity::Set
                 } else if let Some(relation) = self.model.relation(name) {
                     if relation.var && !vars {
@@ -688,7 +717,11 @@ impl Checker<'_> {
         Ok(())
     }
     fn fresh(&self, name: &str, bound: &BTreeSet<String>) -> Result<(), Error> {
-        if bound.contains(name) || self.sigs.contains(name) || self.model.relation(name).is_some() {
+        if bound.contains(name)
+            || self.sigs.contains(name)
+            || self.model.member(name).is_some()
+            || self.model.relation(name).is_some()
+        {
             return Err(Error::kind(format!("{name} shadows another name")));
         }
         Ok(())
@@ -713,6 +746,12 @@ fn check(model: &Model) -> Result<(), Error> {
     for name in model
         .sigs
         .iter()
+        .chain(
+            model
+                .enums
+                .iter()
+                .flat_map(|(name, members)| std::iter::once(name).chain(members)),
+        )
         .chain(model.relations.iter().map(|relation| &relation.name))
         .chain(model.actions.iter().map(|action| &action.name))
         .chain(model.checks.iter().map(|check| &check.name))
@@ -732,6 +771,11 @@ fn check(model: &Model) -> Result<(), Error> {
             return Err(Error::kind(format!("scope for unknown sig {sig}")));
         }
     }
+    // Enums are sigs for typing, without a scope.
+    let sigs: BTreeSet<&str> = sigs
+        .into_iter()
+        .chain(model.enums.iter().map(|(name, _)| name.as_str()))
+        .collect();
     for relation in &model.relations {
         let used = match &relation.shape {
             Shape::Unary { sig, .. } => vec![sig],
