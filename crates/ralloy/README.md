@@ -34,7 +34,7 @@ fn main() -> Result<(), ralloy::Error> {
 
 ## 対応するサブセット
 
-- 静的なトップレベルsigとone/lone/some、名前が一意なfield。fieldの既定multiplicityはone。`A -> B`・`A -> B -> C`と`A m -> n B`で4項までのfieldを書ける。
+- sigとone/lone/some、`abstract`、`extends`、親が1つの`in`、一括宣言、signature fact。名前が一意なfield。fieldの既定multiplicityはone。`A -> B`・`A -> B -> C`と`A m -> n B`で4項までのfieldを書ける。
 - fact、引数なしpred、名前付きassert、run/check、全体scopeと型ごとの上限・exactly。
 - 関係の和、差、交差、積、join、転置、推移閉包、反射推移閉包、domain/range制限。
 - 等価・包含、論理結合、単一atomを束縛するall/no/some/one/loneとdisj。

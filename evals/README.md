@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0080: ralloyのsig階層](iterations/0080-ralloy-sig-hierarchy.md)は、abstract・extends・subset sig・一括宣言・signature factを加え、40 commandすべてでAlloyと一致した。子のscopeの扱いはAlloyの答えから決めた。速度は小さいケース1つが2回とも閾値を超え、`hold`として記録した。
+
 [0079: ralloyのn項関係](iterations/0079-ralloy-nary-relations.md)は、4項までの関係と矢印の多重度を加え、Alloyとの差分で型の交わらないjoinの非互換を見つけて直した。`nary`は30 commandのうち29でAlloyと一致し、1件は予算切れとして残した。速度は二項以下で5〜13%遅くなり、`hold`として記録した。
 
 [0078: ralloyとAlloyの差分テスト](iterations/0078-ralloy-alloy-oracle.md)は、公式Alloy 6.2.0の答えをroracleの`CheckReport`として保存し、`cargo test`で再生する。今の対応範囲の13モデル・50 commandがすべて一致し、評価器の人工故障6件を検出した。
