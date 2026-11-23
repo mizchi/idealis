@@ -8,9 +8,18 @@ pub(crate) enum Mult {
     Lone,
     Some,
 }
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Parent {
+    /// `extends`: a disjoint part of the parent's atoms.
+    Extends,
+    /// `in`: any subset of the parent's atoms.
+    In,
+}
 pub(crate) struct Signature {
     pub name: String,
     pub mult: Mult,
+    pub abstract_: bool,
+    pub parent: Option<(Parent, String)>,
 }
 /// `name: mult A` declares a binary field; `name: A m -> n B` and
 /// `name: A -> B -> C` declare fields of arity three and four (plan 0079).
@@ -92,6 +101,8 @@ pub(crate) struct Module {
     pub signatures: Vec<Signature>,
     pub fields: Vec<Field>,
     pub facts: Vec<Expr>,
+    /// Bodies of signature facts until `parse` turns them into facts.
+    pub signature_facts: Vec<(String, Expr)>,
     pub predicates: BTreeMap<String, Expr>,
     pub assertions: BTreeMap<String, Expr>,
     pub commands: Vec<RawCommand>,

@@ -75,3 +75,8 @@ fn nary_agrees_with_alloy() {
     // scope 3 and exhausts the budget (plan 0079); plan 0083 targets it.
     replay("nary", &[("field-composition", "CompositionHolds")]);
 }
+
+#[test]
+fn hierarchy_agrees_with_alloy() {
+    replay("hierarchy", &[]);
+}

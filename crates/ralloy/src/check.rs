@@ -1,4 +1,4 @@
-use crate::syntax::{Binary, Expr, Module, Mult, Unary};
+use crate::syntax::{Binary, Expr, Module, Mult, Parent, Unary};
 use crate::{Command, Error, ErrorKind, Kind, Scope, SignatureScope};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -60,6 +60,7 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
             ));
         }
     }
+    let order = hierarchy(module)?;
     let all = (1 << (module.signatures.len() + 2)) - 1;
     checker
         .globals
@@ -163,15 +164,35 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
                 ));
             }
         }
-        let mut signatures = Vec::new();
-        for signature in &module.signatures {
+        // Parents first: a signature without its own scope takes the
+        // overall scope at the top level and its parent's bound below it, and
+        // no signature exceeds its parent's bound (plan 0080).
+        let mut bounds: BTreeMap<&str, (usize, bool)> = BTreeMap::new();
+        for &index in &order {
+            let signature = &module.signatures[index];
+            if signature
+                .parent
+                .as_ref()
+                .is_some_and(|(kind, _)| *kind == Parent::In)
+                && explicit.contains_key(&signature.name)
+            {
+                return Err(Error::new(ErrorKind::Scope, "scope for a subset signature"));
+            }
+            let parent = signature
+                .parent
+                .as_ref()
+                .map(|(_, parent)| bounds[parent.as_str()].0);
+            let inherited = match parent {
+                Some(maximum) => Some((maximum, false)),
+                None => command.scope.overall.map(|maximum| (maximum, false)),
+            };
             let (maximum, exact) = match signature.mult {
                 Mult::One => (1, true),
                 Mult::Lone => explicit.get(&signature.name).copied().unwrap_or((1, false)),
                 _ => explicit
                     .get(&signature.name)
                     .copied()
-                    .or(command.scope.overall.map(|maximum| (maximum, false)))
+                    .or(inherited)
                     .ok_or_else(|| {
                         Error::new(
                             ErrorKind::Scope,
@@ -179,12 +200,42 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
                         )
                     })?,
             };
-            signatures.push(SignatureScope {
-                name: signature.name.clone(),
-                maximum,
-                exact,
-            });
+            let maximum = parent.map_or(maximum, |bound| maximum.min(bound));
+            bounds.insert(&signature.name, (maximum, exact));
         }
+        // Children with exact counts (one sigs, `exactly N`) grow their
+        // parent to fit them, as Alloy's ScopeComputer does; other explicit
+        // child scopes stay capped by the parent.
+        for &index in order.iter().rev() {
+            let name = module.signatures[index].name.as_str();
+            let required: usize = module
+                .signatures
+                .iter()
+                .filter(|child| {
+                    child
+                        .parent
+                        .as_ref()
+                        .is_some_and(|(kind, parent)| *kind == Parent::Extends && parent == name)
+                })
+                .map(|child| bounds[child.name.as_str()])
+                .filter(|(_, exact)| *exact)
+                .map(|(maximum, _)| maximum)
+                .sum();
+            let bound = bounds.get_mut(name).expect("bounded signature");
+            bound.0 = bound.0.max(required);
+        }
+        let signatures: Vec<_> = module
+            .signatures
+            .iter()
+            .map(|signature| {
+                let (maximum, exact) = bounds[signature.name.as_str()];
+                SignatureScope {
+                    name: signature.name.clone(),
+                    maximum,
+                    exact,
+                }
+            })
+            .collect();
         let integer_atoms = if command.scope.bitwidth == 0 {
             0
         } else {
@@ -212,9 +263,12 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
                 ));
             }
         }
-        if signatures
+        if module
+            .signatures
             .iter()
-            .map(|signature| signature.maximum)
+            .zip(&signatures)
+            .filter(|(signature, _)| signature.parent.is_none())
+            .map(|(_, scope)| scope.maximum)
             .sum::<usize>()
             + integer_atoms
             > 64
@@ -231,6 +285,55 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
         });
     }
     Ok(commands)
+}
+
+/// Signature indices with every parent before its children. Parents must be
+/// declared, acyclic, and an `extends` parent must not be a subset signature.
+pub(crate) fn hierarchy(module: &Module) -> Result<Vec<usize>, Error> {
+    let position = |name: &str| {
+        module
+            .signatures
+            .iter()
+            .position(|signature| signature.name == name)
+    };
+    let mut order = Vec::new();
+    let mut placed = vec![false; module.signatures.len()];
+    while order.len() < module.signatures.len() {
+        let before = order.len();
+        for (index, signature) in module.signatures.iter().enumerate() {
+            if placed[index] {
+                continue;
+            }
+            let ready = match &signature.parent {
+                None => true,
+                Some((kind, parent)) => {
+                    let parent_index = position(parent).ok_or_else(|| {
+                        Error::new(ErrorKind::Type, format!("unknown parent {parent}"))
+                    })?;
+                    if *kind == Parent::Extends
+                        && module.signatures[parent_index]
+                            .parent
+                            .as_ref()
+                            .is_some_and(|(kind, _)| *kind == Parent::In)
+                    {
+                        return Err(Error::new(
+                            ErrorKind::Type,
+                            "a signature cannot extend a subset signature",
+                        ));
+                    }
+                    placed[parent_index]
+                }
+            };
+            if ready {
+                placed[index] = true;
+                order.push(index);
+            }
+        }
+        if order.len() == before {
+            return Err(Error::new(ErrorKind::Type, "cyclic signature hierarchy"));
+        }
+    }
+    Ok(order)
 }
 
 impl Checker<'_> {

@@ -97,7 +97,6 @@ fn budget_and_unsupported_input_never_become_success() {
     assert!(result.instance.is_none());
     for source in [
         "var sig A {} run {}",
-        "sig A {} sig B extends A {} run {}",
         "open util/ordering[A] sig A {} run {}",
         "sig A {} pred P[x: A] {} run {}",
         "sig A {} run { #A = 1 }",

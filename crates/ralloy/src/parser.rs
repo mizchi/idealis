@@ -1,8 +1,9 @@
 use crate::syntax::{
-    Binary, Declaration, Expr, Field, Module, Mult, Quantifier, RawCommand, RawScope, Signature,
-    Unary,
+    Binary, Declaration, Expr, Field, Module, Mult, Parent, Quantifier, RawCommand, RawScope,
+    Signature, Unary,
 };
 use crate::{Error, ErrorKind, Kind};
+use std::collections::BTreeSet;
 
 struct Parser {
     tokens: Vec<String>,
@@ -63,12 +64,95 @@ pub(crate) fn parse(source: &str) -> Result<Module, Error> {
             return Err(Error::new(ErrorKind::Resource, "too many tokens"));
         }
     }
-    Parser {
+    let mut module = Parser {
         tokens,
         position: 0,
         depth: 0,
     }
-    .module()
+    .module()?;
+    for (signature, body) in std::mem::take(&mut module.signature_facts) {
+        let fact = signature_fact(&module, &signature, body);
+        module.facts.push(fact);
+    }
+    Ok(module)
+}
+
+/// `sig A {...} { body }` is `all this: A | body`, where the fields of A and
+/// of the signatures it extends mean `this.field` unless a quantifier inside
+/// rebinds the name.
+fn signature_fact(module: &Module, signature: &str, body: Expr) -> Expr {
+    let mut owners = vec![signature.to_owned()];
+    while let Some((Parent::Extends, parent)) = module
+        .signatures
+        .iter()
+        .find(|candidate| candidate.name == *owners.last().unwrap())
+        .and_then(|candidate| candidate.parent.clone())
+    {
+        if owners.contains(&parent) {
+            break;
+        }
+        owners.push(parent);
+    }
+    let fields: BTreeSet<String> = module
+        .fields
+        .iter()
+        .filter(|field| owners.contains(&field.owner))
+        .map(|field| field.name.clone())
+        .collect();
+    Expr::Quantified(
+        Quantifier::All,
+        vec![Declaration {
+            names: vec!["this".into()],
+            domain: Expr::Name(signature.to_owned()),
+            disjoint: false,
+        }],
+        Box::new(implicit_this(body, &fields)),
+    )
+}
+fn implicit_this(expression: Expr, fields: &BTreeSet<String>) -> Expr {
+    match expression {
+        Expr::Name(name) if fields.contains(&name) => Expr::Binary(
+            Binary::Join,
+            Box::new(Expr::Name("this".into())),
+            Box::new(Expr::Name(name)),
+        ),
+        Expr::Name(_) | Expr::Call(_) => expression,
+        Expr::Block(expressions) => Expr::Block(
+            expressions
+                .into_iter()
+                .map(|expression| implicit_this(expression, fields))
+                .collect(),
+        ),
+        Expr::Unary(operator, child) => {
+            Expr::Unary(operator, Box::new(implicit_this(*child, fields)))
+        }
+        Expr::Binary(operator, left, right) => Expr::Binary(
+            operator,
+            Box::new(implicit_this(*left, fields)),
+            Box::new(implicit_this(*right, fields)),
+        ),
+        Expr::Quantified(quantifier, declarations, body) => {
+            let mut inner = fields.clone();
+            let declarations = declarations
+                .into_iter()
+                .map(|declaration| {
+                    let domain = implicit_this(declaration.domain, &inner);
+                    for name in &declaration.names {
+                        inner.remove(name);
+                    }
+                    Declaration {
+                        domain,
+                        ..declaration
+                    }
+                })
+                .collect();
+            Expr::Quantified(
+                quantifier,
+                declarations,
+                Box::new(implicit_this(*body, &inner)),
+            )
+        }
+    }
 }
 
 impl Parser {
@@ -200,11 +284,33 @@ impl Parser {
             if self.take(";") {
                 continue;
             }
-            if ["sig", "one", "lone", "some"].contains(&self.peek()) {
+            if ["sig", "one", "lone", "some", "abstract"].contains(&self.peek()) {
+                let abstract_ = self.take("abstract");
                 let mult = self.mult(Mult::Set);
                 self.expect("sig")?;
-                let owner = self.name()?;
+                let mut owners = vec![self.name()?];
+                while self.take(",") {
+                    owners.push(self.name()?);
+                }
+                let parent = if self.take("extends") {
+                    Some((Parent::Extends, self.name()?))
+                } else if self.take("in") {
+                    let parent = self.name()?;
+                    if self.peek() == "+" {
+                        return Err(Error::new(
+                            ErrorKind::Unsupported,
+                            "subset signatures of several parents",
+                        ));
+                    }
+                    Some((Parent::In, parent))
+                } else {
+                    None
+                };
+                if abstract_ && matches!(parent, Some((Parent::In, _))) {
+                    return Err(Error::new(ErrorKind::Syntax, "abstract subset signature"));
+                }
                 self.expect("{")?;
+                let first = module.fields.len();
                 while !self.take("}") {
                     let mut names = vec![self.name()?];
                     while self.take(",") {
@@ -248,7 +354,7 @@ impl Parser {
                     for name in names {
                         module.fields.push(Field {
                             name,
-                            owner: owner.clone(),
+                            owner: owners[0].clone(),
                             columns: columns.clone(),
                             mult: if arrows.is_empty() {
                                 field_mult
@@ -268,7 +374,46 @@ impl Parser {
                         ));
                     }
                 }
-                module.signatures.push(Signature { name: owner, mult });
+                // Fields were declared once for the first name; repeat them for
+                // the others of a multiple declaration.
+                let declared: Vec<_> = module.fields[first..]
+                    .iter()
+                    .map(|field| {
+                        (
+                            field.name.clone(),
+                            field.columns.clone(),
+                            field.mult,
+                            field.arrow,
+                        )
+                    })
+                    .collect();
+                for owner in &owners[1..] {
+                    for (name, columns, mult, arrow) in &declared {
+                        module.fields.push(Field {
+                            name: name.clone(),
+                            owner: owner.clone(),
+                            columns: columns.clone(),
+                            mult: *mult,
+                            arrow: *arrow,
+                        });
+                    }
+                }
+                let fact = if self.peek() == "{" {
+                    Some(self.block()?)
+                } else {
+                    None
+                };
+                for owner in owners {
+                    if let Some(fact) = &fact {
+                        module.signature_facts.push((owner.clone(), fact.clone()));
+                    }
+                    module.signatures.push(Signature {
+                        name: owner,
+                        mult,
+                        abstract_,
+                        parent: parent.clone(),
+                    });
+                }
             } else if self.take("fact") {
                 if self.peek() != "{" {
                     self.name()?;
@@ -324,7 +469,7 @@ impl Parser {
                     scope,
                 });
             }
-            if module.signatures.len() > 8
+            if module.signatures.len() > 16
                 || module.fields.len() > 8
                 || module.predicates.len() + module.assertions.len() > 64
                 || module.commands.len() > 64
@@ -357,6 +502,7 @@ impl Parser {
             } else if self.peek().is_empty()
                 || [
                     "sig", "fact", "pred", "assert", "run", "check", "one", "lone", "some", ";",
+                    "abstract",
                 ]
                 .contains(&self.peek())
                 || self

@@ -1,5 +1,5 @@
 use crate::eval::{Budget, Evaluator, World, admits, arrow_admits};
-use crate::syntax::{Expr, Module, Mult};
+use crate::syntax::{Expr, Module, Parent};
 use crate::{CheckReason, CheckStatus, Command, Error, ErrorKind, Instance, InstanceCheck, Stats};
 use std::collections::BTreeMap;
 
@@ -70,33 +70,72 @@ fn evaluate(
         .enumerate()
         .map(|(index, name)| (name.clone(), index))
         .collect();
-    for (signature, bound) in module.signatures.iter().zip(&command.scope.signatures) {
+    // Top-level signatures own the atoms; the others name atoms of their
+    // parent (plan 0080).
+    let order = crate::check::hierarchy(module).map_err(|_| Failure::Protocol("hierarchy"))?;
+    for &index in &order {
+        let signature = &module.signatures[index];
+        let bound = &command.scope.signatures[index];
         budget.tick()?;
         let values = &instance.signatures[&signature.name];
         if values.len() > bound.maximum || bound.exact && values.len() != bound.maximum {
             return Err(Failure::Invalid(CheckReason::Scope));
         }
-        if signature.mult == Mult::One && values.len() != 1
-            || signature.mult == Mult::Some && values.is_empty()
-            || signature.mult == Mult::Lone && values.len() > 1
+        if !admits(signature.mult, values.len() as u32) {
+            return Err(Failure::Invalid(CheckReason::Declaration));
+        }
+        let mut set = 0u64;
+        for name in values {
+            budget.tick()?;
+            let atom = match &signature.parent {
+                None => {
+                    if name.is_empty()
+                        || name.len() > 256
+                        || atoms.insert(name.clone(), world.names.len()).is_some()
+                    {
+                        return Err(Failure::Protocol(
+                            "atom names must be nonempty, unique and at most 256 bytes",
+                        ));
+                    }
+                    world.names.push(name.clone());
+                    world.names.len() - 1
+                }
+                Some((_, parent)) => {
+                    let atom = *atoms
+                        .get(name)
+                        .ok_or(Failure::Protocol("unknown signature atom"))?;
+                    if world.sets[parent] & (1 << atom) == 0 {
+                        return Err(Failure::Invalid(CheckReason::Declaration));
+                    }
+                    atom
+                }
+            };
+            if set & (1 << atom) != 0 {
+                return Err(Failure::Protocol("duplicate signature atom"));
+            }
+            set |= 1u64 << atom;
+        }
+        world.sets.insert(signature.name.clone(), set);
+    }
+    // Children of one parent are disjoint, and an abstract parent with
+    // children has no atoms of its own.
+    for (index, signature) in module.signatures.iter().enumerate() {
+        let children: Vec<u64> = module
+            .signatures
+            .iter()
+            .filter(|child| {
+                child.parent.as_ref().is_some_and(|(kind, parent)| {
+                    *kind == Parent::Extends && *parent == module.signatures[index].name
+                })
+            })
+            .map(|child| world.sets[&child.name])
+            .collect();
+        let union = children.iter().fold(0, |union, set| union | set);
+        if children.iter().map(|set| set.count_ones()).sum::<u32>() != union.count_ones()
+            || signature.abstract_ && !children.is_empty() && union != world.sets[&signature.name]
         {
             return Err(Failure::Invalid(CheckReason::Declaration));
         }
-        let mut set = 0;
-        for name in values {
-            budget.tick()?;
-            if name.is_empty()
-                || name.len() > 256
-                || atoms.insert(name.clone(), world.names.len()).is_some()
-            {
-                return Err(Failure::Protocol(
-                    "atom names must be nonempty, unique and at most 256 bytes",
-                ));
-            }
-            set |= 1u64 << world.names.len();
-            world.names.push(name.clone());
-        }
-        world.sets.insert(signature.name.clone(), set);
     }
     world.sets.insert(
         "univ".into(),

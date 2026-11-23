@@ -1,6 +1,7 @@
-use crate::eval::{Budget, Evaluator, World, arrow_admits, bits};
-use crate::syntax::{Expr, Module, Mult};
+use crate::eval::{Budget, Evaluator, World, admits, arrow_admits, bits};
+use crate::syntax::{Expr, Module, Mult, Parent};
 use crate::{Analysis, Command, Error, Instance, Kind, Stats, Status};
+use std::collections::BTreeMap;
 
 pub(crate) fn analyze(
     module: &Module,
@@ -17,8 +18,16 @@ pub(crate) fn analyze(
             limit: max_work,
         },
         found: None,
+        order: Vec::new(),
+        subset_order: Vec::new(),
     };
-    let exhausted = search.counts(0, &mut Vec::new());
+    let order = crate::check::hierarchy(module).expect("validated hierarchy");
+    let (subsets, own): (Vec<usize>, Vec<usize>) = order
+        .into_iter()
+        .partition(|index| matches!(module.signatures[*index].parent, Some((Parent::In, _))));
+    search.order = own;
+    search.subset_order = subsets;
+    let exhausted = search.counts(0, &mut vec![0; module.signatures.len()]);
     let status = match exhausted {
         Err(()) => Status::Unknown,
         Ok(true) if command.kind == Kind::Run => Status::Instance,
@@ -41,6 +50,9 @@ struct Search<'a> {
     body: &'a Expr,
     budget: Budget,
     found: Option<Instance>,
+    /// Signatures with their own atoms, parents first; then subset ones.
+    order: Vec<usize>,
+    subset_order: Vec<usize>,
 }
 struct Slot {
     field: usize,
@@ -54,26 +66,47 @@ struct Slot {
 }
 
 impl Search<'_> {
-    fn counts(&mut self, index: usize, counts: &mut Vec<usize>) -> Result<bool, ()> {
+    /// Chooses each signature's atom count, parents before children; an
+    /// `extends` child fits in what its earlier siblings leave of the parent,
+    /// and the last child of an abstract parent takes the rest (plan 0080).
+    fn counts(&mut self, position: usize, counts: &mut Vec<usize>) -> Result<bool, ()> {
         self.budget.tick()?;
-        if index < self.module.signatures.len() {
+        if position < self.order.len() {
+            let index = self.order[position];
+            let signature = &self.module.signatures[index];
             let bound = &self.command.scope.signatures[index];
-            let minimum = if bound.exact {
+            let mut minimum = if bound.exact {
                 bound.maximum
-            } else if self.module.signatures[index].mult == Mult::Some {
+            } else if signature.mult == Mult::Some {
                 1
             } else {
                 0
             };
-            let maximum = bound.maximum;
+            let mut maximum = bound.maximum;
+            if let Some((Parent::Extends, parent)) = &signature.parent {
+                let parent = self.index(parent);
+                let siblings = self.order[..position]
+                    .iter()
+                    .filter(|other| self.extends(**other) == Some(parent))
+                    .map(|other| counts[*other])
+                    .sum::<usize>();
+                let room = counts[parent].saturating_sub(siblings);
+                maximum = maximum.min(room);
+                let last = !self.order[position + 1..]
+                    .iter()
+                    .any(|other| self.extends(*other) == Some(parent));
+                if last && self.module.signatures[parent].abstract_ {
+                    minimum = minimum.max(room);
+                }
+            }
             for count in minimum..=maximum {
-                counts.push(count);
-                let result = self.counts(index + 1, counts)?;
-                counts.pop();
+                counts[index] = count;
+                let result = self.counts(position + 1, counts)?;
                 if result {
                     return Ok(true);
                 }
             }
+            counts[index] = 0;
             return Ok(false);
         }
         let World {
@@ -81,13 +114,10 @@ impl Search<'_> {
             mut sets,
             ..
         } = World::new(self.command.scope.integer_bitwidth);
-        for (signature, count) in self.module.signatures.iter().zip(counts.iter()) {
-            let mut set = 0;
-            for index in 0..*count {
-                set |= 1u64 << names.len();
-                names.push(format!("{}${index}", signature.name));
+        for (index, signature) in self.module.signatures.iter().enumerate() {
+            if signature.parent.is_none() {
+                self.allocate(index, counts, &mut names, &mut sets);
             }
-            sets.insert(signature.name.clone(), set);
         }
         sets.insert(
             "univ".into(),
@@ -97,6 +127,78 @@ impl Search<'_> {
                 (1u64 << names.len()) - 1
             },
         );
+        self.subsets(0, names, sets)
+    }
+    fn index(&self, name: &str) -> usize {
+        self.module
+            .signatures
+            .iter()
+            .position(|signature| signature.name == name)
+            .expect("validated signature")
+    }
+    fn extends(&self, index: usize) -> Option<usize> {
+        match &self.module.signatures[index].parent {
+            Some((Parent::Extends, parent)) => Some(self.index(parent)),
+            _ => None,
+        }
+    }
+    /// Gives a signature a contiguous block of atoms: its `extends` children
+    /// first, then the atoms that belong to it alone.
+    fn allocate(
+        &self,
+        index: usize,
+        counts: &[usize],
+        names: &mut Vec<String>,
+        sets: &mut BTreeMap<String, u64>,
+    ) {
+        let start = names.len();
+        let children: Vec<usize> = (0..self.module.signatures.len())
+            .filter(|child| self.extends(*child) == Some(index))
+            .collect();
+        let mut used = 0;
+        for child in children {
+            used += counts[child];
+            self.allocate(child, counts, names, sets);
+        }
+        let name = &self.module.signatures[index].name;
+        for own in 0..counts[index] - used {
+            names.push(format!("{name}${own}"));
+        }
+        let set = (start..names.len()).fold(0u64, |set, atom| set | 1 << atom);
+        sets.insert(name.clone(), set);
+    }
+    /// Chooses every subset signature among its parent's atoms.
+    fn subsets(
+        &mut self,
+        position: usize,
+        names: Vec<String>,
+        mut sets: BTreeMap<String, u64>,
+    ) -> Result<bool, ()> {
+        self.budget.tick()?;
+        if let Some(&index) = self.subset_order.get(position) {
+            let signature = &self.module.signatures[index];
+            let Some((_, parent)) = &signature.parent else {
+                unreachable!("subset signature")
+            };
+            let domain = sets[parent];
+            let mut choice: u64 = 0;
+            loop {
+                self.budget.tick()?;
+                if admits(signature.mult, choice.count_ones()) {
+                    sets.insert(signature.name.clone(), choice);
+                    if self.subsets(position + 1, names.clone(), sets.clone())? {
+                        return Ok(true);
+                    }
+                }
+                choice = choice.wrapping_sub(domain) & domain;
+                if choice == 0 {
+                    return Ok(false);
+                }
+            }
+        }
+        self.fields(names, sets)
+    }
+    fn fields(&mut self, names: Vec<String>, sets: BTreeMap<String, u64>) -> Result<bool, ()> {
         let mut world = World {
             fields: vec![vec![0; names.len()]; self.module.fields.len()],
             spaces: Vec::new(),
