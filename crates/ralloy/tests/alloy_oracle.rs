@@ -71,9 +71,9 @@ fn core_agrees_with_alloy() {
 
 #[test]
 fn nary_agrees_with_alloy() {
-    // field-composition/CompositionHolds needs about 1.3e8 candidates at
-    // scope 3 and exhausts the budget (plan 0079); plan 0083 targets it.
-    replay("nary", &[("field-composition", "CompositionHolds")]);
+    // CompositionHolds exhausted the enumerator's budget (plans 0079-0084)
+    // and is solved by the SAT backend since plan 0085.
+    replay("nary", &[]);
 }
 
 #[test]

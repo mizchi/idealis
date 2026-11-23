@@ -3,6 +3,7 @@ mod engine;
 mod eval;
 mod instance;
 mod parser;
+mod sat;
 mod search;
 mod syntax;
 #[cfg(target_arch = "wasm32")]

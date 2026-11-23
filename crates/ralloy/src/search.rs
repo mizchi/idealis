@@ -9,6 +9,33 @@ pub(crate) fn analyze(
     body: &Expr,
     max_work: u64,
 ) -> Result<Analysis, Error> {
+    // Wide searches of the relational core go to SAT (plan 0085).
+    if crate::sat::supported(module) && crate::sat::width(module, command) > 24 {
+        return Ok(crate::sat::analyze(module, command, body, max_work));
+    }
+    Ok(enumerate(module, command, body, max_work))
+}
+/// The enumerator alone, whatever the width.
+pub(crate) fn enumerate(
+    module: &Module,
+    command: &Command,
+    body: &Expr,
+    max_work: u64,
+) -> Analysis {
+    analyze_with(module, command, body, max_work, true, false).0
+}
+/// The fields and signature sets of each candidate that reached evaluation.
+type Trace = Vec<(Vec<u64>, Vec<Vec<u64>>)>;
+/// `incremental` prunes during the search; otherwise every leaf is compared
+/// against every swap before evaluation (plan 0083), as a reference.
+fn analyze_with(
+    module: &Module,
+    command: &Command,
+    body: &Expr,
+    max_work: u64,
+    incremental: bool,
+    tracing: bool,
+) -> (Analysis, Option<Trace>) {
     let mut search = Search {
         module,
         command,
@@ -22,7 +49,13 @@ pub(crate) fn analyze(
         subset_order: Vec::new(),
         parents: Vec::new(),
         children: vec![Vec::new(); module.signatures.len()],
-        swaps: Vec::new(),
+        symmetry: Vec::new(),
+        lex: Vec::new(),
+        undo: Vec::new(),
+        incremental,
+        separating: Vec::new(),
+        positions: Vec::new(),
+        trace: tracing.then(Vec::new),
     };
     search.parents = module
         .signatures
@@ -57,12 +90,16 @@ pub(crate) fn analyze(
         }
         Ok(false) => Status::NoInstance,
     };
-    Ok(Analysis {
-        command: command.clone(),
-        status,
-        instance: search.found,
-        stats: search.budget.stats,
-    })
+    let trace = search.trace.take();
+    (
+        Analysis {
+            command: command.clone(),
+            status,
+            instance: search.found,
+            stats: search.budget.stats,
+        },
+        trace,
+    )
 }
 struct Search<'a> {
     module: &'a Module,
@@ -77,9 +114,58 @@ struct Search<'a> {
     /// computed once per analysis (plan 0080a).
     parents: Vec<Option<usize>>,
     children: Vec<Vec<usize>>,
-    /// Adjacent atoms that every signature treats alike, for symmetry
-    /// breaking in the current world (plan 0083).
-    swaps: Vec<(usize, usize)>,
+    /// Interchangeable atom pairs of the current world (plans 0083, 0084).
+    symmetry: Vec<Symmetry>,
+    /// Per pair: slots known equal under the swap, and whether the swap is
+    /// already lexicographically larger.
+    lex: Vec<(usize, bool)>,
+    undo: Vec<(usize, (usize, bool))>,
+    incremental: bool,
+    /// Per sorted set name: whether membership separates atoms.
+    separating: Vec<bool>,
+    /// (field, owner atom) of each slot, in search order.
+    positions: Vec<(usize, usize)>,
+    trace: Option<Trace>,
+}
+struct Symmetry {
+    first: usize,
+    second: usize,
+    /// The slot that each slot's owner maps to.
+    partner: Vec<usize>,
+    /// For multi-column fields, the tuple index each tuple maps to.
+    permutations: Vec<Option<Vec<u8>>>,
+}
+/// The index each tuple of `space` maps to when `first` and `second` swap.
+fn tuple_permutation(space: &[Vec<u8>], first: usize, second: usize) -> Vec<u8> {
+    let swap = |atom: u8| match atom as usize {
+        atom if atom == first => second as u8,
+        atom if atom == second => first as u8,
+        _ => atom,
+    };
+    space
+        .iter()
+        .map(|tuple| {
+            let image: Vec<u8> = tuple.iter().map(|atom| swap(*atom)).collect();
+            space.iter().position(|other| *other == image).unwrap() as u8
+        })
+        .collect()
+}
+impl Symmetry {
+    /// A slot value with the two atoms swapped.
+    fn image(&self, field: usize, value: u64) -> u64 {
+        match &self.permutations[field] {
+            None => {
+                if (value >> self.first) & 1 == (value >> self.second) & 1 {
+                    value
+                } else {
+                    value ^ (1 << self.first | 1 << self.second)
+                }
+            }
+            Some(permutation) => {
+                bits(value).fold(0, |image, index| image | 1 << permutation[index as usize])
+            }
+        }
+    }
 }
 struct Slot {
     field: usize,
@@ -247,28 +333,7 @@ impl Search<'_> {
                 });
             }
         }
-        // Formulas see atoms only through signatures and fields, so swapping
-        // two atoms of identical signature membership maps solutions to
-        // solutions. Fields of several columns would also permute their tuple
-        // spaces; their commands keep every candidate.
-        self.swaps.clear();
-        if world.spaces.iter().all(Option::is_none) {
-            let integers = if world.bitwidth == 0 {
-                0
-            } else {
-                1 << world.bitwidth
-            };
-            for atom in integers..world.names.len().saturating_sub(1) {
-                // Same membership: no set tells the two bits apart.
-                if world
-                    .sets
-                    .values()
-                    .all(|set| (set >> atom) & 1 == (set >> (atom + 1)) & 1)
-                {
-                    self.swaps.push((atom, atom + 1));
-                }
-            }
-        }
+        self.symmetries(&slots, &world);
         self.assign(&slots, 0, &mut world)
     }
     fn assign(&mut self, slots: &[Slot], index: usize, world: &mut World) -> Result<bool, ()> {
@@ -280,7 +345,7 @@ impl Search<'_> {
         if matches!(slot.mult, Mult::One | Mult::Lone) {
             if slot.mult == Mult::Lone {
                 world.fields[slot.field][slot.source] = 0;
-                if self.assign(slots, index + 1, world)? {
+                if self.descend(slots, index, world)? {
                     return Ok(true);
                 }
             }
@@ -290,7 +355,7 @@ impl Search<'_> {
                 let choice = choices.isolate_lowest_one();
                 choices &= !choice;
                 world.fields[slot.field][slot.source] = choice;
-                if self.assign(slots, index + 1, world)? {
+                if self.descend(slots, index, world)? {
                     return Ok(true);
                 }
             }
@@ -307,7 +372,7 @@ impl Search<'_> {
             });
             if (slot.mult == Mult::Set || choice != 0) && admitted {
                 world.fields[slot.field][slot.source] = choice;
-                if self.assign(slots, index + 1, world)? {
+                if self.descend(slots, index, world)? {
                     return Ok(true);
                 }
             }
@@ -317,45 +382,171 @@ impl Search<'_> {
             }
         }
     }
-    /// Whether swapping some interchangeable pair gives a lexicographically
-    /// smaller assignment; the least member of every orbit is kept.
-    fn redundant(&mut self, world: &World) -> Result<bool, ()> {
-        let swap_bits = |row: u64, first: usize, second: usize| {
-            if (row >> first) & 1 == (row >> second) & 1 {
-                row
-            } else {
-                row ^ (1 << first | 1 << second)
-            }
+    /// Interchangeable atom pairs of this world and, per pair, the slot each
+    /// slot maps to and the tuple permutation of multi-column fields.
+    ///
+    /// Formulas see atoms only through signatures and fields, so swapping two
+    /// atoms that no fixed set tells apart maps solutions to solutions. Subset
+    /// signatures are chosen by the search, so their membership is ignored
+    /// unless they own a field or type one of its columns (plan 0084).
+    fn symmetries(&mut self, slots: &[Slot], world: &World) {
+        self.symmetry.clear();
+        self.lex.clear();
+        // Which sets separate atoms, aligned with the sorted set names; the
+        // names are the same in every world of one analysis (plan 0084a).
+        if self.separating.len() != world.sets.len() {
+            self.separating = world
+                .sets
+                .keys()
+                .map(|name| {
+                    let subset = self.module.signatures.iter().any(|signature| {
+                        &signature.name == name && matches!(signature.parent, Some((Parent::In, _)))
+                    });
+                    let used = self.module.fields.iter().any(|field| {
+                        &field.owner == name || field.columns.iter().any(|column| column == name)
+                    });
+                    !subset || used
+                })
+                .collect();
+        }
+        let integers = if world.bitwidth == 0 {
+            0
+        } else {
+            1 << world.bitwidth
         };
-        for &(first, second) in &self.swaps {
+        let atoms = world.names.len();
+        let pairs: Vec<usize> = (integers..atoms.saturating_sub(1))
+            .filter(|&first| {
+                world
+                    .sets
+                    .values()
+                    .zip(&self.separating)
+                    .filter(|(_, separating)| **separating)
+                    .all(|(set, _)| (set >> first) & 1 == (set >> (first + 1)) & 1)
+            })
+            .collect();
+        if pairs.is_empty() {
+            return;
+        }
+        self.positions = slots.iter().map(|slot| (slot.field, slot.source)).collect();
+        let mut position = vec![usize::MAX; self.module.fields.len() * atoms];
+        for (index, slot) in slots.iter().enumerate() {
+            position[slot.field * atoms + slot.source] = index;
+        }
+        for first in pairs {
+            let second = first + 1;
+            let swap = |atom: usize| match atom {
+                atom if atom == first => second,
+                atom if atom == second => first,
+                atom => atom,
+            };
+            let partner = slots
+                .iter()
+                .map(|slot| position[slot.field * atoms + swap(slot.source)])
+                .collect();
+            let permutations = world
+                .spaces
+                .iter()
+                .map(|space| {
+                    space
+                        .as_ref()
+                        .map(|space| tuple_permutation(space, first, second))
+                })
+                .collect();
+            self.symmetry.push(Symmetry {
+                first,
+                second,
+                partner,
+                permutations,
+            });
+            self.lex.push((0, false));
+        }
+    }
+    /// Recurses past slot `index` unless some swap already makes the
+    /// assignment lexicographically smaller; every orbit keeps its least
+    /// member. The comparison state is restored on return.
+    fn descend(&mut self, slots: &[Slot], index: usize, world: &mut World) -> Result<bool, ()> {
+        let mark = self.undo.len();
+        let pruned = if self.incremental {
+            self.advance(slots, index, world)
+        } else {
+            Ok(false)
+        };
+        let result = match pruned {
+            Ok(true) => Ok(false),
+            Ok(false) => self.assign(slots, index + 1, world),
+            Err(()) => Err(()),
+        };
+        while self.undo.len() > mark {
+            let (symmetry, state) = self.undo.pop().expect("undo entry");
+            self.lex[symmetry] = state;
+        }
+        result
+    }
+    /// The reference: whether some swap makes the complete assignment
+    /// lexicographically smaller.
+    fn redundant(&mut self, world: &World) -> Result<bool, ()> {
+        for symmetry in &self.symmetry {
             self.budget.tick()?;
-            let mut order = std::cmp::Ordering::Equal;
-            'rows: for rows in &world.fields {
-                for (owner, row) in rows.iter().enumerate() {
-                    let source = if owner == first {
-                        second
-                    } else if owner == second {
-                        first
-                    } else {
-                        owner
-                    };
-                    let swapped = swap_bits(rows[source], first, second);
-                    order = swapped.cmp(row);
-                    if order.is_ne() {
-                        break 'rows;
+            for (position, &(field, source)) in self.positions.iter().enumerate() {
+                let (partner_field, partner_source) = self.positions[symmetry.partner[position]];
+                let actual = world.fields[field][source];
+                let swapped = symmetry.image(field, world.fields[partner_field][partner_source]);
+                if swapped != actual {
+                    if swapped < actual {
+                        return Ok(true);
                     }
+                    break;
                 }
             }
-            if order.is_lt() {
-                return Ok(true);
+        }
+        Ok(false)
+    }
+    /// Advances each swap's equal prefix over the slots assigned so far.
+    fn advance(&mut self, slots: &[Slot], index: usize, world: &World) -> Result<bool, ()> {
+        for symmetry in 0..self.symmetry.len() {
+            let (mut frontier, done) = self.lex[symmetry];
+            if done {
+                continue;
+            }
+            let start = frontier;
+            let mut decided = false;
+            while frontier <= index {
+                let partner = self.symmetry[symmetry].partner[frontier];
+                if partner > index {
+                    break;
+                }
+                self.budget.tick()?;
+                let slot = &slots[frontier];
+                let actual = world.fields[slot.field][slot.source];
+                let source = &slots[partner];
+                let swapped = self.symmetry[symmetry]
+                    .image(slot.field, world.fields[source.field][source.source]);
+                if swapped < actual {
+                    self.undo.push((symmetry, (start, false)));
+                    self.lex[symmetry] = (frontier, false);
+                    return Ok(true);
+                }
+                if swapped > actual {
+                    decided = true;
+                    break;
+                }
+                frontier += 1;
+            }
+            if frontier != start || decided {
+                self.undo.push((symmetry, (start, false)));
+                self.lex[symmetry] = (frontier, decided);
             }
         }
         Ok(false)
     }
     fn candidate(&mut self, world: &World) -> Result<bool, ()> {
         self.budget.tick()?;
-        if self.redundant(world)? {
+        if !self.incremental && self.redundant(world)? {
             return Ok(false);
+        }
+        if let Some(trace) = &mut self.trace {
+            trace.push((world.sets.values().copied().collect(), world.fields.clone()));
         }
         self.budget.stats.candidates += 1;
         let mut evaluator = Evaluator {
@@ -414,5 +605,91 @@ impl Search<'_> {
             .collect();
         self.found = Some(Instance { signatures, fields });
         Ok(true)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Symmetry, analyze_with, tuple_permutation};
+    use crate::eval::{World, bits};
+    use crate::{Model, Status};
+    use std::collections::BTreeSet;
+
+    /// The image of a mask selects exactly the swapped tuples, checked
+    /// against swapping the atoms of each tuple directly.
+    #[test]
+    fn images_of_multi_column_masks_swap_the_atoms_of_each_tuple() {
+        let mut world = World::new(0);
+        world.names = vec!["a".into(), "b".into(), "c".into()];
+        world.sets.insert("A".into(), 0b111);
+        let space = world.space(&["A".into(), "A".into()]);
+        assert_eq!(space.len(), 9);
+        for (first, second) in [(0, 1), (1, 2)] {
+            let symmetry = Symmetry {
+                first,
+                second,
+                partner: Vec::new(),
+                permutations: vec![Some(tuple_permutation(&space, first, second))],
+            };
+            let swap = |atom: u8| match atom as usize {
+                atom if atom == first => second as u8,
+                atom if atom == second => first as u8,
+                _ => atom,
+            };
+            for mask in 0u64..1 << space.len() {
+                let swapped: BTreeSet<Vec<u8>> = bits(mask)
+                    .map(|index| {
+                        space[index as usize]
+                            .iter()
+                            .map(|atom| swap(*atom))
+                            .collect()
+                    })
+                    .collect();
+                let image: BTreeSet<Vec<u8>> = bits(symmetry.image(0, mask))
+                    .map(|index| space[index as usize].clone())
+                    .collect();
+                assert_eq!(image, swapped, "{first} {second} {mask:b}");
+            }
+        }
+    }
+
+    /// Pruning during the search must reach exactly the leaves that the
+    /// complete comparison at the leaf keeps, in the same order.
+    #[test]
+    fn incremental_pruning_visits_exactly_the_canonical_leaves() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/alloy");
+        let mut compared = 0;
+        let mut groups: Vec<_> = std::fs::read_dir(&root)
+            .unwrap()
+            .map(|entry| entry.unwrap().path())
+            .filter(|path| path.is_dir())
+            .collect();
+        groups.sort();
+        for group in groups {
+            let mut models: Vec<_> = std::fs::read_dir(&group)
+                .unwrap()
+                .map(|entry| entry.unwrap().path())
+                .collect();
+            models.sort();
+            for path in models {
+                let model = Model::parse(&std::fs::read_to_string(&path).unwrap()).unwrap();
+                for index in 0..model.commands().len() {
+                    let (command, body) = model.get_command(index).unwrap();
+                    let run = |incremental| {
+                        analyze_with(&model.syntax, command, body, 3_000_000, incremental, true)
+                    };
+                    let (pruned, pruned_trace) = run(true);
+                    let (reference, reference_trace) = run(false);
+                    if pruned.status == Status::Unknown || reference.status == Status::Unknown {
+                        continue;
+                    }
+                    let label = format!("{} {}", path.display(), command.label);
+                    assert_eq!(pruned.status, reference.status, "{label}");
+                    assert_eq!(pruned_trace, reference_trace, "{label}");
+                    compared += 1;
+                }
+            }
+        }
+        assert!(compared > 150, "{compared}");
     }
 }
