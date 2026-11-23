@@ -48,13 +48,13 @@ module読込、setを束縛する高階量化、5項以上の関係、var sig、
 
 ## 結果と探索
 
-| status            | 意味                                                            |
-| ----------------- | --------------------------------------------------------------- |
-| instance          | runの式とfactを満たす構造が見つかった                           |
-| counterexample    | factを満たしassertを破る構造が見つかった                        |
-| no-counterexample | factを満たす構造があり、指定scope内を列挙して反例がなかった     |
-| no-instance       | runの条件、またはcheckのfactを満たす構造が指定scope内になかった |
-| unknown           | work予算で探索を打ち切った。instanceは返さない                  |
+| status            | 意味                                                                           |
+| ----------------- | ------------------------------------------------------------------------------ |
+| instance          | runの式とfactを満たす構造が見つかった                                          |
+| counterexample    | factを満たしassertを破る構造が見つかった                                       |
+| no-counterexample | factを満たす構造があり、指定scope内（時相モデルではsteps以内）に反例がなかった |
+| no-instance       | runの条件、またはcheckのfactを満たす構造が指定scope内になかった                |
+| unknown           | work予算で探索を打ち切った。instanceは返さない                                 |
 
 no-counterexampleはスコープ外の証明ではない。no-instanceもスコープ外の不整合を意味しない。未対応、構文・型・scope・protocol違反は`Error`として返し、検査成功へ変換しない。
 

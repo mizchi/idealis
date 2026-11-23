@@ -32,8 +32,8 @@ spec: s.Spec = new {
       group = "探索の範囲"
       name = s.text("有界", "bounded")
       definition = s.text(
-        "深さや steps などの上限で探索を打ち切ったこと。上限の外は調べていないので、違反がないことを完全な検査として扱わない。",
-        "The search stopped at a depth, step or similar bound. Beyond the bound nothing was examined, so finding no violation is not a complete check.",
+        "深さ・steps・状態数・work などの上限で探索を打ち切り、調べた部分に違反がなかったこと。どの上限かは理由（rtlc の reason）で示す。上限の外は調べていないので、完全な検査として扱わない。",
+        "The search stopped at a depth, step, state-count, work or similar bound with no violation in the part examined; the reason (rtlc's reason) names the bound. Nothing beyond it was examined, so it is not a complete check.",
       )
       avoid { "完全"; "網羅"; "exhaustive" }
       code { s.code(rtlc, "bounded"); s.code(ralloy, "steps") }
@@ -55,10 +55,9 @@ spec: s.Spec = new {
       group = "探索の範囲"
       name = s.text("未確定", "unknown")
       definition = s.text(
-        "work などの予算が尽きて、判定を出せなかったこと。合格にも不合格にも読み替えない。",
-        "A budget such as work ran out before a verdict. It is read as neither a pass nor a failure.",
+        "予算が尽きて、実例・反例の有無という判定そのものを出せなかったこと。合格にも不合格にも読み替えない。work の予算切れは、ralloy では unknown、rtlc では理由 work の bounded になる（0092 で記録した語の違い）。",
+        "A budget ran out before the verdict itself, whether an instance or counterexample exists, could be given. It is read as neither a pass nor a failure. Running out of work is unknown in ralloy and bounded with reason work in rtlc (a difference in wording recorded in 0092).",
       )
-      aliases { "予算切れ" }
       code { s.code(ralloy, "Unknown"); s.code(roracle, "Unknown") }
     }
     new {

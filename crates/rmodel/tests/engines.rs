@@ -9,6 +9,31 @@ fn root() -> &'static Path {
     Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."))
 }
 
+/// Expected verdicts by model file stem and check, from the claims of the
+/// corpus specification (plan 0092; they replaced expected.json).
+fn claims() -> std::collections::BTreeMap<String, std::collections::BTreeMap<String, String>> {
+    let spec: Value = serde_json::from_str(
+        &std::fs::read_to_string(root().join("fixtures/rmodel/spec.json")).unwrap(),
+    )
+    .unwrap();
+    let mut claims =
+        std::collections::BTreeMap::<String, std::collections::BTreeMap<String, String>>::new();
+    for rule in spec["spec"]["rules"].as_array().unwrap() {
+        for claim in rule["claims"].as_array().unwrap() {
+            let file = Path::new(claim["model"].as_str().unwrap())
+                .file_stem()
+                .unwrap()
+                .to_string_lossy()
+                .into_owned();
+            claims.entry(file).or_default().insert(
+                claim["check"].as_str().unwrap().to_owned(),
+                claim["expect"].as_str().unwrap().to_owned(),
+            );
+        }
+    }
+    claims
+}
+
 #[derive(Debug, PartialEq)]
 struct Explicit {
     verdict: &'static str,
@@ -89,25 +114,17 @@ fn explicit(model: &rmodel::Model, check: &rmodel::Check) -> Explicit {
 
 #[test]
 fn both_engines_give_the_expected_verdicts() {
-    let expected: Value = serde_json::from_str(
-        &std::fs::read_to_string(root().join("fixtures/rmodel/expected.json")).unwrap(),
-    )
-    .unwrap();
     let mut compared = 0;
-    for (file, checks) in expected["models"].as_object().unwrap() {
+    for (file, checks) in claims() {
         let source =
             std::fs::read_to_string(root().join(format!("fixtures/rmodel/{file}.model"))).unwrap();
         let model = rmodel::parse(&source).unwrap_or_else(|error| panic!("{file}: {error}"));
         let alloy_source = rmodel::to_alloy(&model);
         let alloy = ralloy::Model::parse(&alloy_source)
             .unwrap_or_else(|error| panic!("{file}: {error}\n{alloy_source}"));
-        assert_eq!(
-            model.checks.len(),
-            checks.as_object().unwrap().len(),
-            "{file}"
-        );
+        assert_eq!(model.checks.len(), checks.len(), "{file}");
         for check in &model.checks {
-            let want = checks[&check.name].as_str().unwrap();
+            let want = checks[&check.name].as_str();
             let explicit = explicit(&model, check);
             assert_eq!(explicit.verdict, want, "{file} {} explicit", check.name);
             // The SAT bound covers the explicit search's depth.
@@ -143,10 +160,7 @@ fn sha256_hex(bytes: &[u8]) -> String {
 /// after changing a lowering.
 #[test]
 fn external_tools_agree_on_the_current_lowerings() {
-    let expected: Value = serde_json::from_str(
-        &std::fs::read_to_string(root().join("fixtures/rmodel/expected.json")).unwrap(),
-    )
-    .unwrap();
+    let expected = claims();
     let oracle: Value = serde_json::from_str(
         &std::fs::read_to_string(root().join("fixtures/rmodel/oracle.json")).unwrap(),
     )
@@ -176,7 +190,7 @@ fn external_tools_agree_on_the_current_lowerings() {
             row["tlaSha256"],
             "{file} {check}"
         );
-        let found = match expected["models"][file][check].as_str().unwrap() {
+        let found = match expected[file][check].as_str() {
             "violated" | "reachable" => "found",
             _ => "none",
         };

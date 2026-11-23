@@ -1,0 +1,28 @@
+# rspecの対応チェックリスト
+
+チェック済みは、Pklで書いた仕様を読み、静的な結びつき・claim・生成物を決定的に検査し、意味のdriftをjev-lintへ渡す範囲。未チェックは未対応または対象外で、実装予定を約束しない。
+
+## 対応済み
+
+- [x] `spec/Schema.pkl`の用語（id・種類・日英の名前と定義・別名・避ける語・モデルとコードへの参照）、rule（日英の文・用語・claim・形式化しない理由）、claim（モデルのcheckと期待する判定）（0092）。
+- [x] D1〜D4: idの一意性、参照の解決（モデルは宣言、コードは識別子として現れること）、参照するモデルの語彙が閉じていること、checkがすべてclaimされること、期待がcheckの種類と合うこと（0092）。
+- [x] D5: claimの期待を、ralloyのSATとrtlcの判定と照らす（`just spec-check`）。D6: Pklの評価結果・Markdown・jev-lintのmanifestが古くないこと（0092）。
+- [x] jev-lint docsのmanifestを仕様から生成する。用語集と各crateの文書（terminology）、ruleとモデル（semantic）。答えはledgerに追記し、助言として扱う（0092）。
+
+## 照合
+
+- [x] 2つの仕様（語彙21語、corpusの語彙25語・rule 12・claim 20）で、D1〜D6がすべて通る。D1〜D4・D6の故障13件を単体テストが報告する（0092）。
+
+[評価0092](../../evals/iterations/0092-ubiquitous-language.md)を参照。
+
+## 非対応・対象外
+
+- [ ] コードの意味のdrift（ast-grepのruleとcutoffの較正）、各実装の振る舞いの記述（0093）。
+- [ ] jev-lintの答えを合格・不合格として扱うこと、CIの合否に使うこと。
+
+## 制約と根拠
+
+- [x] コードの参照は、識別子が現れることだけを確かめ、意味は確かめない。
+- [x] 静的に決まることはjev-lintへ渡さない。
+
+[公開境界と検査](src/lib.rs)、[検査の実行](examples/spec_check.rs)、[テスト](tests/links.rs)を参照。

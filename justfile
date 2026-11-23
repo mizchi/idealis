@@ -266,6 +266,27 @@ ralloy-build: oracle-wire-build
   cargo build --release --locked --manifest-path crates/ralloy/Cargo.toml
   cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/ralloy/Cargo.toml
 
+rspec-test:
+  cargo fmt --manifest-path crates/rspec/Cargo.toml -- --check
+  cargo clippy --all-targets --locked --manifest-path crates/rspec/Cargo.toml -- -D warnings
+  cargo test --all-targets --locked --manifest-path crates/rspec/Cargo.toml
+
+# Static links, claims through both engines, and freshness of the generated
+# JSON, Markdown and jev-lint manifest (plan 0092). Needs pkl on PATH.
+spec-check:
+  cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check
+
+spec-write:
+  cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check -- --write
+
+# Advisory semantic drift between the glossary, crate documents, rules and
+# models (plan 0092). Appends to the ledger; never a CI gate.
+spec-drift:
+  env -u OPENROUTER_API_KEY pnpm exec jev-lint docs --model jev-1.14.0 --document-manifest spec/documents.json --ledger .jev-lint/judgments/spec
+
+spec-drift-replay:
+  pnpm exec jev-lint docs --replay --model jev-1.14.0 --document-manifest spec/documents.json --ledger .jev-lint/judgments/spec
+
 rmodel-test:
   cargo fmt --manifest-path crates/rmodel/Cargo.toml -- --check
   cargo clippy --all-targets --locked --manifest-path crates/rmodel/Cargo.toml -- -D warnings
