@@ -9,13 +9,27 @@ import { digest, fingerprint } from "./provenance.js";
 import { compactRecords } from "./records.js";
 import { verify } from "./verify.js";
 
-// run <development|confirmation> <run-dir> <baseline-dir> [parent-run]
-const [phase, directory, baselineDirectory, parent] = process.argv.slice(2);
+// run <development|confirmation> <run-dir> <baseline-dir> [parent-run] [plan]
+const [phase, directory, baselineDirectory, parent, planName] =
+  process.argv.slice(2);
 assert.ok(
   directory &&
     baselineDirectory &&
     (phase === "development" || phase === "confirmation"),
 );
+// Seeds and baselines fixed in each plan.
+const plans = {
+  "0074-smt-incremental-cache": {
+    seeds: { development: 0x74a1, confirmation: 0x74c3 },
+    baselineSourceCommit: "bcf018be1",
+  },
+  "0077-smt-lean-context": {
+    seeds: { development: 0x77a1, confirmation: 0x77c3 },
+    baselineSourceCommit: "3dd74cb5b",
+  },
+} as const;
+const plan = (planName || "0074-smt-incremental-cache") as keyof typeof plans;
+assert.ok(plan in plans, plan);
 const baseline = {
   native: join(baselineDirectory, "rusmt"),
   wasm: join(baselineDirectory, "rusmt.wasm"),
@@ -29,6 +43,10 @@ const binaries = await Promise.all(
 );
 if (phase === "confirmation") {
   assert.ok(parent);
+  assert.equal(
+    JSON.parse(await readFile(join(parent, "manifest.json"), "utf8")).plan,
+    plan,
+  );
   const previous = JSON.parse(
     await readFile(join(parent, "manifest.json"), "utf8"),
   );
@@ -43,8 +61,7 @@ if (phase === "confirmation") {
 }
 await mkdir(dirname(directory), { recursive: true });
 await mkdir(directory);
-// Seeds fixed in evals/plans/0074-smt-incremental-cache.md.
-const seed = phase === "development" ? 0x74a1 : 0x74c3;
+const seed = plans[plan].seeds[phase];
 const count = phase === "development" ? 32 : 64;
 const inputs = {
   scripts: [...handCases(), ...generated(seed, count)],
@@ -56,10 +73,10 @@ const save = async (path: string, value: unknown) =>
   });
 await save("manifest.json", {
   ...source,
-  plan: "0074-smt-incremental-cache",
+  plan,
   recordFormat: "0074c-smt-compact-cache-records",
   binaries,
-  baselineSourceCommit: "bcf018be1",
+  baselineSourceCommit: plans[plan].baselineSourceCommit,
   phase,
   seed,
   parent,
@@ -76,7 +93,7 @@ const start = performance.now();
 const ledger = (status: string) =>
   appendFile(
     "evals/runs/ledger.jsonl",
-    `${JSON.stringify({ runId: basename(directory), kind: "smt-incremental-correctness", plan: "0074-smt-incremental-cache", phase, status, sourceVersion: source.sourceVersion })}\n`,
+    `${JSON.stringify({ runId: basename(directory), kind: "smt-incremental-correctness", plan, phase, status, sourceVersion: source.sourceVersion })}\n`,
   );
 try {
   const summary = await verify(

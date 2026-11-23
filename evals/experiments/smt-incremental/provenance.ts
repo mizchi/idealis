@@ -34,6 +34,8 @@ export const fingerprint = async () => {
     "evals/plans/0074c-smt-compact-cache-records.md",
     "evals/plans/0074d-smt-prepared-remeasure.md",
     "evals/plans/0075-smt-cache-transport.md",
+    "evals/plans/0076-smt-cache-store.md",
+    "evals/plans/0077-smt-lean-context.md",
     "evals/experiments/smt-protocol",
     "tests/smt-protocol",
     "evals/plans/0040-smt-expansion.md",
