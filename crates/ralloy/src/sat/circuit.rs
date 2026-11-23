@@ -91,6 +91,118 @@ impl Circuit {
         }
         result
     }
+    /// A two's complement constant of `width` bits, least significant first.
+    pub(crate) fn constant(value: i64, width: usize) -> Vec<Gate> {
+        (0..width)
+            .map(|bit| if (value >> bit) & 1 == 1 { TRUE } else { FALSE })
+            .collect()
+    }
+    /// Sum modulo 2^width; the carry out of the top bit is dropped.
+    pub(crate) fn add(&mut self, left: &[Gate], right: &[Gate]) -> Vec<Gate> {
+        let mut carry = FALSE;
+        let mut sum = Vec::with_capacity(left.len());
+        for (&a, &b) in left.iter().zip(right) {
+            let half = self.xor(a, b);
+            sum.push(self.xor(half, carry));
+            let both = self.and(a, b);
+            let propagated = self.and(half, carry);
+            carry = self.or(both, propagated);
+        }
+        sum
+    }
+    pub(crate) fn xor(&mut self, left: Gate, right: Gate) -> Gate {
+        self.iff(left, right) ^ 1
+    }
+    pub(crate) fn negative(&mut self, value: &[Gate]) -> Vec<Gate> {
+        let inverted: Vec<Gate> = value.iter().map(|gate| gate ^ 1).collect();
+        let one = Self::constant(1, value.len());
+        self.add(&inverted, &one)
+    }
+    pub(crate) fn subtract(&mut self, left: &[Gate], right: &[Gate]) -> Vec<Gate> {
+        let negative = self.negative(right);
+        self.add(left, &negative)
+    }
+    /// Product modulo 2^width by shifted additions.
+    pub(crate) fn multiply(&mut self, left: &[Gate], right: &[Gate]) -> Vec<Gate> {
+        let width = left.len();
+        let mut product = Self::constant(0, width);
+        for (shift, &bit) in right.iter().enumerate() {
+            let partial: Vec<Gate> = (0..width)
+                .map(|index| {
+                    if index < shift {
+                        FALSE
+                    } else {
+                        self.and(left[index - shift], bit)
+                    }
+                })
+                .collect();
+            product = self.add(&product, &partial);
+        }
+        product
+    }
+    pub(crate) fn equal(&mut self, left: &[Gate], right: &[Gate]) -> Gate {
+        let mut all = TRUE;
+        for (&a, &b) in left.iter().zip(right) {
+            let same = self.iff(a, b);
+            all = self.and(all, same);
+        }
+        all
+    }
+    /// Unsigned `left < right`.
+    pub(crate) fn below(&mut self, left: &[Gate], right: &[Gate]) -> Gate {
+        let mut less = FALSE;
+        for (&a, &b) in left.iter().zip(right) {
+            let smaller = self.and(a ^ 1, b);
+            let same = self.iff(a, b);
+            let kept = self.and(same, less);
+            less = self.or(smaller, kept);
+        }
+        less
+    }
+    /// Signed `left < right`: unsigned after flipping the sign bits.
+    pub(crate) fn less(&mut self, left: &[Gate], right: &[Gate]) -> Gate {
+        let flip = |value: &[Gate]| {
+            let mut value = value.to_vec();
+            if let Some(sign) = value.last_mut() {
+                *sign ^= 1;
+            }
+            value
+        };
+        let (left, right) = (flip(left), flip(right));
+        self.below(&left, &right)
+    }
+    /// How many of `gates` hold, modulo 2^width.
+    pub(crate) fn count(&mut self, gates: &[Gate], width: usize) -> Vec<Gate> {
+        let mut total = Self::constant(0, width);
+        for &gate in gates {
+            let mut one = Self::constant(0, width);
+            if let Some(low) = one.first_mut() {
+                *low = gate;
+            }
+            total = self.add(&total, &one);
+        }
+        total
+    }
+    /// At most `bound` of `gates` hold, without wrapping.
+    pub(crate) fn at_most(&mut self, gates: &[Gate], bound: usize) -> Gate {
+        if bound >= gates.len() {
+            return TRUE;
+        }
+        let width = usize::BITS as usize - gates.len().leading_zeros() as usize + 1;
+        let total = self.count(gates, width);
+        let limit = Self::constant(bound as i64 + 1, width);
+        self.below(&total, &limit)
+    }
+    /// Exactly `target` of `gates` hold.
+    pub(crate) fn exactly(&mut self, gates: &[Gate], target: usize) -> Gate {
+        if target > gates.len() {
+            return FALSE;
+        }
+        let width = usize::BITS as usize - gates.len().leading_zeros() as usize + 1;
+        let total = self.count(gates, width);
+        let wanted = Self::constant(target as i64, width);
+        self.equal(&total, &wanted)
+    }
     pub(crate) fn exactly_one(&mut self, gates: &[Gate]) -> Gate {
         let some = self.any(gates.iter().copied());
         let lone = self.at_most_one(gates);
@@ -151,6 +263,57 @@ impl Circuit {
 #[cfg(test)]
 mod tests {
     use super::{Circuit, FALSE, Gate, TRUE};
+
+    /// Bit-vector operations on constants fold to the enumerator's wrapped
+    /// arithmetic at every width 1-4 and every input pair.
+    #[test]
+    fn bit_vectors_wrap_like_the_enumerator() {
+        let wrap = |value: i64, width: usize| {
+            let modulus = 1i64 << width;
+            (value + modulus / 2).rem_euclid(modulus) - modulus / 2
+        };
+        let read = |bits: &[Gate]| -> i64 {
+            let mut value = 0i64;
+            for (index, bit) in bits.iter().enumerate() {
+                assert!(*bit == TRUE || *bit == FALSE, "constant folding");
+                if *bit == TRUE {
+                    value |= 1 << index;
+                }
+            }
+            let width = bits.len();
+            if width > 0 && value >> (width - 1) & 1 == 1 {
+                value -= 1 << width;
+            }
+            value
+        };
+        for width in 1..=4 {
+            let range = -(1i64 << (width - 1))..(1i64 << (width - 1));
+            for a in range.clone() {
+                for b in range.clone() {
+                    let mut circuit = Circuit::new();
+                    let (x, y) = (Circuit::constant(a, width), Circuit::constant(b, width));
+                    assert_eq!(read(&circuit.add(&x, &y)), wrap(a + b, width));
+                    assert_eq!(read(&circuit.subtract(&x, &y)), wrap(a - b, width));
+                    assert_eq!(read(&circuit.multiply(&x, &y)), wrap(a * b, width));
+                    assert_eq!(read(&circuit.negative(&x)), wrap(-a, width));
+                    assert_eq!(circuit.less(&x, &y) == TRUE, a < b, "{a} {b} {width}");
+                    assert_eq!(circuit.equal(&x, &y) == TRUE, a == b);
+                }
+            }
+            for ones in 0..=6usize {
+                let mut circuit = Circuit::new();
+                let gates = vec![TRUE; ones];
+                assert_eq!(
+                    read(&circuit.count(&gates, width)),
+                    wrap(ones as i64, width)
+                );
+                for bound in 0..=6 {
+                    assert_eq!(circuit.at_most(&gates, bound) == TRUE, ones <= bound);
+                    assert_eq!(circuit.exactly(&gates, bound) == TRUE, ones == bound);
+                }
+            }
+        }
+    }
     use crate::{Stats, eval::Budget};
 
     fn evaluate(circuit: &Circuit, gate: Gate, inputs: &[bool]) -> bool {
