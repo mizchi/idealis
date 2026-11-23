@@ -6,7 +6,7 @@ description = "Portable bounded analysis for a static Alloy relational subset"
 repository = "https://github.com/mizchi/idealis"
 readme = "README.md"
 license = "MIT"
-include = ["src/**", "tests/**", "examples/**", "Cargo.toml", "Cargo.lock", "README.md", "SUPPORT.md", "LICENSE", "NOTICE"]
+include = ["src/**", "tests/**", "examples/**", "benches/**", "Cargo.toml", "Cargo.lock", "README.md", "SUPPORT.md", "LICENSE", "NOTICE"]
 
 [lib]
 crate-type = ["rlib", "cdylib"]
@@ -14,6 +14,14 @@ crate-type = ["rlib", "cdylib"]
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+
+[dev-dependencies]
+roracle = { path = "../roracle" }
+criterion = { version = "0.8.2", default-features = false, features = ["cargo_bench_support"] }
+
+[[bench]]
+name = "oracle"
+harness = false
 
 [profile.release]
 opt-level = 3

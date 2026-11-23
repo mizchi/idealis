@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "group": "predicates",
+  "reference": "alloy-6.2.0",
+  "implementations": [
+    "ralloy"
+  ],
+  "status": "error",
+  "cases": [
+    {
+      "case": {
+        "id": "funs",
+        "input": {
+          "source": "sig Person { parent: set Person }\nfun ancestors[p: Person]: set Person { p.^parent }\nfun roots: set Person { Person - parent.Person }\nfun grand: Person -> Person { parent.parent }\nassert Acyclic { all p: Person | p not in ancestors[p] }\nAcyclicFails: check Acyclic for 2 but 0 Int\nGrandBinary: run { some grand } for 3 but 0 Int\nRoots: run { some roots and some Person - roots } for 2 but 0 Int\nReceiverFun: run { some p: Person | some p.ancestors } for 2 but 0 Int\nBoxJoin: run { some p: Person | some parent[p] and parent[p] != p.parent } for 2 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "AcyclicFails": true,
+          "BoxJoin": false,
+          "GrandBinary": true,
+          "ReceiverFun": true,
+          "Roots": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "error",
+          "actual": {
+            "kind": "error",
+            "message": "Unsupported: paragraph fun"
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "nested-calls",
+        "input": {
+          "source": "sig A { r: set A }\nfun out[x: A]: set A { x.r }\npred reaches[x, y: A] { y in out[x] + out[out[x]] }\npred symmetric { all x, y: A | reaches[x, y] => reaches[y, x] }\nfun both[x: A, y: A]: set A { out[x] & out[y] }\nSym: run { symmetric and some r } for 2 but 0 Int\nTwoStep: run { some x, y: A | reaches[x, y] and y not in out[x] } for 3 but 0 Int\nCommon: run { some disj x, y: A | some both[x, y] } for 2 but 0 Int\nassert ReachOut { all x, y: A | y in out[x] => reaches[x, y] }\nReachOutHolds: check ReachOut for 3 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "Common": true,
+          "ReachOutHolds": false,
+          "Sym": true,
+          "TwoStep": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "error",
+          "actual": {
+            "kind": "error",
+            "message": "Unsupported: paragraph fun"
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "pred-args",
+        "input": {
+          "source": "sig Node { edge: set Node }\npred connected[a, b: Node] { b in a.^edge }\npred selfLoop[n: Node] { n in n.edge }\nSomeConnected: run { some a, b: Node | connected[a, b] } for 2 but 0 Int\nRunWithParams: run connected for 2 but 0 Int\nRunLoop: run selfLoop for 1 but 0 Int\nassert Trans { all a, b, c: Node | connected[a, b] and connected[b, c] => connected[a, c] }\nTransHolds: check Trans for 3 but 0 Int\nReceiver: run { some a, b: Node | a.connected[b] and not b.connected[a] } for 2 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "Receiver": true,
+          "RunLoop": true,
+          "RunWithParams": true,
+          "SomeConnected": true,
+          "TransHolds": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "error",
+          "actual": {
+            "kind": "error",
+            "message": "Syntax: expected ], got a at token 11"
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "pred-composition",
+        "input": {
+          "source": "sig S { f: set S }\npred related[x: S, y: S] { x -> y in f }\npred sym[x, y: S] { related[x, y] <=> related[y, x] }\nfun pairs: S -> S { f & ~f }\nassert SymSelf { all x: S | sym[x, x] }\nSymSelfHolds: check SymSelf for 3 but 0 Int\nAsymPair: run { some x, y: S | not sym[x, y] } for 2 but 0 Int\nSymPairs: run { some pairs and pairs = f } for 2 but 0 Int\nassert PairsSymmetric { pairs = ~pairs }\nPairsHold: check PairsSymmetric for 3 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "AsymPair": true,
+          "PairsHold": false,
+          "SymPairs": true,
+          "SymSelfHolds": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "error",
+          "actual": {
+            "kind": "error",
+            "message": "Syntax: expected ], got x at token 11"
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "run-pred-params",
+        "input": {
+          "source": "sig Item { price: one Tier }\nabstract sig Tier {}\none sig Low, High extends Tier {}\npred expensive[i: Item] { i.price = High }\npred mixed[a, b: Item] { a.price != b.price }\npred samePrice[disj a, b: Item] { a.price = b.price }\nExpensive: run expensive for 2 but 0 Int\nMixed: run mixed for 2 but 0 Int\nMixedOne: run mixed for 1 but 0 Int\nDisjPair: run samePrice for 1 but 0 Int\nDisjPairTwo: run samePrice for 2 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "DisjPair": false,
+          "DisjPairTwo": true,
+          "Expensive": true,
+          "Mixed": true,
+          "MixedOne": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "error",
+          "actual": {
+            "kind": "error",
+            "message": "Syntax: expected ], got i at token 25"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-use crate::syntax::{Binary, Expr, Module, Mult, Unary};
+use crate::syntax::{Binary, Expr, Module, Mult, Parent, Unary};
 use crate::{Command, Error, ErrorKind, Kind, Scope, SignatureScope};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -6,12 +6,22 @@ use std::collections::{BTreeMap, BTreeSet};
 enum Type {
     Boolean,
     Relation(Vec<u16>),
+    /// An integer value (plan 0082).
+    Integer,
 }
 impl Type {
     fn columns(self) -> Result<Vec<u16>, Error> {
         match self {
             Self::Relation(columns) => Ok(columns),
             _ => Err(Error::new(ErrorKind::Type, "expected relation")),
+        }
+    }
+    /// An integer, or a unary relation summed into one.
+    fn integer(self) -> Result<(), Error> {
+        match self {
+            Self::Integer => Ok(()),
+            Self::Relation(columns) if columns.len() == 1 => Ok(()),
+            _ => Err(Error::new(ErrorKind::Type, "expected integer")),
         }
     }
     fn boolean(self) -> Result<(), Error> {
@@ -23,11 +33,15 @@ impl Type {
     }
 }
 
+/// Relations of higher arity are rejected as unsupported.
+const MAX_ARITY: usize = 4;
+
 struct Checker<'a> {
     module: &'a Module,
     globals: BTreeMap<String, Type>,
     visiting: BTreeSet<String>,
-    validated: BTreeSet<String>,
+    /// Result types of the preds and funs checked so far.
+    validated: BTreeMap<String, Type>,
     work: usize,
 }
 
@@ -36,7 +50,7 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
         module,
         globals: BTreeMap::new(),
         visiting: BTreeSet::new(),
-        validated: BTreeSet::new(),
+        validated: BTreeMap::new(),
         work: 0,
     };
     for (index, name) in module
@@ -57,6 +71,7 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
             ));
         }
     }
+    let order = hierarchy(module)?;
     let all = (1 << (module.signatures.len() + 2)) - 1;
     checker
         .globals
@@ -68,34 +83,30 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
         .globals
         .insert("iden".into(), Type::Relation(vec![all, all]));
     for field in &module.fields {
-        if !module
-            .signatures
-            .iter()
-            .any(|signature| signature.name == field.target)
-            && !["Int", "String"].contains(&field.target.as_str())
-        {
-            return Err(Error::new(ErrorKind::Type, "unknown field range"));
-        }
         let owner = checker
             .globals
             .get(&field.owner)
             .cloned()
             .ok_or_else(|| Error::new(ErrorKind::Type, "unknown owner"))?
             .columns()?[0];
-        let target = checker
-            .globals
-            .get(&field.target)
-            .cloned()
-            .ok_or_else(|| {
-                Error::new(
+        let mut columns = vec![owner];
+        for column in &field.columns {
+            if !module
+                .signatures
+                .iter()
+                .any(|signature| &signature.name == column)
+                && !["Int", "String"].contains(&column.as_str())
+            {
+                return Err(Error::new(
                     ErrorKind::Type,
-                    format!("unknown field range {}", field.target),
-                )
-            })?
-            .columns()?[0];
+                    format!("unknown field range {column}"),
+                ));
+            }
+            columns.push(checker.globals[column].clone().columns()?[0]);
+        }
         if checker
             .globals
-            .insert(field.name.clone(), Type::Relation(vec![owner, target]))
+            .insert(field.name.clone(), Type::Relation(columns))
             .is_some()
         {
             return Err(Error::new(
@@ -164,15 +175,35 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
                 ));
             }
         }
-        let mut signatures = Vec::new();
-        for signature in &module.signatures {
+        // Parents first: a signature without its own scope takes the
+        // overall scope at the top level and its parent's bound below it, and
+        // no signature exceeds its parent's bound (plan 0080).
+        let mut bounds: BTreeMap<&str, (usize, bool)> = BTreeMap::new();
+        for &index in &order {
+            let signature = &module.signatures[index];
+            if signature
+                .parent
+                .as_ref()
+                .is_some_and(|(kind, _)| *kind == Parent::In)
+                && explicit.contains_key(&signature.name)
+            {
+                return Err(Error::new(ErrorKind::Scope, "scope for a subset signature"));
+            }
+            let parent = signature
+                .parent
+                .as_ref()
+                .map(|(_, parent)| bounds[parent.as_str()].0);
+            let inherited = match parent {
+                Some(maximum) => Some((maximum, false)),
+                None => command.scope.overall.map(|maximum| (maximum, false)),
+            };
             let (maximum, exact) = match signature.mult {
                 Mult::One => (1, true),
                 Mult::Lone => explicit.get(&signature.name).copied().unwrap_or((1, false)),
                 _ => explicit
                     .get(&signature.name)
                     .copied()
-                    .or(command.scope.overall.map(|maximum| (maximum, false)))
+                    .or(inherited)
                     .ok_or_else(|| {
                         Error::new(
                             ErrorKind::Scope,
@@ -180,20 +211,75 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
                         )
                     })?,
             };
-            signatures.push(SignatureScope {
-                name: signature.name.clone(),
-                maximum,
-                exact,
-            });
+            let maximum = parent.map_or(maximum, |bound| maximum.min(bound));
+            bounds.insert(&signature.name, (maximum, exact));
         }
+        // Children with exact counts (one sigs, `exactly N`) grow their
+        // parent to fit them, as Alloy's ScopeComputer does; other explicit
+        // child scopes stay capped by the parent.
+        for &index in order.iter().rev() {
+            let name = module.signatures[index].name.as_str();
+            let required: usize = module
+                .signatures
+                .iter()
+                .filter(|child| {
+                    child
+                        .parent
+                        .as_ref()
+                        .is_some_and(|(kind, parent)| *kind == Parent::Extends && parent == name)
+                })
+                .map(|child| bounds[child.name.as_str()])
+                .filter(|(_, exact)| *exact)
+                .map(|(maximum, _)| maximum)
+                .sum();
+            let bound = bounds.get_mut(name).expect("bounded signature");
+            bound.0 = bound.0.max(required);
+        }
+        let signatures: Vec<_> = module
+            .signatures
+            .iter()
+            .map(|signature| {
+                let (maximum, exact) = bounds[signature.name.as_str()];
+                SignatureScope {
+                    name: signature.name.clone(),
+                    maximum,
+                    exact,
+                }
+            })
+            .collect();
         let integer_atoms = if command.scope.bitwidth == 0 {
             0
         } else {
             1 << command.scope.bitwidth
         };
-        if signatures
+        // A field of several columns chooses, per owner atom, a subset of the
+        // product of its column signatures, kept as a 64-bit mask.
+        for field in module.fields.iter().filter(|field| field.columns.len() > 1) {
+            let space = field
+                .columns
+                .iter()
+                .map(|column| match column.as_str() {
+                    "Int" => integer_atoms,
+                    "String" => 0,
+                    name => signatures
+                        .iter()
+                        .find(|signature| signature.name == name)
+                        .map_or(0, |signature| signature.maximum),
+                })
+                .product::<usize>();
+            if space > 64 {
+                return Err(Error::new(
+                    ErrorKind::Resource,
+                    format!("field {} exceeds 64 tuples per owner atom", field.name),
+                ));
+            }
+        }
+        if module
+            .signatures
             .iter()
-            .map(|signature| signature.maximum)
+            .zip(&signatures)
+            .filter(|(signature, _)| signature.parent.is_none())
+            .map(|(_, scope)| scope.maximum)
             .sum::<usize>()
             + integer_atoms
             > 64
@@ -212,12 +298,63 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
     Ok(commands)
 }
 
-impl Checker<'_> {
-    fn predicate(&mut self, name: &str, depth: usize) -> Result<Type, Error> {
-        if self.validated.contains(name) {
-            return Ok(Type::Boolean);
+/// Signature indices with every parent before its children. Parents must be
+/// declared, acyclic, and an `extends` parent must not be a subset signature.
+pub(crate) fn hierarchy(module: &Module) -> Result<Vec<usize>, Error> {
+    let position = |name: &str| {
+        module
+            .signatures
+            .iter()
+            .position(|signature| signature.name == name)
+    };
+    let mut order = Vec::new();
+    let mut placed = vec![false; module.signatures.len()];
+    while order.len() < module.signatures.len() {
+        let before = order.len();
+        for (index, signature) in module.signatures.iter().enumerate() {
+            if placed[index] {
+                continue;
+            }
+            let ready = match &signature.parent {
+                None => true,
+                Some((kind, parent)) => {
+                    let parent_index = position(parent).ok_or_else(|| {
+                        Error::new(ErrorKind::Type, format!("unknown parent {parent}"))
+                    })?;
+                    if *kind == Parent::Extends
+                        && module.signatures[parent_index]
+                            .parent
+                            .as_ref()
+                            .is_some_and(|(kind, _)| *kind == Parent::In)
+                    {
+                        return Err(Error::new(
+                            ErrorKind::Type,
+                            "a signature cannot extend a subset signature",
+                        ));
+                    }
+                    placed[parent_index]
+                }
+            };
+            if ready {
+                placed[index] = true;
+                order.push(index);
+            }
         }
-        let body = self
+        if order.len() == before {
+            return Err(Error::new(ErrorKind::Type, "cyclic signature hierarchy"));
+        }
+    }
+    Ok(order)
+}
+
+impl Checker<'_> {
+    /// The result type of a pred (formula) or fun (relation), checking its
+    /// body once with the parameters typed by their domains.
+    fn predicate(&mut self, name: &str, depth: usize) -> Result<Type, Error> {
+        if let Some(kind) = self.validated.get(name) {
+            return Ok(kind.clone());
+        }
+        let predicate = self
             .module
             .predicates
             .get(name)
@@ -225,11 +362,32 @@ impl Checker<'_> {
         if !self.visiting.insert(name.to_owned()) {
             return Err(Error::new(ErrorKind::Unsupported, "recursive predicates"));
         }
-        self.expression(body, &BTreeMap::new(), depth + 1)?
-            .boolean()?;
+        let mut locals = BTreeMap::new();
+        for (param, domain) in self.parameters(name, depth)? {
+            locals.insert(param, Type::Relation(domain));
+        }
+        let kind = self.expression(&predicate.body, &locals, depth + 1)?;
+        if predicate.function {
+            kind.clone().columns()?;
+        } else {
+            kind.clone().boolean()?;
+        }
         self.visiting.remove(name);
-        self.validated.insert(name.to_owned());
-        Ok(Type::Boolean)
+        self.validated.insert(name.to_owned(), kind.clone());
+        Ok(kind)
+    }
+    /// Each parameter name with the column types of its domain.
+    fn parameters(&mut self, name: &str, depth: usize) -> Result<Vec<(String, Vec<u16>)>, Error> {
+        let mut parameters = Vec::new();
+        for param in &self.module.predicates[name].params {
+            let domain = self
+                .expression(&param.domain, &BTreeMap::new(), depth + 1)?
+                .columns()?;
+            for parameter in &param.names {
+                parameters.push((parameter.clone(), domain.clone()));
+            }
+        }
+        Ok(parameters)
     }
     fn expression(
         &mut self,
@@ -246,10 +404,58 @@ impl Checker<'_> {
                 if let Some(kind) = locals.get(name).or(self.globals.get(name)) {
                     Ok(kind.clone())
                 } else {
+                    if self
+                        .module
+                        .predicates
+                        .get(name)
+                        .is_some_and(|predicate| predicate.arity() > 0)
+                    {
+                        return Err(Error::new(
+                            ErrorKind::Type,
+                            format!("{name} needs arguments"),
+                        ));
+                    }
                     self.predicate(name, depth)
                 }
             }
-            Expr::Call(name) => self.predicate(name, depth),
+            Expr::Number(_) => Ok(Type::Integer),
+            Expr::Apply(name, arguments)
+                if !self.module.predicates.contains_key(name)
+                    && crate::parser::BUILTINS.contains(&name.as_str()) =>
+            {
+                let expected = if name == "negate" { 1 } else { 2 };
+                if arguments.len() != expected {
+                    return Err(Error::new(
+                        ErrorKind::Type,
+                        format!("{name} takes {expected} arguments"),
+                    ));
+                }
+                for argument in arguments {
+                    self.expression(argument, locals, depth + 1)?.integer()?;
+                }
+                Ok(Type::Integer)
+            }
+            Expr::Apply(name, arguments) => {
+                let kind = self.predicate(name, depth)?;
+                let parameters = self.parameters(name, depth)?;
+                if arguments.len() != parameters.len() {
+                    return Err(Error::new(
+                        ErrorKind::Type,
+                        format!("{name} takes {} arguments", parameters.len()),
+                    ));
+                }
+                for (argument, (_, domain)) in arguments.iter().zip(parameters) {
+                    if self
+                        .expression(argument, locals, depth + 1)?
+                        .columns()?
+                        .len()
+                        != domain.len()
+                    {
+                        return Err(Error::new(ErrorKind::Type, "argument arity mismatch"));
+                    }
+                }
+                Ok(kind)
+            }
             Expr::Block(expressions) => {
                 for expression in expressions {
                     self.expression(expression, locals, depth + 1)?.boolean()?;
@@ -266,6 +472,10 @@ impl Checker<'_> {
                     Unary::No | Unary::Some | Unary::One | Unary::Lone => {
                         kind.columns()?;
                         Ok(Type::Boolean)
+                    }
+                    Unary::Cardinality => {
+                        kind.columns()?;
+                        Ok(Type::Integer)
                     }
                     Unary::Transpose | Unary::Closure | Unary::Reflexive => {
                         let mut columns = kind.columns()?;
@@ -296,21 +506,33 @@ impl Checker<'_> {
                     right.boolean()?;
                     return Ok(Type::Boolean);
                 }
+                let integers = matches!(left, Type::Integer) || matches!(right, Type::Integer);
+                if matches!(
+                    operator,
+                    Binary::Less | Binary::LessEqual | Binary::Greater | Binary::GreaterEqual
+                ) || integers && matches!(operator, Binary::Equal | Binary::NotEqual)
+                {
+                    left.integer()?;
+                    right.integer()?;
+                    return Ok(Type::Boolean);
+                }
                 let left_columns = left.columns()?;
                 let right_columns = right.columns()?;
                 if matches!(operator, Binary::Product) {
-                    if left_columns.len() != 1 || right_columns.len() != 1 {
+                    if left_columns.len() + right_columns.len() > MAX_ARITY {
                         return Err(Error::new(
                             ErrorKind::Unsupported,
-                            "relations above arity two",
+                            "relations above arity four",
                         ));
                     }
-                    return Ok(Type::Relation(vec![left_columns[0], right_columns[0]]));
+                    return Ok(Type::Relation(
+                        left_columns.into_iter().chain(right_columns).collect(),
+                    ));
                 }
                 if matches!(operator, Binary::Join) {
-                    if left_columns.len() + right_columns.len() <= 2
-                        || left_columns.last().unwrap() & right_columns[0] == 0
-                    {
+                    // Alloy accepts a join of disjoint column types; it is
+                    // empty. Only the arity is an error (plan 0079).
+                    if left_columns.len() + right_columns.len() <= 2 {
                         return Err(Error::new(ErrorKind::Type, "ill-typed join"));
                     }
                     return Ok(Type::Relation(
@@ -327,11 +549,8 @@ impl Checker<'_> {
                     } else {
                         (right_columns, left_columns)
                     };
-                    if set.len() != 1 || relation.len() != 2 {
-                        return Err(Error::new(
-                            ErrorKind::Type,
-                            "restriction requires a set and binary relation",
-                        ));
+                    if set.len() != 1 {
+                        return Err(Error::new(ErrorKind::Type, "restriction requires a set"));
                     }
                     return Ok(Type::Relation(relation));
                 }

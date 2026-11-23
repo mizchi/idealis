@@ -1,0 +1,239 @@
+{
+  "version": 1,
+  "group": "hierarchy",
+  "reference": "alloy-6.2.0",
+  "implementations": [
+    "ralloy"
+  ],
+  "status": "error",
+  "cases": [
+    {
+      "case": {
+        "id": "concrete-parent",
+        "input": {
+          "source": "sig Person {}\nsig Student extends Person {}\nPlainPerson: run { some p: Person | p not in Student } for 2 but 0 Int\nAllStudents: run { Person = Student and some Person } for 2 but 0 Int\nExactParent: run { no Student } for 2 but exactly 2 Person, 0 Int\nExactChild: run { Person = Student } for 3 but exactly 2 Student, 0 Int\nChildFillsParent: run { some disj a, b: Student | a in Student } for 1 but 0 Int\nassert StudentsArePeople { Student in Person }\nStudentsHold: check StudentsArePeople for 3 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "AllStudents": true,
+          "ChildFillsParent": false,
+          "ExactChild": true,
+          "ExactParent": true,
+          "PlainPerson": true,
+          "StudentsHold": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "error",
+          "actual": {
+            "kind": "error",
+            "message": "Syntax: expected {, got extends at token 6"
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "default-scope",
+        "input": {
+          "source": "sig A {}\nThree: run { some disj x, y, z: A | x in A }\nFour: run { some disj w, x, y, z: A | w in A }\nOverall: run { some disj w, x, y, z: A | w in A } for 4\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "Four": false,
+          "Overall": true,
+          "Three": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "Four": false,
+              "Overall": true,
+              "Three": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "enum-sigs",
+        "input": {
+          "source": "abstract sig Color {}\none sig Red, Green, Blue extends Color {}\nsig Light { color: one Color }\nsig Bulb, Lamp {}\nEnum: run { Color = Red + Green + Blue } for 3 but 0 Int\nNoOther: run { some c: Color | c not in Red + Green + Blue } for 3 but 0 Int\nMerged: run { Red = Green } for 3 but 0 Int\nTwoLights: run { some disj a, b: Light | a.color != b.color } for 3 but 0 Int\nBulbsAndLamps: run { some Bulb and some Lamp and no Bulb & Lamp } for 1 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "BulbsAndLamps": true,
+          "Enum": true,
+          "Merged": false,
+          "NoOther": false,
+          "TwoLights": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "error",
+          "actual": {
+            "kind": "error",
+            "message": "Unsupported: paragraph abstract"
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "extends-abstract",
+        "input": {
+          "source": "abstract sig Animal { eats: set Animal }\nsig Cat, Dog extends Animal {}\nPartition: run { some Cat and some Dog } for 2 but 0 Int\nNoPlain: run { some a: Animal | a not in Cat + Dog } for 3 but 0 Int\nThreeCats: run { some disj a, b, c: Cat | a in Cat } for 2 but 0 Int\nChildScope: run { some disj a, b, c: Cat | a in Cat } for 2 but 3 Cat, 0 Int\nEatsDogs: run { all c: Cat | some c.eats & Dog } for 2 but 0 Int\nassert Disjoint { no Cat & Dog }\nDisjointHolds: check Disjoint for 3 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "ChildScope": false,
+          "DisjointHolds": false,
+          "EatsDogs": true,
+          "NoPlain": false,
+          "Partition": true,
+          "ThreeCats": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "error",
+          "actual": {
+            "kind": "error",
+            "message": "Unsupported: paragraph abstract"
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "hierarchy-fields",
+        "input": {
+          "source": "sig Account { owner: one Person }\nabstract sig Person {}\nsig Customer extends Person { accounts: set Account }\nsig Staff extends Person {}\nConsistent: run { some accounts and all c: Customer | all a: c.accounts | a.owner = c } for 2 but 0 Int\nassert OwnerTyped { Account.owner in Customer + Staff }\nOwnerHolds: check OwnerTyped for 3 but 0 Int\nStaffOwns: run { some a: Account | a.owner in Staff } for 2 but 0 Int\nassert AccountsOwned { all c: Customer | c.accounts.owner in c }\nAccountsFail: check AccountsOwned for 2 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "AccountsFail": true,
+          "Consistent": true,
+          "OwnerHolds": false,
+          "StaffOwns": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "error",
+          "actual": {
+            "kind": "error",
+            "message": "Unsupported: paragraph abstract"
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "nested-hierarchy",
+        "input": {
+          "source": "abstract sig Shape {}\nabstract sig Polygon extends Shape {}\nsig Triangle, Square extends Polygon {}\nsig Circle extends Shape {}\nLevels: run { some Triangle and some Square and some Circle } for 3 but 0 Int\nPolygonOnly: run { some Polygon - Triangle - Square } for 3 but 0 Int\nBounded: run { some disj a, b, c, d: Shape | a in Shape } for 3 but 0 Int\nassert Layers { Triangle + Square in Polygon and Polygon + Circle = Shape }\nLayersHold: check Layers for 3 but 0 Int\nExactSquares: run { no Triangle and no Circle } for 3 but exactly 2 Square, 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "Bounded": false,
+          "ExactSquares": true,
+          "LayersHold": false,
+          "Levels": true,
+          "PolygonOnly": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "error",
+          "actual": {
+            "kind": "error",
+            "message": "Unsupported: paragraph abstract"
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "sig-facts",
+        "input": {
+          "source": "sig Node { succ: lone Node } { succ != this }\nsig Box { items: set Item } { some items }\nsig Item {}\nSelfLoop: run { some n: Node | n.succ = n } for 2 but 0 Int\nChained: run { some succ } for 2 but 0 Int\nEmptyBox: run { some b: Box | no b.items } for 2 but 0 Int\nBoxesNeedItems: run { some Box and no Item } for 2 but 0 Int\nassert NoLoops { no iden & succ }\nNoLoopsHolds: check NoLoops for 3 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "BoxesNeedItems": false,
+          "Chained": true,
+          "EmptyBox": false,
+          "NoLoopsHolds": false,
+          "SelfLoop": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "error",
+          "actual": {
+            "kind": "error",
+            "message": "Unsupported: paragraph {"
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "subset-sigs",
+        "input": {
+          "source": "sig Node { next: lone Node }\nsig Marked in Node {}\nsig Red, Blue in Node {}\none sig Head in Node {}\nOverlap: run { some Red & Blue } for 2 but 0 Int\nMarkedAll: run { Marked = Node and some Node } for 2 but 0 Int\nassert MarkedInNode { Marked in Node }\nMarkedHolds: check MarkedInNode for 3 but 0 Int\nHeadAlone: run { no Node - Head } for 2 but 0 Int\nNoHead: run { no Head } for 2 but 0 Int\nHeadMarked: run { Head in Marked and Head in Red & Blue } for 2 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "HeadAlone": true,
+          "HeadMarked": true,
+          "MarkedAll": true,
+          "MarkedHolds": false,
+          "NoHead": false,
+          "Overlap": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "error",
+          "actual": {
+            "kind": "error",
+            "message": "Syntax: expected {, got in at token 10"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -515,12 +515,7 @@ export const controls = [
   "sig A { r: set A } run { r = none + none }",
   "sig A {} run { no ^none }",
   "var sig A {} run {}",
-  "sig A {} sig B extends A {} run {}",
-  "sig A {} sig B in A {} run {}",
   "open util/ordering[A] sig A {} run {}",
-  "sig A {} pred P[x:A] {} run {}",
-  "sig A { r: A -> A } run {}",
-  "sig A {} run { #A = 1 }",
   "sig A {} pred P { P } run {}",
   "sig A {} pred P { unknown in A } run {}",
   "sig A {} fact { A } run {}",
@@ -557,7 +552,7 @@ export const pin = (instance: Instance): string => {
     ),
     ...Object.entries(instance.fields).map(([name, tuples]) =>
       tuples.length
-        ? `${name} = (${tuples.map((tuple) => `(${atomName(tuple[0])} -> ${atomName(tuple[1])})`).join(" + ")})`
+        ? `${name} = (${tuples.map((tuple) => `(${tuple.map(atomName).join(" -> ")})`).join(" + ")})`
         : `no ${name}`,
     ),
   ];
