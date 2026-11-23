@@ -245,9 +245,20 @@ impl Evaluator<'_> {
                     let arity = 1 + self.module.fields[index].columns.len();
                     return Ok(Value::Relation(self.world.field(index, arity)));
                 }
-                self.expression(&self.module.predicates[name], &Environment::new())
+                self.expression(&self.module.predicates[name].body, &Environment::new())
             }
-            Expr::Call(name) => self.expression(&self.module.predicates[name], &Environment::new()),
+            // Arguments are evaluated where the call is; the body sees only
+            // the parameters (plan 0081).
+            Expr::Apply(name, arguments) => {
+                let predicate = &self.module.predicates[name];
+                let mut parameters = Environment::new();
+                let names = predicate.params.iter().flat_map(|param| &param.names);
+                for (parameter, argument) in names.zip(arguments) {
+                    let value = self.expression(argument, locals)?.relation();
+                    parameters.insert(parameter.clone(), value);
+                }
+                self.expression(&predicate.body, &parameters)
+            }
             Expr::Block(expressions) => {
                 for expression in expressions {
                     if !self.expression(expression, locals)?.formula() {

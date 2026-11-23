@@ -79,7 +79,9 @@ pub(crate) struct Declaration {
 #[derive(Clone)]
 pub(crate) enum Expr {
     Name(String),
-    Call(String),
+    /// `name[arguments]`: a pred/fun call, resolved after parsing; other
+    /// names become box joins (plan 0081).
+    Apply(String, Vec<Self>),
     Block(Vec<Self>),
     Unary(Unary, Box<Self>),
     Binary(Binary, Box<Self>, Box<Self>),
@@ -96,6 +98,18 @@ pub(crate) struct RawCommand {
     pub body: Expr,
     pub scope: RawScope,
 }
+/// A pred (formula body) or fun (relation body) with its parameters, each
+/// of the default `one` multiplicity.
+pub(crate) struct Predicate {
+    pub params: Vec<Declaration>,
+    pub body: Expr,
+    pub function: bool,
+}
+impl Predicate {
+    pub fn arity(&self) -> usize {
+        self.params.iter().map(|param| param.names.len()).sum()
+    }
+}
 #[derive(Default)]
 pub(crate) struct Module {
     pub signatures: Vec<Signature>,
@@ -103,7 +117,8 @@ pub(crate) struct Module {
     pub facts: Vec<Expr>,
     /// Bodies of signature facts until `parse` turns them into facts.
     pub signature_facts: Vec<(String, Expr)>,
-    pub predicates: BTreeMap<String, Expr>,
+    /// Preds and funs by name.
+    pub predicates: BTreeMap<String, Predicate>,
     pub assertions: BTreeMap<String, Expr>,
     pub commands: Vec<RawCommand>,
 }

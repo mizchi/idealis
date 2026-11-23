@@ -80,3 +80,8 @@ fn nary_agrees_with_alloy() {
 fn hierarchy_agrees_with_alloy() {
     replay("hierarchy", &[]);
 }
+
+#[test]
+fn predicates_agree_with_alloy() {
+    replay("predicates", &[]);
+}

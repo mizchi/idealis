@@ -1,6 +1,6 @@
 use crate::syntax::{
-    Binary, Declaration, Expr, Field, Module, Mult, Parent, Quantifier, RawCommand, RawScope,
-    Signature, Unary,
+    Binary, Declaration, Expr, Field, Module, Mult, Parent, Predicate, Quantifier, RawCommand,
+    RawScope, Signature, Unary,
 };
 use crate::{Error, ErrorKind, Kind};
 use std::collections::BTreeSet;
@@ -74,7 +74,103 @@ pub(crate) fn parse(source: &str) -> Result<Module, Error> {
         let fact = signature_fact(&module, &signature, body);
         module.facts.push(fact);
     }
+    resolve_calls(&mut module);
     Ok(module)
+}
+
+/// Resolves `name[...]`, receiver calls and runs of parameterized preds
+/// (plan 0081). A call of a pred/fun stays `Apply`; `e[a, b]` of anything
+/// else is the box join `b.(a.e)`; `a.P[b]` is `P[a, b]` and `p.f` is `f[p]`
+/// for a pred/fun with parameters; `run P` with parameters is
+/// `some params | P[params]`.
+fn resolve_calls(module: &mut Module) {
+    let arities: std::collections::BTreeMap<String, usize> = module
+        .predicates
+        .iter()
+        .map(|(name, predicate)| (name.clone(), predicate.arity()))
+        .collect();
+    let resolve = |expression: Expr| resolve(expression, &arities);
+    for fact in &mut module.facts {
+        *fact = resolve(std::mem::replace(fact, Expr::Block(vec![])));
+    }
+    for body in module.assertions.values_mut() {
+        *body = resolve(std::mem::replace(body, Expr::Block(vec![])));
+    }
+    for predicate in module.predicates.values_mut() {
+        predicate.body = resolve(std::mem::replace(&mut predicate.body, Expr::Block(vec![])));
+        for param in &mut predicate.params {
+            param.domain = resolve(std::mem::replace(&mut param.domain, Expr::Block(vec![])));
+        }
+    }
+    for command in &mut module.commands {
+        let body = std::mem::replace(&mut command.body, Expr::Block(vec![]));
+        command.body = match body {
+            Expr::Name(name)
+                if command.kind == Kind::Run
+                    && arities.get(&name).is_some_and(|arity| *arity > 0) =>
+            {
+                let params = module.predicates[&name].params.clone();
+                let arguments = params
+                    .iter()
+                    .flat_map(|param| param.names.iter().cloned().map(Expr::Name))
+                    .collect();
+                Expr::Quantified(
+                    Quantifier::Some,
+                    params,
+                    Box::new(Expr::Apply(name, arguments)),
+                )
+            }
+            body => resolve(body),
+        };
+    }
+}
+fn resolve(expression: Expr, arities: &std::collections::BTreeMap<String, usize>) -> Expr {
+    let go = |expression: Expr| resolve(expression, arities);
+    match expression {
+        Expr::Apply(name, arguments) => {
+            let arguments: Vec<Expr> = arguments.into_iter().map(go).collect();
+            if arities.contains_key(&name) {
+                Expr::Apply(name, arguments)
+            } else {
+                arguments
+                    .into_iter()
+                    .fold(Expr::Name(name), |joined, argument| {
+                        Expr::Binary(Binary::Join, Box::new(argument), Box::new(joined))
+                    })
+            }
+        }
+        Expr::Binary(Binary::Join, left, right) => {
+            let left = go(*left);
+            match *right {
+                Expr::Apply(name, arguments) if arities.contains_key(&name) => {
+                    let mut all = vec![left];
+                    all.extend(arguments.into_iter().map(go));
+                    Expr::Apply(name, all)
+                }
+                Expr::Name(name) if arities.get(&name).is_some_and(|arity| *arity > 0) => {
+                    Expr::Apply(name, vec![left])
+                }
+                right => Expr::Binary(Binary::Join, Box::new(left), Box::new(go(right))),
+            }
+        }
+        Expr::Name(_) => expression,
+        Expr::Block(expressions) => Expr::Block(expressions.into_iter().map(go).collect()),
+        Expr::Unary(operator, child) => Expr::Unary(operator, Box::new(go(*child))),
+        Expr::Binary(operator, left, right) => {
+            Expr::Binary(operator, Box::new(go(*left)), Box::new(go(*right)))
+        }
+        Expr::Quantified(quantifier, declarations, body) => Expr::Quantified(
+            quantifier,
+            declarations
+                .into_iter()
+                .map(|declaration| Declaration {
+                    domain: go(declaration.domain),
+                    ..declaration
+                })
+                .collect(),
+            Box::new(go(*body)),
+        ),
+    }
 }
 
 /// `sig A {...} { body }` is `all this: A | body`, where the fields of A and
@@ -116,7 +212,14 @@ fn implicit_this(expression: Expr, fields: &BTreeSet<String>) -> Expr {
             Box::new(Expr::Name("this".into())),
             Box::new(Expr::Name(name)),
         ),
-        Expr::Name(_) | Expr::Call(_) => expression,
+        Expr::Name(_) => expression,
+        Expr::Apply(name, arguments) => Expr::Apply(
+            name,
+            arguments
+                .into_iter()
+                .map(|argument| implicit_this(argument, fields))
+                .collect(),
+        ),
         Expr::Block(expressions) => Expr::Block(
             expressions
                 .into_iter()
@@ -419,13 +522,43 @@ impl Parser {
                     self.name()?;
                 }
                 module.facts.push(self.block()?);
-            } else if self.take("pred") {
-                let name = self.name()?;
-                if self.take("[") {
-                    self.expect("]")?;
+            } else if self.peek() == "pred" || self.peek() == "fun" {
+                let function = self.take("fun");
+                if !function {
+                    self.expect("pred")?;
                 }
-                let body = self.block()?;
-                if module.predicates.insert(name, body).is_some() {
+                let name = self.name()?;
+                let params = if self.take("[") {
+                    if self.take("]") {
+                        Vec::new()
+                    } else {
+                        let params = self.declarations(true)?;
+                        self.expect("]")?;
+                        params
+                    }
+                } else {
+                    Vec::new()
+                };
+                if function {
+                    // The result type is read but not used for evaluation.
+                    self.expect(":")?;
+                    self.mult(Mult::One);
+                    self.expression(0)?;
+                }
+                let body = if function {
+                    self.expect("{")?;
+                    let body = self.expression(0)?;
+                    self.expect("}")?;
+                    body
+                } else {
+                    self.block()?
+                };
+                let predicate = Predicate {
+                    params,
+                    body,
+                    function,
+                };
+                if module.predicates.insert(name, predicate).is_some() {
                     return Err(Error::new(ErrorKind::Type, "duplicate predicate"));
                 }
             } else if self.take("assert") {
@@ -551,6 +684,38 @@ impl Parser {
         }
         Ok(Expr::Block(expressions))
     }
+    /// `[disj] names: domain, ...`. Parameters take only the default `one`
+    /// multiplicity; quantifier domains are plain expressions.
+    fn declarations(&mut self, parameters: bool) -> Result<Vec<Declaration>, Error> {
+        let mut declarations = Vec::new();
+        loop {
+            let disjoint = self.take("disj");
+            let mut names = vec![self.name()?];
+            while self.take(",") {
+                names.push(self.name()?);
+            }
+            self.expect(":")?;
+            if parameters {
+                if ["set", "lone", "some"].contains(&self.peek()) {
+                    return Err(Error::new(
+                        ErrorKind::Unsupported,
+                        "parameters other than one",
+                    ));
+                }
+                self.take("one");
+            }
+            let domain = self.expression(0)?;
+            declarations.push(Declaration {
+                names,
+                domain,
+                disjoint,
+            });
+            if !self.take(",") {
+                break;
+            }
+        }
+        Ok(declarations)
+    }
     fn declaration_ahead(&self) -> bool {
         let mut position = self.position;
         if self
@@ -601,24 +766,7 @@ impl Parser {
                     "one" => Quantifier::One,
                     _ => Quantifier::Lone,
                 };
-                let mut declarations = Vec::new();
-                loop {
-                    let disjoint = self.take("disj");
-                    let mut names = vec![self.name()?];
-                    while self.take(",") {
-                        names.push(self.name()?);
-                    }
-                    self.expect(":")?;
-                    let domain = self.expression(0)?;
-                    declarations.push(Declaration {
-                        names,
-                        domain,
-                        disjoint,
-                    });
-                    if !self.take(",") {
-                        break;
-                    }
-                }
+                let declarations = self.declarations(false)?;
                 self.expect("|")?;
                 Expr::Quantified(quantifier, declarations, Box::new(self.expression(0)?))
             } else {
@@ -656,14 +804,23 @@ impl Parser {
                 ));
             }
             if self.take("[") {
-                self.expect("]")?;
                 let Expr::Name(name) = left else {
                     return Err(Error::new(
                         ErrorKind::Unsupported,
-                        "only zero-argument predicate calls",
+                        "box join of a compound expression",
                     ));
                 };
-                left = Expr::Call(name);
+                let mut arguments = Vec::new();
+                if !self.take("]") {
+                    loop {
+                        arguments.push(self.expression(0)?);
+                        if !self.take(",") {
+                            break;
+                        }
+                    }
+                    self.expect("]")?;
+                }
+                left = Expr::Apply(name, arguments);
                 continue;
             }
             let (operator, precedence, right_associative) = match self.peek() {

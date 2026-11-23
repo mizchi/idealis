@@ -30,7 +30,8 @@ struct Checker<'a> {
     module: &'a Module,
     globals: BTreeMap<String, Type>,
     visiting: BTreeSet<String>,
-    validated: BTreeSet<String>,
+    /// Result types of the preds and funs checked so far.
+    validated: BTreeMap<String, Type>,
     work: usize,
 }
 
@@ -39,7 +40,7 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
         module,
         globals: BTreeMap::new(),
         visiting: BTreeSet::new(),
-        validated: BTreeSet::new(),
+        validated: BTreeMap::new(),
         work: 0,
     };
     for (index, name) in module
@@ -337,11 +338,13 @@ pub(crate) fn hierarchy(module: &Module) -> Result<Vec<usize>, Error> {
 }
 
 impl Checker<'_> {
+    /// The result type of a pred (formula) or fun (relation), checking its
+    /// body once with the parameters typed by their domains.
     fn predicate(&mut self, name: &str, depth: usize) -> Result<Type, Error> {
-        if self.validated.contains(name) {
-            return Ok(Type::Boolean);
+        if let Some(kind) = self.validated.get(name) {
+            return Ok(kind.clone());
         }
-        let body = self
+        let predicate = self
             .module
             .predicates
             .get(name)
@@ -349,11 +352,32 @@ impl Checker<'_> {
         if !self.visiting.insert(name.to_owned()) {
             return Err(Error::new(ErrorKind::Unsupported, "recursive predicates"));
         }
-        self.expression(body, &BTreeMap::new(), depth + 1)?
-            .boolean()?;
+        let mut locals = BTreeMap::new();
+        for (param, domain) in self.parameters(name, depth)? {
+            locals.insert(param, Type::Relation(domain));
+        }
+        let kind = self.expression(&predicate.body, &locals, depth + 1)?;
+        if predicate.function {
+            kind.clone().columns()?;
+        } else {
+            kind.clone().boolean()?;
+        }
         self.visiting.remove(name);
-        self.validated.insert(name.to_owned());
-        Ok(Type::Boolean)
+        self.validated.insert(name.to_owned(), kind.clone());
+        Ok(kind)
+    }
+    /// Each parameter name with the column types of its domain.
+    fn parameters(&mut self, name: &str, depth: usize) -> Result<Vec<(String, Vec<u16>)>, Error> {
+        let mut parameters = Vec::new();
+        for param in &self.module.predicates[name].params {
+            let domain = self
+                .expression(&param.domain, &BTreeMap::new(), depth + 1)?
+                .columns()?;
+            for parameter in &param.names {
+                parameters.push((parameter.clone(), domain.clone()));
+            }
+        }
+        Ok(parameters)
     }
     fn expression(
         &mut self,
@@ -370,10 +394,41 @@ impl Checker<'_> {
                 if let Some(kind) = locals.get(name).or(self.globals.get(name)) {
                     Ok(kind.clone())
                 } else {
+                    if self
+                        .module
+                        .predicates
+                        .get(name)
+                        .is_some_and(|predicate| predicate.arity() > 0)
+                    {
+                        return Err(Error::new(
+                            ErrorKind::Type,
+                            format!("{name} needs arguments"),
+                        ));
+                    }
                     self.predicate(name, depth)
                 }
             }
-            Expr::Call(name) => self.predicate(name, depth),
+            Expr::Apply(name, arguments) => {
+                let kind = self.predicate(name, depth)?;
+                let parameters = self.parameters(name, depth)?;
+                if arguments.len() != parameters.len() {
+                    return Err(Error::new(
+                        ErrorKind::Type,
+                        format!("{name} takes {} arguments", parameters.len()),
+                    ));
+                }
+                for (argument, (_, domain)) in arguments.iter().zip(parameters) {
+                    if self
+                        .expression(argument, locals, depth + 1)?
+                        .columns()?
+                        .len()
+                        != domain.len()
+                    {
+                        return Err(Error::new(ErrorKind::Type, "argument arity mismatch"));
+                    }
+                }
+                Ok(kind)
+            }
             Expr::Block(expressions) => {
                 for expression in expressions {
                     self.expression(expression, locals, depth + 1)?.boolean()?;
