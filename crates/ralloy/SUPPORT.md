@@ -14,6 +14,13 @@
 - [x] matched / mismatch / invalid / unknownと、探索結果の各statusを区別する。
 - [x] native JSONLとホストimport不要のWasm ABI v1。JVM・Z3・idealisの他crateに依存しない。
 
+## Alloyとの差分テスト（0078）
+
+- [x] 公式Alloy 6.2.0の答えをroracleの`CheckReport`として保存し、`cargo test`で再生する。group `core`は今の対応範囲だけで書いた13モデル・50 commandで、記録時に全commandがAlloyと一致した。
+- [x] 評価器の人工故障6件（`one`/`lone`の数え方、閉包、反射閉包、転置、含意）を再生テストで検出する。
+
+[評価0078](../../evals/iterations/0078-ralloy-alloy-oracle.md)を参照。
+
 ## 非対応・対象外
 
 - [ ] sigの継承・subset、一括宣言、signature fact、moduleの読み込み。

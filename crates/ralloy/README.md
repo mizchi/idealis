@@ -78,6 +78,17 @@ no-counterexampleはスコープ外の証明ではない。no-instanceもスコ�
 
 成功は`kind: analysis`とAnalysis、拒否は`kind: error`とError。Wasm ABI v1は`ralloy_abi_version`、`ralloy_input_resize`、`ralloy_dispatch`、`ralloy_output_ptr`、`ralloy_output_len`で、同じJSONを扱う。
 
+## Alloyとの差分テスト
+
+`tests/alloy/<group>/*.als`のモデルを公式Alloy 6.2.0（SAT4J）で1回実行し、commandごとに解があるか（runならinstance、checkならcounterexample）を[roracle](../roracle)の`CheckReport`として`tests/alloy/<group>.json`へ保存する。`tests/alloy_oracle.rs`は現在のモデルを登録して保存した答えを`replay`し、ralloyだけを実行する。予算切れ、解析エラー、自分の`check_instance`で再現できないinstanceは一致にしない。モデルを編集して記録し直していなければ、入力の不一致で失敗する。
+
+記録にはJavaとAlloyのjarが必要で、再生には不要。instanceがAlloyでも成り立つかは検査していない。
+
+```sh
+just ralloy-oracle-record core   # Java/Alloyで記録し直す
+just ralloy-oracle-bench         # 各モデルの全commandの解析時間
+```
+
 ```sh
 just ralloy-build
 just ralloy-test
