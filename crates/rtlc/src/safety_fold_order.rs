@@ -32,12 +32,10 @@ fn mentions(expression: &Expression, references: &[Reference]) -> bool {
         Expression::Frame {
             arguments,
             captures,
-            body,
             ..
         } => arguments
             .iter()
             .chain(captures)
-            .chain(std::iter::once(body.as_ref()))
             .any(|child| mentions(child, references)),
         _ => expression
             .children()

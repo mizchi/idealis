@@ -924,13 +924,20 @@ impl<'scope> Arena<'scope> {
         if self.rank(left) != self.rank(right) {
             return Err(CoreError::protocol("Incomparable TLA values"));
         }
-        if let (Ok(Cell::Set(left)), Ok(Cell::Set(right))) = (self.cell(left), self.cell(right)) {
-            let (left, right) = (left.clone(), right.clone());
-            if left.len() == right.len() {
-                for first in &left {
-                    for second in &right {
-                        self.same_kinds(*first, *second)?;
-                    }
+        if let (Ok(Cell::Set(first)), Ok(Cell::Set(second))) = (self.cell(left), self.cell(right)) {
+            if first.len() != second.len() {
+                return Ok(());
+            }
+            let width = first.len() + second.len();
+            self.consume(width)?;
+            let (Ok(Cell::Set(first)), Ok(Cell::Set(second))) = (self.cell(left), self.cell(right))
+            else {
+                return Ok(());
+            };
+            let (first, second) = (first.clone(), second.clone());
+            for first in &first {
+                for second in &second {
+                    self.same_kinds(*first, *second)?;
                 }
             }
             return Ok(());

@@ -1,0 +1,97 @@
+{
+  "driver": "evals/experiments/fold-order/fold_cost.rs",
+  "supersedes": "0089j-new-path (kept unchanged); tree that searches a nested frame's arguments and captures only and checks set sizes before copying",
+  "preregistered": "evals/plans/0089-record-fold-order.md, 11th addendum",
+  "method": "release build, 400 check calls per cell, median, three runs",
+  "note": "Time is recorded, not judged.",
+  "table": [
+    {
+      "irVersion": "v1",
+      "states": 1,
+      "elements": "integers",
+      "work": 2340,
+      "runsMicroseconds": [
+        67.2,
+        37.5,
+        40.6
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 1,
+      "elements": "records",
+      "work": 23016,
+      "runsMicroseconds": [
+        356.8,
+        365.7,
+        362.2
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 64,
+      "elements": "integers",
+      "work": 141570,
+      "runsMicroseconds": [
+        2046.3,
+        2000.2,
+        2045.0
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 64,
+      "elements": "records",
+      "work": 1460739,
+      "runsMicroseconds": [
+        22182.0,
+        22609.5,
+        22544.8
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 1,
+      "elements": "integers",
+      "work": 2532,
+      "runsMicroseconds": [
+        50.0,
+        50.0,
+        51.4
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 1,
+      "elements": "records",
+      "work": 23208,
+      "runsMicroseconds": [
+        380.4,
+        387.2,
+        384.6
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 64,
+      "elements": "integers",
+      "work": 153858,
+      "runsMicroseconds": [
+        2317.5,
+        2271.2,
+        2291.7
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 64,
+      "elements": "records",
+      "work": 1473027,
+      "runsMicroseconds": [
+        22501.0,
+        22975.7,
+        22852.3
+      ]
+    }
+  ]
+}

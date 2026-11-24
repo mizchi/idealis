@@ -620,13 +620,44 @@ fn callback_calls_must_pass_the_accumulator_then_the_element() {
     }
 }
 
-#[test]
-fn a_nested_frame_that_reuses_a_parameter_number_is_not_accepted() {
+fn nested_frame_union_program(argument: Value) -> SafetyProgram {
     let strings = set(vec![text("b"), text("a")]);
-    let frame = json!({"op":"frame","arguments":[parameter(1)],"captures":[],"parameterCount":1,"captureCount":0,"localScope":0,"body":set(vec![parameter(0)])});
+    let frame = json!({"op":"frame","arguments":[argument],"captures":[],"parameterCount":1,"captureCount":0,"localScope":0,"body":set(vec![parameter(0)])});
     let callee = cup(parameter(0), frame);
     let fold = json!({"op":"fold","accumulator":0,"initial":set(vec![]),"collection":strings.clone(),"order":"set-members","body":{"op":"call","definition":0,"arguments":[bound(0),bound(1)],"captures":[]}});
-    let program = wire(2, strings, fold, vec![definition(0, callee, 0)]);
+    wire(2, strings, fold, vec![definition(0, callee, 0)])
+}
+
+#[test]
+fn a_nested_frame_numbers_its_own_parameters_apart_from_the_callback() {
+    let program = nested_frame_union_program(parameter(1));
+    assert!(holds(&program, "frame passing the element"));
+}
+
+#[test]
+fn a_nested_frame_that_passes_the_accumulator_is_not_a_union() {
+    let program = nested_frame_union_program(parameter(0));
+    assert_eq!(refusal(&program), "Incomparable TLA values");
+}
+
+fn frame_callback_program(arguments: Vec<Value>, expected: Value) -> SafetyProgram {
+    let strings = set(vec![text("p"), text("q")]);
+    let frame = json!({"op":"frame","arguments":arguments,"captures":[],"parameterCount":2,"captureCount":0,"localScope":2,"body":parameter(1)});
+    let fold = json!({"op":"fold","accumulator":0,"initial":int(0),"collection":strings,"order":"set-members","body":{"op":"call","definition":0,"arguments":[bound(0),bound(1)],"captures":[]}});
+    wire(2, expected, fold, vec![definition(0, frame, 0)])
+}
+
+#[test]
+fn a_frame_body_reading_its_own_parameters_is_not_a_mention_of_the_fold_element() {
+    let program = frame_callback_program(vec![int(10), int(20)], int(20));
+    assert!(holds(&program, "frame over literal arguments"));
+    let wrong = frame_callback_program(vec![int(10), int(20)], int(10));
+    assert!(!holds(&wrong, "frame over literal arguments control"));
+}
+
+#[test]
+fn a_frame_argument_that_passes_the_fold_element_is_refused() {
+    let program = frame_callback_program(vec![parameter(0), parameter(1)], text("p"));
     assert_eq!(refusal(&program), STRINGS);
 }
 
@@ -1111,4 +1142,22 @@ fn a_singleton_source_holding_a_set_of_comparable_records_is_accepted() {
         let wrong = fold_program(version, &int(0), &source, &body, &int(2));
         assert!(!holds(&wrong, "comparable singleton control"), "v{version}");
     }
+}
+
+#[test]
+fn a_wide_source_member_is_not_copied_for_each_singleton_it_is_compared_with() {
+    let work = |width: usize| -> u32 {
+        let wide = set((0..width)
+            .map(|index| text(&format!("w{index:04}")))
+            .collect());
+        let mut members = vec![wide];
+        members.extend((0..40).map(|index| set(vec![text(&format!("s{index:02}"))])));
+        let body = json!({"op":"add","left":acc(),"right":int(1)});
+        let program = fold_program(1, &int(0), &set(members), &body, &int(41));
+        let result = run(&program).unwrap();
+        assert!(result.violation.is_none());
+        result.work
+    };
+    let (narrow, wide) = (work(100), work(200));
+    assert_eq!((narrow, wide), (15728, 17428));
 }

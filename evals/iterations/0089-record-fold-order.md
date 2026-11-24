@@ -207,3 +207,19 @@ CodeRabbit の指摘（[#101](https://github.com/mizchi/idealis/pull/101)）を�
 
 - **要素が 1 個の元の集合の免除が、入れ子の確認を飛ばす（Major）: 有効。** 再現: 元の集合 `{R}`（`R = {[a |-> 0, b |-> FALSE], [a |-> 1, b |-> 0]}`）、初期値 0、body `acc + 1` は、要素が 1 個なので順序の拒否を免れ、1 を返した。`Apalache.tla` の `ApaFoldSet` は選んだ要素を集合の差で取り除き、その差が `R` を正規化して、`b` が先の順では `FALSE` と `0` を比べてエラーになる。直し方: 免除が効く前に（文字列・record・model value・整数 key の幅の各経路）、要素の中の入れ子の集合・関数の定義域・record を `walk_nested_kinds` で調べ、食い違いがあれば従来の拒否を返す。予算切れはそのまま返す。回帰 `a_singleton_source_holding_a_set_of_incomparable_records_is_refused`（v1・v2。修正前は受理で失敗）。比べられる入れ子を持つ要素 1 個の元の集合が受理のままであることの対照 `a_singleton_source_holding_a_set_of_comparable_records_is_accepted`（v1・v2）。
   - 費用: 要素が 1 個の元の集合の work が 1〜5 増える。[0089j-paths](../runs/0089j-paths/result.json) は status・文言が `0089i-paths` と同じで、work が減った入力はなく、35 入力で増えた（全て要素が 1 個の元の集合）。[0089j-new-path](../runs/0089j-new-path/result.json) は 64 要素の整数・record の work が `0089i-new-path` と同じ。主張した結果の変更はない。
+
+## レビューへの対応（11 回目）
+
+14:13Z の full review の Minor 4 件を、コードで確かめて扱った。
+
+- **整数 key の幅の制限の記述（Minor、`crates/rtla-compiler/README.md`）: 有効。** 幅の制限は要素が 2 個以上の集合だけに課す。要素が 1 個の集合も、入れ子の集合・関数・record の比較可能性の確認は受ける。README と `docs/rust-frontend.md`、`docs/rust-safety.md` の同じ文を直した。
+- **入れ子の frame の body を callback の slot で探す（Minor、`safety_fold_order.rs`）: 有効。** `mentions` は frame の body を、外側の callback の slot の文脈で探していた。body は frame 自身の parameter 番号の文脈にあるので、引数と capture だけを探す。再現（修正前は拒否で失敗）: callback が引数 10・20、body が `Parameter(1)` の frame を返し、`{"p","q"}` を fold すると 20 を返す `a_frame_body_reading_its_own_parameters_is_not_a_mention_of_the_fold_element`。対照 `a_frame_argument_that_passes_the_fold_element_is_refused`（frame の引数で要素を渡す形は拒否のまま）。既存の `a_nested_frame_that_reuses_a_parameter_number_is_not_accepted` は、frame の body の `Parameter(0)` を累積値と読み違えて拒否していたことに依存していた。frame の引数が要素なら `acc \union {elem}` で、結果は順序に依らず、受理が正しい。テストを `a_nested_frame_numbers_its_own_parameters_apart_from_the_callback`（受理）に書き換え、frame の引数が累積値の形 `a_nested_frame_that_passes_the_accumulator_is_not_a_union`（拒否）を足した。
+- **集合の組の比較で大きさを見る前に写す（Minor、`safety_values.rs`）: 有効。** 大きさが違う集合の組でも、先に両方の要素の列を写していた。大きさが違えば写さずに返し、同じ大きさのときだけ、要素数の分の予算を使ってから写す。集合どうしの組の比較は残している。`a_wide_source_member_is_not_copied_for_each_singleton_it_is_compared_with`（幅 100 と 200 の 1 つの集合と 40 個の 1 要素の集合）が work の固定値 15,728・17,428 を確かめる。修正前は 9,488・11,188 で失敗する。幅の違いによる差は 1,700 のままで、写しの費用は幅に比例して予算に載る。
+- **S の記述（Minor、`fixtures/tlc-apalache-folds/README.md`）: 有効。** S は順序の制限だけを外す。入れ子の比較可能性の確認は要素が 1 個でも残る。Boolean key の関数と幅の広い整数 key の関数の 1 個の集合は受理のまま、と書いた。
+
+### 測定（11 回目）
+
+事前登録（plan の 11 回目の追記）のとおり、新しい run で測った。`0089j-*` は変更しない。
+
+- [0089k-paths](../runs/0089k-paths/result.json): status・文言は `0089j-paths` と同じ。受理 56・拒否 21・評価エラー 7、bounded は 0。work が変わったのは 3 入力（`set-sets-of-strings` の `plus-one`・`union`・`union-left`、v1 と v2）で、2〜4 増えた。減ったものはない。
+- [0089k-new-path](../runs/0089k-new-path/result.json): work は `0089j-new-path` の全 8 セルで同じ。時間は記録のみで判定に使わない。
