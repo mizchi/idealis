@@ -119,3 +119,46 @@ test("a recorded benchmark that was not expected is reported", () => {
     { benchmark: "z", reason: "recorded but not expected" },
   ]);
 });
+
+test("a missing, nonnumeric or nonfinite estimate makes the benchmark incomplete", () => {
+  for (const value of [undefined, "1", Number.NaN, Number.POSITIVE_INFINITY]) {
+    const bad = {
+      ...complete("f"),
+      estimates: [
+        estimates({ f: 100 }),
+        new Map([["f", value as unknown as number]]),
+        estimates({ f: 110 }),
+        estimates({ f: 100 }),
+      ],
+    };
+    const report = compareAll(["a"], new Map([["a", bad]]));
+    assert.deepEqual(report.comparisons, []);
+    assert.deepEqual(report.incomplete, [
+      {
+        benchmark: "a",
+        reason: "sample 1 has a missing or nonfinite estimate for f",
+      },
+    ]);
+  }
+});
+
+test("a nonpositive baseline makes the benchmark incomplete", () => {
+  for (const [slot, offset] of [
+    [0, 0],
+    [3, 3],
+  ] as const) {
+    const sets: Estimates[] = [...complete("f").estimates];
+    sets[slot] = estimates({ f: 0 });
+    const report = compareAll(
+      ["a"],
+      new Map([["a", { ...complete("f"), estimates: sets }]]),
+    );
+    assert.deepEqual(report.comparisons, []);
+    assert.deepEqual(report.incomplete, [
+      {
+        benchmark: "a",
+        reason: `sample ${offset} has a nonpositive baseline for f`,
+      },
+    ]);
+  }
+});

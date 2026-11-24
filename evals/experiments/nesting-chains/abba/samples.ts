@@ -43,10 +43,10 @@ export const readEstimates = async (root: string): Promise<Estimates> => {
     ) {
       const estimates = JSON.parse(
         await readFile(join(directory, "estimates.json"), "utf8"),
-      ) as { mean: { point_estimate: number } };
+      ) as { mean?: { point_estimate?: unknown } } | null;
       found.set(
         relative.slice(0, -"/new".length).replace(/^\//, ""),
-        estimates.mean.point_estimate,
+        estimates?.mean?.point_estimate as number,
       );
     }
     for (const entry of entries) {
@@ -100,6 +100,26 @@ export const compareBenchmark = (
     if (missing.length > 0 || extra.length > 0) {
       return {
         problem: `sample ${offset + 1} differs from sample 0 in function set (${missing.length} missing, ${extra.length} extra)`,
+      };
+    }
+  }
+  for (const [offset, set] of estimates.entries()) {
+    const invalid = [...set.entries()].find(
+      ([, value]) => typeof value !== "number" || !Number.isFinite(value),
+    );
+    if (invalid !== undefined) {
+      return {
+        problem: `sample ${offset} has a missing or nonfinite estimate for ${invalid[0]}`,
+      };
+    }
+  }
+  for (const [offset, set] of [estimates[0], estimates[3]].entries()) {
+    const baseline = [...(set?.entries() ?? [])].find(
+      ([, value]) => value <= 0,
+    );
+    if (baseline !== undefined) {
+      return {
+        problem: `sample ${offset === 0 ? 0 : 3} has a nonpositive baseline for ${baseline[0]}`,
       };
     }
   }
