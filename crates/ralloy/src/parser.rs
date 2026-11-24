@@ -685,6 +685,11 @@ impl Parser {
                 break;
             }
         }
+        // Only steps or Int given: Alloy keeps the default scope of 3
+        // (review of #102).
+        if scope.overall.is_none() && scope.entries.is_empty() {
+            scope.overall = Some(3);
+        }
         Ok(scope)
     }
     fn block(&mut self) -> Result<Expr, Error> {

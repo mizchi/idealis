@@ -50,14 +50,12 @@ impl Value {
     }
 }
 
-/// Whether the SAT backend covers a model: everything but integer division
-/// and remainder (plans 0085, 0086).
-pub(crate) fn supported(module: &Module) -> bool {
+/// Whether the SAT backend covers one command: its body, the facts and the
+/// predicates it may call; other commands do not matter (review of #102).
+pub(crate) fn supported_for(module: &Module, body: &Expr) -> bool {
     fn plain(expression: &Expr, module: &Module) -> bool {
         match expression {
             Expr::Number(_) | Expr::Name(_) => true,
-            // Division by zero is unknown in the enumerator; SAT cannot
-            // reproduce that conditional outcome.
             Expr::Apply(name, arguments) => {
                 (module.predicates.contains_key(name) || !matches!(name.as_str(), "div" | "rem"))
                     && arguments.iter().all(|argument| plain(argument, module))
@@ -70,8 +68,8 @@ pub(crate) fn supported(module: &Module) -> bool {
             }
         }
     }
-    module.facts.iter().all(|fact| plain(fact, module))
-        && module.assertions.values().all(|body| plain(body, module))
+    plain(body, module)
+        && module.facts.iter().all(|fact| plain(fact, module))
         && module.predicates.values().all(|predicate| {
             plain(&predicate.body, module)
                 && predicate
@@ -79,14 +77,21 @@ pub(crate) fn supported(module: &Module) -> bool {
                     .iter()
                     .all(|param| plain(&param.domain, module))
         })
-        && module
-            .commands
-            .iter()
-            .all(|command| plain(&command.body, module))
 }
 
 /// The enumerator's search width: the bits its field slots choose.
 pub(crate) fn width(module: &Module, command: &Command) -> usize {
+    module
+        .fields
+        .iter()
+        .map(|field| field_width(module, command, field))
+        .sum()
+}
+
+/// The tuples one field can hold in one state: its owner's bound times the
+/// bounds of its columns.
+fn field_width(module: &Module, command: &Command, field: &crate::syntax::Field) -> usize {
+    let _ = module;
     let integers = if command.scope.integer_bitwidth == 0 {
         0
     } else {
@@ -102,18 +107,12 @@ pub(crate) fn width(module: &Module, command: &Command) -> usize {
             .find(|scope| scope.name == name)
             .map_or(0, |scope| scope.maximum),
     };
-    module
-        .fields
-        .iter()
-        .map(|field| {
-            maximum(&field.owner)
-                * field
-                    .columns
-                    .iter()
-                    .map(|column| maximum(column))
-                    .product::<usize>()
-        })
-        .sum()
+    maximum(&field.owner)
+        * field
+            .columns
+            .iter()
+            .map(|column| maximum(column))
+            .product::<usize>()
 }
 
 struct Translator<'a> {
@@ -139,7 +138,31 @@ struct Translator<'a> {
 }
 
 pub(crate) fn analyze(module: &Module, command: &Command, body: &Expr, max_work: u64) -> Analysis {
+    // The field tuples of every state are charged before they are built,
+    // so a large candidate space is unknown without being allocated
+    // (review of #102).
+    let steps = command.scope.steps.unwrap_or(1) as u64;
+    let candidates: u64 = module
+        .fields
+        .iter()
+        .map(|field| {
+            let copies = if field.var { steps } else { 1 };
+            (field_width(module, command, field) as u64).saturating_mul(copies)
+        })
+        .fold(0u64, u64::saturating_add);
+    if candidates > max_work {
+        return Analysis {
+            command: command.clone(),
+            status: Status::Unknown,
+            instance: None,
+            stats: Stats {
+                work: max_work,
+                ..Stats::default()
+            },
+        };
+    }
     let mut translator = Translator::new(module, command, max_work);
+    translator.budget.stats.work = candidates;
     let result = translator.solve(command, body);
     let status = match &result {
         Err(()) => Status::Unknown,
@@ -992,7 +1015,7 @@ impl<'a> Translator<'a> {
 
 #[cfg(test)]
 mod tests {
-    use super::{analyze, supported};
+    use super::{analyze, supported_for};
     use crate::{CheckReason, CheckStatus, Kind, Model, Status, search::enumerate};
 
     /// On every corpus command the backend covers, SAT answers like the
@@ -1014,12 +1037,12 @@ mod tests {
         paths.sort();
         for path in paths {
             let model = Model::parse(&std::fs::read_to_string(&path).unwrap()).unwrap();
-            // Temporal models have no enumerator to compare against.
-            if !supported(&model.syntax) || model.syntax.temporal() {
-                continue;
-            }
             for index in 0..model.commands().len() {
                 let (command, body) = model.get_command(index).unwrap();
+                // Temporal commands have no enumerator to compare against.
+                if !supported_for(&model.syntax, body) || model.syntax.temporal_for(body) {
+                    continue;
+                }
                 let label = format!("{} {}", path.display(), command.label);
                 let solved = analyze(&model.syntax, command, body, 50_000_000);
                 assert_ne!(solved.status, Status::Unknown, "{label}");

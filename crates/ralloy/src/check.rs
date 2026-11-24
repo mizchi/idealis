@@ -133,7 +133,6 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
             .expression(expression, &BTreeMap::new(), 0)?
             .boolean()?;
     }
-    let temporal = module.temporal();
     let mut commands = Vec::new();
     for command in &module.commands {
         let body = if let (Kind::Check, Expr::Name(name)) = (command.kind, &command.body) {
@@ -288,7 +287,9 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
             return Err(Error::new(ErrorKind::Resource, "universe exceeds 64 atoms"));
         }
         // Alloy's default trace bound is 10 steps (plan 0090).
-        let steps = temporal.then(|| command.scope.steps.unwrap_or(10));
+        let steps = module
+            .temporal_for(body)
+            .then(|| command.scope.steps.unwrap_or(10));
         if steps.is_some_and(|steps| steps == 0 || steps > 32) {
             return Err(Error::new(ErrorKind::Resource, "supported steps: 1-32"));
         }
@@ -443,6 +444,21 @@ impl Checker<'_> {
                 Ok(Type::Integer)
             }
             Expr::Apply(name, arguments) => {
+                // An argument is evaluated in the calling state; Alloy
+                // substitutes it into the body, so a temporal body would see
+                // a var field's value at another state (review of #102).
+                if crate::syntax::uses_temporal(&self.module.predicates[name].body)
+                    && arguments
+                        .iter()
+                        .any(|argument| reads_var(argument, self.module))
+                {
+                    return Err(Error::new(
+                        ErrorKind::Unsupported,
+                        format!(
+                            "temporal predicate {name} called with an argument that reads a var field"
+                        ),
+                    ));
+                }
                 let kind = self.predicate(name, depth)?;
                 let parameters = self.parameters(name, depth)?;
                 if arguments.len() != parameters.len() {
@@ -612,6 +628,29 @@ impl Checker<'_> {
                 self.expression(body, &locals, depth + 1)?.boolean()?;
                 Ok(Type::Boolean)
             }
+        }
+    }
+}
+
+/// Whether an expression reads a var field, directly or with a prime.
+fn reads_var(expression: &Expr, module: &Module) -> bool {
+    match expression {
+        Expr::Name(name) => module
+            .fields
+            .iter()
+            .any(|field| field.var && &field.name == name),
+        Expr::Number(_) => false,
+        Expr::Apply(_, arguments) => arguments.iter().any(|argument| reads_var(argument, module)),
+        Expr::Block(expressions) => expressions
+            .iter()
+            .any(|expression| reads_var(expression, module)),
+        Expr::Unary(_, child) => reads_var(child, module),
+        Expr::Binary(_, left, right) => reads_var(left, module) || reads_var(right, module),
+        Expr::Quantified(_, declarations, body) => {
+            declarations
+                .iter()
+                .any(|declaration| reads_var(&declaration.domain, module))
+                || reads_var(body, module)
         }
     }
 }

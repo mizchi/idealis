@@ -124,36 +124,45 @@ pub(crate) struct Predicate {
     pub body: Expr,
     pub function: bool,
 }
-impl Module {
-    /// Whether any field is `var` or any formula is temporal (plan 0090).
-    pub fn temporal(&self) -> bool {
-        fn uses(expression: &Expr) -> bool {
-            match expression {
-                Expr::Name(_) | Expr::Number(_) => false,
-                Expr::Apply(_, arguments) => arguments.iter().any(uses),
-                Expr::Block(expressions) => expressions.iter().any(uses),
-                Expr::Unary(operator, child) => {
-                    matches!(
-                        operator,
-                        Unary::Always | Unary::Eventually | Unary::After | Unary::Prime
-                    ) || uses(child)
-                }
-                Expr::Binary(_, left, right) => uses(left) || uses(right),
-                Expr::Quantified(_, declarations, body) => {
-                    declarations
-                        .iter()
-                        .any(|declaration| uses(&declaration.domain))
-                        || uses(body)
-                }
-            }
+/// Whether an expression uses a temporal operator.
+pub(crate) fn uses_temporal(expression: &Expr) -> bool {
+    match expression {
+        Expr::Name(_) | Expr::Number(_) => false,
+        Expr::Apply(_, arguments) => arguments.iter().any(uses_temporal),
+        Expr::Block(expressions) => expressions.iter().any(uses_temporal),
+        Expr::Unary(operator, child) => {
+            matches!(
+                operator,
+                Unary::Always | Unary::Eventually | Unary::After | Unary::Prime
+            ) || uses_temporal(child)
         }
+        Expr::Binary(_, left, right) => uses_temporal(left) || uses_temporal(right),
+        Expr::Quantified(_, declarations, body) => {
+            declarations
+                .iter()
+                .any(|declaration| uses_temporal(&declaration.domain))
+                || uses_temporal(body)
+        }
+    }
+}
+impl Module {
+    /// Temporal for every command: a var field, or a temporal fact or
+    /// predicate (plan 0090).
+    fn temporal_everywhere(&self) -> bool {
         self.fields.iter().any(|field| field.var)
-            || self.facts.iter().any(uses)
-            || self.assertions.values().any(uses)
+            || self.facts.iter().any(uses_temporal)
             || self.predicates.values().any(|predicate| {
-                uses(&predicate.body) || predicate.params.iter().any(|param| uses(&param.domain))
+                uses_temporal(&predicate.body)
+                    || predicate
+                        .params
+                        .iter()
+                        .any(|param| uses_temporal(&param.domain))
             })
-            || self.commands.iter().any(|command| uses(&command.body))
+    }
+    /// Whether the command with this (resolved) body is temporal; a static
+    /// command beside a temporal one stays static (review of #102).
+    pub fn temporal_for(&self, body: &Expr) -> bool {
+        self.temporal_everywhere() || uses_temporal(body)
     }
 }
 impl Predicate {

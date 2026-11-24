@@ -203,3 +203,75 @@ fn sixteen_signatures_type_check() {
         Status::NoInstance
     );
 }
+
+/// Review of #102: `for N steps` alone keeps Alloy's default scope of 3.
+#[test]
+fn steps_alone_keep_the_default_scope() {
+    let model = Model::parse("sig A { var v: set A } run { some A } for 2 steps").unwrap();
+    assert_eq!(model.commands()[0].scope.steps, Some(2));
+    assert_eq!(model.commands()[0].scope.signatures[0].maximum, 3);
+    let model = Model::parse("sig A {} run { some A } for 3 Int").unwrap();
+    assert_eq!(model.commands()[0].scope.signatures[0].maximum, 3);
+}
+
+/// Review of #102: a static command stays static beside a temporal one.
+#[test]
+fn temporal_is_decided_per_command() {
+    let model = Model::parse("sig A {} s: run { some A } t: run { after { some A } }").unwrap();
+    assert_eq!(model.commands()[0].scope.steps, None);
+    assert_eq!(model.commands()[1].scope.steps, Some(10));
+    let instance = model.analyze(0, 1_000_000).unwrap().instance.unwrap();
+    assert!(instance.trace.is_empty() && instance.back.is_none());
+}
+
+/// Review of #102: SAT support is decided for the selected command, so an
+/// unrelated `div` does not reject a temporal one.
+#[test]
+fn sat_support_follows_the_selected_command() {
+    let model = Model::parse(
+        "one sig A { var v: set A } good: run { after { some v } } other: run { div[2, 1] = 2 }",
+    )
+    .unwrap();
+    assert_eq!(
+        model.analyze(0, 1_000_000).unwrap().status,
+        Status::Instance
+    );
+    assert!(model.analyze(1, 1_000_000).is_err());
+}
+
+/// Review of #102: a temporal predicate receives its arguments as values of
+/// the calling state, which differs from Alloy's substitution when an
+/// argument reads a var field; that call is refused.
+#[test]
+fn temporal_predicates_with_mutable_arguments_are_refused() {
+    let Err(error) = Model::parse(
+        "sig A {} one sig S { var v: one A } pred same[x: A] { after { x = S.v } } run { same[S.v] and S.v != S.v' } for 2",
+    ) else {
+        panic!("accepted a temporal predicate with a mutable argument");
+    };
+    assert!(error.to_string().contains("temporal predicate"), "{error}");
+    // Atoms bound by quantifiers are the same in every state.
+    assert!(
+        Model::parse(
+            "sig A {} one sig S { var v: lone A } pred take[x: A] { S.v' = x } run { some a: A | take[a] } for 2"
+        )
+        .is_ok()
+    );
+}
+
+/// Review of #102: the candidate space of every state is charged to the
+/// budget before it is built. The public result cannot show the order of
+/// charging and allocation; this guards the status and the work reported.
+#[test]
+fn temporal_candidates_are_charged_before_allocation() {
+    let model = Model::parse("sig A { var r: A -> A } run { some r } for 8 but 32 steps").unwrap();
+    let start = std::time::Instant::now();
+    let analysis = model.analyze(0, 1_000).unwrap();
+    assert_eq!(analysis.status, Status::Unknown);
+    assert!(analysis.stats.work <= 1_000, "{}", analysis.stats.work);
+    assert!(
+        start.elapsed() < std::time::Duration::from_secs(2),
+        "{:?}",
+        start.elapsed()
+    );
+}
