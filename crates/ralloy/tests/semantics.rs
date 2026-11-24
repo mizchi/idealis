@@ -177,3 +177,29 @@ fn temporal_instances_are_lassos() {
         .unwrap();
     assert!(static_instance.trace.is_empty() && static_instance.back.is_none());
 }
+
+/// The parser admits 16 signatures; with Int and String the type masks need
+/// 18 bits (found by rmodel's enums in plan 0094, which overflowed u16).
+#[test]
+fn sixteen_signatures_type_check() {
+    let sigs: Vec<String> = (0..16).map(|index| format!("sig S{index} {{}}")).collect();
+    let source = format!(
+        "{}\nrun {{ some S15 and no S0 & S15 }} for 1",
+        sigs.join("\n")
+    );
+    let model = Model::parse(&source).unwrap();
+    assert_eq!(
+        model.analyze(0, 1_000_000).unwrap().status,
+        Status::Instance
+    );
+    // A join of two unrelated signatures is still recognized as one.
+    let joined = format!("{}\nrun {{ some S14 & S15 }} for 1", sigs.join("\n"));
+    assert_eq!(
+        Model::parse(&joined)
+            .unwrap()
+            .analyze(0, 1_000_000)
+            .unwrap()
+            .status,
+        Status::NoInstance
+    );
+}

@@ -1,0 +1,891 @@
+{
+  "spec": {
+    "id": "rmodel-corpus",
+    "name": {
+      "ja": "rmodel の corpus の語彙と rule",
+      "en": "Vocabulary and rules of the rmodel corpus"
+    },
+    "groups": [
+      "もの",
+      "設定",
+      "状態",
+      "操作"
+    ],
+    "terms": [
+      {
+        "id": "proc",
+        "kind": "entity",
+        "group": "もの",
+        "name": {
+          "ja": "プロセス",
+          "en": "process"
+        },
+        "definition": {
+          "ja": "ロックを取り合う実行の単位。",
+          "en": "A unit of execution competing for locks."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/mutex.model",
+            "name": "Proc"
+          },
+          {
+            "path": "fixtures/rmodel/declared.model",
+            "name": "Proc"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "lock",
+        "kind": "entity",
+        "group": "もの",
+        "name": {
+          "ja": "ロック",
+          "en": "lock"
+        },
+        "definition": {
+          "ja": "同時に 1 つのプロセスだけが持てる資源。",
+          "en": "A resource at most one process holds at a time."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/mutex.model",
+            "name": "Lock"
+          },
+          {
+            "path": "fixtures/rmodel/declared.model",
+            "name": "Lock"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "user",
+        "kind": "entity",
+        "group": "もの",
+        "name": {
+          "ja": "利用者",
+          "en": "user"
+        },
+        "definition": {
+          "ja": "文書を開き、ログインする人。",
+          "en": "A person who opens documents and logs in."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/permissions.model",
+            "name": "User"
+          },
+          {
+            "path": "fixtures/rmodel/permissions-open.model",
+            "name": "User"
+          },
+          {
+            "path": "fixtures/rmodel/sessions.model",
+            "name": "User"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "role",
+        "kind": "entity",
+        "group": "もの",
+        "name": {
+          "ja": "ロール",
+          "en": "role"
+        },
+        "definition": {
+          "ja": "利用者に付与され、読める文書を決める権限のまとまり。",
+          "en": "A bundle of permissions granted to users that decides which documents they can read."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/permissions.model",
+            "name": "Role"
+          },
+          {
+            "path": "fixtures/rmodel/permissions-open.model",
+            "name": "Role"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "doc",
+        "kind": "entity",
+        "group": "もの",
+        "name": {
+          "ja": "文書",
+          "en": "document"
+        },
+        "definition": {
+          "ja": "利用者が開く対象。",
+          "en": "What a user opens."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/permissions.model",
+            "name": "Doc"
+          },
+          {
+            "path": "fixtures/rmodel/permissions-open.model",
+            "name": "Doc"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "grants",
+        "kind": "relation",
+        "group": "設定",
+        "name": {
+          "ja": "付与",
+          "en": "grant"
+        },
+        "definition": {
+          "ja": "利用者にどのロールを与えたか。運用中は変わらない。",
+          "en": "Which roles each user was given. It does not change while the system runs."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/permissions.model",
+            "name": "grants"
+          },
+          {
+            "path": "fixtures/rmodel/permissions-open.model",
+            "name": "grants"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "reads",
+        "kind": "relation",
+        "group": "設定",
+        "name": {
+          "ja": "閲覧権限",
+          "en": "read permission"
+        },
+        "definition": {
+          "ja": "ロールが読める文書。",
+          "en": "The documents a role can read."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/permissions.model",
+            "name": "reads"
+          },
+          {
+            "path": "fixtures/rmodel/permissions-open.model",
+            "name": "reads"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "secret",
+        "kind": "relation",
+        "group": "設定",
+        "name": {
+          "ja": "機密文書",
+          "en": "secret document"
+        },
+        "definition": {
+          "ja": "許可を受けた利用者だけが開いてよい文書。",
+          "en": "A document only cleared users may open."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/permissions.model",
+            "name": "secret"
+          },
+          {
+            "path": "fixtures/rmodel/permissions-open.model",
+            "name": "secret"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "cleared",
+        "kind": "relation",
+        "group": "設定",
+        "name": {
+          "ja": "許可を受けた利用者",
+          "en": "cleared user"
+        },
+        "definition": {
+          "ja": "機密文書を開いてよいと認められた利用者。",
+          "en": "A user allowed to open secret documents."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/permissions.model",
+            "name": "cleared"
+          },
+          {
+            "path": "fixtures/rmodel/permissions-open.model",
+            "name": "cleared"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "admins",
+        "kind": "relation",
+        "group": "設定",
+        "name": {
+          "ja": "管理者",
+          "en": "administrator"
+        },
+        "definition": {
+          "ja": "システムをロックできる利用者。",
+          "en": "A user who may lock the system."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/sessions.model",
+            "name": "admins"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "holder",
+        "kind": "state",
+        "group": "状態",
+        "name": {
+          "ja": "保持者",
+          "en": "holder"
+        },
+        "definition": {
+          "ja": "いまロックを持っているプロセス。",
+          "en": "The process currently holding a lock."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/mutex.model",
+            "name": "holder"
+          },
+          {
+            "path": "fixtures/rmodel/declared.model",
+            "name": "holder"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "waiting",
+        "kind": "state",
+        "group": "状態",
+        "name": {
+          "ja": "待機中のプロセス",
+          "en": "waiting process"
+        },
+        "definition": {
+          "ja": "次にロックを待っているプロセス。常にちょうど 1 つ。",
+          "en": "The process waiting for a lock next; always exactly one."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/declared.model",
+            "name": "waiting"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "open",
+        "kind": "state",
+        "group": "状態",
+        "name": {
+          "ja": "開いている文書",
+          "en": "open document"
+        },
+        "definition": {
+          "ja": "利用者がいま開いている文書。",
+          "en": "The documents a user currently has open."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/permissions.model",
+            "name": "open"
+          },
+          {
+            "path": "fixtures/rmodel/permissions-open.model",
+            "name": "open"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "active",
+        "kind": "state",
+        "group": "状態",
+        "name": {
+          "ja": "ログイン中の利用者",
+          "en": "active user"
+        },
+        "definition": {
+          "ja": "いまログインしている利用者。",
+          "en": "The users currently logged in."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/sessions.model",
+            "name": "active"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "locked",
+        "kind": "state",
+        "group": "状態",
+        "name": {
+          "ja": "ロックした利用者",
+          "en": "locking user"
+        },
+        "definition": {
+          "ja": "システムをロックしている利用者。いないこともある。",
+          "en": "The user who has locked the system, if any."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/sessions.model",
+            "name": "locked"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "acquire",
+        "kind": "action",
+        "group": "操作",
+        "name": {
+          "ja": "取得",
+          "en": "acquire"
+        },
+        "definition": {
+          "ja": "空いているロックをプロセスが取る。",
+          "en": "A process takes a free lock."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/mutex.model",
+            "name": "acquire"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "release",
+        "kind": "action",
+        "group": "操作",
+        "name": {
+          "ja": "解放",
+          "en": "release"
+        },
+        "definition": {
+          "ja": "ロックを持つプロセスがそれを手放す。",
+          "en": "The process holding a lock gives it up."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/mutex.model",
+            "name": "release"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "grab",
+        "kind": "action",
+        "group": "操作",
+        "name": {
+          "ja": "奪取の試み",
+          "en": "grab"
+        },
+        "definition": {
+          "ja": "条件なしにロックを取ろうとする。宣言の多重度だけが、2 つ目の保持者を止める。",
+          "en": "Try to take a lock with no guard; only the declared multiplicity stops a second holder."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/declared.model",
+            "name": "grab"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "wait",
+        "kind": "action",
+        "group": "操作",
+        "name": {
+          "ja": "待機",
+          "en": "wait"
+        },
+        "definition": {
+          "ja": "待機中のプロセスを入れ替える。",
+          "en": "Replace the waiting process."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/declared.model",
+            "name": "wait"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "read",
+        "kind": "action",
+        "group": "操作",
+        "name": {
+          "ja": "閲覧",
+          "en": "read"
+        },
+        "definition": {
+          "ja": "付与されたロールが読める文書を、利用者が開く。",
+          "en": "A user opens a document a granted role can read."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/permissions.model",
+            "name": "read"
+          },
+          {
+            "path": "fixtures/rmodel/permissions-open.model",
+            "name": "read"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "close",
+        "kind": "action",
+        "group": "操作",
+        "name": {
+          "ja": "閉じる",
+          "en": "close"
+        },
+        "definition": {
+          "ja": "利用者が開いている文書を閉じる。",
+          "en": "A user closes an open document."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/permissions.model",
+            "name": "close"
+          },
+          {
+            "path": "fixtures/rmodel/permissions-open.model",
+            "name": "close"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "login",
+        "kind": "action",
+        "group": "操作",
+        "name": {
+          "ja": "ログイン",
+          "en": "log in"
+        },
+        "definition": {
+          "ja": "定員に空きがあるとき、利用者がログインする。",
+          "en": "A user logs in while there is room."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/sessions.model",
+            "name": "login"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "logout",
+        "kind": "action",
+        "group": "操作",
+        "name": {
+          "ja": "ログアウト",
+          "en": "log out"
+        },
+        "definition": {
+          "ja": "ログイン中の利用者がログアウトする。",
+          "en": "An active user logs out."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/sessions.model",
+            "name": "logout"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "lock-system",
+        "kind": "action",
+        "group": "操作",
+        "name": {
+          "ja": "システムのロック",
+          "en": "lock the system"
+        },
+        "definition": {
+          "ja": "ログイン中の管理者が、誰もロックしていないシステムをロックする。",
+          "en": "An active administrator locks the system when nobody has."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/sessions.model",
+            "name": "lock"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "unlock-system",
+        "kind": "action",
+        "group": "操作",
+        "name": {
+          "ja": "ロックの解除",
+          "en": "unlock the system"
+        },
+        "definition": {
+          "ja": "ロックしている利用者がロックを外す。",
+          "en": "The locking user removes the lock."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rmodel/sessions.model",
+            "name": "unlock"
+          }
+        ],
+        "code": []
+      }
+    ],
+    "rules": [
+      {
+        "id": "MUTEX-ONE-HOLDER",
+        "text": {
+          "ja": "1 つのロックを同時に持つプロセスは高々 1 つ。",
+          "en": "At most one process holds a lock at a time."
+        },
+        "terms": [
+          "lock",
+          "proc",
+          "holder"
+        ],
+        "claims": [
+          {
+            "model": "fixtures/rmodel/mutex.model",
+            "check": "OneHolder",
+            "expect": "holds"
+          },
+          {
+            "model": "fixtures/rmodel/declared.model",
+            "check": "OneHolder",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "MUTEX-USED",
+        "text": {
+          "ja": "ロックは実際に取得され、すべてのロックが同時に持たれることもある。",
+          "en": "Locks are actually acquired, and all of them can be held at once."
+        },
+        "terms": [
+          "lock",
+          "acquire",
+          "holder"
+        ],
+        "claims": [
+          {
+            "model": "fixtures/rmodel/mutex.model",
+            "check": "NeverHeld",
+            "expect": "violated"
+          },
+          {
+            "model": "fixtures/rmodel/mutex.model",
+            "check": "Handover",
+            "expect": "reachable"
+          },
+          {
+            "model": "fixtures/rmodel/declared.model",
+            "check": "BothHeld",
+            "expect": "reachable"
+          }
+        ]
+      },
+      {
+        "id": "MUTEX-SEVERAL-LOCKS",
+        "text": {
+          "ja": "1 つのプロセスが複数のロックを同時に持てる。",
+          "en": "One process can hold several locks at once."
+        },
+        "terms": [
+          "proc",
+          "lock",
+          "holder"
+        ],
+        "claims": [
+          {
+            "model": "fixtures/rmodel/mutex.model",
+            "check": "TwoLocksOneProc",
+            "expect": "reachable"
+          }
+        ]
+      },
+      {
+        "id": "WAIT-EXACTLY-ONE",
+        "text": {
+          "ja": "待機中のプロセスは常にちょうど 1 つ。",
+          "en": "There is always exactly one waiting process."
+        },
+        "terms": [
+          "waiting",
+          "wait"
+        ],
+        "claims": [
+          {
+            "model": "fixtures/rmodel/declared.model",
+            "check": "OneWaiting",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "PERM-NO-LEAK",
+        "text": {
+          "ja": "付与の方針の下では、機密文書を開いている利用者は、許可を受けた利用者だけ。",
+          "en": "Under the grant policy, only cleared users have secret documents open."
+        },
+        "terms": [
+          "secret",
+          "cleared",
+          "open",
+          "grants"
+        ],
+        "claims": [
+          {
+            "model": "fixtures/rmodel/permissions.model",
+            "check": "NoLeak",
+            "expect": "holds"
+          },
+          {
+            "model": "fixtures/rmodel/permissions.model",
+            "check": "UnclearedSecret",
+            "expect": "unreachable"
+          }
+        ]
+      },
+      {
+        "id": "PERM-POLICY-NEEDED",
+        "text": {
+          "ja": "付与の方針がなければ、許可を受けていない利用者が機密文書を開けてしまう。",
+          "en": "Without the grant policy, a user who is not cleared can open a secret document."
+        },
+        "terms": [
+          "secret",
+          "cleared",
+          "grants"
+        ],
+        "claims": [
+          {
+            "model": "fixtures/rmodel/permissions-open.model",
+            "check": "NoLeak",
+            "expect": "violated"
+          },
+          {
+            "model": "fixtures/rmodel/permissions-open.model",
+            "check": "UnclearedSecret",
+            "expect": "reachable"
+          }
+        ]
+      },
+      {
+        "id": "PERM-ONLY-GRANTED",
+        "text": {
+          "ja": "利用者が開いている文書は、付与されたロールが読める文書だけ。",
+          "en": "A user has open only documents a granted role can read."
+        },
+        "terms": [
+          "open",
+          "grants",
+          "reads"
+        ],
+        "claims": [
+          {
+            "model": "fixtures/rmodel/permissions.model",
+            "check": "OnlyGranted",
+            "expect": "holds"
+          },
+          {
+            "model": "fixtures/rmodel/permissions-open.model",
+            "check": "OnlyGranted",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "PERM-SECRET-USABLE",
+        "text": {
+          "ja": "付与の方針があっても、機密文書を開ける場合がある。",
+          "en": "Even under the grant policy, a secret document can be opened."
+        },
+        "terms": [
+          "secret",
+          "read"
+        ],
+        "claims": [
+          {
+            "model": "fixtures/rmodel/permissions.model",
+            "check": "SecretRead",
+            "expect": "reachable"
+          },
+          {
+            "model": "fixtures/rmodel/permissions-open.model",
+            "check": "SecretRead",
+            "expect": "reachable"
+          }
+        ]
+      },
+      {
+        "id": "SESS-CAPACITY",
+        "text": {
+          "ja": "同時にログインしている利用者は 2 人まで。",
+          "en": "At most two users are logged in at once."
+        },
+        "terms": [
+          "active",
+          "login"
+        ],
+        "claims": [
+          {
+            "model": "fixtures/rmodel/sessions.model",
+            "check": "Capacity",
+            "expect": "holds"
+          },
+          {
+            "model": "fixtures/rmodel/sessions.model",
+            "check": "ThreeActive",
+            "expect": "unreachable"
+          }
+        ]
+      },
+      {
+        "id": "SESS-FULL-AND-LOCKED",
+        "text": {
+          "ja": "定員いっぱいで、かつロックされた状態になりうる。",
+          "en": "The system can be full and locked at the same time."
+        },
+        "terms": [
+          "active",
+          "locked"
+        ],
+        "claims": [
+          {
+            "model": "fixtures/rmodel/sessions.model",
+            "check": "Full",
+            "expect": "reachable"
+          }
+        ]
+      },
+      {
+        "id": "SESS-LOCK-BY-ADMIN",
+        "text": {
+          "ja": "システムをロックしているのは管理者だけ。",
+          "en": "Only an administrator has the system locked."
+        },
+        "terms": [
+          "locked",
+          "admins",
+          "lock-system"
+        ],
+        "claims": [
+          {
+            "model": "fixtures/rmodel/sessions.model",
+            "check": "LockedByAdmin",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "SESS-LOCK-OUTLIVES-LOGOUT",
+        "text": {
+          "ja": "ロックした利用者がログアウトしても、ロックは残る。",
+          "en": "The lock remains after the locking user logs out."
+        },
+        "terms": [
+          "locked",
+          "logout",
+          "active"
+        ],
+        "claims": [
+          {
+            "model": "fixtures/rmodel/sessions.model",
+            "check": "LockedIsActive",
+            "expect": "violated"
+          }
+        ]
+      }
+    ],
+    "groundings": []
+  }
+}

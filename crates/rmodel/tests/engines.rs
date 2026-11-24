@@ -9,6 +9,31 @@ fn root() -> &'static Path {
     Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."))
 }
 
+/// Expected verdicts by model file stem and check, from the claims of the
+/// corpus specification (plan 0092; they replaced expected.json).
+fn claims() -> std::collections::BTreeMap<String, std::collections::BTreeMap<String, String>> {
+    let spec: Value = serde_json::from_str(
+        &std::fs::read_to_string(root().join("fixtures/rmodel/spec.json")).unwrap(),
+    )
+    .unwrap();
+    let mut claims =
+        std::collections::BTreeMap::<String, std::collections::BTreeMap<String, String>>::new();
+    for rule in spec["spec"]["rules"].as_array().unwrap() {
+        for claim in rule["claims"].as_array().unwrap() {
+            let file = Path::new(claim["model"].as_str().unwrap())
+                .file_stem()
+                .unwrap()
+                .to_string_lossy()
+                .into_owned();
+            claims.entry(file).or_default().insert(
+                claim["check"].as_str().unwrap().to_owned(),
+                claim["expect"].as_str().unwrap().to_owned(),
+            );
+        }
+    }
+    claims
+}
+
 #[derive(Debug, PartialEq)]
 struct Explicit {
     verdict: &'static str,
@@ -89,25 +114,17 @@ fn explicit(model: &rmodel::Model, check: &rmodel::Check) -> Explicit {
 
 #[test]
 fn both_engines_give_the_expected_verdicts() {
-    let expected: Value = serde_json::from_str(
-        &std::fs::read_to_string(root().join("fixtures/rmodel/expected.json")).unwrap(),
-    )
-    .unwrap();
     let mut compared = 0;
-    for (file, checks) in expected["models"].as_object().unwrap() {
+    for (file, checks) in claims() {
         let source =
             std::fs::read_to_string(root().join(format!("fixtures/rmodel/{file}.model"))).unwrap();
         let model = rmodel::parse(&source).unwrap_or_else(|error| panic!("{file}: {error}"));
         let alloy_source = rmodel::to_alloy(&model);
         let alloy = ralloy::Model::parse(&alloy_source)
             .unwrap_or_else(|error| panic!("{file}: {error}\n{alloy_source}"));
-        assert_eq!(
-            model.checks.len(),
-            checks.as_object().unwrap().len(),
-            "{file}"
-        );
+        assert_eq!(model.checks.len(), checks.len(), "{file}");
         for check in &model.checks {
-            let want = checks[&check.name].as_str().unwrap();
+            let want = checks[&check.name].as_str();
             let explicit = explicit(&model, check);
             assert_eq!(explicit.verdict, want, "{file} {} explicit", check.name);
             // The SAT bound covers the explicit search's depth.
@@ -143,10 +160,7 @@ fn sha256_hex(bytes: &[u8]) -> String {
 /// after changing a lowering.
 #[test]
 fn external_tools_agree_on_the_current_lowerings() {
-    let expected: Value = serde_json::from_str(
-        &std::fs::read_to_string(root().join("fixtures/rmodel/expected.json")).unwrap(),
-    )
-    .unwrap();
+    let expected = claims();
     let oracle: Value = serde_json::from_str(
         &std::fs::read_to_string(root().join("fixtures/rmodel/oracle.json")).unwrap(),
     )
@@ -176,7 +190,7 @@ fn external_tools_agree_on_the_current_lowerings() {
             row["tlaSha256"],
             "{file} {check}"
         );
-        let found = match expected["models"][file][check].as_str().unwrap() {
+        let found = match expected[file][check].as_str() {
             "violated" | "reachable" => "found",
             _ => "none",
         };
@@ -250,4 +264,73 @@ fn malformed_models_are_rejected() {
     assert!(rmodel::parse("model M\nsig A\nscope A = 8, steps = 3").is_err());
     assert!(rmodel::parse("model M\nsig A\nscope A = 2").is_err());
     assert!(rmodel::parse("model M\nsig A\nsig B\nscope A = 2, steps = 3").is_err());
+}
+
+/// Enums name their atoms in both lowerings (plan 0093).
+#[test]
+fn enums_agree() {
+    let model = rmodel::parse(
+        "model Light
+enum Color = Red | Green | Amber
+sig Lamp
+var shows: Lamp -> one Color
+init { Lamp.shows in Red }
+action next(l: Lamp) { Red in l.shows  shows' = shows - l -> Red + l -> Green }
+action caution(l: Lamp) { Green in l.shows  shows' = shows - l -> Green + l -> Amber }
+action stop(l: Lamp) { Amber in l.shows  shows' = shows - l -> Amber + l -> Red }
+invariant OneColor { all l: Lamp | one l.shows }
+reachable AllGreen { Lamp.shows = Green }
+reachable Mixed { some shows.Red and some shows.Amber }
+invariant NeverAmber { no shows.Amber }
+reachable AmberAfterRed { all c: Color | c in Lamp.shows }
+scope Lamp = 2, steps = 6",
+    )
+    .unwrap();
+    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model))
+        .unwrap_or_else(|error| panic!("{error}\n{}", rmodel::to_alloy(&model)));
+    for (check, want) in [
+        ("OneColor", "holds"),
+        ("AllGreen", "reachable"),
+        ("Mixed", "reachable"),
+        ("NeverAmber", "violated"),
+        ("AmberAfterRed", "unreachable"),
+    ] {
+        let check = model
+            .checks
+            .iter()
+            .find(|candidate| candidate.name == check)
+            .unwrap();
+        assert_eq!(
+            explicit(&model, check).verdict,
+            want,
+            "{} explicit",
+            check.name
+        );
+        assert_eq!(sat(&model, &alloy, check), want, "{} SAT", check.name);
+    }
+}
+
+#[test]
+fn malformed_enums_are_rejected() {
+    for (source, needle) in [
+        (
+            "model M\nenum E = A | A\nscope steps = 1",
+            "duplicate name A",
+        ),
+        (
+            "model M\nenum E = A\nsig S\nscope S = 1, E = 1, steps = 1",
+            "scope for unknown sig E",
+        ),
+        (
+            "model M\nenum E = A\nrel r: set E\ninvariant I { r in B }\nscope steps = 1",
+            "unknown name B",
+        ),
+        (
+            "model M\nenum E = A\nsig A\nscope A = 1, steps = 1",
+            "duplicate name A",
+        ),
+    ] {
+        let error = rmodel::parse(source).unwrap_err();
+        assert!(error.message.contains(needle), "{source}: {error}");
+    }
 }

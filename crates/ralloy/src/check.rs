@@ -5,12 +5,12 @@ use std::collections::{BTreeMap, BTreeSet};
 #[derive(Clone)]
 enum Type {
     Boolean,
-    Relation(Vec<u16>),
+    Relation(Vec<u32>),
     /// An integer value (plan 0082).
     Integer,
 }
 impl Type {
-    fn columns(self) -> Result<Vec<u16>, Error> {
+    fn columns(self) -> Result<Vec<u32>, Error> {
         match self {
             Self::Relation(columns) => Ok(columns),
             _ => Err(Error::new(ErrorKind::Type, "expected relation")),
@@ -384,7 +384,7 @@ impl Checker<'_> {
         Ok(kind)
     }
     /// Each parameter name with the column types of its domain.
-    fn parameters(&mut self, name: &str, depth: usize) -> Result<Vec<(String, Vec<u16>)>, Error> {
+    fn parameters(&mut self, name: &str, depth: usize) -> Result<Vec<(String, Vec<u32>)>, Error> {
         let mut parameters = Vec::new();
         for param in &self.module.predicates[name].params {
             let domain = self
@@ -504,7 +504,7 @@ impl Checker<'_> {
                             columns.swap(0, 1);
                         }
                         if matches!(operator, Unary::Reflexive) {
-                            columns.fill(u16::MAX);
+                            columns.fill(u32::MAX);
                         }
                         Ok(Type::Relation(columns))
                     }

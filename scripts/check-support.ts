@@ -428,6 +428,16 @@ const scopes: readonly CrateScope[] = [
     ],
   },
   {
+    name: "rspec",
+    evidence: [
+      {
+        path: "src/lib.rs",
+        topic:
+          "Pklの仕様（用語・rule・claim）の静的な結びつきの検査、生成するMarkdownとjev-lintのmanifest",
+      },
+    ],
+  },
+  {
     name: "rmodel",
     evidence: [
       {

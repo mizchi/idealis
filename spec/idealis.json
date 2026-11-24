@@ -1,0 +1,1013 @@
+{
+  "spec": {
+    "id": "idealis",
+    "name": {
+      "ja": "idealis の語彙",
+      "en": "The idealis vocabulary"
+    },
+    "groups": [
+      "探索の範囲",
+      "判定",
+      "比較",
+      "モデル"
+    ],
+    "terms": [
+      {
+        "id": "search.complete",
+        "kind": "result",
+        "group": "探索の範囲",
+        "name": {
+          "ja": "完全",
+          "en": "complete"
+        },
+        "definition": {
+          "ja": "宣言した scope と上限の中で、到達できる状態や候補をすべて調べ終えたこと。その範囲の外については何も示さない。",
+          "en": "Every reachable state or candidate within the declared scope and bounds was examined. It says nothing outside that range."
+        },
+        "aliases": [],
+        "avoid": [
+          "証明済み",
+          "proved"
+        ],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rtlc/src/safety.rs",
+            "symbol": "complete"
+          }
+        ]
+      },
+      {
+        "id": "search.bounded",
+        "kind": "result",
+        "group": "探索の範囲",
+        "name": {
+          "ja": "有界",
+          "en": "bounded"
+        },
+        "definition": {
+          "ja": "深さ・steps・状態数・work などの上限で探索を打ち切り、調べた部分に違反がなかったこと。どの上限かは理由（rtlc の reason）で示す。上限の外は調べていないので、完全な検査として扱わない。",
+          "en": "The search stopped at a depth, step, state-count, work or similar bound with no violation in the part examined; the reason (rtlc's reason) names the bound. Nothing beyond it was examined, so it is not a complete check."
+        },
+        "aliases": [],
+        "avoid": [
+          "完全",
+          "網羅",
+          "exhaustive"
+        ],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rtlc/src/safety.rs",
+            "symbol": "bounded"
+          },
+          {
+            "path": "crates/ralloy/src/lib.rs",
+            "symbol": "steps"
+          }
+        ]
+      },
+      {
+        "id": "search.empty",
+        "kind": "result",
+        "group": "探索の範囲",
+        "name": {
+          "ja": "空",
+          "en": "empty"
+        },
+        "definition": {
+          "ja": "初期状態や候補が 1 つもなく、検査する対象がなかったこと。合格ではない。",
+          "en": "There was no initial state or candidate, so nothing was checked. It is not a pass."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rtlc/src/safety.rs",
+            "symbol": "empty"
+          }
+        ]
+      },
+      {
+        "id": "search.unknown",
+        "kind": "result",
+        "group": "探索の範囲",
+        "name": {
+          "ja": "未確定",
+          "en": "unknown"
+        },
+        "definition": {
+          "ja": "予算が尽きて、実例・反例の有無という判定そのものを出せなかったこと。合格にも不合格にも読み替えない。work の予算切れは、ralloy では unknown、rtlc では理由 work の bounded になる（0092 で記録した語の違い）。",
+          "en": "A budget ran out before the verdict itself, whether an instance or counterexample exists, could be given. It is read as neither a pass nor a failure. Running out of work is unknown in ralloy and bounded with reason work in rtlc (a difference in wording recorded in 0092)."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-report.model",
+            "name": "Unknown"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "Unknown"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "UnknownObservation"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/ralloy/src/lib.rs",
+            "symbol": "Unknown"
+          },
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "Unknown"
+          }
+        ]
+      },
+      {
+        "id": "verdict.instance",
+        "kind": "verdict",
+        "group": "判定",
+        "name": {
+          "ja": "実例",
+          "en": "instance"
+        },
+        "definition": {
+          "ja": "run の条件と事実を満たす構造（時相モデルでは trace）が scope の中に見つかったこと。",
+          "en": "A structure, or a trace in a temporal model, within the scope satisfies the facts and the run's condition."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/ralloy/src/lib.rs",
+            "symbol": "Instance"
+          }
+        ]
+      },
+      {
+        "id": "verdict.counterexample",
+        "kind": "verdict",
+        "group": "判定",
+        "name": {
+          "ja": "反例",
+          "en": "counterexample"
+        },
+        "definition": {
+          "ja": "事実を満たしながら、検査する性質を破る構造または trace が scope の中に見つかったこと。",
+          "en": "A structure or trace within the scope satisfies the facts and violates the checked property."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/ralloy/src/lib.rs",
+            "symbol": "Counterexample"
+          }
+        ]
+      },
+      {
+        "id": "verdict.no-counterexample",
+        "kind": "verdict",
+        "group": "判定",
+        "name": {
+          "ja": "反例なし",
+          "en": "no counterexample"
+        },
+        "definition": {
+          "ja": "scope の中に反例がなかったこと。scope の外で性質が成り立つことの証明ではない。",
+          "en": "No counterexample exists within the scope. It does not prove the property beyond the scope."
+        },
+        "aliases": [],
+        "avoid": [
+          "正しい",
+          "検証済み",
+          "verified"
+        ],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/ralloy/src/lib.rs",
+            "symbol": "NoCounterexample"
+          }
+        ]
+      },
+      {
+        "id": "verdict.holds",
+        "kind": "verdict",
+        "group": "判定",
+        "name": {
+          "ja": "成り立つ",
+          "en": "holds"
+        },
+        "definition": {
+          "ja": "invariant が、検査した範囲で到達できるすべての状態で成り立つこと。範囲が有界か完全かを併せて示す。",
+          "en": "An invariant is true in every reachable state within the checked range, which is stated as bounded or complete."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": []
+      },
+      {
+        "id": "verdict.violated",
+        "kind": "verdict",
+        "group": "判定",
+        "name": {
+          "ja": "破れる",
+          "en": "violated"
+        },
+        "definition": {
+          "ja": "invariant が偽になる状態に到達できること。到達する trace が witness になる。",
+          "en": "A state where an invariant is false is reachable; the trace reaching it is the witness."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": []
+      },
+      {
+        "id": "verdict.reachable",
+        "kind": "verdict",
+        "group": "判定",
+        "name": {
+          "ja": "到達できる",
+          "en": "reachable"
+        },
+        "definition": {
+          "ja": "reachable の条件を満たす状態に、初期状態から到達できること。",
+          "en": "A state satisfying a reachable check's condition can be reached from an initial state."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": []
+      },
+      {
+        "id": "verdict.unreachable",
+        "kind": "verdict",
+        "group": "判定",
+        "name": {
+          "ja": "到達できない",
+          "en": "unreachable"
+        },
+        "definition": {
+          "ja": "検査した範囲では、reachable の条件を満たす状態に到達できないこと。範囲が有界か完全かを併せて示す。",
+          "en": "Within the checked range no state satisfying a reachable check's condition is reachable; the range is stated as bounded or complete."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": []
+      },
+      {
+        "id": "compare.matched",
+        "kind": "result",
+        "group": "比較",
+        "name": {
+          "ja": "一致",
+          "en": "matched"
+        },
+        "definition": {
+          "ja": "実装や engine の観測が、基準（oracle やモデル）の答えと同じだったこと。",
+          "en": "An observation of an implementation or engine equals the reference answer of an oracle or model."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-report.model",
+            "name": "Matched"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "Matched"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "Matched"
+          },
+          {
+            "path": "crates/ralloy/src/lib.rs",
+            "symbol": "Matched"
+          }
+        ]
+      },
+      {
+        "id": "compare.mismatch",
+        "kind": "result",
+        "group": "比較",
+        "name": {
+          "ja": "不一致",
+          "en": "mismatch"
+        },
+        "definition": {
+          "ja": "観測は正しく取れたうえで、基準の答えと異なったこと。",
+          "en": "The observation was obtained correctly and differs from the reference answer."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-report.model",
+            "name": "Mismatch"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "Mismatch"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "Mismatch"
+          },
+          {
+            "path": "crates/ralloy/src/lib.rs",
+            "symbol": "Mismatch"
+          }
+        ]
+      },
+      {
+        "id": "compare.invalid",
+        "kind": "result",
+        "group": "比較",
+        "name": {
+          "ja": "無効",
+          "en": "invalid"
+        },
+        "definition": {
+          "ja": "入力や観測が契約を満たさず、比較そのものが成立しなかったこと。不一致とは区別する。",
+          "en": "An input or observation breaks its contract, so no comparison took place. It is distinct from a mismatch."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-report.model",
+            "name": "Invalid"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "Invalid"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "InvalidObservation"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "Invalid"
+          },
+          {
+            "path": "crates/ralloy/src/lib.rs",
+            "symbol": "Invalid"
+          }
+        ]
+      },
+      {
+        "id": "compare.error",
+        "kind": "result",
+        "group": "比較",
+        "name": {
+          "ja": "エラー",
+          "en": "error"
+        },
+        "definition": {
+          "ja": "実装・oracle・基盤が失敗して、比較する観測そのものが得られなかったこと。不一致とも未確定とも区別する。",
+          "en": "The implementation, oracle or infrastructure failed, so there was no observation to compare. It is distinct from a mismatch and from unknown."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-report.model",
+            "name": "Error"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "Error"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "ErrorObservation"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "Error"
+          }
+        ]
+      },
+      {
+        "id": "compare.status",
+        "kind": "concept",
+        "group": "比較",
+        "name": {
+          "ja": "比較の結果",
+          "en": "comparison status"
+        },
+        "definition": {
+          "ja": "1 つの比較が一致・不一致・無効・未確定・エラーのどれだったか。",
+          "en": "Whether one comparison matched, mismatched, was invalid, unknown or an error."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-report.model",
+            "name": "Status"
+          },
+          {
+            "path": "spec/models/roracle-report.model",
+            "name": "status"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "Outcome"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "outcome"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "Status"
+          }
+        ]
+      },
+      {
+        "id": "compare.observation",
+        "kind": "concept",
+        "group": "比較",
+        "name": {
+          "ja": "観測",
+          "en": "observation"
+        },
+        "definition": {
+          "ja": "実装や oracle から得た 1 回分の答え。値・許容値の集合・未確定・無効・エラーのいずれか。",
+          "en": "One answer from an implementation or oracle: a value, an allowed set, unknown, invalid or an error."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "Observed"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "Observation"
+          }
+        ]
+      },
+      {
+        "id": "compare.value",
+        "kind": "concept",
+        "group": "比較",
+        "name": {
+          "ja": "値",
+          "en": "value"
+        },
+        "definition": {
+          "ja": "正しく得られた観測の中身。基準の値とは等しさで比べる。",
+          "en": "The content of an observation obtained correctly, compared with a reference value for equality."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "ValueOf"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "Value"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "Value"
+          }
+        ]
+      },
+      {
+        "id": "compare.allowed",
+        "kind": "concept",
+        "group": "比較",
+        "name": {
+          "ja": "許容値の集合",
+          "en": "allowed set"
+        },
+        "definition": {
+          "ja": "基準が 1 つの値に決まらないときに、受け入れる値をすべて並べたもの。空の集合とは比較が成立しない。",
+          "en": "Every value accepted when the reference is not a single value. Nothing can be compared with an empty set."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "AllowedSet"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "Allowed"
+          }
+        ]
+      },
+      {
+        "id": "compare.reference",
+        "kind": "concept",
+        "group": "比較",
+        "name": {
+          "ja": "基準の観測",
+          "en": "reference observation"
+        },
+        "definition": {
+          "ja": "比較の基準になる、oracle やモデルの観測。",
+          "en": "The observation of an oracle or model that a comparison is measured against."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "referenceKind"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "referenceValue"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "referenceAllowed"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "reference"
+          }
+        ]
+      },
+      {
+        "id": "compare.actual",
+        "kind": "concept",
+        "group": "比較",
+        "name": {
+          "ja": "実装の観測",
+          "en": "actual observation"
+        },
+        "definition": {
+          "ja": "検査する実装から得た観測。値でなければ一致にならない。",
+          "en": "The observation from the implementation under test. It never matches unless it is a value."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "actualKind"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "actualValue"
+          },
+          {
+            "path": "spec/models/roracle-compare.model",
+            "name": "actualAllowed"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "actual"
+          }
+        ]
+      },
+      {
+        "id": "compare.slot",
+        "kind": "concept",
+        "group": "比較",
+        "name": {
+          "ja": "比較の枠",
+          "en": "comparison slot"
+        },
+        "definition": {
+          "ja": "モデルで比較の数を変えるための枠。結果を持つ枠だけが比較になる。",
+          "en": "A slot that lets a model vary the number of comparisons; only slots with a status are comparisons."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-report.model",
+            "name": "Slot"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "compare.report",
+        "kind": "concept",
+        "group": "比較",
+        "name": {
+          "ja": "報告の結果",
+          "en": "report status"
+        },
+        "definition": {
+          "ja": "比較の結果を 1 つにまとめた結果。最も重いものを示し、重い順にエラー・不一致・未確定・無効・一致。比較が 1 つもなければ無効。",
+          "en": "The comparison statuses folded into one: the heaviest, in the order error, mismatch, unknown, invalid, matched. With no comparison it is invalid."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/roracle-report.model",
+            "name": "report"
+          }
+        ],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "CheckReport"
+          },
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "aggregate"
+          }
+        ]
+      },
+      {
+        "id": "compare.oracle",
+        "kind": "concept",
+        "group": "比較",
+        "name": {
+          "ja": "oracle",
+          "en": "oracle"
+        },
+        "definition": {
+          "ja": "比較の基準にする、別の道具（Alloy・TLC・Z3 など）の答え。記録して再生し、記録時の版と入力の digest を残す。",
+          "en": "The reference answer from another tool such as Alloy, TLC or Z3, recorded and replayed with the tool version and input digests."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/roracle/src/report.rs",
+            "symbol": "Status"
+          }
+        ]
+      },
+      {
+        "id": "model.configuration",
+        "kind": "concept",
+        "group": "モデル",
+        "name": {
+          "ja": "設定",
+          "en": "configuration"
+        },
+        "definition": {
+          "ja": "状態とともに変わらない関係（rmodel の rel）。solver はすべての候補を考え、明示状態の探索は初期状態で列挙する。",
+          "en": "Relations that do not change with the state (rel in rmodel). A solver considers every candidate; the explicit search enumerates them in the initial states."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rmodel/src/syntax.rs",
+            "symbol": "Relation"
+          }
+        ]
+      },
+      {
+        "id": "model.state",
+        "kind": "concept",
+        "group": "モデル",
+        "name": {
+          "ja": "状態",
+          "en": "state"
+        },
+        "definition": {
+          "ja": "action によって変わる関係（rmodel の var、Alloy の var field）の、ある時点の値。",
+          "en": "The value at one point in time of the relations actions change (var in rmodel, var fields in Alloy)."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rmodel/src/syntax.rs",
+            "symbol": "var"
+          }
+        ]
+      },
+      {
+        "id": "model.action",
+        "kind": "concept",
+        "group": "モデル",
+        "name": {
+          "ja": "action",
+          "en": "action"
+        },
+        "definition": {
+          "ja": "状態を変える遷移。条件と代入を持ち、代入しない状態は変わらない（暗黙の frame）。",
+          "en": "A transition that changes the state, with guards and assignments; state it does not assign is unchanged (the implicit frame)."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rmodel/src/syntax.rs",
+            "symbol": "Action"
+          }
+        ]
+      },
+      {
+        "id": "model.trace",
+        "kind": "concept",
+        "group": "モデル",
+        "name": {
+          "ja": "trace",
+          "en": "trace"
+        },
+        "definition": {
+          "ja": "初期状態から始まる状態の列。有界な検査では、最後の状態から戻る位置を持つ lasso として表す。",
+          "en": "A sequence of states from an initial one. Bounded checks represent it as a lasso whose last state goes back to an earlier position."
+        },
+        "aliases": [
+          "lasso"
+        ],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/ralloy/src/lib.rs",
+            "symbol": "trace"
+          },
+          {
+            "path": "crates/ralloy/src/lib.rs",
+            "symbol": "back"
+          }
+        ]
+      },
+      {
+        "id": "model.witness",
+        "kind": "concept",
+        "group": "モデル",
+        "name": {
+          "ja": "witness",
+          "en": "witness"
+        },
+        "definition": {
+          "ja": "判定を裏付ける具体的な実例・反例・trace。engine とは独立した評価器で検査し直せるもの。",
+          "en": "A concrete instance, counterexample or trace backing a verdict, which an evaluator independent of the engine can check again."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/ralloy/src/lib.rs",
+            "symbol": "check_instance"
+          }
+        ]
+      },
+      {
+        "id": "model.scope",
+        "kind": "concept",
+        "group": "モデル",
+        "name": {
+          "ja": "scope",
+          "en": "scope"
+        },
+        "definition": {
+          "ja": "検査する atom の数・整数の bit 幅・steps などの範囲。判定はすべてこの範囲についてのもの。",
+          "en": "The range checked: atom counts, integer bit width, steps. Every verdict is about this range."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/ralloy/src/lib.rs",
+            "symbol": "Scope"
+          },
+          {
+            "path": "crates/rmodel/src/syntax.rs",
+            "symbol": "Scope"
+          }
+        ]
+      }
+    ],
+    "rules": [
+      {
+        "id": "ORACLE-NO-FALSE-MATCH",
+        "text": {
+          "ja": "報告が一致になるのは、比較が 1 つ以上あり、そのすべてが一致したときだけ。未確定の比較があれば一致にならない。",
+          "en": "A report is matched only when there is at least one comparison and every one matched; an unknown comparison keeps it from being matched."
+        },
+        "terms": [
+          "compare.report",
+          "compare.matched",
+          "search.unknown"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/roracle-report.model",
+            "check": "MatchedOnlyIfAllMatched",
+            "expect": "holds"
+          },
+          {
+            "model": "spec/models/roracle-report.model",
+            "check": "UnknownNeverMatched",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "ORACLE-HEAVIEST-WINS",
+        "text": {
+          "ja": "報告は最も重い比較の結果を示す。不一致があれば、無効の比較があっても不一致になり、エラーと不一致がなければ未確定が無効より重い。",
+          "en": "A report shows the heaviest comparison status: a mismatch wins over an invalid comparison, and without errors or mismatches unknown wins over invalid."
+        },
+        "terms": [
+          "compare.report",
+          "compare.mismatch",
+          "compare.invalid",
+          "search.unknown"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/roracle-report.model",
+            "check": "InvalidHiddenByMismatch",
+            "expect": "reachable"
+          },
+          {
+            "model": "spec/models/roracle-report.model",
+            "check": "UnknownOverInvalid",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "ORACLE-INVALID-IS-NOT-MISMATCH",
+        "text": {
+          "ja": "無効の比較は、不一致の比較がない限り、報告を不一致にしない。",
+          "en": "An invalid comparison does not make the report a mismatch unless some comparison mismatched."
+        },
+        "terms": [
+          "compare.invalid",
+          "compare.mismatch",
+          "compare.report"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/roracle-report.model",
+            "check": "InvalidNotMismatch",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "ORACLE-FAILURES-FIRST",
+        "text": {
+          "ja": "基準か実装の観測が未確定・無効・エラーなら、比較は一致にならず、エラーがあれば必ずエラーになる。",
+          "en": "If the reference or actual observation is unknown, invalid or an error, the comparison never matches, and any error makes it an error."
+        },
+        "terms": [
+          "compare.observation",
+          "compare.error",
+          "search.unknown",
+          "compare.invalid"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/roracle-compare.model",
+            "check": "FailureNeverMatched",
+            "expect": "holds"
+          },
+          {
+            "model": "spec/models/roracle-compare.model",
+            "check": "ErrorDominates",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "ORACLE-ACTUAL-IS-A-VALUE",
+        "text": {
+          "ja": "一致するのは実装の観測が値のときだけ。実装が許容値の集合を返したら、比較は無効。",
+          "en": "A comparison matches only when the actual observation is a value; an actual allowed set makes it invalid."
+        },
+        "terms": [
+          "compare.actual",
+          "compare.value",
+          "compare.allowed",
+          "compare.invalid"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/roracle-compare.model",
+            "check": "MatchedNeedsActualValue",
+            "expect": "holds"
+          },
+          {
+            "model": "spec/models/roracle-compare.model",
+            "check": "ActualAllowedIsInvalid",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "ORACLE-ALLOWED-SETS",
+        "text": {
+          "ja": "基準が許容値の集合なら、含まれる値は一致、含まれない値は不一致。空の集合との比較は無効。",
+          "en": "Against an allowed set, a member matches and a non-member mismatches; comparing with an empty set is invalid."
+        },
+        "terms": [
+          "compare.allowed",
+          "compare.reference",
+          "compare.mismatch",
+          "compare.invalid"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/roracle-compare.model",
+            "check": "EmptyAllowedIsInvalid",
+            "expect": "reachable"
+          },
+          {
+            "model": "spec/models/roracle-compare.model",
+            "check": "AllowedMismatch",
+            "expect": "reachable"
+          }
+        ]
+      },
+      {
+        "id": "ORACLE-EMPTY-IS-INVALID",
+        "text": {
+          "ja": "比較が 1 つもない報告は無効。",
+          "en": "A report without comparisons is invalid."
+        },
+        "terms": [
+          "compare.report",
+          "compare.invalid"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/roracle-report.model",
+            "check": "EmptyIsInvalid",
+            "expect": "reachable"
+          }
+        ]
+      }
+    ],
+    "groundings": [
+      {
+        "model": "spec/models/roracle-compare.model",
+        "implementation": {
+          "path": "crates/roracle/src/report.rs",
+          "symbol": "compare"
+        },
+        "test": {
+          "path": "crates/rspec/tests/grounding.rs",
+          "symbol": "compare_conforms_to_the_compare_model"
+        }
+      },
+      {
+        "model": "spec/models/roracle-report.model",
+        "implementation": {
+          "path": "crates/roracle/src/report.rs",
+          "symbol": "aggregate"
+        },
+        "test": {
+          "path": "crates/rspec/tests/grounding.rs",
+          "symbol": "aggregate_conforms_to_the_report_model"
+        }
+      }
+    ]
+  }
+}

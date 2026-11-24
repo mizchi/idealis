@@ -30,6 +30,13 @@ pub fn to_alloy(model: &Model) -> String {
     for sig in &model.sigs {
         out.push_str(&format!("sig s_{sig} {{}}\n"));
     }
+    for (name, members) in &model.enums {
+        let members: Vec<String> = members.iter().map(|member| format!("e_{member}")).collect();
+        out.push_str(&format!(
+            "abstract sig s_{name} {{}}\none sig {} extends s_{name} {{}}\n",
+            members.join(", ")
+        ));
+    }
     let fields: Vec<String> = model
         .relations
         .iter()
@@ -127,6 +134,12 @@ pub fn to_alloy(model: &Model) -> String {
         .sizes
         .iter()
         .map(|(sig, size)| format!("exactly {size} s_{sig}"))
+        .chain(
+            model
+                .enums
+                .iter()
+                .map(|(name, members)| format!("exactly {} s_{name}", members.len())),
+        )
         .chain(["4 Int".to_owned(), format!("{} steps", model.scope.steps)])
         .collect();
     for check in &model.checks {
@@ -161,6 +174,8 @@ fn alloy_expression(model: &Model, expression: &Expr, scope: &Scope) -> String {
                 bound.clone()
             } else if model.relation(name).is_some() {
                 format!("(World.r_{name})")
+            } else if model.member(name).is_some() {
+                format!("e_{name}")
             } else {
                 format!("s_{name}")
             }
@@ -289,6 +304,13 @@ impl Tla<'_> {
                 .collect();
             out.push_str(&format!("s_{sig} == {{{}}}\n", atoms.join(", ")));
         }
+        for (name, members) in &model.enums {
+            let atoms: Vec<String> = members
+                .iter()
+                .map(|member| format!("\"{member}\""))
+                .collect();
+            out.push_str(&format!("s_{name} == {{{}}}\n", atoms.join(", ")));
+        }
         for relation in &model.relations {
             let (domain, shape) = match &relation.shape {
                 Shape::Unary { sig, mult } => (
@@ -416,6 +438,8 @@ impl Tla<'_> {
                         Shape::Binary { .. } => Arity::Pair,
                     };
                     (format!("r_{name}"), arity)
+                } else if self.model.member(name).is_some() {
+                    (format!("{{\"{name}\"}}"), Arity::Set)
                 } else {
                     (format!("s_{name}"), Arity::Set)
                 }
