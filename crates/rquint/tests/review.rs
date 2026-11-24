@@ -307,3 +307,59 @@ fn malformed_arity_is_an_error() {
         .is_err()
     );
 }
+
+// Issue #105: name scoping in the TLA+ lowering.
+
+fn let_val(name: &str, value: Value, body: Value) -> Value {
+    json!({"kind": "let", "opdef": def("val", name, value), "expr": body})
+}
+
+/// A global action inlined from init sees the globals, not the caller's
+/// local bindings.
+#[test]
+fn inlined_actions_do_not_see_caller_locals() {
+    let model = ir(vec![
+        def("val", "limit", int(3)),
+        def(
+            "action",
+            "setX",
+            lambda(
+                &["n"],
+                app(
+                    "assign",
+                    vec![name("x"), app("iadd", vec![name("n"), name("limit")])],
+                ),
+            ),
+        ),
+        def(
+            "action",
+            "init",
+            let_val("limit", int(10), app("setX", vec![int(0)])),
+        ),
+        def("action", "step", app("assign", vec![name("x"), name("x")])),
+        def("val", "three", app("eq", vec![name("x"), int(3)])),
+    ]);
+    assert_eq!(check(&model, "three"), ("complete".to_owned(), 1));
+}
+
+/// A local binding named like a global is not a dependency on it.
+#[test]
+fn local_names_are_not_dependencies() {
+    let model = ir(steady(vec![
+        def("val", "a", app("iadd", vec![name("b"), int(1)])),
+        def("val", "b", let_val("a", int(1), name("a"))),
+        def("val", "two", app("eq", vec![name("a"), int(2)])),
+    ]));
+    assert_eq!(check(&model, "two"), ("complete".to_owned(), 1));
+}
+
+/// Names that lower to the same TLA+ identifier are refused.
+#[test]
+fn lowered_name_collisions_are_refused() {
+    let model = ir(steady(vec![
+        def("pure", "Helpers::limit", int(3)),
+        def("pure", "Helpers_limit", int(4)),
+    ]));
+    let error = rquint::translate(&model, &rquint::Options::default()).unwrap_err();
+    assert!(error.0.contains("collide"), "{error}");
+}
