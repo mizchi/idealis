@@ -1,0 +1,17 @@
+{
+  "driver": "evals/experiments/fold-order/fold_cost.rs",
+  "supersedes": "0089b-new-path (kept unchanged); tree whose comparable-members check compares every corresponding field and nested value",
+  "method": "release build, 400 check calls per cell, median, three runs",
+  "loadAverageAtStart": "6.38",
+  "table": [
+    {"irVersion": "v1", "states": 1, "elements": "integers", "work": 2340, "runsMicroseconds": [39.2, 39.6, 41.7]},
+    {"irVersion": "v1", "states": 1, "elements": "records", "work": 8581, "runsMicroseconds": [244.7, 255.1, 263.5]},
+    {"irVersion": "v1", "states": 64, "elements": "integers", "work": 141570, "runsMicroseconds": [2258.3, 2228.3, 2403.8]},
+    {"irVersion": "v1", "states": 64, "elements": "records", "work": 536899, "runsMicroseconds": [16232.3, 16133.1, 16488.0]},
+    {"irVersion": "v2", "states": 1, "elements": "integers", "work": 2532, "runsMicroseconds": [57.4, 56.4, 55.5]},
+    {"irVersion": "v2", "states": 1, "elements": "records", "work": 8773, "runsMicroseconds": [285.2, 338.5, 280.8]},
+    {"irVersion": "v2", "states": 64, "elements": "integers", "work": 153858, "runsMicroseconds": [2562.0, 2624.0, 2559.4]},
+    {"irVersion": "v2", "states": 64, "elements": "records", "work": 549187, "runsMicroseconds": [16364.0, 16732.4, 16796.4]}
+  ],
+  "note": "Record work doubled against 0089b-new-path (v1 states=1: 4549 to 8581) because every visited value is ticked; median time is unchanged within noise."
+}

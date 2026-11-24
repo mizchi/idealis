@@ -752,3 +752,79 @@ fn a_union_fold_that_exceeds_the_evaluation_nesting_reports_the_bound() {
     assert_eq!(result.status, "bounded");
     assert_eq!(result.reason.as_deref(), Some("evaluation"));
 }
+
+type Fields = Vec<(&'static str, Value)>;
+
+fn truth() -> Value {
+    json!({"op":"literal","value":{"type":"bool","value":true}})
+}
+
+fn selected_record_body(first: Fields, second: Fields) -> Value {
+    branching_union_body("p", vec![record(first)], vec![record(second)])
+}
+
+#[test]
+fn a_fold_whose_result_is_not_a_set_skips_the_comparability_check() {
+    let collection = set(vec![text("x"), text("y")]);
+    let body = json!({"op":"if","condition":{"op":"eq","left":elem(),"right":text("z")},
+        "consequent":cup(acc(), set(vec![elem()])),"alternative":acc()});
+    for version in [1, 2] {
+        let program = fold_program(version, &int(0), &collection, &body, &int(0));
+        assert!(holds(&program, "non-set result"), "v{version}");
+    }
+}
+
+#[test]
+fn records_that_differ_in_the_kind_of_any_field_are_refused_whatever_the_field_order() {
+    let collection = set(vec![text("p"), text("q")]);
+    let shapes: Vec<(Fields, Fields)> = vec![
+        (
+            vec![("a", int(1)), ("b", int(1))],
+            vec![("a", int(1)), ("b", truth())],
+        ),
+        (
+            vec![("a", int(1)), ("b", int(1))],
+            vec![("a", int(2)), ("b", truth())],
+        ),
+        (
+            vec![("a", int(1)), ("b", truth())],
+            vec![("a", int(2)), ("b", int(1))],
+        ),
+        (
+            vec![
+                ("a", int(1)),
+                ("b", record(vec![("c", int(1)), ("d", int(1))])),
+            ],
+            vec![
+                ("a", int(2)),
+                ("b", record(vec![("c", int(2)), ("d", truth())])),
+            ],
+        ),
+    ];
+    for version in [1, 2] {
+        for (index, (first, second)) in shapes.iter().enumerate() {
+            let body = selected_record_body(first.clone(), second.clone());
+            let program = fold_program(version, &set(vec![]), &collection, &body, &set(vec![]));
+            assert_eq!(refusal(&program), STRINGS, "v{version} shape {index}");
+        }
+    }
+}
+
+#[test]
+fn records_whose_fields_agree_in_kind_are_accepted_when_only_values_differ() {
+    let collection = set(vec![text("p"), text("q")]);
+    let first = vec![
+        ("a", int(1)),
+        ("b", record(vec![("c", int(1)), ("d", truth())])),
+    ];
+    let second = vec![
+        ("a", int(2)),
+        ("b", record(vec![("c", int(2)), ("d", truth())])),
+    ];
+    let expected = set(vec![record(first.clone()), record(second.clone())]);
+    for version in [1, 2] {
+        let body = selected_record_body(first.clone(), second.clone());
+        let program = fold_program(version, &set(vec![]), &collection, &body, &expected);
+        assert!(holds(&program, "homogeneous records"), "v{version}");
+    }
+}

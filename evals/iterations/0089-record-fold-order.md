@@ -91,3 +91,11 @@ CodeRabbit の指摘（[#101](https://github.com/mizchi/idealis/pull/101)）を�
 - **grid の v1/v2 の比較（Minor）: 有効。** 駆動コードを全文字列の比較に直し、新しい run `0089b-paths` で流した。結果: 受理 56・拒否 21・評価エラー 7（修正前の木の 63 = 56 + 7 と同じ）。v1 と v2 が同一なのは 28 入力、work だけが違うのは受理した 56 入力で、status・文言が違う入力はない。`0089-paths` は変更しない。
 
 この対応で今受理される入力（要素 1 個の集合と、文字列・record を含まない fold）の結果・work・IR は変わらない。変わるのは、文字列・record を含み要素が 2 個以上の集合を R1 で fold する経路の work（record の結果で 2 乗）と、結果に比較できない組がある入力の扱い（受理から拒否）。
+
+## レビューへの対応（2 回目）
+
+- **fold の結果が集合でない時にも比較可能性の確認が走る（Minor）: 有効。** 初期値 `0`、要素 `{"x","y"}`、body `IF element = "z" THEN acc \union {element} ELSE acc` は、R1 として受理されたのに、確認が結果の `0` を集合として読んで拒否になった（TLC は `0` を返す）。確認は結果が集合の時だけ行う。回帰: `a_fold_whose_result_is_not_a_set_skips_the_comparability_check`（v1・v2。修正前は `Expected a collection or string` で失敗）。
+- **record の確認が最初の違う field で止まる（Major）: 有効。** 確認は `equal` を使っていたため、先の field が違うと、後の field の Int と Bool の食い違いを見ずに通した。`{a: 1, b: 1}` と `{a: 2, b: TRUE}` は通り、`b` が先に比べられる順なら TLC はエラーにする。結果が field の並びに依っていた。
+  - 直し方: 確認を、対応する全ての field と入れ子の値を種類で比べる再帰（`same_kinds`）に替えた。整数同士・Boolean 同士・型付き model value の組・順位の違いは `equal` と同じ判定で、集合・関数は長さが同じなら全ての対応する組へ下りる（長さが違うと `equal` は不等で止まるので、そこで止める）。TLC が比べる順は IR に載らないので、どの順でも評価エラーにならないことを全ての組で確かめる。健全な側に倒れ、同種の field を持つ record の集合は受理したままである。
+  - 回帰（修正前に Red を確認）: `records_that_differ_in_the_kind_of_any_field_are_refused_whatever_the_field_order`（4 形、v1・v2。2 番目の `{a:1,b:1}` と `{a:2,b:TRUE}` と、入れ子の record の後ろの field を含む）。対照: `records_whose_fields_agree_in_kind_are_accepted_when_only_values_differ`。
+  - 費用: 組あたり、比べる値の数だけ tick を使う。n 要素の結果で n(n-1)/2 組。全要素が整数・Boolean・文字列の結果は確認を省くので、今受理される入力の work は変わらない。測定は [0089c-new-path](../runs/0089c-new-path/result.json): 64 要素の record の fold の work は v1 で 4,549 から 8,581（その前は 2,533）になった。中央値時間は v1 で約 245〜264 µs で、0089b の約 248 µs と差は出ていない。整数の fold は work・時間とも変わらない。grid の全文字列の比較は [0089c-paths](../runs/0089c-paths/result.json): 84 入力の status と拒否の文言は 0089b-paths と同じで、work だけが変わった入力がある。`0089b-*` は変更しない。

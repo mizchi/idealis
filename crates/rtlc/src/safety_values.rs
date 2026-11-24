@@ -851,7 +851,10 @@ impl<'scope> Arena<'scope> {
         value: Scalar,
         message: &'static str,
     ) -> Result<(), CoreError> {
-        let members = self.members(value)?;
+        let Ok(Cell::Set(members)) = self.cell(value) else {
+            return Ok(());
+        };
+        let members = members.clone();
         let kind = |value: Scalar| match value {
             Scalar::Int(_) => Some(0),
             Scalar::Bool(_) => Some(1),
@@ -866,13 +869,42 @@ impl<'scope> Arena<'scope> {
         }
         for (index, left) in members.iter().enumerate() {
             for right in &members[index + 1..] {
-                self.tick()?;
-                if self.equal(*left, *right).is_err() || self.equal(*right, *left).is_err() {
+                if self.same_kinds(*left, *right).is_err() {
                     return Err(CoreError::protocol(message));
                 }
             }
         }
         Ok(())
+    }
+    fn same_kinds(&mut self, left: Scalar, right: Scalar) -> Result<(), CoreError> {
+        self.tick()?;
+        if left == right
+            || matches!(
+                (left, right),
+                (Scalar::Int(_), Scalar::Int(_)) | (Scalar::Bool(_), Scalar::Bool(_))
+            )
+            || self.model_comparison(left, right)?
+        {
+            return Ok(());
+        }
+        if self.rank(left) != self.rank(right) {
+            return Err(CoreError::protocol("Incomparable TLA values"));
+        }
+        let pairs: Vec<(Scalar, Scalar)> = match (self.cell(left), self.cell(right)) {
+            (Ok(Cell::Set(left)), Ok(Cell::Set(right))) if left.len() == right.len() => {
+                left.iter().copied().zip(right.iter().copied()).collect()
+            }
+            (Ok(Cell::Function(left)), Ok(Cell::Function(right))) if left.len() == right.len() => {
+                left.iter()
+                    .zip(right.iter())
+                    .flat_map(|(left, right)| [(left.0, right.0), (left.1, right.1)])
+                    .collect()
+            }
+            _ => vec![],
+        };
+        pairs
+            .into_iter()
+            .try_for_each(|(left, right)| self.same_kinds(left, right))
     }
     fn fold_independence(&self, fold: &Expression) -> OrderIndependence {
         match self.prepared {
