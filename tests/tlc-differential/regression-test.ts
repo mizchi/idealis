@@ -68,6 +68,13 @@ const bodyErrors = new Map([
       tlc: "Attempted to apply Head to the empty sequence.",
     },
   ],
+  [
+    "fold-independent-overflow",
+    {
+      idealis: "Safety integer overflow",
+      tlc: "Overflow when computing 2147483647+1",
+    },
+  ],
 ]);
 const core = await createCiWasm();
 for (const input of [
@@ -232,6 +239,7 @@ for (const input of [
     if (first.kind === "error") {
       assert.equal(first.code, "protocol");
       assert.equal(second.kind, "error");
+      assert.equal(second.code, first.code);
       assert.equal(second.message, first.message);
       assert.equal(
         fixture.status === "error" || fixture.unsupported !== undefined,

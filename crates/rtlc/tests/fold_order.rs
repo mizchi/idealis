@@ -595,30 +595,28 @@ fn captures_of_the_fold_callback_must_not_read_the_accumulator_or_the_element() 
 fn callback_calls_must_pass_the_accumulator_then_the_element() {
     let strings = set(vec![text("b"), text("a")]);
     let callee = cup(parameter(0), set(vec![parameter(1)]));
-    for (arguments, accepted) in [
-        (vec![bound(0), bound(1)], true),
-        (vec![bound(1), bound(0)], false),
-        (vec![bound(0)], false),
-        (vec![bound(0), bound(1), bound(1)], false),
-        (vec![bound(0), tuple(vec![bound(1)])], false),
-    ] {
-        let fold = json!({"op":"fold","accumulator":0,"initial":set(vec![]),"collection":strings,"order":"set-members","body":{"op":"call","definition":0,"arguments":arguments,"captures":[]}});
-        let program = wire(
+    let wrapped = set(vec![tuple(vec![text("b")]), tuple(vec![text("a")])]);
+    let fold_of = |arguments: Vec<Value>| json!({"op":"fold","accumulator":0,"initial":set(vec![]),"collection":strings,"order":"set-members","body":{"op":"call","definition":0,"arguments":arguments,"captures":[]}});
+    let program_of = |arguments: Vec<Value>, expected: Value| {
+        wire(
             2,
-            strings.clone(),
-            fold,
+            expected,
+            fold_of(arguments),
             vec![definition(0, callee.clone(), 0)],
-        );
-        match run(&program) {
-            Ok(result) => assert!(
-                accepted && result.violation.is_none(),
-                "{arguments:?}",
-                arguments = program.definitions.is_some()
-            ),
-            Err(error) => {
-                assert!(!accepted, "{}", error.message);
-            }
-        }
+        )
+    };
+    let accepted = program_of(vec![bound(0), bound(1)], strings.clone());
+    let result = run(&accepted).unwrap();
+    assert!(result.violation.is_none());
+    let wrapped_element = program_of(vec![bound(0), tuple(vec![bound(1)])], wrapped);
+    assert_eq!(refusal(&wrapped_element), STRINGS);
+    for arguments in [
+        vec![bound(1), bound(0)],
+        vec![bound(0)],
+        vec![bound(0), bound(1), bound(1)],
+    ] {
+        let program = program_of(arguments, strings.clone());
+        assert!(run(&program).is_err());
     }
 }
 
@@ -1005,5 +1003,26 @@ fn matching_record_fields_by_name_charges_the_budget_in_proportion_to_the_fields
         run(&program).unwrap().work
     };
     let (narrow, wide) = (work(100), work(200));
-    assert_eq!((narrow, wide), (3367, 6667));
+    assert_eq!((narrow, wide), (3779, 7479));
+}
+
+#[test]
+fn a_set_nested_in_a_shared_or_lone_member_is_checked_for_mixed_kinds() {
+    let collection = set(vec![text("p"), text("q")]);
+    let mixed = set(vec![
+        kinds_record(int(0), truth()),
+        kinds_record(int(1), int(0)),
+    ]);
+    let shared = branching_union_body(
+        "p",
+        vec![tuple(vec![mixed.clone(), text("p")])],
+        vec![tuple(vec![mixed.clone(), text("q")])],
+    );
+    let lone = branching_union_body("p", vec![mixed.clone()], vec![mixed.clone()]);
+    for version in [1, 2] {
+        for (label, body) in [("shared", &shared), ("lone", &lone)] {
+            let program = fold_program(version, &set(vec![]), &collection, body, &set(vec![]));
+            assert_eq!(refusal(&program), STRINGS, "v{version} {label}");
+        }
+    }
 }

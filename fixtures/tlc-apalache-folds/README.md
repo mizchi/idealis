@@ -20,7 +20,7 @@ stdout と stderr を同じストリームへ保存し、次の置換だけを�
 | `\b\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\b` | `<time>` |
 
 ホスト説明の OS・architecture・JVM は置換し、FP set と queue の名前は残した。TLC のメッセージ、ソース位置、状態数・生成数、seed、fingerprint の行は変更していない。`expected.json` に source / config / 置換後 log の SHA-256、終了コード、判定、正常終了時の状態数・生成数、エラー時の文言と位置を記録する。
-値は TLC の `x = ...` から PortableValue へ転記し、idealis の出力を期待値に使わない。値の対照は `Prop == x # x` の初期 invariant violation で取得する。Next の対照は2状態・3生成の完全探索。fixture の `unsupported` は TLC の失敗を表さず、TLC が値を返す入力、または TLC が評価エラーを返す入力を idealis の対応 fragment で拒否することを表す。`trace` は状態の列で、Next を含む対照の全状態を比べる。
+値は TLC の `x = ...` から PortableValue へ転記し、idealis の出力を期待値に使わない。値の対照は `Prop == x # x` の初期 invariant violation で取得する。Next の対照のうち `fold-next-action` は2状態・3生成の完全探索で完了し、`fold-independent-next` は `Safe` が x = 4 で崩れる3状態の反例（trace は 0 → 2 → 4）になる。fixture の `unsupported` は TLC の失敗を表さず、TLC が値を返す入力、または TLC が評価エラーを返す入力を idealis の対応 fragment で拒否することを表す。`trace` は状態の列で、Next を含む対照の全状態を比べる。
 
 | 対照 | ケース | TLC / idealis |
 | --- | --- | --- |
@@ -34,7 +34,7 @@ stdout と stderr を同じストリームへ保存し、次の置換だけを�
 | fragment 制限 | `fold-reject-lambda`, `fold-reject-operator-parameter`, `fold-reject-recursive`, `fold-reject-other-apalache` | TLC は値を返す。frontend は拒否 |
 | 不正な形式 | 残り7件の `fold-reject-*` | TLC の input error と frontend 拒否。正常の意味論一致には数えない |
 
-sequence は先頭から処理し、文字列・record・関数を含む任意の要素種を扱う。集合 fold は TLC v1.7.4 (`5a47802`) の順序に合わせ、整数、Boolean、tuple / sequence、集合、整数 key の関数と、それらの再帰的な組み合わせを扱う。整数は数値順、Boolean は FALSE / TRUE、tuple / sequence と集合は要素数の後に再帰的な辞書順、関数は domain 要素数の後に各 key / value を交互に比較する。集合要素内の全整数 function key の最大値と最小値の差が `i32::MAX` を超える場合は拒否する。TLC の interval / 明示 domain 間の32-bit減算で順序が反転するためで、IR は元の domain 表現を区別しない。primitive 整数や関数の値にこの幅制限は課さない。domain が `1..n` の関数は既存の値表現どおり sequence として扱う。文字列・record をどの深さでも含む集合は、IR に TLC の文字列・field 名の intern ID がないため、それぞれ理由を明示した評価時エラーで拒否する。非整数 key のその他の関数は従来の `Unsupported TLA input: set fold order for strings, records or functions` を維持する。model value は従来どおり未対応で、異なる値種の比較が必要な集合も拒否する。順序に依存しない sequence fold は要素種を制限しない。
+sequence は先頭から処理し、文字列・record・関数を含む任意の要素種を扱う。集合 fold は TLC v1.7.4 (`5a47802`) の順序に合わせ、整数、Boolean、tuple / sequence、集合、整数 key の関数と、それらの再帰的な組み合わせを扱う。整数は数値順、Boolean は FALSE / TRUE、tuple / sequence と集合は要素数の後に再帰的な辞書順、関数は domain 要素数の後に各 key / value を交互に比較する。要素が2個以上の集合では、要素内の全整数 function key の最大値と最小値の差が `i32::MAX` を超える場合は拒否する。TLC の interval / 明示 domain 間の32-bit減算で順序が反転するためで、IR は元の domain 表現を区別しない。primitive 整数や関数の値にこの幅制限は課さない。domain が `1..n` の関数は既存の値表現どおり sequence として扱う。要素が2個以上で、文字列・record をどの深さでも含む集合は、body が要素を読まない形（R0）と累積値への `\union`（R1）を除き（下の「順序に依存しない fold」）、IR に TLC の文字列・field 名の intern ID がないため、それぞれ理由を明示した評価時エラーで拒否する。要素が2個以上の集合では、非整数 key のその他の関数は従来の `Unsupported TLA input: set fold order for strings, records or functions` を維持する。要素が2個以上の集合では、model value は従来どおり未対応で、異なる値種の比較が必要な集合も拒否する。要素が1個以下の集合（S）は、これらの制限を受けない。順序に依存しない sequence fold は要素種を制限しない。
 
 | value-order の対照 | TLC の値・結果 | idealis |
 | --- | --- | --- |
@@ -67,7 +67,7 @@ sequence は先頭から処理し、文字列・record・関数を含む任意�
 
 ## 順序に依存しない fold
 
-集合 fold の拒否は、TLC の順序を IR から再現できないことが理由である。TLC の順序を知らなくても結果が TLC と同じになると IR から証明できる fold は、次の3つの形で受理する。判定は rtlc が IR の木だけを見て行い、文字列か record を含むために今まで拒否されていた fold にだけ使う。
+集合 fold の拒否は、TLC の順序を IR から再現できないことが理由である。TLC の順序を知らなくても結果が TLC と同じになると IR から証明できる fold は、次の3つの形で受理する。判定は rtlc が IR の木だけを見て行う。R0 と R1 は、文字列か record を含むために今まで拒否されていた fold にだけ使う。S は、要素の種類（Boolean を key にした関数、整数 key の幅が `i32::MAX` を超える関数、model value を含む）を問わず適用する。
 
 - S: 集合の要素が1個以下。要素同士の比較が起きない。種類を問わず受理する。
 - R0: body が要素を読まない。毎回同じ関数を要素数だけ適用するので、値・評価エラーの文言と位置・overflow が順序に依らない。

@@ -867,14 +867,34 @@ impl<'scope> Arena<'scope> {
         }) {
             return Ok(());
         }
-        for (index, left) in members.iter().enumerate() {
-            for right in &members[index + 1..] {
-                if let Err(error) = self.same_kinds(*left, *right) {
-                    return Err(match error.code {
-                        "budget" | "evaluation-budget" => error,
-                        _ => CoreError::protocol(message),
-                    });
+        match self.check_nested_kinds(value) {
+            Err(error) if !matches!(error.code, "budget" | "evaluation-budget") => {
+                Err(CoreError::protocol(message))
+            }
+            outcome => outcome,
+        }
+    }
+    fn check_nested_kinds(&mut self, root: Scalar) -> Result<(), CoreError> {
+        let mut pending = vec![root];
+        let mut visited = HashSet::new();
+        while let Some(value) = pending.pop() {
+            let Scalar::Ref(index) = value else {
+                continue;
+            };
+            if !visited.insert(index) {
+                continue;
+            }
+            self.tick()?;
+            match self.cell(value) {
+                Ok(Cell::Set(members)) => {
+                    let members = members.clone();
+                    self.same_kinds_within(&members)?;
+                    pending.extend(members);
                 }
+                Ok(Cell::Function(entries)) => {
+                    pending.extend(entries.iter().flat_map(|(key, value)| [key, value]));
+                }
+                _ => {}
             }
         }
         Ok(())
@@ -895,8 +915,6 @@ impl<'scope> Arena<'scope> {
         }
         if let (Ok(Cell::Set(left)), Ok(Cell::Set(right))) = (self.cell(left), self.cell(right)) {
             let (left, right) = (left.clone(), right.clone());
-            self.same_kinds_within(&left)?;
-            self.same_kinds_within(&right)?;
             if left.len() == right.len() {
                 for first in &left {
                     for second in &right {

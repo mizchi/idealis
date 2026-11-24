@@ -178,3 +178,15 @@ CodeRabbit の指摘（[#101](https://github.com/mizchi/idealis/pull/101)）を�
 - [0089f-paths](../runs/0089f-paths/result.json): 84 入力の status と拒否の文言は `0089e-paths` と同じ。受理 56・拒否 21・評価エラー 7、bounded は 0。work が変わったのは 11 入力（`union`・`union-left`）で、全て増えた（名前の併合と、列の早期の停止の `equal` が tick を使うため）。v1 と v2 の status・文言の食い違いは 0。
 - [0089f-new-path](../runs/0089f-new-path/result.json): 整数の fold の work は `0089e-new-path` と同じ（v1 の状態数 1 で 2,340）。record の work は 64 要素・状態数 1 で v1 が 6,565 から 12,613、v2 が 6,757 から 12,805 に増えた。併合と field の形の走査が tick を使うため。record の中央値時間は v1 で 272〜283 µs で、`0089e` の 273〜278 µs と差が出ていない（load average 3.2。時間は判定に使わない）。
 - 変わる測定値: 文字列・record を含み要素が 2 個以上の集合を R1 で fold する経路の work が増える。今受理される入力（要素 1 個の集合と、文字列・record を含まない fold）の結果・work・IR は変わらない。受理が増えるのは、列を含む結果で最初の違いで止まる形（`{<<1,1>>,<<2,TRUE>>}`）と、大きさの違う入れ子の集合（`{{1},{FALSE,TRUE}}`）。拒否が増えるのは、record と、長さの違う key が文字列でない列・関数の組。
+
+## レビューへの対応（7 回目）
+
+6 回目の push の後に届いた 6 件を、コードで確かめて扱った。
+
+- **共有された値が `same_kinds` の早期の返却で確認から漏れる（Minor）: 有効で、範囲はもっと広かった。** `left == right` の返却は、同じ参照の値の組で入れ子の確認を飛ばす。再現: `R = {[a |-> 0, b |-> FALSE], [a |-> 1, b |-> 0]}` を、`<<R, "p">>` と `<<R, "q">>` の第 1 要素に共有する結果は受理された。さらに、1 個だけの要素 `{R}` も、比べる相手がないので受理された。TLC は `R` を正規化する時に、2 つの record を比べ、`b` が先の順では `FALSE` と `0` でエラーになる。正規化は、共有されているか、1 個だけかに依らない。直し方: 集合の中の組の確認を、2 つの値を比べる時ではなく、結果から届く全ての集合に対して 1 回ずつ行う（`check_nested_kinds`。参照で重複を除き、集合の要素と関数の key・値をたどる）。`same_kinds` は 2 つの値の間の組（大きさが同じ集合の間、record の同名の field、列・関数）だけを比べる。参照が同じ値の組の早期の返却は、間の組が自明に比べられるので残す。回帰 `a_set_nested_in_a_shared_or_lone_member_is_checked_for_mixed_kinds`（共有と 1 個だけの両方、v1・v2。修正前は受理で失敗）。
+  - 費用: 確認は結果のセルを 1 回ずつ tick を使ってたどる。幅 100 と 200 の record の work は 3,367・6,667 から 3,779・7,479 になった（`matching_record_fields_by_name_charges_the_budget_in_proportion_to_the_fields` の固定値を更新）。測定は [0089g-paths](../runs/0089g-paths/result.json)（status・文言は `0089f-paths` と同じ。work が変わったのは 12 入力で、減ったものはない）と [0089g-new-path](../runs/0089g-new-path/result.json)（整数の fold の work は同じ。record は v1 の状態数 1 で 12,613 から 12,679）。時間は判定に使わない。6 回目の「`same_kinds` の規則」の「集合どうし」の中の、それぞれの集合の中の組を比べるという記述は、この変更で `same_kinds` の外へ移った。確認する組の集合は変わらない。
+- **wrapped 要素の callback の対照が任意のエラーを受け入れる（Minor）: 有効。** 引数の数が正しい `[bound(0), tuple(bound(1))]` の行は、期待の集合（包んだ文字列の集合）を置き、`STRINGS` の拒否を完全一致で確かめる。引数の数が違う 3 行は、検証エラーになることだけを別に確かめる。
+- **`fixtures/tlc-apalache-folds/README.md` の Next の対照の記述（Minor）: 有効。** `fold-next-action` を 2 状態・3 生成の完全探索、`fold-independent-next` を `Safe` が x = 4 で崩れる 3 状態の反例（0 → 2 → 4）と書き分けた。
+- **同 README の S の記述（Minor）: 有効。** 文字列・record・非整数 key・model value・整数 key の幅の制限を「要素が 2 個以上の集合では」に限り、R0・R1 の例外を書いた。S は要素の種類を問わず適用すると書いた。
+- **`fold-independent-overflow` の期待（Minor）: 有効。** 差分テストの `bodyErrors` に、rtlc の `Safety integer overflow` と、採取した TLC のログの `Overflow when computing 2147483647+1` を足した。rtlc と TLC の文言は違うので、共有の fixture の欄には入れず、`fold-singleton-error` と同じ表に別々に置いた。
+- **IR の版の間で `code` を比べる（Minor）: 有効。** v1 と v2 の拒否の比較に `second.code == first.code` を足した。
