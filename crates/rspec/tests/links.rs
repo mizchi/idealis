@@ -209,3 +209,49 @@ fn stale_markdown_is_detected() {
         std::fs::read_to_string(root().join("fixtures/rmodel/spec.md")).unwrap()
     );
 }
+
+/// Review of #103: terms may name checks (plan 0092); checks still need
+/// claims.
+#[test]
+fn terms_may_reference_checks() {
+    let mut spec = load("spec/idealis.json");
+    spec["spec"]["terms"][0]["model"] =
+        json!([{"path": "spec/models/roracle-report.model", "name": "MatchedOnlyIfAllMatched"}]);
+    assert_eq!(problems(&spec), vec![]);
+}
+
+/// Review of #103: two paths with the same source id are an error, and a
+/// control's reference file is registered.
+#[test]
+fn manifest_sources_are_distinct_and_registered() {
+    let spec = rspec::from_json(
+        &std::fs::read_to_string(root().join("fixtures/rmodel/spec.json")).unwrap(),
+    )
+    .unwrap();
+    let clash = rspec::documents_manifest(&rspec::Drift {
+        glossary: "docs/glossary.md",
+        documents: vec!["crates/a-b/README.md".into(), "crates/a_b/README.md".into()],
+        rules: vec![],
+        controls: vec![],
+    });
+    assert!(clash.is_err());
+    let manifest = rspec::documents_manifest(&rspec::Drift {
+        glossary: "docs/glossary.md",
+        documents: vec![],
+        rules: vec![("fixtures/rmodel/spec.md", &spec)],
+        controls: vec![(
+            "own",
+            "semantic",
+            "fixtures/spec-controls/bounded-right.md",
+            "fixtures/spec-controls/rule-negated.md",
+            Some("PERM-NO-LEAK"),
+        )],
+    })
+    .unwrap();
+    let roots = manifest["roots"].as_array().unwrap();
+    assert!(
+        roots
+            .iter()
+            .any(|root| root == "fixtures/spec-controls/bounded-right.md")
+    );
+}

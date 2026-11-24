@@ -292,14 +292,14 @@ action によって変わる関係（rmodel の var、Alloy の var field）の�
 
 ### ORACLE-ACTUAL-IS-A-VALUE
 
-一致するのは実装の観測が値のときだけ。実装が許容値の集合を返したら、比較は無効。
+一致するのは実装の観測が値のときだけ。どちらの観測も未確定・無効・エラーでないとき、実装が許容値の集合を返したら、比較は無効。
 
 - `spec/models/roracle-compare.model` の `MatchedNeedsActualValue` は holds
 - `spec/models/roracle-compare.model` の `ActualAllowedIsInvalid` は holds
 
 ### ORACLE-ALLOWED-SETS
 
-基準が許容値の集合なら、含まれる値は一致、含まれない値は不一致。空の集合との比較は無効。
+どちらの観測も未確定・無効・エラーでないとき、基準が許容値の集合なら、含まれる値は一致、含まれない値は不一致。空の集合との比較は無効。
 
 - `spec/models/roracle-compare.model` の `EmptyAllowedIsInvalid` は reachable
 - `spec/models/roracle-compare.model` の `AllowedMismatch` は reachable

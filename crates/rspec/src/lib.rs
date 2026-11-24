@@ -186,7 +186,14 @@ pub fn links(spec: &Spec, root: &Path) -> Vec<Problem> {
             let Some(Some(model)) = models.get(reference.path.as_str()) else {
                 continue;
             };
-            if !declarations(model).contains(&reference.name) {
+            // A term may name a declaration or a check (plan 0092); D3 still
+            // requires claims for checks (review of #103).
+            if !declarations(model).contains(&reference.name)
+                && !model
+                    .checks
+                    .iter()
+                    .any(|check| check.name == reference.name)
+            {
                 problems.push(problem(
                     "D2",
                     format!(
@@ -415,11 +422,24 @@ fn source_id(path: &str) -> String {
 /// The manifest for `jev-lint docs --document-manifest`, derived from the
 /// specifications so a new rule or crate document is compared without a
 /// hand edit.
-pub fn documents_manifest(drift: &Drift<'_>) -> serde_json::Value {
+pub fn documents_manifest(drift: &Drift<'_>) -> Result<serde_json::Value, String> {
     use serde_json::json;
     let mut files = serde_json::Map::new();
+    let mut clash = None;
+    // Two paths with one source id would silently merge (review of #103).
     let mut register = |path: &str, role: &str| {
-        files.insert(source_id(path), json!({"path": path, "role": role}));
+        let id = source_id(path);
+        match files.get(&id) {
+            Some(existing) if existing["path"] != path => {
+                clash.get_or_insert_with(|| {
+                    format!("{path} and {} share the source id {id}", existing["path"])
+                });
+            }
+            Some(_) => {}
+            None => {
+                files.insert(id, json!({"path": path, "role": role}));
+            }
+        }
     };
     register(drift.glossary, "reference");
     for document in &drift.documents {
@@ -456,6 +476,7 @@ pub fn documents_manifest(drift: &Drift<'_>) -> serde_json::Value {
         }
     }
     for (id, mode, reference, target, heading) in &drift.controls {
+        register(reference, "reference");
         register(target, "document");
         let mut selector = json!({"source": source_id(target)});
         if let Some(heading) = heading {
@@ -478,10 +499,13 @@ pub fn documents_manifest(drift: &Drift<'_>) -> serde_json::Value {
         .map(|file| file["path"].as_str().unwrap().to_owned())
         .collect();
     roots.sort();
-    json!({
+    if let Some(clash) = clash {
+        return Err(clash);
+    }
+    Ok(json!({
         "schema": "jev-lint-documents-manifest-1",
         "roots": roots,
         "files": files,
         "comparisons": comparisons,
-    })
+    }))
 }
