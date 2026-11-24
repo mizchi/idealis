@@ -1,0 +1,423 @@
+{
+  "version": 1,
+  "group": "core",
+  "reference": "alloy-6.2.0",
+  "implementations": [
+    "ralloy"
+  ],
+  "status": "matched",
+  "cases": [
+    {
+      "case": {
+        "id": "cardinality-formulas",
+        "input": {
+          "source": "sig A { r: set A }\nOneOfTwo: run { one A } for 2 but exactly 2 A, 0 Int\nOneOfOne: run { one A } for 2 but exactly 1 A, 0 Int\nLoneOfOne: run { lone A } for 2 but exactly 1 A, 0 Int\nLoneOfTwo: run { lone A } for 2 but exactly 2 A, 0 Int\nOneEdge: run { one r and some A } for 2 but 0 Int\nLoneLoop: run { lone r and r = A -> A } for 2 but exactly 2 A, 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "LoneLoop": false,
+          "LoneOfOne": true,
+          "LoneOfTwo": false,
+          "OneEdge": true,
+          "OneOfOne": true,
+          "OneOfTwo": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "LoneLoop": false,
+              "LoneOfOne": true,
+              "LoneOfTwo": false,
+              "OneEdge": true,
+              "OneOfOne": true,
+              "OneOfTwo": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "dag-closure",
+        "input": {
+          "source": "sig Node { edge: set Node }\nfact Dag { no iden & ^edge }\nassert NoReturn { all n: Node | n not in n.^edge }\nassert Reflexive { iden & (Node -> Node) in *edge }\nSafe: check NoReturn for 3 but 0 Int\nReflexiveClosure: check Reflexive for 3 but 0 Int\nChain: run { some a, b, c: Node | a -> b in edge and b -> c in edge } for 3 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "Chain": true,
+          "ReflexiveClosure": false,
+          "Safe": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "Chain": true,
+              "ReflexiveClosure": false,
+              "Safe": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "dense-graph",
+        "input": {
+          "source": "sig V { e: set V }\nfact Symmetric { e = ~e }\nfact Irreflexive { no iden & e }\nTriangle: run { some disj a, b, c: V | a -> b + b -> c + c -> a in e } for 4 but 0 Int\nassert Connected { all disj a, b: V | a -> b in ^e }\nNotConnected: check Connected for 4 but 0 Int\nMatching: run { all v: V | one v.e } for 4 but exactly 4 V, 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "Matching": true,
+          "NotConnected": true,
+          "Triangle": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "Matching": true,
+              "NotConnected": true,
+              "Triangle": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "exact-scopes",
+        "input": {
+          "source": "sig A {}\nsig B { to: set A }\nExactThree: run { all b: B | b.to = A } for 4 but exactly 3 A, exactly 2 B, 0 Int\nEmpty: run { no A and no B } for 2 but 0 Int\nZero: run { some A } for 0 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "Empty": true,
+          "ExactThree": true,
+          "Zero": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "Empty": true,
+              "ExactThree": true,
+              "Zero": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "graph-cycles",
+        "input": {
+          "source": "sig Node { edge: set Node }\nfact NoSelfLoops { no iden & edge }\nassert Acyclic { no iden & ^edge }\nCyclic: check Acyclic for 3 but 0 Int\nTwoCycle: run { some n: Node | n in n.^edge } for 2 but 0 Int\nDag: run { no iden & ^edge and some edge } for 3 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "Cyclic": true,
+          "Dag": true,
+          "TwoCycle": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "Cyclic": true,
+              "Dag": true,
+              "TwoCycle": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "iff-implies",
+        "input": {
+          "source": "sig P { q: set P }\nassert Contrapositive { (some q => some P) <=> (no P => no q) }\nassert BadConverse { (some q => some P) <=> (some P => some q) }\nContra: check Contrapositive for 3 but 0 Int\nConverse: check BadConverse for 2 but 0 Int\nIff: run { some q <=> no P } for 2 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "Contra": false,
+          "Converse": true,
+          "Iff": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "Contra": false,
+              "Converse": true,
+              "Iff": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "multiplicity",
+        "input": {
+          "source": "sig Owner { one_: one Resource, maybe: lone Resource, many: some Resource }\nsig Resource {}\nNoOwners: run { no Owner } for 2 but 0 Int\nOneOwner: run { one Owner } for 2 but 0 Int\nSharedOne: run { some disj a, b: Owner | a.one_ = b.one_ } for 2 but 0 Int\nEmptyMaybe: run { some o: Owner | no o.maybe } for 1 but 0 Int\nEmptyMany: run { some o: Owner | no o.many } for 2 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "EmptyMany": false,
+          "EmptyMaybe": true,
+          "NoOwners": true,
+          "OneOwner": true,
+          "SharedOne": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "EmptyMany": false,
+              "EmptyMaybe": true,
+              "NoOwners": true,
+              "OneOwner": true,
+              "SharedOne": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "pigeonhole",
+        "input": {
+          "source": "sig Pigeon { hole: one Hole }\nsig Hole {}\nfact Injective { all disj p, q: Pigeon | p.hole != q.hole }\nFit: run { } for 3 but exactly 3 Pigeon, exactly 3 Hole, 0 Int\nOverflow: run { } for 3 but exactly 3 Pigeon, exactly 2 Hole, 0 Int\nassert Distinct { all disj p, q: Pigeon | p.hole != q.hole }\nHolds: check Distinct for 3 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "Fit": true,
+          "Holds": false,
+          "Overflow": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "Fit": true,
+              "Holds": false,
+              "Overflow": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "preds",
+        "input": {
+          "source": "sig Node { next: lone Node }\npred Ring { all n: Node | Node in n.^next }\npred Line { some n: Node | no n.next }\nfact { some Node }\nRingExists: run Ring for 3 but 0 Int\nLineExists: run Line for 3 but 0 Int\nassert RingNoEnd { Ring => no n: Node | no n.next }\nRingHasNoEnd: check RingNoEnd for 3 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "LineExists": true,
+          "RingExists": true,
+          "RingHasNoEnd": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "LineExists": true,
+              "RingExists": true,
+              "RingHasNoEnd": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "quantifiers",
+        "input": {
+          "source": "sig A { r: set A }\nAllSome: run { all x: A | some x.r } for 2 but exactly 2 A, 0 Int\nNoneLoop: run { no x: A | x in x.r } for 2 but 0 Int\nOneMap: run { one x: A | x.r = A } for 2 but exactly 2 A, 0 Int\nLoneMap: run { lone x: A | some x.r } for 2 but exactly 2 A, 0 Int\nDisjointPair: run { some disj x, y: A | x.r = y and y.r = x } for 2 but 0 Int\nEmptyAll: run { all x: A | x in none } for 2 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "AllSome": true,
+          "DisjointPair": true,
+          "EmptyAll": true,
+          "LoneMap": true,
+          "NoneLoop": true,
+          "OneMap": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "AllSome": true,
+              "DisjointPair": true,
+              "EmptyAll": true,
+              "LoneMap": true,
+              "NoneLoop": true,
+              "OneMap": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "restrictions",
+        "input": {
+          "source": "sig A { f: set B }\nsig B {}\nDomainRestrict: run { some a: A | a <: f = a -> a.f and some a.f } for 2 but 0 Int\nRangeRestrict: run { some b: B | f :> b != f } for 2 but 0 Int\nTranspose: run { ~f = B <: ~f and some f } for 2 but 0 Int\nProduct: run { f = A -> B and some A and some B } for 2 but 0 Int\nUniv: run { univ = A + B } for 2 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "DomainRestrict": true,
+          "Product": true,
+          "RangeRestrict": true,
+          "Transpose": true,
+          "Univ": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "DomainRestrict": true,
+              "Product": true,
+              "RangeRestrict": true,
+              "Transpose": true,
+              "Univ": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "set-algebra",
+        "input": {
+          "source": "sig S { a: set S, b: set S }\nassert UnionCommutes { a + b = b + a }\nassert DiffSubset { a - b in a }\nassert InterLaw { a & b = a - (a - b) }\nassert Wrong { a - b = b - a }\nUnion: check UnionCommutes for 3 but 0 Int\nDiff: check DiffSubset for 3 but 0 Int\nInter: check InterLaw for 3 but 0 Int\nBroken: check Wrong for 2 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "Broken": true,
+          "Diff": false,
+          "Inter": false,
+          "Union": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "Broken": true,
+              "Diff": false,
+              "Inter": false,
+              "Union": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "sig-multiplicity",
+        "input": {
+          "source": "one sig Root { child: set Leaf }\nlone sig Spare {}\nsome sig Leaf {}\nRootOnly: run { no Leaf } for 3 but 0 Int\nSpareAbsent: run { no Spare } for 3 but 0 Int\nAllChildren: run { Root.child = Leaf } for 3 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "AllChildren": true,
+          "RootOnly": false,
+          "SpareAbsent": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "AllChildren": true,
+              "RootOnly": false,
+              "SpareAbsent": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

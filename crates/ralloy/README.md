@@ -34,13 +34,14 @@ fn main() -> Result<(), ralloy::Error> {
 
 ## 対応するサブセット
 
-- 静的なトップレベルsigとone/lone/some、名前が一意な二項field。fieldの既定multiplicityはone。
-- fact、引数なしpred、名前付きassert、run/check、全体scopeと型ごとの上限・exactly。
+- sigとone/lone/some、`abstract`、`extends`、親が1つの`in`、一括宣言、signature fact。名前が一意なfield。fieldの既定multiplicityはone。`A -> B`・`A -> B -> C`と`A m -> n B`で4項までのfieldを書ける。
+- fact、引数付きpred/fun（引数は既定の`one`）、名前付きassert、run/check、全体scopeと型ごとの上限・exactly。呼び出しは`P[a, b]`・`a.P[b]`・`p.f`、それ以外の`r[x]`はbox join。
 - 関係の和、差、交差、積、join、転置、推移閉包、反射推移閉包、domain/range制限。
 - 等価・包含、論理結合、単一atomを束縛するall/no/some/one/loneとdisj。
-- none、univ、iden、Int、String。noneは単項の空集合で、二項の空関係はnone -> noneと書く。整数演算は扱わないが、既定4-bitのInt atomはuniv/idenへ含める。0 Intも指定できる。
+- none、univ、iden、Int、String。noneは単項の空集合で、二項の空関係はnone -> noneと書く。既定4-bitのInt atomはuniv/idenへ含める。0 Intも指定できる。
+- 整数リテラル、`#e`、`plus`などの算術と比較。Int型の関係は値の和として整数になり、値はbit幅の2の補数で桁あふれする（Alloy 6.2.0の既定）。
 
-signatureは最大8個、fieldは最大8個、signatureのscopeは最大8、Intは0-5 bit、全体は64 atomまで。sourceは1 MiB、10万token、tokenは256 bytes、式の再帰は48段、同一式の連続演算は512 tokenまで。超える入力はresource errorにする。
+signatureは最大16個、fieldは最大8個、signatureのscopeは最大8、Intは0-5 bit、全体は64 atomまで。2列以上のfieldは、ownerのatomごとのtuple空間が64まで。sourceは1 MiB、10万token、tokenは256 bytes、式の再帰は48段、同一式の連続演算は512 tokenまで。超える入力はresource errorにする。
 
 sigの継承・subset、複数sigの一括宣言、signature fact、module読込、引数付きpred/function、setを束縛する高階量化、整数演算・cardinality、3項以上の関係、時間・varは未対応として拒否する。Alloyの型検査全体や全構文の互換性は示さない。
 
@@ -56,7 +57,7 @@ sigの継承・subset、複数sigの一括宣言、signature fact、module読込
 
 no-counterexampleはスコープ外の証明ではない。no-instanceもスコープ外の不整合を意味しない。未対応、構文・型・scope・protocol違反は`Error`として返し、検査成功へ変換しない。
 
-関係をbit matrixとして評価し、signatureの個数とfieldを列挙する。atom名で区別できないモデルでは、signatureごとに標準のatom名を使う。SAT符号化、節学習、一般的な対称性除去は実装していないため、小さいscope向けの試作。workは列挙と式の評価を数え、parserの費用やwall clockの上限ではない。
+関係をbit matrixとして評価し、signatureの個数とfieldを列挙する。atom名で区別できないモデルでは、signatureごとに標準のatom名を使う。入れ替えられるatomの重複した枝は、lex-leaderで探索の途中で刈る。`div`・`rem`を含まないモデルで、fieldのslotの幅が24 bitを超えるcommandは、関係・sigの階層・整数（bitベクトル）をAIGとTseitin変換でCNFにし、ralloyの中のCDCLで解く。workは列挙と式の評価を数え、parserの費用やwall clockの上限ではない。
 
 ## nativeとWasm
 
@@ -77,6 +78,17 @@ no-counterexampleはスコープ外の証明ではない。no-instanceもスコ�
 固定instanceのJSONL requestはkindを`check-instance`とし、同じsource/command/maxWorkに`instance: {signatures, fields}`を加える。応答は`kind: instance-check`とInstanceCheck。
 
 成功は`kind: analysis`とAnalysis、拒否は`kind: error`とError。Wasm ABI v1は`ralloy_abi_version`、`ralloy_input_resize`、`ralloy_dispatch`、`ralloy_output_ptr`、`ralloy_output_len`で、同じJSONを扱う。
+
+## Alloyとの差分テスト
+
+`tests/alloy/<group>/*.als`のモデルを公式Alloy 6.2.0（SAT4J）で1回実行し、commandごとに解があるか（runならinstance、checkならcounterexample）を[roracle](../roracle)の`CheckReport`として`tests/alloy/<group>.json`へ保存する。`tests/alloy_oracle.rs`は現在のモデルを登録して保存した答えを`replay`し、ralloyだけを実行する。予算切れ、解析エラー、自分の`check_instance`で再現できないinstanceは一致にしない。モデルを編集して記録し直していなければ、入力の不一致で失敗する。
+
+記録にはJavaとAlloyのjarが必要で、再生には不要。instanceがAlloyでも成り立つかは検査していない。
+
+```sh
+just ralloy-oracle-record core   # Java/Alloyで記録し直す
+just ralloy-oracle-bench         # 各モデルの全commandの解析時間
+```
 
 ```sh
 just ralloy-build

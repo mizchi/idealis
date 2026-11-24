@@ -4,28 +4,29 @@
 
 ## 対応済み
 
-- [x] トップレベルsig、one/lone/some、名前が一意な二項fieldとmultiplicity。
-- [x] fact、引数なしpred、名前付きassert、run/check、全体scopeと型ごとの上限・exactly。
-- [x] 関係の和・差・交差・積・join・転置・推移閉包・反射推移閉包・domain/range制限。
-- [x] 等価・包含・論理結合、単一atomを束縛するall/no/some/one/loneとdisj。
-- [x] none/univ/iden/Int/String。Int atomを扱うことと整数演算を区別する。
-- [x] bit matrixで関係を評価し、有限構造を列挙してinstanceやcounterexampleを返す。
-- [x] check_instanceで渡されたsig/fieldを固定し、scope・宣言・fact・性質を検査する。
-- [x] matched / mismatch / invalid / unknownと、探索結果の各statusを区別する。
-- [x] native JSONLとホストimport不要のWasm ABI v1。JVM・Z3・idealisの他crateに依存しない。
+- [x] sig: トップレベル・`abstract`・`extends`・親が1つの`in`、one/lone/some、`sig A, B {}`、signature fact。子の明示scopeは親を超えず、one/exactlyの子は親を広げる（0080）。
+- [x] field: 名前が一意で4項まで、`A m -> n B`。fact、assert、run/check、全体scope・型ごとの上限・exactly、`for`なしの既定3（0079、0080）。
+- [x] 式: 4項までの和・差・交差・積・join・domain/range制限、転置・閉包、比較・論理結合、atomを束縛する量化とdisj、none/univ/iden/Int/String、引数付きpred/funとbox join（0079、0081）。
+- [x] 整数: リテラル、`#e`、`plus`などの算術、比較。Int型の関係は値の和になり、bit幅の2の補数で桁あふれする（0082）。
+- [x] 入れ替えられるatomの対称性を、lex-leaderで探索の途中で除く。2列以上のfieldとsubset sigも扱う（0083、0084）。
+- [x] `div`・`rem`を含まないモデルで、fieldのslotの幅が24 bitを超えるcommandは、関係・階層・整数をSATへ符号化してralloy内のCDCLで解く（0085、0086）。
+- [x] 有限構造の全列挙、`check_instance`、matched/mismatch/invalid/unknownとstatusの区別、native JSONLとホストimport不要のWasm ABI v1。
+
+## Alloyとの差分テスト
+
+- [x] 公式Alloy 6.2.0の答えをroracleの`CheckReport`として保存し、`cargo test`で再生する。5 group・38モデル・178 commandすべてで一致する（0078〜0086）。
+
+[評価0078](../../evals/iterations/0078-ralloy-alloy-oracle.md)から[0086](../../evals/iterations/0086-ralloy-sat-hierarchy-integers.md)を参照。
 
 ## 非対応・対象外
 
-- [ ] sigの継承・subset、一括宣言、signature fact、moduleの読み込み。
-- [ ] 引数付きpred/function、setを束縛する高階量化、3項以上の関係。
-- [ ] 整数演算・cardinality、時間・varを使うAlloy 6の振る舞い。
-- [ ] Alloy全体の構文・型検査、SAT符号化、節学習、一般的な対称性除去。
+- [ ] 親が複数の`in`、`@field`、module、`set`などの引数、高階量化、5項以上の関係、`sum`、整数を関係として使う式、0による割り算、時間・var。
+- [ ] Alloy全体の構文・型検査、`div`・`rem`のSAT符号化。
 - [ ] 固定instanceの一致だけから未観測の実装履歴を保証すること。
 
 ## 制約と根拠
 
-- [x] sig/field各8、sig scope各8、Int 0〜5 bit、全体64 atom等の上限とwork予算を検査する。
+- [x] sig 16・field 8、sig scope各8、Int 0〜5 bit、全体64 atom、fieldのtuple空間64とwork予算を検査する。
 - [x] no-counterexampleはscope外の証明ではない。no-instance、unknown、エラーを合格に読み替えない。
-- [x] noneは単項の空集合で、二項の空関係はnone -> noneで表す。
 
-[README](README.md)、[parser](src/parser.rs)、[公開境界](src/lib.rs)、[固定instance](src/check.rs)、[評価](../../evals/iterations/0035-alloy-instance.md)を参照。
+[README](README.md)、[parser](src/parser.rs)、[公開境界](src/lib.rs)、[固定instance](src/check.rs)を参照。

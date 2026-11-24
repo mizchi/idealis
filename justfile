@@ -271,6 +271,13 @@ ralloy-test:
   cargo clippy --all-targets --locked --manifest-path crates/ralloy/Cargo.toml -- -D warnings
   cargo test --all-targets --locked --manifest-path crates/ralloy/Cargo.toml
 
+# Records Alloy 6.2.0's answers for tests/alloy/<group> (plan 0078).
+ralloy-oracle-record group java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" jar=".artifacts/alloy-subset/org.alloytools.alloy.dist.jar":
+  cargo run --release --locked --manifest-path crates/ralloy/Cargo.toml --example record_alloy -- {{quote(group)}} {{quote(absolute_path(java))}} {{quote(absolute_path(jar))}}
+
+ralloy-oracle-bench:
+  cargo bench --locked --manifest-path crates/ralloy/Cargo.toml --bench oracle
+
 ralloy-example:
   cargo run --example graph --locked --manifest-path crates/ralloy/Cargo.toml
 

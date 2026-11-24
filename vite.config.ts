@@ -9,6 +9,8 @@ const ignorePatterns = [
   "test-results/**",
   "playwright-report/**",
   "evals/runs/**",
+  // Recorded by examples/record_alloy.rs; kept byte for byte.
+  "crates/ralloy/tests/alloy/*.json",
   "fixtures/**",
   "evals/experiments/structured-fuzz/fuzz/artifacts/**",
   "evals/experiments/structured-fuzz/fuzz/corpus/**",

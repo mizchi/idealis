@@ -3,6 +3,7 @@ mod engine;
 mod eval;
 mod instance;
 mod parser;
+mod sat;
 mod search;
 mod syntax;
 #[cfg(target_arch = "wasm32")]
@@ -110,7 +111,8 @@ pub struct Command {
 #[serde(deny_unknown_fields)]
 pub struct Instance {
     pub signatures: BTreeMap<String, Vec<String>>,
-    pub fields: BTreeMap<String, Vec<[String; 2]>>,
+    /// Tuples of each field, owner atom first; binary fields have pairs.
+    pub fields: BTreeMap<String, Vec<Vec<String>>>,
 }
 #[derive(Default, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -134,8 +136,9 @@ pub struct Model {
 }
 impl Model {
     pub fn parse(source: &str) -> Result<Self, Error> {
-        let syntax = parser::parse(source)?;
+        let mut syntax = parser::parse(source)?;
         let commands = check::validate(&syntax)?;
+        syntax.hierarchy = check::hierarchy(&syntax)?;
         Ok(Self { syntax, commands })
     }
     pub fn commands(&self) -> &[Command] {
@@ -153,6 +156,31 @@ impl Model {
     pub fn analyze(&self, command: usize, max_work: u64) -> Result<Analysis, Error> {
         let (metadata, body) = self.get_command(command)?;
         search::analyze(&self.syntax, metadata, body, max_work)
+    }
+    /// Measurement hook (plan 0087): one backend regardless of width, or
+    /// `None` when the SAT backend does not cover the model. Not a stable API.
+    #[doc(hidden)]
+    pub fn analyze_backend(
+        &self,
+        command: usize,
+        max_work: u64,
+        sat: bool,
+    ) -> Result<Option<Analysis>, Error> {
+        let (metadata, body) = self.get_command(command)?;
+        if !sat::supported(&self.syntax) {
+            return Ok(None);
+        }
+        Ok(Some(if sat {
+            sat::analyze(&self.syntax, metadata, body, max_work)
+        } else {
+            search::enumerate(&self.syntax, metadata, body, max_work)
+        }))
+    }
+    /// The bits the enumerator's field slots choose for a command (plan 0087).
+    #[doc(hidden)]
+    pub fn search_width(&self, command: usize) -> Result<usize, Error> {
+        let (metadata, _) = self.get_command(command)?;
+        Ok(sat::width(&self.syntax, metadata))
     }
     fn get_command(&self, command: usize) -> Result<(&Command, &syntax::Expr), Error> {
         let metadata = self

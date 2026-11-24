@@ -1,0 +1,208 @@
+{
+  "version": 1,
+  "group": "nary",
+  "reference": "alloy-6.2.0",
+  "implementations": [
+    "ralloy"
+  ],
+  "status": "unknown",
+  "cases": [
+    {
+      "case": {
+        "id": "arrow-defaults",
+        "input": {
+          "source": "sig A {}\nsig B {}\nsig S { f: A some -> set B, g: A set -> one B }\nSomeLeft: run { some s: S | some s.f } for 2 but 0 Int\nassert SomeEveryB { all s: S, b: B | some (s.f).b }\nSomeEveryBHolds: check SomeEveryB for 2 but 0 Int\nassert OneEveryA { all s: S, a: A | one a.(s.g) }\nOneEveryAHolds: check OneEveryA for 2 but 0 Int\nNoBButA: run { some A and no B and some S } for 2 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "NoBButA": false,
+          "OneEveryAHolds": false,
+          "SomeEveryBHolds": false,
+          "SomeLeft": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "NoBButA": false,
+              "OneEveryAHolds": false,
+              "SomeEveryBHolds": false,
+              "SomeLeft": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "arrow-multiplicity",
+        "input": {
+          "source": "sig A {}\nsig B {}\nsig S { f: A one -> lone B }\nFunctional: run { some s: S | some s.f } for 2 but 0 Int\nassert EachAOnce { all s: S, a: A | lone a.(s.f) }\nEachAOnceHolds: check EachAOnce for 3 but 0 Int\nassert Total { all s: S, b: B | one (s.f).b }\nTotalHolds: check Total for 3 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "EachAOnceHolds": false,
+          "Functional": true,
+          "TotalHolds": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "EachAOnceHolds": false,
+              "Functional": true,
+              "TotalHolds": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "field-composition",
+        "input": {
+          "source": "sig P {}\nsig Q { r: P -> P }\nassert Composition { all q: Q | q.r.(q.r) in P -> P }\nCompositionHolds: check Composition for 3 but 0 Int\nThreeWay: run { some q: Q, p: P | q -> p -> p in r } for 2 but 0 Int\nTranspose: run { some q: Q | ~(q.r) = q.r and some q.r } for 2 but 0 Int\nClosure: run { some q: Q | some p: P | p in p.^(q.r) } for 2 but 0 Int\nInclusion: run { r in Q -> P -> P and some r } for 2 but 0 Int\nEquality: run { some disj a, b: Q | a.r = b.r and some a.r } for 2 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "Closure": true,
+          "CompositionHolds": false,
+          "Equality": true,
+          "Inclusion": true,
+          "ThreeWay": true,
+          "Transpose": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "unknown",
+          "actual": {
+            "kind": "unknown",
+            "reason": "CompositionHolds: work budget"
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "quaternary-ops",
+        "input": {
+          "source": "sig X {}\none sig R { t: X -> X -> X }\nProductArity: run { R.t = X -> X -> X and some X } for 2 but 0 Int\nDomainRestrict: run { some x: X | x <: (R.t) != R.t } for 2 but 0 Int\nRangeRestrict: run { some x: X | (R.t) :> x = R.t and some R.t } for 2 but exactly 2 X, 0 Int\nUnionDiff: run { some x: X | (R.t) - (x -> X -> X) + (x -> x -> x) = R.t and some R.t } for 2 but 0 Int\nIntersection: run { some R.t & (X -> X -> X) } for 2 but 0 Int\nassert JoinTwice { all a, b: X | b.(a.(R.t)) in X }\nJoinTwiceHolds: check JoinTwice for 2 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "DomainRestrict": true,
+          "Intersection": true,
+          "JoinTwiceHolds": false,
+          "ProductArity": true,
+          "RangeRestrict": true,
+          "UnionDiff": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "DomainRestrict": true,
+              "Intersection": true,
+              "JoinTwiceHolds": false,
+              "ProductArity": true,
+              "RangeRestrict": true,
+              "UnionDiff": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "right-joins",
+        "input": {
+          "source": "sig X {}\none sig R { t: X -> X -> X }\nsig Y { u: X -> X }\nRightJoin: run { some x: X | some (R.t).x and (R.t).x != x.(R.t) } for 2 but 0 Int\nFieldRightJoin: run { some x: X | some u.x and no x.u } for 2 but 0 Int\nMiddleJoin: run { some disj a, b: X | a.((R.t).b) != b.((R.t).a) } for 2 but 0 Int\nassert RightTyped { all x: X | (R.t).x in X -> X }\nRightTypedHolds: check RightTyped for 2 but 0 Int\nTernaryJoinBinary: run { some y: Y | some (R.t).(y.u) } for 2 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "FieldRightJoin": true,
+          "MiddleJoin": true,
+          "RightJoin": true,
+          "RightTypedHolds": false,
+          "TernaryJoinBinary": true
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "FieldRightJoin": true,
+              "MiddleJoin": true,
+              "RightJoin": true,
+              "RightTypedHolds": false,
+              "TernaryJoinBinary": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "ternary-join",
+        "input": {
+          "source": "sig Account {}\nsig Day {}\none sig Bank { balance: Account -> Day }\nEmpty: run { no Bank.balance } for 2 but 0 Int\nFull: run { Bank.balance = Account -> Day and some Account and some Day } for 2 but 0 Int\nJoinLeft: run { some a: Account | some a.(Bank.balance) } for 2 but 0 Int\nJoinRight: run { some d: Day | some (Bank.balance).d and no Account - (Bank.balance).d } for 2 but exactly 2 Account, 0 Int\nassert Typed { Bank.balance in Account -> Day }\nTypedHolds: check Typed for 3 but 0 Int\nassert AllPairs { Bank.balance = Account -> Day }\nAllPairsFails: check AllPairs for 2 but 0 Int\n"
+        }
+      },
+      "reference": {
+        "kind": "value",
+        "value": {
+          "AllPairsFails": true,
+          "Empty": true,
+          "Full": true,
+          "JoinLeft": true,
+          "JoinRight": true,
+          "TypedHolds": false
+        }
+      },
+      "comparisons": [
+        {
+          "id": "ralloy",
+          "status": "matched",
+          "actual": {
+            "kind": "value",
+            "value": {
+              "AllPairsFails": true,
+              "Empty": true,
+              "Full": true,
+              "JoinLeft": true,
+              "JoinRight": true,
+              "TypedHolds": false
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

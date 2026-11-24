@@ -2,11 +2,33 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
-[0075: 連鎖をcheckerの検証と評価でも1段と数える](iterations/0075-nesting-chains-ir-eval.md)は、rtlcのv2で連言・選言とELSE IFの連鎖を明示的なloopでたどり、checker 48と動的評価128の1段と数える。54枝のLongIfChainはTLCと同じ56状態・57生成で検査でき、今受理される入力のIR・結果・workは変えない。評価の再帰の腕を分け、9種類の入れ子がdebugの2 MiBのthreadで動的評価128に届くようにした（#83）。JSONの要求のdecoder 128により、平たい連言127項とCASE 126枝からは型付きで拒否される。
+[0088: 総当たりとSATのportfolio](iterations/0088-ralloy-portfolio.md)は、総当たりを5000 workで先に走らせてSATへ切り替える方法を実装し、正しさの検査を通した。速度の2回の測定は関係のないプロセスの負荷（8〜22）に埋もれて`hold`になり、変更を戻した。
+
+[0087: SATと総当たりの切り替えの境界](iterations/0087-ralloy-backend-threshold.md)は、171 commandで両backendを測った。合計が最小の4 bitは、小さい探索を2〜13倍遅くして`hold`になり、24 bitに戻した。幅は、解がすぐ見つかるかを表さないため、backendの選択の目安にならなかった。
+
+[0086: SAT backendでsigの階層と整数を扱う](iterations/0086-ralloy-sat-hierarchy-integers.md)は、階層を所属の変数と加算回路の数の制約で、整数をbit幅のbitベクトルで符号化した。`div`・`rem`以外のモデルをSATで解け、166 commandで総当たりと一致した。速度は負荷の中で2回とも`hold`。
+
+[0085: ralloyのSAT backend](iterations/0085-ralloy-sat-backend.md)は、関係の中核をAIGとTseitin変換でCNFにし、ralloyの中に書いた小さなCDCLで解く。総当たりでwork 25.6億だった`CompositionHolds`がwork 1,910で解け、174 commandすべてでAlloyと一致した。
+
+[0084: ralloyの対称性の除去を探索の途中で行う](iterations/0084-ralloy-incremental-symmetry.md)は、枝を途中で刈り、2列以上のfieldとsubset sigにも広げた。`CompositionHolds`の候補は約15分の1になったが、予算内では解けない。数µsのケースが最大1.22倍で`hold`。
+
+[0083: ralloyの対称性の除去](iterations/0083-ralloy-symmetry.md)は、lex-leaderで入れ替えられるatomの重複した候補を評価前に除き、`core-set-algebra`を128 msから34 msにした。0078からの累積では8ケースが0.30〜0.64倍になり、数µsの4ケースは最大1.17倍のまま残る。
+
+[0082: ralloyの整数とcardinality](iterations/0082-ralloy-integers.md)は、整数・`#`・算術・比較を加えた。Alloy 6.2.0の既定の2の補数の桁あふれを答えから確かめて合わせ、31 commandすべてで一致した。速度は`adopt`。
+
+[0081: ralloyの引数付きpred/fun](iterations/0081-ralloy-parameterized-predicates.md)は、引数付きpred/fun、receiver形式の呼び出し、box join、引数付きpredの`run`を加え、23 commandすべてでAlloyと一致した。速度は`adopt`。
+
+[0080: ralloyのsig階層](iterations/0080-ralloy-sig-hierarchy.md)は、abstract・extends・subset sig・一括宣言・signature factを加え、40 commandすべてでAlloyと一致した。子のscopeの扱いはAlloyの答えから決めた。速度は小さいケース1つが2回とも閾値を超え、`hold`として記録した。
+
+[0079: ralloyのn項関係](iterations/0079-ralloy-nary-relations.md)は、4項までの関係と矢印の多重度を加え、Alloyとの差分で型の交わらないjoinの非互換を見つけて直した。`nary`は30 commandのうち29でAlloyと一致し、1件は予算切れとして残した。速度は二項以下で5〜13%遅くなり、`hold`として記録した。
+
+[0078: ralloyとAlloyの差分テスト](iterations/0078-ralloy-alloy-oracle.md)は、公式Alloy 6.2.0の答えをroracleの`CheckReport`として保存し、`cargo test`で再生する。今の対応範囲の13モデル・50 commandがすべて一致し、評価器の人工故障6件を検出した。
 
 [0077: 増分contextの固定費の削減](iterations/0077-smt-lean-context.md)は、profileに合わせて、文字列を作らない長さの計算、遅延したsource hash、遅延したProblem、名前を含む式だけの再コンパイルを入れた。`context-assert-256`は0.59倍、`context-constant-256`は0.47倍。単発の小さいparseの後退も戻った。旧版との完全応答一致とZ3照合を記録し、cache benchの`prepared-4`の1組の後退も残した。
 
 [0075/0076: check cacheの往復費用とengine側のstore](iterations/0076-smt-cache-store.md)は、JSON/Wasm protocolでsnapshotを往復させる費用を測り、N=512でhitがcacheなしのcheckの21〜28倍になることを確かめた。engine側のstoreを追加し、hitはNによらずnative 4.6 µs・Wasm 9.9 µsになった。snapshotを往復させた場合との2400要求の完全応答一致も記録した。
+
+[0075: 連鎖をcheckerの検証と評価でも1段と数える](iterations/0075-nesting-chains-ir-eval.md)は、rtlcのv2で連言・選言とELSE IFの連鎖を明示的なloopでたどり、checker 48と動的評価128の1段と数える。54枝のLongIfChainはTLCと同じ56状態・57生成で検査でき、今受理される入力のIR・結果・workは変えない。評価の再帰の腕を分け、9種類の入れ子がdebugの2 MiBのthreadで動的評価128に届くようにした（#83）。JSONの要求のdecoder 128により、平たい連言127項とCASE 126枝からは型付きで拒否される。
 
 [0074: SMT contextの増分解析とcheck cache](iterations/0074-smt-incremental-cache.md)は、assertで追加した式だけを解析する変更と既定無効のcheck cacheを、bcf018be1との交互順Criterion、旧native/Wasmとの完全応答、Z3照合で評価する。保存runで見つけた2回の後退と追記plan、0074bの`prepared-128`の1組の後退と、0074dの再測定で再現しなかったことも記録した。
 

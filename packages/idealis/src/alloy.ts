@@ -84,13 +84,13 @@ const instance = (input: unknown): AlloyInstance => {
           return [
             name,
             Object.freeze(
-              tuples.map((tuple: unknown): readonly [string, string] => {
-                if (!Array.isArray(tuple) || tuple.length !== 2)
+              tuples.map((tuple: unknown): readonly string[] => {
+                if (!Array.isArray(tuple) || tuple.length < 2)
                   throw new AlloyError(
                     "protocol",
-                    "Expected binary Alloy tuple",
+                    "Expected an Alloy tuple of at least two atoms",
                   );
-                return Object.freeze([text(tuple[0]), text(tuple[1])]);
+                return Object.freeze(tuple.map(text));
               }),
             ),
           ];

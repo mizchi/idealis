@@ -1128,7 +1128,8 @@ export interface ScheduledRun<Result> {
 export interface AlloyInstance {
   readonly signatures: Readonly<Record<string, readonly string[]>>;
   readonly fields: Readonly<
-    Record<string, readonly (readonly [string, string])[]>
+    // Owner atom first; binary fields have pairs, n-ary fields longer tuples.
+    Record<string, readonly (readonly string[])[]>
   >;
 }
 export interface AlloyInput {
