@@ -1,0 +1,52 @@
+{
+  "quint": "0.33.1",
+  "command": "quint compile <model>.qnt --target json",
+  "models": {
+    "Choice": {
+      "source": "fixtures/quint-generated/Choice.qnt",
+      "sourceSha256": "d8a5ee644cc34dfa7745aefc9771e00572d8c9be195cb559cb2c821aada432c9",
+      "irSha256": "ffb88e031a5140c826c3aca46d4c7ab6acd9ae1c994e692e1524d95e335fe93a"
+    },
+    "Counter": {
+      "source": "fixtures/quint-generated/Counter.qnt",
+      "sourceSha256": "ddcdfa0adbacb2004ee74bc3caea0af0112dec0fe3b95d340264cec01d5140af",
+      "irSha256": "cf17630387f1b3f3e050e26fa25895c85de38754937f11102bf3c152acee6ab6"
+    },
+    "Match": {
+      "source": "fixtures/quint-generated/Match.qnt",
+      "sourceSha256": "afa5eb38e983a206d09095fa6b2ff182eabd26cef42a9ea8750019dca41d3721",
+      "irSha256": "69f9f89fa8e7e4618cd29bc063f1f1b1333b4755f266f687229eeff72a7779a9"
+    },
+    "NestedFold": {
+      "source": "fixtures/quint-generated/NestedFold.qnt",
+      "sourceSha256": "5dcc44a2e5047618710df292cd2f08c8c06a07f7f459d41beed54dfd2216697d",
+      "irSha256": "0eab1ca7b5ced38c9e9c35de2dde949d36986f784d7d93937cb75996322a04f4"
+    },
+    "SequenceFold": {
+      "source": "fixtures/quint-generated/SequenceFold.qnt",
+      "sourceSha256": "b9d27ab68724e142cd747b0e8539dc6e9be0554bc8ae978b7ebcc7cd5c2a270a",
+      "irSha256": "f65616b7da10d3b80315c580f8b39410149dc49bcb19f567ce5d2cc62e82d158"
+    },
+    "SetFold": {
+      "source": "fixtures/quint-generated/SetFold.qnt",
+      "sourceSha256": "f565a2f304287846bb6abcf5647f0c38c21e14cb415f4780462add1c250f4dbf",
+      "irSha256": "0dbdf99cf1db79b3acd78ae67194c6d4b7a7ef7888dc8b1d8fd69207726c2c7d"
+    },
+    "Coverage": {
+      "source": "fixtures/quint-ir/Coverage.qnt",
+      "sourceSha256": "977fbd2ef4993eb097baea2e78911541adfb06e9552b3228944a3b4cccedf5f8",
+      "irSha256": "6e4ed368ee1267a66bff69b08aa74b3f9572bc6780c45d6258fe2310234a210b",
+      "simulator": {
+        "command": "quint run Coverage.qnt --invariant <name> --max-steps 10 --max-samples 50",
+        "all_facts": "no violation",
+        "broken_index": "violation"
+      }
+    }
+  },
+  "tlc": {
+    "file": "fixtures/quint-ir/tlc-rquint.json",
+    "command": "evals/experiments/quint-ir/tlc.sh <java> <tla2tools.jar> <output>",
+    "jar": ".artifacts/0068-tlc-1.8.0.jar",
+    "java": "Temurin JRE 21.0.13+9"
+  }
+}

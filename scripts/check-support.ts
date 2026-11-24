@@ -428,6 +428,28 @@ const scopes: readonly CrateScope[] = [
     ],
   },
   {
+    name: "rmodel",
+    evidence: [
+      {
+        path: "src/syntax.rs",
+        topic: "モデル言語の構文・型・actionの形の検査と拒否する入力",
+      },
+      {
+        path: "src/emit.rs",
+        topic: "AlloyとTLA+への2つの写し方、暗黙のframeと多重度の意味",
+      },
+    ],
+  },
+  {
+    name: "rquint",
+    evidence: [
+      {
+        path: "src/lib.rs",
+        topic: "受理するQuint IRのopcode・宣言、TLA+への写し方、拒否する構文",
+      },
+    ],
+  },
+  {
     name: "idealis-cli",
     evidence: [
       {

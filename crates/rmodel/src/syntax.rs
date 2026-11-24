@@ -1,0 +1,794 @@
+//! The model language (plan 0091): tokens, syntax tree, parser and the
+//! type and form checks every lowering relies on.
+use crate::Error;
+use std::collections::{BTreeMap, BTreeSet};
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Mult {
+    Set,
+    Lone,
+    One,
+    Some,
+}
+/// A relation's shape: a set of atoms of one sig, or a binary relation.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Shape {
+    Unary {
+        sig: String,
+        mult: Mult,
+    },
+    Binary {
+        from: String,
+        to: String,
+        mult: Mult,
+    },
+}
+#[derive(Clone, Debug)]
+pub struct Relation {
+    pub name: String,
+    /// `var`: part of the state; otherwise part of the configuration.
+    pub var: bool,
+    pub shape: Shape,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SetOp {
+    Union,
+    Difference,
+    Intersection,
+    Product,
+    Join,
+}
+#[derive(Clone, Debug)]
+pub enum Expr {
+    /// A sig, a relation, or a bound atom variable.
+    Name(String),
+    None,
+    Binary(SetOp, Box<Expr>, Box<Expr>),
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Compare {
+    In,
+    NotIn,
+    Equal,
+    NotEqual,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum IntCompare {
+    Less,
+    LessEqual,
+    Greater,
+    GreaterEqual,
+    Equal,
+    NotEqual,
+}
+#[derive(Clone, Debug)]
+pub enum Int {
+    Count(Expr),
+    Literal(i64),
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Quantifier {
+    All,
+    Some,
+}
+#[derive(Clone, Debug)]
+pub enum Formula {
+    Compare(Compare, Expr, Expr),
+    Ints(IntCompare, Int, Int),
+    Mult(Mult, Expr),
+    /// `no e`.
+    Empty(Expr),
+    Not(Box<Formula>),
+    And(Vec<Formula>),
+    Or(Box<Formula>, Box<Formula>),
+    Implies(Box<Formula>, Box<Formula>),
+    Quantified(Quantifier, String, String, Box<Formula>),
+}
+#[derive(Clone, Debug)]
+pub struct Action {
+    pub name: String,
+    /// Parameters and their sigs.
+    pub params: Vec<(String, String)>,
+    pub guards: Vec<Formula>,
+    /// `var' = expr`, at most one per var.
+    pub assignments: Vec<(String, Expr)>,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CheckKind {
+    /// Holds in every reachable state.
+    Invariant,
+    /// Holds in some reachable state.
+    Reachable,
+}
+#[derive(Clone, Debug)]
+pub struct Check {
+    pub name: String,
+    pub kind: CheckKind,
+    pub formula: Formula,
+}
+#[derive(Clone, Debug)]
+pub struct Scope {
+    /// Exactly this many atoms per sig.
+    pub sizes: BTreeMap<String, usize>,
+    /// The SAT engine's trace length.
+    pub steps: usize,
+}
+#[derive(Clone, Debug)]
+pub struct Model {
+    pub name: String,
+    pub sigs: Vec<String>,
+    pub relations: Vec<Relation>,
+    pub facts: Vec<Formula>,
+    pub init: Vec<Formula>,
+    pub actions: Vec<Action>,
+    pub checks: Vec<Check>,
+    pub scope: Scope,
+}
+impl Model {
+    pub fn relation(&self, name: &str) -> Option<&Relation> {
+        self.relations.iter().find(|relation| relation.name == name)
+    }
+    pub fn vars(&self) -> impl Iterator<Item = &Relation> {
+        self.relations.iter().filter(|relation| relation.var)
+    }
+}
+
+const KEYWORDS: &[&str] = &[
+    "model",
+    "sig",
+    "rel",
+    "var",
+    "fact",
+    "init",
+    "action",
+    "invariant",
+    "reachable",
+    "scope",
+    "steps",
+    "set",
+    "lone",
+    "one",
+    "some",
+    "no",
+    "all",
+    "not",
+    "and",
+    "or",
+    "implies",
+    "in",
+    "none",
+];
+const MAX_SCOPE: usize = 7;
+const MAX_LITERAL: i64 = 7;
+
+fn tokens(source: &str) -> Result<Vec<String>, Error> {
+    let mut tokens = Vec::new();
+    let characters: Vec<char> = source.chars().collect();
+    let mut position = 0;
+    while position < characters.len() {
+        let character = characters[position];
+        if character.is_whitespace() {
+            position += 1;
+            continue;
+        }
+        if character == '/' && characters.get(position + 1) == Some(&'/') {
+            while position < characters.len() && characters[position] != '\n' {
+                position += 1;
+            }
+            continue;
+        }
+        let start = position;
+        if character.is_ascii_alphanumeric() || character == '_' {
+            while position < characters.len()
+                && (characters[position].is_ascii_alphanumeric() || characters[position] == '_')
+            {
+                position += 1;
+            }
+        } else if let Some(operator) = ["->", "!=", "<=", ">="].into_iter().find(|operator| {
+            characters[position..].starts_with(&operator.chars().collect::<Vec<_>>())
+        }) {
+            position += operator.len();
+        } else if "{}():,.+-&#=<>'|".contains(character) {
+            position += 1;
+        } else {
+            return Err(Error::syntax(format!("unexpected character {character:?}")));
+        }
+        tokens.push(characters[start..position].iter().collect());
+    }
+    Ok(tokens)
+}
+
+struct Parser {
+    tokens: Vec<String>,
+    position: usize,
+}
+impl Parser {
+    fn peek(&self) -> &str {
+        self.tokens.get(self.position).map_or("", String::as_str)
+    }
+    fn peek_at(&self, offset: usize) -> &str {
+        self.tokens
+            .get(self.position + offset)
+            .map_or("", String::as_str)
+    }
+    fn take(&mut self, token: &str) -> bool {
+        if self.peek() == token {
+            self.position += 1;
+            true
+        } else {
+            false
+        }
+    }
+    fn expect(&mut self, token: &str) -> Result<(), Error> {
+        if self.take(token) {
+            Ok(())
+        } else {
+            Err(Error::syntax(format!(
+                "expected {token}, got {:?}",
+                self.peek()
+            )))
+        }
+    }
+    fn name(&mut self) -> Result<String, Error> {
+        let token = self.peek().to_owned();
+        if token.is_empty()
+            || !(token.as_bytes()[0].is_ascii_alphabetic() || token.starts_with('_'))
+            || KEYWORDS.contains(&token.as_str())
+        {
+            return Err(Error::syntax(format!("expected a name, got {token:?}")));
+        }
+        self.position += 1;
+        Ok(token)
+    }
+    fn number(&mut self) -> Result<i64, Error> {
+        let value = self
+            .peek()
+            .parse()
+            .map_err(|_| Error::syntax(format!("expected a number, got {:?}", self.peek())))?;
+        self.position += 1;
+        Ok(value)
+    }
+    fn mult(&mut self) -> Mult {
+        for (word, mult) in [
+            ("set", Mult::Set),
+            ("lone", Mult::Lone),
+            ("one", Mult::One),
+            ("some", Mult::Some),
+        ] {
+            if self.take(word) {
+                return mult;
+            }
+        }
+        Mult::One
+    }
+
+    fn model(&mut self) -> Result<Model, Error> {
+        self.expect("model")?;
+        let mut model = Model {
+            name: self.name()?,
+            sigs: Vec::new(),
+            relations: Vec::new(),
+            facts: Vec::new(),
+            init: Vec::new(),
+            actions: Vec::new(),
+            checks: Vec::new(),
+            scope: Scope {
+                sizes: BTreeMap::new(),
+                steps: 0,
+            },
+        };
+        let mut scoped = false;
+        while !self.peek().is_empty() {
+            match self.peek() {
+                "sig" => {
+                    self.position += 1;
+                    model.sigs.push(self.name()?);
+                }
+                "rel" | "var" => {
+                    let var = self.take("var") || {
+                        self.position += 1;
+                        false
+                    };
+                    let name = self.name()?;
+                    self.expect(":")?;
+                    let shape = if ["set", "lone", "one", "some"].contains(&self.peek()) {
+                        let mult = self.mult();
+                        Shape::Unary {
+                            sig: self.name()?,
+                            mult,
+                        }
+                    } else {
+                        let from = self.name()?;
+                        self.expect("->")?;
+                        let mult = self.mult();
+                        Shape::Binary {
+                            from,
+                            to: self.name()?,
+                            mult,
+                        }
+                    };
+                    model.relations.push(Relation { name, var, shape });
+                }
+                "fact" | "init" => {
+                    let initial = self.peek() == "init";
+                    self.position += 1;
+                    let formulas = self.block()?;
+                    if initial {
+                        model.init.extend(formulas);
+                    } else {
+                        model.facts.extend(formulas);
+                    }
+                }
+                "action" => {
+                    self.position += 1;
+                    model.actions.push(self.action()?);
+                }
+                "invariant" | "reachable" => {
+                    let kind = if self.take("invariant") {
+                        CheckKind::Invariant
+                    } else {
+                        self.position += 1;
+                        CheckKind::Reachable
+                    };
+                    let name = self.name()?;
+                    let formula = Formula::And(self.block()?);
+                    model.checks.push(Check {
+                        name,
+                        kind,
+                        formula,
+                    });
+                }
+                "scope" => {
+                    self.position += 1;
+                    if scoped {
+                        return Err(Error::syntax("a second scope"));
+                    }
+                    scoped = true;
+                    loop {
+                        if self.take("steps") {
+                            self.expect("=")?;
+                            model.scope.steps = self.size(32)?;
+                        } else {
+                            let sig = self.name()?;
+                            self.expect("=")?;
+                            let size = self.size(MAX_SCOPE)?;
+                            if model.scope.sizes.insert(sig.clone(), size).is_some() {
+                                return Err(Error::syntax(format!("duplicate scope for {sig}")));
+                            }
+                        }
+                        if !self.take(",") {
+                            break;
+                        }
+                    }
+                }
+                other => return Err(Error::syntax(format!("unexpected {other:?}"))),
+            }
+        }
+        if !scoped || model.scope.steps == 0 {
+            return Err(Error::syntax("the model needs a scope with steps"));
+        }
+        Ok(model)
+    }
+    fn size(&mut self, maximum: usize) -> Result<usize, Error> {
+        let value = self.number()?;
+        if value < 1 || value as usize > maximum {
+            return Err(Error::syntax(format!("size {value} outside 1..={maximum}")));
+        }
+        Ok(value as usize)
+    }
+    fn block(&mut self) -> Result<Vec<Formula>, Error> {
+        self.expect("{")?;
+        let mut formulas = Vec::new();
+        while !self.take("}") {
+            if self.peek().is_empty() {
+                return Err(Error::syntax("unterminated block"));
+            }
+            formulas.push(self.formula()?);
+        }
+        Ok(formulas)
+    }
+    fn action(&mut self) -> Result<Action, Error> {
+        let name = self.name()?;
+        let mut params = Vec::new();
+        self.expect("(")?;
+        if !self.take(")") {
+            loop {
+                let param = self.name()?;
+                self.expect(":")?;
+                params.push((param, self.name()?));
+                if !self.take(",") {
+                    break;
+                }
+            }
+            self.expect(")")?;
+        }
+        let mut action = Action {
+            name,
+            params,
+            guards: Vec::new(),
+            assignments: Vec::new(),
+        };
+        self.expect("{")?;
+        while !self.take("}") {
+            if self.peek().is_empty() {
+                return Err(Error::syntax("unterminated action"));
+            }
+            if self.peek_at(1) == "'" {
+                let var = self.name()?;
+                self.expect("'")?;
+                self.expect("=")?;
+                action.assignments.push((var, self.expression(0)?));
+            } else {
+                action.guards.push(self.formula()?);
+            }
+        }
+        Ok(action)
+    }
+
+    /// implies (right) < or < and < not < atoms.
+    fn formula(&mut self) -> Result<Formula, Error> {
+        let left = self.disjunction()?;
+        if self.take("implies") {
+            return Ok(Formula::Implies(Box::new(left), Box::new(self.formula()?)));
+        }
+        Ok(left)
+    }
+    fn disjunction(&mut self) -> Result<Formula, Error> {
+        let mut left = self.conjunction()?;
+        while self.take("or") {
+            left = Formula::Or(Box::new(left), Box::new(self.conjunction()?));
+        }
+        Ok(left)
+    }
+    fn conjunction(&mut self) -> Result<Formula, Error> {
+        let mut parts = vec![self.negation()?];
+        while self.take("and") {
+            parts.push(self.negation()?);
+        }
+        Ok(if parts.len() == 1 {
+            parts.pop().unwrap()
+        } else {
+            Formula::And(parts)
+        })
+    }
+    fn negation(&mut self) -> Result<Formula, Error> {
+        if self.take("not") {
+            return Ok(Formula::Not(Box::new(self.negation()?)));
+        }
+        self.atom()
+    }
+    fn atom(&mut self) -> Result<Formula, Error> {
+        if self.peek() == "{" {
+            return Ok(Formula::And(self.block()?));
+        }
+        if ["all", "some"].contains(&self.peek()) && self.peek_at(2) == ":" {
+            let quantifier = if self.take("all") {
+                Quantifier::All
+            } else {
+                self.position += 1;
+                Quantifier::Some
+            };
+            let variable = self.name()?;
+            self.expect(":")?;
+            let sig = self.name()?;
+            self.expect("|")?;
+            return Ok(Formula::Quantified(
+                quantifier,
+                variable,
+                sig,
+                Box::new(self.formula()?),
+            ));
+        }
+        for (word, make) in [
+            ("no", None),
+            ("some", Some(Mult::Some)),
+            ("one", Some(Mult::One)),
+            ("lone", Some(Mult::Lone)),
+        ] {
+            if self.take(word) {
+                let expression = self.expression(0)?;
+                return Ok(match make {
+                    None => Formula::Empty(expression),
+                    Some(mult) => Formula::Mult(mult, expression),
+                });
+            }
+        }
+        if self.take("(") {
+            let formula = self.formula()?;
+            self.expect(")")?;
+            return Ok(formula);
+        }
+        if self.peek() == "#" || self.peek().bytes().all(|byte| byte.is_ascii_digit()) {
+            let left = self.int()?;
+            let operator = match self.peek() {
+                "<" => IntCompare::Less,
+                "<=" => IntCompare::LessEqual,
+                ">" => IntCompare::Greater,
+                ">=" => IntCompare::GreaterEqual,
+                "=" => IntCompare::Equal,
+                "!=" => IntCompare::NotEqual,
+                other => {
+                    return Err(Error::syntax(format!(
+                        "expected an integer comparison, got {other:?}"
+                    )));
+                }
+            };
+            self.position += 1;
+            return Ok(Formula::Ints(operator, left, self.int()?));
+        }
+        let left = self.expression(0)?;
+        let operator = match self.peek() {
+            "in" => Compare::In,
+            "=" => Compare::Equal,
+            "!=" => Compare::NotEqual,
+            "not" if self.peek_at(1) == "in" => {
+                self.position += 1;
+                Compare::NotIn
+            }
+            other => {
+                return Err(Error::syntax(format!(
+                    "expected a comparison, got {other:?}"
+                )));
+            }
+        };
+        self.position += 1;
+        Ok(Formula::Compare(operator, left, self.expression(0)?))
+    }
+    fn int(&mut self) -> Result<Int, Error> {
+        if self.take("#") {
+            return Ok(Int::Count(self.expression(4)?));
+        }
+        let value = self.number()?;
+        if value > MAX_LITERAL {
+            return Err(Error::syntax(format!(
+                "literal {value} above {MAX_LITERAL}"
+            )));
+        }
+        Ok(Int::Literal(value))
+    }
+    /// `+ -` (1) < `&` (2) < `->` (3) < `.` (4).
+    fn expression(&mut self, minimum: u8) -> Result<Expr, Error> {
+        let mut left = if self.take("(") {
+            let inner = self.expression(0)?;
+            self.expect(")")?;
+            inner
+        } else if self.take("none") {
+            Expr::None
+        } else {
+            Expr::Name(self.name()?)
+        };
+        loop {
+            let (operator, precedence) = match self.peek() {
+                "+" => (SetOp::Union, 1),
+                "-" => (SetOp::Difference, 1),
+                "&" => (SetOp::Intersection, 2),
+                "->" => (SetOp::Product, 3),
+                "." => (SetOp::Join, 4),
+                _ => break,
+            };
+            if precedence < minimum {
+                break;
+            }
+            self.position += 1;
+            let right = self.expression(precedence + 1)?;
+            left = Expr::Binary(operator, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+}
+
+/// Arity of an expression, or a type error.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Arity {
+    /// `none`: either arity.
+    Any,
+    Set,
+    Pair,
+}
+struct Checker<'a> {
+    model: &'a Model,
+    sigs: BTreeSet<&'a str>,
+}
+impl Checker<'_> {
+    fn expression(
+        &self,
+        expression: &Expr,
+        bound: &BTreeSet<String>,
+        vars: bool,
+    ) -> Result<Arity, Error> {
+        Ok(match expression {
+            Expr::None => Arity::Any,
+            Expr::Name(name) => {
+                if bound.contains(name) || self.sigs.contains(name.as_str()) {
+                    Arity::Set
+                } else if let Some(relation) = self.model.relation(name) {
+                    if relation.var && !vars {
+                        return Err(Error::kind(format!("fact refers to the var {name}")));
+                    }
+                    match relation.shape {
+                        Shape::Unary { .. } => Arity::Set,
+                        Shape::Binary { .. } => Arity::Pair,
+                    }
+                } else {
+                    return Err(Error::kind(format!("unknown name {name}")));
+                }
+            }
+            Expr::Binary(operator, left, right) => {
+                let left = self.expression(left, bound, vars)?;
+                let right = self.expression(right, bound, vars)?;
+                match operator {
+                    SetOp::Product => {
+                        if left == Arity::Pair || right == Arity::Pair {
+                            return Err(Error::kind("product above arity two"));
+                        }
+                        Arity::Pair
+                    }
+                    SetOp::Join => match (left, right) {
+                        (Arity::Set, Arity::Pair) | (Arity::Pair, Arity::Set) => Arity::Set,
+                        (Arity::Pair, Arity::Pair) => Arity::Pair,
+                        _ => return Err(Error::kind("join needs a binary relation")),
+                    },
+                    _ => match (left, right) {
+                        (Arity::Any, other) | (other, Arity::Any) => other,
+                        (left, right) if left == right => left,
+                        _ => return Err(Error::kind("set operation on different arities")),
+                    },
+                }
+            }
+        })
+    }
+    fn formula(
+        &self,
+        formula: &Formula,
+        bound: &BTreeSet<String>,
+        vars: bool,
+    ) -> Result<(), Error> {
+        match formula {
+            Formula::Compare(_, left, right) => {
+                let (left, right) = (
+                    self.expression(left, bound, vars)?,
+                    self.expression(right, bound, vars)?,
+                );
+                if left != right && left != Arity::Any && right != Arity::Any {
+                    return Err(Error::kind("comparison of different arities"));
+                }
+            }
+            Formula::Ints(_, left, right) => {
+                for int in [left, right] {
+                    if let Int::Count(expression) = int
+                        && self.expression(expression, bound, vars)? == Arity::Pair
+                    {
+                        return Err(Error::kind("# counts only sets"));
+                    }
+                }
+            }
+            Formula::Mult(_, expression) | Formula::Empty(expression) => {
+                self.expression(expression, bound, vars)?;
+            }
+            Formula::Not(inner) => self.formula(inner, bound, vars)?,
+            Formula::And(parts) => {
+                for part in parts {
+                    self.formula(part, bound, vars)?;
+                }
+            }
+            Formula::Or(left, right) | Formula::Implies(left, right) => {
+                self.formula(left, bound, vars)?;
+                self.formula(right, bound, vars)?;
+            }
+            Formula::Quantified(_, variable, sig, body) => {
+                if !self.sigs.contains(sig.as_str()) {
+                    return Err(Error::kind(format!("unknown sig {sig}")));
+                }
+                self.fresh(variable, bound)?;
+                let mut inner = bound.clone();
+                inner.insert(variable.clone());
+                self.formula(body, &inner, vars)?;
+            }
+        }
+        Ok(())
+    }
+    fn fresh(&self, name: &str, bound: &BTreeSet<String>) -> Result<(), Error> {
+        if bound.contains(name) || self.sigs.contains(name) || self.model.relation(name).is_some() {
+            return Err(Error::kind(format!("{name} shadows another name")));
+        }
+        Ok(())
+    }
+}
+
+pub(crate) fn parse(source: &str) -> Result<Model, Error> {
+    if source.len() > 1 << 20 {
+        return Err(Error::syntax("source exceeds 1 MiB"));
+    }
+    let mut parser = Parser {
+        tokens: tokens(source)?,
+        position: 0,
+    };
+    let model = parser.model()?;
+    check(&model)?;
+    Ok(model)
+}
+
+fn check(model: &Model) -> Result<(), Error> {
+    let mut names = BTreeSet::new();
+    for name in model
+        .sigs
+        .iter()
+        .chain(model.relations.iter().map(|relation| &relation.name))
+        .chain(model.actions.iter().map(|action| &action.name))
+        .chain(model.checks.iter().map(|check| &check.name))
+    {
+        if !names.insert(name.as_str()) {
+            return Err(Error::kind(format!("duplicate name {name}")));
+        }
+    }
+    let sigs: BTreeSet<&str> = model.sigs.iter().map(String::as_str).collect();
+    for sig in &model.sigs {
+        if !model.scope.sizes.contains_key(sig) {
+            return Err(Error::kind(format!("no scope for {sig}")));
+        }
+    }
+    for sig in model.scope.sizes.keys() {
+        if !sigs.contains(sig.as_str()) {
+            return Err(Error::kind(format!("scope for unknown sig {sig}")));
+        }
+    }
+    for relation in &model.relations {
+        let used = match &relation.shape {
+            Shape::Unary { sig, .. } => vec![sig],
+            Shape::Binary { from, to, .. } => vec![from, to],
+        };
+        if let Some(sig) = used.iter().find(|sig| !sigs.contains(sig.as_str())) {
+            return Err(Error::kind(format!("{}: unknown sig {sig}", relation.name)));
+        }
+    }
+    let checker = Checker { model, sigs };
+    let none = BTreeSet::new();
+    for fact in &model.facts {
+        checker.formula(fact, &none, false)?;
+    }
+    for formula in model
+        .init
+        .iter()
+        .chain(model.checks.iter().map(|check| &check.formula))
+    {
+        checker.formula(formula, &none, true)?;
+    }
+    for action in &model.actions {
+        let mut bound = BTreeSet::new();
+        for (param, sig) in &action.params {
+            if !checker.sigs.contains(sig.as_str()) {
+                return Err(Error::kind(format!("{}: unknown sig {sig}", action.name)));
+            }
+            checker.fresh(param, &bound)?;
+            bound.insert(param.clone());
+        }
+        for guard in &action.guards {
+            checker.formula(guard, &bound, true)?;
+        }
+        let mut assigned = BTreeSet::new();
+        for (var, value) in &action.assignments {
+            let relation = model
+                .relation(var)
+                .filter(|relation| relation.var)
+                .ok_or_else(|| Error::kind(format!("{}: {var} is not a var", action.name)))?;
+            if !assigned.insert(var) {
+                return Err(Error::kind(format!(
+                    "{}: {var} assigned twice",
+                    action.name
+                )));
+            }
+            let arity = checker.expression(value, &bound, true)?;
+            let expected = match relation.shape {
+                Shape::Unary { .. } => Arity::Set,
+                Shape::Binary { .. } => Arity::Pair,
+            };
+            if arity != expected && arity != Arity::Any {
+                return Err(Error::kind(format!(
+                    "{}: {var} assigned a value of another arity",
+                    action.name
+                )));
+            }
+        }
+    }
+    Ok(())
+}

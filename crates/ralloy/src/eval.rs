@@ -142,6 +142,7 @@ impl Budget {
         Ok(())
     }
 }
+#[derive(Clone)]
 pub(crate) struct World {
     /// Integer bitwidth; Int atoms are the first 2^bitwidth names.
     pub bitwidth: usize,
@@ -213,8 +214,14 @@ impl World {
 type Environment = BTreeMap<String, Relation>;
 pub(crate) struct Evaluator<'a> {
     pub module: &'a Module,
+    /// The state being evaluated: `trace[time]`.
     pub world: &'a World,
     pub budget: &'a mut Budget,
+    /// The lasso of a temporal model, or the single world (plan 0090).
+    pub trace: &'a [World],
+    pub time: usize,
+    /// The state that follows the last one.
+    pub back: usize,
 }
 impl Evaluator<'_> {
     pub fn formula(&mut self, expression: &Expr) -> Result<bool, ()> {
@@ -292,6 +299,45 @@ impl Evaluator<'_> {
                     }
                 }
                 Ok(Value::Formula(true))
+            }
+            Expr::Unary(
+                operator @ (Unary::Always | Unary::Eventually | Unary::After | Unary::Prime),
+                child,
+            ) => {
+                let now = self.time;
+                let last = self.trace.len() - 1;
+                let next = if now < last { now + 1 } else { self.back };
+                // From position i the lasso reaches min(i, back)..=last.
+                let positions: Vec<usize> = match operator {
+                    Unary::After | Unary::Prime => vec![next],
+                    _ => (now.min(self.back)..=last).collect(),
+                };
+                let (world, trace) = (self.world, self.trace);
+                let mut result = None;
+                let mut found = matches!(operator, Unary::Always);
+                for position in positions {
+                    self.budget.tick()?;
+                    self.time = position;
+                    self.world = &trace[position];
+                    let value = self.expression(child, locals);
+                    self.time = now;
+                    self.world = world;
+                    let value = value?;
+                    match operator {
+                        Unary::Prime => result = Some(value),
+                        Unary::After => found = value.formula(),
+                        Unary::Always if !value.formula_ref() => {
+                            found = false;
+                            break;
+                        }
+                        Unary::Eventually if value.formula_ref() => {
+                            found = true;
+                            break;
+                        }
+                        _ => {}
+                    }
+                }
+                Ok(result.unwrap_or(Value::Formula(found)))
             }
             Expr::Unary(operator, child) => {
                 let value = self.expression(child, locals)?;

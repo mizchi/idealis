@@ -1,0 +1,31 @@
+model Sessions
+sig User
+rel admins: set User
+fact { some admins }
+var active: set User
+var locked: lone User
+init { no active and no locked }
+action login(u: User) {
+  u not in active
+  #active < 2
+  active' = active + u
+}
+action logout(u: User) {
+  u in active
+  active' = active - u
+}
+action lock(u: User) {
+  no locked
+  u in admins & active
+  locked' = u
+}
+action unlock(u: User) {
+  u in locked
+  locked' = none
+}
+invariant Capacity { #active <= 2 }
+invariant LockedByAdmin { locked in admins }
+invariant LockedIsActive { locked in active }
+reachable Full { #active = 2 and some locked }
+reachable ThreeActive { #active = 3 }
+scope User = 3, steps = 8

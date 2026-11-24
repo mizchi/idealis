@@ -1,0 +1,14 @@
+// Added after the mult-tla fault went undetected (plan 0091): the
+// declarations, not guards, keep each lock with at most one holder.
+model Declared
+sig Proc
+sig Lock
+var holder: Lock -> lone Proc
+var waiting: one Proc
+init { no holder }
+action grab(p: Proc, l: Lock) { holder' = holder + l -> p }
+action wait(p: Proc) { waiting' = p }
+invariant OneHolder { all l: Lock | lone l.holder }
+invariant OneWaiting { one waiting }
+reachable BothHeld { all l: Lock | some l.holder }
+scope Proc = 2, Lock = 2, steps = 6

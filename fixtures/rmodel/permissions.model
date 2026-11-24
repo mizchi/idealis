@@ -1,0 +1,26 @@
+model Permissions
+sig User
+sig Role
+sig Doc
+rel grants: User -> set Role
+rel reads: Role -> set Doc
+rel secret: set Doc
+rel cleared: set User
+// Configuration: a role that reads a secret document is granted only to
+// cleared users.
+fact { all r: Role | some r.reads & secret implies grants.r in cleared }
+var open: User -> set Doc
+init { no open }
+action read(u: User, d: Doc) {
+  d in u.grants.reads
+  open' = open + u -> d
+}
+action close(u: User, d: Doc) {
+  d in u.open
+  open' = open - u -> d
+}
+invariant NoLeak { all u: User | some u.open & secret implies u in cleared }
+invariant OnlyGranted { all u: User | u.open in u.grants.reads }
+reachable SecretRead { some u: User | some u.open & secret }
+reachable UnclearedSecret { some u: User | u not in cleared and some u.open & secret }
+scope User = 2, Role = 2, Doc = 2, steps = 6
