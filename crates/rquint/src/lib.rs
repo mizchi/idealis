@@ -740,7 +740,10 @@ mod tests {
             "---- MODULE M ----\nEXTENDS Integers, Sequences, FiniteSets, TLC\nVARIABLES x\n\
              init == (x' = 0)\ninv == (x >= 0)\nstep == (x' = x)\nq_init == (x = 0)\n====\n"
         );
-        assert_eq!(translation.config, "INIT q_init\nNEXT step\nINVARIANT inv\n");
+        assert_eq!(
+            translation.config,
+            "INIT q_init\nNEXT step\nINVARIANT inv\n"
+        );
     }
 
     #[test]
