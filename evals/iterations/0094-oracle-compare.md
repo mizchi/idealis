@@ -13,3 +13,7 @@
 ## jev-lint（jev-1.14.0、UNREVIEWED）
 
 追加した3つのruleとモデルの比較はすべてsupports。ralloyのREADMEは引き続き矛盾（0.65）とされ、根拠を特定できない候補のまま。[記録](../runs/0094-oracle-compare/drift.json)。
+
+## 後からの変更
+
+照合の2つのテストは、roracleの中からrspecのテスト（`crates/rspec/tests/grounding.rs`）へ移した。roracleがrmodelとralloyをdev-dependencyに持つと、配布するcrateだけで組み立てる`just package`のworkspaceにrmodelがなく、CIで失敗したため。roracleは、照合用の入口を`#[doc(hidden)] pub mod grounding`として公開する（安定したAPIではない）。

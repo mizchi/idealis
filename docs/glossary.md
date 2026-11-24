@@ -258,8 +258,8 @@ action によって変わる関係（rmodel の var、Alloy の var field）の�
 
 ## 実装の照合
 
-- `crates/roracle/src/report.rs` の `compare` を、`crates/roracle/src/report.rs` の `compare_conforms_to_the_compare_model` がモデル `spec/models/roracle-compare.model` と照合する
-- `crates/roracle/src/report.rs` の `aggregate` を、`crates/roracle/src/report.rs` の `aggregate_conforms_to_the_report_model` がモデル `spec/models/roracle-report.model` と照合する
+- `crates/roracle/src/report.rs` の `compare` を、`crates/rspec/tests/grounding.rs` の `compare_conforms_to_the_compare_model` がモデル `spec/models/roracle-compare.model` と照合する
+- `crates/roracle/src/report.rs` の `aggregate` を、`crates/rspec/tests/grounding.rs` の `aggregate_conforms_to_the_report_model` がモデル `spec/models/roracle-report.model` と照合する
 
 ## rule
 

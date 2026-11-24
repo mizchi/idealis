@@ -438,12 +438,12 @@ spec: s.Spec = new {
     new {
       model = compare
       implementation = s.code(roracle, "compare")
-      test = s.code(roracle, "compare_conforms_to_the_compare_model")
+      test = s.code("crates/rspec/tests/grounding.rs", "compare_conforms_to_the_compare_model")
     }
     new {
       model = report
       implementation = s.code(roracle, "aggregate")
-      test = s.code(roracle, "aggregate_conforms_to_the_report_model")
+      test = s.code("crates/rspec/tests/grounding.rs", "aggregate_conforms_to_the_report_model")
     }
   }
 }
