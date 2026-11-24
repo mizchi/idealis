@@ -854,6 +854,11 @@ impl<'scope> Arena<'scope> {
         let Ok(Cell::Set(members)) = self.cell(value) else {
             return Ok(());
         };
+        let width = members.len();
+        self.consume(width)?;
+        let Ok(Cell::Set(members)) = self.cell(value) else {
+            return Ok(());
+        };
         let members = members.clone();
         let kind = |value: Scalar| match value {
             Scalar::Int(_) => Some(0),
@@ -942,6 +947,13 @@ impl<'scope> Arena<'scope> {
             }
             return Ok(());
         }
+        let (Ok(Cell::Function(first)), Ok(Cell::Function(second))) =
+            (self.cell(left), self.cell(right))
+        else {
+            return Ok(());
+        };
+        let width = first.len() + second.len();
+        self.consume(width)?;
         let (Ok(Cell::Function(left)), Ok(Cell::Function(right))) =
             (self.cell(left), self.cell(right))
         else {
@@ -949,8 +961,8 @@ impl<'scope> Arena<'scope> {
         };
         let left: Vec<(Scalar, Scalar)> = left.iter().collect();
         let right: Vec<(Scalar, Scalar)> = right.iter().collect();
-        let left_named = self.named_entries(&left)?;
-        let right_named = self.named_entries(&right)?;
+        let left_named = self.named_entries(&left);
+        let right_named = self.named_entries(&right);
         if (left_named && !right.is_empty() && !right_named)
             || (right_named && !left.is_empty() && !left_named)
         {
@@ -970,6 +982,11 @@ impl<'scope> Arena<'scope> {
             for (left, right) in left.iter().zip(right.iter()) {
                 self.tick()?;
                 if left.0 != right.0 {
+                    if let (Scalar::Int(first), Scalar::Int(second)) = (left.0, right.0)
+                        && first.abs_diff(second) > i32::MAX as u32
+                    {
+                        return Err(CoreError::protocol("Incomparable TLA values"));
+                    }
                     break;
                 }
                 self.same_kinds(left.1, right.1)?;
@@ -1011,12 +1028,11 @@ impl<'scope> Arena<'scope> {
         }
         Ok(())
     }
-    fn named_entries(&mut self, entries: &[(Scalar, Scalar)]) -> Result<bool, CoreError> {
-        self.consume(entries.len())?;
-        Ok(!entries.is_empty()
+    fn named_entries(&self, entries: &[(Scalar, Scalar)]) -> bool {
+        !entries.is_empty()
             && entries
                 .iter()
-                .all(|(key, _)| matches!(self.cell(*key), Ok(Cell::String(_)))))
+                .all(|(key, _)| matches!(self.cell(*key), Ok(Cell::String(_))))
     }
     fn same_kinds_by_name(
         &mut self,

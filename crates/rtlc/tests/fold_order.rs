@@ -1034,7 +1034,7 @@ fn matching_record_fields_by_name_charges_the_budget_in_proportion_to_the_fields
         run(&program).unwrap().work
     };
     let (narrow, wide) = (work(100), work(200));
-    assert_eq!((narrow, wide), (4595, 9095));
+    assert_eq!((narrow, wide), (4603, 9103));
 }
 
 #[test]
@@ -1160,4 +1160,74 @@ fn a_wide_source_member_is_not_copied_for_each_singleton_it_is_compared_with() {
     };
     let (narrow, wide) = (work(100), work(200));
     assert_eq!((narrow, wide), (15728, 17428));
+}
+
+fn enabled(guard: Value) -> Value {
+    json!({"op":"enabled","branches":[{"name":"Enabled","steps":[{"kind":"guard","expression":guard}]}]})
+}
+
+fn enabled_fold(version: u8, guard: Value, expected: Value) -> SafetyProgram {
+    let collection = set(vec![text("p"), text("q")]);
+    let body = enabled(guard);
+    let (callback, definitions) = if version == 1 {
+        (body, vec![])
+    } else {
+        (
+            json!({"op":"call","definition":0,"arguments":[bound(0),bound(1)],"captures":[]}),
+            vec![definition(0, body, 0)],
+        )
+    };
+    let fold = json!({"op":"fold","accumulator":0,"initial":truth_literal(false),"collection":collection,"order":"set-members","body":callback});
+    wire(version, expected, fold, definitions)
+}
+
+#[test]
+fn an_enabled_guard_that_does_not_read_the_fold_slots_is_not_a_mention_of_the_element() {
+    let reads_state = json!({"op":"eq","left":{"op":"read","slot":0,"next":false},"right":{"op":"read","slot":0,"next":false}});
+    for version in [1, 2] {
+        for guard in [reads_state.clone(), truth_literal(true)] {
+            let program = enabled_fold(version, guard, truth_literal(true));
+            assert!(holds(&program, "enabled over constants"), "v{version}");
+        }
+    }
+}
+
+#[test]
+fn an_enabled_guard_that_reads_the_fold_element_is_refused() {
+    for version in [1, 2] {
+        let element = if version == 1 { bound(1) } else { parameter(1) };
+        let guard = json!({"op":"eq","left":element,"right":text("p")});
+        let program = enabled_fold(version, guard, truth_literal(true));
+        assert_eq!(refusal(&program), STRINGS, "v{version}");
+    }
+}
+
+#[test]
+fn a_callback_call_that_passes_neither_fold_slot_reads_no_element() {
+    let strings = set(vec![text("p"), text("q")]);
+    let constant = json!({"id":0,"parameterCount":0,"captureCount":0,"bodyKind":"expression","localScope":0,"body":int(20)});
+    let fold = |body: Value| json!({"op":"fold","accumulator":0,"initial":int(0),"collection":strings,"order":"set-members","body":body});
+    let call = |captures: Vec<Value>| json!({"op":"call","definition":0,"arguments":[],"captures":captures});
+    let program = wire(2, int(20), fold(call(vec![])), vec![constant.clone()]);
+    assert!(holds(&program, "constant definition"));
+    let wrong = wire(2, int(0), fold(call(vec![])), vec![constant.clone()]);
+    assert!(!holds(&wrong, "constant definition control"));
+    let passing = json!({"id":0,"parameterCount":0,"captureCount":1,"bodyKind":"expression","localScope":0,"body":int(20)});
+    let program = wire(2, int(20), fold(call(vec![bound(1)])), vec![passing]);
+    assert_eq!(refusal(&program), STRINGS);
+}
+
+#[test]
+fn integer_function_keys_that_could_overflow_in_tlc_are_refused_in_a_result() {
+    let collection = set(vec![text("p"), text("q")]);
+    let far = |key: i32| json!({"op":"data","value":{"type":"map","value":[[{"type":"int","value":key.to_string()},{"type":"int","value":"0"}]]}});
+    for version in [1, 2] {
+        let wide = selected_tuple_body(tuple(vec![int(0)]), far(-2147483647));
+        let program = fold_program(version, &set(vec![]), &collection, &wide, &set(vec![]));
+        assert_eq!(refusal(&program), STRINGS, "v{version} wide");
+        let near = selected_tuple_body(tuple(vec![int(0)]), far(5));
+        let expected = set(vec![tuple(vec![int(0)]), far(5)]);
+        let program = fold_program(version, &set(vec![]), &collection, &near, &expected);
+        assert!(holds(&program, "near keys"), "v{version} near");
+    }
 }

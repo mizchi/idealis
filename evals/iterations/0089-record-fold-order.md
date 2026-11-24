@@ -219,7 +219,27 @@ CodeRabbit の指摘（[#101](https://github.com/mizchi/idealis/pull/101)）を�
 
 ### 測定（11 回目）
 
-事前登録（plan の 11 回目の追記）のとおり、新しい run で測った。`0089j-*` は変更しない。
+plan の 11 回目の追記の条件で、新しい run で測った。その追記は測定の後に書いたので、事前登録ではなく確認として扱う。`0089j-*` は変更しない。
 
 - [0089k-paths](../runs/0089k-paths/result.json): status・文言は `0089j-paths` と同じ。受理 56・拒否 21・評価エラー 7、bounded は 0。work が変わったのは 3 入力（`set-sets-of-strings` の `plus-one`・`union`・`union-left`、v1 と v2）で、2〜4 増えた。減ったものはない。
 - [0089k-new-path](../runs/0089k-new-path/result.json): work は `0089j-new-path` の全 8 セルで同じ。時間は記録のみで判定に使わない。
+
+## レビューへの対応（12 回目）
+
+14:40Z の review の 6 件を、コードで確かめて扱った。
+
+- **結果の中の整数 key の関数・列の比較が、key の差を確かめない（Major）: 有効。** 再現（修正前は受理で失敗）: `{<<0>>, [k \in {-2147483647} |-> 0]}` を結果にする R1 の fold が受理された。元の集合の側は、fold の key の幅の制限（`abs_diff > i32::MAX`）が先に拒否していたが、結果の側の `same_kinds` の整数 key の枝にはなかった。
+  - TLC の読み（`FcnRcdValue.java` の `compareTo`・`compareToInterval`・`compareOtherInterval`、`TupleValue.java` の `compareTo`。固定した版）: 両方を `toFcnRcd()` で関数にし、正規化し、要素数の差を返し、同じなら位置ごとに比べる。片方が整数の区間（`intv`。列と連続する整数の domain）の時に、区間でない側の domain の要素 `d` と区間の `low + i` を `d.val - (low + i)` または `low + i - d.val` の int の引き算で比べる。区間どうしは `this.intv.low - fcn.intv.low`。どちらも Java の int の引き算で、差が i32 の範囲を超えると桁あふれして符号が反転する。2 つの key が違えば差は 0 にならないので（差は ±2^32 に届かない）、結果は 0 でない。両方が区間でなければ `compareTo` は `Integer.compare` で、桁あふれしない。
+  - 条件: 要素数が同じ 2 つの関数・列で、同じ位置の整数 key の組が最初に違う位置の差が、i32 の範囲を超える時に拒否する。key が等しい位置は 0 で、先へ進む。rtlc は表現が区間か配列かを知らないので、表現によらず拒否する（区間でない組は安全な拒否の側に広い）。`same_kinds` の整数 key の枝は、整数 key だけの関数・列の長さが同じ組を比べる唯一の枝で、ほかの枝は key が Int でない組を比べる（Int どうしの組は種類が同じとして通る）。回帰 `integer_function_keys_that_could_overflow_in_tlc_are_refused_in_a_result`（v1・v2）。差が i32 に収まる対照（key 5）は受理のまま。
+- **`ENABLED` を毎回要素の読みと数える（Minor）: 有効。** `mentions` は `Expression::Enabled` を無条件に true にしていた。branch の step の式（guard・assign・bind と choose の domain・call と frame の引数と capture）と subscript を、他の node と同じ文脈で探す。frame の body は frame 自身の文脈なので探さない。回帰 `an_enabled_guard_that_does_not_read_the_fold_slots_is_not_a_mention_of_the_element`（v1・v2。修正前は拒否で失敗）。対照 `an_enabled_guard_that_reads_the_fold_element_is_refused`。
+- **引数も capture も fold の slot を渡さない callback の呼び出し（Minor）: 有効。** v2 で、引数 0・capture 0 の定数の定義を呼ぶ body は、引数が 2 つの slot でないという理由で Dependent と分類されていた。引数と capture のどれも fold の 2 つの slot を読まない呼び出しは R0（Constant）にする。slot を渡す呼び出しは従来の写像の確認を通る。回帰 `a_callback_call_that_passes_neither_fold_slot_reads_no_element`（修正前は拒否で失敗）。対照: capture に要素を渡す呼び出しは拒否のまま。
+- **結果の種類の走査を写す前に予算へ載せる（Minor）: 有効。** 要素数を予算に使ってから、要素を写して走査する。`matching_record_fields_by_name_charges_the_budget_in_proportion_to_the_fields` の固定値は、4,595・9,095 から 4,603・9,103 になった（幅の差は 4,500 のまま）。
+- **関数どうしの比較で、entry を集める前に幅を予算へ載せる（Minor）: 有効。** `same_kinds` の関数の枝は、両方の entry 数を、entry の vector を作る前に予算に使う。record 名の確認は先に走るので、長さの違いで返る前に拒否される。`named_entries` の課金を除き、二重に数えない（work の合計は変わらない）。
+- **0089k の事前登録の記述（Minor）: 有効。** plan の 11 回目の追記は測定の後に書いた。上の 11 回目の「事前登録のとおり」を、確認として扱うと直した。保存済みの run は変更していない。plan の 12 回目の追記に開示した。
+
+### 測定（12 回目）
+
+plan の 12 回目の追記（測定の前に書いた）のとおり、新しい run で測った。`0089k-*` は変更しない。
+
+- [0089l-paths](../runs/0089l-paths/result.json): status・文言は `0089k-paths` と同じ。受理 56・拒否 21・評価エラー 7、bounded は 0。work が変わったのは 14 入力（`union`・`union-left`、7 つの集合、v1 と v2）で、2〜6 増えた。減ったものはない。
+- [0089l-new-path](../runs/0089l-new-path/result.json): 整数の fold の work は `0089k-new-path` と同じ。record は 64 要素・状態数 1 の v1 で 23,016 から 23,080、状態数 64 の v1 で 1,460,739 から 1,464,835 に増えた（走査の費用が載る）。時間は記録のみで判定に使わない。

@@ -1,4 +1,4 @@
-use crate::ir::{Definition, DefinitionBody, Expression};
+use crate::ir::{Branch, Definition, DefinitionBody, Expression, Step};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum OrderIndependence {
@@ -28,7 +28,17 @@ fn mentions(expression: &Expression, references: &[Reference]) -> bool {
         return true;
     }
     match expression {
-        Expression::Enabled { .. } => true,
+        Expression::Enabled {
+            branches,
+            subscript,
+        } => {
+            branches
+                .iter()
+                .any(|branch| branch_mentions(branch, references))
+                || subscript
+                    .as_deref()
+                    .is_some_and(|subscript| mentions(subscript, references))
+        }
         Expression::Frame {
             arguments,
             captures,
@@ -42,6 +52,32 @@ fn mentions(expression: &Expression, references: &[Reference]) -> bool {
             .into_iter()
             .any(|child| mentions(child, references)),
     }
+}
+
+fn branch_mentions(branch: &Branch, references: &[Reference]) -> bool {
+    branch.steps.iter().any(|step| match step {
+        Step::Guard { expression }
+        | Step::Assign {
+            value: expression, ..
+        } => mentions(expression, references),
+        Step::Bind { domain, .. } | Step::Choose { domain, .. } => domain
+            .children()
+            .into_iter()
+            .any(|child| mentions(child, references)),
+        Step::Call {
+            arguments,
+            captures,
+            ..
+        }
+        | Step::Frame {
+            arguments,
+            captures,
+            ..
+        } => arguments
+            .iter()
+            .chain(captures)
+            .any(|child| mentions(child, references)),
+    })
 }
 
 fn is_union(expression: &Expression, accumulator: Reference) -> bool {
@@ -75,13 +111,6 @@ pub(crate) fn classify(
             arguments,
             captures,
         } => {
-            let [
-                Expression::Bound { slot: first },
-                Expression::Bound { slot: second },
-            ] = arguments.as_slice()
-            else {
-                return OrderIndependence::Dependent;
-            };
             let slots = [
                 Reference::Bound(accumulator),
                 Reference::Bound(accumulator + 1),
@@ -90,6 +119,20 @@ pub(crate) fn classify(
                 body: DefinitionBody::Expression(callee),
                 ..
             }) = definitions.get(*definition)
+            else {
+                return OrderIndependence::Dependent;
+            };
+            if !arguments
+                .iter()
+                .chain(captures)
+                .any(|operand| mentions(operand, &slots))
+            {
+                return OrderIndependence::Constant;
+            }
+            let [
+                Expression::Bound { slot: first },
+                Expression::Bound { slot: second },
+            ] = arguments.as_slice()
             else {
                 return OrderIndependence::Dependent;
             };
