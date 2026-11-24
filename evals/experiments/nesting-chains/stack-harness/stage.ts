@@ -1,14 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { writeFile } from "node:fs/promises";
-
-type Cell = {
-  readonly family: string;
-  readonly length: number;
-  readonly exit: number | null;
-  readonly signal: string | null;
-  readonly stdout: string;
-  readonly stderr: string;
-};
+import { cellFrom, type Cell } from "./cell.js";
 
 const [
   binary,
@@ -36,14 +28,7 @@ for (const family of families.split(",")) {
         timeout: 600_000,
       },
     );
-    cells.push({
-      family,
-      length: Number(length),
-      exit: result.status,
-      signal: result.signal,
-      stdout: result.stdout.trim(),
-      stderr: result.stderr.trim(),
-    });
+    cells.push(cellFrom(family, Number(length), result));
   }
 }
 await writeFile(output, `${JSON.stringify(cells, null, 1)}\n`);
@@ -52,7 +37,7 @@ for (const cell of cells) {
   console.log(
     cell.family,
     cell.length,
-    cell.exit ?? cell.signal,
-    cell.stdout || first.slice(0, 160),
+    cell.exit ?? cell.signal ?? "spawn-error",
+    cell.stdout || cell.spawnError || first.slice(0, 160),
   );
 }
