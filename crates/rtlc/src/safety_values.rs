@@ -894,43 +894,101 @@ impl<'scope> Arena<'scope> {
             return Err(CoreError::protocol("Incomparable TLA values"));
         }
         if let (Ok(Cell::Set(left)), Ok(Cell::Set(right))) = (self.cell(left), self.cell(right)) {
-            let members: Vec<Scalar> = left.iter().chain(right.iter()).copied().collect();
-            for (index, first) in members.iter().enumerate() {
-                for second in &members[index + 1..] {
-                    self.same_kinds(*first, *second)?;
+            let (left, right) = (left.clone(), right.clone());
+            self.same_kinds_within(&left)?;
+            self.same_kinds_within(&right)?;
+            if left.len() == right.len() {
+                for first in &left {
+                    for second in &right {
+                        self.same_kinds(*first, *second)?;
+                    }
                 }
             }
             return Ok(());
         }
-        let pairs: Vec<(Scalar, Scalar)> = match (self.cell(left), self.cell(right)) {
-            (Ok(Cell::Function(left)), Ok(Cell::Function(right))) if left.len() == right.len() => {
-                let left: Vec<_> = left.iter().collect();
-                let right: Vec<_> = right.iter().collect();
-                let named = left
-                    .iter()
-                    .chain(right.iter())
-                    .all(|(key, _)| matches!(self.cell(*key), Ok(Cell::String(_))));
-                if named {
-                    left.iter()
-                        .filter_map(|(key, value)| {
-                            right
-                                .iter()
-                                .find(|(other, _)| self.total(*key, *other) == Ordering::Equal)
-                                .map(|(_, other)| (*value, *other))
-                        })
-                        .collect()
-                } else {
-                    left.iter()
-                        .zip(right.iter())
-                        .flat_map(|(left, right)| [(left.0, right.0), (left.1, right.1)])
-                        .collect()
+        let (Ok(Cell::Function(left)), Ok(Cell::Function(right))) =
+            (self.cell(left), self.cell(right))
+        else {
+            return Ok(());
+        };
+        let left: Vec<(Scalar, Scalar)> = left.iter().collect();
+        let right: Vec<(Scalar, Scalar)> = right.iter().collect();
+        let left_named = self.named_entries(&left)?;
+        let right_named = self.named_entries(&right)?;
+        if (left_named && !right.is_empty() && !right_named)
+            || (right_named && !left.is_empty() && !left_named)
+        {
+            return Err(CoreError::protocol("Incomparable TLA values"));
+        }
+        if left.len() != right.len() {
+            return Ok(());
+        }
+        if left_named {
+            return self.same_kinds_by_name(&left, &right);
+        }
+        let integer_keys = left
+            .iter()
+            .chain(right.iter())
+            .all(|(key, _)| matches!(key, Scalar::Int(_)));
+        if integer_keys {
+            for (left, right) in left.iter().zip(right.iter()) {
+                self.tick()?;
+                if left.0 != right.0 {
+                    break;
+                }
+                self.same_kinds(left.1, right.1)?;
+                if !self.equal(left.1, right.1)? {
+                    break;
                 }
             }
-            _ => vec![],
-        };
-        pairs
-            .into_iter()
-            .try_for_each(|(left, right)| self.same_kinds(left, right))
+            return Ok(());
+        }
+        for (first, _) in &left {
+            for (second, _) in &right {
+                self.same_kinds(*first, *second)?;
+            }
+        }
+        for (_, first) in &left {
+            for (_, second) in &right {
+                self.same_kinds(*first, *second)?;
+            }
+        }
+        Ok(())
+    }
+    fn same_kinds_within(&mut self, members: &[Scalar]) -> Result<(), CoreError> {
+        for (index, first) in members.iter().enumerate() {
+            for second in &members[index + 1..] {
+                self.same_kinds(*first, *second)?;
+            }
+        }
+        Ok(())
+    }
+    fn named_entries(&mut self, entries: &[(Scalar, Scalar)]) -> Result<bool, CoreError> {
+        self.consume(entries.len())?;
+        Ok(!entries.is_empty()
+            && entries
+                .iter()
+                .all(|(key, _)| matches!(self.cell(*key), Ok(Cell::String(_)))))
+    }
+    fn same_kinds_by_name(
+        &mut self,
+        left: &[(Scalar, Scalar)],
+        right: &[(Scalar, Scalar)],
+    ) -> Result<(), CoreError> {
+        let (mut first, mut second) = (0, 0);
+        while first < left.len() && second < right.len() {
+            self.tick()?;
+            match self.total(left[first].0, right[second].0) {
+                Ordering::Less => first += 1,
+                Ordering::Greater => second += 1,
+                Ordering::Equal => {
+                    self.same_kinds(left[first].1, right[second].1)?;
+                    first += 1;
+                    second += 1;
+                }
+            }
+        }
+        Ok(())
     }
     fn fold_independence(&self, fold: &Expression) -> OrderIndependence {
         match self.prepared {

@@ -925,3 +925,85 @@ fn nested_sets_are_compared_across_each_other_whatever_the_field_name_order() {
         assert!(holds(&program, "compatible nested sets"), "v{version}");
     }
 }
+
+#[test]
+fn nested_sets_of_different_sizes_are_not_compared_across_each_other() {
+    let collection = set(vec![text("p"), text("q")]);
+    let small = set(vec![int(1)]);
+    let large = set(vec![
+        truth(),
+        json!({"op":"literal","value":{"type":"bool","value":false}}),
+    ]);
+    let expected = set(vec![small.clone(), large.clone()]);
+    for version in [1, 2] {
+        for first in ["p", "q"] {
+            let body = branching_union_body(first, vec![small.clone()], vec![large.clone()]);
+            let program = fold_program(version, &set(vec![]), &collection, &body, &expected);
+            assert!(holds(&program, "unequal sizes"), "v{version} first={first}");
+        }
+    }
+}
+
+#[test]
+fn nested_sets_of_equal_size_with_incomparable_members_stay_refused() {
+    let collection = set(vec![text("p"), text("q")]);
+    for version in [1, 2] {
+        let body = branching_union_body("p", vec![set(vec![int(1)])], vec![set(vec![truth()])]);
+        let program = fold_program(version, &set(vec![]), &collection, &body, &set(vec![]));
+        assert_eq!(refusal(&program), STRINGS, "v{version}");
+    }
+}
+
+#[test]
+fn sequences_are_compared_only_up_to_their_first_difference() {
+    let collection = set(vec![text("p"), text("q")]);
+    let stops = vec![tuple(vec![int(1), int(1)]), tuple(vec![int(2), truth()])];
+    let reaches = [tuple(vec![int(1), int(1)]), tuple(vec![int(1), truth()])];
+    for version in [1, 2] {
+        let body = selected_tuple_body(stops[0].clone(), stops[1].clone());
+        let expected = set(stops.clone());
+        let program = fold_program(version, &set(vec![]), &collection, &body, &expected);
+        assert!(holds(&program, "stops at first difference"), "v{version}");
+        let body = selected_tuple_body(reaches[0].clone(), reaches[1].clone());
+        let program = fold_program(version, &set(vec![]), &collection, &body, &set(vec![]));
+        assert_eq!(refusal(&program), STRINGS, "v{version} reaches");
+    }
+}
+
+fn selected_tuple_body(first: Value, second: Value) -> Value {
+    branching_union_body("p", vec![first], vec![second])
+}
+
+#[test]
+fn a_record_and_a_sequence_of_different_lengths_are_refused() {
+    let collection = set(vec![text("p"), text("q")]);
+    for version in [1, 2] {
+        let body = selected_tuple_body(record(vec![("a", int(1))]), tuple(vec![int(1), int(2)]));
+        let program = fold_program(version, &set(vec![]), &collection, &body, &set(vec![]));
+        assert_eq!(refusal(&program), STRINGS, "v{version}");
+    }
+}
+
+#[test]
+fn matching_record_fields_by_name_charges_the_budget_in_proportion_to_the_fields() {
+    let collection = set(vec![text("p"), text("q")]);
+    let width = |count: usize, shift: i32| -> Value {
+        record(
+            (0..count)
+                .map(|index| (format!("f{index:05}"), int(index as i32 + shift)))
+                .collect::<Vec<_>>()
+                .iter()
+                .map(|(name, value)| (name.as_str(), value.clone()))
+                .collect(),
+        )
+    };
+    let work = |count: usize| -> u32 {
+        let (first, second) = (width(count, 0), width(count, 1));
+        let expected = set(vec![first.clone(), second.clone()]);
+        let body = selected_tuple_body(first, second);
+        let program = fold_program(1, &set(vec![]), &collection, &body, &expected);
+        run(&program).unwrap().work
+    };
+    let (narrow, wide) = (work(100), work(200));
+    assert_eq!((narrow, wide), (3367, 6667));
+}

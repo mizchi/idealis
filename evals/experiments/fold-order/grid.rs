@@ -43,7 +43,7 @@ fn main() {
                 });
             }
             let first = &outcomes[0];
-            let kind = if first.starts_with("ok") { accepted += 1; "accepted" } else if first.contains("set fold order") { refused += 1; "refused" } else { other += 1; "other" };
+            let kind = if first.starts_with("ok:") && !first.starts_with("ok:bounded:") { accepted += 1; "accepted" } else if first.contains("set fold order") { refused += 1; "refused" } else { other += 1; "other" };
             let same = outcomes[0] == outcomes[1];
             if !same { differing += 1; }
             println!("{set_name}\t{body_name}\t{kind}\tv1v2same={same}\tv1={}\tv2={}", outcomes[0], outcomes[1]);

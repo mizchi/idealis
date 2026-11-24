@@ -1,0 +1,98 @@
+{
+  "driver": "evals/experiments/fold-order/fold_cost.rs",
+  "supersedes": "0089e-new-path (kept unchanged); tree whose set comparison pairs by name through a charged merge, stops sequences at the first difference and compares unequal-size sets only inside each set",
+  "preregistered": "evals/plans/0089-record-fold-order.md, 6th addendum",
+  "method": "release build, 400 check calls per cell, median, three runs",
+  "loadAverageAtStart": "3.17",
+  "table": [
+    {
+      "irVersion": "v1",
+      "states": 1,
+      "elements": "integers",
+      "work": 2340,
+      "runsMicroseconds": [
+        38.1,
+        38.4,
+        37.6
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 1,
+      "elements": "records",
+      "work": 12613,
+      "runsMicroseconds": [
+        277.2,
+        283.1,
+        272.1
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 64,
+      "elements": "integers",
+      "work": 141570,
+      "runsMicroseconds": [
+        2187.1,
+        2130.8,
+        2180.3
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 64,
+      "elements": "records",
+      "work": 794947,
+      "runsMicroseconds": [
+        17544.8,
+        17406.2,
+        17635.8
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 1,
+      "elements": "integers",
+      "work": 2532,
+      "runsMicroseconds": [
+        55.0,
+        55.0,
+        55.5
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 1,
+      "elements": "records",
+      "work": 12805,
+      "runsMicroseconds": [
+        301.7,
+        304.5,
+        303.4
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 64,
+      "elements": "integers",
+      "work": 153858,
+      "runsMicroseconds": [
+        2466.3,
+        2422.6,
+        2432.9
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 64,
+      "elements": "records",
+      "work": 807235,
+      "runsMicroseconds": [
+        17794.2,
+        17916.5,
+        17869.4
+      ]
+    }
+  ],
+  "note": "Integer work is identical to 0089e-new-path. Record work rises (v1 states=1: 6565 to 12613) because the name merge and the field-shape scan now charge ticks; no record in this input has a nested set. Record medians (v1 states=1: 272 to 283 us) are within the run-to-run spread of 0089e (273 to 278 us); time is recorded, not judged."
+}
