@@ -875,7 +875,9 @@ impl<'scope> Arena<'scope> {
         }
     }
     fn check_nested_kinds(&mut self, root: Scalar) -> Result<(), CoreError> {
-        let mut pending = vec![root];
+        self.walk_nested_kinds(vec![root])
+    }
+    fn walk_nested_kinds(&mut self, mut pending: Vec<Scalar>) -> Result<(), CoreError> {
         let mut visited = HashSet::new();
         while let Some(value) = pending.pop() {
             let Scalar::Ref(index) = value else {
@@ -1109,6 +1111,19 @@ impl<'scope> Arena<'scope> {
                         }
                     }
                 }
+            }
+        }
+        if let (Some(message), false, true) =
+            (text, single, independence != OrderIndependence::Dependent)
+        {
+            let comparable = self
+                .same_kinds_within(values)
+                .and_then(|()| self.walk_nested_kinds(values.to_vec()));
+            if let Err(error) = comparable {
+                return Err(match error.code {
+                    "budget" | "evaluation-budget" => error,
+                    _ => CoreError::protocol(message),
+                });
             }
         }
         if let Some((minimum, maximum)) = keys

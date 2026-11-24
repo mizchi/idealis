@@ -1003,7 +1003,7 @@ fn matching_record_fields_by_name_charges_the_budget_in_proportion_to_the_fields
         run(&program).unwrap().work
     };
     let (narrow, wide) = (work(100), work(200));
-    assert_eq!((narrow, wide), (4587, 9087));
+    assert_eq!((narrow, wide), (4595, 9095));
 }
 
 #[test]
@@ -1054,5 +1054,27 @@ fn a_function_domain_is_checked_for_mixed_kinds_whatever_the_other_member() {
         ]);
         let program = fold_program(version, &set(vec![]), &collection, &uniform, &expected);
         assert!(holds(&program, "uniform domain"), "v{version} uniform");
+    }
+}
+
+#[test]
+fn a_source_set_with_mixed_field_kinds_is_refused_before_the_fold_is_admitted() {
+    let body = json!({"op":"add","left":acc(),"right":int(1)});
+    let mixed = set(vec![
+        kinds_record(int(0), truth()),
+        kinds_record(int(1), int(0)),
+    ]);
+    let compatible = set(vec![
+        kinds_record(int(0), truth()),
+        kinds_record(int(1), truth()),
+    ]);
+    for version in [1, 2] {
+        let program = fold_program(version, &int(0), &mixed, &body, &int(2));
+        assert_eq!(refusal(&program), RECORDS, "v{version} mixed");
+        let program = fold_program(version, &int(0), &compatible, &body, &int(2));
+        assert!(
+            holds(&program, "compatible source"),
+            "v{version} compatible"
+        );
     }
 }
