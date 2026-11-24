@@ -174,3 +174,136 @@ fn qualified_definitions_are_kept() {
     ]);
     assert_eq!(check(&model, "atLimit"), ("complete".to_owned(), 1));
 }
+
+// Review of #103: the Alloy lowering.
+
+fn lower(model: &str, invariant: &str, bounds: rquint::Bounds) -> Result<String, rquint::Error> {
+    rquint::to_alloy(
+        model,
+        &rquint::Options {
+            invariants: vec![invariant.to_owned()],
+            ..rquint::Options::default()
+        },
+        bounds,
+    )
+}
+fn sat(source: &str, label: &str) -> ralloy::Status {
+    let model = ralloy::Model::parse(source).unwrap_or_else(|error| panic!("{error}\n{source}"));
+    let index = model
+        .commands()
+        .iter()
+        .position(|command| command.label == label)
+        .unwrap();
+    model.analyze(index, 50_000_000).unwrap().status
+}
+fn typed_ir(declarations: Vec<Value>) -> String {
+    let mut all = vec![json!({"kind": "var", "name": "x", "typeAnnotation": {"kind": "int"}})];
+    all.extend(declarations);
+    json!({"main": "M", "errors": [], "modules": [{"name": "M", "declarations": all}]}).to_string()
+}
+
+#[test]
+fn constant_false_is_unsatisfiable() {
+    let model = typed_ir(steady(vec![def(
+        "val",
+        "never",
+        json!({"kind": "bool", "value": false}),
+    )]));
+    let source = lower(&model, "never", rquint::Bounds::default()).unwrap();
+    assert_eq!(sat(&source, "c_never"), ralloy::Status::Counterexample);
+}
+
+#[test]
+fn the_smallest_integer_is_a_signed_literal() {
+    let model = typed_ir(vec![
+        def("action", "init", app("assign", vec![name("x"), int(-16)])),
+        def("action", "step", app("assign", vec![name("x"), name("x")])),
+        def("val", "least", app("eq", vec![name("x"), int(-16)])),
+    ]);
+    let source = lower(&model, "least", rquint::Bounds::default()).unwrap();
+    assert_eq!(sat(&source, "c_least"), ralloy::Status::NoCounterexample);
+    // Alloy rejects the literal 16 at five bits; ralloy happens to wrap it.
+    assert!(
+        !source.contains("negate[16]") && source.contains("-16"),
+        "{source}"
+    );
+}
+
+#[test]
+fn unsupported_widths_and_names_are_refused() {
+    let model = typed_ir(steady(vec![def(
+        "val",
+        "overflow",
+        json!({"kind": "bool", "value": true}),
+    )]));
+    let error = lower(&model, "overflow", rquint::Bounds::default()).unwrap_err();
+    assert!(error.0.contains("overflow"), "{error}");
+    let model = typed_ir(steady(vec![def(
+        "val",
+        "ok",
+        json!({"kind": "bool", "value": true}),
+    )]));
+    for bitwidth in [0, 6] {
+        let error = lower(&model, "ok", rquint::Bounds { bitwidth, steps: 8 }).unwrap_err();
+        assert!(error.0.contains("bit width"), "{error}");
+    }
+}
+
+#[test]
+fn constant_folding_does_not_overflow_the_host() {
+    let big = int(65_536);
+    let product = app(
+        "imul",
+        vec![
+            app("imul", vec![big.clone(), big.clone()]),
+            app("imul", vec![big.clone(), big]),
+        ],
+    );
+    let model = typed_ir(vec![
+        def("action", "init", app("assign", vec![name("x"), product])),
+        def("action", "step", app("assign", vec![name("x"), name("x")])),
+        def("val", "ok", json!({"kind": "bool", "value": true})),
+    ]);
+    let error = lower(&model, "ok", rquint::Bounds::default()).unwrap_err();
+    assert!(error.0.contains("64-bit"), "{error}");
+}
+
+#[test]
+fn non_integer_choices_are_refused() {
+    let choice = json!({
+        "kind": "let",
+        "opdef": def("nondet", "b", app("oneOf", vec![app("Set", vec![json!({"kind": "bool", "value": true})])])),
+        "expr": app("assign", vec![name("x"), int(0)]),
+    });
+    let model = typed_ir(vec![
+        def("action", "init", app("assign", vec![name("x"), int(0)])),
+        def("action", "step", choice),
+        def("val", "ok", json!({"kind": "bool", "value": true})),
+    ]);
+    let error = lower(&model, "ok", rquint::Bounds::default()).unwrap_err();
+    assert!(error.0.contains("oneOf"), "{error}");
+}
+
+#[test]
+fn malformed_arity_is_an_error() {
+    let model = typed_ir(vec![
+        def("action", "init", app("assign", vec![])),
+        def("action", "step", app("assign", vec![name("x"), name("x")])),
+        def("val", "ok", app("matchVariant", vec![])),
+    ]);
+    assert!(lower(&model, "ok", rquint::Bounds::default()).is_err());
+    assert!(
+        rquint::translate(
+            &ir(vec![
+                def("action", "init", app("assign", vec![name("x"), int(0)])),
+                def("action", "step", app("assign", vec![name("x"), name("x")])),
+                def("val", "ok", app("matchVariant", vec![])),
+            ]),
+            &rquint::Options {
+                invariants: vec!["ok".into()],
+                ..rquint::Options::default()
+            }
+        )
+        .is_err()
+    );
+}

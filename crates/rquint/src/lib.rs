@@ -603,6 +603,11 @@ impl Emitter<'_> {
             "matchVariant" => {
                 let subject = self.expression(at(0)?)?;
                 let mut cases = Vec::new();
+                if arguments.len() < 3 || arguments.len() % 2 == 0 {
+                    return Err(Error(
+                        "matchVariant needs a subject and label/handler pairs".into(),
+                    ));
+                }
                 for pair in arguments[1..].chunks(2) {
                     let [label, handler] = pair else {
                         return Err(Error("matchVariant needs label/handler pairs".into()));
