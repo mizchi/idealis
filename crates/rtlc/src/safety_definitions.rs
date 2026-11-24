@@ -3,6 +3,7 @@ use crate::ir::{
     Binding, BodyKind, Branch, Definition, DefinitionBody, Domain, Expression, SafetyProgram, Step,
     TemporalFormula, validate_wire_index,
 };
+use crate::safety_chains::chain_terms;
 use std::collections::{BTreeMap, HashMap};
 
 #[derive(Clone, Default, PartialEq, Eq)]
@@ -38,10 +39,11 @@ pub(crate) struct Metadata {
     variables: usize,
 }
 
-#[derive(Clone, Copy, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy)]
 struct Context {
     phase: u8,
     depth: usize,
+    nodes: usize,
     locals: usize,
     capacity: usize,
     parameters: usize,
@@ -49,11 +51,28 @@ struct Context {
     old: bool,
 }
 
+type ContextKey = (u8, usize, usize, usize, usize, usize, bool);
+
+impl Context {
+    fn key(self) -> ContextKey {
+        (
+            self.phase,
+            self.depth,
+            self.locals,
+            self.capacity,
+            self.parameters,
+            self.captures,
+            self.old,
+        )
+    }
+}
+
 impl Context {
     fn root(phase: u8) -> Self {
         Self {
             phase,
             depth: 0,
+            nodes: 0,
             locals: 0,
             capacity: 40,
             parameters: 0,
@@ -64,6 +83,14 @@ impl Context {
     fn child(self) -> Self {
         Self {
             depth: self.depth + 1,
+            nodes: self.nodes + 1,
+            ..self
+        }
+    }
+    fn term(self, offset: usize) -> Self {
+        Self {
+            depth: self.depth + 1,
+            nodes: self.nodes + offset,
             ..self
         }
     }
@@ -74,6 +101,12 @@ impl Context {
 
 fn invalid(message: &str) -> CoreError {
     CoreError::protocol(message)
+}
+
+const IR_NODE_LIMIT: usize = 128;
+
+fn ir_nesting() -> CoreError {
+    invalid("Safety IR expression nesting exceeds 128")
 }
 
 fn branch_expansion(branches: &[Branch], depth: usize) -> Result<(usize, usize), CoreError> {
@@ -119,8 +152,8 @@ fn definition_order(definitions: &[Definition]) -> Result<Vec<(Vec<usize>, bool)
             return Err(invalid("Invalid safety definition ID or local scope"));
         }
         enum Node<'a> {
-            Expression(&'a Expression, usize),
-            Branch(&'a Branch, usize),
+            Expression(&'a Expression, usize, usize),
+            Branch(&'a Branch, usize, usize),
             Formula(&'a TemporalFormula, usize),
         }
         let mut pending = match &definition.body {
@@ -130,12 +163,12 @@ fn definition_order(definitions: &[Definition]) -> Result<Vec<(Vec<usize>, bool)
                 vec![Node::Formula(body, 0)]
             }
             DefinitionBody::Expression(body) if definition.body_kind == BodyKind::Expression => {
-                vec![Node::Expression(body, 0)]
+                vec![Node::Expression(body, 0, 0)]
             }
             DefinitionBody::Action(branches) if definition.body_kind == BodyKind::Action => {
                 branches
                     .iter()
-                    .map(|branch| Node::Branch(branch, 0))
+                    .map(|branch| Node::Branch(branch, 0, 0))
                     .collect()
             }
             _ => return Err(invalid("Invalid safety definition body kind")),
@@ -175,7 +208,7 @@ fn definition_order(definitions: &[Definition]) -> Result<Vec<(Vec<usize>, bool)
                                 arguments
                                     .iter()
                                     .chain(captures)
-                                    .map(|expression| Node::Expression(expression, 0)),
+                                    .map(|expression| Node::Expression(expression, 0, 0)),
                             );
                         }
                         TemporalFormula::Frame {
@@ -188,12 +221,12 @@ fn definition_order(definitions: &[Definition]) -> Result<Vec<(Vec<usize>, bool)
                                 arguments
                                     .iter()
                                     .chain(captures)
-                                    .map(|expression| Node::Expression(expression, 0)),
+                                    .map(|expression| Node::Expression(expression, 0, 0)),
                             );
                             pending.push(Node::Formula(formula, depth + 1));
                         }
                         TemporalFormula::Atom { expression } => {
-                            pending.push(Node::Expression(expression, 0))
+                            pending.push(Node::Expression(expression, 0, 0))
                         }
                         TemporalFormula::Not { formula }
                         | TemporalFormula::Always { formula }
@@ -213,16 +246,25 @@ fn definition_order(definitions: &[Definition]) -> Result<Vec<(Vec<usize>, bool)
                                         .domain
                                         .children()
                                         .into_iter()
-                                        .map(|expression| Node::Expression(expression, 0)),
+                                        .map(|expression| Node::Expression(expression, 0, 0)),
                                 );
                             }
                             pending.push(Node::Formula(formula, depth + 1));
                         }
                     }
                 }
-                Node::Expression(expression, depth) => {
+                Node::Expression(expression, depth, nodes) => {
                     if depth > 48 {
                         return Err(invalid("Safety expression nesting exceeds 48"));
+                    }
+                    if nodes > IR_NODE_LIMIT {
+                        return Err(ir_nesting());
+                    }
+                    if let Some(terms) = chain_terms(expression) {
+                        pending.extend(terms.into_iter().map(|(term, offset)| {
+                            Node::Expression(term, depth + 1, nodes + offset)
+                        }));
+                        continue;
                     }
                     if let Expression::Call {
                         definition,
@@ -240,23 +282,23 @@ fn definition_order(definitions: &[Definition]) -> Result<Vec<(Vec<usize>, bool)
                         pending.extend(
                             branches
                                 .iter()
-                                .map(|branch| Node::Branch(branch, depth + 1)),
+                                .map(|branch| Node::Branch(branch, depth + 1, nodes + 1)),
                         );
                         pending.extend(
                             subscript
                                 .iter()
-                                .map(|body| Node::Expression(body, depth + 1)),
+                                .map(|body| Node::Expression(body, depth + 1, nodes + 1)),
                         );
                     } else {
                         pending.extend(
                             expression
                                 .children()
                                 .into_iter()
-                                .map(|body| Node::Expression(body, depth + 1)),
+                                .map(|body| Node::Expression(body, depth + 1, nodes + 1)),
                         );
                     }
                 }
-                Node::Branch(branch, depth) => {
+                Node::Branch(branch, depth, nodes) => {
                     if depth > 48 {
                         return Err(invalid("Safety expression nesting exceeds 48"));
                     }
@@ -272,7 +314,7 @@ fn definition_order(definitions: &[Definition]) -> Result<Vec<(Vec<usize>, bool)
                                     arguments
                                         .iter()
                                         .chain(captures)
-                                        .map(|body| Node::Expression(body, depth + 1)),
+                                        .map(|body| Node::Expression(body, depth + 1, nodes + 1)),
                                 );
                             }
                             Step::Frame {
@@ -285,24 +327,24 @@ fn definition_order(definitions: &[Definition]) -> Result<Vec<(Vec<usize>, bool)
                                     arguments
                                         .iter()
                                         .chain(captures)
-                                        .map(|body| Node::Expression(body, depth + 1)),
+                                        .map(|body| Node::Expression(body, depth + 1, nodes + 1)),
                                 );
                                 pending.extend(
                                     branches
                                         .iter()
-                                        .map(|branch| Node::Branch(branch, depth + 1)),
+                                        .map(|branch| Node::Branch(branch, depth + 1, nodes + 1)),
                                 );
                             }
                             Step::Guard { expression }
                             | Step::Assign {
                                 value: expression, ..
-                            } => pending.push(Node::Expression(expression, depth + 1)),
+                            } => pending.push(Node::Expression(expression, depth + 1, nodes + 1)),
                             Step::Bind { domain, .. } | Step::Choose { domain, .. } => pending
                                 .extend(
                                     domain
                                         .children()
                                         .into_iter()
-                                        .map(|body| Node::Expression(body, depth + 1)),
+                                        .map(|body| Node::Expression(body, depth + 1, nodes + 1)),
                                 ),
                         }
                     }
@@ -375,7 +417,7 @@ type CachedAnalysis = Result<Summary, (&'static str, String)>;
 
 struct Analyzer<'metadata> {
     metadata: &'metadata Metadata,
-    cache: HashMap<(usize, Context), CachedAnalysis>,
+    cache: HashMap<(usize, ContextKey), CachedAnalysis>,
 }
 
 impl<'metadata> Analyzer<'metadata> {
@@ -622,7 +664,7 @@ impl Analyzer<'_> {
         expression: &Expression,
         context: Context,
     ) -> Result<Summary, CoreError> {
-        let key = (std::ptr::from_ref(expression) as usize, context);
+        let key = (std::ptr::from_ref(expression) as usize, context.key());
         if let Some(result) = self.cache.get(&key) {
             return result
                 .clone()
@@ -646,6 +688,16 @@ impl Analyzer<'_> {
     ) -> Result<Summary, CoreError> {
         if context.depth > 48 {
             return Err(invalid("Safety expression nesting exceeds 48"));
+        }
+        if context.nodes > IR_NODE_LIMIT {
+            return Err(ir_nesting());
+        }
+        if let Some(terms) = chain_terms(expression) {
+            let mut summary = Summary::default();
+            for (term, offset) in terms {
+                summary.merge(self.expression(term, context.term(offset))?);
+            }
+            return Ok(summary);
         }
         match expression {
             Expression::Call { definition, .. } => validate_wire_index(*definition)?,

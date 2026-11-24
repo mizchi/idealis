@@ -6,6 +6,7 @@ pub use expansions::{
 };
 pub mod ir;
 mod safety;
+mod safety_chains;
 #[cfg(test)]
 mod safety_definition_tests;
 mod safety_definitions;

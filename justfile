@@ -494,7 +494,7 @@ portable-replay run: build
 safety-build: portable-build build
 
 safety-test: safety-build
-  node --test dist/tests/rust-safety/contract-test.js dist/tests/collections-temporal/contract-test.js dist/tests/tlc-differential/compare-test.js dist/tests/tlc-differential/regression-test.js dist/tests/nesting-chains/contract-test.js
+  node --test dist/tests/rust-safety/contract-test.js dist/tests/collections-temporal/contract-test.js dist/tests/tlc-differential/compare-test.js dist/tests/tlc-differential/regression-test.js dist/tests/nesting-chains/contract-test.js dist/tests/nesting-chains/abba-report-test.js dist/tests/nesting-chains/stack-cell-test.js
 
 safety-eval run plan="0014-value-hash": safety-build
   node dist/evals/experiments/rust-safety/evaluate.js {{quote(run)}} {{quote(plan)}}

@@ -5,6 +5,8 @@ use serde_json::{Value, json};
 
 const FRONTEND_LIMIT: &str = "expression or operator nesting exceeds 40";
 const CHECKER_LIMIT: &str = "Safety expression nesting exceeds 48";
+const QUINT_IF_CHAIN_WORK: u64 = 226;
+const OUTPUT_LIMIT: &str = "compiled expression nesting exceeds 128";
 const PARSER_LIMIT: &str = "TLA parsing: Expression nesting exceeds 64";
 
 fn large(body: fn()) {
@@ -18,6 +20,13 @@ fn large(body: fn()) {
 
 fn cases() -> Vec<Value> {
     serde_json::from_str(include_str!("../../../fixtures/nesting-chains/cases.json")).unwrap()
+}
+
+fn cases_0075() -> Vec<Value> {
+    serde_json::from_str(include_str!(
+        "../../../fixtures/nesting-chains/cases-0075.json"
+    ))
+    .unwrap()
 }
 
 fn named(cases: &[Value], name: &str) -> Value {
@@ -77,6 +86,12 @@ fn checked(program: &rtlc::SafetyProgram) -> Value {
             "generated": result.generated,
             "work": result.work,
         }),
+        Ok(result) if result.status == "bounded" => json!({
+            "stage": "result",
+            "status": "bounded",
+            "reason": result.reason,
+            "work": result.work,
+        }),
         Ok(result) => {
             assert_eq!(result.status, "invariant-violation");
             json!({
@@ -89,10 +104,23 @@ fn checked(program: &rtlc::SafetyProgram) -> Value {
     }
 }
 
+fn request(program: &rtlc::SafetyProgram) -> Result<(), String> {
+    let command = format!(
+        r#"{{"version":1,"request":{{"kind":"check-safety","program":{},"bounds":{{"maxDepth":100,"maxStates":1000,"maxWork":1000000}}}}}}"#,
+        wire(program)
+    );
+    serde_json::from_str::<Value>(&command)
+        .map(drop)
+        .map_err(|error| error.to_string())
+}
+
 fn outcome(source: &str, config: &str, version: u8) -> (Value, Option<rtlc::SafetyProgram>) {
     match compile(source, config, version) {
         Err(message) => (json!({"stage": "compile", "message": bare(&message)}), None),
-        Ok(program) => (checked(&program), Some(program)),
+        Ok(program) => match request(&program) {
+            Err(message) => (json!({"stage": "check", "message": message}), Some(program)),
+            Ok(()) => (checked(&program), Some(program)),
+        },
     }
 }
 
@@ -119,7 +147,10 @@ fn group_versions(name: &str, versions: &[u8]) {
 }
 
 fn cases_versions(selected: impl Fn(&Value) -> bool, versions: &[u8]) {
-    let cases = cases();
+    cases_from(cases(), selected, versions);
+}
+
+fn cases_from(cases: Vec<Value>, selected: impl Fn(&Value) -> bool, versions: &[u8]) {
     let mut failures = vec![];
     for case in cases.iter().filter(|case| selected(case)) {
         let source = case["source"].as_str().unwrap();
@@ -198,6 +229,28 @@ fn nesting_that_is_not_a_chain_keeps_its_limit() {
     large(|| group("boundary"));
 }
 
+#[test]
+fn chains_past_the_former_checker_limits_follow_the_expected_layer() {
+    large(|| {
+        cases_from(
+            cases_0075(),
+            |case| case["group"] != "boundary-0075",
+            &[1, 2],
+        )
+    });
+}
+
+#[test]
+fn nesting_that_is_not_a_chain_keeps_the_checker_and_evaluation_limits() {
+    large(|| {
+        cases_from(
+            cases_0075(),
+            |case| case["group"] == "boundary-0075",
+            &[1, 2],
+        )
+    });
+}
+
 fn rust(cases: &[Value], name: &str, version: &str) -> Value {
     named(cases, name)["expect"]["rust"][version].clone()
 }
@@ -211,36 +264,60 @@ fn refused(stage: &str, message: &str) -> Value {
 }
 
 #[test]
-fn a_chain_counts_as_one_level_up_to_the_checker_limit() {
-    large(a_chain_counts_as_one_level_up_to_the_checker_limit_body);
+fn a_chain_counts_as_one_level_up_to_the_parser_limit() {
+    large(a_chain_counts_as_one_level_up_to_the_parser_limit_body);
 }
 
-fn a_chain_counts_as_one_level_up_to_the_checker_limit_body() {
+fn a_chain_counts_as_one_level_up_to_the_parser_limit_body() {
     let cases = cases();
-    for form in ["paren-and", "paren-or"] {
-        for length in [2, 3, 4, 24, 25, 38, 39, 40, 44, 47, 48] {
+    for form in [
+        "paren-and",
+        "paren-or",
+        "if-chain",
+        "flat-and",
+        "flat-or",
+        "case-other",
+    ] {
+        for length in [2, 3, 4, 24, 25, 38, 39, 40, 44, 47, 48, 49, 54, 61] {
             let expected = rust(&cases, &format!("{form}-{length}"), "v2");
             assert_eq!(expected["status"], "complete", "{form}-{length}");
         }
-        for length in [49, 54, 61] {
-            assert_eq!(
-                rust(&cases, &format!("{form}-{length}"), "v2"),
-                refused("check", CHECKER_LIMIT),
+    }
+    let added = cases_0075();
+    let decoder = |expected: Value| {
+        expected["stage"] == "check"
+            && expected["message"]
+                .as_str()
+                .unwrap()
+                .starts_with("recursion limit exceeded")
+    };
+    for form in ["flat-and", "flat-or"] {
+        let expected = rust(&added, &format!("{form}-100"), "v2");
+        assert_eq!(expected["status"], "complete", "{form}-100");
+        for length in [127, 128] {
+            assert!(
+                decoder(rust(&added, &format!("{form}-{length}"), "v2")),
                 "{form}-{length}"
             );
         }
-    }
-    for length in [2, 3, 4, 24, 25, 38, 39, 40, 44, 47] {
-        let expected = rust(&cases, &format!("if-chain-{length}"), "v2");
-        assert_eq!(expected["status"], "complete", "if-chain-{length}");
-    }
-    for length in [48, 49, 54, 61] {
         assert_eq!(
-            rust(&cases, &format!("if-chain-{length}"), "v2"),
-            refused("check", CHECKER_LIMIT),
-            "if-chain-{length}"
+            rust(&added, &format!("{form}-129"), "v2"),
+            refused("compile", OUTPUT_LIMIT),
+            "{form}-129"
         );
     }
+    let expected = rust(&added, "case-other-100", "v2");
+    assert_eq!(expected["status"], "complete", "case-other-100");
+    for length in [126, 127] {
+        assert!(
+            decoder(rust(&added, &format!("case-other-{length}"), "v2")),
+            "case-other-{length}"
+        );
+    }
+    assert_eq!(
+        rust(&added, "case-other-128", "v2"),
+        refused("compile", OUTPUT_LIMIT)
+    );
     assert_eq!(rust(&cases, "paren-and-44", "v2"), complete(6, 7, 20));
     for form in ["paren-and", "paren-or", "if-chain"] {
         for version in ["v1", "v2"] {
@@ -311,15 +388,17 @@ fn quint_conjunction_of_44_terms_is_checked_like_the_flat_form_body() {
 }
 
 #[test]
-fn quint_if_chain_of_54_branches_compiles_and_stops_at_the_checker() {
-    large(quint_if_chain_of_54_branches_compiles_and_stops_at_the_checker_body);
+fn quint_if_chain_of_54_branches_is_checked_like_tlc() {
+    large(quint_if_chain_of_54_branches_is_checked_like_tlc_body);
 }
 
-fn quint_if_chain_of_54_branches_compiles_and_stops_at_the_checker_body() {
+fn quint_if_chain_of_54_branches_is_checked_like_tlc_body() {
+    let (safety, _) = quint("LongIfChain", "safety", 2);
+    assert_eq!(safety, complete(56, 57, QUINT_IF_CHAIN_WORK));
+    let (broken, _) = quint("LongIfChain", "broken", 2);
+    assert_eq!(broken["status"], "invariant-violation");
+    assert_eq!(broken["trace"], 54);
     for property in ["safety", "broken"] {
-        let (result, program) = quint("LongIfChain", property, 2);
-        assert!(program.is_some(), "{property} compiles");
-        assert_eq!(result, refused("check", CHECKER_LIMIT));
         assert_eq!(
             quint("LongIfChain", property, 1).0,
             refused("compile", FRONTEND_LIMIT)

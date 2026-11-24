@@ -275,3 +275,42 @@ fn temporal_candidates_are_charged_before_allocation() {
         start.elapsed()
     );
 }
+
+/// Issue #107: the refusal of temporal predicates with mutable arguments
+/// follows predicate and function calls, and respects local bindings.
+#[test]
+fn temporal_refusal_follows_calls() {
+    let base = "sig A {} one sig S { var v: one A } pred same[x: A] { after { x = S.v } }";
+    // A temporal predicate behind another predicate.
+    assert!(
+        Model::parse(&format!(
+            "{base} pred wrap[x: A] {{ same[x] }} run {{ wrap[S.v] }} for 2"
+        ))
+        .is_err()
+    );
+    // A var read behind a function.
+    assert!(
+        Model::parse(&format!(
+            "{base} fun current: one A {{ S.v }} run {{ same[current] }} for 2"
+        ))
+        .is_err()
+    );
+    // A quantified atom named like the field is stable in every state.
+    assert!(Model::parse(&format!("{base} run {{ some v: A | same[v] }} for 2")).is_ok());
+}
+
+/// Review of #110: a parameter named like a temporal predicate is an atom,
+/// not a call of that predicate.
+#[test]
+fn parameters_shadowing_predicates_are_not_calls() {
+    let source = "sig A {} one sig S { var v: one A } pred same { after { some S.v } } pred use[same: A] { some same } run { use[S.v] } for 2";
+    assert!(Model::parse(source).is_ok());
+}
+
+/// Review of #110: an application always calls the predicate, whatever
+/// parameter shares its name; only bare names are shadowed.
+#[test]
+fn applications_call_predicates_despite_shadowing_parameters() {
+    let source = "sig A {} one sig S { var v: one A } pred step[x: A] { after { x = S.v } } pred wrap[step: A] { step[step] } run { wrap[S.v] } for 2";
+    assert!(Model::parse(source).is_err());
+}

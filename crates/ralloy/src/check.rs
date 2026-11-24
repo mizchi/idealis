@@ -447,10 +447,11 @@ impl Checker<'_> {
                 // An argument is evaluated in the calling state; Alloy
                 // substitutes it into the body, so a temporal body would see
                 // a var field's value at another state (review of #102).
-                if crate::syntax::uses_temporal(&self.module.predicates[name].body)
-                    && arguments
-                        .iter()
-                        .any(|argument| reads_var(argument, self.module))
+                let bound: BTreeSet<String> = locals.keys().cloned().collect();
+                if temporal_predicate(self.module, name, &mut BTreeSet::new())
+                    && arguments.iter().any(|argument| {
+                        reads_var(argument, self.module, &bound, &mut BTreeSet::new())
+                    })
                 {
                     return Err(Error::new(
                         ErrorKind::Unsupported,
@@ -632,25 +633,122 @@ impl Checker<'_> {
     }
 }
 
-/// Whether an expression reads a var field, directly or with a prime.
-fn reads_var(expression: &Expr, module: &Module) -> bool {
-    match expression {
-        Expr::Name(name) => module
-            .fields
+/// Whether a predicate or function is temporal: its body uses a temporal
+/// operator, or calls one that is (issue #107).
+fn temporal_predicate(module: &Module, name: &str, visiting: &mut BTreeSet<String>) -> bool {
+    /// Whether `expression` calls a temporal predicate; names bound by
+    /// parameters and quantifiers are atoms, not calls (review of #110).
+    fn calls(
+        expression: &Expr,
+        module: &Module,
+        bound: &BTreeSet<String>,
+        visiting: &mut BTreeSet<String>,
+    ) -> bool {
+        let call = |name: &str, visiting: &mut BTreeSet<String>| {
+            !bound.contains(name)
+                && module.predicates.contains_key(name)
+                && temporal_predicate(module, name, visiting)
+        };
+        match expression {
+            Expr::Name(name) => call(name, visiting),
+            Expr::Number(_) => false,
+            // An application always calls the predicate; only bare names
+            // are shadowed by parameters (review of #110).
+            Expr::Apply(name, arguments) => {
+                (module.predicates.contains_key(name) && temporal_predicate(module, name, visiting))
+                    || arguments
+                        .iter()
+                        .any(|argument| calls(argument, module, bound, visiting))
+            }
+            Expr::Block(expressions) => expressions
+                .iter()
+                .any(|expression| calls(expression, module, bound, visiting)),
+            Expr::Unary(_, child) => calls(child, module, bound, visiting),
+            Expr::Binary(_, left, right) => {
+                calls(left, module, bound, visiting) || calls(right, module, bound, visiting)
+            }
+            Expr::Quantified(_, declarations, body) => {
+                let mut inner = bound.clone();
+                for declaration in declarations {
+                    if calls(&declaration.domain, module, &inner, visiting) {
+                        return true;
+                    }
+                    inner.extend(declaration.names.iter().cloned());
+                }
+                calls(body, module, &inner, visiting)
+            }
+        }
+    }
+    let Some(predicate) = module.predicates.get(name) else {
+        return false;
+    };
+    if !visiting.insert(name.to_owned()) {
+        return false;
+    }
+    let params: BTreeSet<String> = predicate
+        .params
+        .iter()
+        .flat_map(|param| param.names.iter().cloned())
+        .collect();
+    crate::syntax::uses_temporal(&predicate.body)
+        || calls(&predicate.body, module, &params, visiting)
+}
+
+/// Whether an expression reads a var field, directly or through the
+/// predicates and functions it calls. Names bound by quantifiers and
+/// parameters are atoms, never fields (issue #107).
+fn reads_var(
+    expression: &Expr,
+    module: &Module,
+    bound: &BTreeSet<String>,
+    visiting: &mut BTreeSet<String>,
+) -> bool {
+    let body_reads = |name: &str, visiting: &mut BTreeSet<String>| -> bool {
+        let Some(predicate) = module.predicates.get(name) else {
+            return false;
+        };
+        if !visiting.insert(name.to_owned()) {
+            return false;
+        }
+        let params: BTreeSet<String> = predicate
+            .params
             .iter()
-            .any(|field| field.var && &field.name == name),
+            .flat_map(|param| param.names.iter().cloned())
+            .collect();
+        reads_var(&predicate.body, module, &params, visiting)
+    };
+    match expression {
+        Expr::Name(name) if bound.contains(name) => false,
+        Expr::Name(name) => {
+            module
+                .fields
+                .iter()
+                .any(|field| field.var && &field.name == name)
+                || body_reads(name, visiting)
+        }
         Expr::Number(_) => false,
-        Expr::Apply(_, arguments) => arguments.iter().any(|argument| reads_var(argument, module)),
+        Expr::Apply(name, arguments) => {
+            arguments
+                .iter()
+                .any(|argument| reads_var(argument, module, bound, visiting))
+                || body_reads(name, visiting)
+        }
         Expr::Block(expressions) => expressions
             .iter()
-            .any(|expression| reads_var(expression, module)),
-        Expr::Unary(_, child) => reads_var(child, module),
-        Expr::Binary(_, left, right) => reads_var(left, module) || reads_var(right, module),
+            .any(|expression| reads_var(expression, module, bound, visiting)),
+        Expr::Unary(_, child) => reads_var(child, module, bound, visiting),
+        Expr::Binary(_, left, right) => {
+            reads_var(left, module, bound, visiting) || reads_var(right, module, bound, visiting)
+        }
         Expr::Quantified(_, declarations, body) => {
-            declarations
-                .iter()
-                .any(|declaration| reads_var(&declaration.domain, module))
-                || reads_var(body, module)
+            let mut inner = bound.clone();
+            for declaration in declarations {
+                if reads_var(&declaration.domain, module, &inner, visiting) {
+                    return true;
+                }
+                inner.extend(declaration.names.iter().cloned());
+            }
+            reads_var(body, module, &inner, visiting)
         }
     }
 }

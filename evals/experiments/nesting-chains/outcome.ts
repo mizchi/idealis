@@ -30,6 +30,12 @@ export type Outcome =
       readonly status: "invariant-violation";
       readonly trace: number;
       readonly work: number | null;
+    }
+  | {
+      readonly stage: "result";
+      readonly status: "bounded";
+      readonly reason: string;
+      readonly work: number | null;
     };
 
 export interface Input {
@@ -70,6 +76,13 @@ export const checked = (reply: unknown): Outcome => {
       status: "complete",
       states: Number(result.states),
       generated: Number(result.generated),
+      work: Number(result.work),
+    };
+  if (result.status === "bounded")
+    return {
+      stage: "result",
+      status: "bounded",
+      reason: String(result.reason),
       work: Number(result.work),
     };
   assert.equal(result.status, "invariant-violation");

@@ -205,10 +205,27 @@ fn is_pair(model: &Model, expression: &Expr, scope: &Scope) -> bool {
 /// `none` as the empty relation of the arity it stands for: Alloy's `none`
 /// is unary (review of #102).
 fn alloy_as(model: &Model, expression: &Expr, scope: &Scope, pair: bool) -> String {
-    if pair && matches!(expression, Expr::None) {
-        "(none -> none)".into()
-    } else {
-        alloy_expression(model, expression, scope)
+    match expression {
+        Expr::None if pair => "(none -> none)".into(),
+        // The binary context reaches the operands of a set operation, so
+        // `none + none` is binary too (issue #106).
+        Expr::Binary(
+            operator @ (SetOp::Union | SetOp::Difference | SetOp::Intersection),
+            left,
+            right,
+        ) if pair => {
+            let symbol = match operator {
+                SetOp::Union => "+",
+                SetOp::Difference => "-",
+                _ => "&",
+            };
+            format!(
+                "({} {symbol} {})",
+                alloy_as(model, left, scope, true),
+                alloy_as(model, right, scope, true)
+            )
+        }
+        _ => alloy_expression(model, expression, scope),
     }
 }
 

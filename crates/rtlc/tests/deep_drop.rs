@@ -7,6 +7,7 @@ use rtlc::{SafetyBounds, SafetyProgram, Value};
 const DEPTH: usize = 100_000;
 const STACK_BYTES: usize = 8 * 1024 * 1024;
 const EXPRESSION_REFUSAL: &str = "Safety expression nesting exceeds 48";
+const IR_REFUSAL: &str = "Safety IR expression nesting exceeds 128";
 const TEMPORAL_REFUSAL: &str = "Temporal formula nesting exceeds 40";
 
 fn truth() -> Expression {
@@ -272,13 +273,19 @@ deep_expression!(deep_drop_expression_if_condition, |inner| Expression::If {
     alternative: Box::new(truth()),
 });
 
-deep_expression!(deep_drop_expression_if_alternative, |inner| {
-    Expression::If {
-        condition: Box::new(truth()),
-        consequent: Box::new(truth()),
-        alternative: Box::new(inner),
-    }
-});
+#[test]
+fn deep_drop_expression_if_alternative() {
+    assert_refused_then_dropped(
+        || {
+            program(expression_chain(|inner| Expression::If {
+                condition: Box::new(truth()),
+                consequent: Box::new(truth()),
+                alternative: Box::new(inner),
+            }))
+        },
+        IR_REFUSAL,
+    );
+}
 
 deep_expression!(deep_drop_expression_subseq_sequence, |inner| {
     Expression::Subseq {
