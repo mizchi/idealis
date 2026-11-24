@@ -1056,7 +1056,7 @@ impl<'scope> Arena<'scope> {
         while let Some((value, is_key)) = pending.pop() {
             if is_key {
                 let Scalar::Int(key) = value else {
-                    return self.refuse_fold_order(single, text, unsupported_fold_order());
+                    return self.refuse_fold_order(values, single, text, unsupported_fold_order());
                 };
                 keys = Some(match keys {
                     Some((minimum, maximum)) => (key.min(minimum), key.max(maximum)),
@@ -1072,6 +1072,7 @@ impl<'scope> Arena<'scope> {
                 match self.cell(value)? {
                     Cell::ModelValue(_) => {
                         return self.refuse_fold_order(
+                            values,
                             single,
                             text,
                             CoreError::protocol(
@@ -1082,7 +1083,10 @@ impl<'scope> Arena<'scope> {
                     Cell::String(_) => {
                         if text.is_none() {
                             if single {
-                                return Ok(None);
+                                return self.exempt_singleton(
+                                    values,
+                                    CoreError::protocol(STRING_FOLD_ORDER),
+                                );
                             }
                             independence = self.text_fold_order(fold, STRING_FOLD_ORDER)?;
                             text = Some(STRING_FOLD_ORDER);
@@ -1098,7 +1102,10 @@ impl<'scope> Arena<'scope> {
                                 .all(|entry| matches!(self.cell(entry.0), Ok(Cell::String(_))));
                         if record && text.is_none() {
                             if single {
-                                return Ok(None);
+                                return self.exempt_singleton(
+                                    values,
+                                    CoreError::protocol(RECORD_FOLD_ORDER),
+                                );
                             }
                             independence = self.text_fold_order(fold, RECORD_FOLD_ORDER)?;
                             text = Some(RECORD_FOLD_ORDER);
@@ -1130,6 +1137,7 @@ impl<'scope> Arena<'scope> {
             && maximum.abs_diff(minimum) > i32::MAX as u32
         {
             return self.refuse_fold_order(
+                values,
                 single,
                 text,
                 CoreError::protocol(
@@ -1151,14 +1159,26 @@ impl<'scope> Arena<'scope> {
             independence => Ok(independence),
         }
     }
+    fn exempt_singleton(
+        &mut self,
+        values: &[Scalar],
+        refusal: CoreError,
+    ) -> Result<Option<&'static str>, CoreError> {
+        match self.walk_nested_kinds(values.to_vec()) {
+            Ok(()) => Ok(None),
+            Err(error) if matches!(error.code, "budget" | "evaluation-budget") => Err(error),
+            Err(_) => Err(refusal),
+        }
+    }
     fn refuse_fold_order(
-        &self,
+        &mut self,
+        values: &[Scalar],
         single: bool,
         text: Option<&'static str>,
         error: CoreError,
     ) -> Result<Option<&'static str>, CoreError> {
         if single {
-            Ok(None)
+            self.exempt_singleton(values, text.map_or(error, CoreError::protocol))
         } else {
             Err(text.map_or(error, CoreError::protocol))
         }

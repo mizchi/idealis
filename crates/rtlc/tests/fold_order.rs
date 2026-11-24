@@ -1078,3 +1078,37 @@ fn a_source_set_with_mixed_field_kinds_is_refused_before_the_fold_is_admitted() 
         );
     }
 }
+
+fn truth_literal(value: bool) -> Value {
+    json!({"op":"literal","value":{"type":"bool","value":value}})
+}
+
+#[test]
+fn a_singleton_source_holding_a_set_of_incomparable_records_is_refused() {
+    let mixed = set(vec![
+        record(vec![("a", int(0)), ("b", truth_literal(false))]),
+        record(vec![("a", int(1)), ("b", int(0))]),
+    ]);
+    let body = json!({"op":"add","left":acc(),"right":int(1)});
+    for version in [1, 2] {
+        let program = fold_program(version, &int(0), &set(vec![mixed.clone()]), &body, &int(1));
+        let message = refusal(&program);
+        assert_eq!(message, RECORDS, "v{version}");
+    }
+}
+
+#[test]
+fn a_singleton_source_holding_a_set_of_comparable_records_is_accepted() {
+    let comparable = set(vec![
+        record(vec![("a", int(0)), ("b", truth_literal(false))]),
+        record(vec![("a", int(1)), ("b", truth_literal(true))]),
+    ]);
+    let body = json!({"op":"add","left":acc(),"right":int(1)});
+    for version in [1, 2] {
+        let source = set(vec![comparable.clone()]);
+        let program = fold_program(version, &int(0), &source, &body, &int(1));
+        assert!(holds(&program, "comparable singleton"), "v{version}");
+        let wrong = fold_program(version, &int(0), &source, &body, &int(2));
+        assert!(!holds(&wrong, "comparable singleton control"), "v{version}");
+    }
+}
