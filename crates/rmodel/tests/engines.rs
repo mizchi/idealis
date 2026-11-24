@@ -423,3 +423,36 @@ fn deep_inputs_are_refused() {
     let joins = format!("invariant I {{ some {} }}", vec!["v"; 5_000].join(" + "));
     assert!(rmodel::parse(&format!("{base}{joins}{scope}")).is_err());
 }
+
+/// Review of #103: an enum member named like a generated sig atom stays a
+/// different atom.
+#[test]
+fn enum_atoms_are_distinct_from_sig_atoms() {
+    let model = rmodel::parse(
+        "model Names
+enum E = S0
+sig S
+var on: set S
+init { no on }
+action add(s: S) { on' = on + s }
+invariant Disjoint { no S & E }
+reachable Lit { some on }
+scope S = 1, steps = 3",
+    )
+    .unwrap();
+    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
+    for (check, want) in [("Disjoint", "holds"), ("Lit", "reachable")] {
+        let check = model
+            .checks
+            .iter()
+            .find(|candidate| candidate.name == check)
+            .unwrap();
+        assert_eq!(
+            explicit(&model, check).verdict,
+            want,
+            "{} explicit",
+            check.name
+        );
+        assert_eq!(sat(&model, &alloy, check), want, "{} SAT", check.name);
+    }
+}

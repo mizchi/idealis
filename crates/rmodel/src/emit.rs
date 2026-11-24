@@ -357,9 +357,11 @@ impl Tla<'_> {
             out.push_str(&format!("s_{sig} == {{{}}}\n", atoms.join(", ")));
         }
         for (name, members) in &model.enums {
+            // "Enum.Member": generated sig atoms have no dot, so an enum
+            // member never equals one (review of #103).
             let atoms: Vec<String> = members
                 .iter()
-                .map(|member| format!("\"{member}\""))
+                .map(|member| format!("\"{name}.{member}\""))
                 .collect();
             out.push_str(&format!("s_{name} == {{{}}}\n", atoms.join(", ")));
         }
@@ -490,8 +492,8 @@ impl Tla<'_> {
                         Shape::Binary { .. } => Arity::Pair,
                     };
                     (format!("r_{name}"), arity)
-                } else if self.model.member(name).is_some() {
-                    (format!("{{\"{name}\"}}"), Arity::Set)
+                } else if let Some(enumeration) = self.model.member(name) {
+                    (format!("{{\"{enumeration}.{name}\"}}"), Arity::Set)
                 } else {
                     (format!("s_{name}"), Arity::Set)
                 }
