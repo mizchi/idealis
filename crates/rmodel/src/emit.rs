@@ -79,9 +79,13 @@ pub fn to_alloy(model: &Model) -> String {
             .map(|guard| alloy_formula(model, guard, &scope))
             .collect();
         for (var, value) in &action.assignments {
+            let pair = matches!(
+                model.relation(var).map(|relation| &relation.shape),
+                Some(Shape::Binary { .. })
+            );
             body.push(format!(
                 "(World.r_{var})' = {}",
-                alloy_expression(model, value, &scope)
+                alloy_as(model, value, &scope, pair)
             ));
         }
         let assigned: Vec<&str> = action
@@ -140,7 +144,18 @@ pub fn to_alloy(model: &Model) -> String {
                 .iter()
                 .map(|(name, members)| format!("exactly {} s_{name}", members.len())),
         )
-        .chain(["4 Int".to_owned(), format!("{} steps", model.scope.steps)])
+        .chain([
+            // Wide enough for any count of atoms in scope (review of #102).
+            format!(
+                "{} Int",
+                if crate::syntax::atoms(model) <= 7 {
+                    4
+                } else {
+                    5
+                }
+            ),
+            format!("{} steps", model.scope.steps),
+        ])
         .collect();
     for check in &model.checks {
         let formula = alloy_formula(model, &check.formula, &empty);
@@ -166,6 +181,35 @@ fn alloy_mult(mult: Mult) -> &'static str {
     }
 }
 
+/// Whether an expression denotes a binary relation.
+fn is_pair(model: &Model, expression: &Expr, scope: &Scope) -> bool {
+    match expression {
+        Expr::None => false,
+        Expr::Name(name) => {
+            !scope.contains_key(name)
+                && matches!(
+                    model.relation(name).map(|relation| &relation.shape),
+                    Some(Shape::Binary { .. })
+                )
+        }
+        Expr::Binary(SetOp::Product, _, _) => true,
+        Expr::Binary(SetOp::Join, left, right) => {
+            is_pair(model, left, scope) && is_pair(model, right, scope)
+        }
+        Expr::Binary(_, left, right) => is_pair(model, left, scope) || is_pair(model, right, scope),
+    }
+}
+
+/// `none` as the empty relation of the arity it stands for: Alloy's `none`
+/// is unary (review of #102).
+fn alloy_as(model: &Model, expression: &Expr, scope: &Scope, pair: bool) -> String {
+    if pair && matches!(expression, Expr::None) {
+        "(none -> none)".into()
+    } else {
+        alloy_expression(model, expression, scope)
+    }
+}
+
 fn alloy_expression(model: &Model, expression: &Expr, scope: &Scope) -> String {
     match expression {
         Expr::None => "none".into(),
@@ -188,10 +232,14 @@ fn alloy_expression(model: &Model, expression: &Expr, scope: &Scope) -> String {
                 SetOp::Product => "->",
                 SetOp::Join => ".",
             };
+            let pair = matches!(
+                operator,
+                SetOp::Union | SetOp::Difference | SetOp::Intersection
+            ) && (is_pair(model, left, scope) || is_pair(model, right, scope));
             format!(
                 "({} {symbol} {})",
-                alloy_expression(model, left, scope),
-                alloy_expression(model, right, scope)
+                alloy_as(model, left, scope, pair),
+                alloy_as(model, right, scope, pair)
             )
         }
     }
@@ -201,7 +249,11 @@ fn alloy_formula(model: &Model, formula: &Formula, scope: &Scope) -> String {
     let expression = |expression: &Expr| alloy_expression(model, expression, scope);
     match formula {
         Formula::Compare(operator, left, right) => {
-            let (left, right) = (expression(left), expression(right));
+            let pair = is_pair(model, left, scope) || is_pair(model, right, scope);
+            let (left, right) = (
+                alloy_as(model, left, scope, pair),
+                alloy_as(model, right, scope, pair),
+            );
             match operator {
                 Compare::In => format!("({left} in {right})"),
                 Compare::NotIn => format!("(not ({left} in {right}))"),

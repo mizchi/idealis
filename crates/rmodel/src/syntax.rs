@@ -216,7 +216,13 @@ fn tokens(source: &str) -> Result<Vec<String>, Error> {
 struct Parser {
     tokens: Vec<String>,
     position: usize,
+    /// Nesting of formulas and expressions being parsed (review of #102).
+    depth: usize,
 }
+/// Nesting and operator chains are bounded, so neither the parser nor the
+/// checks after it can exhaust the stack.
+const MAX_DEPTH: usize = 64;
+const MAX_CHAIN: usize = 256;
 impl Parser {
     fn peek(&self) -> &str {
         self.tokens.get(self.position).map_or("", String::as_str)
@@ -452,7 +458,28 @@ impl Parser {
     }
 
     /// implies (right) < or < and < not < atoms.
+    fn enter(&mut self) -> Result<(), Error> {
+        self.depth += 1;
+        if self.depth > MAX_DEPTH {
+            return Err(Error::syntax(format!("nesting deeper than {MAX_DEPTH}")));
+        }
+        Ok(())
+    }
+    fn chain(length: usize) -> Result<(), Error> {
+        if length > MAX_CHAIN {
+            return Err(Error::syntax(format!(
+                "more than {MAX_CHAIN} operands in a chain"
+            )));
+        }
+        Ok(())
+    }
     fn formula(&mut self) -> Result<Formula, Error> {
+        self.enter()?;
+        let formula = self.implication();
+        self.depth -= 1;
+        formula
+    }
+    fn implication(&mut self) -> Result<Formula, Error> {
         let left = self.disjunction()?;
         if self.take("implies") {
             return Ok(Formula::Implies(Box::new(left), Box::new(self.formula()?)));
@@ -461,7 +488,10 @@ impl Parser {
     }
     fn disjunction(&mut self) -> Result<Formula, Error> {
         let mut left = self.conjunction()?;
+        let mut length = 1;
         while self.take("or") {
+            length += 1;
+            Self::chain(length)?;
             left = Formula::Or(Box::new(left), Box::new(self.conjunction()?));
         }
         Ok(left)
@@ -469,6 +499,7 @@ impl Parser {
     fn conjunction(&mut self) -> Result<Formula, Error> {
         let mut parts = vec![self.negation()?];
         while self.take("and") {
+            Self::chain(parts.len() + 1)?;
             parts.push(self.negation()?);
         }
         Ok(if parts.len() == 1 {
@@ -574,6 +605,13 @@ impl Parser {
     }
     /// `+ -` (1) < `&` (2) < `->` (3) < `.` (4).
     fn expression(&mut self, minimum: u8) -> Result<Expr, Error> {
+        self.enter()?;
+        let expression = self.operand_chain(minimum);
+        self.depth -= 1;
+        expression
+    }
+    fn operand_chain(&mut self, minimum: u8) -> Result<Expr, Error> {
+        let mut length = 1;
         let mut left = if self.take("(") {
             let inner = self.expression(0)?;
             self.expect(")")?;
@@ -596,6 +634,8 @@ impl Parser {
                 break;
             }
             self.position += 1;
+            length += 1;
+            Self::chain(length)?;
             let right = self.expression(precedence + 1)?;
             left = Expr::Binary(operator, Box::new(left), Box::new(right));
         }
@@ -735,6 +775,7 @@ pub(crate) fn parse(source: &str) -> Result<Model, Error> {
     let mut parser = Parser {
         tokens: tokens(source)?,
         position: 0,
+        depth: 0,
     };
     let model = parser.model()?;
     check(&model)?;
@@ -784,6 +825,14 @@ fn check(model: &Model) -> Result<(), Error> {
         if let Some(sig) = used.iter().find(|sig| !sigs.contains(sig.as_str())) {
             return Err(Error::kind(format!("{}: unknown sig {sig}", relation.name)));
         }
+    }
+    // Counts are integers in the Alloy lowering, at most 5 bits (-16..15);
+    // every count of a set is bounded by the atoms in scope (review of #102).
+    if uses_counts(model) && atoms(model) > 15 {
+        return Err(Error::kind(format!(
+            "counts over {} atoms exceed the 15 an Alloy integer holds",
+            atoms(model)
+        )));
     }
     let checker = Checker { model, sigs };
     let none = BTreeSet::new();
@@ -835,4 +884,34 @@ fn check(model: &Model) -> Result<(), Error> {
         }
     }
     Ok(())
+}
+
+/// Every atom in scope: signature sizes and enum members.
+pub(crate) fn atoms(model: &Model) -> usize {
+    model.scope.sizes.values().sum::<usize>()
+        + model
+            .enums
+            .iter()
+            .map(|(_, members)| members.len())
+            .sum::<usize>()
+}
+
+/// Whether any formula compares integers.
+pub(crate) fn uses_counts(model: &Model) -> bool {
+    fn ints(formula: &Formula) -> bool {
+        match formula {
+            Formula::Ints(..) => true,
+            Formula::Not(inner) | Formula::Quantified(_, _, _, inner) => ints(inner),
+            Formula::And(parts) => parts.iter().any(ints),
+            Formula::Or(left, right) | Formula::Implies(left, right) => ints(left) || ints(right),
+            _ => false,
+        }
+    }
+    model
+        .facts
+        .iter()
+        .chain(&model.init)
+        .chain(model.checks.iter().map(|check| &check.formula))
+        .chain(model.actions.iter().flat_map(|action| &action.guards))
+        .any(ints)
 }
