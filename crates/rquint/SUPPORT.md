@@ -10,7 +10,7 @@
 - [x] sum typeの値を`[tag, value]`のrecordにし、`match`を`CASE`にする。`nondet`の`oneOf`は`\E`、`all`・`any`は`/\`・`\/`（0089）。
 - [x] 出力は`Integers`・`Sequences`・`FiniteSets`・`TLC`だけを使い、ApalacheのmoduleやJVMを必要としない。依存はserde_jsonだけで、Wasmにもビルドできる。
 
-- [x] `to_alloy`: 整数とunitのvariantの状態変数を持つモデルを、Alloy 6へ写してralloyのSATで有界に検査する（5 bitの整数・8 steps）。状態に依存しない式は変換時に評価し、bit幅に収まらない定数は拒否する（0095）。
+- [x] `to_alloy`: 整数とunitのvariantの状態変数を持つモデルを、Alloy 6へ写してralloyのSATで有界に検査する（5 bitの整数・8 steps）。状態に依存しない式は変換時に評価し、bit幅に収まらない定数は拒否する（0095）。状態に依存する足し算・引き算・符号反転の桁あふれは`c_overflow`で検出し、反例があれば判定を未確定にする。状態に依存する掛け算は拒否する（0096）。
 
 ## 照合
 
@@ -24,7 +24,7 @@
 
 - [ ] `const`・`temporal`・`run`の定義、module間のimport・instance（平坦化しないIR）、Quintのrandom simulatorとREPL。
 - [ ] 上に挙げていないopcode（`always`・`eventually`・`setOfMaps`・`range`・`slice`・`select`など）。未知のopcodeは拒否する。
-- [ ] SATの経路でのbool・record・map・listの状態変数、状態に依存するfold、算術の桁あふれの検出。
+- [ ] SATの経路でのbool・record・map・listの状態変数、状態に依存するfold、掛け算・割り算の桁あふれの符号化。
 - [ ] Quintの型検査と効果の検査。IRはQuintが検査した後のものとして読む。
 
 ## 制約と根拠

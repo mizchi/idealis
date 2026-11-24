@@ -114,3 +114,83 @@ fn alloy_record_matches_the_current_lowering() {
         assert_eq!(row["alloy"], want, "{name} {property}");
     }
 }
+
+fn solve(source: &str, label: &str) -> ralloy::Status {
+    let model = ralloy::Model::parse(source).unwrap_or_else(|error| panic!("{error}\n{source}"));
+    let index = model
+        .commands()
+        .iter()
+        .position(|command| command.label == label)
+        .unwrap_or_else(|| panic!("no command {label}\n{source}"));
+    model.analyze(index, 50_000_000).unwrap().status
+}
+
+/// Plan 0096: arithmetic beyond the bit width is detected by c_overflow, so
+/// a wrapped value never passes as a verdict.
+#[test]
+fn overflow_is_detected() {
+    let ir = std::fs::read_to_string(root().join("fixtures/quint-ir/Overflow.json")).unwrap();
+    let options = rquint::Options {
+        invariants: vec!["nonnegative".into(), "small".into()],
+        ..rquint::Options::default()
+    };
+    let source = rquint::to_alloy(&ir, &options, rquint::Bounds::default()).unwrap();
+    assert_eq!(
+        solve(&source, rquint::OVERFLOW_LABEL),
+        ralloy::Status::Counterexample
+    );
+    // Without the guard the wrapped count is a false counterexample.
+    assert_eq!(
+        solve(&source, "c_nonnegative"),
+        ralloy::Status::Counterexample
+    );
+    // rtlc, cut at depth 8, finds no negative count and does find count >= 9.
+    for (property, violated) in [("nonnegative", false), ("small", true)] {
+        let tla = rquint::translate(&ir, &self::options(property)).unwrap();
+        let result = idealis_core::compile_tla_with_options(
+            &tla.source,
+            &tla.config,
+            idealis_core::CompileOptions {
+                irVersion: idealis_core::IrVersion::V2,
+            },
+        )
+        .unwrap()
+        .check(idealis_core::SafetyBounds {
+            max_depth: 8,
+            max_states: 100_000,
+            max_work: 10_000_000,
+            max_temporal_nodes: None,
+        })
+        .unwrap();
+        assert_eq!(
+            result.violation.is_some(),
+            violated,
+            "{property}: {}",
+            result.status
+        );
+    }
+}
+
+#[test]
+fn no_overflow_in_the_lowerable_cases() {
+    for name in ["Counter", "SetFold", "Choice", "Match", "NestedFold"] {
+        let ir =
+            std::fs::read_to_string(root().join(format!("fixtures/quint-ir/{name}.json"))).unwrap();
+        let source = rquint::to_alloy(&ir, &options("safety"), rquint::Bounds::default()).unwrap();
+        assert_eq!(
+            solve(&source, rquint::OVERFLOW_LABEL),
+            ralloy::Status::NoCounterexample,
+            "{name}"
+        );
+    }
+}
+
+#[test]
+fn state_dependent_multiplication_is_refused() {
+    let ir = std::fs::read_to_string(root().join("fixtures/quint-ir/Overflow.json"))
+        .unwrap()
+        .replace("\"iadd\"", "\"imul\"");
+    let error =
+        rquint::to_alloy(&ir, &options("nonnegative"), rquint::Bounds::default()).unwrap_err();
+    assert!(error.0.contains("multiplication"), "{error}");
+}

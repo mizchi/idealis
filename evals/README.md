@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0096: SATの経路で整数の桁あふれを検出し、判定を未確定にする](iterations/0096-quint-overflow.md)は、状態に依存する足し算・引き算・符号反転の桁あふれを`c_overflow`で検出するようにした。桁あふれで偽の反例が出るモデルで、それを検出して未確定にできる。
+
 [0095: QuintのモデルをSATでも有界に検査し、明示状態の経路と比べる](iterations/0095-quint-sat.md)は、Quint IRをAlloy 6へ写し、0044の12件のうち10件でralloyのSATとAlloy 6.2.0がTLCと一致した。5 bitに収まらないSequenceFoldは拒否した。状態の少ないモデルでは、rtlcがSATより2〜4桁速かった。
 
 [0094: roracleの`compare`を語彙の上で記述し、実装を照合する](iterations/0094-oracle-compare.md)は、観測の組から比較の結果を出す規則をモデルにし、81通りで実装を照合した。enumでsigが増えたことで、ralloyの型検査がsig 15個以上で桁あふれするバグが見つかり、直した。

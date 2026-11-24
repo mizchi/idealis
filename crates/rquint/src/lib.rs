@@ -8,7 +8,7 @@
 //! TLA+'s 1-based ones. Constructs outside the subset are rejected, never
 //! given another meaning.
 mod alloy;
-pub use alloy::{Bounds, to_alloy};
+pub use alloy::{Bounds, OVERFLOW_LABEL, to_alloy};
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;

@@ -11,6 +11,11 @@ use crate::{Error, Options, Result, text, unsupported};
 use serde_json::Value as Json;
 use std::collections::{BTreeMap, BTreeSet};
 
+/// The command whose counterexample means some state-dependent addition,
+/// subtraction or negation left the bit width (plan 0096). When it has one,
+/// the other commands' verdicts are unknown.
+pub const OVERFLOW_LABEL: &str = "c_overflow";
+
 /// Integer bit width and trace length of every command.
 #[derive(Clone, Copy, Debug)]
 pub struct Bounds {
@@ -55,6 +60,11 @@ struct Lowering<'a> {
     tags: BTreeMap<String, String>,
     bounds: Bounds,
     fresh: usize,
+    /// No-overflow conditions of state-dependent arithmetic, each closed
+    /// over the nondet atoms in scope where it occurs.
+    overflow: Vec<String>,
+    /// Nondet atoms in scope with their membership formulas.
+    binders: Vec<(String, String)>,
 }
 
 pub fn to_alloy(ir: &str, options: &Options, bounds: Bounds) -> Result<String> {
@@ -135,6 +145,8 @@ pub fn to_alloy(ir: &str, options: &Options, bounds: Bounds) -> Result<String> {
         tags,
         bounds,
         fresh: 0,
+        overflow: Vec::new(),
+        binders: Vec::new(),
     };
     let mut out = String::new();
     for (sum, tags) in &sums {
@@ -180,6 +192,15 @@ pub fn to_alloy(ir: &str, options: &Options, bounds: Bounds) -> Result<String> {
             scope.join(", ")
         ));
     }
+    let guard = if lowering.overflow.is_empty() {
+        "(no none)".to_owned()
+    } else {
+        lowering.overflow.join(" and ")
+    };
+    out.push_str(&format!(
+        "{OVERFLOW_LABEL}: check {{ always {{ {guard} }} }} for {}\n",
+        scope.join(", ")
+    ));
     Ok(out)
 }
 
@@ -358,23 +379,46 @@ impl Lowering<'_> {
             Some("app") => {
                 let opcode = text(&expression["opcode"])?;
                 let args = arguments(expression);
-                let function = match opcode {
-                    "iadd" => "plus",
-                    "isub" => "minus",
-                    "imul" => "mul",
+                let minimum = -(1i64 << (self.bounds.bitwidth - 1));
+                match opcode {
                     "iuminus" => {
-                        return Ok(format!("negate[{}]", self.term(&args[0], env)?));
+                        let value = self.term(&args[0], env)?;
+                        self.guard(format!("({value} != {minimum})"));
+                        Ok(format!("negate[{value}]"))
                     }
-                    other => return unsupported(format!("operator {other} as a SAT term")),
-                };
-                Ok(format!(
-                    "{function}[{}, {}]",
-                    self.term(&args[0], env)?,
-                    self.term(&args[1], env)?
-                ))
+                    "iadd" | "isub" => {
+                        let left = self.term(&args[0], env)?;
+                        let right = self.term(&args[1], env)?;
+                        let function = if opcode == "iadd" { "plus" } else { "minus" };
+                        let result = format!("{function}[{left}, {right}]");
+                        // Two's complement: a sum of same-signed operands,
+                        // or a difference of opposite-signed ones, keeps the
+                        // left operand's sign.
+                        let (nonnegative, negative) = if opcode == "iadd" {
+                            ((">= 0", ">= 0"), ("< 0", "< 0"))
+                        } else {
+                            ((">= 0", "< 0"), ("< 0", ">= 0"))
+                        };
+                        self.guard(format!(
+                            "(({left} {} and {right} {}) implies {result} >= 0) and (({left} {} and {right} {}) implies {result} < 0)",
+                            nonnegative.0, nonnegative.1, negative.0, negative.1
+                        ));
+                        Ok(result)
+                    }
+                    "imul" => unsupported("multiplication of state-dependent integers for SAT"),
+                    other => unsupported(format!("operator {other} as a SAT term")),
+                }
             }
             other => unsupported(format!("expression {other:?} as a SAT term")),
         }
+    }
+    /// Records a no-overflow condition, closed over the nondet atoms in scope.
+    fn guard(&mut self, condition: String) {
+        let mut closed = condition;
+        for (atom, membership) in self.binders.iter().rev() {
+            closed = format!("(all {atom}: Int | ({membership}) implies ({closed}))");
+        }
+        self.overflow.push(format!("({closed})"));
     }
     fn formula(&mut self, expression: &Json, env: &Env) -> Result<String> {
         if let Some(value) = self.evaluate(expression, env)? {
@@ -514,11 +558,11 @@ impl Lowering<'_> {
                     text(&definition["name"])?.to_owned(),
                     Binding::Atom(atom.clone()),
                 ));
-                let body = self.action(&expression["expr"], &inner, primed)?;
-                Ok(format!(
-                    "(some {atom}: Int | ({}) and {body})",
-                    members.join(" or ")
-                ))
+                let membership = members.join(" or ");
+                self.binders.push((atom.clone(), membership.clone()));
+                let body = self.action(&expression["expr"], &inner, primed);
+                self.binders.pop();
+                Ok(format!("(some {atom}: Int | ({membership}) and {})", body?))
             }
             Some("app") => {
                 let opcode = text(&expression["opcode"])?;
