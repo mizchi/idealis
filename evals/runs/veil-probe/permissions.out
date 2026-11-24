@@ -1,0 +1,29 @@
+✅ No violation (explored 2 states)
+Initialization must establish the invariant:
+  doesNotThrow ... ✅
+  no_leak ... ✅
+  only_granted ... ✅
+The following set of actions must preserve the invariant and successfully terminate:
+  close
+    doesNotThrow ... ✅
+    no_leak ... ✅
+    only_granted ... ✅
+  read
+    doesNotThrow ... ✅
+    no_leak ... ✅
+    only_granted ... ✅
+Examples/Idealis/Permissions.lean:58:0: warning: Trusting SMT solver for 6 goals. `set_option veil.smt.trust false` to enable proof reconstruction.
+✅ Satisfying trace found
+  Instantiation:
+    doc = Fin 1
+    role = Fin 1
+    user = Fin 1
+  Theory:
+    grants = {(0, 0)}
+    reads = {(0, 0)}
+    secret = {0}
+    cleared = {0}
+  State 0 (via init):
+    opened = {}
+  State 1 (via read(u=0, d=0)):
+    opened = {(0, 0)}
