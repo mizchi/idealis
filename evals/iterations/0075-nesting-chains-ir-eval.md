@@ -86,6 +86,8 @@ plan の harness（`evals/experiments/nesting-chains/stack-harness/`）を befor
 | CASE       |  47 |        1,283 |          51 |             51 |             7 |
 | CASE       | 127 |   checker 48 |          51 |     checker 48 |             7 |
 
+連鎖の表の `if 127`、`if 128`、`case 128` は、保存した記録では 1 GiB の thread での終了コード -6（stderr なし）だけで、拒否した段が分からなかった。stderr を保存して流し直すと（[stack-stage](../runs/0075-stack-stage/)、before・after の debug・release の 4 つとも同じ）、`if 127` と `if 128` は compile の前の parse で `Expression nesting exceeds 64`（Rust の parser の入れ子 64）、`case 128` は compile の frontend の出力検査 `compiled expression nesting exceeds 128` で拒否されていた。どれも `check` には届いていない。harness が失敗を `unwrap()` し `panic = "abort"` なので、終了コードはどちらも -6 になる。このため `if 127`・`if 128` を `compile 拒否` とした [stack](../runs/0075-stack/) の表の表記は誤りで、parse での拒否と読む。`case 128` は compile での拒否のとおり。
+
 after の最小 stack は n によらず debug 51 KiB、release 7 KiB で、n の差あたりの増分は debug・release とも 0 KiB / 段（plan の上限は debug 1 KiB / 段、release 0.1 KiB / 段）。before が受理する長さで、after が before を超えるセルはない。
 
 #83 の 9 種類（受理される最大の大きさと次の大きさ。どちらも release の before と同じ結果）:
@@ -121,12 +123,14 @@ after の debug の最小 stack は最大で membership の 1,187 KiB で、plan
 - 修正後の ABBA-3（144 関数）: 10% 以上の後退は 0 件。最大は `frontend-check_factorial` の +6.2% で、変化の中央値は +0.3%。`nesting_chains` の `check` は if-chain-47 が -43%、paren-and-47 が -27%、if-chain-8 が -10%。
 - kernel（14 関数）: -9.2% から +0.0%。10% 以上の後退はない。
 
+ABBA の driver は、最初の sample が失敗した bench を `runs.json` にだけ残し、集計がその bench の行を黙って出さない作りだった。保存した ABBA-1・ABBA-3 は 6 本すべてが 4 sample とも終了コード 0 で、表も 144 関数を持つので、欠落はなかった。失敗した sample を終了コード 1 にする driver と、bench ごとに before / after / after / before の 4 sample がすべて成功していなければ `INCOMPLETE` として失敗する report を `evals/experiments/nesting-chains/abba/` に置き、6 本を流し直した（[abba-complete](../runs/0075-abba-complete/)）。6 本とも完了し 144 関数だった。load average が 10 の中で流した最初の run では 10% 以上の後退が 17 件（最大 +24.7%、compile を含む）出たが、同じ binary を流し直した 2 本（33 関数）では 0 件（最大 +8.7%）で、before の binary の複製を after に置いた対照も最大 +5.3% だった。17 件は再現しないので、判断に ABBA-3 を使うことは変わらない。
+
 [ABBA-1](../runs/0075-abba-1/)、[ABBA-2](../runs/0075-abba-2/)、[ABBA-3](../runs/0075-abba-3/)、[kernel](../runs/0075-kernel-summary/)を参照。ABBA-1 と ABBA-2 は修正の前の after で、判断には ABBA-3 を使う。
 
 ## 検査
 
 - `just check`（書式、型、Vitest 79 件、node:test 79 件）。最初の実行は新しい 6 ファイルの書式で失敗し、`vp check --fix` の後に通った。
-- `just wasm-test`（23 件）、`just safety-test`（1,687 件。新しい contract を含む）、`just quint-test`（38 件）。
+- `just wasm-test`（23 件）、`just safety-test`（1,687 件。新しい contract を含む。ABBA の report の test 5 件を足した後は 1,692 件）、`just quint-test`（38 件）。
 - `just portable-build` と `just portable-test`（`rtlc-test`・`rtla-test`・`compiler-test` の fmt・clippy `-D warnings`・全テストを含み、Rust 610 件と node:test 33 件）。
 - #83 のテストは debug（`cargo test`）と release（`cargo test --release`）の両方で通った。
 - `just browser`（Chromium 7 件）、`just evaluate` と `just replay-evaluation`。
