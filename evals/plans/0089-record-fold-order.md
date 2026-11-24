@@ -152,3 +152,29 @@ run は追記のみ。`evals/runs/0089-*` に、source / binary / 入力・drive
 - 再現する 10% 以上の後退がない。
 
 採用しても、要素が 2 個以上で順序に依存する body（`Append` など）の fold は拒否のまま残る。その扱いは D と A の候補として iteration に残し、#98 には S・R0・R1 で受理する範囲と残る範囲を書く。
+
+## 追記（2026-11-24）: 入れ子の fold を R1 の対照に加える
+
+実装に入る前の依頼で、R1 の対照を 1 件増やす。結果を見る前の予測と受理の条件を、ここで固定する。plan の記録を整えるのは採取と実装の後になったが、予測値 `{1, 2, 3}` は `crates/rtlc/tests/fold_order.rs` の `nested` に、TLC の採取の前に書いた。
+
+### 新しい入力
+
+`fold-independent-union-nested`（`goldenFrontendParity`）。外側の fold は record 2 個の集合で、body は累積値に内側の fold の結果を `\union` で足す。内側の fold も record 2 個の集合で、body は `xs \union {y.v}`（R1）。内側の集合は外側の要素を読む。
+
+```tla
+Inner(xs, y) == xs \union {y.v}
+Op(a, b) == a \union ApaFoldSet(Inner, {}, {[v |-> 1], [v |-> b.w]})
+Init == x = (ApaFoldSet(Op, {}, {[w |-> 2], [w |-> 3]}))
+```
+
+- 予測する TLC の結果は `x = {1, 2, 3}`（`b.w` が 2 のとき `{1, 2}`、3 のとき `{1, 3}`）。TLC の値が違えば TLC の値を期待値にし、外れを iteration に記録する。
+- 受理の理由は R1 の入れ子。外側の body は `cup`（左が累積値、右が内側の fold）で、右は外側の累積値を読まない。要素を読むのは R1 で許す。内側の fold は、自分の body が R1 なので、自分の判定で受理する。
+- v1 では内側の fold の slot が外側の `bound` の 0・1 の次（2・3）に置かれ、外側の slot と衝突しない。v2 では内側の callback は別の共有定義で、`parameter` の 0・1 は定義ごとの frame の中にある。外側の判定は呼ばれる定義の body を見ないので、内側の定義の parameter 番号を数えない。この数え方で拒否されるなら、実装を直して iteration に書く。健全でないと分かったら拒否のままにして、理由を iteration に書く。
+- 回帰は `foldIndependentControls`（TS の 4 経路と v1 / v2）と `fold_order.rs`（v1 と v2 の IR を直接組む）に置く。
+
+### 実装中に決めたこと
+
+- 追加の入力は、plan の表の 20 件とこの 1 件の計 22 件を `foldIndependentControls` にまとめる。TLC のログは 22 件を同じ command・置換・1 つずつの JVM で採取する。`expected.json` には Next を含む対照のために、状態の列を持つ `trace` を足し、回帰テストが全状態を比べる。TLC が評価エラーを返すのに受理側で評価エラーになる行（`fold-independent-overflow`、`fold-singleton-error`）は、順序の拒否の文言でないことも検査する（status だけでは before の拒否と区別できない）。
+- 走査は、判定を最初の文字列・record を見つけた時にだけ行う。今受理される fold はこの経路を通らない。判定の結果は prepared program の fold の node ごとに 1 回だけ計算する。prepared program に載らない複製された式（呼び出しの actual の中の fold）では、その都度計算する。
+- 走査が最後まで進んだ後に整数 key の幅・Boolean などの key・model value の拒否が見つかる場合は、走査が最初に見つけた文字列・record の拒否を返す。今は最初に見つけた拒否を返すので、その文言と一致する。
+- 入れ子の frame が自分の parameter として同じ番号を使う場合を数える規則は、plan のとおり読むと数える側に倒す。`fold_order.rs` にこの形の拒否を置く。
