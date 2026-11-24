@@ -22,3 +22,12 @@ Answers are `holds`, `violated`, `reachable`, `unreachable`, `empty`,
 violation or a reachable state, the shortest depth. A bounded `holds` is not
 a proof, `empty` is not a pass, and `unknown` is never read as either. The
 command exits 1 when two definite answers disagree.
+
+## Implementations
+
+`rcheck generate <model> rust|typescript|schema|states` writes bindings for
+an implementation: a Rust trait with one method per action, TypeScript types
+with a JSON Lines driver, and JSON Schema of the configuration, the state and
+the commands. `rcheck::conform` replays the implementation along the
+reference semantics and reports the shortest command sequence where it
+differs.

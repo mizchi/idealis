@@ -446,6 +446,12 @@ const scopes: readonly CrateScope[] = [
           "検査器の宣言（complete・bounded・対応しない）、答えの語、autoとallの選び方と食い違い",
         context: ["src/checkers.rs"],
       },
+      {
+        path: "src/conform.rs",
+        topic:
+          "実装の照合の手順と答えの語（一致・bounded・不一致・invalid・空・未確定）、driverのprotocol",
+        context: ["src/schema.rs"],
+      },
     ],
   },
   {

@@ -51,7 +51,8 @@ pub struct Verdict {
 enum Atom {
     Id(u16),
     Int(i64),
-    Record(Box<[Atom]>),
+    /// The record's position among the model's records, and its fields.
+    Record(u16, Box<[Atom]>),
 }
 type Tuple = Vec<Atom>;
 type Value = BTreeSet<Tuple>;
@@ -102,7 +103,7 @@ impl<'a> Universe<'a> {
         if let Some((low, high)) = model.scope.ints {
             sorts.insert(crate::syntax::INT, (low..=high).map(Atom::Int).collect());
         }
-        for record in &model.records {
+        for (position, record) in model.records.iter().enumerate() {
             let mut all: Vec<Vec<Atom>> = vec![Vec::new()];
             for (_, sort) in &record.fields {
                 all = all
@@ -119,7 +120,7 @@ impl<'a> Universe<'a> {
             sorts.insert(
                 record.name.as_str(),
                 all.into_iter()
-                    .map(|fields| Atom::Record(fields.into()))
+                    .map(|fields| Atom::Record(position as u16, fields.into()))
                     .collect(),
             );
         }
@@ -168,7 +169,7 @@ impl<'a> Universe<'a> {
             match atom {
                 Atom::Id(_) => true,
                 Atom::Int(value) => ints.is_some_and(|(low, high)| (low..=high).contains(value)),
-                Atom::Record(fields) => fields.iter().all(|field| inside(ints, field)),
+                Atom::Record(_, fields) => fields.iter().all(|field| inside(ints, field)),
             }
         }
         value
@@ -249,7 +250,13 @@ impl Universe<'_> {
                     Arith::Mul => left.saturating_mul(right),
                 }))
             }
-            Expr::Record(_, values) => {
+            Expr::Record(name, values) => {
+                let position = self
+                    .model
+                    .records
+                    .iter()
+                    .position(|record| &record.name == name)
+                    .expect("a declared record") as u16;
                 let fields: Vec<Atom> = values
                     .iter()
                     .map(|value| {
@@ -257,7 +264,7 @@ impl Universe<'_> {
                         value.into_iter().next().expect("one value by the checker")[0].clone()
                     })
                     .collect();
-                singleton(Atom::Record(fields.into()))
+                singleton(Atom::Record(position, fields.into()))
             }
             Expr::Binary(SetOp::Join, left, right)
                 if matches!(right.as_ref(), Expr::Name(name)
@@ -270,7 +277,7 @@ impl Universe<'_> {
                 self.expression(left, scene)
                     .into_iter()
                     .map(|tuple| match &tuple[0] {
-                        Atom::Record(fields) => vec![fields[index].clone()],
+                        Atom::Record(_, fields) => vec![fields[index].clone()],
                         other => unreachable!("a record by the checker, got {other:?}"),
                     })
                     .collect()
@@ -657,5 +664,225 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
                 )
             })
             .collect(),
+    }
+}
+
+/// A value in portable form, for drivers of implementations (plan 0102):
+/// an atom by name (`User0`, an enum member such as `JPY`, `true`), an
+/// integer, or a record with its fields in declaration order.
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Data {
+    Atom(String),
+    Int(i64),
+    Record(String, Vec<(String, Data)>),
+}
+
+/// The relations' values of a configuration or a state, opaque outside.
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Snapshot(Vec<Value>);
+
+/// Where an action instance leads.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Next {
+    /// A state within the multiplicities and the integer scope.
+    State(Snapshot),
+    /// A state that breaks a var's multiplicity (the Declarations check).
+    Broken(Snapshot),
+    /// A state with an integer outside the scope (the Scope check).
+    Outside(Snapshot),
+}
+
+/// One action instance from a state: its arguments in parameter order, and
+/// the next state when the guards hold.
+#[derive(Clone, Debug)]
+pub struct Step {
+    pub action: String,
+    pub args: Vec<(String, Data)>,
+    pub next: Option<Next>,
+}
+
+/// The reference semantics as a machine to drive step by step: the
+/// conformance check replays an implementation along it (plan 0102).
+pub struct Machine<'a> {
+    model: &'a Model,
+    universe: Universe<'a>,
+    statics: Vec<&'a crate::syntax::Relation>,
+    vars: Vec<&'a crate::syntax::Relation>,
+    static_choices: Vec<Vec<Value>>,
+    var_choices: Vec<Vec<Value>>,
+    names: BTreeMap<u16, String>,
+}
+
+impl<'a> Machine<'a> {
+    pub fn new(model: &'a Model) -> Result<Self, String> {
+        enumerable(model)?;
+        let universe = Universe::new(model);
+        let statics: Vec<_> = model.relations.iter().filter(|r| !r.var).collect();
+        let vars: Vec<_> = model.relations.iter().filter(|r| r.var).collect();
+        let choices = |relations: &[&crate::syntax::Relation]| {
+            relations
+                .iter()
+                .map(|r| universe.candidates(&r.shape).expect("enumerable"))
+                .collect::<Vec<_>>()
+        };
+        let (static_choices, var_choices) = (choices(&statics), choices(&vars));
+        // Atom ids follow Universe::new: signatures, then enum members.
+        let mut names = BTreeMap::new();
+        let mut next = 0u16;
+        for sig in &model.sigs {
+            for index in 0..model.scope.sizes[sig] {
+                names.insert(next, format!("{sig}{index}"));
+                next += 1;
+            }
+        }
+        for (_, members) in &model.enums {
+            for member in members {
+                names.insert(next, member.clone());
+                next += 1;
+            }
+        }
+        Ok(Self {
+            model,
+            universe,
+            statics,
+            vars,
+            static_choices,
+            var_choices,
+            names,
+        })
+    }
+    /// Every configuration that satisfies the facts, one at a time.
+    pub fn configurations(&self) -> impl Iterator<Item = Snapshot> + '_ {
+        let none = BTreeMap::new();
+        product(&self.static_choices).filter_map(move |configuration| {
+            let relations = self.relations(&configuration, &[]);
+            let scene = Scene {
+                relations: &relations,
+                bound: &none,
+            };
+            self.model
+                .facts
+                .iter()
+                .all(|fact| self.universe.formula(fact, &scene))
+                .then_some(Snapshot(configuration))
+        })
+    }
+    /// The initial states of a configuration.
+    pub fn initial(&self, configuration: &Snapshot) -> Vec<Snapshot> {
+        let none = BTreeMap::new();
+        product(&self.var_choices)
+            .filter(|state| {
+                let relations = self.relations(&configuration.0, state);
+                let scene = Scene {
+                    relations: &relations,
+                    bound: &none,
+                };
+                self.model
+                    .init
+                    .iter()
+                    .all(|formula| self.universe.formula(formula, &scene))
+            })
+            .map(Snapshot)
+            .collect()
+    }
+    /// Every action instance from a state, in declaration and argument
+    /// order.
+    pub fn steps(&self, configuration: &Snapshot, state: &Snapshot) -> Vec<Step> {
+        let relations = self.relations(&configuration.0, &state.0);
+        let mut steps = Vec::new();
+        for action in &self.model.actions {
+            for bound in bindings(&self.universe, &action.params) {
+                let scene = Scene {
+                    relations: &relations,
+                    bound: &bound,
+                };
+                let args = action
+                    .params
+                    .iter()
+                    .map(|(param, _)| (param.clone(), self.data(&bound[param])))
+                    .collect();
+                let next = action
+                    .guards
+                    .iter()
+                    .all(|guard| self.universe.formula(guard, &scene))
+                    .then(|| {
+                        let mut next = state.0.clone();
+                        let (mut valid, mut inside) = (true, true);
+                        for (var, value) in &action.assignments {
+                            let position = self
+                                .vars
+                                .iter()
+                                .position(|r| &r.name == var)
+                                .expect("checked var");
+                            let value = self.universe.expression(value, &scene);
+                            inside &= self.universe.in_scope(&value);
+                            valid &= self.universe.admits(&self.vars[position].shape, &value);
+                            next[position] = value;
+                        }
+                        match (inside, valid) {
+                            (false, _) => Next::Outside(Snapshot(next)),
+                            (true, false) => Next::Broken(Snapshot(next)),
+                            (true, true) => Next::State(Snapshot(next)),
+                        }
+                    });
+                steps.push(Step {
+                    action: action.name.clone(),
+                    args,
+                    next,
+                });
+            }
+        }
+        steps
+    }
+    /// The static relations' values, by name, as sets of tuples.
+    pub fn configuration_data(&self, configuration: &Snapshot) -> Vec<(String, Vec<Vec<Data>>)> {
+        self.describe(&self.statics, &configuration.0)
+    }
+    /// The vars' values, by name, as sets of tuples.
+    pub fn state_data(&self, state: &Snapshot) -> Vec<(String, Vec<Vec<Data>>)> {
+        self.describe(&self.vars, &state.0)
+    }
+    fn describe(
+        &self,
+        relations: &[&crate::syntax::Relation],
+        values: &[Value],
+    ) -> Vec<(String, Vec<Vec<Data>>)> {
+        relations
+            .iter()
+            .zip(values)
+            .map(|(relation, value)| {
+                let tuples = value
+                    .iter()
+                    .map(|tuple| tuple.iter().map(|atom| self.data(atom)).collect())
+                    .collect();
+                (relation.name.clone(), tuples)
+            })
+            .collect()
+    }
+    fn data(&self, atom: &Atom) -> Data {
+        match atom {
+            Atom::Id(id) => Data::Atom(self.names[id].clone()),
+            Atom::Int(value) => Data::Int(*value),
+            Atom::Record(position, fields) => {
+                let record = &self.model.records[*position as usize];
+                Data::Record(
+                    record.name.clone(),
+                    record
+                        .fields
+                        .iter()
+                        .zip(fields.iter())
+                        .map(|((field, _), value)| (field.clone(), self.data(value)))
+                        .collect(),
+                )
+            }
+        }
+    }
+    fn relations(&self, configuration: &[Value], state: &[Value]) -> BTreeMap<&'a str, Value> {
+        self.statics
+            .iter()
+            .zip(configuration)
+            .chain(self.vars.iter().zip(state))
+            .map(|(r, value)| (r.name.as_str(), value.clone()))
+            .collect()
     }
 }

@@ -1,10 +1,35 @@
 //! rcheck <model> [--checker auto|reference|explicit|sat|all] [--question NAME]
+//! rcheck generate <model> rust|typescript|schema|states
 //! Answers every question of an rmodel model, or one, and prints JSON. Exits
 //! 1 when two definite answers disagree, 2 on a usage or model error.
 use rcheck::Selection;
 
 fn main() {
     let arguments: Vec<String> = std::env::args().skip(1).collect();
+    // rcheck generate <model> rust|typescript|schema (plan 0102).
+    if let [command, path, target] = arguments.as_slice()
+        && command == "generate"
+    {
+        let source = std::fs::read_to_string(path).unwrap_or_else(|error| fail(&error.to_string()));
+        let model = rmodel::parse(&source).unwrap_or_else(|error| fail(&error.to_string()));
+        let text = match target.as_str() {
+            "rust" => rmodel::bindings::rust(&model, &source),
+            "typescript" => rmodel::bindings::typescript(&model),
+            "schema" => {
+                let schema: serde_json::Value =
+                    serde_json::from_str(&rmodel::bindings::json_schema(&model)).expect("JSON");
+                format!("{}\n", serde_json::to_string_pretty(&schema).expect("JSON"))
+            }
+            "states" => {
+                let states =
+                    rcheck::conform::reachable_states(&model).unwrap_or_else(|error| fail(&error));
+                format!("{}\n", serde_json::to_string_pretty(&states).expect("JSON"))
+            }
+            _ => usage(),
+        };
+        print!("{text}");
+        return;
+    }
     let mut path = None;
     let mut selection = Selection::Auto;
     let mut only = None;
@@ -48,7 +73,9 @@ fn main() {
 }
 
 fn usage() -> ! {
-    fail("usage: rcheck <model> [--checker auto|reference|explicit|sat|all] [--question NAME]")
+    fail(
+        "usage: rcheck <model> [--checker auto|reference|explicit|sat|all] [--question NAME] | rcheck generate <model> rust|typescript|schema|states",
+    )
 }
 
 fn fail(message: &str) -> ! {

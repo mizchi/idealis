@@ -298,6 +298,12 @@ rcheck-test:
   cargo clippy --all-targets --locked --manifest-path crates/rcheck/Cargo.toml -- -D warnings
   cargo test --all-targets --locked --manifest-path crates/rcheck/Cargo.toml
 
+# TypeScript implementations against the generated bindings and ajv on the
+# generated JSON Schema (plan 0102).
+rcheck-typescript: build
+  node --test dist/tests/rcheck/schema.test.js
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test typescript -- --ignored
+
 rmodel-oracle output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" alloy=".artifacts/alloy-subset/org.alloytools.alloy.dist.jar" tlc=".artifacts/0068-tlc-1.8.0.jar":
   evals/experiments/rmodel/oracle.sh {{quote(absolute_path(java))}} {{quote(absolute_path(alloy))}} {{quote(absolute_path(tlc))}} {{quote(absolute_path(output))}}
 

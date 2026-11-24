@@ -1,0 +1,17 @@
+[
+  {
+    "model": "sessions",
+    "why": "locked is lone: two users",
+    "state": { "active": ["User0", "User1"], "locked": ["User0", "User1"] }
+  },
+  {
+    "model": "bank",
+    "why": "balance is one: Account0 holds none",
+    "state": { "balance": { "Account0": null, "Account1": 0 } }
+  },
+  {
+    "model": "bank",
+    "why": "balance is one: Account1 holds two",
+    "state": { "balance": { "Account0": 0, "Account1": [1, 2] } }
+  }
+]

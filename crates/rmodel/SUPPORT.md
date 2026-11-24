@@ -19,6 +19,8 @@
 
 - [x] 値（0103）: `Int`（scopeの`Int = lo..hi`、数学の整数、範囲の外は組み込みのcheck `Scope`）、`Bool`、`record`（構造で等しい値、literal `R { f: e }`、field `x.f`）。値への関係は`one`・`lone`、算術`+ - *`と整数の比較は値が1つに決まる式だけ。TLA+へ写し、Alloyへは写さない（`alloy_supports`）。
 
+- [x] 実装のためのbindings（`bindings`、0102）: JSONの形（atomは名前、Boolはboolean、recordはobject、二項関係は定義域のatomを鍵にしたobject）、JSON Schema（draft 2020-12）、Rustのtraitと型、TypeScriptの型とJSON Linesのdriver。参照評価器を1歩ずつ進める`reference::Machine`。
+
 ## 照合
 
 - [x] corpusの5モデル・20 checkで、ralloyのSAT・rtlc・Alloy 6.2.0・TLC 1.8.0の判定が、結果の前に書いた期待とすべて一致する。明示状態の深さはstepsの内側（0091）。

@@ -4,6 +4,7 @@
 //!
 //! The declarations and check names are stable identifiers that a Pkl
 //! specification links its rules to (plan 0092).
+pub mod bindings;
 mod emit;
 mod print;
 pub mod reference;
