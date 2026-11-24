@@ -869,8 +869,11 @@ impl<'scope> Arena<'scope> {
         }
         for (index, left) in members.iter().enumerate() {
             for right in &members[index + 1..] {
-                if self.same_kinds(*left, *right).is_err() {
-                    return Err(CoreError::protocol(message));
+                if let Err(error) = self.same_kinds(*left, *right) {
+                    return Err(match error.code {
+                        "budget" | "evaluation-budget" => error,
+                        _ => CoreError::protocol(message),
+                    });
                 }
             }
         }

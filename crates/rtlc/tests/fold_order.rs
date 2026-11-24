@@ -828,3 +828,27 @@ fn records_whose_fields_agree_in_kind_are_accepted_when_only_values_differ() {
         assert!(holds(&program, "homogeneous records"), "v{version}");
     }
 }
+
+#[test]
+fn a_record_result_exhausts_its_budget_while_comparing_kinds_instead_of_turning_into_a_refusal() {
+    let collection = set(vec![text("p"), text("q")]);
+    let first = vec![
+        ("a", int(1)),
+        ("b", record(vec![("c", int(1)), ("d", truth())])),
+    ];
+    let second = vec![
+        ("a", int(2)),
+        ("b", record(vec![("c", int(2)), ("d", truth())])),
+    ];
+    let expected = set(vec![record(first.clone()), record(second.clone())]);
+    for version in [1, 2] {
+        let body = selected_record_body(first.clone(), second.clone());
+        let program = fold_program(version, &set(vec![]), &collection, &body, &expected);
+        let complete = program.check(bounds(100_000)).unwrap();
+        assert_eq!(complete.status, "complete");
+        for budget in 1..complete.work {
+            let result = program.check(bounds(budget)).unwrap();
+            assert_eq!(result.status, "bounded", "v{version} budget {budget}");
+        }
+    }
+}

@@ -99,3 +99,7 @@ CodeRabbit の指摘（[#101](https://github.com/mizchi/idealis/pull/101)）を�
   - 直し方: 確認を、対応する全ての field と入れ子の値を種類で比べる再帰（`same_kinds`）に替えた。整数同士・Boolean 同士・型付き model value の組・順位の違いは `equal` と同じ判定で、集合・関数は長さが同じなら全ての対応する組へ下りる（長さが違うと `equal` は不等で止まるので、そこで止める）。TLC が比べる順は IR に載らないので、どの順でも評価エラーにならないことを全ての組で確かめる。健全な側に倒れ、同種の field を持つ record の集合は受理したままである。
   - 回帰（修正前に Red を確認）: `records_that_differ_in_the_kind_of_any_field_are_refused_whatever_the_field_order`（4 形、v1・v2。2 番目の `{a:1,b:1}` と `{a:2,b:TRUE}` と、入れ子の record の後ろの field を含む）。対照: `records_whose_fields_agree_in_kind_are_accepted_when_only_values_differ`。
   - 費用: 組あたり、比べる値の数だけ tick を使う。n 要素の結果で n(n-1)/2 組。全要素が整数・Boolean・文字列の結果は確認を省くので、今受理される入力の work は変わらない。測定は [0089c-new-path](../runs/0089c-new-path/result.json): 64 要素の record の fold の work は v1 で 4,549 から 8,581（その前は 2,533）になった。中央値時間は v1 で約 245〜264 µs で、0089b の約 248 µs と差は出ていない。整数の fold は work・時間とも変わらない。grid の全文字列の比較は [0089c-paths](../runs/0089c-paths/result.json): 84 入力の status と拒否の文言は 0089b-paths と同じで、work だけが変わった入力がある。`0089b-*` は変更しない。
+
+## レビューへの対応（3 回目）
+
+- **kind 比較の予算切れが順序の拒否に置き換わる（Minor）: 有効。** `same_kinds` は tick で `budget` を返すが、呼び出し側が全てのエラーを順序の拒否に替えていた。`budget` と `evaluation-budget` はそのまま返し、比較の不一致だけを拒否の文言にする。回帰: `a_record_result_exhausts_its_budget_while_comparing_kinds_instead_of_turning_into_a_refusal`（v1・v2。全ての予算で `bounded`。修正前は拒否の `protocol` エラーで失敗）。測定値の変更はない。
