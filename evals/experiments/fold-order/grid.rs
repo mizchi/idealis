@@ -28,6 +28,7 @@ fn main() {
     let mut accepted = 0;
     let mut refused = 0;
     let mut other = 0;
+    let mut differing = 0;
     for (set_name, set) in sets {
         for (body_name, init, body) in bodies {
             let source = format!("---- MODULE Differential ----\nEXTENDS Integers, Sequences, FiniteSets, Apalache\nVARIABLE x\nOp(a, b) == {body}\nInit == x = (ApaFoldSet(Op, {init}, {set}))\nNext == UNCHANGED x\nProp == x # x\n====");
@@ -43,9 +44,10 @@ fn main() {
             }
             let first = &outcomes[0];
             let kind = if first.starts_with("ok") { accepted += 1; "accepted" } else if first.contains("set fold order") { refused += 1; "refused" } else { other += 1; "other" };
-            let same = outcomes[0].split(':').take(2).collect::<Vec<_>>() == outcomes[1].split(':').take(2).collect::<Vec<_>>() || outcomes[0] == outcomes[1];
-            println!("{set_name}\t{body_name}\t{kind}\tv1v2same={same}\t{}", outcomes[0].chars().take(110).collect::<String>());
+            let same = outcomes[0] == outcomes[1];
+            if !same { differing += 1; }
+            println!("{set_name}\t{body_name}\t{kind}\tv1v2same={same}\tv1={}\tv2={}", outcomes[0], outcomes[1]);
         }
     }
-    println!("TOTAL accepted={accepted} refused={refused} other={other}");
+    println!("TOTAL accepted={accepted} refused={refused} other={other} v1v2differ={differing}");
 }

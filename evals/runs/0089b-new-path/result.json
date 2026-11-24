@@ -1,0 +1,129 @@
+{
+  "driver": "evals/experiments/fold-order/fold_cost.rs",
+  "supersedes": "0089-new-path (tree before the comparable-members check; that run is kept unchanged)",
+  "model": "Next assigns x to (x + (Cardinality(fold) - 63)) mod states; the fold unions 64 elements into the accumulator (R1 body for records, the unchanged integer path for integers)",
+  "method": "release build of the tree with the comparable-members check, 400 check calls per cell, median, three runs",
+  "loadAverageAtStart": "7.28",
+  "table": [
+    {
+      "irVersion": "v1",
+      "states": 1,
+      "elements": "integers",
+      "work": 2340,
+      "medianOfRunsMicroseconds": 40.0,
+      "runs": [
+        41.4,
+        40.0,
+        36.5
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 1,
+      "elements": "records",
+      "work": 4549,
+      "medianOfRunsMicroseconds": 248.3,
+      "runs": [
+        256.8,
+        248.3,
+        235.2
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 64,
+      "elements": "integers",
+      "work": 141570,
+      "medianOfRunsMicroseconds": 2287.2,
+      "runs": [
+        2373.5,
+        2287.2,
+        2260.4
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 64,
+      "elements": "records",
+      "work": 278851,
+      "medianOfRunsMicroseconds": 15661.5,
+      "runs": [
+        15661.5,
+        15896.9,
+        15185.2
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 1,
+      "elements": "integers",
+      "work": 2532,
+      "medianOfRunsMicroseconds": 54.7,
+      "runs": [
+        54.7,
+        54.9,
+        54.7
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 1,
+      "elements": "records",
+      "work": 4741,
+      "medianOfRunsMicroseconds": 272.8,
+      "runs": [
+        267.8,
+        277.0,
+        272.8
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 64,
+      "elements": "integers",
+      "work": 153858,
+      "medianOfRunsMicroseconds": 2518.0,
+      "runs": [
+        2518.0,
+        2505.0,
+        2541.8
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 64,
+      "elements": "records",
+      "work": 291139,
+      "medianOfRunsMicroseconds": 16031.7,
+      "runs": [
+        16122.8,
+        16031.7,
+        15596.6
+      ]
+    }
+  ],
+  "ratios": [
+    {
+      "irVersion": "v1",
+      "recordsOverIntegers": {
+        "1 state": 6.21,
+        "64 states": 6.85
+      },
+      "64StatesOver1State": {
+        "records": 63.1,
+        "integers": 57.2
+      }
+    },
+    {
+      "irVersion": "v2",
+      "recordsOverIntegers": {
+        "1 state": 4.99,
+        "64 states": 6.37
+      },
+      "64StatesOver1State": {
+        "records": 58.8,
+        "integers": 46.0
+      }
+    }
+  ]
+}

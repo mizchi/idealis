@@ -14,14 +14,19 @@ import { join } from "node:path";
 const { TLC_JAVA, TLC_JAR, TLC_APALACHE } = process.env;
 const fixtures = "fixtures/tlc-apalache-folds";
 const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
-if (digest(readFileSync(TLC_JAR)) !== "936a262061c914694dfd669a543be24573c45d5aa0ff20a8b96b23d01e050e88")
+if (
+  digest(readFileSync(TLC_JAR)) !==
+  "936a262061c914694dfd669a543be24573c45d5aa0ff20a8b96b23d01e050e88"
+)
   throw new Error("TLC jar does not match the pinned SHA-256");
-if (digest(readFileSync(TLC_APALACHE)) !== "a9115b404e72c58fd085f81bc59cc918f8adac49feabfb57f8e285bc7ab5cfac")
+if (
+  digest(readFileSync(TLC_APALACHE)) !==
+  "a9115b404e72c58fd085f81bc59cc918f8adac49feabfb57f8e285bc7ab5cfac"
+)
   throw new Error("Apalache.tla does not match the pinned SHA-256");
 
-const { foldIndependentControls } = await import(
-  "../../../dist/evals/experiments/tlc-differential/corpus.js"
-);
+const { foldIndependentControls } =
+  await import("../../../dist/evals/experiments/tlc-differential/corpus.js");
 const refusals = {
   "fold-independent-union-error": "records requires TLC field-name intern IDs",
   "fold-independent-union-nonset": "strings requires TLC intern IDs",
@@ -66,7 +71,8 @@ const parseValue = (text) => {
         position += close.length;
         return items;
       }
-      if (text[position] !== ",") throw new Error(`Bad value at ${position}: ${text}`);
+      if (text[position] !== ",")
+        throw new Error(`Bad value at ${position}: ${text}`);
       position += 1;
       skip();
     }
@@ -84,7 +90,9 @@ const parseValue = (text) => {
     if (text[position] === "[") {
       position += 1;
       const fields = list("]", () => {
-        const match = /^([A-Za-z_][A-Za-z0-9_]*) \|-> /.exec(text.slice(position));
+        const match = /^([A-Za-z_][A-Za-z0-9_]*) \|-> /.exec(
+          text.slice(position),
+        );
         if (!match) throw new Error(`Bad record at ${position}: ${text}`);
         position += match[0].length;
         return [match[1], value()];
@@ -106,16 +114,27 @@ const parseValue = (text) => {
   };
   const result = value();
   skip();
-  if (position !== text.length) throw new Error(`Trailing text: ${text.slice(position)}`);
+  if (position !== text.length)
+    throw new Error(`Trailing text: ${text.slice(position)}`);
   return result;
 };
 const normalize = (value) => {
   if (value.type === "set") {
-    const entries = new Map(value.value.map((item) => [JSON.stringify(item), item]));
-    return { type: "set", value: [...entries.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)).map(([, item]) => item) };
+    const entries = new Map(
+      value.value.map((item) => [JSON.stringify(item), item]),
+    );
+    return {
+      type: "set",
+      value: [...entries.entries()]
+        .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+        .map(([, item]) => item),
+    };
   }
   if (value.type === "record")
-    return { type: "record", value: [...value.value].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)) };
+    return {
+      type: "record",
+      value: [...value.value].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)),
+    };
   return value;
 };
 
@@ -123,7 +142,8 @@ const expected = JSON.parse(readFileSync(`${fixtures}/expected.json`, "utf8"));
 const existing = new Set(expected.cases.map((entry) => entry.name));
 const added = [];
 for (const input of foldIndependentControls()) {
-  if (existing.has(input.name)) throw new Error(`${input.name} is already captured`);
+  if (existing.has(input.name))
+    throw new Error(`${input.name} is already captured`);
   const caseDirectory = mkdtempSync(join(tmpdir(), "tlc-case-"));
   const temporaryDirectory = mkdtempSync(join(tmpdir(), "tlc-tmp-"));
   writeFileSync(join(caseDirectory, "Differential.tla"), input.source);
@@ -166,22 +186,29 @@ for (const input of foldIndependentControls()) {
   };
   if (run.status === 12) {
     entry.status = "invariant-violation";
-    const initial = /violated by the initial state:\nx = ([^\n]*(?:\n(?!\n)[^\n]*)*)\n\n/.exec(log);
+    const initial =
+      /violated by the initial state:\nx = ([^\n]*(?:\n(?!\n)[^\n]*)*)\n\n/.exec(
+        log,
+      );
     if (initial) entry.values = [parseValue(initial[1].replace(/\n/g, " "))];
     else {
       const states = [...log.matchAll(/^State \d+: [^\n]*\nx = ([^\n]*)\n/gm)];
-      if (states.length === 0) throw new Error(`${input.name}: no state in log`);
+      if (states.length === 0)
+        throw new Error(`${input.name}: no state in log`);
       entry.values = [parseValue(states[0][1])];
       entry.trace = states.map((state) => [parseValue(state[1])]);
     }
   } else if (run.status === 0) {
     entry.status = "success";
-    const counts = /(\d+) states generated, (\d+) distinct states found/.exec(log);
+    const counts = /(\d+) states generated, (\d+) distinct states found/.exec(
+      log,
+    );
     entry.states = Number(counts[2]);
     entry.generated = Number(counts[1]);
   } else if (run.status === 75) {
     entry.status = "error";
-  } else throw new Error(`${input.name}: unexpected exit ${run.status}\n${log}`);
+  } else
+    throw new Error(`${input.name}: unexpected exit ${run.status}\n${log}`);
   if (refusals[input.name])
     entry.unsupported = refusals[input.name].startsWith("strings")
       ? refusalText.strings
@@ -200,6 +227,10 @@ const nowAccepted = new Set([
   "fold-set-wide-single-function",
   "fold-set-boolean-function-keys",
 ]);
-for (const entry of expected.cases) if (nowAccepted.has(entry.name)) delete entry.unsupported;
+for (const entry of expected.cases)
+  if (nowAccepted.has(entry.name)) delete entry.unsupported;
 expected.cases.push(...added);
-writeFileSync(`${fixtures}/expected.json`, `${JSON.stringify(expected, null, 2)}\n`);
+writeFileSync(
+  `${fixtures}/expected.json`,
+  `${JSON.stringify(expected, null, 2)}\n`,
+);
