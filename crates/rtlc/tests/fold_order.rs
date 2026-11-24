@@ -891,3 +891,37 @@ fn record_fields_are_paired_by_name_not_by_position() {
         assert!(holds(&program, "differently named fields"), "v{version}");
     }
 }
+
+#[test]
+fn nested_sets_are_compared_across_each_other_whatever_the_field_name_order() {
+    let collection = set(vec![text("p"), text("q")]);
+    let first = set(vec![
+        record(vec![("a", int(0))]),
+        record(vec![("b", truth())]),
+    ]);
+    let second = set(vec![
+        record(vec![("b", int(0))]),
+        record(vec![("c", truth())]),
+    ]);
+    let compatible = set(vec![
+        record(vec![("b", int(0))]),
+        record(vec![("c", truth())]),
+    ]);
+    let first_compatible = set(vec![
+        record(vec![("a", int(0))]),
+        record(vec![("b", int(1))]),
+    ]);
+    for version in [1, 2] {
+        let body = branching_union_body("p", vec![first.clone()], vec![second.clone()]);
+        let program = fold_program(version, &set(vec![]), &collection, &body, &set(vec![]));
+        assert_eq!(refusal(&program), STRINGS, "v{version} cross");
+        let body = branching_union_body(
+            "p",
+            vec![first_compatible.clone()],
+            vec![compatible.clone()],
+        );
+        let expected = set(vec![first_compatible.clone(), compatible.clone()]);
+        let program = fold_program(version, &set(vec![]), &collection, &body, &expected);
+        assert!(holds(&program, "compatible nested sets"), "v{version}");
+    }
+}

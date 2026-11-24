@@ -893,22 +893,16 @@ impl<'scope> Arena<'scope> {
         if self.rank(left) != self.rank(right) {
             return Err(CoreError::protocol("Incomparable TLA values"));
         }
+        if let (Ok(Cell::Set(left)), Ok(Cell::Set(right))) = (self.cell(left), self.cell(right)) {
+            let members: Vec<Scalar> = left.iter().chain(right.iter()).copied().collect();
+            for (index, first) in members.iter().enumerate() {
+                for second in &members[index + 1..] {
+                    self.same_kinds(*first, *second)?;
+                }
+            }
+            return Ok(());
+        }
         let pairs: Vec<(Scalar, Scalar)> = match (self.cell(left), self.cell(right)) {
-            (Ok(Cell::Set(left)), Ok(Cell::Set(right))) if left.len() == right.len() => {
-                left.iter().copied().zip(right.iter().copied()).collect()
-            }
-            (Ok(Cell::Set(left)), Ok(Cell::Set(right))) => {
-                let within = |members: &[Scalar]| -> Vec<(Scalar, Scalar)> {
-                    members
-                        .iter()
-                        .enumerate()
-                        .flat_map(|(index, first)| {
-                            members[index + 1..].iter().map(|second| (*first, *second))
-                        })
-                        .collect()
-                };
-                within(left).into_iter().chain(within(right)).collect()
-            }
             (Ok(Cell::Function(left)), Ok(Cell::Function(right))) if left.len() == right.len() => {
                 let left: Vec<_> = left.iter().collect();
                 let right: Vec<_> = right.iter().collect();

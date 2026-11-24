@@ -113,3 +113,10 @@ CodeRabbit の指摘（[#101](https://github.com/mizchi/idealis/pull/101)）を�
 - **`fold-singleton-error` の期待（Minor）: 有効。** 順序の拒否でないことしか見ていなかった。回帰テストは、エラー文言が `Head of an empty sequence` と一致し、採取したログに TLC の `Attempted to apply Head to the empty sequence.` があることを確かめる。Rust 側の `a_singleton_body_error_is_reported_as_it_is` も同じ文言を確かめる。`expected.json` の `message` は TLC と rtlc の文言が同じ時の欄で、ここでは違うので、採取済みの fixture は変えず、テスト内の表に置いた。
 
 測定: [0089d-new-path](../runs/0089d-new-path/result.json) は、record の fold の work が v1 の 64 要素・状態数 1 で 8,581 から 6,565 になった（field 名の組に tick を使わなくなったため）。中央値時間は 0089c と差が出ていない。整数の fold は work・時間とも変わらない。[0089d-paths](../runs/0089d-paths/result.json) は 84 入力の status と拒否の文言が 0089c-paths と同じで、work が変わったのは 4 入力（1〜2 減）。`0089c-*` は変更しない。
+
+## レビューへの対応（5 回目）
+
+- **入れ子の集合を rtlc の並びで組にする（Major）: 有効。** 同じ長さの集合は位置で組にしていたため、`A = {[a |-> 0], [b |-> TRUE]}` と `B = {[b |-> 0], [c |-> FALSE]}` は、rtlc の並び（field 名の文字列順）では `a` と `b`、`b` と `c` が組になり、共通の field がなく通った。TLC は field 名を intern ID の順で並べるので、`b` が先なら両方の集合が `b` の record から始まり、`TRUE` と `0` を比べてエラーになる。集合どうしの確認を、2 つの集合の全ての要素の全ての組を種類で比べる形に替えた（位置による対応づけをやめた）。回帰: `nested_sets_are_compared_across_each_other_whatever_the_field_name_order`（修正前は受理で失敗。同種の入れ子の集合は受理のまま。v1・v2）。
+- **長さが違う集合の組を全て溜める（Minor）: 有効。** 上の直しで組を `Vec` に作らず、1 組ずつ比べて途中のエラー・予算切れで止まる。
+- **plan を先に記録する（Minor）: 一部有効。** R1 の受理条件を TLC の採取と実装の後に足したことは事実なので、plan の 5 回目の追記で開示した。先に記録していない条件を後から書き換えず、この確認（`0089e-*`）の条件を測定の前に同じ追記へ書いた。最初の予測値の記録は変えていない。
+- 測定: [0089e-paths](../runs/0089e-paths/result.json) の 84 入力は [0089d-paths](../runs/0089d-paths/result.json) とバイト単位で同じ。[0089e-new-path](../runs/0089e-new-path/result.json) の work は全てのセルで 0089d と同じで、中央値時間は record で 2〜4% 高く、この host の run 間のばらつきの範囲。入れ子の集合を含む測定入力はない。

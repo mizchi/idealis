@@ -1,0 +1,18 @@
+{
+  "driver": "evals/experiments/fold-order/fold_cost.rs",
+  "supersedes": "0089d-new-path (kept unchanged); tree whose set comparison checks every pair of members across both sets",
+  "preregistered": "evals/plans/0089-record-fold-order.md, 5th addendum",
+  "method": "release build, 400 check calls per cell, median, three runs",
+  "loadAverageAtStart": "1.28",
+  "table": [
+    {"irVersion": "v1", "states": 1, "elements": "integers", "work": 2340, "runsMicroseconds": [59.8, 38.9, 45.0]},
+    {"irVersion": "v1", "states": 1, "elements": "records", "work": 6565, "runsMicroseconds": [277.7, 275.3, 273.0]},
+    {"irVersion": "v1", "states": 64, "elements": "integers", "work": 141570, "runsMicroseconds": [2069.5, 2075.2, 2077.0]},
+    {"irVersion": "v1", "states": 64, "elements": "records", "work": 407875, "runsMicroseconds": [17005.5, 17002.8, 16980.7]},
+    {"irVersion": "v2", "states": 1, "elements": "integers", "work": 2532, "runsMicroseconds": [52.4, 50.8, 51.3]},
+    {"irVersion": "v2", "states": 1, "elements": "records", "work": 6757, "runsMicroseconds": [295.0, 293.0, 298.1]},
+    {"irVersion": "v2", "states": 64, "elements": "integers", "work": 153858, "runsMicroseconds": [2336.0, 2338.2, 2343.9]},
+    {"irVersion": "v2", "states": 64, "elements": "records", "work": 420163, "runsMicroseconds": [17469.2, 17215.4, 17234.5]}
+  ],
+  "note": "Work is identical to 0089d-new-path for every cell. Record medians are about 2 to 4 percent above 0089d (v1 states=1: 267 to 275 us), within the run-to-run spread seen on this host."
+}
