@@ -79,6 +79,14 @@ impl<'a> Universe<'a> {
             }
             sorts.insert(name.as_str(), atoms);
         }
+        // A sum sort's atoms are its children's (plan 0100).
+        for (name, children) in &model.sums {
+            let atoms: Vec<Atom> = children
+                .iter()
+                .flat_map(|child| sorts[child.as_str()].clone())
+                .collect();
+            sorts.insert(name.as_str(), atoms);
+        }
         Self { sorts, members }
     }
     fn domain(&self, shape: &Shape) -> Vec<Tuple> {

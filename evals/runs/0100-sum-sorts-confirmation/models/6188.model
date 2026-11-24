@@ -1,0 +1,18 @@
+model G6188
+sig S0
+sig S1
+type P = S0 + S1
+rel r0: lone S1
+var v1: S0 -> some S0
+init { no ((v1.S0) & S0) }
+action a0() {
+  (some q1: S1 | S0 = (S0.(S0 -> P)))
+  some (S1 + r0)
+  v1' = (S0 -> (S0.v1))
+}
+action a1() {
+  v1' = (S0 -> S0)
+}
+invariant Inv { ((v1.v1).(S0.(S0 -> S0))) != S0 }
+reachable Goal { some (S0.v1) }
+scope S0 = 2, S1 = 3, steps = 6

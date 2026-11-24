@@ -1,0 +1,21 @@
+model G5244
+sig S0
+sig S1
+type P = S0 + S1
+rel r0: lone S0
+rel r1: S0 -> some S1
+var v2: P -> some P
+var v3: S1 -> set P
+fact { not (#S0 <= 2) }
+init { ((r0 -> S0) in ((S0 -> r0) - (r0 -> S0)) implies (((S0 -> P).(P -> S1)).(v3.P)) in ((r0 -> r0).r0)) }
+action a0(p0_0: S0, p0_1: S1) {
+  (one S1 and some ((r0 & S0) + none))
+  v2' = (P -> P)
+}
+action a1(p1_0: S0, p1_1: S0) {
+  (some q1: S1 | no p1_0)
+  v3' = (((S1 -> S0).(p1_0 -> P)).v2)
+}
+invariant Inv { ((some (S1.v3) or (some (S1.v3) and some ((r0 -> P).P))) or not (not (((S1 -> S1).(S1 -> S1)) in (S1 -> S1)))) }
+reachable Goal { (((P -> r0) in (P -> S0) and (one (S1.(S1 -> P)) or #((P -> S1).S1) = 2)) implies (((P -> S1) - (P -> S1)).S1) = (P.(v2.v2))) }
+scope S0 = 3, S1 = 2, steps = 6

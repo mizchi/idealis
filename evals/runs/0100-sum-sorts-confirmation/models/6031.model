@@ -1,0 +1,20 @@
+model G6031
+sig S0
+sig S1
+enum E = Ea | Eb
+rel r0: one E
+rel r1: S1 -> one E
+var v2: E -> one S0
+fact { not ((some S1 and one (((S1 -> S1).S1).r1))) }
+init { not (some (E.v2)) }
+action a0(p0_0: E) {
+  v2' = v2
+}
+action a1(p1_0: S1, p1_1: E) {
+  some none
+  (S1 in S1 and (p1_0 -> S0) in (p1_0 -> S0))
+  v2' = (Ea -> ((S0 -> S0).S0))
+}
+invariant Inv { (some q1: S0 | (E -> q1) in v2) }
+reachable Goal { not ((r0 -> S1) = (v2.(S0 -> S1))) }
+scope S0 = 2, S1 = 1, steps = 6

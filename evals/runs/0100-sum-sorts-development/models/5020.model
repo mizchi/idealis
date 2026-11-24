@@ -1,0 +1,15 @@
+model G5020
+sig S0
+sig S1
+enum E = Ea | Eb
+rel r0: E -> lone E
+var v1: S1 -> lone S0
+fact { ((some (S1.(S1 -> Ea)) or some S0) implies (#(none - Eb) != 2 and ((E -> S1) & (E -> S1)) in (Eb -> S1))) }
+init { (E -> S0) in ((E -> S1).v1) }
+action a0(p0_0: E) {
+  some none
+  v1' = (S1 -> (S1.v1))
+}
+invariant Inv { (((S0 -> Eb) - (S0 -> Eb)) = (S0 -> Eb) and one ((S0 & S0) & (S1.v1))) }
+reachable Goal { (not ((#(v1.S0) = 1 implies #((S1 -> S1).S1) < 1)) implies (S0 & S0) not in S0) }
+scope S0 = 2, S1 = 2, steps = 6

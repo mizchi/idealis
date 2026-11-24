@@ -1,0 +1,26 @@
+model G6202
+sig S0
+sig S1
+enum E = Ea | Eb
+type P = S0 + S1
+rel r0: P -> set P
+rel r1: E -> set P
+var v2: S1 -> lone S0
+var v3: some S1
+fact { Eb not in ((S1 + S1).((S1 -> Ea) + (S1 -> Eb))) }
+init { (((Eb.(E -> v3)) & (v3 & v3)) in ((v3 + S1).(v3 -> v3)) and (S0 -> Eb) in ((S0 -> E).(E -> E))) }
+action a0() {
+  some S1
+  v2' = (v2 + (S1 -> S0))
+}
+action a1(p1_0: S0, p1_1: P) {
+  ((P -> E) in (P -> Eb) and E = ((S1.(v3 -> Eb)) & (r1.P)))
+  v2' = ((S1 -> E).(Eb -> S0))
+}
+action a2(p2_0: E) {
+  (one S1 implies lone S0)
+  v2' = (((v3 -> S1).v3) -> (v3.v2))
+}
+invariant Inv { (not (((((Eb -> S1) - (E -> v3)).(S1 - S1)) in ((Ea -> v3).v3) implies ((S1 + S1) & S1) = S1)) or (some q1: S0 | S1 = v3)) }
+reachable Goal { ((some q2: P | (q2 != (q2 & ((P -> P).P)) or (S1 -> S0) in ((v3 -> S0) & v2))) and some none) }
+scope S0 = 2, S1 = 2, steps = 6

@@ -40,6 +40,8 @@ struct Generator {
     members: Vec<(String, String)>,
     rels: Vec<Rel>,
     fresh: usize,
+    /// Sum sorts with their children (plan 0100).
+    sums: Vec<(String, Vec<String>)>,
 }
 
 type Locals = Vec<(String, String)>;
@@ -49,6 +51,10 @@ impl Generator {
     fn set(&mut self, sort: &str, depth: usize, locals: &Locals, vars: bool) -> String {
         if depth == 0 || self.random.chance(40) {
             let mut options = vec![sort.to_owned()];
+            // A sum sort's set may be one of its children's sorts.
+            if let Some((_, children)) = self.sums.iter().find(|(sum, _)| sum == sort) {
+                options.extend(children.iter().cloned());
+            }
             options.extend(
                 self.members
                     .iter()
@@ -101,6 +107,11 @@ impl Generator {
     }
     /// A set operand of a join, where `none` would have no type.
     fn join_set(&mut self, sort: &str, depth: usize, locals: &Locals, vars: bool) -> String {
+        // A sum's child would narrow the type; joins and products of a sum
+        // use the sum itself.
+        if self.sums.iter().any(|(sum, _)| sum == sort) {
+            return sort.to_owned();
+        }
         let set = self.set(sort, depth, locals, vars);
         if set == "none" { sort.to_owned() } else { set }
     }
@@ -240,6 +251,7 @@ pub fn generate(seed: u64) -> String {
         members: Vec::new(),
         rels: Vec::new(),
         fresh: 0,
+        sums: Vec::new(),
     };
     let mut out = format!("model G{seed}\n");
     let mut scope = Vec::new();
@@ -256,6 +268,13 @@ pub fn generate(seed: u64) -> String {
             ("Ea".to_owned(), "E".to_owned()),
             ("Eb".to_owned(), "E".to_owned()),
         ]);
+    }
+    // Since 0100: a sum of two sorts.
+    if g.sorts.len() >= 2 && g.random.chance(30) {
+        let children = vec![g.sorts[0].clone(), g.sorts[1].clone()];
+        out.push_str(&format!("type P = {}\n", children.join(" + ")));
+        g.sorts.push("P".into());
+        g.sums.push(("P".into(), children));
     }
     let statics = g.random.below(3);
     let vars = 1 + g.random.below(2);

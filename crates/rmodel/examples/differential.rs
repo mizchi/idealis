@@ -76,64 +76,116 @@ fn sat(alloy: &Result<ralloy::Model, String>, name: &str, kind: rmodel::CheckKin
     }
 }
 
+/// One seed's rows. Each seed runs in its own process: memory grew across
+/// seeds in one process until the system killed it (plan 0100), and a crash
+/// must not lose or pass the other seeds.
+fn one(seed: u64, output: &str) -> String {
+    let mut lines = String::new();
+    let source = generate(seed);
+    let model = match rmodel::parse(&source) {
+        Ok(model) => model,
+        Err(error) => {
+            let _ = writeln!(
+                lines,
+                "{{\"seed\":{seed},\"generator\":{:?}}}",
+                error.to_string()
+            );
+            std::fs::write(format!("{output}/models/{seed}.model"), &source).unwrap();
+            return lines;
+        }
+    };
+    let report = rmodel::reference::analyze(&model, 200_000);
+    // The model's checks and the built-in multiplicity check (plan 0099).
+    let mut checks: Vec<(String, rmodel::CheckKind, rmodel::reference::Outcome)> = model
+        .checks
+        .iter()
+        .zip(&report.verdicts)
+        .map(|(check, verdict)| (check.name.clone(), check.kind, verdict.outcome))
+        .collect();
+    checks.push((
+        rmodel::DECLARATIONS.to_owned(),
+        rmodel::CheckKind::Invariant,
+        report.declarations,
+    ));
+    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).map_err(|e| e.to_string());
+    let mut keep = false;
+    for (name, kind, outcome) in &checks {
+        let (reference, depth) = reference_word(*outcome);
+        let explicit = explicit(&model, name, *kind);
+        let sat = sat(&alloy, name, *kind);
+        let deep = depth.is_some_and(|d| d >= model.scope.steps);
+        let explicit_agrees = explicit == reference;
+        let sat_agrees = sat == reference || deep || reference == "empty" && sat == "unreachable";
+        if !explicit_agrees || !sat_agrees || reference == "unknown" {
+            keep = true;
+        }
+        let _ = writeln!(
+            lines,
+            "{{\"seed\":{seed},\"check\":{:?},\"reference\":{reference:?},\"depth\":{},\"explicit\":{explicit:?},\"sat\":{sat:?},\"deep\":{deep},\"explicitAgrees\":{explicit_agrees},\"satAgrees\":{sat_agrees}}}",
+            name,
+            depth.map_or("null".into(), |d| d.to_string()),
+        );
+    }
+    if keep {
+        std::fs::write(format!("{output}/models/{seed}.model"), &source).unwrap();
+    }
+    lines
+}
+
 fn main() {
     let arguments: Vec<String> = std::env::args().skip(1).collect();
+    if let [flag, seed, output] = arguments.as_slice()
+        && flag == "--one"
+    {
+        print!("{}", one(seed.parse().unwrap(), output));
+        return;
+    }
     let [first, last, output] = arguments.as_slice() else {
         panic!("usage: differential <first-seed> <last-seed> <output-dir>");
     };
     let (first, last): (u64, u64) = (first.parse().unwrap(), last.parse().unwrap());
     std::fs::create_dir_all(format!("{output}/models")).unwrap();
-    let mut lines = String::new();
+    // Rows are appended per seed, so an interrupted run keeps what it did.
+    let mut file = std::fs::File::create(format!("{output}/results.jsonl")).unwrap();
+    let program = std::env::current_exe().unwrap();
     for seed in first..=last {
-        let source = generate(seed);
-        let model = match rmodel::parse(&source) {
-            Ok(model) => model,
-            Err(error) => {
-                let _ = writeln!(
-                    lines,
-                    "{{\"seed\":{seed},\"generator\":{:?}}}",
-                    error.to_string()
-                );
-                std::fs::write(format!("{output}/models/{seed}.model"), &source).unwrap();
-                continue;
+        use std::io::Write as _;
+        let mut child = std::process::Command::new(&program)
+            .args(["--one", &seed.to_string(), output])
+            .stdout(std::process::Stdio::piped())
+            .spawn()
+            .unwrap();
+        // The engines' budgets count work, not time; a seed may still spin
+        // (seed 6130, plan 0100), so each seed gets a wall-clock limit.
+        let started = std::time::Instant::now();
+        let status = loop {
+            if let Some(status) = child.try_wait().unwrap() {
+                break Some(status);
             }
+            if started.elapsed() > std::time::Duration::from_secs(600) {
+                let _ = child.kill();
+                let _ = child.wait();
+                break None;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(100));
         };
-        let report = rmodel::reference::analyze(&model, 200_000);
-        // The model's checks and the built-in multiplicity check (plan 0099).
-        let mut checks: Vec<(String, rmodel::CheckKind, rmodel::reference::Outcome)> = model
-            .checks
-            .iter()
-            .zip(&report.verdicts)
-            .map(|(check, verdict)| (check.name.clone(), check.kind, verdict.outcome))
-            .collect();
-        checks.push((
-            rmodel::DECLARATIONS.to_owned(),
-            rmodel::CheckKind::Invariant,
-            report.declarations,
-        ));
-        let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).map_err(|e| e.to_string());
-        let mut keep = false;
-        for (name, kind, outcome) in &checks {
-            let (reference, depth) = reference_word(*outcome);
-            let explicit = explicit(&model, name, *kind);
-            let sat = sat(&alloy, name, *kind);
-            let deep = depth.is_some_and(|d| d >= model.scope.steps);
-            let explicit_agrees = explicit == reference;
-            let sat_agrees =
-                sat == reference || deep || reference == "empty" && sat == "unreachable";
-            if !explicit_agrees || !sat_agrees || reference == "unknown" {
-                keep = true;
-            }
-            let _ = writeln!(
-                lines,
-                "{{\"seed\":{seed},\"check\":{:?},\"reference\":{reference:?},\"depth\":{},\"explicit\":{explicit:?},\"sat\":{sat:?},\"deep\":{deep},\"explicitAgrees\":{explicit_agrees},\"satAgrees\":{sat_agrees}}}",
-                name,
-                depth.map_or("null".into(), |d| d.to_string()),
-            );
+        let mut stdout = Vec::new();
+        {
+            use std::io::Read as _;
+            child
+                .stdout
+                .take()
+                .unwrap()
+                .read_to_end(&mut stdout)
+                .unwrap();
         }
-        if keep {
-            std::fs::write(format!("{output}/models/{seed}.model"), &source).unwrap();
+        if status.is_some_and(|status| status.success()) {
+            file.write_all(&stdout).unwrap();
+        } else {
+            // Neither agreement nor disagreement: recorded as a crash.
+            let reason = status.map_or("timeout after 600s".to_owned(), |s| s.to_string());
+            writeln!(file, "{{\"seed\":{seed},\"crash\":{reason:?}}}").unwrap();
+            std::fs::write(format!("{output}/models/{seed}.model"), generate(seed)).unwrap();
         }
     }
-    std::fs::write(format!("{output}/results.jsonl"), lines).unwrap();
 }

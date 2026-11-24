@@ -1,0 +1,22 @@
+model G6257
+sig S0
+sig S1
+var v0: S1 -> one S0
+var v1: set S1
+init { (none = ((S1.v0) - S0) and (S0 -> S1) in ((S0 -> S1) + (S0 -> S1))) }
+action a0(p0_0: S0, p0_1: S1) {
+  (some (((p0_0 -> S1).p0_1).((S0 -> S0) & (p0_0 -> p0_0))) or some (S0 + S0))
+  v1' = ((S1 - S1) & ((v1 -> S0).p0_0))
+}
+action a1(p1_0: S1, p1_1: S0) {
+  lone ((S0 -> p1_0).(v0.S0))
+  (#((S0 -> p1_1).p1_1) != 2 and none = (v1 & (S0.(S0 -> v1))))
+  v0' = ((S1.(S1 -> S1)) -> ((S0 -> S0).p1_1))
+}
+action a2(p2_0: S0) {
+  (v1 in S1 or v1 in S1)
+  v1' = ((S0 & p2_0).(p2_0 -> v1))
+}
+invariant Inv { (one v1 or #(S1.v0) = 2) }
+reachable Goal { ((all q2: S1 | some S1) or #(v1.(S1 -> S1)) = 3) }
+scope S0 = 1, S1 = 1, steps = 6

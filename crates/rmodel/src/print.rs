@@ -48,6 +48,10 @@ impl QuintLike<'_> {
         for (name, members) in &model.enums {
             out.push_str(&format!("  type {name} = {}\n", members.join(" | ")));
         }
+        // A union of sorts, not a tagged sum: `+` as for sets (plan 0100).
+        for (name, children) in &model.sums {
+            out.push_str(&format!("  type {name} = {}\n", children.join(" + ")));
+        }
         for relation in &model.relations {
             let keyword = if relation.var { "var" } else { "const" };
             let (kind, mult, binary) = match &relation.shape {

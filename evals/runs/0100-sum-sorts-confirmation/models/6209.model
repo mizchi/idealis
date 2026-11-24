@@ -1,0 +1,18 @@
+model G6209
+sig S0
+sig S1
+type P = S0 + S1
+rel r0: P -> set P
+var v1: lone S1
+var v2: lone S1
+fact { some (S1.(S1 -> S1)) }
+init { (some (r0.P) or ((S1 -> P).(P -> v1)) = (v1 -> S1)) }
+action a0() {
+  v1' = (((v2 -> P).(P -> S1)).S1)
+}
+action a1(p1_0: P, p1_1: P) {
+  v1' = ((v2 - S1) + (S1 - S1))
+}
+invariant Inv { (((lone P and S1 = ((r0 + (P -> P)).P)) implies (all q1: S0 | (q1 -> P) in ((S0 -> P) - (q1 -> P)))) or ((S1 -> v1) in (v1 -> v2) and (S1 not in (P.(P -> P)) and #(S1 + S1) != 2))) }
+reachable Goal { ((not (S0 not in (P + S0)) and (some ((S0 -> S0).S0) and #((P -> v1).v1) = 1)) and not (S0 != ((S0.(S0 -> S1)).(S1 -> S0)))) }
+scope S0 = 2, S1 = 2, steps = 6

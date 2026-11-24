@@ -1,0 +1,23 @@
+model G5021
+sig S0
+sig S1
+type P = S0 + S1
+rel r0: S1 -> lone S0
+rel r1: lone P
+var v2: S1 -> set S0
+var v3: P -> lone P
+fact { #none > 2 }
+init { (all q1: S0 | some (S1.v2)) }
+action a0() {
+  ((S1 -> S1) = ((S1 -> S1) + (S1 -> S1)) implies (S1 + r1) in ((S0 + S1) + (S0.(S0 -> P))))
+  v2' = (S1 -> S0)
+}
+action a1() {
+  v2' = ((S1 -> S0) + (S1 -> S0))
+}
+action a2() {
+  v2' = v2
+}
+invariant Inv { (((S0 -> P) = (S0 -> P) and S0 = (((S0 -> P).v3).P)) implies #(S1.v2) <= 1) }
+reachable Goal { (((some S1 implies S1 in (P + r1)) implies not (v2 = ((S1 -> S0).(S0 -> S0)))) implies not (((S1 -> P) in (S1 -> P) implies (S1 -> P) in (S1 -> P)))) }
+scope S0 = 3, S1 = 3, steps = 6

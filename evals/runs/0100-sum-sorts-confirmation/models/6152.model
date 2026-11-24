@@ -1,0 +1,16 @@
+model G6152
+sig S0
+var v0: S0 -> some S0
+init { (#(v0.S0) > 1 implies lone (S0.((S0 -> S0) - (S0 -> S0)))) }
+action a0(p0_0: S0) {
+  v0 = (S0 -> p0_0)
+  (all q1: S0 | #(q1 - q1) >= 3)
+  v0' = ((S0 - S0) -> (p0_0.(S0 -> p0_0)))
+}
+action a1() {
+  (#(v0.S0) <= 1 and S0 = (S0.(S0 -> S0)))
+  v0' = ((S0 -> S0).(v0 + v0))
+}
+invariant Inv { not (((v0.v0).S0) in ((S0 + S0).(S0 -> S0))) }
+reachable Goal { ((not (some (S0 - S0)) or (no ((v0 & v0).S0) and some ((S0 + S0) - S0))) or not (some (v0.S0))) }
+scope S0 = 2, steps = 6

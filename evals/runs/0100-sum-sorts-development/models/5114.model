@@ -1,0 +1,27 @@
+model G5114
+sig S0
+sig S1
+enum E = Ea | Eb
+type P = S0 + S1
+rel r0: some S1
+var v1: P -> set P
+var v2: P -> one E
+fact { (not (#E = 3) or (#(r0 - S1) <= 3 and (S0 -> r0) = (S0 -> S1))) }
+init { ((v1.P) & ((P -> S0).S0)) in ((v1 & v1).P) }
+action a0() {
+  (#r0 < 3 or (S0 -> Eb) = ((S0 -> S0).(S0 -> Ea)))
+  (#(P.v1) > 1 or (v1 & (P -> P)) = v1)
+  v1' = (v1 - (P -> P))
+}
+action a1(p1_0: S0, p1_1: E) {
+  not (#((p1_0 -> E).E) <= 3)
+  #(S1 & r0) <= 1
+  v1' = ((P -> Ea).(Ea -> P))
+}
+action a2(p2_0: P, p2_1: E) {
+  no ((none + E) - (Ea - Ea))
+  v2' = (P -> ((Eb -> P).P))
+}
+invariant Inv { (((r0 not in ((S0.(S0 -> S0)).((S0 -> r0) + (S0 -> r0))) implies some (P.v1)) implies #S1 = 3) or ((((r0 -> P) & (r0 -> P)) = (S1 -> P) implies (r0 -> S1) in (r0 -> r0)) implies (((S0 -> S1) - (S0 -> r0)) in (S0 -> S1) or some ((S1 -> S1).S1)))) }
+reachable Goal { (#S0 != 0 and ((((S0 -> S1) + (S0 -> S1)) in (S0 -> r0) implies some (E.(E -> S0))) or (some (P.v1) and #P >= 3))) }
+scope S0 = 1, S1 = 2, steps = 6

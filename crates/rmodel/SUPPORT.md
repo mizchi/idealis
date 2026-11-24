@@ -15,6 +15,8 @@
 
 - [x] sortの静的な型検査（集合と二項関係のsort、join・比較・代入のsortの一致）。多重度を破る遷移は組み込みのcheck `Declarations`で違反として報告し、違反した状態からは遷移しない（0099）。
 
+- [x] 和のsort `type Party = Person + Org`: sig・enumをまとめた、自分のatomを持たないsort。和・比較・joinは部分型の関係で型を付け、Alloyでは`abstract sig`と`extends`、TLA+では子の集合の和に写す。1つのsigが属する和は1つまで、和の入れ子はない（0100）。
+
 ## 照合
 
 - [x] corpusの5モデル・20 checkで、ralloyのSAT・rtlc・Alloy 6.2.0・TLC 1.8.0の判定が、結果の前に書いた期待とすべて一致する。明示状態の深さはstepsの内側（0091）。

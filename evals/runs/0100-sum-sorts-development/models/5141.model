@@ -1,0 +1,25 @@
+model G5141
+sig S0
+sig S1
+type P = S0 + S1
+rel r0: S0 -> set P
+rel r1: P -> some P
+var v2: lone S1
+fact { ((P -> P).(P -> P)) in r1 }
+init { (all q2: P | (S0 -> v2) in (S0 -> v2)) }
+action a0(p0_0: S0) {
+  v2' = v2
+}
+action a1(p1_0: P) {
+  ((P -> S0) - (P -> S0)) in (P -> S0)
+  (all q3: P | #((P -> S1).S1) < 1)
+  v2' = (v2.(v2 -> v2))
+}
+action a2(p2_0: P, p2_1: S1) {
+  (P -> P) = (P -> P)
+  not (#v2 > 0)
+  v2' = (none & ((v2 -> S1).S1))
+}
+invariant Inv { (all q4: S0 | some ((v2 -> S0).S0)) }
+reachable Goal { (P != ((S1 - v2).((S1 -> S0).r0)) or some S1) }
+scope S0 = 3, S1 = 1, steps = 6

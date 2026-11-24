@@ -27,13 +27,23 @@ type Scope = BTreeMap<String, String>;
 
 pub fn to_alloy(model: &Model) -> String {
     let mut out = String::new();
+    // A sum sort is an abstract signature its children extend (plan 0100).
+    let extends = |sort: &str| {
+        model
+            .parent(sort)
+            .map_or(String::new(), |sum| format!(" extends s_{sum}"))
+    };
+    for (name, _) in &model.sums {
+        out.push_str(&format!("abstract sig s_{name} {{}}\n"));
+    }
     for sig in &model.sigs {
-        out.push_str(&format!("sig s_{sig} {{}}\n"));
+        out.push_str(&format!("sig s_{sig}{} {{}}\n", extends(sig)));
     }
     for (name, members) in &model.enums {
         let members: Vec<String> = members.iter().map(|member| format!("e_{member}")).collect();
         out.push_str(&format!(
-            "abstract sig s_{name} {{}}\none sig {} extends s_{name} {{}}\n",
+            "abstract sig s_{name}{} {{}}\none sig {} extends s_{name} {{}}\n",
+            extends(name),
             members.join(", ")
         ));
     }
@@ -159,6 +169,21 @@ pub fn to_alloy(model: &Model) -> String {
                 .iter()
                 .map(|(name, members)| format!("exactly {} s_{name}", members.len())),
         )
+        .chain(model.sums.iter().map(|(name, children)| {
+            let size: usize = children
+                .iter()
+                .map(|child| {
+                    model.scope.sizes.get(child).copied().unwrap_or_else(|| {
+                        model
+                            .enums
+                            .iter()
+                            .find(|(e, _)| e == child)
+                            .map_or(0, |(_, members)| members.len())
+                    })
+                })
+                .sum();
+            format!("exactly {size} s_{name}")
+        }))
         .chain([
             // Wide enough for any count of atoms in scope (review of #102).
             format!(
@@ -446,6 +471,10 @@ impl Tla<'_> {
                 .map(|member| format!("\"{name}.{member}\""))
                 .collect();
             out.push_str(&format!("s_{name} == {{{}}}\n", atoms.join(", ")));
+        }
+        for (name, children) in &model.sums {
+            let parts: Vec<String> = children.iter().map(|child| format!("s_{child}")).collect();
+            out.push_str(&format!("s_{name} == {}\n", parts.join(" \\cup ")));
         }
         for relation in &model.relations {
             let (domain, shape) = match &relation.shape {

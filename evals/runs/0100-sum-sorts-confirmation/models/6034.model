@@ -1,0 +1,21 @@
+model G6034
+sig S0
+enum E = Ea | Eb
+rel r0: E -> lone E
+rel r1: one S0
+var v2: S0 -> some E
+fact { (some S0 and (some none and #(S0 + S0) > 1)) }
+init { ((r1 + r1) = ((r1.v2).((Eb -> S0).(S0 -> r1))) or some S0) }
+action a0(p0_0: S0, p0_1: E) {
+  v2' = ((p0_1.(p0_1 -> p0_0)) -> (none + E))
+}
+action a1(p1_0: E) {
+  (all q1: S0 | ((E -> S0).(r1 -> E)) in r0)
+  v2' = (v2 + v2)
+}
+action a2() {
+  v2' = (((r1 -> Eb).E) -> (Ea.r0))
+}
+invariant Inv { ((some q2: S0 | not (some (S0.v2))) implies (some q3: S0 | (some q4: E | (q3 -> S0) = (q3 -> r1)))) }
+reachable Goal { not (((v2 & v2) = (r1 -> Ea) and (#(Ea.(E -> S0)) >= 1 or (Eb -> Ea) = r0))) }
+scope S0 = 1, steps = 6

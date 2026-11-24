@@ -119,6 +119,9 @@ pub struct Model {
     pub sigs: Vec<String>,
     /// `enum Name = A | B`: named atoms, one each, with no scope (0093).
     pub enums: Vec<(String, Vec<String>)>,
+    /// `type Party = Person + Org`: a union of signatures and enums with no
+    /// atoms of its own (plan 0100).
+    pub sums: Vec<(String, Vec<String>)>,
     pub relations: Vec<Relation>,
     pub facts: Vec<Formula>,
     pub init: Vec<Formula>,
@@ -137,6 +140,33 @@ impl Model {
             .find(|(_, members)| members.iter().any(|member| member == name))
             .map(|(enumeration, _)| enumeration.as_str())
     }
+    /// The sum sort a signature or enum belongs to.
+    pub fn parent(&self, sort: &str) -> Option<&str> {
+        self.sums
+            .iter()
+            .find(|(_, children)| children.iter().any(|child| child == sort))
+            .map(|(sum, _)| sum.as_str())
+    }
+    /// Whether values of sort `a` are values of sort `b`.
+    pub fn subsort(&self, a: &str, b: &str) -> bool {
+        a == b || self.parent(a) == Some(b)
+    }
+    /// The smallest sort containing both, if any.
+    pub fn join_sorts(&self, a: &str, b: &str) -> Option<String> {
+        if self.subsort(a, b) {
+            Some(b.to_owned())
+        } else if self.subsort(b, a) {
+            Some(a.to_owned())
+        } else {
+            match (self.parent(a), self.parent(b)) {
+                (Some(x), Some(y)) if x == y => Some(x.to_owned()),
+                _ => None,
+            }
+        }
+    }
+    pub fn is_sum(&self, name: &str) -> bool {
+        self.sums.iter().any(|(sum, _)| sum == name)
+    }
     pub fn is_enum(&self, name: &str) -> bool {
         self.enums
             .iter()
@@ -150,6 +180,7 @@ impl Model {
 const KEYWORDS: &[&str] = &[
     "model",
     "enum",
+    "type",
     "sig",
     "rel",
     "var",
@@ -293,6 +324,7 @@ impl Parser {
             name: self.name()?,
             sigs: Vec::new(),
             enums: Vec::new(),
+            sums: Vec::new(),
             relations: Vec::new(),
             facts: Vec::new(),
             init: Vec::new(),
@@ -317,6 +349,16 @@ impl Parser {
                         members.push(self.name()?);
                     }
                     model.enums.push((name, members));
+                }
+                "type" => {
+                    self.position += 1;
+                    let name = self.name()?;
+                    self.expect("=")?;
+                    let mut children = vec![self.name()?];
+                    while self.take("+") {
+                        children.push(self.name()?);
+                    }
+                    model.sums.push((name, children));
                 }
                 "sig" => {
                     self.position += 1;
@@ -706,17 +748,45 @@ struct Checker<'a> {
     sigs: BTreeSet<&'a str>,
 }
 impl Checker<'_> {
+    /// Sorts a join may connect: one is a subsort of the other.
+    fn compatible(&self, a: &str, b: &str) -> bool {
+        self.model.subsort(a, b) || self.model.subsort(b, a)
+    }
+    /// Whether a value of type `value` fits a variable of type `expected`.
+    fn fits(&self, value: &Type, expected: &Type) -> bool {
+        match (value, expected) {
+            (Type::Any, _) => true,
+            (Type::Set(a), Type::Set(b)) => self.model.subsort(a, b),
+            (Type::Pair(a, b), Type::Pair(c, d)) => {
+                self.model.subsort(a, c) && self.model.subsort(b, d)
+            }
+            _ => false,
+        }
+    }
     fn shape(shape: &Shape) -> Type {
         match shape {
             Shape::Unary { sig, .. } => Type::Set(sig.clone()),
             Shape::Binary { from, to, .. } => Type::Pair(from.clone(), to.clone()),
         }
     }
-    /// Both sides of a set operation or comparison have one type.
-    fn same(left: Type, right: Type, what: &str) -> Result<Type, Error> {
+    /// Both sides of a set operation or comparison have one type, up to
+    /// the sum sorts both belong to (plan 0100).
+    fn same(&self, left: Type, right: Type, what: &str) -> Result<Type, Error> {
+        let joined = |a: &str, b: &str| self.model.join_sorts(a, b);
         match (left, right) {
             (Type::Any, other) | (other, Type::Any) => Ok(other),
             (left, right) if left == right => Ok(left),
+            (Type::Set(a), Type::Set(b)) if joined(&a, &b).is_some() => {
+                Ok(Type::Set(joined(&a, &b).expect("joined")))
+            }
+            (Type::Pair(a, b), Type::Pair(c, d))
+                if joined(&a, &c).is_some() && joined(&b, &d).is_some() =>
+            {
+                Ok(Type::Pair(
+                    joined(&a, &c).expect("joined"),
+                    joined(&b, &d).expect("joined"),
+                ))
+            }
             (left, right) if left.arity() != right.arity() => {
                 Err(Error::kind(format!("{what} of different arities")))
             }
@@ -763,19 +833,19 @@ impl Checker<'_> {
                         };
                         match (left, right) {
                             (Type::Set(a), Type::Pair(b, c)) => {
-                                if a != b {
+                                if !self.compatible(&a, &b) {
                                     return mismatch(&a, &b);
                                 }
                                 Type::Set(c)
                             }
                             (Type::Pair(a, b), Type::Set(c)) => {
-                                if b != c {
+                                if !self.compatible(&b, &c) {
                                     return mismatch(&b, &c);
                                 }
                                 Type::Set(a)
                             }
                             (Type::Pair(a, b), Type::Pair(c, d)) => {
-                                if b != c {
+                                if !self.compatible(&b, &c) {
                                     return mismatch(&b, &c);
                                 }
                                 Type::Pair(a, d)
@@ -784,7 +854,7 @@ impl Checker<'_> {
                             _ => return Err(Error::kind("join needs a binary relation")),
                         }
                     }
-                    _ => Self::same(left, right, "set operation")?,
+                    _ => self.same(left, right, "set operation")?,
                 }
             }
         })
@@ -796,7 +866,7 @@ impl Checker<'_> {
                     self.expression(left, bound, vars)?,
                     self.expression(right, bound, vars)?,
                 );
-                Self::same(left, right, "comparison")?;
+                self.same(left, right, "comparison")?;
             }
             Formula::Ints(_, left, right) => {
                 for int in [left, right] {
@@ -870,6 +940,7 @@ fn check(model: &Model) -> Result<(), Error> {
                 .iter()
                 .flat_map(|(name, members)| std::iter::once(name).chain(members)),
         )
+        .chain(model.sums.iter().map(|(name, _)| name))
         .chain(model.relations.iter().map(|relation| &relation.name))
         .chain(model.actions.iter().map(|action| &action.name))
         .chain(model.checks.iter().map(|check| &check.name))
@@ -894,10 +965,29 @@ fn check(model: &Model) -> Result<(), Error> {
             return Err(Error::kind(format!("scope for unknown sig {sig}")));
         }
     }
-    // Enums are sigs for typing, without a scope.
+    // Enums and sums are sorts for typing, without a scope.
     let sigs: BTreeSet<&str> = sigs
         .into_iter()
         .chain(model.enums.iter().map(|(name, _)| name.as_str()))
+        .collect();
+    // A sum's children are signatures or enums, each in one sum at most
+    // (plan 0100).
+    let mut owned = BTreeSet::new();
+    for (sum, children) in &model.sums {
+        for child in children {
+            if !sigs.contains(child.as_str()) {
+                return Err(Error::kind(format!(
+                    "sum sort {sum}: {child} is not a signature or enum"
+                )));
+            }
+            if !owned.insert(child.as_str()) {
+                return Err(Error::kind(format!("{child} belongs to two sum sorts")));
+            }
+        }
+    }
+    let sigs: BTreeSet<&str> = sigs
+        .into_iter()
+        .chain(model.sums.iter().map(|(name, _)| name.as_str()))
         .collect();
     for relation in &model.relations {
         let used = match &relation.shape {
@@ -954,7 +1044,7 @@ fn check(model: &Model) -> Result<(), Error> {
             }
             let value = checker.expression(value, &bound, true)?;
             let expected = Checker::shape(&relation.shape);
-            if value != expected && value != Type::Any {
+            if !checker.fits(&value, &expected) {
                 let what = if value.arity() == expected.arity() {
                     format!(
                         "another sort ({} for {})",

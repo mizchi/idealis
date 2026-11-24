@@ -1,0 +1,24 @@
+model G6151
+sig S0
+sig S1
+enum E = Ea | Eb
+type P = S0 + S1
+rel r0: P -> some P
+rel r1: P -> set E
+var v2: S0 -> lone P
+var v3: lone S0
+fact { ((S1 + ((P -> S1).S1)) != S0 and ((S1 - S1) = ((S1.(S1 -> S1)) - S1) implies (Eb.(Ea -> E)) = Ea)) }
+init { not (#v3 = 0) }
+action a0(p0_0: S1) {
+  (all q1: S0 | (v3 -> v3) = ((v3 -> v3) + (q1 -> q1)))
+  v3' = none
+}
+action a1(p1_0: E) {
+  v2' = v2
+}
+action a2() {
+  v2' = ((S0 -> E).((Ea -> Eb).(Ea -> P)))
+}
+invariant Inv { not ((all q2: P | (Eb -> S0) = ((E -> P).(P -> v3)))) }
+reachable Goal { (#(v3.(v3 -> S1)) >= 1 implies ((#(r0.P) != 0 and lone ((E -> S1).S1)) or (#((E -> S0).v3) != 1 or some P))) }
+scope S0 = 1, S1 = 3, steps = 6

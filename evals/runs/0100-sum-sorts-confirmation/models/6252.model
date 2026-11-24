@@ -1,0 +1,19 @@
+model G6252
+sig S0
+sig S1
+rel r0: S0 -> some S1
+var v1: S0 -> one S1
+fact { (not (#(S1 - S1) < 0) implies (S1 != S1 and no S0)) }
+init { #(v1.S1) != 2 }
+action a0() {
+  lone S1
+  v1' = v1
+}
+action a1(p1_0: S0) {
+  no ((v1.(S1 -> S0)).(S1.(S1 -> S0)))
+  p1_0 = S0
+  v1' = ((S0 + p1_0) -> ((S1 -> S1).S1))
+}
+invariant Inv { ((#(S1 + S1) = 0 implies ((S1 -> S0).(S0 & S0)) in (((S1 -> S1).(S1 -> S0)).S0)) and ((some (S1 + S1) implies S1 in (none & (S0.v1))) implies #(S0.v1) < 1)) }
+reachable Goal { (some S1 or not ((some q7: S1 | (v1 & v1) = (S0 -> S1)))) }
+scope S0 = 3, S1 = 1, steps = 6

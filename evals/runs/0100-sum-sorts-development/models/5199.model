@@ -1,0 +1,18 @@
+model G5199
+sig S0
+sig S1
+rel r0: S0 -> some S1
+rel r1: S0 -> set S1
+var v2: S1 -> set S1
+init { not ((((S1 -> S0) & (S1 -> S0)).S0) != (((S1 -> S0).r0).(v2.S1))) }
+action a0() {
+  v2' = ((v2.S1) -> ((S1 -> S1).S1))
+}
+action a1(p1_0: S0, p1_1: S1) {
+  (some (S0 - p1_0) and lone ((p1_0.(S0 -> p1_0)) - ((p1_0 -> S1).S1)))
+  not (#(p1_1 & p1_1) <= 3)
+  v2' = (p1_1 -> p1_1)
+}
+invariant Inv { (v2 + v2) = ((S1 -> S1).v2) }
+reachable Goal { (some (S1.v2) implies (((S1 -> S0) - (S1 -> S0)) in (S1 -> S0) implies (S1 in S1 or no (v2.S1)))) }
+scope S0 = 1, S1 = 1, steps = 6

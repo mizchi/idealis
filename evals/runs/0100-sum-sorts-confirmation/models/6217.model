@@ -1,0 +1,17 @@
+model G6217
+sig S0
+sig S1
+enum E = Ea | Eb
+var v0: S1 -> set S1
+init { (some q1: S0 | ((q1.(q1 -> S1)).(v0.(S1 -> E))) != none) }
+action a0(p0_0: E) {
+  v0' = (((S1 -> S1).S1) -> (S1.v0))
+}
+action a1(p1_0: S0, p1_1: S0) {
+  (((p1_1 -> p1_1).(S0 -> Ea)) in ((p1_1 -> p1_0).(p1_0 -> Eb)) implies S0 in ((p1_0 -> S0).p1_0))
+  some (S1 & S1)
+  v0' = ((v0.(S1 -> S1)) - ((S1 -> S1) & v0))
+}
+invariant Inv { S1 = (v0.S1) }
+reachable Goal { (not (#((S1 -> Eb).Eb) >= 0) or (((S1 -> Ea).(Ea.(Eb -> E))) = ((v0.S1) + S1) implies (all q4: S0 | (S1 -> S0) = (S1 -> q4)))) }
+scope S0 = 1, S1 = 1, steps = 6

@@ -1,0 +1,23 @@
+model G6130
+sig S0
+enum E = Ea | Eb
+type P = S0 + E
+rel r0: S0 -> some P
+rel r1: E -> some P
+var v2: S0 -> set P
+init { (((P.(P -> S0)) - (v2.P)) = ((Eb + Ea).((E -> S0) & (E -> S0))) or lone E) }
+action a0(p0_0: P) {
+  (P.((P -> P).(P -> Ea))) not in E
+  v2' = (((S0 -> Eb).r1) + (S0 -> P))
+}
+action a1(p1_0: E, p1_1: E) {
+  ((((p1_0 -> S0).S0).(p1_0 -> p1_1)) not in (S0.((S0 -> S0).(S0 -> E))) and ((S0 -> Ea).p1_0) != (S0 + (S0.(S0 -> S0))))
+  v2' = ((v2 & r0) + r0)
+}
+action a2() {
+  (some (E.(Eb -> S0)) implies (E -> S0) = ((E -> S0) - (Ea -> S0)))
+  v2' = ((S0 -> S0).r0)
+}
+invariant Inv { (some q3: S0 | ((some (Eb & (P.(P -> E))) and ((P -> S0).v2) in ((P -> P) - (P -> P))) or (some (E + Eb) and (P -> E) in (P -> Eb)))) }
+reachable Goal { ((some q6: E | (all q7: S0 | ((S0 -> S0).(q7 -> S0)) in ((q7 -> P).(P -> S0)))) and not (some (S0.v2))) }
+scope S0 = 3, steps = 6

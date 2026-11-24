@@ -1,0 +1,22 @@
+model G6293
+sig S0
+sig S1
+enum E = Ea | Eb
+var v0: S0 -> one E
+var v1: set S0
+init { (some q1: E | ((S1 -> S0).(q1.(E -> v1))) not in S1) }
+action a0() {
+  (#((S1 -> Ea).E) != 0 and some (S1 & S1))
+  not (((Eb -> v1) & (Ea -> S0)) in (E -> v1))
+  v1' = (S0.((v1 -> S0) - (v1 -> v1)))
+}
+action a1() {
+  v1' = S0
+}
+action a2(p2_0: E, p2_1: S0) {
+  ((v1 + S0) - ((S0 -> p2_1).v1)) in ((v1 + S0) - v1)
+  v0' = ((S1.(S1 -> p2_1)) -> ((p2_0 -> p2_1).v1))
+}
+invariant Inv { (lone E or not (#v1 != 1)) }
+reachable Goal { some (v0.Eb) }
+scope S0 = 3, S1 = 2, steps = 6

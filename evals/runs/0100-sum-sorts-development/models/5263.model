@@ -1,0 +1,16 @@
+model G5263
+sig S0
+sig S1
+rel r0: lone S1
+rel r1: S1 -> set S0
+var v2: S0 -> one S1
+fact { (r1 + r1) in ((r0 -> S0).(S0 -> S0)) }
+init { ((S0 & S0) = (v2.(r1.S0)) and S1 in (((S1 -> S1).(r0 -> S1)).(S1.(r0 -> S1)))) }
+action a0(p0_0: S0, p0_1: S1) {
+  (some S1 or some S0)
+  ((r0 + r0) + (S0.v2)) not in ((p0_0.v2).((r0 -> r0) + (r0 -> p0_1)))
+  v2' = ((S0 - S0) -> (r0.(S1 -> r0)))
+}
+invariant Inv { (((lone ((S0 -> S0).((S0 -> r0).r0)) and #((r0 -> S0).S0) = 2) or (lone r0 and r0 not in ((r1 - r1).(v2.r0)))) and (some q2: S0 | (S1 -> r0) in (r1.v2))) }
+reachable Goal { S0 != (((S0 -> S0).v2).(S0.v2)) }
+scope S0 = 2, S1 = 2, steps = 6

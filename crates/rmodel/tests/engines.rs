@@ -598,3 +598,91 @@ scope A = 2, steps = 6",
     .unwrap();
     assert!(result.violation.is_some(), "{}", result.status);
 }
+
+/// Plan 0100: sum sorts make the idioms sort checking took away writable
+/// again, and mean the same on all engines.
+#[test]
+fn sum_sorts_restore_polymorphic_idioms() {
+    let model = rmodel::parse(
+        "model Zoo
+sig Cat
+sig Dog
+sig Fish
+type Animal = Cat + Dog
+sig Account
+sig Customer
+sig Staff
+type Party = Customer + Staff
+rel owner: Account -> one Party
+var fed: set Animal
+init { no fed }
+action feed(a: Animal) { fed' = fed + a }
+action feedCat(c: Cat) { fed' = fed + c }
+invariant Plain { all a: Animal | a in Cat + Dog }
+invariant Owned { Account.owner in Customer + Staff }
+reachable AllFed { fed = Cat + Dog }
+reachable OnlyCats { some fed and fed in Cat }
+invariant NeverDog { no fed & Dog }
+scope Cat = 2, Dog = 1, Fish = 1, Account = 2, Customer = 1, Staff = 1, steps = 5",
+    )
+    .unwrap();
+    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model))
+        .unwrap_or_else(|error| panic!("{error}\n{}", rmodel::to_alloy(&model)));
+    let reference = rmodel::reference::evaluate(&model, 1_000_000);
+    for (check, want) in [
+        ("Plain", "holds"),
+        ("Owned", "holds"),
+        ("AllFed", "reachable"),
+        ("OnlyCats", "reachable"),
+        ("NeverDog", "violated"),
+    ] {
+        let check = model
+            .checks
+            .iter()
+            .find(|candidate| candidate.name == check)
+            .unwrap();
+        let verdict = reference.iter().find(|v| v.check == check.name).unwrap();
+        let word = match verdict.outcome {
+            rmodel::reference::Outcome::Holds => "holds",
+            rmodel::reference::Outcome::Violated { .. } => "violated",
+            rmodel::reference::Outcome::Reachable { .. } => "reachable",
+            rmodel::reference::Outcome::Unreachable => "unreachable",
+            other => panic!("{other:?}"),
+        };
+        assert_eq!(word, want, "{} reference", check.name);
+        assert_eq!(
+            explicit(&model, check).verdict,
+            want,
+            "{} explicit",
+            check.name
+        );
+        assert_eq!(sat(&model, &alloy, check), want, "{} SAT", check.name);
+    }
+}
+
+#[test]
+fn malformed_sum_sorts_are_rejected() {
+    let base = "model M\nsig A\nsig B\nsig C\n";
+    let scope = "\nscope A = 1, B = 1, C = 1, steps = 1";
+    for (body, needle) in [
+        (
+            "type S = A + B\nvar v: set A\ninvariant I { v + C in A }",
+            "different sorts",
+        ),
+        (
+            "type S = A + B\ntype T = B + C\nvar v: set A\ninvariant I { some v }",
+            "two sum sorts",
+        ),
+        (
+            "type S = A + B\ntype T = S + C\nvar v: set A\ninvariant I { some v }",
+            "not a signature or enum",
+        ),
+        (
+            "type S = A + B\nvar v: set A\naction x(s: S) { v' = v + s }",
+            "another sort",
+        ),
+    ] {
+        let error = rmodel::parse(&format!("{base}{body}{scope}")).unwrap_err();
+        assert!(error.message.contains(needle), "{body}: {error}");
+    }
+}

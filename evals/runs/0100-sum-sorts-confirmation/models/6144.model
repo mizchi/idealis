@@ -1,0 +1,22 @@
+model G6144
+sig S0
+sig S1
+rel r0: S0 -> set S1
+rel r1: set S1
+var v2: set S1
+var v3: S0 -> one S1
+init { not (some (v2 & none)) }
+action a0(p0_0: S0, p0_1: S0) {
+  v3' = (((S0 -> S0).(p0_1 -> r1)).(S1 -> S1))
+}
+action a1(p1_0: S0) {
+  v3' = ((v3.(v2 -> v2)) - (p1_0 -> r1))
+}
+action a2(p2_0: S1, p2_1: S0) {
+  r1 = (((S1 -> S0).p2_1).(p2_0 -> r1))
+  (all q1: S1 | some (S1.(q1 -> p2_0)))
+  v3' = ((S0 -> S1) + r0)
+}
+invariant Inv { (((v3 - v3) = (v3.(v2 -> r1)) and (some ((r1 -> v2).r1) implies no (v2 & (r1 - none)))) implies (all q3: S1 | (all q4: S1 | no S0))) }
+reachable Goal { (lone (((S0 -> v2).(r1 -> S0)).(S0 & S0)) and (all q5: S1 | (S0 -> S1) = (S0 -> q5))) }
+scope S0 = 3, S1 = 3, steps = 6

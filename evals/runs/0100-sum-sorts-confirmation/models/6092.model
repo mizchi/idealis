@@ -1,0 +1,24 @@
+model G6092
+sig S0
+sig S1
+enum E = Ea | Eb
+type P = S0 + S1
+rel r0: P -> set P
+var v1: one S1
+init { some (((v1 -> S1).S1) + v1) }
+action a0() {
+  (((P -> S0).(S0 -> P)) in (r0 - r0) and ((v1 -> S0).(S0 -> Eb)) = ((S1 -> v1).(S1 -> Ea)))
+  v1' = S1
+}
+action a1() {
+  lone (Eb - E)
+  v1' = ((v1 -> Ea).(Ea - Ea))
+}
+action a2() {
+  one Ea
+  #((S1 -> v1).S1) >= 1
+  v1' = S1
+}
+invariant Inv { not (((lone S1 and some (P.(P -> E))) or (one v1 implies (S0 -> S1) in ((S0 -> Eb).(E -> v1))))) }
+reachable Goal { (some q5: E | (some q6: S1 | (((Ea + Ea).((q5 -> P).(P -> v1))) != ((E.(Eb -> S1)) & (P.(P -> S1))) implies (Eb.(E -> S0)) not in S0))) }
+scope S0 = 1, S1 = 3, steps = 6

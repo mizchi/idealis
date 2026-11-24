@@ -1,0 +1,22 @@
+model G5052
+sig S0
+sig S1
+enum E = Ea | Eb
+type P = S0 + S1
+var v0: E -> some E
+var v1: S1 -> set E
+init { ((Ea -> E) in v0 implies lone E) }
+action a0() {
+  v1' = ((S1 + S1) -> ((E -> S0).S0))
+}
+action a1(p1_0: P) {
+  (#(S1 + P) > 1 and some ((Eb.(Eb -> S0)) - none))
+  (all q1: E | one ((S0.(S0 -> S1)).v1))
+  v0' = v0
+}
+action a2(p2_0: P) {
+  v0' = ((Eb -> S1).(S1 -> E))
+}
+invariant Inv { (lone S1 and some (v0.Eb)) }
+reachable Goal { (((E -> S0) = (E -> S0) implies ((P -> S1).(S1 -> S1)) in ((P -> S1) & (P -> S1))) and (some S0 implies (((Eb -> S1) & (E -> S1)).S1) not in (S1.((S1 -> E) + v1)))) }
+scope S0 = 1, S1 = 1, steps = 6

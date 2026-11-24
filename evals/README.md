@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0100: 和のsort（多態のentity）](iterations/0100-sum-sorts.md)は、`type Party = Person + Org`で、型検査で書けなくなった多態の表現を部分型として戻した。生成した598モデル・1794 checkで3つのengineの判定は食い違わず、crashした2つのseedは参照評価器の予算の数え方の穴だった。
+
 [0099: sortの静的な型検査と、多重度の違反の報告](iterations/0099-sorts-and-violations.md)は、rmodelにsortの型検査を入れ、多重度を破る遷移を`Declarations`の違反として報告するようにした。生成した600モデル・1800 checkで3つのengineの判定は食い違わず、読み手の誤答からsortの合わない式が消えた。
 
 [0098: 文法の候補を、意味と結果が読み取れるかで評価するループ](iterations/0098-syntax-readability.md)は、Quint風のprinterと、参照評価器から問いと正解を作る仕組みを作り、文脈のない読み手で42問中36問の正答を得た。誤答6件はすべてsortの合わない式で、静的な型検査の必要を示した。

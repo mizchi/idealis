@@ -1,0 +1,15 @@
+model G5037
+sig S0
+enum E = Ea | Eb
+rel r0: S0 -> lone S0
+rel r1: E -> lone S0
+var v2: E -> set S0
+var v3: S0 -> some S0
+fact { not (((S0 & S0) & ((S0 -> Ea).Eb)) not in (((S0 -> S0).(S0 -> Ea)).E)) }
+init { Eb in ((Eb -> S0).(E.v2)) }
+action a0(p0_0: E, p0_1: S0) {
+  v2' = ((E -> E).((Eb -> E).v2))
+}
+invariant Inv { (some none implies not (#(v2.S0) >= 2)) }
+reachable Goal { (not (((E -> Eb) = (Ea -> Eb) or some (Ea & (r1.S0)))) implies (r1 + (E -> S0)) = ((E -> S0) + v2)) }
+scope S0 = 3, steps = 6
