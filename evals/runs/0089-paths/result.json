@@ -1,0 +1,90 @@
+{
+  "before": {
+    "revision": "6ea8530ec",
+    "binaries": "release idealis-core native and Wasm built from the base revision",
+    "typescript": {
+      "file": "tests/tlc-differential/regression-test.ts",
+      "tests": 1319,
+      "pass": 1271,
+      "fail": 48,
+      "failing": [
+        "TLC regression: fold-independent-constant",
+        "TLC regression: fold-independent-count-records",
+        "TLC regression: fold-independent-count-strings",
+        "TLC regression: fold-independent-issue",
+        "TLC regression: fold-independent-next",
+        "TLC regression: fold-independent-overflow",
+        "TLC regression: fold-independent-union-if",
+        "TLC regression: fold-independent-union-left",
+        "TLC regression: fold-independent-union-let",
+        "TLC regression: fold-independent-union-nested",
+        "TLC regression: fold-independent-union-project",
+        "TLC regression: fold-independent-union-records",
+        "TLC regression: fold-independent-union-strings",
+        "TLC regression: fold-independent-union-variants",
+        "TLC regression: fold-set-boolean-function-keys",
+        "TLC regression: fold-set-functions-with-records",
+        "TLC regression: fold-set-wide-single-function",
+        "TLC regression: fold-singleton-error",
+        "TLC regression: fold-singleton-last",
+        "TLC regression: fold-unsupported-record-direct",
+        "TLC regression: fold-unsupported-record-set",
+        "TLC regression: fold-unsupported-record-tuple",
+        "TLC regression: fold-unsupported-string-direct",
+        "TLC regression: fold-unsupported-string-set",
+        "TLC regression: fold-unsupported-string-tuple",
+        "fold independence agrees across frontends, IR versions and checkers: fold-independent-constant",
+        "fold independence agrees across frontends, IR versions and checkers: fold-independent-count-records",
+        "fold independence agrees across frontends, IR versions and checkers: fold-independent-count-strings",
+        "fold independence agrees across frontends, IR versions and checkers: fold-independent-issue",
+        "fold independence agrees across frontends, IR versions and checkers: fold-independent-next",
+        "fold independence agrees across frontends, IR versions and checkers: fold-independent-union-if",
+        "fold independence agrees across frontends, IR versions and checkers: fold-independent-union-left",
+        "fold independence agrees across frontends, IR versions and checkers: fold-independent-union-let",
+        "fold independence agrees across frontends, IR versions and checkers: fold-independent-union-nested",
+        "fold independence agrees across frontends, IR versions and checkers: fold-independent-union-project",
+        "fold independence agrees across frontends, IR versions and checkers: fold-independent-union-records",
+        "fold independence agrees across frontends, IR versions and checkers: fold-independent-union-strings",
+        "fold independence agrees across frontends, IR versions and checkers: fold-independent-union-variants",
+        "fold independence agrees across frontends, IR versions and checkers: fold-set-boolean-function-keys",
+        "fold independence agrees across frontends, IR versions and checkers: fold-set-functions-with-records",
+        "fold independence agrees across frontends, IR versions and checkers: fold-set-wide-single-function",
+        "fold independence agrees across frontends, IR versions and checkers: fold-singleton-last",
+        "fold independence agrees across frontends, IR versions and checkers: fold-unsupported-record-direct",
+        "fold independence agrees across frontends, IR versions and checkers: fold-unsupported-record-set",
+        "fold independence agrees across frontends, IR versions and checkers: fold-unsupported-record-tuple",
+        "fold independence agrees across frontends, IR versions and checkers: fold-unsupported-string-direct",
+        "fold independence agrees across frontends, IR versions and checkers: fold-unsupported-string-set",
+        "fold independence agrees across frontends, IR versions and checkers: fold-unsupported-string-tuple"
+      ]
+    },
+    "rust": {
+      "file": "crates/rtlc/tests/fold_order.rs",
+      "passing": [
+        "a_fold_over_integers_keeps_its_result_and_work",
+        "a_nested_frame_that_reuses_a_parameter_number_is_not_accepted",
+        "a_reason_that_cannot_be_ignored_wins_over_an_accepted_one_in_scan_order",
+        "folds_that_depend_on_the_order_keep_their_refusal"
+      ],
+      "failing": [
+        "a_set_of_one_element_is_folded_whatever_it_contains",
+        "a_singleton_body_error_is_reported_as_it_is",
+        "a_union_body_error_that_is_not_an_order_refusal_passes_through",
+        "a_union_fold_exhausts_its_budget_instead_of_turning_into_a_refusal",
+        "a_union_fold_nested_in_a_union_fold_is_accepted",
+        "callback_calls_must_pass_the_accumulator_then_the_element",
+        "captures_of_the_fold_callback_must_not_read_the_accumulator_or_the_element",
+        "order_independent_folds_over_records_and_strings_are_accepted_in_both_ir_versions",
+        "the_overflow_of_an_independent_body_is_reported"
+      ]
+    }
+  },
+  "after": {
+    "typescript": {
+      "tests": 1319,
+      "pass": 1319,
+      "fail": 0
+    },
+    "rust": "cargo test --all-targets of crates/rtlc: see 0089-audit/commands.tsv"
+  }
+}

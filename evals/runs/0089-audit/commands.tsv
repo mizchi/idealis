@@ -1,0 +1,21 @@
+name	command	exit	result
+rtlc-test	just rtlc-test	0	cargo fmt --check, clippy -D warnings, 323 tests passed, 0 failed
+compiler-test	just compiler-test	0	cargo fmt --check, clippy -D warnings, 199 tests passed, 0 failed
+safety-test	just safety-test	0	node tests 1659 passed, 0 failed (includes tests/tlc-differential/regression-test.js)
+regression-test	node --test dist/tests/tlc-differential/regression-test.js	0	1319 passed, 0 failed (after binaries); 48 failing before
+wasm-test	just wasm-test	0	node 23 passed; vitest 23 passed
+quint-test	just quint-test	0	38 passed
+portable-test	just portable-test	0	cargo 604 passed; node 3 + 22 passed
+test	just test	0	vitest core and node tests passed
+check	just check	0	vp check, tsc --noEmit, tests
+support-check	just support-check	0	Support checklist structure and links checked
+browser	just browser	0	7 passed in Chromium
+evaluate	just evaluate	0	evidence written; ledger lines it appended were not kept
+replay-evaluation	just replay-evaluation	0	6 schedules replayed; fixed implementation passed
+evaluator-corpus	just evaluator-corpus <before> <after> <java> <jar> <archive> 0089-corpus 0089-record-fold-order	0	264 comparisons identical including work
+evaluator-kernel	just evaluator-kernel <before> <after> 0089-kernel	0	14 Criterion kernels, ABBA; see 0089-kernel-summary
+evaluator-kernel recheck	just evaluator-kernel <before> <after> 0089-abba-1 search/counter-product/8	0	+0.22%; see 0089-abba-1-summary
+compiler benches	ABBA of the quint_generated and compatibility bench executables	0	see 0089-compiler-abba
+temporal-parity	IDEALIS_PARITY_PLAN=0089-record-fold-order just temporal-parity <baseline> 0089-temporal-parity	0	156 cases x 10 commands exact
+fold cost	cargo run --release --example fold_cost (copy of 0089-new-path/fold_cost.rs, removed after the run)	0	see 0089-new-path
+tlc capture	node evals/runs/0089-tlc/capture.mjs (TLC_JAVA, TLC_JAR, TLC_APALACHE set)	0	22 logs; see 0089-tlc

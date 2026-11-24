@@ -1,0 +1,95 @@
+{
+  "status": "complete",
+  "plan": "0089-record-fold-order",
+  "input": "<scratch>/runs/0089-abba-1",
+  "manifest": {
+    "metadata": [
+      {
+        "binarySha256": "d19987901406d74422511b0de0e46bf0e8f657966a29822e9242386a27ec9aed",
+        "benchSha256": "2c98a88b5767c9ce73fc0e17c3622baf1c1925624e4b8ff1842a5f1513c79c7b"
+      },
+      {
+        "binarySha256": "d89cf76f01cecc60e477f9b8d4e7f8fb17334499afb8ba6c29a4855536afc6a0",
+        "benchSha256": "2c98a88b5767c9ce73fc0e17c3622baf1c1925624e4b8ff1842a5f1513c79c7b"
+      }
+    ],
+    "filter": "search/counter-product/8",
+    "inputPath": "crates/rtlc/src/bench-fixtures.json",
+    "inputSha256": "a9df6debe79bf441a8ff51b48f352077d3d6804d12e58afc962cb34365569f25",
+    "cpu": "Apple M5 Pro",
+    "sampleSize": 20,
+    "warmupMs": 500,
+    "measurementMs": 1000,
+    "order": [
+      "before",
+      "after",
+      "after",
+      "before"
+    ]
+  },
+  "manifestSha256": "f836ec7c2f6175939b5325e2c7ce5823533cd2f424929f5d25a00ee6f0cf2529",
+  "method": "Arithmetic mean of two Criterion mean estimates per side in ABBA order. Intervals are per repetition, not pooled.",
+  "records": [
+    {
+      "name": "search/counter-product/8",
+      "estimates": [
+        {
+          "path": "<scratch>/runs/0089-abba-1/0/criterion/search/counter-product/8/new/estimates.json",
+          "sha256": "cfcda82c01a28d37990689a402037a96b37949b3a248bfb01e3f4152024ace6d",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 9389617.148875168,
+              "upper_bound": 9413836.962861117
+            },
+            "point_estimate": 9401115.82485244,
+            "standard_error": 6179.868845675373
+          }
+        },
+        {
+          "path": "<scratch>/runs/0089-abba-1/1/criterion/search/counter-product/8/new/estimates.json",
+          "sha256": "b478238f03655ef797160fe2c43bac22df1683fb09c42dc94217e4c7c8f7ef15",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 9446486.828835864,
+              "upper_bound": 9468203.168079937
+            },
+            "point_estimate": 9457301.560683172,
+            "standard_error": 5571.434405235945
+          }
+        },
+        {
+          "path": "<scratch>/runs/0089-abba-1/2/criterion/search/counter-product/8/new/estimates.json",
+          "sha256": "1e46e23f14f2dbe0244f62de38510886f62a9773408ffdded5b4e0b55b2a2a73",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 9454154.999,
+              "upper_bound": 9516449.220250001
+            },
+            "point_estimate": 9481000.020000001,
+            "standard_error": 16234.422287173351
+          }
+        },
+        {
+          "path": "<scratch>/runs/0089-abba-1/3/criterion/search/counter-product/8/new/estimates.json",
+          "sha256": "38a99dfebec5d3883d1f17643fddd1caa2d03e4aa4b7d82b86f896af3e5994e1",
+          "mean": {
+            "confidence_interval": {
+              "confidence_level": 0.95,
+              "lower_bound": 9461871.383597096,
+              "upper_bound": 9536599.698772686
+            },
+            "point_estimate": 9495880.754577292,
+            "standard_error": 19192.428557980587
+          }
+        }
+      ],
+      "beforeNs": 9448498.289714865,
+      "afterNs": 9469150.790341586,
+      "ratio": 1.002185797149289,
+      "regressionOver10Percent": false
+    }
+  ]
+}
