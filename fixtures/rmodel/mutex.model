@@ -1,0 +1,18 @@
+model Mutex
+sig Proc
+sig Lock
+var holder: Lock -> lone Proc
+init { no holder }
+action acquire(p: Proc, l: Lock) {
+  no l.holder
+  holder' = holder + l -> p
+}
+action release(p: Proc, l: Lock) {
+  p in l.holder
+  holder' = holder - l -> p
+}
+invariant OneHolder { all l: Lock | lone l.holder }
+invariant NeverHeld { no holder }
+reachable Handover { all l: Lock | some l.holder }
+reachable TwoLocksOneProc { some p: Proc | #(holder.p) = 2 }
+scope Proc = 2, Lock = 2, steps = 6

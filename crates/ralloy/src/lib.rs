@@ -99,6 +99,9 @@ pub struct SignatureScope {
 pub struct Scope {
     pub signatures: Vec<SignatureScope>,
     pub integer_bitwidth: usize,
+    /// The trace length of a temporal model (plan 0090).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub steps: Option<usize>,
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -107,12 +110,19 @@ pub struct Command {
     pub kind: Kind,
     pub scope: Scope,
 }
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Instance {
     pub signatures: BTreeMap<String, Vec<String>>,
     /// Tuples of each field, owner atom first; binary fields have pairs.
+    /// In a temporal model only the static fields (plan 0090).
     pub fields: BTreeMap<String, Vec<Vec<String>>>,
+    /// A temporal model's trace: the `var` fields in each state.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub trace: Vec<BTreeMap<String, Vec<Vec<String>>>>,
+    /// The state the last one is followed by, closing the lasso.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub back: Option<usize>,
 }
 #[derive(Default, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -167,7 +177,7 @@ impl Model {
         sat: bool,
     ) -> Result<Option<Analysis>, Error> {
         let (metadata, body) = self.get_command(command)?;
-        if !sat::supported(&self.syntax) {
+        if !sat::supported_for(&self.syntax, body) || !sat && self.syntax.temporal_for(body) {
             return Ok(None);
         }
         Ok(Some(if sat {

@@ -50,14 +50,12 @@ impl Value {
     }
 }
 
-/// Whether the SAT backend covers a model: everything but integer division
-/// and remainder (plans 0085, 0086).
-pub(crate) fn supported(module: &Module) -> bool {
+/// Whether the SAT backend covers one command: its body, the facts and the
+/// predicates it may call; other commands do not matter (review of #102).
+pub(crate) fn supported_for(module: &Module, body: &Expr) -> bool {
     fn plain(expression: &Expr, module: &Module) -> bool {
         match expression {
             Expr::Number(_) | Expr::Name(_) => true,
-            // Division by zero is unknown in the enumerator; SAT cannot
-            // reproduce that conditional outcome.
             Expr::Apply(name, arguments) => {
                 (module.predicates.contains_key(name) || !matches!(name.as_str(), "div" | "rem"))
                     && arguments.iter().all(|argument| plain(argument, module))
@@ -70,8 +68,8 @@ pub(crate) fn supported(module: &Module) -> bool {
             }
         }
     }
-    module.facts.iter().all(|fact| plain(fact, module))
-        && module.assertions.values().all(|body| plain(body, module))
+    plain(body, module)
+        && module.facts.iter().all(|fact| plain(fact, module))
         && module.predicates.values().all(|predicate| {
             plain(&predicate.body, module)
                 && predicate
@@ -79,14 +77,21 @@ pub(crate) fn supported(module: &Module) -> bool {
                     .iter()
                     .all(|param| plain(&param.domain, module))
         })
-        && module
-            .commands
-            .iter()
-            .all(|command| plain(&command.body, module))
 }
 
 /// The enumerator's search width: the bits its field slots choose.
 pub(crate) fn width(module: &Module, command: &Command) -> usize {
+    module
+        .fields
+        .iter()
+        .map(|field| field_width(module, command, field))
+        .sum()
+}
+
+/// The tuples one field can hold in one state: its owner's bound times the
+/// bounds of its columns.
+fn field_width(module: &Module, command: &Command, field: &crate::syntax::Field) -> usize {
+    let _ = module;
     let integers = if command.scope.integer_bitwidth == 0 {
         0
     } else {
@@ -102,18 +107,12 @@ pub(crate) fn width(module: &Module, command: &Command) -> usize {
             .find(|scope| scope.name == name)
             .map_or(0, |scope| scope.maximum),
     };
-    module
-        .fields
-        .iter()
-        .map(|field| {
-            maximum(&field.owner)
-                * field
-                    .columns
-                    .iter()
-                    .map(|column| maximum(column))
-                    .product::<usize>()
-        })
-        .sum()
+    maximum(&field.owner)
+        * field
+            .columns
+            .iter()
+            .map(|column| maximum(column))
+            .product::<usize>()
 }
 
 struct Translator<'a> {
@@ -122,7 +121,15 @@ struct Translator<'a> {
     budget: Budget,
     names: Vec<String>,
     signatures: BTreeMap<String, Relation>,
-    fields: BTreeMap<String, Relation>,
+    /// Every field in each state of the trace; static fields share their
+    /// gates, `var` fields have their own (plan 0090). One state for a
+    /// static model.
+    states: Vec<BTreeMap<String, Relation>>,
+    /// The state being translated.
+    time: usize,
+    /// `loops[l]`: the last state is followed by state `l`.
+    loops: Vec<Gate>,
+    temporal: bool,
     universe: Relation,
     /// Each signature's bound and exactness in this command.
     scopes: BTreeMap<String, (usize, bool)>,
@@ -131,7 +138,31 @@ struct Translator<'a> {
 }
 
 pub(crate) fn analyze(module: &Module, command: &Command, body: &Expr, max_work: u64) -> Analysis {
+    // The field tuples of every state are charged before they are built,
+    // so a large candidate space is unknown without being allocated
+    // (review of #102).
+    let steps = command.scope.steps.unwrap_or(1) as u64;
+    let candidates: u64 = module
+        .fields
+        .iter()
+        .map(|field| {
+            let copies = if field.var { steps } else { 1 };
+            (field_width(module, command, field) as u64).saturating_mul(copies)
+        })
+        .fold(0u64, u64::saturating_add);
+    if candidates > max_work {
+        return Analysis {
+            command: command.clone(),
+            status: Status::Unknown,
+            instance: None,
+            stats: Stats {
+                work: max_work,
+                ..Stats::default()
+            },
+        };
+    }
     let mut translator = Translator::new(module, command, max_work);
+    translator.budget.stats.work = candidates;
     let result = translator.solve(command, body);
     let status = match &result {
         Err(()) => Status::Unknown,
@@ -202,7 +233,10 @@ impl<'a> Translator<'a> {
             },
             names,
             signatures,
-            fields: BTreeMap::new(),
+            states: vec![BTreeMap::new(); command.scope.steps.unwrap_or(1)],
+            time: 0,
+            loops: Vec::new(),
+            temporal: command.scope.steps.is_some(),
             universe,
             scopes: command
                 .scope
@@ -219,30 +253,50 @@ impl<'a> Translator<'a> {
                 .iter()
                 .map(|column| translator.signatures[column].clone())
                 .collect();
-            let mut relation = Relation::new(1 + columns.len());
-            for owner_atom in owner.tuples.keys() {
-                let mut space: Vec<Vec<u8>> = vec![vec![]];
-                for column in &columns {
-                    space = space
-                        .into_iter()
-                        .flat_map(|prefix| {
-                            column.tuples.keys().map(move |atom| {
-                                let mut tuple = prefix.clone();
-                                tuple.push(atom[0]);
-                                tuple
+            let copies = if field.var {
+                translator.states.len()
+            } else {
+                1
+            };
+            for copy in 0..copies {
+                let mut relation = Relation::new(1 + columns.len());
+                for owner_atom in owner.tuples.keys() {
+                    let mut space: Vec<Vec<u8>> = vec![vec![]];
+                    for column in &columns {
+                        space = space
+                            .into_iter()
+                            .flat_map(|prefix| {
+                                column.tuples.keys().map(move |atom| {
+                                    let mut tuple = prefix.clone();
+                                    tuple.push(atom[0]);
+                                    tuple
+                                })
                             })
-                        })
-                        .collect();
+                            .collect();
+                    }
+                    for tuple in space {
+                        let mut key = owner_atom.clone();
+                        key.extend(&tuple);
+                        let gate = translator.circuit.input();
+                        relation.tuples.insert(key, gate);
+                    }
                 }
-                for tuple in space {
-                    let mut key = owner_atom.clone();
-                    key.extend(&tuple);
-                    let gate = translator.circuit.input();
-                    relation.tuples.insert(key, gate);
+                if field.var {
+                    translator.states[copy].insert(field.name.clone(), relation);
+                } else {
+                    for state in &mut translator.states {
+                        state.insert(field.name.clone(), relation.clone());
+                    }
                 }
             }
-            translator.fields.insert(field.name.clone(), relation);
         }
+        translator.loops = if translator.temporal {
+            (0..translator.states.len())
+                .map(|_| translator.circuit.input())
+                .collect()
+        } else {
+            vec![TRUE]
+        };
         translator
     }
 
@@ -307,8 +361,16 @@ impl<'a> Translator<'a> {
                 }
             }
         }
-        for field in &self.module.fields {
-            let relation = self.fields[&field.name].clone();
+        // The lasso closes on exactly one state.
+        let loops = self.loops.clone();
+        constraints.push(self.circuit.exactly_one(&loops));
+        // Field declarations hold in every state (plan 0090).
+        let states = self.states.len();
+        for (state, field) in (0..states)
+            .flat_map(|state| self.module.fields.iter().map(move |field| (state, field)))
+            .filter(|(state, field)| *state == 0 || field.var)
+        {
+            let relation = self.states[state][&field.name].clone();
             let owner = self.signatures[&field.owner].clone();
             let columns: Vec<Relation> = field
                 .columns
@@ -451,21 +513,45 @@ impl<'a> Translator<'a> {
                 (signature.name.clone(), atoms)
             })
             .collect();
+        let tuples = |state: usize, field: &str| -> Vec<Vec<String>> {
+            self.states[state][field]
+                .tuples
+                .iter()
+                .filter(|(_, gate)| self.holds(**gate, model))
+                .map(|(tuple, _)| tuple.iter().map(|atom| name(*atom)).collect())
+                .collect()
+        };
         let fields = self
             .module
             .fields
             .iter()
-            .map(|field| {
-                let tuples = self.fields[&field.name]
-                    .tuples
+            .filter(|field| !self.temporal || !field.var)
+            .map(|field| (field.name.clone(), tuples(0, &field.name)))
+            .collect();
+        if !self.temporal {
+            return Instance {
+                signatures,
+                fields,
+                ..Instance::default()
+            };
+        }
+        let trace = (0..self.states.len())
+            .map(|state| {
+                self.module
+                    .fields
                     .iter()
-                    .filter(|(_, gate)| self.holds(**gate, model))
-                    .map(|(tuple, _)| tuple.iter().map(|atom| name(*atom)).collect())
-                    .collect();
-                (field.name.clone(), tuples)
+                    .filter(|field| field.var)
+                    .map(|field| (field.name.clone(), tuples(state, &field.name)))
+                    .collect()
             })
             .collect();
-        Instance { signatures, fields }
+        let back = self.loops.iter().position(|gate| self.holds(*gate, model));
+        Instance {
+            signatures,
+            fields,
+            trace,
+            back,
+        }
     }
 
     fn expression(
@@ -490,7 +576,7 @@ impl<'a> Translator<'a> {
                     Value::Relation(iden)
                 } else if let Some(relation) = self.signatures.get(name) {
                     Value::Relation(relation.clone())
-                } else if let Some(relation) = self.fields.get(name) {
+                } else if let Some(relation) = self.states[self.time].get(name) {
                     Value::Relation(relation.clone())
                 } else {
                     let body = &self.module.predicates[name].body;
@@ -530,6 +616,10 @@ impl<'a> Translator<'a> {
                 }
                 Value::Formula(all)
             }
+            Expr::Unary(
+                operator @ (Unary::Always | Unary::Eventually | Unary::After | Unary::Prime),
+                child,
+            ) => self.temporal(*operator, child, locals)?,
             Expr::Unary(operator, child) => {
                 let value = self.expression(child, locals)?;
                 match operator {
@@ -573,6 +663,7 @@ impl<'a> Translator<'a> {
                         let gates: Vec<Gate> = value.relation().tuples.into_values().collect();
                         Value::Integer(self.circuit.count(&gates, self.bitwidth))
                     }
+                    _ => unreachable!("temporal operators are translated by position"),
                 }
             }
             Expr::Binary(operator, left, right) => {
@@ -723,6 +814,85 @@ impl<'a> Translator<'a> {
             }
         })
     }
+    /// `child` in state `position`.
+    fn at(
+        &mut self,
+        position: usize,
+        child: &Expr,
+        locals: &BTreeMap<String, Relation>,
+    ) -> Result<Value, ()> {
+        let now = self.time;
+        self.time = position;
+        let value = self.expression(child, locals);
+        self.time = now;
+        value
+    }
+    /// A temporal operator in the current state of the lasso (plan 0090).
+    /// The last state is followed by the state its loop variable selects;
+    /// from state i the trace reaches i.. and, through the loop, the states
+    /// from the loop target on.
+    fn temporal(
+        &mut self,
+        operator: Unary,
+        child: &Expr,
+        locals: &BTreeMap<String, Relation>,
+    ) -> Result<Value, ()> {
+        let now = self.time;
+        let last = self.states.len() - 1;
+        match operator {
+            Unary::After | Unary::Prime if now < last => self.at(now + 1, child, locals),
+            Unary::After => {
+                let mut cases = Vec::new();
+                for (position, &chosen) in self.loops.clone().iter().enumerate() {
+                    let value = self.at(position, child, locals)?.formula();
+                    cases.push(self.circuit.and(chosen, value));
+                }
+                Ok(Value::Formula(self.circuit.any(cases)))
+            }
+            Unary::Prime => {
+                let mut output: Option<Relation> = None;
+                for (position, &chosen) in self.loops.clone().iter().enumerate() {
+                    let value = self.at(position, child, locals)?.relation();
+                    let output = output.get_or_insert_with(|| Relation::new(value.arity));
+                    for (tuple, gate) in value.tuples {
+                        self.budget.tick()?;
+                        let selected = self.circuit.and(chosen, gate);
+                        let merged = self.circuit.or(output.get(&tuple), selected);
+                        output.tuples.insert(tuple, merged);
+                    }
+                }
+                Ok(Value::Relation(output.expect("a trace has a state")))
+            }
+            _ => {
+                let always = matches!(operator, Unary::Always);
+                let mut cases = Vec::new();
+                for position in 0..=last {
+                    // A state before `now` is reached when the loop goes
+                    // back to it or earlier.
+                    let reached = if position >= now {
+                        TRUE
+                    } else {
+                        let earlier = self.loops[..=position].to_vec();
+                        self.circuit.any(earlier)
+                    };
+                    if reached == FALSE {
+                        continue;
+                    }
+                    let value = self.at(position, child, locals)?.formula();
+                    cases.push(if always {
+                        self.circuit.implies(reached, value)
+                    } else {
+                        self.circuit.and(reached, value)
+                    });
+                }
+                Ok(Value::Formula(if always {
+                    self.circuit.all(cases)
+                } else {
+                    self.circuit.any(cases)
+                }))
+            }
+        }
+    }
     /// Every binding of the declared names to one atom of its domain's upper
     /// bound, with the membership guard and the body's value.
     #[allow(clippy::too_many_arguments)]
@@ -845,7 +1015,7 @@ impl<'a> Translator<'a> {
 
 #[cfg(test)]
 mod tests {
-    use super::{analyze, supported};
+    use super::{analyze, supported_for};
     use crate::{CheckReason, CheckStatus, Kind, Model, Status, search::enumerate};
 
     /// On every corpus command the backend covers, SAT answers like the
@@ -867,11 +1037,12 @@ mod tests {
         paths.sort();
         for path in paths {
             let model = Model::parse(&std::fs::read_to_string(&path).unwrap()).unwrap();
-            if !supported(&model.syntax) {
-                continue;
-            }
             for index in 0..model.commands().len() {
                 let (command, body) = model.get_command(index).unwrap();
+                // Temporal commands have no enumerator to compare against.
+                if !supported_for(&model.syntax, body) || model.syntax.temporal_for(body) {
+                    continue;
+                }
                 let label = format!("{} {}", path.display(), command.label);
                 let solved = analyze(&model.syntax, command, body, 50_000_000);
                 assert_ne!(solved.status, Status::Unknown, "{label}");

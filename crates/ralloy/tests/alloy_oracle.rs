@@ -90,3 +90,8 @@ fn predicates_agree_with_alloy() {
 fn integers_agree_with_alloy() {
     replay("integers", &[]);
 }
+
+#[test]
+fn temporal_agrees_with_alloy() {
+    replay("temporal", &[]);
+}

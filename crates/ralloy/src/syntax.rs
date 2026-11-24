@@ -32,6 +32,8 @@ pub(crate) struct Field {
     pub mult: Mult,
     /// Multiplicities around the arrow of a two-column field.
     pub arrow: Option<(Mult, Mult)>,
+    /// `var`: the field changes from state to state (plan 0090).
+    pub var: bool,
 }
 #[derive(Clone, Copy)]
 pub(crate) enum Unary {
@@ -45,6 +47,12 @@ pub(crate) enum Unary {
     Reflexive,
     /// `#e`, an integer (plan 0082).
     Cardinality,
+    /// Temporal formulas over a lasso trace and the postfix prime `e'`,
+    /// the value of `e` in the next state (plan 0090).
+    Always,
+    Eventually,
+    After,
+    Prime,
 }
 #[derive(Clone, Copy)]
 pub(crate) enum Binary {
@@ -100,6 +108,8 @@ pub(crate) struct RawScope {
     pub overall: Option<usize>,
     pub entries: Vec<(String, usize, bool)>,
     pub bitwidth: usize,
+    /// `N steps`: the trace length (plan 0090).
+    pub steps: Option<usize>,
 }
 pub(crate) struct RawCommand {
     pub label: String,
@@ -113,6 +123,47 @@ pub(crate) struct Predicate {
     pub params: Vec<Declaration>,
     pub body: Expr,
     pub function: bool,
+}
+/// Whether an expression uses a temporal operator.
+pub(crate) fn uses_temporal(expression: &Expr) -> bool {
+    match expression {
+        Expr::Name(_) | Expr::Number(_) => false,
+        Expr::Apply(_, arguments) => arguments.iter().any(uses_temporal),
+        Expr::Block(expressions) => expressions.iter().any(uses_temporal),
+        Expr::Unary(operator, child) => {
+            matches!(
+                operator,
+                Unary::Always | Unary::Eventually | Unary::After | Unary::Prime
+            ) || uses_temporal(child)
+        }
+        Expr::Binary(_, left, right) => uses_temporal(left) || uses_temporal(right),
+        Expr::Quantified(_, declarations, body) => {
+            declarations
+                .iter()
+                .any(|declaration| uses_temporal(&declaration.domain))
+                || uses_temporal(body)
+        }
+    }
+}
+impl Module {
+    /// Temporal for every command: a var field, or a temporal fact or
+    /// predicate (plan 0090).
+    fn temporal_everywhere(&self) -> bool {
+        self.fields.iter().any(|field| field.var)
+            || self.facts.iter().any(uses_temporal)
+            || self.predicates.values().any(|predicate| {
+                uses_temporal(&predicate.body)
+                    || predicate
+                        .params
+                        .iter()
+                        .any(|param| uses_temporal(&param.domain))
+            })
+    }
+    /// Whether the command with this (resolved) body is temporal; a static
+    /// command beside a temporal one stays static (review of #102).
+    pub fn temporal_for(&self, body: &Expr) -> bool {
+        self.temporal_everywhere() || uses_temporal(body)
+    }
 }
 impl Predicate {
     pub fn arity(&self) -> usize {

@@ -13,6 +13,7 @@ fn graph(edges: &[[&str; 2]]) -> Instance {
                 .map(|edge| edge.map(String::from).to_vec())
                 .collect(),
         )]),
+        ..Instance::default()
     }
 }
 
@@ -63,6 +64,8 @@ fn declaration_multiplicity_and_builtin_integers_are_checked() {
     let empty = Instance {
         signatures: BTreeMap::from([("N".into(), vec![])]),
         fields: BTreeMap::from([("edge".into(), vec![])]),
+
+        ..Instance::default()
     };
     let empty_model = Model::parse("sig N { edge: some N } run { no N } for 0 but 0 Int").unwrap();
     assert_eq!(
@@ -76,6 +79,8 @@ fn declaration_multiplicity_and_builtin_integers_are_checked() {
     let instance = Instance {
         signatures: BTreeMap::from([("N".into(), vec!["opaque".into()])]),
         fields: BTreeMap::from([("value".into(), vec![vec!["opaque".into(), "-8".into()]])]),
+
+        ..Instance::default()
     };
     assert_eq!(
         model.check_instance(0, &instance, 10_000).unwrap().status,
@@ -152,6 +157,8 @@ fn field_domains_and_all_multiplicities_are_enforced() {
             ("B".into(), vec!["b".into()]),
         ]),
         fields: BTreeMap::from([("r".into(), vec![vec!["a".into(), "b".into()]])]),
+
+        ..Instance::default()
     };
     assert_eq!(
         model.check_instance(0, &instance, 10_000).unwrap().reason,

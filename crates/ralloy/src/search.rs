@@ -1,6 +1,6 @@
 use crate::eval::{Budget, Evaluator, World, admits, arrow_admits, bits};
 use crate::syntax::{Expr, Module, Mult, Parent};
-use crate::{Analysis, Command, Error, Instance, Kind, Stats, Status};
+use crate::{Analysis, Command, Error, ErrorKind, Instance, Kind, Stats, Status};
 use std::collections::BTreeMap;
 
 pub(crate) fn analyze(
@@ -9,8 +9,18 @@ pub(crate) fn analyze(
     body: &Expr,
     max_work: u64,
 ) -> Result<Analysis, Error> {
+    // Temporal models are only unrolled by SAT (plan 0090).
+    if module.temporal_for(body) {
+        if !crate::sat::supported_for(module, body) {
+            return Err(Error::new(
+                ErrorKind::Unsupported,
+                "temporal models with div or rem",
+            ));
+        }
+        return Ok(crate::sat::analyze(module, command, body, max_work));
+    }
     // Wide searches of the relational core go to SAT (plan 0085).
-    if crate::sat::supported(module) && crate::sat::width(module, command) > 24 {
+    if crate::sat::supported_for(module, body) && crate::sat::width(module, command) > 24 {
         return Ok(crate::sat::analyze(module, command, body, max_work));
     }
     Ok(enumerate(module, command, body, max_work))
@@ -553,6 +563,9 @@ impl Search<'_> {
             module: self.module,
             world,
             budget: &mut self.budget,
+            trace: std::slice::from_ref(world),
+            time: 0,
+            back: 0,
         };
         for fact in &self.module.facts {
             if !evaluator.formula(fact)? {
@@ -603,7 +616,12 @@ impl Search<'_> {
                 (field.name.clone(), tuples)
             })
             .collect();
-        self.found = Some(Instance { signatures, fields });
+        self.found = Some(Instance {
+            signatures,
+            fields,
+            trace: Vec::new(),
+            back: None,
+        });
         Ok(true)
     }
 }

@@ -2,6 +2,22 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0096: SATの経路で整数の桁あふれを検出し、判定を未確定にする](iterations/0096-quint-overflow.md)は、状態に依存する足し算・引き算・符号反転の桁あふれを`c_overflow`で検出するようにした。桁あふれで偽の反例が出るモデルで、それを検出して未確定にできる。
+
+[0095: QuintのモデルをSATでも有界に検査し、明示状態の経路と比べる](iterations/0095-quint-sat.md)は、Quint IRをAlloy 6へ写し、0044の12件のうち10件でralloyのSATとAlloy 6.2.0がTLCと一致した。5 bitに収まらないSequenceFoldは拒否した。状態の少ないモデルでは、rtlcがSATより2〜4桁速かった。
+
+[0094: roracleの`compare`を語彙の上で記述し、実装を照合する](iterations/0094-oracle-compare.md)は、観測の組から比較の結果を出す規則をモデルにし、81通りで実装を照合した。enumでsigが増えたことで、ralloyの型検査がsig 15個以上で桁あふれするバグが見つかり、直した。
+
+[0093: 語彙の上で実装の振る舞いを書き、実装を照合する](iterations/0093-implementation-behavior.md)は、roracleの比較の集約をrmodelで記述し、比較0〜3件の156通りで実装の結果をモデルのinstanceとしてralloyの`check_instance`で照合した。実装の故障2件は照合が、モデルの故障はclaimの検査が検出した。
+
+[0092: ユビキタス言語と、層の間のdrift検知](iterations/0092-ubiquitous-language.md)は、Pklで用語・rule・claimを書き、モデルの宣言・コードの記号・checkへ結びつけた。決定的な検査はrspec、意味の食い違いはjev-lint docsで見る。予算切れをralloyはunknown、rtlcはboundedと呼ぶ語の違いが見つかった。
+
+[0091: 構造と振る舞いを1つのモデルで書く言語の核](iterations/0091-rmodel-language.md)は、静的な関係・状態・暗黙のframeを持つactionを1つのモデルで書き、AlloyとTLA+へ独立に写した。5モデル・20 checkでralloyのSAT・rtlc・Alloy 6.2.0・TLCが期待と一致した。設定の空間を持つ権限モデルでは、SATが明示状態より2桁以上速かった。
+
+[0090: ralloyの時相をSATで有界に検査する](iterations/0090-ralloy-temporal-bmc.md)は、Alloy 6のvarと`always`・`eventually`・`after`・primeを、長さstepsのlassoとしてSATへ展開した。時相の25 commandがAlloy 6.2.0と一致し、SATのtraceはすべて評価器の検査を通った。
+
+[0089: Quint IRを直接読むfrontend](iterations/0089-quint-ir-frontend.md)は、Quint CLIのJSON IRを標準のTLA+へ写すcrate rquintを作った。Apalacheを経由せずに、0044の12件でTLCと判定・状態数・生成数が一致し、builtinの事実もQuintのsimulatorと同じ判定になった。
+
 [0089: 順序に依存しない集合 fold をrecord・文字列を含む要素でも受理する](iterations/0089-record-fold-order.md)は、TLCのintern IDなしで結果がTLCと同じになると分かる3つの形（要素1個以下、bodyが要素を読まない、累積値への`\union`）だけをrtlcが受理する。固定TLCで22入力を採取し、宣言した9件と新しい対照がログと一致した。今受理される入力の結果・work・IRは変わらない。
 
 [0088: 総当たりとSATのportfolio](iterations/0088-ralloy-portfolio.md)は、総当たりを5000 workで先に走らせてSATへ切り替える方法を実装し、正しさの検査を通した。速度の2回の測定は関係のないプロセスの負荷（8〜22）に埋もれて`hold`になり、変更を戻した。

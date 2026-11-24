@@ -5,12 +5,12 @@ use std::collections::{BTreeMap, BTreeSet};
 #[derive(Clone)]
 enum Type {
     Boolean,
-    Relation(Vec<u16>),
+    Relation(Vec<u32>),
     /// An integer value (plan 0082).
     Integer,
 }
 impl Type {
-    fn columns(self) -> Result<Vec<u16>, Error> {
+    fn columns(self) -> Result<Vec<u32>, Error> {
         match self {
             Self::Relation(columns) => Ok(columns),
             _ => Err(Error::new(ErrorKind::Type, "expected relation")),
@@ -286,12 +286,20 @@ pub(crate) fn validate(module: &Module) -> Result<Vec<Command>, Error> {
         {
             return Err(Error::new(ErrorKind::Resource, "universe exceeds 64 atoms"));
         }
+        // Alloy's default trace bound is 10 steps (plan 0090).
+        let steps = module
+            .temporal_for(body)
+            .then(|| command.scope.steps.unwrap_or(10));
+        if steps.is_some_and(|steps| steps == 0 || steps > 32) {
+            return Err(Error::new(ErrorKind::Resource, "supported steps: 1-32"));
+        }
         commands.push(Command {
             label: command.label.clone(),
             kind: command.kind,
             scope: Scope {
                 signatures,
                 integer_bitwidth: command.scope.bitwidth,
+                steps,
             },
         });
     }
@@ -377,7 +385,7 @@ impl Checker<'_> {
         Ok(kind)
     }
     /// Each parameter name with the column types of its domain.
-    fn parameters(&mut self, name: &str, depth: usize) -> Result<Vec<(String, Vec<u16>)>, Error> {
+    fn parameters(&mut self, name: &str, depth: usize) -> Result<Vec<(String, Vec<u32>)>, Error> {
         let mut parameters = Vec::new();
         for param in &self.module.predicates[name].params {
             let domain = self
@@ -436,6 +444,21 @@ impl Checker<'_> {
                 Ok(Type::Integer)
             }
             Expr::Apply(name, arguments) => {
+                // An argument is evaluated in the calling state; Alloy
+                // substitutes it into the body, so a temporal body would see
+                // a var field's value at another state (review of #102).
+                if crate::syntax::uses_temporal(&self.module.predicates[name].body)
+                    && arguments
+                        .iter()
+                        .any(|argument| reads_var(argument, self.module))
+                {
+                    return Err(Error::new(
+                        ErrorKind::Unsupported,
+                        format!(
+                            "temporal predicate {name} called with an argument that reads a var field"
+                        ),
+                    ));
+                }
                 let kind = self.predicate(name, depth)?;
                 let parameters = self.parameters(name, depth)?;
                 if arguments.len() != parameters.len() {
@@ -477,6 +500,14 @@ impl Checker<'_> {
                         kind.columns()?;
                         Ok(Type::Integer)
                     }
+                    Unary::Always | Unary::Eventually | Unary::After => {
+                        kind.boolean()?;
+                        Ok(Type::Boolean)
+                    }
+                    Unary::Prime => {
+                        kind.clone().columns()?;
+                        Ok(kind)
+                    }
                     Unary::Transpose | Unary::Closure | Unary::Reflexive => {
                         let mut columns = kind.columns()?;
                         if columns.len() != 2 {
@@ -489,7 +520,7 @@ impl Checker<'_> {
                             columns.swap(0, 1);
                         }
                         if matches!(operator, Unary::Reflexive) {
-                            columns.fill(u16::MAX);
+                            columns.fill(u32::MAX);
                         }
                         Ok(Type::Relation(columns))
                     }
@@ -597,6 +628,29 @@ impl Checker<'_> {
                 self.expression(body, &locals, depth + 1)?.boolean()?;
                 Ok(Type::Boolean)
             }
+        }
+    }
+}
+
+/// Whether an expression reads a var field, directly or with a prime.
+fn reads_var(expression: &Expr, module: &Module) -> bool {
+    match expression {
+        Expr::Name(name) => module
+            .fields
+            .iter()
+            .any(|field| field.var && &field.name == name),
+        Expr::Number(_) => false,
+        Expr::Apply(_, arguments) => arguments.iter().any(|argument| reads_var(argument, module)),
+        Expr::Block(expressions) => expressions
+            .iter()
+            .any(|expression| reads_var(expression, module)),
+        Expr::Unary(_, child) => reads_var(child, module),
+        Expr::Binary(_, left, right) => reads_var(left, module) || reads_var(right, module),
+        Expr::Quantified(_, declarations, body) => {
+            declarations
+                .iter()
+                .any(|declaration| reads_var(&declaration.domain, module))
+                || reads_var(body, module)
         }
     }
 }

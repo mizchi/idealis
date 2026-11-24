@@ -71,6 +71,16 @@ jobs:
       - run: cargo fmt --manifest-path crates/ralloy/Cargo.toml -- --check
       - run: cargo clippy --all-targets --locked --manifest-path crates/ralloy/Cargo.toml -- -D warnings
       - run: cargo test --all-targets --locked --manifest-path crates/ralloy/Cargo.toml
+      - run: just rquint-test
+      - run: just rmodel-test
+      - name: Install Pkl 0.31.1
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/pkl" https://github.com/apple/pkl/releases/download/0.31.1/pkl-linux-amd64
+          echo "618f13955d755cafbfe8c9cba1d27635848cd49dbc6abffd398d2751db1231bf  $RUNNER_TEMP/pkl" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/pkl"
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      - run: just rspec-test
+      - run: just spec-check
       - run: cargo fmt --manifest-path crates/rusmt/Cargo.toml -- --check
       - run: cargo clippy --all-targets --locked --manifest-path crates/rusmt/Cargo.toml -- -D warnings
       - run: cargo test --all-targets --locked --manifest-path crates/rusmt/Cargo.toml
