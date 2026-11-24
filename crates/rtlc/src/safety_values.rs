@@ -2,6 +2,7 @@
 mod functions;
 use crate::ir::{Definition, Expression, Scalar};
 use crate::safety_expressions::MembershipSet;
+use crate::safety_fold_order::{OrderIndependence, classify};
 use crate::safety_prepared::PreparedProgram;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::safety_work::WorkBudget;
@@ -833,19 +834,44 @@ impl<'scope> Arena<'scope> {
             _ => Err(CoreError::protocol("Expected a finite set")),
         }
     }
-    pub fn fold_members(&mut self, value: Scalar) -> Result<Vec<Scalar>, CoreError> {
+    pub fn fold_members(
+        &mut self,
+        value: Scalar,
+        fold: &Expression,
+    ) -> Result<FoldMembers, CoreError> {
         let members = self.members(value)?;
-        self.check_fold_order(&members)?;
-        Ok(members)
+        let replacement = self.check_fold_order(&members, fold)?;
+        Ok(FoldMembers {
+            members,
+            replacement,
+        })
     }
-    fn check_fold_order(&mut self, values: &[Scalar]) -> Result<(), CoreError> {
+    fn fold_independence(&self, fold: &Expression) -> OrderIndependence {
+        match self.prepared {
+            Some(prepared) => prepared.fold_independence(fold, self.definitions),
+            None => match fold {
+                Expression::Fold {
+                    accumulator, body, ..
+                } => classify(*accumulator, body, self.definitions),
+                _ => OrderIndependence::Dependent,
+            },
+        }
+    }
+    fn check_fold_order(
+        &mut self,
+        values: &[Scalar],
+        fold: &Expression,
+    ) -> Result<Option<&'static str>, CoreError> {
+        let single = values.len() <= 1;
+        let mut text = None;
+        let mut independence = OrderIndependence::Dependent;
         let mut pending: Vec<_> = values.iter().rev().map(|value| (*value, false)).collect();
         let mut visited = HashSet::new();
         let mut keys = None;
         while let Some((value, is_key)) = pending.pop() {
             if is_key {
                 let Scalar::Int(key) = value else {
-                    return Err(unsupported_fold_order());
+                    return self.refuse_fold_order(single, text, unsupported_fold_order());
                 };
                 keys = Some(match keys {
                     Some((minimum, maximum)) => (key.min(minimum), key.max(maximum)),
@@ -860,31 +886,43 @@ impl<'scope> Arena<'scope> {
                 self.tick()?;
                 match self.cell(value)? {
                     Cell::ModelValue(_) => {
-                        return Err(CoreError::protocol(
-                            "Unsupported TLA input: set fold order for model values is not implemented",
-                        ));
+                        return self.refuse_fold_order(
+                            single,
+                            text,
+                            CoreError::protocol(
+                                "Unsupported TLA input: set fold order for model values is not implemented",
+                            ),
+                        );
                     }
                     Cell::String(_) => {
-                        return Err(CoreError::protocol(
-                            "Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR",
-                        ));
+                        if text.is_none() {
+                            if single {
+                                return Ok(None);
+                            }
+                            independence = self.text_fold_order(fold, STRING_FOLD_ORDER)?;
+                            text = Some(STRING_FOLD_ORDER);
+                        }
                     }
                     Cell::Set(values) => {
                         pending.extend(values.iter().rev().map(|value| (*value, false)));
                     }
                     Cell::Function(entries) => {
-                        if !entries.is_empty()
+                        let record = !entries.is_empty()
                             && entries
                                 .iter()
-                                .all(|entry| matches!(self.cell(entry.0), Ok(Cell::String(_))))
-                        {
-                            return Err(CoreError::protocol(
-                                "Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR",
-                            ));
+                                .all(|entry| matches!(self.cell(entry.0), Ok(Cell::String(_))));
+                        if record && text.is_none() {
+                            if single {
+                                return Ok(None);
+                            }
+                            independence = self.text_fold_order(fold, RECORD_FOLD_ORDER)?;
+                            text = Some(RECORD_FOLD_ORDER);
                         }
                         for (key, value) in entries.iter().rev() {
                             pending.push((value, false));
-                            pending.push((key, true));
+                            if !record {
+                                pending.push((key, true));
+                            }
                         }
                     }
                 }
@@ -893,11 +931,39 @@ impl<'scope> Arena<'scope> {
         if let Some((minimum, maximum)) = keys
             && maximum.abs_diff(minimum) > i32::MAX as u32
         {
-            return Err(CoreError::protocol(
-                "Unsupported TLA input: set fold order for integer function domains spanning more than i32::MAX",
-            ));
+            return self.refuse_fold_order(
+                single,
+                text,
+                CoreError::protocol(
+                    "Unsupported TLA input: set fold order for integer function domains spanning more than i32::MAX",
+                ),
+            );
         }
-        Ok(())
+        Ok((independence == OrderIndependence::Union)
+            .then_some(text)
+            .flatten())
+    }
+    fn text_fold_order(
+        &self,
+        fold: &Expression,
+        message: &'static str,
+    ) -> Result<OrderIndependence, CoreError> {
+        match self.fold_independence(fold) {
+            OrderIndependence::Dependent => Err(CoreError::protocol(message)),
+            independence => Ok(independence),
+        }
+    }
+    fn refuse_fold_order(
+        &self,
+        single: bool,
+        text: Option<&'static str>,
+        error: CoreError,
+    ) -> Result<Option<&'static str>, CoreError> {
+        if single {
+            Ok(None)
+        } else {
+            Err(text.map_or(error, CoreError::protocol))
+        }
     }
     pub fn contains(&self, value: Scalar, set: Scalar) -> Result<bool, CoreError> {
         let Cell::Set(values) = self.cell(set)? else {
@@ -1172,6 +1238,16 @@ impl<'scope> Arena<'scope> {
     }
 }
 
+const STRING_FOLD_ORDER: &str =
+    "Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR";
+const RECORD_FOLD_ORDER: &str = "Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR";
+
+#[derive(Debug)]
+pub(crate) struct FoldMembers {
+    pub members: Vec<Scalar>,
+    pub replacement: Option<&'static str>,
+}
+
 fn unsupported_fold_order() -> CoreError {
     CoreError::protocol("Unsupported TLA input: set fold order for strings, records or functions")
 }
@@ -1216,7 +1292,7 @@ impl ValueRemap {
 #[cfg(test)]
 mod tests {
     use super::{Arena, Cell, ValueHasher};
-    use crate::ir::Scalar;
+    use crate::ir::{Expression, FoldOrder, Scalar};
     use std::hash::{Hash, Hasher};
 
     #[test]
@@ -1230,10 +1306,17 @@ mod tests {
         let second = arena.tuple(vec![Scalar::Int(2), deep]).unwrap();
         let members = arena.set(vec![first, second]).unwrap();
         let before = arena.work;
-        let result = arena.fold_members(members);
+        let fold = Expression::Fold {
+            accumulator: 0,
+            initial: Box::new(Expression::Old),
+            collection: Box::new(Expression::Old),
+            order: FoldOrder::SetMembers,
+            body: Box::new(Expression::Old),
+        };
+        let result = arena.fold_members(members, &fold);
         assert_eq!(arena.work - before, 50);
-        assert_eq!(result.unwrap(), vec![first, second]);
-        let error = arena.fold_members(members).unwrap_err();
+        assert_eq!(result.unwrap().members, vec![first, second]);
+        let error = arena.fold_members(members, &fold).unwrap_err();
         assert_eq!(error.code, "budget");
         assert_eq!(error.message, "Safety work budget exhausted");
         assert_eq!(arena.work, 150);

@@ -544,7 +544,6 @@
       "logSha256": "38e440ae87eb654964964695a90cb863fa40090427da6cdd37bbbb2669e4cb6c",
       "exit": 12,
       "status": "invariant-violation",
-      "unsupported": "Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR",
       "values": [
         {
           "type": "list",
@@ -565,7 +564,6 @@
       "logSha256": "ae45740f40d8fed768c3c77889348cc1e93f3084fd56040c237057865ed62890",
       "exit": 12,
       "status": "invariant-violation",
-      "unsupported": "Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR",
       "values": [
         {
           "type": "list",
@@ -591,7 +589,6 @@
       "logSha256": "24b3dd6685c1144bedaa0cd9bba712118605db9c4b441e087a588440c09257d2",
       "exit": 12,
       "status": "invariant-violation",
-      "unsupported": "Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR",
       "values": [
         {
           "type": "list",
@@ -617,19 +614,21 @@
       "logSha256": "5357621043ee9189767fae02ab0ceaa3ea83c6a054ad9e2c4d4bd7461da879ce",
       "exit": 12,
       "status": "invariant-violation",
-      "unsupported": "Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR",
       "values": [
         {
           "type": "list",
           "value": [
             {
               "type": "record",
-              "value": {
-                "field": {
-                  "type": "int",
-                  "value": "0"
-                }
-              }
+              "value": [
+                [
+                  "field",
+                  {
+                    "type": "int",
+                    "value": "0"
+                  }
+                ]
+              ]
             }
           ]
         }
@@ -643,7 +642,6 @@
       "logSha256": "8f58a95f2ac0cfc2222b8dea2c179e73ce3f68a0771b601966f7aaa4bc5034ee",
       "exit": 12,
       "status": "invariant-violation",
-      "unsupported": "Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR",
       "values": [
         {
           "type": "list",
@@ -653,12 +651,15 @@
               "value": [
                 {
                   "type": "record",
-                  "value": {
-                    "field": {
-                      "type": "int",
-                      "value": "0"
-                    }
-                  }
+                  "value": [
+                    [
+                      "field",
+                      {
+                        "type": "int",
+                        "value": "0"
+                      }
+                    ]
+                  ]
                 }
               ]
             }
@@ -674,7 +675,6 @@
       "logSha256": "0f214a6e09ebc4200e547b7ac932abdd41d9ee6151cfc27cdb7f096ecde3302e",
       "exit": 12,
       "status": "invariant-violation",
-      "unsupported": "Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR",
       "values": [
         {
           "type": "list",
@@ -684,12 +684,15 @@
               "value": [
                 {
                   "type": "record",
-                  "value": {
-                    "field": {
-                      "type": "int",
-                      "value": "0"
-                    }
-                  }
+                  "value": [
+                    [
+                      "field",
+                      {
+                        "type": "int",
+                        "value": "0"
+                      }
+                    ]
+                  ]
                 }
               ]
             }
@@ -1529,20 +1532,22 @@
                   },
                   {
                     "type": "record",
-                    "value": {
-                      "a": {
-                        "type": "int",
-                        "value": "0"
-                      }
-                    }
+                    "value": [
+                      [
+                        "a",
+                        {
+                          "type": "int",
+                          "value": "0"
+                        }
+                      ]
+                    ]
                   }
                 ]
               ]
             }
           ]
         }
-      ],
-      "unsupported": "Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR"
+      ]
     },
     {
       "name": "fold-set-interval-functions",
@@ -1732,8 +1737,7 @@
             }
           ]
         }
-      ],
-      "unsupported": "Unsupported TLA input: set fold order for integer function domains spanning more than i32::MAX"
+      ]
     },
     {
       "name": "fold-set-boolean-function-keys",
@@ -1764,8 +1768,7 @@
             }
           ]
         }
-      ],
-      "unsupported": "Unsupported TLA input: set fold order for strings, records or functions"
+      ]
     },
     {
       "name": "function-initial-choice",
@@ -1874,6 +1877,532 @@
       "logSha256": "d343ba26bc183a555e23f5da943cf78f1a384d355041605eaa9a9882659d8004",
       "exit": 75,
       "status": "error"
+    },
+    {
+      "name": "fold-independent-count-records",
+      "sourceSha256": "bdd76703aecafca6226bd2fd04669bde38dec32372c31fd3edee5470e752c96f",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-independent-count-records.log",
+      "logSha256": "41930e07fe2c30da6d19a1392004dd7b2a0dc1e57114ce901e423851ad4fb224",
+      "exit": 12,
+      "status": "invariant-violation",
+      "values": [
+        {
+          "type": "int",
+          "value": "2"
+        }
+      ]
+    },
+    {
+      "name": "fold-independent-count-strings",
+      "sourceSha256": "b4912063f23c511208488d827246e51c9c1bbae14b1bfa6df065b508acdde60b",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-independent-count-strings.log",
+      "logSha256": "d7cfa864b0d81dde4f8e599263c5bd7803d8eaef8aa7105021055376c0222cb5",
+      "exit": 12,
+      "status": "invariant-violation",
+      "values": [
+        {
+          "type": "int",
+          "value": "6"
+        }
+      ]
+    },
+    {
+      "name": "fold-independent-constant",
+      "sourceSha256": "cd8dc48b1d88886685c4159231df90ca2cd533b6869d4bce3b15d5e865bfa30f",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-independent-constant.log",
+      "logSha256": "f21942ce43057cd194d98e737fcdca18fb4881b444f003a879688d3584f02f6a",
+      "exit": 12,
+      "status": "invariant-violation",
+      "values": [
+        {
+          "type": "list",
+          "value": [
+            {
+              "type": "list",
+              "value": [
+                {
+                  "type": "int",
+                  "value": "0"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fold-independent-overflow",
+      "sourceSha256": "378ce9a6a6fab4a47bdc8f97d9858f4a4deb9ce0ddeee0586a4a91a886794930",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-independent-overflow.log",
+      "logSha256": "e17bf04f8d5345e6e7c8dea50099b7de2cdf638c9463e0bf66e8bcbdd684a7f2",
+      "exit": 75,
+      "status": "error"
+    },
+    {
+      "name": "fold-independent-issue",
+      "sourceSha256": "bc5b6e298c8cdbc2b61e53691ac87b7c3df4f8f75f64b7689aa180418aa8d0bf",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-independent-issue.log",
+      "logSha256": "62c25c2b70607c39b5e49e8ed209d9e5510b009097e4d2b2540254e5192943fb",
+      "exit": 12,
+      "status": "invariant-violation",
+      "values": [
+        {
+          "type": "int",
+          "value": "2"
+        }
+      ]
+    },
+    {
+      "name": "fold-independent-next",
+      "sourceSha256": "3049b4988a494ebe789c2814f61921c2128643b6441ac336d8d86e0bb235741b",
+      "configSha256": "900bf8fdf1b2a1902cac0f9e4cc8e7f1ed1edc055698c1ef9e3aee1b0e375375",
+      "log": "fold-independent-next.log",
+      "logSha256": "d1e5b42fa732199a6d4b54267dac46eba6701ed25215071c816f5487c48f9c73",
+      "exit": 12,
+      "status": "invariant-violation",
+      "values": [
+        {
+          "type": "int",
+          "value": "0"
+        }
+      ],
+      "trace": [
+        [
+          {
+            "type": "int",
+            "value": "0"
+          }
+        ],
+        [
+          {
+            "type": "int",
+            "value": "2"
+          }
+        ],
+        [
+          {
+            "type": "int",
+            "value": "4"
+          }
+        ]
+      ]
+    },
+    {
+      "name": "fold-independent-union-records",
+      "sourceSha256": "c5aaf0d53735727eed9f70e21ba1c9bdad269893ce73d9d365483acf4d3ba569",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-independent-union-records.log",
+      "logSha256": "4a1176a87f9fa0b86a3cf343eea79eb5cec3eeb7f5302d6ea7261f5039014c4b",
+      "exit": 12,
+      "status": "invariant-violation",
+      "values": [
+        {
+          "type": "set",
+          "value": [
+            {
+              "type": "record",
+              "value": [
+                [
+                  "alpha",
+                  {
+                    "type": "int",
+                    "value": "0"
+                  }
+                ]
+              ]
+            },
+            {
+              "type": "record",
+              "value": [
+                [
+                  "zeta",
+                  {
+                    "type": "int",
+                    "value": "0"
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fold-independent-union-strings",
+      "sourceSha256": "62da503817145151924c27020680a2e91ed8be60e2488f5f0d9dd03d235b2935",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-independent-union-strings.log",
+      "logSha256": "ffc59d3552d76368d445aea03d54331c7e6c28c6c9d09cc40981c877451bef4f",
+      "exit": 12,
+      "status": "invariant-violation",
+      "values": [
+        {
+          "type": "set",
+          "value": [
+            {
+              "type": "string",
+              "value": ""
+            },
+            {
+              "type": "string",
+              "value": "A"
+            },
+            {
+              "type": "string",
+              "value": "B"
+            },
+            {
+              "type": "string",
+              "value": "a"
+            },
+            {
+              "type": "string",
+              "value": "aa"
+            },
+            {
+              "type": "string",
+              "value": "b"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fold-independent-union-left",
+      "sourceSha256": "b848de670b28f9c0d189d56bbbf2596c0f1662a28ffb88f1b70d5b414f93dbbb",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-independent-union-left.log",
+      "logSha256": "6c2552b00f1af781ab05172531f7ef9ef644a21afba2ff46036b18a89cd7304e",
+      "exit": 12,
+      "status": "invariant-violation",
+      "values": [
+        {
+          "type": "set",
+          "value": [
+            {
+              "type": "list",
+              "value": [
+                {
+                  "type": "list",
+                  "value": [
+                    {
+                      "type": "string",
+                      "value": "a"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "value": [
+                {
+                  "type": "list",
+                  "value": [
+                    {
+                      "type": "string",
+                      "value": "b"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fold-independent-union-project",
+      "sourceSha256": "4b641d5a5b136c2ff180d08549848ee3f77224e843cfac609ee95de818231ae5",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-independent-union-project.log",
+      "logSha256": "05a36002128b89a8b8e40f6d555f096baa3d05887eb622fc2aa2f7674378f297",
+      "exit": 12,
+      "status": "invariant-violation",
+      "values": [
+        {
+          "type": "set",
+          "value": [
+            {
+              "type": "int",
+              "value": "1"
+            },
+            {
+              "type": "int",
+              "value": "2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fold-independent-union-if",
+      "sourceSha256": "10ef816f3afa54f5d2de43e7765e395919ebc19d613d9db1038a01884a2eac46",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-independent-union-if.log",
+      "logSha256": "d3b60ca628965ed04ca43d9c1f32aecf95ab86a5b948ea5afe18812ce915213b",
+      "exit": 12,
+      "status": "invariant-violation",
+      "values": [
+        {
+          "type": "set",
+          "value": [
+            {
+              "type": "record",
+              "value": [
+                [
+                  "a",
+                  {
+                    "type": "int",
+                    "value": "2"
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fold-independent-union-variants",
+      "sourceSha256": "1f174a360b6810ed87b6c29f38dc9fcd335bbde7511e1b49029a764ac6e31e2c",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-independent-union-variants.log",
+      "logSha256": "c8d98ed4cf70968534a92c1fd4c73c4c8a29eb7865cb2b3cbd573e1e08924154",
+      "exit": 12,
+      "status": "invariant-violation",
+      "values": [
+        {
+          "type": "set",
+          "value": [
+            {
+              "type": "int",
+              "value": "1"
+            },
+            {
+              "type": "int",
+              "value": "2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fold-independent-union-let",
+      "sourceSha256": "4e9ad9d4371638f0239372107dd43ffc683413875c889ae9c88c258e78b9b32e",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-independent-union-let.log",
+      "logSha256": "c62a639c71bad6ff0eb42efcb0747c2f8040d8077a47267932ec26837159522e",
+      "exit": 12,
+      "status": "invariant-violation",
+      "values": [
+        {
+          "type": "set",
+          "value": [
+            {
+              "type": "string",
+              "value": "a"
+            },
+            {
+              "type": "string",
+              "value": "b"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fold-independent-union-nested",
+      "sourceSha256": "1b864b9fbd81a325a930158cabba884dde325059c8f5cc129621620ee60e55af",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-independent-union-nested.log",
+      "logSha256": "c1ba45ae2535141683bb630a8bddab27027672180675f5711d4d3a2ec7c97621",
+      "exit": 12,
+      "status": "invariant-violation",
+      "values": [
+        {
+          "type": "set",
+          "value": [
+            {
+              "type": "int",
+              "value": "1"
+            },
+            {
+              "type": "int",
+              "value": "2"
+            },
+            {
+              "type": "int",
+              "value": "3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fold-singleton-last",
+      "sourceSha256": "aa2df99cd373c438bc89563f2a2c9c15eea3b417658041f79732008bebfbef27",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-singleton-last.log",
+      "logSha256": "32b3816dfa3c88bd13cf7285b6878c5e04e694363a2a5d6b18e7e2136c8cf8fa",
+      "exit": 12,
+      "status": "invariant-violation",
+      "values": [
+        {
+          "type": "record",
+          "value": [
+            [
+              "zeta",
+              {
+                "type": "int",
+                "value": "0"
+              }
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fold-singleton-error",
+      "sourceSha256": "738f13f83069c1824362974d2ef2ab50817377f42927acd5d731cec6f7402fc1",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-singleton-error.log",
+      "logSha256": "1dd623099925d09f3995b5dd5bdc2b14f858d6fb757dd1565750aff5b9b0fd57",
+      "exit": 75,
+      "status": "error"
+    },
+    {
+      "name": "fold-independent-union-error",
+      "sourceSha256": "31d39ea7e4921cef7b8ba893e758e5cadaa8fd91002682ce9367c7d5b5ef9185",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-independent-union-error.log",
+      "logSha256": "7031261525d153371ef4bfe29c58ebb82d53a25d0d1806908d73c4539054603d",
+      "exit": 75,
+      "status": "error",
+      "unsupported": "Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR"
+    },
+    {
+      "name": "fold-independent-union-nonset",
+      "sourceSha256": "3a3249af9d8e0ee3ab5af3a9ac1d7214901e5e86c0758472f7d6040e35ff9648",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-independent-union-nonset.log",
+      "logSha256": "a02bcb19cdfc9ff67d9d7fa4c131b44031aa64509d927cba85295fc481807ca7",
+      "exit": 75,
+      "status": "error",
+      "unsupported": "Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR"
+    },
+    {
+      "name": "fold-dependent-last",
+      "sourceSha256": "521c84f8c3df2787023b938ebe3e4e372de0c1b7d53b03ed9ee3b8c0d30e1ea5",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-dependent-last.log",
+      "logSha256": "a64ec640c6be5bd5aab6e4931f021253b2bde209c467ab1afb38e1f5193e2dcc",
+      "exit": 12,
+      "status": "invariant-violation",
+      "values": [
+        {
+          "type": "record",
+          "value": [
+            [
+              "alpha",
+              {
+                "type": "int",
+                "value": "0"
+              }
+            ]
+          ]
+        }
+      ],
+      "unsupported": "Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR"
+    },
+    {
+      "name": "fold-dependent-reads-acc",
+      "sourceSha256": "28884003f197d68b6843e97009b036c32500c2bbad1c206eac2a709478e29ce9",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-dependent-reads-acc.log",
+      "logSha256": "0da1f2bea3957c06dcb53f5d6d7e345351c51ff9ff582b7954b80c91e12c0f9a",
+      "exit": 12,
+      "status": "invariant-violation",
+      "values": [
+        {
+          "type": "set",
+          "value": [
+            {
+              "type": "list",
+              "value": [
+                {
+                  "type": "string",
+                  "value": "a"
+                },
+                {
+                  "type": "int",
+                  "value": "0"
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "value": [
+                {
+                  "type": "string",
+                  "value": "b"
+                },
+                {
+                  "type": "int",
+                  "value": "1"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "unsupported": "Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR"
+    },
+    {
+      "name": "fold-dependent-if-leaf",
+      "sourceSha256": "1dba0f3a36f531425c44dc9abe0d94549301727ff38a80a18cd2f5aa77006974",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-dependent-if-leaf.log",
+      "logSha256": "9a9f88d675d2caa37d85f3ca6645cdf397ac4b14b8d78c534f625a7a87da8e38",
+      "exit": 12,
+      "status": "invariant-violation",
+      "values": [
+        {
+          "type": "set",
+          "value": [
+            {
+              "type": "string",
+              "value": "a"
+            },
+            {
+              "type": "string",
+              "value": "b"
+            }
+          ]
+        }
+      ],
+      "unsupported": "Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR"
+    },
+    {
+      "name": "fold-dependent-sum",
+      "sourceSha256": "306a012b5a8f6a915c1bb3b62478cd3e4634a5eb8426583041f1df7c0b591aa7",
+      "configSha256": "58de36f4ceaca3bc03812614aa7610f31b6c29dc06d6ebaef235f09762f255fe",
+      "log": "fold-dependent-sum.log",
+      "logSha256": "3ae0874c762553d6e21f716926fea461e71668642b89bb9666c295c4e3b3b706",
+      "exit": 12,
+      "status": "invariant-violation",
+      "values": [
+        {
+          "type": "int",
+          "value": "3"
+        }
+      ],
+      "unsupported": "Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR"
     }
   ]
 }

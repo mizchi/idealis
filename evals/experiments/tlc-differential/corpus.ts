@@ -267,6 +267,124 @@ export const foldOrderControls = (): readonly Input[] => [
   ).map(([name, expression]) => foldValue(name, expression)),
   foldValue("set-mixed-kinds", 'ApaFoldSet(Op, <<>>, {TRUE, 0, "a"})'),
 ];
+const independentSet = '{"b", "a", "A", "aa", "B", ""}';
+const zetaAlpha = "{[zeta |-> 0], [alpha |-> 0]}";
+const fieldRecords = "{[a |-> 2], [a |-> 1, b |-> 0], [a |-> 1]}";
+export const foldIndependentControls = (): readonly Input[] => [
+  foldValue(
+    "independent-count-records",
+    `ApaFoldSet(Op, 0, ${zetaAlpha})`,
+    "Op(a, b) == a + 1",
+  ),
+  foldValue(
+    "independent-count-strings",
+    `ApaFoldSet(Op, 0, ${independentSet})`,
+    "Op(a, b) == a + 1",
+  ),
+  foldValue(
+    "independent-constant",
+    'ApaFoldSet(Op, 0, {"b", "a"})',
+    "Op(a, b) == <<a>>",
+  ),
+  foldValue(
+    "independent-overflow",
+    `ApaFoldSet(Op, 2147483646, ${zetaAlpha})`,
+    "Op(a, b) == a + 1",
+  ),
+  {
+    ...foldValue("independent-issue", "ApaFoldSet(Step, 0, Rs)", ""),
+    source:
+      "---- MODULE Differential ----\nEXTENDS Integers, Apalache\n\nRs == {[zeta |-> 0], [alpha |-> 0]}\n\nStep(acc, r) == acc + 1\n\nVARIABLE x\n\nInit == x = ApaFoldSet(Step, 0, Rs)\nNext == x' = x\n\nProp == x # 2\n====",
+  },
+  {
+    name: "fold-independent-next",
+    family: "graph",
+    goldenFrontendParity: true,
+    source:
+      "---- MODULE Differential ----\nEXTENDS Integers, Apalache\nVARIABLE x\nOp(a, b) == a + 1\nInit == x = 0\nNext == IF x < 4 THEN x' = ApaFoldSet(Op, x, {[a |-> 1], [b |-> 2]}) ELSE UNCHANGED x\nSafe == x # 4\n====",
+    config: "INIT Init\nNEXT Next\nINVARIANT Safe",
+  },
+  foldValue(
+    "independent-union-records",
+    `ApaFoldSet(Op, {}, ${zetaAlpha})`,
+    "Op(a, b) == a \\union {b}",
+  ),
+  foldValue(
+    "independent-union-strings",
+    `ApaFoldSet(Op, {}, ${independentSet})`,
+    "Op(a, b) == a \\union {b}",
+  ),
+  foldValue(
+    "independent-union-left",
+    'ApaFoldSet(Op, {}, {<<"b">>, <<"a">>})',
+    "Op(a, b) == {<<b>>} \\cup a",
+  ),
+  foldValue(
+    "independent-union-project",
+    `ApaFoldSet(Op, {}, ${fieldRecords})`,
+    "Op(a, b) == a \\union {b.a}",
+  ),
+  foldValue(
+    "independent-union-if",
+    `ApaFoldSet(Op, {}, ${fieldRecords})`,
+    "Op(a, b) == IF b.a > 1 THEN a \\union {b} ELSE a",
+  ),
+  foldValue(
+    "independent-union-variants",
+    'ApaFoldSet(Op, {}, {[tag |-> "B", value |-> 1], [tag |-> "A", value |-> 2]})',
+    "Op(a, b) == a \\union {b.value}",
+  ),
+  foldValue(
+    "independent-union-let",
+    'LET Op(a, b) == a \\union {b} IN ApaFoldSet(Op, {}, {"b", "a"})',
+    "",
+  ),
+  foldValue(
+    "independent-union-nested",
+    "ApaFoldSet(Op, {}, {[w |-> 2], [w |-> 3]})",
+    "Inner(xs, y) == xs \\union {y.v}\nOp(a, b) == a \\union ApaFoldSet(Inner, {}, {[v |-> 1], [v |-> b.w]})",
+  ),
+  foldValue(
+    "singleton-last",
+    "ApaFoldSet(Op, 0, {[zeta |-> 0]})",
+    "Op(a, b) == b",
+  ),
+  foldValue(
+    "singleton-error",
+    'ApaFoldSet(Op, 0, {"only"})',
+    "Op(a, b) == Head(<<>>)",
+  ),
+  foldValue(
+    "independent-union-error",
+    "ApaFoldSet(Op, {}, {[a |-> 1], [b |-> 2]})",
+    "Op(a, b) == a \\union {b.a}",
+  ),
+  foldValue(
+    "independent-union-nonset",
+    'ApaFoldSet(Op, 0, {"b", "a"})',
+    "Op(a, b) == a \\union {b}",
+  ),
+  foldValue(
+    "dependent-last",
+    `ApaFoldSet(Op, 0, ${zetaAlpha})`,
+    "Op(a, b) == b",
+  ),
+  foldValue(
+    "dependent-reads-acc",
+    'ApaFoldSet(Op, {}, {"b", "a"})',
+    "Op(a, b) == a \\union {<<b, Cardinality(a)>>}",
+  ),
+  foldValue(
+    "dependent-if-leaf",
+    'ApaFoldSet(Op, {}, {"b", "a"})',
+    'Op(a, b) == IF b = "a" THEN {b} ELSE a \\union {b}',
+  ),
+  foldValue(
+    "dependent-sum",
+    "ApaFoldSet(Op, 0, {[v |-> 1], [v |-> 2]})",
+    "Op(a, b) == a + b.v",
+  ),
+];
 export const foldRejections = (): readonly Input[] => [
   ...(
     [

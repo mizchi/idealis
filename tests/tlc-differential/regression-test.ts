@@ -5,6 +5,7 @@ import { bounds } from "../../evals/experiments/collections-temporal/cases.js";
 import { traceInput } from "../../evals/experiments/collections-temporal/tlc.js";
 import {
   boundaries,
+  foldIndependentControls,
   foldOrderControls,
   foldRejections,
 } from "../../evals/experiments/tlc-differential/corpus.js";
@@ -40,6 +41,7 @@ interface Golden {
     logSha256: string;
     status: string;
     values?: readonly PortableValue[];
+    trace?: readonly (readonly PortableValue[])[];
     states?: number;
     generated?: number;
     unsupported?: string;
@@ -59,7 +61,11 @@ const golden = (
   )
 ).flat();
 const core = await createCiWasm();
-for (const input of [...boundaries(), ...foldOrderControls()])
+for (const input of [
+  ...boundaries(),
+  ...foldOrderControls(),
+  ...foldIndependentControls(),
+])
   test(`TLC regression: ${input.name}`, async () => {
     if (input.expectedRejection) {
       assert.throws(() => compileTlaSafety(input), /TLC 1.7.4 string literal/);
@@ -125,8 +131,18 @@ for (const input of [...boundaries(), ...foldOrderControls()])
       assert.ok(error?.message.includes(fixture.unsupported), error?.message);
       return;
     }
+    if (fixture?.status === "error")
+      assert.ok(
+        error && !error.message.includes("set fold order"),
+        `${input.name}: ${error?.message}`,
+      );
     if (fixture?.values)
       assert.deepEqual(result?.violation?.trace[0]?.values, fixture.values);
+    if (fixture?.trace)
+      assert.deepEqual(
+        result?.violation?.trace.map((state) => state.values),
+        fixture.trace,
+      );
     if (fixture?.states !== undefined)
       assert.equal(result?.states, fixture.states);
     if (fixture?.generated !== undefined)
@@ -146,6 +162,70 @@ for (const input of [...boundaries(), ...foldOrderControls()])
       assert.equal(witness.status, "success", input.name);
       assert.equal(witness.distinctStates, result.violation.trace.length);
     }
+  });
+
+const singletonInputs = [
+  "fold-unsupported-string-direct",
+  "fold-unsupported-string-tuple",
+  "fold-unsupported-string-set",
+  "fold-unsupported-record-direct",
+  "fold-unsupported-record-tuple",
+  "fold-unsupported-record-set",
+  "fold-set-functions-with-records",
+  "fold-set-wide-single-function",
+  "fold-set-boolean-function-keys",
+];
+for (const input of [
+  ...foldIndependentControls(),
+  ...foldOrderControls().filter((entry) =>
+    singletonInputs.includes(entry.name),
+  ),
+])
+  test(`fold independence agrees across frontends, IR versions and checkers: ${input.name}`, async () => {
+    const outcome = async (irVersion: 1 | 2) => {
+      const versioned = { ...input, irVersion };
+      const program = compileTlaSource(core, versioned);
+      assert.deepEqual(program, compileTlaSafety(versioned));
+      let wasm: unknown;
+      try {
+        wasm = { kind: "safety", result: checkSafety(core, program, bounds) };
+      } catch (failure) {
+        assert.ok(failure instanceof PortableCoreError);
+        wasm = { kind: "error", code: failure.code, message: failure.message };
+      }
+      const native = startCiNative();
+      try {
+        const response = await native.request({
+          version: 1,
+          request: { kind: "check-safety", program, bounds },
+        });
+        assert.deepEqual(response, wasm);
+      } finally {
+        await native.close();
+      }
+      return wasm;
+    };
+    const fixture = golden.find((entry) => entry.name === input.name);
+    assert.ok(fixture, input.name);
+    const first = await outcome(1);
+    const second = await outcome(2);
+    assert.ok(isRecord(first) && isRecord(second));
+    if (first.kind === "error") {
+      assert.equal(first.code, "protocol");
+      assert.equal(second.kind, "error");
+      assert.equal(second.message, first.message);
+      assert.equal(
+        fixture.status === "error" || fixture.unsupported !== undefined,
+        true,
+      );
+      return;
+    }
+    assert.equal(second.kind, "safety");
+    assert.ok(isRecord(first.result) && isRecord(second.result));
+    assert.equal(first.result.status, second.result.status);
+    assert.equal(first.result.states, second.result.states);
+    assert.deepEqual(first.result.violation, second.result.violation);
+    assert.equal(fixture.unsupported, undefined);
   });
 
 test("unmatched CASE IR requires a nonempty location and exact fields", () => {

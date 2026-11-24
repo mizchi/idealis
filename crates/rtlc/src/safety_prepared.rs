@@ -1,8 +1,10 @@
-use crate::ir::{Branch, Expression, SafetyProgram, TemporalFormula};
+use crate::ir::{Branch, Definition, Expression, FoldOrder, SafetyProgram, TemporalFormula};
 use crate::safety_expressions::register_branch_memberships;
 use crate::safety_expressions::{BindRun, plan_bind_runs};
+use crate::safety_fold_order::{OrderIndependence, classify};
 use std::collections::HashMap;
 use std::hash::{BuildHasherDefault, Hasher};
+use std::sync::OnceLock;
 
 #[derive(Default)]
 struct AddressHasher(u64);
@@ -32,6 +34,7 @@ impl Hasher for AddressHasher {
 pub(crate) struct PreparedProgram {
     slots: HashMap<usize, usize, BuildHasherDefault<AddressHasher>>,
     bind_runs: HashMap<usize, Vec<Option<BindRun>>, BuildHasherDefault<AddressHasher>>,
+    fold_orders: HashMap<usize, OnceLock<OrderIndependence>, BuildHasherDefault<AddressHasher>>,
 }
 
 impl PreparedProgram {
@@ -120,8 +123,19 @@ impl PreparedProgram {
         let mut prepared = Self {
             slots: HashMap::default(),
             bind_runs: HashMap::default(),
+            fold_orders: HashMap::default(),
         };
         while let Some(expression) = roots.pop() {
+            if let Expression::Fold {
+                order: FoldOrder::SetMembers,
+                ..
+            } = expression
+            {
+                prepared
+                    .fold_orders
+                    .entry(std::ptr::from_ref(expression) as usize)
+                    .or_default();
+            }
             if let Expression::Data { .. } = expression {
                 let address = std::ptr::from_ref(expression) as usize;
                 let slot = prepared.slots.len();
@@ -165,6 +179,26 @@ impl PreparedProgram {
             .as_ref()
     }
 
+    pub fn fold_independence(
+        &self,
+        expression: &Expression,
+        definitions: &[Definition],
+    ) -> OrderIndependence {
+        let Expression::Fold {
+            accumulator, body, ..
+        } = expression
+        else {
+            return OrderIndependence::Dependent;
+        };
+        match self
+            .fold_orders
+            .get(&(std::ptr::from_ref(expression) as usize))
+        {
+            Some(class) => *class.get_or_init(|| classify(*accumulator, body, definitions)),
+            None => classify(*accumulator, body, definitions),
+        }
+    }
+
     pub fn slot(&self, expression: &Expression) -> Option<usize> {
         self.slots
             .get(&(std::ptr::from_ref(expression) as usize))
@@ -179,7 +213,48 @@ impl PreparedProgram {
 #[cfg(test)]
 mod tests {
     use super::PreparedProgram;
-    use crate::ir::{SafetyProgram, Step};
+    use crate::ir::{Expression, SafetyProgram, Step};
+    use crate::safety_fold_order::OrderIndependence;
+    use serde_json::json;
+
+    fn fold_program() -> SafetyProgram {
+        let literal = |value: &str| json!({"op":"literal","value":{"type":"int","value":value}});
+        let fold = json!({"op":"fold","accumulator":0,"initial":{"op":"set","values":[]},"collection":{"op":"set","values":[literal("1")]},"order":"set-members","body":{"op":"cup","left":{"op":"bound","slot":0},"right":{"op":"set","values":[{"op":"bound","slot":1}]}}});
+        serde_json::from_value(json!({
+            "format":"modelt.safety-program","version":1,"name":"Fold","variables":["x"],
+            "initial":[{"name":"Init","steps":[{"kind":"assign","slot":0,"value":literal("0")}]}],
+            "next":[{"name":"Next","steps":[{"kind":"assign","slot":0,"value":literal("0")}]}],
+            "invariants":[{"name":"Safe","expression":{"op":"eq","left":fold,"right":{"op":"set","values":[literal("1")]}}}],
+            "assumptions":[],"checkDeadlock":false
+        }))
+        .unwrap()
+    }
+
+    #[test]
+    fn fold_order_classes_are_computed_on_first_use_and_only_once() {
+        let program = fold_program();
+        let prepared = PreparedProgram::new(&program);
+        let fold = match &program.invariants[0].expression {
+            Expression::Eq { left, .. } => left.as_ref(),
+            _ => unreachable!(),
+        };
+        let cell = prepared
+            .fold_orders
+            .get(&(std::ptr::from_ref(fold) as usize))
+            .unwrap();
+        assert!(cell.get().is_none());
+        assert_eq!(
+            prepared.fold_independence(fold, &[]),
+            OrderIndependence::Union
+        );
+        assert_eq!(cell.get(), Some(&OrderIndependence::Union));
+        let copy = fold.clone();
+        assert_eq!(
+            prepared.fold_independence(&copy, &[]),
+            OrderIndependence::Union
+        );
+        assert_eq!(prepared.fold_orders.len(), 1);
+    }
 
     #[test]
     fn bind_plans_are_found_only_for_the_program_own_branches() {

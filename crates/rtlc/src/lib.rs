@@ -10,6 +10,7 @@ mod safety;
 mod safety_definition_tests;
 mod safety_definitions;
 mod safety_expressions;
+mod safety_fold_order;
 mod safety_partial_order;
 mod safety_prepared;
 mod safety_symmetry;

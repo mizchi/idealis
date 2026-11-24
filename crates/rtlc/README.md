@@ -12,7 +12,7 @@
 
 select-seq / sort-seqのIRは、1引数の選択predicateと2引数の比較bodyを束縛slotで評価する。sortはTLCの挿入sortと同じ順序で比較し、常に真・偽の比較も扱う。反復・比較はwork予算を消費する。assertはconditionとmessageを順に評価し、TRUE以外ならmessage付きの評価エラーを返す。対応するTLA+ソースの制約はrtla-compilerが定める。
 
-model valueのwire表現は`{"type":"model-value","value":"p_1"}`。文字列の`"p_1"`とは異なる値で、反例にもtagを保持する。型名はTLCと同じく名前の先頭1文字とunderscoreで表す。集合foldでmodel valueの順序を使う入力は拒否する。
+model valueのwire表現は`{"type":"model-value","value":"p_1"}`。文字列の`"p_1"`とは異なる値で、反例にもtagを保持する。型名はTLCと同じく名前の先頭1文字とunderscoreで表す。集合foldでmodel valueの順序を使う入力（要素が2個以上）は拒否する。
 
 時間論理の展開では、256式以下のpoolの訪問済み式を固定長bit集合で保持する。分岐のcloneでHashSetのhash・確保を繰り返す費用を減らす。257式以上のpoolはHashSetを使い、分岐ごとに全pool分のbitmapを確保しない。式の展開順とworkのtickは同じ。
 

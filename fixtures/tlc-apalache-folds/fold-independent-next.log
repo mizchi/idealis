@@ -1,0 +1,30 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 100 and seed 820727546543959012 with 1 worker on <cores> cores with 256MB heap and 64MB offheap memory [pid: <pid>] (<host>, MSBDiskFPSet, DiskStateQueue).
+Parsing file <capture>/Differential.tla
+Parsing file <tlc-tmp>/Integers.tla
+Parsing file <capture>/Apalache.tla
+Parsing file <tlc-tmp>/Naturals.tla
+Parsing file <tlc-tmp>/Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module Apalache
+Semantic processing of module Differential
+Starting... (<time>)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at <time>.
+Error: Invariant Safe is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+x = 0
+
+State 2: <Next line 6, col 9 to line 6, col 85 of module Differential>
+x = 2
+
+State 3: <Next line 6, col 9 to line 6, col 85 of module Differential>
+x = 4
+
+3 states generated, 3 distinct states found, 0 states left on queue.
+The depth of the complete state graph search is 3.
+The average outdegree of the complete state graph is 1 (minimum is 1, the maximum 1 and the 95th percentile is 1).
+Finished in 00s at (<time>)
