@@ -218,11 +218,15 @@ struct Parser {
     position: usize,
     /// Nesting of formulas and expressions being parsed (review of #102).
     depth: usize,
+    /// Formulas and expressions parsed in the current declaration (issue
+    /// #106): bounds the tree the checker and Drop recurse over.
+    nodes: usize,
 }
 /// Nesting and operator chains are bounded, so neither the parser nor the
 /// checks after it can exhaust the stack.
 const MAX_DEPTH: usize = 64;
 const MAX_CHAIN: usize = 256;
+const MAX_NODES: usize = 4096;
 impl Parser {
     fn peek(&self) -> &str {
         self.tokens.get(self.position).map_or("", String::as_str)
@@ -301,6 +305,8 @@ impl Parser {
         };
         let mut scoped = false;
         while !self.peek().is_empty() {
+            // The node bound applies to each declaration (issue #106).
+            self.nodes = 0;
             match self.peek() {
                 "enum" => {
                     self.position += 1;
@@ -459,6 +465,12 @@ impl Parser {
 
     /// implies (right) < or < and < not < atoms.
     fn enter(&mut self) -> Result<(), Error> {
+        self.nodes += 1;
+        if self.nodes > MAX_NODES {
+            return Err(Error::syntax(format!(
+                "a declaration with more than {MAX_NODES} nodes"
+            )));
+        }
         self.depth += 1;
         if self.depth > MAX_DEPTH {
             return Err(Error::syntax(format!("nesting deeper than {MAX_DEPTH}")));
@@ -776,6 +788,7 @@ pub(crate) fn parse(source: &str) -> Result<Model, Error> {
         tokens: tokens(source)?,
         position: 0,
         depth: 0,
+        nodes: 0,
     };
     let model = parser.model()?;
     check(&model)?;
