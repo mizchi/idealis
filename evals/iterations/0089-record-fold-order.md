@@ -190,3 +190,9 @@ CodeRabbit の指摘（[#101](https://github.com/mizchi/idealis/pull/101)）を�
 - **同 README の S の記述（Minor）: 有効。** 文字列・record・非整数 key・model value・整数 key の幅の制限を「要素が 2 個以上の集合では」に限り、R0・R1 の例外を書いた。S は要素の種類を問わず適用すると書いた。
 - **`fold-independent-overflow` の期待（Minor）: 有効。** 差分テストの `bodyErrors` に、rtlc の `Safety integer overflow` と、採取した TLC のログの `Overflow when computing 2147483647+1` を足した。rtlc と TLC の文言は違うので、共有の fixture の欄には入れず、`fold-singleton-error` と同じ表に別々に置いた。
 - **IR の版の間で `code` を比べる（Minor）: 有効。** v1 と v2 の拒否の比較に `second.code == first.code` を足した。
+
+## レビューへの対応（8 回目）
+
+- **関数の domain が長さの近道で確認から漏れる（Major）: 有効。** 再現: `F = [k \in {r, s} |-> 0]`（`r = [a |-> 0, b |-> FALSE]`、`s = [a |-> 1, b |-> 0]`）と空の関数を足す R1 の fold は受理された。TLC は関数を正規化する時に domain の要素どうしを比べ、`b` が先の順で `FALSE` と `0` でエラーになる（`FcnRcdValue.java` の normalize）。結果をたどる確認が、関数の key どうしの組を比べていなかった。直し方: たどる時に、関数の key の全ての組を比べる。全て同じ Int・Bool・文字列の列は比較がエラーにならないので省く（幅の広い列・record で 2 乗の費用が出ないように）。回帰 `a_function_domain_is_checked_for_mixed_kinds_whatever_the_other_member`（v1・v2。修正前は受理で失敗。比べられる domain の対照は受理のまま）。
+- **関数の entry の走査が予算を使う前に `pending` を伸ばす（Minor）: 有効。** 集合の要素数・関数の entry 数を、`pending` を伸ばす前に予算に使う。`matching_record_fields_by_name_charges_the_budget_in_proportion_to_the_fields` の固定値は 3,779・7,479 から 4,587・9,087 になった。
+- 測定: [0089h-paths](../runs/0089h-paths/result.json)（status・文言は `0089g-paths` と同じ、work は減った入力なし）、[0089h-new-path](../runs/0089h-new-path/result.json)（整数の fold の work は同じ、record は v1 の状態数 1 で 12,679 から 12,807。record の中央値時間は 5〜8% 高く、記録のみで判定に使わない）。

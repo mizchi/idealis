@@ -885,6 +885,12 @@ impl<'scope> Arena<'scope> {
                 continue;
             }
             self.tick()?;
+            let width = match self.cell(value) {
+                Ok(Cell::Set(members)) => members.len(),
+                Ok(Cell::Function(entries)) => entries.len(),
+                _ => continue,
+            };
+            self.consume(width)?;
             match self.cell(value) {
                 Ok(Cell::Set(members)) => {
                     let members = members.clone();
@@ -892,7 +898,10 @@ impl<'scope> Arena<'scope> {
                     pending.extend(members);
                 }
                 Ok(Cell::Function(entries)) => {
-                    pending.extend(entries.iter().flat_map(|(key, value)| [key, value]));
+                    let (keys, values): (Vec<Scalar>, Vec<Scalar>) = entries.iter().unzip();
+                    self.same_kinds_within(&keys)?;
+                    pending.extend(keys);
+                    pending.extend(values);
                 }
                 _ => {}
             }
@@ -974,6 +983,18 @@ impl<'scope> Arena<'scope> {
         Ok(())
     }
     fn same_kinds_within(&mut self, members: &[Scalar]) -> Result<(), CoreError> {
+        let kind = |value: &Scalar| match value {
+            Scalar::Int(_) => Some(0),
+            Scalar::Bool(_) => Some(1),
+            Scalar::Ref(_) => matches!(self.cell(*value), Ok(Cell::String(_))).then_some(2),
+        };
+        if members.first().is_some_and(|first| {
+            members
+                .iter()
+                .all(|member| kind(member) == kind(first) && kind(first).is_some())
+        }) {
+            return Ok(());
+        }
         for (index, first) in members.iter().enumerate() {
             for second in &members[index + 1..] {
                 self.same_kinds(*first, *second)?;

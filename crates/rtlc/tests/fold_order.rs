@@ -1003,7 +1003,7 @@ fn matching_record_fields_by_name_charges_the_budget_in_proportion_to_the_fields
         run(&program).unwrap().work
     };
     let (narrow, wide) = (work(100), work(200));
-    assert_eq!((narrow, wide), (3779, 7479));
+    assert_eq!((narrow, wide), (4587, 9087));
 }
 
 #[test]
@@ -1024,5 +1024,35 @@ fn a_set_nested_in_a_shared_or_lone_member_is_checked_for_mixed_kinds() {
             let program = fold_program(version, &set(vec![]), &collection, body, &set(vec![]));
             assert_eq!(refusal(&program), STRINGS, "v{version} {label}");
         }
+    }
+}
+
+#[test]
+fn a_function_domain_is_checked_for_mixed_kinds_whatever_the_other_member() {
+    let collection = set(vec![text("p"), text("q")]);
+    let first = kinds_record(int(0), truth());
+    let second = kinds_record(int(1), int(0));
+    let function = |slot: usize, members: Vec<Value>| json!({"op":"function","bounds":[{"slot":slot,"domain":{"kind":"value","value":set(members)}}],"body":int(0)});
+    for version in [1, 2] {
+        let inner = if version == 1 { 2 } else { 0 };
+        let third = kinds_record(int(1), truth());
+        let mixed = branching_union_body(
+            "p",
+            vec![function(inner, vec![first.clone(), second.clone()])],
+            vec![tuple(vec![])],
+        );
+        let uniform = branching_union_body(
+            "p",
+            vec![function(inner, vec![first.clone(), third.clone()])],
+            vec![tuple(vec![])],
+        );
+        let program = fold_program(version, &set(vec![]), &collection, &mixed, &set(vec![]));
+        assert_eq!(refusal(&program), STRINGS, "v{version} mixed");
+        let expected = set(vec![
+            function(0, vec![first.clone(), third.clone()]),
+            tuple(vec![]),
+        ]);
+        let program = fold_program(version, &set(vec![]), &collection, &uniform, &expected);
+        assert!(holds(&program, "uniform domain"), "v{version} uniform");
     }
 }
