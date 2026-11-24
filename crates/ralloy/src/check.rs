@@ -652,8 +652,10 @@ fn temporal_predicate(module: &Module, name: &str, visiting: &mut BTreeSet<Strin
         match expression {
             Expr::Name(name) => call(name, visiting),
             Expr::Number(_) => false,
+            // An application always calls the predicate; only bare names
+            // are shadowed by parameters (review of #110).
             Expr::Apply(name, arguments) => {
-                call(name, visiting)
+                (module.predicates.contains_key(name) && temporal_predicate(module, name, visiting))
                     || arguments
                         .iter()
                         .any(|argument| calls(argument, module, bound, visiting))

@@ -306,3 +306,11 @@ fn parameters_shadowing_predicates_are_not_calls() {
     let source = "sig A {} one sig S { var v: one A } pred same { after { some S.v } } pred use[same: A] { some same } run { use[S.v] } for 2";
     assert!(Model::parse(source).is_ok());
 }
+
+/// Review of #110: an application always calls the predicate, whatever
+/// parameter shares its name; only bare names are shadowed.
+#[test]
+fn applications_call_predicates_despite_shadowing_parameters() {
+    let source = "sig A {} one sig S { var v: one A } pred step[x: A] { after { x = S.v } } pred wrap[step: A] { step[step] } run { wrap[S.v] } for 2";
+    assert!(Model::parse(source).is_err());
+}
