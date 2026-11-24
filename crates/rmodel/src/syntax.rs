@@ -522,7 +522,12 @@ impl Parser {
     }
     fn negation(&mut self) -> Result<Formula, Error> {
         if self.take("not") {
-            return Ok(Formula::Not(Box::new(self.negation()?)));
+            // A chain of `not` counts against the nesting bound (review of
+            // #110).
+            self.enter()?;
+            let inner = self.negation();
+            self.depth -= 1;
+            return Ok(Formula::Not(Box::new(inner?)));
         }
         self.atom()
     }

@@ -636,28 +636,44 @@ impl Checker<'_> {
 /// Whether a predicate or function is temporal: its body uses a temporal
 /// operator, or calls one that is (issue #107).
 fn temporal_predicate(module: &Module, name: &str, visiting: &mut BTreeSet<String>) -> bool {
-    fn calls(expression: &Expr, module: &Module, visiting: &mut BTreeSet<String>) -> bool {
+    /// Whether `expression` calls a temporal predicate; names bound by
+    /// parameters and quantifiers are atoms, not calls (review of #110).
+    fn calls(
+        expression: &Expr,
+        module: &Module,
+        bound: &BTreeSet<String>,
+        visiting: &mut BTreeSet<String>,
+    ) -> bool {
+        let call = |name: &str, visiting: &mut BTreeSet<String>| {
+            !bound.contains(name)
+                && module.predicates.contains_key(name)
+                && temporal_predicate(module, name, visiting)
+        };
         match expression {
-            Expr::Name(name) => {
-                module.predicates.contains_key(name) && temporal_predicate(module, name, visiting)
-            }
+            Expr::Name(name) => call(name, visiting),
             Expr::Number(_) => false,
             Expr::Apply(name, arguments) => {
-                (module.predicates.contains_key(name) && temporal_predicate(module, name, visiting))
+                call(name, visiting)
                     || arguments
                         .iter()
-                        .any(|argument| calls(argument, module, visiting))
+                        .any(|argument| calls(argument, module, bound, visiting))
             }
-            Expr::Block(expressions) => expressions.iter().any(|e| calls(e, module, visiting)),
-            Expr::Unary(_, child) => calls(child, module, visiting),
+            Expr::Block(expressions) => expressions
+                .iter()
+                .any(|expression| calls(expression, module, bound, visiting)),
+            Expr::Unary(_, child) => calls(child, module, bound, visiting),
             Expr::Binary(_, left, right) => {
-                calls(left, module, visiting) || calls(right, module, visiting)
+                calls(left, module, bound, visiting) || calls(right, module, bound, visiting)
             }
             Expr::Quantified(_, declarations, body) => {
-                declarations
-                    .iter()
-                    .any(|d| calls(&d.domain, module, visiting))
-                    || calls(body, module, visiting)
+                let mut inner = bound.clone();
+                for declaration in declarations {
+                    if calls(&declaration.domain, module, &inner, visiting) {
+                        return true;
+                    }
+                    inner.extend(declaration.names.iter().cloned());
+                }
+                calls(body, module, &inner, visiting)
             }
         }
     }
@@ -667,7 +683,13 @@ fn temporal_predicate(module: &Module, name: &str, visiting: &mut BTreeSet<Strin
     if !visiting.insert(name.to_owned()) {
         return false;
     }
-    crate::syntax::uses_temporal(&predicate.body) || calls(&predicate.body, module, visiting)
+    let params: BTreeSet<String> = predicate
+        .params
+        .iter()
+        .flat_map(|param| param.names.iter().cloned())
+        .collect();
+    crate::syntax::uses_temporal(&predicate.body)
+        || calls(&predicate.body, module, &params, visiting)
 }
 
 /// Whether an expression reads a var field, directly or through the

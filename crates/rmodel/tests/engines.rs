@@ -515,3 +515,15 @@ fn formula_size_is_bounded() {
     let error = rmodel::parse(&source).unwrap_err();
     assert!(error.message.contains("nodes"), "{error}");
 }
+
+/// Review of #110: a chain of `not` counts against the nesting bound.
+#[test]
+fn long_negation_chains_are_refused() {
+    let chain = format!("invariant I {{ {}some v }}", "not ".repeat(100_000));
+    assert!(
+        rmodel::parse(&format!(
+            "model M\nsig A\nvar v: set A\n{chain}\nscope A = 1, steps = 1"
+        ))
+        .is_err()
+    );
+}

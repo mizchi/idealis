@@ -298,3 +298,11 @@ fn temporal_refusal_follows_calls() {
     // A quantified atom named like the field is stable in every state.
     assert!(Model::parse(&format!("{base} run {{ some v: A | same[v] }} for 2")).is_ok());
 }
+
+/// Review of #110: a parameter named like a temporal predicate is an atom,
+/// not a call of that predicate.
+#[test]
+fn parameters_shadowing_predicates_are_not_calls() {
+    let source = "sig A {} one sig S { var v: one A } pred same { after { some S.v } } pred use[same: A] { some same } run { use[S.v] } for 2";
+    assert!(Model::parse(source).is_ok());
+}
