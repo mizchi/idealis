@@ -1,0 +1,16 @@
+model G110
+sig S0
+sig S1
+enum E = Ea | Eb
+rel r0: S0 -> some S0
+var v1: lone E
+var v2: E -> set S1
+init { (Eb in none and ((Eb.v2).r0) not in S0) }
+action a0(p0_0: E, p0_1: S0) {
+  some p0_0
+  ((v2.p0_0) in ((v2.r0).(v1 + S1)) or one ((r0 + v2).(v2.p0_0)))
+  v2' = (none -> (E.v2))
+}
+invariant Inv { (((E != v1 and some v1) and ((r0.((S1 -> Ea).v1)) != ((E.r0).v2) and #S0 = 0)) and (some q1: E | ((Eb + S0) & E) in E)) }
+reachable Goal { (all q2: S1 | ((#(v1.v2) > 3 or ((S0.(Eb -> Ea)).r0) not in (Ea - S0)) and some (Eb - none))) }
+scope S0 = 2, S1 = 2, steps = 6

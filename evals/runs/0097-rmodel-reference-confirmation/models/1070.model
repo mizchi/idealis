@@ -1,0 +1,22 @@
+model G1070
+sig S0
+rel r0: set S0
+rel r1: S0 -> one S0
+var v2: S0 -> set S0
+var v3: S0 -> some S0
+fact { ((r1.S0) - (S0.(r0 -> S0))) = ((S0 -> r0).(S0.(S0 -> r0))) }
+init { ((v3 - (none -> r0)) in (r0 -> r0) or (none -> S0) in (r0 -> none)) }
+action a0(p0_0: S0, p0_1: S0) {
+  (#(p0_1.v2) != 3 and (p0_0 -> p0_0) in (r1.v2))
+  v2' = (v3 - (none -> none))
+}
+action a1(p1_0: S0, p1_1: S0) {
+  v3' = ((r1.r0) -> p1_0)
+}
+action a2(p2_0: S0, p2_1: S0) {
+  p2_1 = none
+  v3' = ((none + p2_1) -> (p2_1.v2))
+}
+invariant Inv { (some r0 and not (not (v3 = (S0 -> S0)))) }
+reachable Goal { not (not (v2 = (S0 -> r0))) }
+scope S0 = 1, steps = 6

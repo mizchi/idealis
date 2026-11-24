@@ -1,0 +1,24 @@
+model G1236
+sig S0
+rel r0: set S0
+var v1: S0 -> lone S0
+var v2: S0 -> some S0
+fact { not (no none) }
+init { (#(S0 + r0) >= 1 implies (S0 -> S0) in (v1 - v1)) }
+action a0() {
+  #(S0.v2) <= 3
+  v1' = v1
+}
+action a1() {
+  ((r0 -> r0) = (v2 & v2) or some none)
+  v2 = v1
+  v2' = ((v1 & v1).(v1.v1))
+}
+action a2(p2_0: S0) {
+  (all q1: S0 | p2_0 not in none)
+  ((v1 + v2).(v2.r0)) = ((p2_0 + S0) & (r0.(S0 -> r0)))
+  v1' = (v2 + (S0 -> S0))
+}
+invariant Inv { ((not (#(none & S0) >= 2) or (some S0 or ((v2.r0) + r0) not in ((r0 -> r0).(S0.v1)))) or (lone ((r0 -> S0).r0) implies (v2.v2) in (v2 - v1))) }
+reachable Goal { (all q2: S0 | one ((v1.q2) - S0)) }
+scope S0 = 3, steps = 6

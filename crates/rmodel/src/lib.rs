@@ -5,6 +5,7 @@
 //! The declarations and check names are stable identifiers that a Pkl
 //! specification links its rules to (plan 0092).
 mod emit;
+pub mod reference;
 mod syntax;
 
 pub use emit::{alloy_label, to_alloy, to_tla};

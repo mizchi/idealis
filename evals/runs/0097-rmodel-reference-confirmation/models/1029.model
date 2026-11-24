@@ -1,0 +1,18 @@
+model G1029
+sig S0
+sig S1
+enum E = Ea | Eb
+var v0: S1 -> set S0
+init { (#(Eb.v0) >= 3 or no none) }
+action a0(p0_0: S0, p0_1: E) {
+  #(S1 + p0_1) <= 0
+  (some q1: E | no ((p0_1 -> p0_1).q1))
+  v0' = ((S1 -> Ea).(S0 -> S0))
+}
+action a1(p1_0: S1) {
+  lone ((E.v0) & (S0.v0))
+  v0' = ((none + Ea) -> (S0.(Ea -> S1)))
+}
+invariant Inv { #(v0.Ea) <= 1 }
+reachable Goal { (some ((Eb.(S1 -> Eb)).v0) and ((all q2: E | #Eb < 2) and (lone (E.(S0 -> S1)) implies none not in (Eb & (none + S0))))) }
+scope S0 = 3, S1 = 1, steps = 6

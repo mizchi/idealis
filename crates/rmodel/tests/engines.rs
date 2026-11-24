@@ -527,3 +527,13 @@ fn long_negation_chains_are_refused() {
         .is_err()
     );
 }
+
+/// Plan 0097: a parenthesized set expression may start a comparison.
+#[test]
+fn parenthesized_sets_start_comparisons() {
+    let model = rmodel::parse(
+        "model P\nsig A\nsig B\nvar v: set A\ninit { (A + B) in (A + B) and (no v) }\naction add(a: A) { v' = v + a }\ninvariant I { (v + v) in A }\nreachable R { ((some v)) }\nscope A = 1, B = 1, steps = 3",
+    )
+    .unwrap();
+    assert_eq!(model.checks.len(), 2);
+}

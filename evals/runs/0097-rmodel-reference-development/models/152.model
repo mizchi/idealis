@@ -1,0 +1,26 @@
+model G152
+sig S0
+sig S1
+rel r0: some S0
+rel r1: S0 -> set S1
+var v2: S1 -> set S1
+var v3: S1 -> one S0
+init { (((S0 -> S1).S0).(S0 -> S1)) = ((S0 - r0).v2) }
+action a0(p0_0: S0, p0_1: S1) {
+  (#((r0 -> S0).r0) >= 1 or some (none - S1))
+  not (v3 in (S0 -> S1))
+  v3' = (S1 -> (v2.S1))
+}
+action a1() {
+  (no (S0.(S0 -> r0)) or #r0 < 2)
+  some (v2.S1)
+  v2' = ((S0.r1) -> (r0 & S0))
+}
+action a2() {
+  not (v3 in v2)
+  some (r0.(r0 -> S1))
+  v3' = v2
+}
+invariant Inv { (lone ((v2.v3).r0) implies one (none & (S1.(S1 -> S1)))) }
+reachable Goal { (lone S1 implies ((((v2 + v3).(S1.v2)) != S1 implies some S1) or (some (r0 - r0) and r0 in S0))) }
+scope S0 = 1, S1 = 3, steps = 6

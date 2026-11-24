@@ -1,0 +1,19 @@
+model G161
+sig S0
+enum E = Ea | Eb
+rel r0: set S0
+var v1: S0 -> lone S0
+init { (Eb -> none) in (v1 + v1) }
+action a0() {
+  #(Ea - E) <= 0
+  v1' = v1
+}
+action a1(p1_0: S0) {
+  v1' = v1
+}
+action a2(p2_0: E, p2_1: S0) {
+  v1' = (S0 -> ((S0 -> Eb).S0))
+}
+invariant Inv { (not (some (v1.S0)) and some (v1.Eb)) }
+reachable Goal { ((E != r0 implies ((Eb -> S0) in v1 or (v1 - v1) = (Ea -> r0))) and v1 in (S0 -> E)) }
+scope S0 = 3, steps = 6

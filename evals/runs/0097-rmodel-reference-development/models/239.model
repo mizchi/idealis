@@ -1,0 +1,15 @@
+model G239
+sig S0
+sig S1
+var v0: S0 -> lone S1
+init { no ((S0 + S1).(v0.v0)) }
+action a0(p0_0: S0) {
+  (lone S1 and (((p0_0 -> S1).v0).p0_0) != p0_0)
+  v0' = ((p0_0.(S0 -> S0)) -> (S1.(S1 -> S0)))
+}
+action a1() {
+  v0' = v0
+}
+invariant Inv { #(S0.v0) < 1 }
+reachable Goal { not (((S0.v0) = ((S1 & S0).v0) or #(S0 & S0) >= 0)) }
+scope S0 = 1, S1 = 2, steps = 6

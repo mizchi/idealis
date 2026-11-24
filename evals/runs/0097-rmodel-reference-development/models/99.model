@@ -1,0 +1,23 @@
+model G99
+sig S0
+rel r0: S0 -> some S0
+rel r1: some S0
+var v2: S0 -> one S0
+var v3: S0 -> some S0
+fact { (((r1 & S0) in ((r0.r1).(r0.r0)) and some (S0.r0)) and (one (r1 - ((S0 -> r1).r1)) implies some S0)) }
+init { (#S0 = 2 implies #(S0.v2) < 3) }
+action a0() {
+  (one r1 or lone ((r1.r0).(S0 -> S0)))
+  v2' = ((r0.r0).(v3.v2))
+}
+action a1() {
+  not (some r1)
+  v2' = (v3 - (S0 -> none))
+}
+action a2(p2_0: S0, p2_1: S0) {
+  (some p2_0 or #((r1 -> p2_1).p2_0) > 1)
+  v2' = (v3.(p2_1 -> S0))
+}
+invariant Inv { (#S0 > 0 implies v3 = (v2.v2)) }
+reachable Goal { (((((r1 -> none) - v3) = v3 or no (((S0 -> S0).r1) & (S0.(S0 -> S0)))) implies lone ((S0.(S0 -> S0)) - (r1 - r1))) or one (((S0 -> r1).(r1 -> S0)).r1)) }
+scope S0 = 3, steps = 6

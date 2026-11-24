@@ -567,10 +567,24 @@ impl Parser {
                 });
             }
         }
-        if self.take("(") {
-            let formula = self.formula()?;
-            self.expect(")")?;
-            return Ok(formula);
+        // A parenthesis opens a formula, or a set expression compared after
+        // it, as in `(A + B) in C`: try the formula and fall back (plan 0097,
+        // found by the generated models).
+        if self.peek() == "(" {
+            let start = (self.position, self.depth, self.nodes);
+            self.position += 1;
+            let formula = self.formula().and_then(|formula| {
+                self.expect(")")?;
+                Ok(formula)
+            });
+            let comparison_follows = matches!(
+                self.peek(),
+                "in" | "=" | "!=" | "." | "+" | "-" | "&" | "->"
+            ) || self.peek() == "not" && self.peek_at(1) == "in";
+            match formula {
+                Ok(formula) if !comparison_follows => return Ok(formula),
+                _ => (self.position, self.depth, self.nodes) = start,
+            }
         }
         if self.peek() == "#" || self.peek().bytes().all(|byte| byte.is_ascii_digit()) {
             let left = self.int()?;

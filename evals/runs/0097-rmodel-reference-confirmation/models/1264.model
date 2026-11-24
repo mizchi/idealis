@@ -1,0 +1,15 @@
+model G1264
+sig S0
+sig S1
+rel r0: S1 -> one S0
+rel r1: S0 -> one S0
+var v2: S1 -> set S0
+var v3: S1 -> one S0
+init { (some q1: S0 | (v2.(S0 -> S0)) in v2) }
+action a0(p0_0: S0, p0_1: S1) {
+  some (S1.r1)
+  v3' = (p0_1 -> (p0_0 & S1))
+}
+invariant Inv { (some q2: S1 | some (S0.v3)) }
+reachable Goal { (((all q3: S0 | ((S1 -> q3) - v2) in (q3 -> S1)) implies #(r1.S0) = 1) implies not (#none != 1)) }
+scope S0 = 2, S1 = 3, steps = 6

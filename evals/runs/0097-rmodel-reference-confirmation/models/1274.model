@@ -1,0 +1,20 @@
+model G1274
+sig S0
+enum E = Ea | Eb
+var v0: E -> set S0
+var v1: E -> lone E
+init { (some q2: E | (none -> S0) = (v1 & v1)) }
+action a0(p0_0: E, p0_1: S0) {
+  v0' = ((Ea + E) -> (Ea.v0))
+}
+action a1() {
+  not (no ((E.(Ea -> Ea)).((E -> Eb).(Eb -> E))))
+  (#(v1.S0) = 2 and some Eb)
+  v0' = (S0 -> (Eb - S0))
+}
+action a2(p2_0: E, p2_1: S0) {
+  v1' = (p2_1 -> p2_1)
+}
+invariant Inv { (#(v1.Ea) > 1 or #(E & E) <= 3) }
+reachable Goal { not ((all q4: E | (((v0.q4).v1) in (q4 + E) or some (S0 & S0)))) }
+scope S0 = 1, steps = 6

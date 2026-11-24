@@ -1,0 +1,18 @@
+model G1146
+sig S0
+sig S1
+enum E = Ea | Eb
+rel r0: some S0
+var v1: S0 -> some S0
+fact { (some E and not (some r0)) }
+init { (some q1: S1 | ((v1.(S1 -> q1)).(r0 - S0)) != (((S1 -> Ea).E).(q1 -> q1))) }
+action a0(p0_0: S0) {
+  (((S1 -> S1).((Ea -> Ea).Eb)) = ((v1.v1).E) and #S0 < 3)
+  v1' = ((Ea -> r0).(E -> Ea))
+}
+action a1() {
+  v1' = (Ea -> (Ea.v1))
+}
+invariant Inv { ((((E -> Eb) = v1 or one ((S0 -> E).(Eb & r0))) and Eb != none) implies (((v1.(S0 -> Ea)).(v1.r0)) not in ((S0.v1) - (Eb.(S1 -> S0))) or (#(S0 - S1) = 1 and #(r0 + E) <= 1))) }
+reachable Goal { lone ((v1 - v1).(Ea + Eb)) }
+scope S0 = 1, S1 = 1, steps = 6

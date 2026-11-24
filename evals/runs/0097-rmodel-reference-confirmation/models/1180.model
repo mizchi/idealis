@@ -1,0 +1,21 @@
+model G1180
+sig S0
+sig S1
+rel r0: set S0
+rel r1: S1 -> set S0
+var v2: some S1
+var v3: S1 -> set S0
+init { (r0 -> none) = (v2 -> v2) }
+action a0() {
+  (S0 not in r0 or lone r0)
+  none = v2
+  v3' = r1
+}
+action a1() {
+  (some r0 and some (r1.v2))
+  (#v2 >= 2 or lone S0)
+  v2' = ((v3 + r1).(S1 + v2))
+}
+invariant Inv { ((#(v3.v2) >= 1 and #(S1.r1) = 3) or (((r0 - ((r0 -> S0).r0)) not in r0 or no ((r1.S0) & (r0 & r0))) implies some v2)) }
+reachable Goal { ((some q2: S0 | some q2) implies (not (some (r1.S1)) implies (#((v2 -> S0).v2) <= 0 and some (S0.v3)))) }
+scope S0 = 3, S1 = 3, steps = 6

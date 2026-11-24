@@ -1,0 +1,20 @@
+model G76
+sig S0
+sig S1
+rel r0: one S1
+rel r1: S1 -> one S1
+var v2: lone S0
+var v3: S1 -> lone S1
+fact { one (r0.r1) }
+init { (some (v2 & r0) and some S1) }
+action a0(p0_0: S0, p0_1: S0) {
+  (v3 in (r1 + (p0_1 -> S1)) implies no p0_1)
+  ((S0 -> S1) in (r1.v3) or S1 = ((v3.p0_0) & p0_1))
+  v3' = (p0_0 -> (v3.p0_0))
+}
+action a1(p1_0: S0, p1_1: S1) {
+  v3' = v3
+}
+invariant Inv { S1 in ((v2.(S1 -> S0)).(r1.r1)) }
+reachable Goal { ((#r0 = 3 or (lone (r1.(v2.(S1 -> S1))) and ((v2 -> v2).v2) = r0)) and not ((all q2: S0 | some (v2.r1)))) }
+scope S0 = 3, S1 = 3, steps = 6

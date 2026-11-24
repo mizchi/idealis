@@ -1,0 +1,16 @@
+model G1014
+sig S0
+sig S1
+rel r0: S0 -> set S1
+rel r1: set S0
+var v2: S1 -> set S1
+var v3: S0 -> set S1
+fact { some (r0.S1) }
+init { not ((v2.(r1.r0)) = (S0 + (r0.r1))) }
+action a0(p0_0: S0) {
+  ((S1 -> S1) = (none -> S1) or #(r1.r0) = 0)
+  v3' = (p0_0 -> (p0_0.v2))
+}
+invariant Inv { ((not (some S0) implies ((v3.v2) = v2 implies r0 in (v3.r0))) implies ((S1 != S0 and some (S0 - none)) and some S1)) }
+reachable Goal { (some q2: S1 | (((r1 -> S0) = (r1 -> none) and some ((S0 -> r1).(r0.r1))) or (v3 in v3 or (q2 - q2) not in r1))) }
+scope S0 = 1, S1 = 3, steps = 6

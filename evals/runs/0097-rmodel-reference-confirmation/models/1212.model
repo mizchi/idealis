@@ -1,0 +1,21 @@
+model G1212
+sig S0
+enum E = Ea | Eb
+var v0: S0 -> set E
+var v1: E -> set E
+init { some (v1.Ea) }
+action a0(p0_0: E, p0_1: S0) {
+  v0' = (none -> (p0_1.v0))
+}
+action a1(p1_0: E) {
+  S0 = S0
+  (#S0 > 0 or (Eb -> S0) in (v0 + v0))
+  v1' = ((v1.Ea) -> none)
+}
+action a2() {
+  not (some E)
+  v1' = (E -> none)
+}
+invariant Inv { ((S0 -> S0).(v0.S0)) = Eb }
+reachable Goal { (((S0.(E -> E)) & none) in (((Ea -> S0).S0) + Eb) or one (v0.Eb)) }
+scope S0 = 1, steps = 6

@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0097: rmodelの参照評価器と、写し方の差分テスト](iterations/0097-rmodel-reference.md)は、意味論の正本として参照評価器を作り、生成した600モデル・1200 checkで参照評価器・rtlc・ralloyのSATを比べた。判定の食い違いは0件で、rtlcのバグ（#112）が見つかった。
+
 [0096: SATの経路で整数の桁あふれを検出し、判定を未確定にする](iterations/0096-quint-overflow.md)は、状態に依存する足し算・引き算・符号反転の桁あふれを`c_overflow`で検出するようにした。桁あふれで偽の反例が出るモデルで、それを検出して未確定にできる。
 
 [0095: QuintのモデルをSATでも有界に検査し、明示状態の経路と比べる](iterations/0095-quint-sat.md)は、Quint IRをAlloy 6へ写し、0044の12件のうち10件でralloyのSATとAlloy 6.2.0がTLCと一致した。5 bitに収まらないSequenceFoldは拒否した。状態の少ないモデルでは、rtlcがSATより2〜4桁速かった。
