@@ -307,6 +307,7 @@ jobs:
             .artifacts/shared-oracle
             .artifacts/async-tuning
           if-no-files-found: warn
+      - run: just rcheck-go
 
   cache-proof:
     runs-on: ubuntu-latest

@@ -759,3 +759,504 @@ pub fn typescript(model: &Model) -> String {
     );
     out
 }
+
+fn capital(name: &str) -> String {
+    let mut chars = name.chars();
+    chars.next().map_or(String::new(), |first| {
+        first.to_uppercase().chain(chars).collect()
+    })
+}
+
+/// The Go type of an element of a sort.
+fn go_type(sort: &str) -> String {
+    match sort {
+        INT => "int64".into(),
+        BOOL => "bool".into(),
+        other => other.into(),
+    }
+}
+
+fn go_relation(shape: &Shape) -> String {
+    let held = |sort: &str, mult: Mult| match mult {
+        Mult::Set | Mult::Some => format!("Set[{}]", go_type(sort)),
+        Mult::Lone => format!("*{}", go_type(sort)),
+        Mult::One => go_type(sort),
+    };
+    match shape {
+        Shape::Unary { sig, mult } => held(sig, *mult),
+        Shape::Binary { from, to, mult } => {
+            let value = match mult {
+                Mult::Lone | Mult::One => go_type(to),
+                _ => format!("Set[{}]", go_type(to)),
+            };
+            format!("map[{}]{value}", go_type(from))
+        }
+    }
+}
+
+/// Brace depth, ignoring braces in strings, raw strings and comments.
+fn braces(line: &str) -> (usize, usize) {
+    let (mut opens, mut closes) = (0usize, 0usize);
+    let mut quote: Option<char> = None;
+    let mut chars = line.chars().peekable();
+    while let Some(c) = chars.next() {
+        match quote {
+            Some(q) => {
+                if c == '\\' && q == '"' {
+                    chars.next();
+                } else if c == q {
+                    quote = None;
+                }
+            }
+            None => match c {
+                '"' | '`' => quote = Some(c),
+                '/' if chars.peek() == Some(&'/') => break,
+                '{' | '(' => opens += 1,
+                '}' | ')' => {
+                    if opens > 0 {
+                        opens -= 1;
+                    } else {
+                        closes += 1;
+                    }
+                }
+                _ => {}
+            },
+        }
+    }
+    (opens, closes)
+}
+
+/// The gofmt layout of the generated text: indentation by brace depth,
+/// `case` one level out, and aligned columns in struct and const blocks.
+fn gofmt(text: &str) -> String {
+    let mut depth = 0usize;
+    let mut lines: Vec<String> = Vec::new();
+    for raw in text.lines() {
+        let line = raw.trim();
+        if line.is_empty() {
+            // gofmt drops a blank line right after an opening brace.
+            if !lines.last().is_some_and(|last| last.ends_with('{')) {
+                lines.push(String::new());
+            }
+            continue;
+        }
+        let (opens, closes) = braces(line);
+        let starts_closed = line.starts_with('}') || line.starts_with(')');
+        let level = if starts_closed {
+            depth.saturating_sub(1)
+        } else {
+            depth
+        };
+        let level = if line.starts_with("case ") || line.starts_with("default:") {
+            level.saturating_sub(1)
+        } else {
+            level
+        };
+        lines.push(format!("{}{line}", "\t".repeat(level)));
+        depth = depth + opens - closes.min(depth + opens);
+    }
+    // Align columns in runs of field or constant lines.
+    let mut out: Vec<String> = Vec::new();
+    let mut index = 0;
+    let field = |line: &str| -> Option<(String, Vec<String>)> {
+        let indentation: String = line.chars().take_while(|c| *c == '\t').collect();
+        let body = line.trim_start();
+        let words: Vec<String> = body.split(' ').map(str::to_owned).collect();
+        let simple = words.len() >= 2
+            && words[0].chars().all(|c| c.is_alphanumeric() || c == '_')
+            && !matches!(
+                words[0].as_str(),
+                "return"
+                    | "if"
+                    | "for"
+                    | "func"
+                    | "var"
+                    | "case"
+                    | "switch"
+                    | "type"
+                    | "panic"
+                    | "default"
+                    | "else"
+                    | "go"
+                    | "package"
+                    | "import"
+            )
+            && !body.contains(":=")
+            && !body.ends_with('{')
+            && !body.contains('(')
+            && (words.len() == 2 || words[2] == "=" || words[2].starts_with('`'));
+        simple.then_some((indentation, words))
+    };
+    while index < lines.len() {
+        let Some((indentation, _)) = field(&lines[index]) else {
+            out.push(lines[index].clone());
+            index += 1;
+            continue;
+        };
+        let mut run = Vec::new();
+        while index < lines.len() {
+            match field(&lines[index]) {
+                Some((level, words)) if level == indentation => {
+                    run.push(words);
+                    index += 1;
+                }
+                _ => break,
+            }
+        }
+        let columns = run.iter().map(Vec::len).max().unwrap_or(0);
+        let mut widths = vec![0usize; columns];
+        for words in &run {
+            for (column, word) in words.iter().enumerate().take(words.len() - 1) {
+                widths[column] = widths[column].max(word.chars().count());
+            }
+        }
+        for words in run {
+            let mut line = indentation.clone();
+            for (column, word) in words.iter().enumerate() {
+                if column + 1 == words.len() {
+                    line.push_str(word);
+                } else {
+                    line.push_str(word);
+                    line.push_str(&" ".repeat(widths[column] - word.chars().count() + 1));
+                }
+            }
+            out.push(line);
+        }
+    }
+    let mut text = out.join("\n");
+    text.push('\n');
+    text
+}
+
+/// A Go package (plan 0104): the sorts as types, `Config`, `State`, the
+/// `Command` structs, the model's interface with one method per action,
+/// strict JSON decoders, and `Serve`, rcheck's JSON Lines driver.
+pub fn go(model: &Model, package: &str) -> String {
+    gofmt(&go_text(model, package))
+}
+
+fn go_text(model: &Model, package: &str) -> String {
+    let mut out = format!(
+        "// Code generated by rmodel from the model {} (plans 0102, 0104). DO NOT EDIT.\n\n\
+         package {package}\n\n\
+         import (\n\t\"bufio\"\n\t\"bytes\"\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"io\"\n\t\"strconv\"\n\t\"strings\"\n)\n\n\
+         var _ = strconv.Itoa\nvar _ = strings.HasPrefix\n\n\
+         // Set is a set of atoms or values.\ntype Set[T comparable] map[T]struct{{}}\n\n\
+         // object decodes a JSON object with exactly the given fields.\n\
+         func object(raw json.RawMessage, names ...string) (map[string]json.RawMessage, error) {{\n\
+         \tvar fields map[string]json.RawMessage\n\
+         \tif err := json.Unmarshal(raw, &fields); err != nil || fields == nil {{\n\t\treturn nil, fmt.Errorf(\"not an object: %s\", raw)\n\t}}\n\
+         \tif len(fields) != len(names) {{\n\t\treturn nil, fmt.Errorf(\"want the fields %v: %s\", names, raw)\n\t}}\n\
+         \tfor _, name := range names {{\n\t\tif _, ok := fields[name]; !ok {{\n\t\t\treturn nil, fmt.Errorf(\"missing %s: %s\", name, raw)\n\t\t}}\n\t}}\n\
+         \treturn fields, nil\n}}\n\n\
+         func array(raw json.RawMessage) ([]json.RawMessage, error) {{\n\
+         \tvar items []json.RawMessage\n\
+         \tif err := json.Unmarshal(raw, &items); err != nil || items == nil {{\n\t\treturn nil, fmt.Errorf(\"not an array: %s\", raw)\n\t}}\n\
+         \treturn items, nil\n}}\n\n\
+         func isNull(raw json.RawMessage) bool {{ return bytes.Equal(bytes.TrimSpace(raw), []byte(\"null\")) }}\n\n\
+         func encodeInt(x int64) any {{ return x }}\n\n\
+         func decodeInt(raw json.RawMessage) (int64, error) {{\n\tvar x int64\n\tif err := json.Unmarshal(raw, &x); err != nil {{\n\t\treturn 0, fmt.Errorf(\"not an integer: %s\", raw)\n\t}}\n\treturn x, nil\n}}\n\n\
+         func encodeBool(x bool) any {{ return x }}\n\n\
+         func decodeBool(raw json.RawMessage) (bool, error) {{\n\tvar x bool\n\tif err := json.Unmarshal(raw, &x); err != nil {{\n\t\treturn false, fmt.Errorf(\"not a boolean: %s\", raw)\n\t}}\n\treturn x, nil\n}}\n\n\
+         func keyBool(x bool) string {{ return strconv.FormatBool(x) }}\n\n\
+         func decodeBoolKey(s string) (bool, error) {{\n\tswitch s {{\n\tcase \"true\":\n\t\treturn true, nil\n\tcase \"false\":\n\t\treturn false, nil\n\t}}\n\treturn false, fmt.Errorf(\"not a Bool key: %q\", s)\n}}\n\n\
+         func allBool() []bool {{ return []bool{{false, true}} }}\n\n",
+        model.name
+    );
+    // Atom sorts share key, decodeKey, encode, decode and all.
+    let atom_codec = |name: &str| {
+        format!(
+            "func encode{name}(x {name}) any {{ return key{name}(x) }}\n\n\
+             func decode{name}(raw json.RawMessage) ({name}, error) {{\n\tvar s string\n\tif err := json.Unmarshal(raw, &s); err != nil {{\n\t\tvar zero {name}\n\t\treturn zero, fmt.Errorf(\"{name}: not a string: %s\", raw)\n\t}}\n\treturn decode{name}Key(s)\n}}\n\n"
+        )
+    };
+    for sig in &model.sigs {
+        let size = model.scope.sizes[sig];
+        let all: Vec<String> = (0..size).map(|index| index.to_string()).collect();
+        out.push_str(&format!(
+            "// {sig} is an atom of the signature {sig}.\ntype {sig} uint8\n\n\
+             func key{sig}(x {sig}) string {{ return \"{sig}\" + strconv.Itoa(int(x)) }}\n\n\
+             func decode{sig}Key(s string) ({sig}, error) {{\n\tn, err := strconv.Atoi(strings.TrimPrefix(s, \"{sig}\"))\n\tif err != nil || n < 0 || n >= {size} || key{sig}({sig}(n)) != s {{\n\t\treturn 0, fmt.Errorf(\"not a {sig}: %q\", s)\n\t}}\n\treturn {sig}(n), nil\n}}\n\n\
+             func all{sig}() []{sig} {{ return []{sig}{{{}}} }}\n\n{}",
+            all.join(", "),
+            atom_codec(sig)
+        ));
+    }
+    for (name, members) in &model.enums {
+        if name == BOOL {
+            continue;
+        }
+        let constants: Vec<String> = members
+            .iter()
+            .map(|m| format!("\t{name}{m} {name} = \"{m}\""))
+            .collect();
+        let all: Vec<String> = members.iter().map(|m| format!("{name}{m}")).collect();
+        out.push_str(&format!(
+            "// {name} is an enum.\ntype {name} string\n\nconst (\n{}\n)\n\n\
+             func key{name}(x {name}) string {{ return string(x) }}\n\n\
+             func decode{name}Key(s string) ({name}, error) {{\n\tfor _, x := range all{name}() {{\n\t\tif string(x) == s {{\n\t\t\treturn x, nil\n\t\t}}\n\t}}\n\treturn \"\", fmt.Errorf(\"not a {name}: %q\", s)\n}}\n\n\
+             func all{name}() []{name} {{ return []{name}{{{}}} }}\n\n{}",
+            constants.join("\n"),
+            all.join(", "),
+            atom_codec(name)
+        ));
+    }
+    for (name, children) in &model.sums {
+        let marks: String = children
+            .iter()
+            .map(|c| format!("func ({c}) is{name}() {{}}\n\n"))
+            .collect();
+        let keys: Vec<String> = children
+            .iter()
+            .map(|c| format!("\tcase {c}:\n\t\treturn key{c}(v)"))
+            .collect();
+        let decoders: Vec<String> = children
+            .iter()
+            .map(|c| {
+                format!("\tif v, err := decode{c}Key(s); err == nil {{\n\t\treturn v, nil\n\t}}")
+            })
+            .collect();
+        let alls: Vec<String> = children
+            .iter()
+            .map(|c| format!("\tfor _, x := range all{c}() {{\n\t\tall = append(all, x)\n\t}}"))
+            .collect();
+        out.push_str(&format!(
+            "// {name} is one of {}.\ntype {name} interface{{ is{name}() }}\n\n{marks}\
+             func key{name}(x {name}) string {{\n\tswitch v := x.(type) {{\n{}\n\t}}\n\tpanic(\"not a {name}\")\n}}\n\n\
+             func decode{name}Key(s string) ({name}, error) {{\n{}\n\treturn nil, fmt.Errorf(\"not a {name}: %q\", s)\n}}\n\n\
+             func all{name}() []{name} {{\n\tvar all []{name}\n{}\n\treturn all\n}}\n\n{}",
+            children.join(", "),
+            keys.join("\n"),
+            decoders.join("\n"),
+            alls.join("\n"),
+            atom_codec(name)
+        ));
+    }
+    for record in &model.records {
+        let name = &record.name;
+        let fields: Vec<String> = record
+            .fields
+            .iter()
+            .map(|(field, sort)| format!("\t{} {}", capital(field), go_type(sort)))
+            .collect();
+        let encoded: Vec<String> = record
+            .fields
+            .iter()
+            .map(|(field, sort)| format!("\"{field}\": encode{sort}(x.{})", capital(field)))
+            .collect();
+        let names: Vec<String> = record.fields.iter().map(|(f, _)| quote(f)).collect();
+        let decoded: Vec<String> = record
+            .fields
+            .iter()
+            .map(|(field, sort)| {
+                format!(
+                    "\tif x.{0}, err = decode{sort}(fields[\"{field}\"]); err != nil {{\n\t\treturn x, fmt.Errorf(\"{name}.{field}: %w\", err)\n\t}}",
+                    capital(field)
+                )
+            })
+            .collect();
+        out.push_str(&format!(
+            "// {name} is a record, equal when its fields are.\ntype {name} struct {{\n{}\n}}\n\n\
+             func encode{name}(x {name}) any {{ return map[string]any{{{}}} }}\n\n\
+             func decode{name}(raw json.RawMessage) ({name}, error) {{\n\tvar x {name}\n\tfields, err := object(raw, {})\n\tif err != nil {{\n\t\treturn x, fmt.Errorf(\"{name}: %w\", err)\n\t}}\n{}\n\treturn x, nil\n}}\n\n",
+            fields.join("\n"),
+            encoded.join(", "),
+            names.join(", "),
+            decoded.join("\n")
+        ));
+    }
+    // Config and State.
+    for var in [false, true] {
+        let name = if var { "State" } else { "Config" };
+        let relations: Vec<_> = model.relations.iter().filter(|r| r.var == var).collect();
+        let fields: Vec<String> = relations
+            .iter()
+            .map(|r| format!("\t{} {}", capital(&r.name), go_relation(&r.shape)))
+            .collect();
+        let mut encode = Vec::new();
+        let mut decode = Vec::new();
+        for relation in &relations {
+            let field = capital(&relation.name);
+            let json = &relation.name;
+            let (sort, mult) = target(&relation.shape);
+            let held_encode = |value: &str| match mult {
+                Mult::Set | Mult::Some => format!(
+                    "func() any {{\n\t\titems := []any{{}}\n\t\tfor e := range {value} {{\n\t\t\titems = append(items, encode{sort}(e))\n\t\t}}\n\t\treturn items\n\t}}()"
+                ),
+                Mult::Lone => format!(
+                    "func() any {{\n\t\tif {value} == nil {{\n\t\t\treturn nil\n\t\t}}\n\t\treturn encode{sort}(*{value})\n\t}}()"
+                ),
+                Mult::One => format!("encode{sort}({value})"),
+            };
+            // Decodes `raw` into `target`, returning an error from the
+            // surrounding function.
+            let held_decode = |raw: &str, assign: &str| match mult {
+                Mult::Set | Mult::Some => format!(
+                    "items, err := array({raw})\n\tif err != nil {{\n\t\treturn x, fmt.Errorf(\"{json}: %w\", err)\n\t}}\n\tset := Set[{t}]{{}}\n\tfor _, item := range items {{\n\t\te, err := decode{sort}(item)\n\t\tif err != nil {{\n\t\t\treturn x, fmt.Errorf(\"{json}: %w\", err)\n\t\t}}\n\t\tset[e] = struct{{}}{{}}\n\t}}\n\t{assign}set",
+                    t = go_type(sort)
+                ),
+                Mult::Lone => format!(
+                    "if !isNull({raw}) {{\n\t\te, err := decode{sort}({raw})\n\t\tif err != nil {{\n\t\t\treturn x, fmt.Errorf(\"{json}: %w\", err)\n\t\t}}\n\t\t{assign}&e\n\t}}"
+                ),
+                Mult::One => format!(
+                    "e, err := decode{sort}({raw})\n\tif err != nil {{\n\t\treturn x, fmt.Errorf(\"{json}: %w\", err)\n\t}}\n\t{assign}e"
+                ),
+            };
+            match &relation.shape {
+                Shape::Unary { .. } => {
+                    encode.push(format!(
+                        "\tm[\"{json}\"] = {}",
+                        held_encode(&format!("x.{field}"))
+                    ));
+                    decode.push(format!(
+                        "\t{{\n\t{}\n\t}}",
+                        indent(
+                            &held_decode(&format!("fields[\"{json}\"]"), &format!("x.{field} = ")),
+                            1
+                        )
+                        .replace("\n ", "\n\t")
+                        .trim_start()
+                    ));
+                }
+                Shape::Binary { from: domain, .. } => {
+                    let missing = match mult {
+                        Mult::Set | Mult::Some => "[]any{}",
+                        _ => "nil",
+                    };
+                    let present = match mult {
+                        Mult::Set | Mult::Some => held_encode("v"),
+                        _ => format!("encode{sort}(v)"),
+                    };
+                    let value_type = match mult {
+                        Mult::Lone | Mult::One => go_type(sort),
+                        _ => format!("Set[{}]", go_type(sort)),
+                    };
+                    encode.push(format!(
+                        "\t{{\n\t\tr := map[string]any{{}}\n\t\tfor _, k := range all{domain}() {{\n\t\t\tif v, ok := x.{field}[k]; ok {{\n\t\t\t\tr[key{domain}(k)] = {}\n\t\t\t}} else {{\n\t\t\t\tr[key{domain}(k)] = {missing}\n\t\t\t}}\n\t\t}}\n\t\tm[\"{json}\"] = r\n\t}}",
+                        present.replace("\n", "\n\t\t\t")
+                    ));
+                    let inner = match mult {
+                        Mult::Lone => format!(
+                            "if !isNull(raw) {{\n\t\t\te, err := decode{sort}(raw)\n\t\t\tif err != nil {{\n\t\t\t\treturn x, fmt.Errorf(\"{json}: %w\", err)\n\t\t\t}}\n\t\t\tr[k] = e\n\t\t}}"
+                        ),
+                        Mult::One => format!(
+                            "e, err := decode{sort}(raw)\n\t\tif err != nil {{\n\t\t\treturn x, fmt.Errorf(\"{json}: %w\", err)\n\t\t}}\n\t\tr[k] = e"
+                        ),
+                        _ => format!(
+                            "items, err := array(raw)\n\t\tif err != nil {{\n\t\t\treturn x, fmt.Errorf(\"{json}: %w\", err)\n\t\t}}\n\t\tset := Set[{t}]{{}}\n\t\tfor _, item := range items {{\n\t\t\te, err := decode{sort}(item)\n\t\t\tif err != nil {{\n\t\t\t\treturn x, fmt.Errorf(\"{json}: %w\", err)\n\t\t\t}}\n\t\t\tset[e] = struct{{}}{{}}\n\t\t}}\n\t\tr[k] = set",
+                            t = go_type(sort)
+                        ),
+                    };
+                    decode.push(format!(
+                        "\t{{\n\t\tvar names []string\n\t\tfor _, k := range all{domain}() {{\n\t\t\tnames = append(names, key{domain}(k))\n\t\t}}\n\t\tentries, err := object(fields[\"{json}\"], names...)\n\t\tif err != nil {{\n\t\t\treturn x, fmt.Errorf(\"{json}: %w\", err)\n\t\t}}\n\t\tr := map[{}]{value_type}{{}}\n\t\tfor _, k := range all{domain}() {{\n\t\t\traw := entries[key{domain}(k)]\n\t\t{}\n\t\t}}\n\t\tx.{field} = r\n\t}}",
+                        go_type(domain),
+                        inner
+                    ));
+                }
+            }
+        }
+        let names: Vec<String> = relations.iter().map(|r| quote(&r.name)).collect();
+        let fields_line = if relations.is_empty() {
+            String::new()
+        } else {
+            fields.join("\n")
+        };
+        out.push_str(&format!(
+            "// {name} holds the model's {}.\ntype {name} struct {{\n{fields_line}\n}}\n\n\
+             // Encode writes the JSON form shared with the other bindings.\n\
+             func (x {name}) Encode() map[string]any {{\n\tm := map[string]any{{}}\n{}\n\treturn m\n}}\n\n\
+             // Decode{name} reads the JSON form, rejecting unknown and missing fields.\n\
+             func Decode{name}(raw json.RawMessage) ({name}, error) {{\n\tvar x {name}\n\tfields, err := object(raw{})\n\tif err != nil {{\n\t\treturn x, fmt.Errorf(\"{name}: %w\", err)\n\t}}\n\t_ = fields\n{}\n\treturn x, nil\n}}\n\n",
+            if var { "state (vars)" } else { "configuration (rels)" },
+            encode.join("\n"),
+            names.iter().map(|n| format!(", {n}")).collect::<String>(),
+            decode.join("\n")
+        ));
+    }
+    // Commands.
+    out.push_str(
+        "// Command is one action with its arguments.\ntype Command interface{ isCommand() }\n\n",
+    );
+    let mut cases = Vec::new();
+    let mut methods = Vec::new();
+    let mut applies = Vec::new();
+    for action in &model.actions {
+        let type_name = format!("Command{}", capital(&action.name));
+        let fields: Vec<String> = action
+            .params
+            .iter()
+            .map(|(param, sort)| format!("\t{} {}", capital(param), go_type(sort)))
+            .collect();
+        out.push_str(&format!(
+            "// {type_name} is the action {}.\ntype {type_name} struct {{\n{}\n}}\n\nfunc ({type_name}) isCommand() {{}}\n\n",
+            action.name,
+            fields.join("\n")
+        ));
+        let mut names = vec![quote("kind")];
+        names.extend(action.params.iter().map(|(p, _)| quote(p)));
+        let decoded: Vec<String> = action
+            .params
+            .iter()
+            .map(|(param, sort)| {
+                format!(
+                    "\t\tif c.{0}, err = decode{sort}(fields[\"{param}\"]); err != nil {{\n\t\t\treturn nil, fmt.Errorf(\"{1}.{param}: %w\", err)\n\t\t}}",
+                    capital(param),
+                    action.name
+                )
+            })
+            .collect();
+        cases.push(format!(
+            "\tcase \"{0}\":\n\t\tfields, err := object(raw, {1})\n\t\tif err != nil {{\n\t\t\treturn nil, fmt.Errorf(\"{0}: %w\", err)\n\t\t}}\n\t\t_ = fields\n\t\tvar c {type_name}\n{2}\n\t\treturn c, nil",
+            action.name,
+            names.join(", "),
+            decoded.join("\n")
+        ));
+        let params: Vec<String> = action
+            .params
+            .iter()
+            .map(|(param, sort)| format!("{param} {}", go_type(sort)))
+            .collect();
+        methods.push(format!(
+            "\t// {} applies the action when its guards hold, and says whether it did.\n\t{}({}) bool",
+            capital(&action.name),
+            capital(&action.name),
+            params.join(", ")
+        ));
+        let args: Vec<String> = action
+            .params
+            .iter()
+            .map(|(param, _)| format!("c.{}", capital(param)))
+            .collect();
+        applies.push(format!(
+            "\tcase {type_name}:\n\t\treturn domain.{}({})",
+            capital(&action.name),
+            args.join(", ")
+        ));
+    }
+    out.push_str(&format!(
+        "// DecodeCommand reads `{{\"kind\": action, param: value}}`.\n\
+         func DecodeCommand(raw json.RawMessage) (Command, error) {{\n\tvar head struct {{\n\t\tKind string `json:\"kind\"`\n\t}}\n\tif err := json.Unmarshal(raw, &head); err != nil {{\n\t\treturn nil, fmt.Errorf(\"Command: %w\", err)\n\t}}\n\tswitch head.Kind {{\n{}\n\t}}\n\treturn nil, fmt.Errorf(\"no action %q\", head.Kind)\n}}\n\n",
+        cases.join("\n")
+    ));
+    let model_name = &model.name;
+    out.push_str(&format!(
+        "// {model_name} is the model: an implementation keeps the state and applies the actions.\n\
+         type {model_name} interface {{\n\tState() State\n{}\n}}\n\n\
+         // Apply runs a command on an implementation.\n\
+         func Apply(domain {model_name}, command Command) bool {{\n\tswitch c := command.(type) {{\n{}\n\t}}\n\tpanic(\"unknown command\")\n}}\n\n\
+         // Serve speaks rcheck's JSON Lines driver protocol.\n\
+         func Serve(create func(Config) {model_name}, in io.Reader, out io.Writer) error {{\n\
+         \tscanner := bufio.NewScanner(in)\n\tscanner.Buffer(make([]byte, 1<<20), 1<<26)\n\tencoder := json.NewEncoder(out)\n\tvar domain {model_name}\n\
+         \tfor scanner.Scan() {{\n\t\tvar message struct {{\n\t\t\tOp      string          `json:\"op\"`\n\t\t\tConfig  json.RawMessage `json:\"config\"`\n\t\t\tCommand json.RawMessage `json:\"command\"`\n\t\t}}\n\
+         \t\tvar reply any\n\
+         \t\tif err := json.Unmarshal(scanner.Bytes(), &message); err != nil {{\n\t\t\treply = map[string]any{{\"error\": err.Error()}}\n\t\t}} else if message.Op == \"reset\" {{\n\
+         \t\t\tif config, err := DecodeConfig(message.Config); err != nil {{\n\t\t\t\treply = map[string]any{{\"error\": err.Error()}}\n\t\t\t}} else {{\n\t\t\t\tdomain = create(config)\n\t\t\t\treply = map[string]any{{\"state\": domain.State().Encode()}}\n\t\t\t}}\n\
+         \t\t}} else if message.Op == \"apply\" && domain != nil {{\n\
+         \t\t\tif command, err := DecodeCommand(message.Command); err != nil {{\n\t\t\t\treply = map[string]any{{\"error\": err.Error()}}\n\t\t\t}} else {{\n\t\t\t\taccepted := Apply(domain, command)\n\t\t\t\treply = map[string]any{{\"accepted\": accepted, \"state\": domain.State().Encode()}}\n\t\t\t}}\n\
+         \t\t}} else {{\n\t\t\treply = map[string]any{{\"error\": \"unexpected message\"}}\n\t\t}}\n\
+         \t\tif err := encoder.Encode(reply); err != nil {{\n\t\t\treturn err\n\t\t}}\n\t}}\n\treturn scanner.Err()\n}}\n",
+        methods.join("\n"),
+        applies.join("\n")
+    ));
+    out
+}

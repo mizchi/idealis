@@ -304,6 +304,14 @@ rcheck-typescript: build
   node --test dist/tests/rcheck/schema.test.js
   cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test typescript -- --ignored
 
+# Go implementations against the generated interfaces (plan 0104).
+rcheck-go:
+  test -z "$(gofmt -l tests/rcheck/go)"
+  cd tests/rcheck/go && go vet ./...
+  cd tests/rcheck/go && CGO_ENABLED=0 go test -count=1 ./...
+  cd tests/rcheck/go && CGO_ENABLED=0 go build -o ../../../.artifacts/rcheck-go/ ./cmd/...
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test go -- --ignored
+
 rmodel-oracle output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" alloy=".artifacts/alloy-subset/org.alloytools.alloy.dist.jar" tlc=".artifacts/0068-tlc-1.8.0.jar":
   evals/experiments/rmodel/oracle.sh {{quote(absolute_path(java))}} {{quote(absolute_path(alloy))}} {{quote(absolute_path(tlc))}} {{quote(absolute_path(output))}}
 

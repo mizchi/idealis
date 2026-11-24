@@ -234,6 +234,10 @@ fn generated_bindings_are_fresh() {
                 rmodel::bindings::typescript(&parsed),
             ),
             (
+                format!("tests/rcheck/go/{name}/bindings.go"),
+                rmodel::bindings::go(&parsed, name),
+            ),
+            (
                 format!("fixtures/rcheck/{name}.schema.json"),
                 format!("{}\n", serde_json::to_string_pretty(&schema).unwrap()),
             ),
