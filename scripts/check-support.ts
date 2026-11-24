@@ -438,6 +438,17 @@ const scopes: readonly CrateScope[] = [
     ],
   },
   {
+    name: "rcheck",
+    evidence: [
+      {
+        path: "src/lib.rs",
+        topic:
+          "検査器の宣言（complete・bounded・対応しない）、答えの語、autoとallの選び方と食い違い",
+        context: ["src/checkers.rs"],
+      },
+    ],
+  },
+  {
     name: "rmodel",
     evidence: [
       {

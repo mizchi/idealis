@@ -247,21 +247,33 @@ impl Universe<'_> {
 }
 
 /// Every combination of one value per relation.
-fn product(choices: &[Vec<Value>]) -> Vec<Vec<Value>> {
-    let mut all = vec![Vec::new()];
-    for options in choices {
-        all = all
-            .into_iter()
-            .flat_map(|prefix| {
-                options.iter().map(move |value| {
-                    let mut next = prefix.clone();
-                    next.push(value.clone());
-                    next
-                })
-            })
+/// Every combination of one value per relation, produced one at a time:
+/// materializing them exhausted memory before the budget applied (seed
+/// 5141, plan 0101).
+fn product(choices: &[Vec<Value>]) -> impl Iterator<Item = Vec<Value>> + '_ {
+    let mut indices = vec![0usize; choices.len()];
+    let mut done = choices.iter().any(Vec::is_empty);
+    std::iter::from_fn(move || {
+        if done {
+            return None;
+        }
+        let item = indices
+            .iter()
+            .zip(choices)
+            .map(|(&index, options)| options[index].clone())
             .collect();
-    }
-    all
+        // Advance the last position fastest, as the nested loops did.
+        done = true;
+        for position in (0..choices.len()).rev() {
+            indices[position] += 1;
+            if indices[position] < choices[position].len() {
+                done = false;
+                break;
+            }
+            indices[position] = 0;
+        }
+        Some(item)
+    })
 }
 
 /// Every binding of a parameter list to atoms of its sorts.
@@ -282,8 +294,8 @@ fn bindings(universe: &Universe<'_>, params: &[(String, String)]) -> Vec<BTreeMa
     all
 }
 
-/// The verdict of every check, exploring at most `max_states` states over
-/// all configurations.
+/// The verdict of every check, examining at most `max_states` configurations,
+/// initial candidates and states in all.
 pub fn evaluate(model: &Model, max_states: usize) -> Vec<Verdict> {
     analyze(model, max_states).verdicts
 }
@@ -298,6 +310,22 @@ pub struct Report {
     /// `Empty` or `Unknown`.
     pub declarations: Outcome,
     pub enabled: Vec<(String, Option<bool>)>,
+}
+
+/// Whether every relation's values can be enumerated, or the first that
+/// cannot (more than `MAX_DOMAIN` tuples in its domain).
+pub fn enumerable(model: &Model) -> Result<(), String> {
+    let universe = Universe::new(model);
+    for relation in &model.relations {
+        let size = universe.domain(&relation.shape).len();
+        if size > MAX_DOMAIN {
+            return Err(format!(
+                "{} has {size} possible tuples, more than {MAX_DOMAIN}",
+                relation.name
+            ));
+        }
+    }
+    Ok(())
 }
 
 pub fn analyze(model: &Model, max_states: usize) -> Report {
@@ -340,7 +368,15 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
     let mut complete = true;
     let mut initial = false;
     let none = BTreeMap::new();
+    // The budget counts every configuration and initial candidate examined,
+    // not only reached states: their product can be far larger than the
+    // state space (seed 6130, plan 0101).
     'configurations: for configuration in product(&static_choices) {
+        explored += 1;
+        if explored > max_states {
+            complete = false;
+            break 'configurations;
+        }
         let mut relations: BTreeMap<&str, Value> = statics
             .iter()
             .zip(&configuration)
@@ -360,6 +396,11 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
         let mut seen: BTreeSet<Vec<Value>> = BTreeSet::new();
         let mut queue: VecDeque<(Vec<Value>, usize)> = VecDeque::new();
         for state in product(&var_choices) {
+            explored += 1;
+            if explored > max_states {
+                complete = false;
+                break 'configurations;
+            }
             for (r, value) in vars.iter().zip(&state) {
                 relations.insert(r.name.as_str(), value.clone());
             }

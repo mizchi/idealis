@@ -73,6 +73,7 @@ jobs:
       - run: cargo test --all-targets --locked --manifest-path crates/ralloy/Cargo.toml
       - run: just rquint-test
       - run: just rmodel-test
+      - run: just rcheck-test
       - name: Install Pkl 0.31.1
         run: |
           curl -fsSL -o "$RUNNER_TEMP/pkl" https://github.com/apple/pkl/releases/download/0.31.1/pkl-linux-amd64

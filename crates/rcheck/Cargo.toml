@@ -1,0 +1,29 @@
+[package]
+name = "rcheck"
+version = "0.1.0-alpha.0"
+edition = "2024"
+description = "One entry point that answers an rmodel model's questions with the reference evaluator, rtlc or ralloy's SAT"
+repository = "https://github.com/mizchi/idealis"
+license = "MIT"
+readme = "README.md"
+include = ["src/**", "tests/**", "Cargo.toml", "Cargo.lock", "README.md", "SUPPORT.md", "LICENSE"]
+
+[lib]
+crate-type = ["rlib"]
+
+[[bin]]
+name = "rcheck"
+path = "src/main.rs"
+
+[dependencies]
+idealis-core = { path = "../idealis-core" }
+ralloy = { path = "../ralloy" }
+rmodel = { path = "../rmodel" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[dev-dependencies]
+
+# The engines run the corpus in tests; optimize them in debug builds.
+[profile.dev.package."*"]
+opt-level = 2

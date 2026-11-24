@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0101: 検査器の共通の枠と、1つの入口](iterations/0101-checker-registry.md)は、crate `rcheck`で、検査器ごとにcomplete・bounded・対応しないを宣言させ、`auto`・`all`で答えを用語集の語で返した。corpusの32 claimで一致し、0100でcrashした2 seedから、参照評価器の予算の数え方の穴を直した。
+
 [0100: 和のsort（多態のentity）](iterations/0100-sum-sorts.md)は、`type Party = Person + Org`で、型検査で書けなくなった多態の表現を部分型として戻した。生成した598モデル・1794 checkで3つのengineの判定は食い違わず、crashした2つのseedは参照評価器の予算の数え方の穴だった。
 
 [0099: sortの静的な型検査と、多重度の違反の報告](iterations/0099-sorts-and-violations.md)は、rmodelにsortの型検査を入れ、多重度を破る遷移を`Declarations`の違反として報告するようにした。生成した600モデル・1800 checkで3つのengineの判定は食い違わず、読み手の誤答からsortの合わない式が消えた。
