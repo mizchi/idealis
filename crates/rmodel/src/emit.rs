@@ -148,7 +148,9 @@ pub fn to_alloy(model: &Model) -> String {
             // Wide enough for any count of atoms in scope (review of #102).
             format!(
                 "{} Int",
-                if crate::syntax::atoms(model) <= 7 {
+                // Only a model that counts needs more than 4 bits; wider
+                // integers would crowd ralloy's 64-atom universe (issue #106).
+                if !crate::syntax::uses_counts(model) || crate::syntax::atoms(model) <= 7 {
                     4
                 } else {
                     5

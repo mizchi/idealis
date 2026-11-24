@@ -456,3 +456,27 @@ scope S = 1, steps = 3",
         assert_eq!(sat(&model, &alloy, check), want, "{} SAT", check.name);
     }
 }
+
+/// Issue #106: a model that never counts keeps 4-bit integers, so its
+/// universe stays within ralloy's 64 atoms.
+#[test]
+fn count_free_models_keep_the_small_width() {
+    let model = rmodel::parse(
+        "model Wide
+sig A
+sig B
+sig C
+sig D
+sig E
+var on: set A
+init { no on }
+action add(a: A) { on' = on + a }
+reachable Some { some on }
+scope A = 7, B = 7, C = 7, D = 7, E = 7, steps = 3",
+    )
+    .unwrap();
+    let source = rmodel::to_alloy(&model);
+    let alloy = ralloy::Model::parse(&source).unwrap_or_else(|error| panic!("{error}"));
+    let check = &model.checks[0];
+    assert_eq!(sat(&model, &alloy, check), "reachable");
+}
