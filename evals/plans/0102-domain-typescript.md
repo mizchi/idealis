@@ -34,3 +34,22 @@ mizchiの方針（DDD）: ドメイン記述言語としてドメインをモデ
 ## 範囲外
 
 - Rust・Goの型生成、値オブジェクト・整数の状態、実装の状態の一部だけを観測すること。
+
+## 改訂（結果の前、mizchiと相談）
+
+- 生成する言語にRustを加える。Rustは、actionをmethodに持つtraitを生成し、実装がそれを満たすことを要求する。
+
+  ```rust
+  pub trait Permissions: Sized {
+      fn new(config: &Config) -> Self;
+      fn state(&self) -> State;
+      fn read(&mut self, u: User, d: Doc) -> bool; // 受け付けたか
+      fn close(&mut self, u: User, d: Doc) -> bool;
+  }
+  ```
+
+  methodの形はcompilerが検査し、振る舞いは同じプロセスの照合（`conformance::<Impl>(budget)`）が参照評価器と照らす。atomは`User(u8)`のようなnewtype、enumはRustのenum、集合と関係は`BTreeSet`・`BTreeMap`。
+
+- 汎用の検査器として、モデルの型からConfig・State・CommandのJSON Schema（draft 2020-12）を生成する。sortのatomの集合、enum、多重度（`one`・`lone`・`some`）を制約に写す。照合器は、driverの答えをまずschemaで検査し、形が違えば意味の照合の前にinvalidとして報告する。外部のvalidatorでも同じschemaを使える。
+- 値の種類（[0103](0103-values.md)）を先に入れ、型の生成はInt・Bool・recordも扱う（TypeScriptでは`number`・`boolean`・readonlyのobject、Rustでは`i64`・`bool`・struct）。
+- 正しさに加える: `permissions`・`sessions`と0103の口座のモデルをRustでも実装し、照合が一致すること。同じ3件の人工故障をRustでも検出すること。生成したschemaが、照合で得た全状態を受け付け、多重度を破る状態（手で作った3件）を拒むこと。
