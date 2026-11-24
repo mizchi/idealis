@@ -480,3 +480,50 @@ scope A = 7, B = 7, C = 7, D = 7, E = 7, steps = 3",
     let check = &model.checks[0];
     assert_eq!(sat(&model, &alloy, check), "reachable");
 }
+
+/// Issue #106: `none` inside a compound expression takes the binary arity.
+#[test]
+fn compound_none_for_a_binary_relation() {
+    let model = rmodel::parse(
+        "model Clear
+sig A
+var edges: A -> set A
+init { some edges }
+action clear() { edges' = none + none }
+reachable Cleared { edges = none - none }
+scope A = 2, steps = 4",
+    )
+    .unwrap();
+    let source = rmodel::to_alloy(&model);
+    let alloy = ralloy::Model::parse(&source).unwrap_or_else(|error| panic!("{error}\n{source}"));
+    assert_eq!(sat(&model, &alloy, &model.checks[0]), "reachable");
+    assert_eq!(explicit(&model, &model.checks[0]).verdict, "reachable");
+}
+
+/// Issue #106: the total size of one formula is bounded, so nesting under
+/// the depth limit cannot build a spine the checker overflows on.
+#[test]
+fn formula_size_is_bounded() {
+    let level = |inner: String| format!("({} + {inner})", vec!["v"; 200].join(" + "));
+    let mut expression = "v".to_owned();
+    for _ in 0..40 {
+        expression = level(expression);
+    }
+    let source = format!(
+        "model M\nsig A\nvar v: set A\ninvariant I {{ some {expression} }}\nscope A = 1, steps = 1"
+    );
+    let error = rmodel::parse(&source).unwrap_err();
+    assert!(error.message.contains("nodes"), "{error}");
+}
+
+/// Review of #110: a chain of `not` counts against the nesting bound.
+#[test]
+fn long_negation_chains_are_refused() {
+    let chain = format!("invariant I {{ {}some v }}", "not ".repeat(100_000));
+    assert!(
+        rmodel::parse(&format!(
+            "model M\nsig A\nvar v: set A\n{chain}\nscope A = 1, steps = 1"
+        ))
+        .is_err()
+    );
+}
