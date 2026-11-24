@@ -277,10 +277,23 @@ fn bindings(universe: &Universe<'_>, params: &[(String, String)]) -> Vec<BTreeMa
 /// The verdict of every check, exploring at most `max_states` states over
 /// all configurations.
 pub fn evaluate(model: &Model, max_states: usize) -> Vec<Verdict> {
+    analyze(model, max_states).verdicts
+}
+
+/// Verdicts, and whether each action has a transition from some reachable
+/// state (plan 0098); `enabled` is `None` for an action never seen enabled
+/// in an incomplete search.
+pub struct Report {
+    pub verdicts: Vec<Verdict>,
+    pub enabled: Vec<(String, Option<bool>)>,
+}
+
+pub fn analyze(model: &Model, max_states: usize) -> Report {
     let universe = Universe::new(model);
     let statics: Vec<_> = model.relations.iter().filter(|r| !r.var).collect();
     let vars: Vec<_> = model.relations.iter().filter(|r| r.var).collect();
     let mut found: Vec<Option<usize>> = vec![None; model.checks.len()];
+    let mut enabled = vec![false; model.actions.len()];
     let unknown = |model: &Model| {
         model
             .checks
@@ -300,7 +313,14 @@ pub fn evaluate(model: &Model, max_states: usize) -> Vec<Verdict> {
             .map(|r| universe.candidates(&r.shape))
             .collect::<Option<Vec<_>>>(),
     ) else {
-        return unknown(model);
+        return Report {
+            verdicts: unknown(model),
+            enabled: model
+                .actions
+                .iter()
+                .map(|a| (a.name.clone(), None))
+                .collect(),
+        };
     };
     let mut explored = 0usize;
     let mut complete = true;
@@ -362,7 +382,7 @@ pub fn evaluate(model: &Model, max_states: usize) -> Vec<Verdict> {
                     found[index] = Some(depth);
                 }
             }
-            for action in &model.actions {
+            for (action_index, action) in model.actions.iter().enumerate() {
                 for bound in bindings(&universe, &action.params) {
                     let scene = Scene {
                         relations: &relations,
@@ -389,6 +409,9 @@ pub fn evaluate(model: &Model, max_states: usize) -> Vec<Verdict> {
                         }
                         next[position] = value;
                     }
+                    if admitted {
+                        enabled[action_index] = true;
+                    }
                     if admitted && seen.insert(next.clone()) {
                         queue.push_back((next, depth + 1));
                     }
@@ -396,7 +419,7 @@ pub fn evaluate(model: &Model, max_states: usize) -> Vec<Verdict> {
             }
         }
     }
-    model
+    let verdicts = model
         .checks
         .iter()
         .zip(found)
@@ -411,5 +434,19 @@ pub fn evaluate(model: &Model, max_states: usize) -> Vec<Verdict> {
                 (CheckKind::Reachable, None, true) => Outcome::Unreachable,
             },
         })
-        .collect()
+        .collect();
+    Report {
+        verdicts,
+        enabled: model
+            .actions
+            .iter()
+            .zip(enabled)
+            .map(|(action, enabled)| {
+                (
+                    action.name.clone(),
+                    (enabled || complete).then_some(enabled),
+                )
+            })
+            .collect(),
+    }
 }

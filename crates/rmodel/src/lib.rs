@@ -5,10 +5,12 @@
 //! The declarations and check names are stable identifiers that a Pkl
 //! specification links its rules to (plan 0092).
 mod emit;
+mod print;
 pub mod reference;
 mod syntax;
 
 pub use emit::{alloy_label, to_alloy, to_tla};
+pub use print::quint_like;
 use std::fmt;
 pub use syntax::{
     Action, Check, CheckKind, Compare, Expr, Formula, Int, IntCompare, Model, Mult, Quantifier,
