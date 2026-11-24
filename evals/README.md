@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0099: sortの静的な型検査と、多重度の違反の報告](iterations/0099-sorts-and-violations.md)は、rmodelにsortの型検査を入れ、多重度を破る遷移を`Declarations`の違反として報告するようにした。生成した600モデル・1800 checkで3つのengineの判定は食い違わず、読み手の誤答からsortの合わない式が消えた。
+
 [0098: 文法の候補を、意味と結果が読み取れるかで評価するループ](iterations/0098-syntax-readability.md)は、Quint風のprinterと、参照評価器から問いと正解を作る仕組みを作り、文脈のない読み手で42問中36問の正答を得た。誤答6件はすべてsortの合わない式で、静的な型検査の必要を示した。
 
 [0097: rmodelの参照評価器と、写し方の差分テスト](iterations/0097-rmodel-reference.md)は、意味論の正本として参照評価器を作り、生成した600モデル・1200 checkで参照評価器・rtlc・ralloyのSATを比べた。判定の食い違いは0件で、rtlcのバグ（#112）が見つかった。

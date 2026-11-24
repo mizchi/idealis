@@ -1,0 +1,11 @@
+model G3168
+sig S0
+sig S1
+var v0: S1 -> set S1
+init { (one ((S1.v0) + (S0.(S0 -> S1))) or ((S1 -> S0).(S0 -> S1)) = ((S1 -> S0).(S0 -> S1))) }
+action a0(p0_0: S1) {
+  v0' = ((S0.(S0 -> S1)) -> ((p0_0 -> p0_0).p0_0))
+}
+invariant Inv { (lone S0 or S1 = ((S1.v0) + S1)) }
+reachable Goal { ((some ((v0.S1) + S1) implies (some q6: S1 | (((S0 -> S0).S0).(S0 -> S0)) not in S0)) or (S1.((S1 -> S0) + (S1 -> S0))) not in (S0 + S0)) }
+scope S0 = 2, S1 = 3, steps = 6

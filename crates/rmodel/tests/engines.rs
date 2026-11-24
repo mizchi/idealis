@@ -335,7 +335,8 @@ fn malformed_enums_are_rejected() {
     }
 }
 
-/// Review of #102: a count can exceed one signature's scope, so the Alloy
+/// Review of #102 and plan 0099: a count reaches its sort's full size
+/// within the Alloy integer width; the Alloy
 /// bit width covers every atom in scope.
 #[test]
 fn counts_across_signatures_do_not_wrap() {
@@ -346,9 +347,9 @@ sig B
 var marked: set A
 init { no marked }
 action mark(a: A) { marked' = marked + a }
-reachable Big { #(marked + B) > 7 }
-reachable AllMarked { #marked = 4 }
-scope A = 4, B = 4, steps = 6",
+reachable Big { #(marked + A) > 6 }
+reachable AllMarked { #marked = 7 }
+scope A = 7, B = 4, steps = 9",
     )
     .unwrap();
     let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
@@ -368,7 +369,7 @@ scope A = 4, B = 4, steps = 6",
     }
     // Beyond 15 atoms no supported width holds every count.
     let error = rmodel::parse(
-        "model Wide\nsig A\nsig B\nsig C\ninvariant I { #(A + B + C) > 0 }\nscope A = 6, B = 6, C = 6, steps = 1",
+        "model Wide\nsig A\nsig B\nsig C\ninvariant I { #A > 0 }\nscope A = 6, B = 6, C = 6, steps = 1",
     )
     .unwrap_err();
     assert!(error.message.contains("15"), "{error}");
@@ -424,36 +425,50 @@ fn deep_inputs_are_refused() {
     assert!(rmodel::parse(&format!("{base}{joins}{scope}")).is_err());
 }
 
-/// Review of #103: an enum member named like a generated sig atom stays a
-/// different atom.
+/// Review of #103 and plan 0099: an enum member named like a generated sig
+/// atom is another sort, so mixing them is a type error rather than an
+/// equality between atoms.
 #[test]
-fn enum_atoms_are_distinct_from_sig_atoms() {
-    let model = rmodel::parse(
-        "model Names
-enum E = S0
-sig S
-var on: set S
-init { no on }
-action add(s: S) { on' = on + s }
-invariant Disjoint { no S & E }
-reachable Lit { some on }
-scope S = 1, steps = 3",
+fn enum_atoms_are_another_sort() {
+    let error = rmodel::parse(
+        "model Names\nenum E = S0\nsig S\nvar on: set S\ninit { no on }\ninvariant Disjoint { no S & E }\nscope S = 1, steps = 3",
     )
-    .unwrap();
-    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
-    for (check, want) in [("Disjoint", "holds"), ("Lit", "reachable")] {
-        let check = model
-            .checks
-            .iter()
-            .find(|candidate| candidate.name == check)
-            .unwrap();
-        assert_eq!(
-            explicit(&model, check).verdict,
-            want,
-            "{} explicit",
-            check.name
+    .unwrap_err();
+    assert!(error.message.contains("different sorts"), "{error}");
+}
+
+/// Plan 0099: expressions whose sorts do not match are type errors.
+#[test]
+fn sort_mismatches_are_rejected() {
+    let base = "model M\nsig A\nsig B\nenum E = Ea | Eb\nvar a: set A\nvar f: A -> set B\n";
+    let scope = "\nscope A = 2, B = 2, steps = 3";
+    for (body, needle) in [
+        ("invariant I { a in B }", "comparison of different sorts"),
+        (
+            "invariant I { some a + B }",
+            "set operation of different sorts",
+        ),
+        ("invariant I { some B.f }", "join of different sorts"),
+        ("invariant I { some f.A }", "join of different sorts"),
+        ("action x() { a' = Ea }", "another sort"),
+        ("action x(b: B) { a' = a + b }", "different sorts"),
+        (
+            "invariant I { all e: E | e in a }",
+            "comparison of different sorts",
+        ),
+    ] {
+        let error = rmodel::parse(&format!("{base}{body}{scope}")).unwrap_err();
+        assert!(error.message.contains(needle), "{body}: {error}");
+    }
+    // Well-sorted forms are accepted.
+    for body in [
+        "invariant I { a.f in B }",
+        "action x(b: B, y: A) { f' = f + y -> b }",
+    ] {
+        assert!(
+            rmodel::parse(&format!("{base}{body}{scope}")).is_ok(),
+            "{body}"
         );
-        assert_eq!(sat(&model, &alloy, check), want, "{} SAT", check.name);
     }
 }
 
@@ -532,8 +547,54 @@ fn long_negation_chains_are_refused() {
 #[test]
 fn parenthesized_sets_start_comparisons() {
     let model = rmodel::parse(
-        "model P\nsig A\nsig B\nvar v: set A\ninit { (A + B) in (A + B) and (no v) }\naction add(a: A) { v' = v + a }\ninvariant I { (v + v) in A }\nreachable R { ((some v)) }\nscope A = 1, B = 1, steps = 3",
+        "model P\nsig A\nsig B\nvar v: set A\ninit { (A + A) in (A + A) and (no v) }\naction add(a: A) { v' = v + a }\ninvariant I { (v + v) in A }\nreachable R { ((some v)) }\nscope A = 1, B = 1, steps = 3",
     )
     .unwrap();
     assert_eq!(model.checks.len(), 2);
+}
+
+/// Plan 0099: a state that breaks a multiplicity has no successors. Here
+/// only such a state could take `flag`, so `NeverFlagged` holds and the
+/// multiplicity check is violated. Added after the generated models did not
+/// detect a TLA+ lowering that let broken states step.
+#[test]
+fn broken_states_do_not_step() {
+    let model = rmodel::parse(
+        "model Broken
+sig A
+var x: lone A
+var y: set A
+init { no x and no y }
+action add(a: A) { x' = x + a }
+action flag() { #x = 2  y' = A  x' = none }
+invariant NeverFlagged { no y }
+scope A = 2, steps = 6",
+    )
+    .unwrap();
+    let report = rmodel::reference::analyze(&model, 100_000);
+    assert_eq!(
+        report.declarations,
+        rmodel::reference::Outcome::Violated { depth: 2 }
+    );
+    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
+    let check = &model.checks[0];
+    assert_eq!(explicit(&model, check).verdict, "holds");
+    assert_eq!(sat(&model, &alloy, check), "holds");
+    let (source, config) = rmodel::to_tla(&model, rmodel::DECLARATIONS).unwrap();
+    let result = idealis_core::compile_tla_with_options(
+        &source,
+        &config,
+        idealis_core::CompileOptions {
+            irVersion: idealis_core::IrVersion::V2,
+        },
+    )
+    .unwrap()
+    .check(idealis_core::SafetyBounds {
+        max_depth: 100,
+        max_states: 100_000,
+        max_work: 10_000_000,
+        max_temporal_nodes: None,
+    })
+    .unwrap();
+    assert!(result.violation.is_some(), "{}", result.status);
 }

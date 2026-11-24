@@ -1,0 +1,20 @@
+model G3279
+sig S0
+sig S1
+enum E = Ea | Eb
+rel r0: E -> set S1
+rel r1: E -> one S0
+var v2: S0 -> lone S0
+var v3: set E
+init { (some (S0 - S0) or some ((S0.v2) - S0)) }
+action a0(p0_0: S0) {
+  #S1 = 2
+  ((((S0 -> v3).r0).S1) not in (S1.(S1 -> S0)) or E in (((E -> v3).v3) & (Ea - E)))
+  v2' = v2
+}
+action a1(p1_0: S1, p1_1: S1) {
+  v3' = Eb
+}
+invariant Inv { ((lone (((Eb -> v3).v3).(Eb -> S1)) implies ((((S0 -> S1).S1).(S0 -> S1)) != S1 implies (S1.((S1 -> S0).(S0 -> Ea))) = Eb)) or (all q1: S1 | some (q1.(S1 -> q1)))) }
+reachable Goal { ((((S1 -> S1).(S1 -> S0)).(S0.v2)) != S1 implies (some (S0 - S0) implies not ((((S0 -> S1).S1) & (S0 + S0)) in ((S0 -> S1).((S1 -> v3).E))))) }
+scope S0 = 3, S1 = 2, steps = 6

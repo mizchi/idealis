@@ -1,0 +1,16 @@
+model G4047
+sig S0
+enum E = Ea | Eb
+rel r0: one S0
+var v1: S0 -> set E
+var v2: S0 -> lone E
+fact { (all q1: S0 | some (Ea & Eb)) }
+init { (v1 in v2 or #(none & r0) > 0) }
+action a0() {
+  (some (S0.(r0 -> r0)) implies some S0)
+  (some ((S0 -> E).Ea) and some ((r0 -> r0).r0))
+  v2' = ((r0.(S0 -> S0)) -> (Eb.(Eb -> E)))
+}
+invariant Inv { (no ((Ea -> E).(r0.v1)) implies ((S0 -> S0) + (r0 -> r0)) = (S0 -> r0)) }
+reachable Goal { (not ((#S0 = 0 implies some ((S0 & S0).(v1 + (r0 -> E))))) and ((some q2: S0 | one (r0 & (Eb.(Ea -> q2)))) implies (((r0 -> Ea).(Eb.(E -> E))) not in S0 or some ((E -> S0).r0)))) }
+scope S0 = 3, steps = 6

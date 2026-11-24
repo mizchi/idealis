@@ -41,10 +41,13 @@ pub fn to_alloy(model: &Model) -> String {
         .relations
         .iter()
         .map(|relation| {
+            // A var's multiplicity is a formula, so breaking it is a
+            // reachable violation rather than a declaration (plan 0099).
+            let mult = |mult: Mult| if relation.var { Mult::Set } else { mult };
             let shape = match &relation.shape {
-                Shape::Unary { sig, mult } => format!("{} s_{sig}", alloy_mult(*mult)),
-                Shape::Binary { from, to, mult } => {
-                    format!("s_{from} -> {} s_{to}", alloy_mult(*mult))
+                Shape::Unary { sig, mult: m } => format!("{} s_{sig}", alloy_mult(mult(*m))),
+                Shape::Binary { from, to, mult: m } => {
+                    format!("s_{from} -> {} s_{to}", alloy_mult(mult(*m)))
                 }
             };
             let var = if relation.var { "var " } else { "" };
@@ -53,6 +56,10 @@ pub fn to_alloy(model: &Model) -> String {
         .collect();
     out.push_str(&format!("one sig World {{\n{}\n}}\n", fields.join(",\n")));
     let empty = Scope::new();
+    let declared = alloy_declarations(model);
+    if let Some(declared) = &declared {
+        out.push_str(&format!("fact {{ {declared} }}\n"));
+    }
     for formula in model.facts.iter().chain(&model.init) {
         out.push_str(&format!(
             "fact {{ {} }}\n",
@@ -132,7 +139,15 @@ pub fn to_alloy(model: &Model) -> String {
     } else {
         format!("({})", stutter.join(" and "))
     });
-    out.push_str(&format!("fact {{ always {{ {} }} }}\n", steps.join(" or ")));
+    match &declared {
+        None => out.push_str(&format!("fact {{ always {{ {} }} }}\n", steps.join(" or "))),
+        // A state that breaks a multiplicity stays as it is.
+        Some(declared) => out.push_str(&format!(
+            "fact {{ always {{ ({declared} implies ({})) and ((not {declared}) implies {}) }} }}\n",
+            steps.join(" or "),
+            steps.last().expect("stutter")
+        )),
+    }
     let scope: Vec<String> = model
         .scope
         .sizes
@@ -161,6 +176,11 @@ pub fn to_alloy(model: &Model) -> String {
         .collect();
     for check in &model.checks {
         let formula = alloy_formula(model, &check.formula, &empty);
+        let formula = match (&declared, check.kind) {
+            (None, _) => formula,
+            (Some(declared), CheckKind::Invariant) => format!("({declared} implies {formula})"),
+            (Some(declared), CheckKind::Reachable) => format!("({declared} and {formula})"),
+        };
         let (kind, temporal) = match check.kind {
             CheckKind::Invariant => ("check", "always"),
             CheckKind::Reachable => ("run", "eventually"),
@@ -171,7 +191,44 @@ pub fn to_alloy(model: &Model) -> String {
             scope.join(", ")
         ));
     }
+    out.push_str(&format!(
+        "{}: check {{ always {{ {} }} }} for {}\n",
+        alloy_label(DECLARATIONS),
+        declared.as_deref().unwrap_or("(no none)"),
+        scope.join(", ")
+    ));
     out
+}
+
+/// The name of the built-in check that no transition breaks a var's
+/// multiplicity (plan 0099).
+pub const DECLARATIONS: &str = "Declarations";
+
+/// Every var's multiplicity as one Alloy formula, or `None` when no var has
+/// one.
+fn alloy_declarations(model: &Model) -> Option<String> {
+    let parts: Vec<String> = model
+        .vars()
+        .filter_map(|relation| match &relation.shape {
+            Shape::Unary {
+                mult: Mult::Set, ..
+            }
+            | Shape::Binary {
+                mult: Mult::Set, ..
+            } => None,
+            Shape::Unary { mult, .. } => Some(format!(
+                "({} (World.r_{}))",
+                alloy_mult(*mult),
+                relation.name
+            )),
+            Shape::Binary { from, mult, .. } => Some(format!(
+                "(all m_{0}: s_{from} | {1} (m_{0}.(World.r_{0})))",
+                relation.name,
+                alloy_mult(*mult)
+            )),
+        })
+        .collect();
+    (!parts.is_empty()).then(|| format!("({})", parts.join(" and ")))
 }
 
 fn alloy_mult(mult: Mult) -> &'static str {
@@ -334,11 +391,17 @@ fn alloy_formula(model: &Model, formula: &Formula, scope: &Scope) -> String {
 
 /// A TLA+ module and TLC configuration checking one check of the model.
 pub fn to_tla(model: &Model, check: &str) -> Result<(String, String), Error> {
-    let target = model
-        .checks
-        .iter()
-        .find(|candidate| candidate.name == check)
-        .ok_or_else(|| Error::kind(format!("no check {check}")))?;
+    let target = if check == DECLARATIONS {
+        None
+    } else {
+        Some(
+            model
+                .checks
+                .iter()
+                .find(|candidate| candidate.name == check)
+                .ok_or_else(|| Error::kind(format!("no check {check}")))?,
+        )
+    };
     let mut emitter = Tla { model, fresh: 0 };
     Ok((
         emitter.module(target),
@@ -357,7 +420,7 @@ enum Arity {
     Pair,
 }
 impl Tla<'_> {
-    fn module(&mut self, check: &Check) -> String {
+    fn module(&mut self, check: Option<&Check>) -> String {
         let model = self.model;
         let mut out = format!(
             "---- MODULE {} ----\nEXTENDS Integers, FiniteSets\n",
@@ -461,9 +524,7 @@ impl Tla<'_> {
             for guard in &action.guards {
                 body.push(self.formula(guard, &scope));
             }
-            for (var, _) in &action.assignments {
-                body.push(format!("T_{var}(r_{var}')"));
-            }
+
             let params: Vec<String> = action
                 .params
                 .iter()
@@ -482,13 +543,38 @@ impl Tla<'_> {
             steps.push(step);
         }
         steps.push(format!("UNCHANGED <<{}>>", variables.join(", ")));
-        out.push_str(&format!("Next == {}\n", steps.join(" \\/ ")));
-        let formula = self.formula(&check.formula, &empty);
-        let body = match check.kind {
-            CheckKind::Invariant => formula,
-            CheckKind::Reachable => format!("~{formula}"),
+        // Only a state within the var multiplicities steps; checks look at
+        // those states, and Declarations at the multiplicities themselves
+        // (plan 0099).
+        let declared: Vec<String> = model
+            .vars()
+            .map(|relation| format!("T_{0}(r_{0})", relation.name))
+            .collect();
+        let declared = if declared.is_empty() {
+            "TRUE".to_owned()
+        } else {
+            declared.join(" /\\ ")
         };
-        out.push_str(&format!("{} == {body}\n====\n", alloy_label(&check.name)));
+        out.push_str(&format!("TypeOK == {declared}\n"));
+        // A state that breaks a multiplicity stays as it is, like the Alloy
+        // lowering, rather than deadlocking.
+        out.push_str(&format!(
+            "Next == (TypeOK /\\ ({})) \\/ (~TypeOK /\\ UNCHANGED <<{}>>)\n",
+            steps.join(" \\/ "),
+            variables.join(", ")
+        ));
+        let (name, body) = match check {
+            None => (DECLARATIONS, "TypeOK".to_owned()),
+            Some(check) => {
+                let formula = self.formula(&check.formula, &empty);
+                let body = match check.kind {
+                    CheckKind::Invariant => format!("(TypeOK => {formula})"),
+                    CheckKind::Reachable => format!("~(TypeOK /\\ {formula})"),
+                };
+                (check.name.as_str(), body)
+            }
+        };
+        out.push_str(&format!("{} == {body}\n====\n", alloy_label(name)));
         out
     }
     fn next(&mut self) -> usize {

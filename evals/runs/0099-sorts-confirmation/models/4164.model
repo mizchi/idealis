@@ -1,0 +1,16 @@
+model G4164
+sig S0
+sig S1
+var v0: S1 -> set S1
+var v1: S1 -> set S1
+init { ((S0 -> S1).v1) in ((S0 -> S1) - (S0 -> S1)) }
+action a0(p0_0: S1) {
+  v0' = v1
+}
+action a1() {
+  (one (S0 - S0) and lone (((S1 -> S0).(S0 -> S0)).((S0 -> S1).S1)))
+  v1' = v0
+}
+invariant Inv { not (((some S1 or some ((S1 -> S0).S0)) or (some (S1.v0) or #((S0 -> S1).S1) = 2))) }
+reachable Goal { (((((S0 -> S1).S1) in S0 implies ((S1 -> S0) & (S1 -> S0)) in (v0.(S1 -> S0))) or #none >= 3) implies ((some S0 implies #(S0.(S0 -> S0)) = 0) or #S1 > 0)) }
+scope S0 = 2, S1 = 3, steps = 6

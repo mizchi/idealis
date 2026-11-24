@@ -1,0 +1,21 @@
+model G3086
+sig S0
+sig S1
+rel r0: S0 -> lone S1
+rel r1: some S0
+var v2: S1 -> some S1
+init { ((S1 -> S1) in (v2 + v2) or ((S1 -> S1).(S1 -> S0)) = (S1 -> S0)) }
+action a0(p0_0: S1) {
+  v2' = ((S1 -> S0).((r1 -> p0_0) & r0))
+}
+action a1(p1_0: S0) {
+  ((((r1 -> S1).(S1 -> S1)).S1) in S0 implies some (S0 & S0))
+  v2' = ((S1 - S1) -> (S1 & S1))
+}
+action a2() {
+  (S1 -> S0) in (S1 -> S0)
+  v2' = ((S1 -> S1).(v2.(S1 -> S1)))
+}
+invariant Inv { (((S0.(S0 -> S1)) != S1 and S0 != (r1 - none)) and ((no ((S1.v2) - S1) or lone S0) and some ((v2.(S1 -> r1)).r1))) }
+reachable Goal { (((#(S1.(S1 -> S0)) != 1 and some (((S0 -> S0) - (S0 -> r1)).(r1.(S0 -> r1)))) and (all q2: S1 | r0 in r0)) implies (not (some (S1.v2)) and (#S0 >= 3 and #(S1.v2) = 1))) }
+scope S0 = 3, S1 = 3, steps = 6

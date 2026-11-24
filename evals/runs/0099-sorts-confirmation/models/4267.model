@@ -1,0 +1,14 @@
+model G4267
+sig S0
+sig S1
+var v0: S0 -> set S0
+var v1: S0 -> set S0
+init { (one S0 implies (v1.(S1.(S1 -> S0))) not in ((S1.(S1 -> S1)).(S1 -> S0))) }
+action a0() {
+  (#(S1 + S1) < 2 implies ((S1 -> S0).(S0 -> S1)) = (S1 -> S1))
+  (#none = 0 implies some (S1.(S1 -> S0)))
+  v0' = (((S0 -> S1).S1) -> ((S0 -> S1).S1))
+}
+invariant Inv { (all q1: S0 | ((S0 -> q1) & v1) = v0) }
+reachable Goal { ((some S0 or lone (v0.(S1.(S1 -> S0)))) and ((some S1 implies S0 in S0) or not (((S0 -> S0).S0) = ((S0 - S0) - S0)))) }
+scope S0 = 1, S1 = 3, steps = 6

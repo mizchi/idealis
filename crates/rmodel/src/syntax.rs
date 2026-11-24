@@ -674,41 +674,74 @@ impl Parser {
     }
 }
 
-/// Arity of an expression, or a type error.
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum Arity {
-    /// `none`: either arity.
+/// The type of an expression: a set of one sort, or a binary relation
+/// between two sorts (plan 0099). `none` fits any type.
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum Type {
     Any,
-    Set,
-    Pair,
+    Set(String),
+    Pair(String, String),
 }
+impl Type {
+    fn arity(&self) -> Option<usize> {
+        match self {
+            Type::Any => None,
+            Type::Set(_) => Some(1),
+            Type::Pair(..) => Some(2),
+        }
+    }
+    fn describe(&self) -> String {
+        match self {
+            Type::Any => "none".into(),
+            Type::Set(sort) => format!("Set[{sort}]"),
+            Type::Pair(from, to) => format!("{from} -> {to}"),
+        }
+    }
+}
+/// Names bound by parameters and quantifiers, with their sorts.
+type Bound = BTreeMap<String, String>;
+
 struct Checker<'a> {
     model: &'a Model,
     sigs: BTreeSet<&'a str>,
 }
 impl Checker<'_> {
-    fn expression(
-        &self,
-        expression: &Expr,
-        bound: &BTreeSet<String>,
-        vars: bool,
-    ) -> Result<Arity, Error> {
+    fn shape(shape: &Shape) -> Type {
+        match shape {
+            Shape::Unary { sig, .. } => Type::Set(sig.clone()),
+            Shape::Binary { from, to, .. } => Type::Pair(from.clone(), to.clone()),
+        }
+    }
+    /// Both sides of a set operation or comparison have one type.
+    fn same(left: Type, right: Type, what: &str) -> Result<Type, Error> {
+        match (left, right) {
+            (Type::Any, other) | (other, Type::Any) => Ok(other),
+            (left, right) if left == right => Ok(left),
+            (left, right) if left.arity() != right.arity() => {
+                Err(Error::kind(format!("{what} of different arities")))
+            }
+            (left, right) => Err(Error::kind(format!(
+                "{what} of different sorts: {} and {}",
+                left.describe(),
+                right.describe()
+            ))),
+        }
+    }
+    fn expression(&self, expression: &Expr, bound: &Bound, vars: bool) -> Result<Type, Error> {
         Ok(match expression {
-            Expr::None => Arity::Any,
+            Expr::None => Type::Any,
             Expr::Name(name) => {
-                if bound.contains(name)
-                    || self.sigs.contains(name.as_str())
-                    || self.model.member(name).is_some()
-                {
-                    Arity::Set
+                if let Some(sort) = bound.get(name) {
+                    Type::Set(sort.clone())
+                } else if self.sigs.contains(name.as_str()) {
+                    Type::Set(name.clone())
+                } else if let Some(enumeration) = self.model.member(name) {
+                    Type::Set(enumeration.to_owned())
                 } else if let Some(relation) = self.model.relation(name) {
                     if relation.var && !vars {
                         return Err(Error::kind(format!("fact refers to the var {name}")));
                     }
-                    match relation.shape {
-                        Shape::Unary { .. } => Arity::Set,
-                        Shape::Binary { .. } => Arity::Pair,
-                    }
+                    Self::shape(&relation.shape)
                 } else {
                     return Err(Error::kind(format!("unknown name {name}")));
                 }
@@ -717,46 +750,58 @@ impl Checker<'_> {
                 let left = self.expression(left, bound, vars)?;
                 let right = self.expression(right, bound, vars)?;
                 match operator {
-                    SetOp::Product => {
-                        if left == Arity::Pair || right == Arity::Pair {
+                    SetOp::Product => match (left, right) {
+                        (Type::Pair(..), _) | (_, Type::Pair(..)) => {
                             return Err(Error::kind("product above arity two"));
                         }
-                        Arity::Pair
+                        (Type::Set(a), Type::Set(b)) => Type::Pair(a, b),
+                        _ => Type::Any,
+                    },
+                    SetOp::Join => {
+                        let mismatch = |l: &str, r: &str| {
+                            Err(Error::kind(format!("join of different sorts: {l} and {r}")))
+                        };
+                        match (left, right) {
+                            (Type::Set(a), Type::Pair(b, c)) => {
+                                if a != b {
+                                    return mismatch(&a, &b);
+                                }
+                                Type::Set(c)
+                            }
+                            (Type::Pair(a, b), Type::Set(c)) => {
+                                if b != c {
+                                    return mismatch(&b, &c);
+                                }
+                                Type::Set(a)
+                            }
+                            (Type::Pair(a, b), Type::Pair(c, d)) => {
+                                if b != c {
+                                    return mismatch(&b, &c);
+                                }
+                                Type::Pair(a, d)
+                            }
+                            (Type::Any, Type::Pair(..)) | (Type::Pair(..), Type::Any) => Type::Any,
+                            _ => return Err(Error::kind("join needs a binary relation")),
+                        }
                     }
-                    SetOp::Join => match (left, right) {
-                        (Arity::Set, Arity::Pair) | (Arity::Pair, Arity::Set) => Arity::Set,
-                        (Arity::Pair, Arity::Pair) => Arity::Pair,
-                        _ => return Err(Error::kind("join needs a binary relation")),
-                    },
-                    _ => match (left, right) {
-                        (Arity::Any, other) | (other, Arity::Any) => other,
-                        (left, right) if left == right => left,
-                        _ => return Err(Error::kind("set operation on different arities")),
-                    },
+                    _ => Self::same(left, right, "set operation")?,
                 }
             }
         })
     }
-    fn formula(
-        &self,
-        formula: &Formula,
-        bound: &BTreeSet<String>,
-        vars: bool,
-    ) -> Result<(), Error> {
+    fn formula(&self, formula: &Formula, bound: &Bound, vars: bool) -> Result<(), Error> {
         match formula {
             Formula::Compare(_, left, right) => {
                 let (left, right) = (
                     self.expression(left, bound, vars)?,
                     self.expression(right, bound, vars)?,
                 );
-                if left != right && left != Arity::Any && right != Arity::Any {
-                    return Err(Error::kind("comparison of different arities"));
-                }
+                Self::same(left, right, "comparison")?;
             }
             Formula::Ints(_, left, right) => {
                 for int in [left, right] {
                     if let Int::Count(expression) = int
-                        && self.expression(expression, bound, vars)? == Arity::Pair
+                        && matches!(self.expression(expression, bound, vars)?, Type::Pair(..))
                     {
                         return Err(Error::kind("# counts only sets"));
                     }
@@ -781,14 +826,14 @@ impl Checker<'_> {
                 }
                 self.fresh(variable, bound)?;
                 let mut inner = bound.clone();
-                inner.insert(variable.clone());
+                inner.insert(variable.clone(), sig.clone());
                 self.formula(body, &inner, vars)?;
             }
         }
         Ok(())
     }
-    fn fresh(&self, name: &str, bound: &BTreeSet<String>) -> Result<(), Error> {
-        if bound.contains(name)
+    fn fresh(&self, name: &str, bound: &Bound) -> Result<(), Error> {
+        if bound.contains_key(name)
             || self.sigs.contains(name)
             || self.model.member(name).is_some()
             || self.model.relation(name).is_some()
@@ -832,6 +877,11 @@ fn check(model: &Model) -> Result<(), Error> {
         if !names.insert(name.as_str()) {
             return Err(Error::kind(format!("duplicate name {name}")));
         }
+        if name == crate::DECLARATIONS {
+            return Err(Error::kind(format!(
+                "{name} is the built-in multiplicity check"
+            )));
+        }
     }
     let sigs: BTreeSet<&str> = model.sigs.iter().map(String::as_str).collect();
     for sig in &model.sigs {
@@ -867,7 +917,7 @@ fn check(model: &Model) -> Result<(), Error> {
         )));
     }
     let checker = Checker { model, sigs };
-    let none = BTreeSet::new();
+    let none = Bound::new();
     for fact in &model.facts {
         checker.formula(fact, &none, false)?;
     }
@@ -879,13 +929,13 @@ fn check(model: &Model) -> Result<(), Error> {
         checker.formula(formula, &none, true)?;
     }
     for action in &model.actions {
-        let mut bound = BTreeSet::new();
+        let mut bound = Bound::new();
         for (param, sig) in &action.params {
             if !checker.sigs.contains(sig.as_str()) {
                 return Err(Error::kind(format!("{}: unknown sig {sig}", action.name)));
             }
             checker.fresh(param, &bound)?;
-            bound.insert(param.clone());
+            bound.insert(param.clone(), sig.clone());
         }
         for guard in &action.guards {
             checker.formula(guard, &bound, true)?;
@@ -902,14 +952,20 @@ fn check(model: &Model) -> Result<(), Error> {
                     action.name
                 )));
             }
-            let arity = checker.expression(value, &bound, true)?;
-            let expected = match relation.shape {
-                Shape::Unary { .. } => Arity::Set,
-                Shape::Binary { .. } => Arity::Pair,
-            };
-            if arity != expected && arity != Arity::Any {
+            let value = checker.expression(value, &bound, true)?;
+            let expected = Checker::shape(&relation.shape);
+            if value != expected && value != Type::Any {
+                let what = if value.arity() == expected.arity() {
+                    format!(
+                        "another sort ({} for {})",
+                        value.describe(),
+                        expected.describe()
+                    )
+                } else {
+                    "another arity".to_owned()
+                };
                 return Err(Error::kind(format!(
-                    "{}: {var} assigned a value of another arity",
+                    "{}: {var} assigned a value of {what}",
                     action.name
                 )));
             }

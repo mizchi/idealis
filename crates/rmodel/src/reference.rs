@@ -285,6 +285,10 @@ pub fn evaluate(model: &Model, max_states: usize) -> Vec<Verdict> {
 /// in an incomplete search.
 pub struct Report {
     pub verdicts: Vec<Verdict>,
+    /// Whether a transition breaks a declared multiplicity (plan 0099):
+    /// `Violated` with the shortest depth of the breaking state, `Holds`,
+    /// `Empty` or `Unknown`.
+    pub declarations: Outcome,
     pub enabled: Vec<(String, Option<bool>)>,
 }
 
@@ -294,6 +298,7 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
     let vars: Vec<_> = model.relations.iter().filter(|r| r.var).collect();
     let mut found: Vec<Option<usize>> = vec![None; model.checks.len()];
     let mut enabled = vec![false; model.actions.len()];
+    let mut broken: Option<usize> = None;
     let unknown = |model: &Model| {
         model
             .checks
@@ -315,6 +320,7 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
     ) else {
         return Report {
             verdicts: unknown(model),
+            declarations: Outcome::Unknown,
             enabled: model
                 .actions
                 .iter()
@@ -391,28 +397,31 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
                     if !action.guards.iter().all(|g| universe.formula(g, &scene)) {
                         continue;
                     }
+                    // Sorted expressions stay in their domains; a broken
+                    // multiplicity is a reported violation, not a disabled
+                    // transition, and the broken state has no successors
+                    // (plan 0099).
                     let mut next = state.clone();
-                    let mut admitted = true;
+                    let mut valid = true;
                     for (var, value) in &action.assignments {
                         let position = vars
                             .iter()
                             .position(|r| &r.name == var)
                             .expect("checked var");
                         let value = universe.expression(value, &scene);
-                        let domain: Value =
-                            universe.domain(&vars[position].shape).into_iter().collect();
-                        if !value.is_subset(&domain)
-                            || !universe.admits(&vars[position].shape, &value)
-                        {
-                            admitted = false;
-                            break;
+                        if !universe.admits(&vars[position].shape, &value) {
+                            valid = false;
                         }
                         next[position] = value;
                     }
-                    if admitted {
-                        enabled[action_index] = true;
+                    enabled[action_index] = true;
+                    if !valid {
+                        if broken.is_none_or(|known| depth + 1 < known) {
+                            broken = Some(depth + 1);
+                        }
+                        continue;
                     }
-                    if admitted && seen.insert(next.clone()) {
+                    if seen.insert(next.clone()) {
                         queue.push_back((next, depth + 1));
                     }
                 }
@@ -437,6 +446,12 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
         .collect();
     Report {
         verdicts,
+        declarations: match (broken, complete) {
+            (Some(depth), _) => Outcome::Violated { depth },
+            (None, true) if !initial => Outcome::Empty,
+            (None, true) => Outcome::Holds,
+            (None, false) => Outcome::Unknown,
+        },
         enabled: model
             .actions
             .iter()

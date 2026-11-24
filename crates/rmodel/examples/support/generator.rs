@@ -1,5 +1,7 @@
-//! The seeded generator of typed rmodel models shared by the differential
-//! test (plan 0097) and the readability loop (plan 0098).
+//! The seeded generator of well-sorted rmodel models shared by the
+//! differential test and the readability loop (plans 0097-0099). Since 0099
+//! every expression has a sort-correct type; the 0097 runs used the earlier,
+//! arity-only generator in that revision.
 use std::fmt::Write as _;
 
 struct Random(u64);
@@ -17,8 +19,8 @@ impl Random {
     fn chance(&mut self, percent: usize) -> bool {
         self.below(100) < percent
     }
-    fn pick<'a, T>(&mut self, items: &'a [T]) -> &'a T {
-        &items[self.below(items.len())]
+    fn pick<T: Clone>(&mut self, items: &[T]) -> T {
+        items[self.below(items.len())].clone()
     }
 }
 
@@ -26,137 +28,157 @@ impl Random {
 struct Rel {
     name: String,
     var: bool,
-    binary: bool,
+    /// The sort of a set, or (from, to) of a binary relation.
+    from: String,
+    to: Option<String>,
 }
 
 struct Generator {
     random: Random,
     sorts: Vec<String>,
-    members: Vec<String>,
+    /// Enum members with their enum.
+    members: Vec<(String, String)>,
     rels: Vec<Rel>,
     fresh: usize,
-    /// Building a join operand, where `none` has no arity.
-    joining: bool,
 }
 
+type Locals = Vec<(String, String)>;
+
 impl Generator {
-    /// A unary expression over the names in scope.
-    fn set(&mut self, depth: usize, locals: &[String], vars: bool) -> String {
-        let leaf = depth == 0 || self.random.chance(40);
-        if leaf {
-            let mut options: Vec<String> = self.sorts.clone();
-            options.extend(self.members.iter().cloned());
-            options.extend(locals.iter().cloned());
+    /// A set of `sort`.
+    fn set(&mut self, sort: &str, depth: usize, locals: &Locals, vars: bool) -> String {
+        if depth == 0 || self.random.chance(40) {
+            let mut options = vec![sort.to_owned()];
+            options.extend(
+                self.members
+                    .iter()
+                    .filter(|(_, e)| e == sort)
+                    .map(|(m, _)| m.clone()),
+            );
+            options.extend(
+                locals
+                    .iter()
+                    .filter(|(_, s)| s == sort)
+                    .map(|(n, _)| n.clone()),
+            );
             options.extend(
                 self.rels
                     .iter()
-                    .filter(|r| !r.binary && (vars || !r.var))
+                    .filter(|r| r.to.is_none() && r.from == sort && (vars || !r.var))
                     .map(|r| r.name.clone()),
             );
-            if self.random.chance(10) && !self.joining {
+            if self.random.chance(8) {
                 return "none".into();
             }
-            return self.random.pick(&options).clone();
+            return self.random.pick(&options);
         }
         match self.random.below(3) {
             0 => {
-                let op = *self.random.pick(&["+", "-", "&"]);
+                let op = self.random.pick(&["+", "-", "&"]);
                 let (l, r) = (
-                    self.set(depth - 1, locals, vars),
-                    self.set(depth - 1, locals, vars),
+                    self.set(sort, depth - 1, locals, vars),
+                    self.set(sort, depth - 1, locals, vars),
                 );
                 format!("({l} {op} {r})")
             }
-            1 if self.has_binary(vars) => {
-                let outer = std::mem::replace(&mut self.joining, true);
+            1 => {
+                let via = self.random.pick(&self.sorts.clone());
                 let (s, p) = (
-                    self.set(depth - 1, locals, vars),
-                    self.pair(depth - 1, locals, vars),
+                    self.join_set(&via, depth - 1, locals, vars),
+                    self.pair(&via, sort, depth - 1, locals, vars),
                 );
-                self.joining = outer;
                 format!("({s}.{p})")
             }
-            2 if self.has_binary(vars) => {
-                let outer = std::mem::replace(&mut self.joining, true);
+            _ => {
+                let via = self.random.pick(&self.sorts.clone());
                 let (p, s) = (
-                    self.pair(depth - 1, locals, vars),
-                    self.set(depth - 1, locals, vars),
+                    self.pair(sort, &via, depth - 1, locals, vars),
+                    self.join_set(&via, depth - 1, locals, vars),
                 );
-                self.joining = outer;
                 format!("({p}.{s})")
             }
-            _ => self.set(0, locals, vars),
         }
     }
-    fn has_binary(&self, vars: bool) -> bool {
-        self.rels.iter().any(|r| r.binary && (vars || !r.var))
+    /// A set operand of a join, where `none` would have no type.
+    fn join_set(&mut self, sort: &str, depth: usize, locals: &Locals, vars: bool) -> String {
+        let set = self.set(sort, depth, locals, vars);
+        if set == "none" { sort.to_owned() } else { set }
     }
-    /// A binary expression.
-    fn pair(&mut self, depth: usize, locals: &[String], vars: bool) -> String {
-        let binaries: Vec<String> = self
+    /// A binary relation from `from` to `to`.
+    fn pair(&mut self, from: &str, to: &str, depth: usize, locals: &Locals, vars: bool) -> String {
+        let relations: Vec<String> = self
             .rels
             .iter()
-            .filter(|r| r.binary && (vars || !r.var))
+            .filter(|r| r.from == from && r.to.as_deref() == Some(to) && (vars || !r.var))
             .map(|r| r.name.clone())
             .collect();
         if depth == 0 || self.random.chance(40) {
-            if !binaries.is_empty() && self.random.chance(70) {
-                return self.random.pick(&binaries).clone();
+            if !relations.is_empty() && self.random.chance(70) {
+                return self.random.pick(&relations);
             }
-            let (l, r) = (self.set(0, locals, vars), self.set(0, locals, vars));
+            let (l, r) = (
+                self.join_set(from, 0, locals, vars),
+                self.join_set(to, 0, locals, vars),
+            );
             return format!("({l} -> {r})");
         }
         match self.random.below(3) {
             0 => {
-                let op = *self.random.pick(&["+", "-", "&"]);
+                let op = self.random.pick(&["+", "-", "&"]);
                 let (l, r) = (
-                    self.pair(depth - 1, locals, vars),
-                    self.pair(depth - 1, locals, vars),
+                    self.pair(from, to, depth - 1, locals, vars),
+                    self.pair(from, to, depth - 1, locals, vars),
                 );
                 format!("({l} {op} {r})")
             }
             1 => {
                 let (l, r) = (
-                    self.set(depth - 1, locals, vars),
-                    self.set(depth - 1, locals, vars),
+                    self.join_set(from, depth - 1, locals, vars),
+                    self.join_set(to, depth - 1, locals, vars),
                 );
                 format!("({l} -> {r})")
             }
             _ => {
-                let outer = std::mem::replace(&mut self.joining, true);
+                let via = self.random.pick(&self.sorts.clone());
                 let (l, r) = (
-                    self.pair(depth - 1, locals, vars),
-                    self.pair(depth - 1, locals, vars),
+                    self.pair(from, &via, depth - 1, locals, vars),
+                    self.pair(&via, to, depth - 1, locals, vars),
                 );
-                self.joining = outer;
                 format!("({l}.{r})")
             }
         }
     }
-    fn formula(&mut self, depth: usize, locals: &[String], vars: bool) -> String {
-        let leaf = depth == 0 || self.random.chance(35);
-        if leaf {
+    fn formula(&mut self, depth: usize, locals: &Locals, vars: bool) -> String {
+        let sort = self.random.pick(&self.sorts.clone());
+        if depth == 0 || self.random.chance(35) {
             return match self.random.below(5) {
                 0 => {
-                    let word = *self.random.pick(&["some", "no", "one", "lone"]);
-                    format!("{word} {}", self.set(2, locals, vars))
+                    let word = self.random.pick(&["some", "no", "one", "lone"]);
+                    format!("{word} {}", self.set(&sort, 2, locals, vars))
                 }
                 1 => {
-                    let op = *self.random.pick(&["in", "=", "!=", "not in"]);
-                    let (l, r) = (self.set(2, locals, vars), self.set(2, locals, vars));
+                    let op = self.random.pick(&["in", "=", "!=", "not in"]);
+                    let (l, r) = (
+                        self.set(&sort, 2, locals, vars),
+                        self.set(&sort, 2, locals, vars),
+                    );
                     format!("{l} {op} {r}")
                 }
-                2 if self.has_binary(vars) => {
-                    let op = *self.random.pick(&["in", "="]);
-                    let (l, r) = (self.pair(1, locals, vars), self.pair(1, locals, vars));
+                2 => {
+                    let to = self.random.pick(&self.sorts.clone());
+                    let op = self.random.pick(&["in", "="]);
+                    let (l, r) = (
+                        self.pair(&sort, &to, 1, locals, vars),
+                        self.pair(&sort, &to, 1, locals, vars),
+                    );
                     format!("{l} {op} {r}")
                 }
                 3 => {
-                    let op = *self.random.pick(&["<", "<=", ">", ">=", "=", "!="]);
+                    let op = self.random.pick(&["<", "<=", ">", ">=", "=", "!="]);
                     let value = self.random.below(4);
-                    format!("#{} {op} {value}", self.set(1, locals, vars))
+                    format!("#{} {op} {value}", self.set(&sort, 1, locals, vars))
                 }
-                _ => format!("some {}", self.set(1, locals, vars)),
+                _ => format!("some {}", self.set(&sort, 1, locals, vars)),
             };
         }
         match self.random.below(5) {
@@ -179,10 +201,9 @@ impl Generator {
             _ => {
                 self.fresh += 1;
                 let name = format!("q{}", self.fresh);
-                let sort = self.random.pick(&self.sorts.clone()).clone();
-                let word = *self.random.pick(&["all", "some"]);
-                let mut inner = locals.to_vec();
-                inner.push(name.clone());
+                let word = self.random.pick(&["all", "some"]);
+                let mut inner = locals.clone();
+                inner.push((name.clone(), sort.clone()));
                 format!(
                     "({word} {name}: {sort} | {})",
                     self.formula(depth - 1, &inner, vars)
@@ -191,7 +212,7 @@ impl Generator {
         }
     }
     /// A formula that reads some var, so it is not constant.
-    fn state_formula(&mut self, depth: usize, locals: &[String]) -> String {
+    fn state_formula(&mut self, depth: usize, locals: &Locals) -> String {
         let vars: Vec<String> = self
             .rels
             .iter()
@@ -211,7 +232,7 @@ impl Generator {
     }
 }
 
-/// A typed rmodel model for a seed (plans 0097, 0098).
+/// A well-sorted rmodel model for a seed.
 pub fn generate(seed: u64) -> String {
     let mut g = Generator {
         random: Random(seed.wrapping_mul(0x9E37_79B9_7F4A_7C15) | 1),
@@ -219,7 +240,6 @@ pub fn generate(seed: u64) -> String {
         members: Vec::new(),
         rels: Vec::new(),
         fresh: 0,
-        joining: false,
     };
     let mut out = format!("model G{seed}\n");
     let mut scope = Vec::new();
@@ -232,16 +252,19 @@ pub fn generate(seed: u64) -> String {
     if g.random.chance(40) {
         out.push_str("enum E = Ea | Eb\n");
         g.sorts.push("E".into());
-        g.members.extend(["Ea".to_owned(), "Eb".to_owned()]);
+        g.members.extend([
+            ("Ea".to_owned(), "E".to_owned()),
+            ("Eb".to_owned(), "E".to_owned()),
+        ]);
     }
     let statics = g.random.below(3);
     let vars = 1 + g.random.below(2);
     for index in 0..statics + vars {
         let var = index >= statics;
         let binary = g.random.chance(50);
-        let from = g.random.pick(&g.sorts.clone()).clone();
-        let to = g.random.pick(&g.sorts.clone()).clone();
-        let mult = *g.random.pick(&["set", "set", "lone", "one", "some"]);
+        let from = g.random.pick(&g.sorts.clone());
+        let to = g.random.pick(&g.sorts.clone());
+        let mult = g.random.pick(&["set", "set", "lone", "one", "some"]);
         let name = format!("{}{index}", if var { "v" } else { "r" });
         let keyword = if var { "var" } else { "rel" };
         if binary {
@@ -249,36 +272,32 @@ pub fn generate(seed: u64) -> String {
         } else {
             out.push_str(&format!("{keyword} {name}: {mult} {from}\n"));
         }
-        g.rels.push(Rel { name, var, binary });
+        g.rels.push(Rel {
+            name,
+            var,
+            from,
+            to: binary.then_some(to),
+        });
     }
     if statics > 0 && g.random.chance(60) {
-        let fact = g.formula(2, &[], false);
+        let fact = g.formula(2, &Vec::new(), false);
         out.push_str(&format!("fact {{ {fact} }}\n"));
     }
-    let init = g.state_formula(1, &[]);
+    let init = g.state_formula(1, &Vec::new());
     out.push_str(&format!("init {{ {init} }}\n"));
     for index in 0..1 + g.random.below(3) {
-        let params: Vec<(String, String)> = (0..g.random.below(3))
-            .map(|p| {
-                (
-                    format!("p{index}_{p}"),
-                    g.random.pick(&g.sorts.clone()).clone(),
-                )
-            })
+        let params: Locals = (0..g.random.below(3))
+            .map(|p| (format!("p{index}_{p}"), g.random.pick(&g.sorts.clone())))
             .collect();
-        let locals: Vec<String> = params.iter().map(|(name, _)| name.clone()).collect();
         let mut body = String::new();
         for _ in 0..g.random.below(3) {
-            let _ = writeln!(body, "  {}", g.formula(1, &locals, true));
+            let _ = writeln!(body, "  {}", g.formula(1, &params, true));
         }
-        let target = g
-            .random
-            .pick(&g.rels.iter().filter(|r| r.var).cloned().collect::<Vec<_>>())
-            .clone();
-        let value = if target.binary {
-            g.pair(2, &locals, true)
-        } else {
-            g.set(2, &locals, true)
+        let targets: Vec<Rel> = g.rels.iter().filter(|r| r.var).cloned().collect();
+        let target = g.random.pick(&targets);
+        let value = match &target.to {
+            Some(to) => g.pair(&target.from, to, 2, &params, true),
+            None => g.set(&target.from, 2, &params, true),
         };
         let _ = writeln!(body, "  {}' = {value}", target.name);
         let signature: Vec<String> = params.iter().map(|(n, s)| format!("{n}: {s}")).collect();
@@ -287,8 +306,8 @@ pub fn generate(seed: u64) -> String {
             signature.join(", ")
         ));
     }
-    let invariant = g.state_formula(3, &[]);
-    let reachable = g.state_formula(3, &[]);
+    let invariant = g.state_formula(3, &Vec::new());
+    let reachable = g.state_formula(3, &Vec::new());
     out.push_str(&format!(
         "invariant Inv {{ {invariant} }}\nreachable Goal {{ {reachable} }}\n"
     ));

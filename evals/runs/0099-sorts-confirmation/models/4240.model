@@ -1,0 +1,16 @@
+model G4240
+sig S0
+var v0: S0 -> set S0
+init { (some q1: S0 | (q1 -> S0) in v0) }
+action a0() {
+  v0' = v0
+}
+action a1() {
+  v0' = v0
+}
+action a2(p2_0: S0, p2_1: S0) {
+  v0' = (S0 -> (S0.(p2_1 -> S0)))
+}
+invariant Inv { (not (some (S0 - S0)) and ((all q3: S0 | some none) or (#S0 < 2 or #(v0.S0) < 0))) }
+reachable Goal { not ((S0 -> S0) = v0) }
+scope S0 = 1, steps = 6

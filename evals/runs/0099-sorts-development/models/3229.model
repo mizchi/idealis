@@ -1,0 +1,16 @@
+model G3229
+sig S0
+rel r0: set S0
+var v1: S0 -> some S0
+fact { (((r0.((r0 -> r0).(r0 -> r0))) in r0 implies some (S0.(S0 -> S0))) or not (no (S0 + ((r0 -> r0).S0)))) }
+init { some (S0.v1) }
+action a0(p0_0: S0) {
+  some (p0_0.v1)
+  v1' = v1
+}
+action a1() {
+  v1' = ((v1.S0) -> (S0.v1))
+}
+invariant Inv { ((S0 in (v1.S0) implies (some q2: S0 | #none >= 1)) and (((S0.(v1 - v1)) != ((r0.v1) - (r0 + r0)) implies #r0 < 0) or (all q3: S0 | some (r0 - q3)))) }
+reachable Goal { (#(v1.r0) != 3 or S0 in S0) }
+scope S0 = 3, steps = 6

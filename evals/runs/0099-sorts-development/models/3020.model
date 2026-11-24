@@ -1,0 +1,14 @@
+model G3020
+sig S0
+sig S1
+rel r0: S0 -> set S0
+var v1: S1 -> some S0
+init { ((v1 + v1) in (S1 -> S0) and #S1 >= 3) }
+action a0() {
+  some (S1 & S1)
+  (S1 != ((S1 -> S0).((S0 -> S1).S1)) implies ((S1 & S1) + (S1.(S1 -> S1))) in ((S1 -> S1).(S1 & S1)))
+  v1' = ((S1 -> S1).(S1 -> S0))
+}
+invariant Inv { (not (#S0 <= 3) or ((some S0 or ((v1.r0).S0) in ((S1 -> S0).(S1.(S1 -> S0)))) implies #S0 <= 1)) }
+reachable Goal { (all q4: S0 | (all q5: S1 | ((S1 -> q4).(S0 -> q5)) = (v1.(q4 -> q5)))) }
+scope S0 = 3, S1 = 3, steps = 6

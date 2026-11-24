@@ -1,0 +1,23 @@
+model G4235
+sig S0
+sig S1
+rel r0: S0 -> some S1
+rel r1: set S1
+var v2: set S1
+var v3: S1 -> some S0
+init { (#S0 = 2 and (r1 -> S0) = (v2 -> S0)) }
+action a0() {
+  v2' = ((v2.v3).r0)
+}
+action a1() {
+  (some S0 implies lone S1)
+  #(S1.v3) != 0
+  v2' = (((r1 -> r1).r1) - v2)
+}
+action a2(p2_0: S1) {
+  (((S0 -> r1).v3) = ((S0 -> S0) + (S0 -> S0)) or one ((S1.(r1 -> S0)) + S0))
+  v3' = (p2_0 -> S0)
+}
+invariant Inv { ((((S1 -> S1).r1) not in none or not (one ((S0 -> v2).S1))) or #(S0.r0) != 0) }
+reachable Goal { (some q1: S1 | not ((r1 -> S1) in ((S1 -> q1) + (S1 -> v2)))) }
+scope S0 = 2, S1 = 3, steps = 6

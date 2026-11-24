@@ -1,0 +1,22 @@
+model G3269
+sig S0
+enum E = Ea | Eb
+rel r0: E -> set E
+rel r1: S0 -> one E
+var v2: E -> some E
+fact { (some q1: S0 | (one E implies (none & Ea) = (Ea.(Ea -> Ea)))) }
+init { (#(E.v2) <= 0 and #none > 2) }
+action a0(p0_0: S0, p0_1: E) {
+  (Eb -> S0) in (E -> S0)
+  (S0 & (Ea.(Ea -> S0))) in p0_0
+  v2' = ((v2.Eb) -> E)
+}
+action a1() {
+  v2' = (((Eb -> S0).S0) -> (E.(Ea -> E)))
+}
+action a2(p2_0: E) {
+  v2' = v2
+}
+invariant Inv { (((S0 not in ((none & S0) & (S0 - S0)) implies ((S0 & S0) & (E.(Eb -> S0))) not in (S0 & none)) implies ((Eb -> E) = (Ea -> E) and S0 = ((v2.Eb).(E -> S0)))) and some ((Eb -> S0).S0)) }
+reachable Goal { (((S0 + (S0.(S0 -> S0))) in S0 and lone ((v2.Eb).(E -> S0))) and #(S0 + S0) = 1) }
+scope S0 = 1, steps = 6

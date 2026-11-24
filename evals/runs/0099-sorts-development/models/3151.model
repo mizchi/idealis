@@ -1,0 +1,19 @@
+model G3151
+sig S0
+rel r0: S0 -> lone S0
+rel r1: S0 -> some S0
+var v2: lone S0
+fact { some ((S0 - S0).(S0 -> S0)) }
+init { (some q1: S0 | some (v2 - v2)) }
+action a0(p0_0: S0, p0_1: S0) {
+  some (r0.(r1.v2))
+  (((v2.r1) + (S0 + S0)) not in (((v2 -> v2).p0_1).(p0_0 -> p0_1)) or #p0_0 <= 0)
+  v2' = S0
+}
+action a1(p1_0: S0) {
+  (all q2: S0 | some (r0.S0))
+  v2' = S0
+}
+invariant Inv { not (some (S0 - v2)) }
+reachable Goal { (some q3: S0 | not (some v2)) }
+scope S0 = 3, steps = 6

@@ -1,0 +1,19 @@
+model G4258
+sig S0
+sig S1
+enum E = Ea | Eb
+rel r0: lone S1
+rel r1: S1 -> set S1
+var v2: S1 -> some S0
+fact { not (#((S0 -> Ea).E) != 2) }
+init { (some q2: E | (v2 + v2) in v2) }
+action a0(p0_0: S1, p0_1: S1) {
+  #((Ea -> Eb).E) = 2
+  v2' = ((r0 -> p0_1).v2)
+}
+action a1(p1_0: E) {
+  v2' = ((r1.v2) & v2)
+}
+invariant Inv { (some (v2.S0) and #(S0.(S0 -> S0)) < 2) }
+reachable Goal { (all q8: S1 | ((lone (Eb.(E -> E)) and ((Ea -> S0) & (Ea -> S0)) in ((Eb -> S1).v2)) or #Eb > 3)) }
+scope S0 = 2, S1 = 3, steps = 6

@@ -1,0 +1,21 @@
+model G4187
+sig S0
+enum E = Ea | Eb
+var v0: E -> some E
+init { ((Ea -> E) = v0 and some S0) }
+action a0(p0_0: E, p0_1: E) {
+  (E -> S0) = (Ea -> S0)
+  (((S0 -> S0) + (S0 -> S0)) in (S0 -> S0) implies #(p0_0 - p0_1) <= 2)
+  v0' = (((Ea -> S0).S0) -> ((p0_0 -> p0_0).E))
+}
+action a1() {
+  v0' = (v0.((Ea -> E) - v0))
+}
+action a2(p2_0: S0) {
+  ((E -> S0) in (Ea -> p2_0) or some ((Eb -> Eb).Eb))
+  (all q2: E | #(q2 - E) < 0)
+  v0' = (Ea -> (p2_0.(p2_0 -> Ea)))
+}
+invariant Inv { (v0.v0) in (v0 + v0) }
+reachable Goal { ((#(S0 & S0) = 0 and (no (S0.(S0 -> E)) implies #S0 >= 0)) implies (((S0.((S0 -> S0).(S0 -> S0))) = (((S0 -> S0).(S0 -> Ea)).(S0.(S0 -> E))) implies (Ea - (Eb + none)) != ((v0.v0).Ea)) and not ((Eb - (Eb + E)) != Eb))) }
+scope S0 = 2, steps = 6

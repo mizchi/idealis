@@ -1,0 +1,22 @@
+model G3039
+sig S0
+sig S1
+rel r0: S0 -> set S1
+rel r1: S1 -> set S0
+var v2: S0 -> one S1
+var v3: S1 -> some S0
+fact { (some ((S1 -> S1).S1) and (S0 != none or one ((S0.(S0 -> S0)).((S0 -> S0).(S0 -> S0))))) }
+init { (S0 != ((v2.S1).(S0 -> S0)) or some ((S0 -> S0).(S0.(S0 -> S0)))) }
+action a0() {
+  v3' = (S1 -> S0)
+}
+action a1(p1_0: S1) {
+  (no S0 or (S1 + ((S1 -> S1).S1)) = S1)
+  v3' = ((v3 & r1) - (S1 -> S0))
+}
+action a2(p2_0: S1, p2_1: S1) {
+  v2' = (S0 -> ((p2_0 -> p2_1).p2_1))
+}
+invariant Inv { (r1 + v3) = (S1 -> S0) }
+reachable Goal { not (not ((#(S0 - S0) >= 3 or v3 in r1))) }
+scope S0 = 3, S1 = 2, steps = 6

@@ -1,0 +1,24 @@
+model G3236
+sig S0
+rel r0: one S0
+rel r1: S0 -> lone S0
+var v2: S0 -> set S0
+var v3: S0 -> some S0
+fact { (all q1: S0 | (r1 in (r1 + (S0 -> r0)) implies some q1)) }
+init { #(v3.r0) = 1 }
+action a0() {
+  v2' = v2
+}
+action a1(p1_0: S0, p1_1: S0) {
+  not (#((p1_1 -> p1_0).r0) = 2)
+  ((p1_1 -> p1_0) = (r0 -> r0) or (v3.(v2.r0)) != S0)
+  v3' = ((v2 - v2) - ((r0 -> r0) + v2))
+}
+action a2() {
+  (all q2: S0 | lone (q2.((q2 -> q2).v2)))
+  some (r0.(r0 -> S0))
+  v3' = ((r0 -> S0) + v2)
+}
+invariant Inv { v3 in ((r0 -> S0) & (r0 -> r0)) }
+reachable Goal { (not (lone (v2.(r0 + r0))) and (some q4: S0 | #(r0.(r0 -> r0)) != 2)) }
+scope S0 = 3, steps = 6

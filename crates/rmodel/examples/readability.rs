@@ -33,7 +33,11 @@ fn main() {
             .verdicts
             .iter()
             .all(|v| !matches!(v.outcome, Outcome::Empty | Outcome::Unknown))
-            && report.enabled.iter().all(|(_, enabled)| enabled.is_some());
+            && report.enabled.iter().all(|(_, enabled)| enabled.is_some())
+            && matches!(
+                report.declarations,
+                Outcome::Holds | Outcome::Violated { .. }
+            );
         if decided {
             picked.push((seed, model, report));
         }
@@ -80,6 +84,19 @@ fn main() {
                 let _ = writeln!(prompt, "- `{id}`: {question} Options: {options}");
                 entries.push(format!("{id:?}:{answer:?}"));
             }
+            // Plan 0099: a step that breaks a declared multiplicity is a
+            // reported violation.
+            let id = format!("{seed}.declarations");
+            let _ = writeln!(
+                prompt,
+                "- `{id}`: Can some step reach a state that breaks one of the declared limits noted in the comments (at most one, exactly one, at least one)? Options: yes | no"
+            );
+            let answer = if matches!(report.declarations, Outcome::Violated { .. }) {
+                "yes"
+            } else {
+                "no"
+            };
+            entries.push(format!("{id:?}:{answer:?}"));
             for (action, enabled) in &report.enabled {
                 let id = format!("{seed}.action.{action}");
                 let _ = writeln!(

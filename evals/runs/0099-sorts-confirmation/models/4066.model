@@ -1,0 +1,20 @@
+model G4066
+sig S0
+sig S1
+enum E = Ea | Eb
+var v0: S1 -> set S1
+init { (some (S1.v0) and some (S0.(S0 -> Ea))) }
+action a0(p0_0: E, p0_1: S1) {
+  v0' = (S1 -> (Ea.(p0_0 -> S1)))
+}
+action a1() {
+  v0' = (v0 + (v0 - (S1 -> S1)))
+}
+action a2(p2_0: S1, p2_1: E) {
+  (some q2: E | ((S1 + S1).(p2_0 -> E)) = ((q2 -> S0).(S0 + S0)))
+  (all q3: S1 | some (none - none))
+  v0' = ((p2_0 -> S1).((p2_0 -> p2_1).(Eb -> S1)))
+}
+invariant Inv { (S1 -> S1) in ((S1 -> S1) & v0) }
+reachable Goal { (((Ea != (((Eb -> Eb) - (Ea -> E)).E) and no S1) implies (((Ea -> S0) + (Ea -> S0)) = (Ea -> S0) implies ((E + Ea).(Eb -> S0)) not in (S0.(S0 -> S0)))) or some (S1.v0)) }
+scope S0 = 1, S1 = 2, steps = 6

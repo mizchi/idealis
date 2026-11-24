@@ -1,0 +1,23 @@
+model G3206
+sig S0
+enum E = Ea | Eb
+rel r0: set E
+rel r1: E -> lone E
+var v2: E -> one E
+var v3: S0 -> some S0
+fact { (not ((Ea -> E) = ((Eb -> S0).(S0 -> E))) and (#(r0 - E) != 3 implies (S0 -> Eb) = (S0 -> Eb))) }
+init { (((r0 -> Eb).(r0 -> S0)) in (Eb -> S0) and ((S0 & S0) + S0) not in ((v3.S0) & (S0.(S0 -> S0)))) }
+action a0() {
+  v3' = v3
+}
+action a1() {
+  not (no (((Ea -> S0) + (Ea -> S0)).S0))
+  v3' = ((S0 -> S0) + (S0 -> S0))
+}
+action a2(p2_0: E) {
+  (S0 -> Eb) in ((S0 -> S0).(S0 -> p2_0))
+  v3' = (v3.v3)
+}
+invariant Inv { (((#S0 <= 0 implies ((r0.r1).r1) != ((Eb -> S0).S0)) and (some ((S0 -> r0).r0) and (v3.(S0 -> r0)) = ((S0 -> r0).v2))) and ((S0 -> r0) + (S0 -> r0)) in ((S0 -> Ea) & (S0 -> E))) }
+reachable Goal { (all q5: S0 | (#((E -> r0).Ea) > 1 or (some (((Eb -> q5).v3).(q5.v3)) or #(v2.r0) != 2))) }
+scope S0 = 3, steps = 6

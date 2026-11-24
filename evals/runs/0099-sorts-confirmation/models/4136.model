@@ -1,0 +1,22 @@
+model G4136
+sig S0
+rel r0: S0 -> some S0
+var v1: some S0
+var v2: S0 -> set S0
+fact { (some q1: S0 | (all q2: S0 | #(q2.r0) != 2)) }
+init { (r0 = (v2.v2) or #v1 = 0) }
+action a0(p0_0: S0, p0_1: S0) {
+  #(r0.p0_1) > 1
+  v1' = p0_0
+}
+action a1() {
+  S0 in v1
+  r0 in (S0 -> v1)
+  v2' = (S0 -> (v1.r0))
+}
+action a2(p2_0: S0) {
+  v2' = ((S0.v2) -> S0)
+}
+invariant Inv { not (((#(S0.v2) > 2 and #v1 != 0) and (some S0 and no ((v1 - v1).r0)))) }
+reachable Goal { (((v1.(v2.v2)) in (r0.(r0.v1)) implies v1 != (S0.(v2.r0))) and (all q7: S0 | (v2.v2) in r0)) }
+scope S0 = 2, steps = 6

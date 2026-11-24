@@ -1,0 +1,20 @@
+model G3010
+sig S0
+sig S1
+enum E = Ea | Eb
+rel r0: S1 -> some S1
+rel r1: some S0
+var v2: set S0
+var v3: S0 -> set S1
+fact { ((some Ea or ((S1 -> r1).(S0 -> S1)) = (S1 -> S1)) implies (some (Eb - Ea) or some (S1 + S1))) }
+init { not (#(v2.(S0 -> S0)) > 1) }
+action a0(p0_0: S1) {
+  (lone none and (((E -> S0).(v2 -> S0)).((v2 -> v2).r1)) in ((Eb + E) + E))
+  v2' = r1
+}
+action a1(p1_0: E) {
+  v2' = (v2.((S0 -> r1).(r1 -> r1)))
+}
+invariant Inv { S0 != (((S0 -> S1) + v3).(r0.S1)) }
+reachable Goal { ((#v2 >= 3 implies (some q3: S1 | r1 != (v2 - (Ea.(Ea -> r1))))) and (((S1 -> r1) in (S1 -> S0) or ((S0 -> E).(S1.(S1 -> Ea))) = ((S0 - S0) & ((r1 -> v2).S0))) implies (((E -> Ea).(E -> S0)) = (E -> v2) and some S1))) }
+scope S0 = 2, S1 = 3, steps = 6

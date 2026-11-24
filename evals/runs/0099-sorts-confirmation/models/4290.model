@@ -1,0 +1,21 @@
+model G4290
+sig S0
+sig S1
+rel r0: S0 -> set S0
+rel r1: set S0
+var v2: S0 -> set S0
+var v3: set S0
+init { (S1 not in ((S1.(S1 -> S0)).(r1 -> S1)) and (r0 & r0) in (r0 & v2)) }
+action a0(p0_0: S1, p0_1: S1) {
+  #r1 <= 1
+  (no (r1.((S0 -> p0_1).(p0_0 -> r1))) or (r1 -> v3) in (r1 -> S0))
+  v2' = r0
+}
+action a1() {
+  ((((S1 -> S0).v3) + ((S1 -> S1).S1)) not in (S0.((r1 -> r1).(S0 -> S1))) and (v3 -> S1) in (r1 -> S1))
+  (#((S1 -> S1).S1) >= 0 implies (r0.(r1 -> S1)) = (v2.(S0 -> S1)))
+  v3' = (S1.((S1 -> v3) + (S1 -> S0)))
+}
+invariant Inv { not (#(r0.v3) > 3) }
+reachable Goal { (S1 in S1 implies (some q2: S0 | not ((S1 -> v3) in (S1 -> S0)))) }
+scope S0 = 3, S1 = 2, steps = 6

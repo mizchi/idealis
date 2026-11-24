@@ -9,7 +9,7 @@ mod print;
 pub mod reference;
 mod syntax;
 
-pub use emit::{alloy_label, to_alloy, to_tla};
+pub use emit::{DECLARATIONS, alloy_label, to_alloy, to_tla};
 pub use print::quint_like;
 use std::fmt;
 pub use syntax::{

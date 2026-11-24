@@ -21,8 +21,8 @@ fn reference_word(outcome: rmodel::reference::Outcome) -> (String, Option<usize>
     }
 }
 
-fn explicit(model: &rmodel::Model, check: &rmodel::Check) -> String {
-    let Ok((source, config)) = rmodel::to_tla(model, &check.name) else {
+fn explicit(model: &rmodel::Model, name: &str, kind: rmodel::CheckKind) -> String {
+    let Ok((source, config)) = rmodel::to_tla(model, name) else {
         return "lowering-error".into();
     };
     let program = match idealis_core::compile_tla_with_options(
@@ -42,11 +42,7 @@ fn explicit(model: &rmodel::Model, check: &rmodel::Check) -> String {
         max_temporal_nodes: None,
     }) {
         Err(error) => format!("error: {}", error.message),
-        Ok(result) => match (
-            result.status.as_str(),
-            result.violation.is_some(),
-            check.kind,
-        ) {
+        Ok(result) => match (result.status.as_str(), result.violation.is_some(), kind) {
             ("complete", _, rmodel::CheckKind::Invariant) => "holds".into(),
             ("complete", _, rmodel::CheckKind::Reachable) => "unreachable".into(),
             (_, true, rmodel::CheckKind::Invariant) => "violated".into(),
@@ -56,12 +52,12 @@ fn explicit(model: &rmodel::Model, check: &rmodel::Check) -> String {
     }
 }
 
-fn sat(alloy: &Result<ralloy::Model, String>, check: &rmodel::Check) -> String {
+fn sat(alloy: &Result<ralloy::Model, String>, name: &str, kind: rmodel::CheckKind) -> String {
     let alloy = match alloy {
         Ok(alloy) => alloy,
         Err(error) => return format!("error: {error}"),
     };
-    let label = rmodel::alloy_label(&check.name);
+    let label = rmodel::alloy_label(name);
     let Some(index) = alloy.commands().iter().position(|c| c.label == label) else {
         return "error: no command".into();
     };
@@ -73,9 +69,7 @@ fn sat(alloy: &Result<ralloy::Model, String>, check: &rmodel::Check) -> String {
             ralloy::Status::Instance => "reachable".into(),
             // A check without instances has inconsistent facts: empty. A run
             // without one is empty or unreachable; compared below.
-            ralloy::Status::NoInstance if check.kind == rmodel::CheckKind::Invariant => {
-                "empty".into()
-            }
+            ralloy::Status::NoInstance if kind == rmodel::CheckKind::Invariant => "empty".into(),
             ralloy::Status::NoInstance => "unreachable".into(),
             ralloy::Status::Unknown => "unknown".into(),
         },
@@ -104,19 +98,25 @@ fn main() {
                 continue;
             }
         };
-        let verdicts = rmodel::reference::evaluate(&model, 200_000);
+        let report = rmodel::reference::analyze(&model, 200_000);
+        // The model's checks and the built-in multiplicity check (plan 0099).
+        let mut checks: Vec<(String, rmodel::CheckKind, rmodel::reference::Outcome)> = model
+            .checks
+            .iter()
+            .zip(&report.verdicts)
+            .map(|(check, verdict)| (check.name.clone(), check.kind, verdict.outcome))
+            .collect();
+        checks.push((
+            rmodel::DECLARATIONS.to_owned(),
+            rmodel::CheckKind::Invariant,
+            report.declarations,
+        ));
         let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).map_err(|e| e.to_string());
         let mut keep = false;
-        for check in &model.checks {
-            let (reference, depth) = reference_word(
-                verdicts
-                    .iter()
-                    .find(|v| v.check == check.name)
-                    .unwrap()
-                    .outcome,
-            );
-            let explicit = explicit(&model, check);
-            let sat = sat(&alloy, check);
+        for (name, kind, outcome) in &checks {
+            let (reference, depth) = reference_word(*outcome);
+            let explicit = explicit(&model, name, *kind);
+            let sat = sat(&alloy, name, *kind);
             let deep = depth.is_some_and(|d| d >= model.scope.steps);
             let explicit_agrees = explicit == reference;
             let sat_agrees =
@@ -127,7 +127,7 @@ fn main() {
             let _ = writeln!(
                 lines,
                 "{{\"seed\":{seed},\"check\":{:?},\"reference\":{reference:?},\"depth\":{},\"explicit\":{explicit:?},\"sat\":{sat:?},\"deep\":{deep},\"explicitAgrees\":{explicit_agrees},\"satAgrees\":{sat_agrees}}}",
-                check.name,
+                name,
                 depth.map_or("null".into(), |d| d.to_string()),
             );
         }
