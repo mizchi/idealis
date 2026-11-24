@@ -1,0 +1,97 @@
+{
+  "driver": "evals/experiments/fold-order/fold_cost.rs",
+  "supersedes": "0089h-new-path (kept unchanged); tree that checks the source set for mixed kinds before admitting a text-order fold",
+  "preregistered": "evals/plans/0089-record-fold-order.md, 9th addendum",
+  "method": "release build, 400 check calls per cell, median, three runs",
+  "table": [
+    {
+      "irVersion": "v1",
+      "states": 1,
+      "elements": "integers",
+      "work": 2340,
+      "runsMicroseconds": [
+        77.4,
+        39.8,
+        40.4
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 1,
+      "elements": "records",
+      "work": 23016,
+      "runsMicroseconds": [
+        387.6,
+        410.1,
+        408.6
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 64,
+      "elements": "integers",
+      "work": 141570,
+      "runsMicroseconds": [
+        2252.0,
+        2232.7,
+        2269.3
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 64,
+      "elements": "records",
+      "work": 1460739,
+      "runsMicroseconds": [
+        25027.1,
+        25946.2,
+        25882.5
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 1,
+      "elements": "integers",
+      "work": 2532,
+      "runsMicroseconds": [
+        57.2,
+        58.6,
+        57.8
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 1,
+      "elements": "records",
+      "work": 23208,
+      "runsMicroseconds": [
+        429.2,
+        440.1,
+        443.9
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 64,
+      "elements": "integers",
+      "work": 153858,
+      "runsMicroseconds": [
+        2531.8,
+        2525.2,
+        2567.2
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 64,
+      "elements": "records",
+      "work": 1473027,
+      "runsMicroseconds": [
+        25823.0,
+        26372.5,
+        26169.9
+      ]
+    }
+  ],
+  "note": "Time is recorded, not judged."
+}

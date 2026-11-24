@@ -1542,23 +1542,40 @@ impl Expression {
             }
             let mut result = initial.eval(ctx, arena)?;
             let source = collection.eval(ctx, arena)?;
-            let elements = match order {
-                FoldOrder::SetMembers => arena.fold_members(source)?,
-                FoldOrder::SequenceLeft => arena.sequence(source)?,
+            let (elements, replacement) = match order {
+                FoldOrder::SetMembers => {
+                    let found = arena.fold_members(source, self)?;
+                    (found.members, found.replacement)
+                }
+                FoldOrder::SequenceLeft => (arena.sequence(source)?, None),
             };
             let mut locals = ctx.locals.to_vec();
             for element in elements {
                 arena.tick()?;
                 locals.push(result);
                 locals.push(element);
-                result = body.eval(
-                    EvalContext {
-                        locals: &locals,
-                        ..ctx
-                    },
-                    arena,
-                )?;
+                result = body
+                    .eval(
+                        EvalContext {
+                            locals: &locals,
+                            ..ctx
+                        },
+                        arena,
+                    )
+                    .map_err(|error| match replacement {
+                        Some(message)
+                            if error.code != "budget"
+                                && error.code != "evaluation-budget"
+                                && !error.message.starts_with("Unsupported TLA input") =>
+                        {
+                            CoreError::protocol(message)
+                        }
+                        _ => error,
+                    })?;
                 locals.truncate(ctx.locals.len());
+            }
+            if let Some(message) = replacement {
+                arena.require_comparable_members(result, message)?;
             }
             result
         })

@@ -2,6 +2,7 @@
 mod functions;
 use crate::ir::{Definition, Expression, Scalar};
 use crate::safety_expressions::MembershipSet;
+use crate::safety_fold_order::{OrderIndependence, classify};
 use crate::safety_prepared::PreparedProgram;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::safety_work::WorkBudget;
@@ -833,19 +834,252 @@ impl<'scope> Arena<'scope> {
             _ => Err(CoreError::protocol("Expected a finite set")),
         }
     }
-    pub fn fold_members(&mut self, value: Scalar) -> Result<Vec<Scalar>, CoreError> {
+    pub fn fold_members(
+        &mut self,
+        value: Scalar,
+        fold: &Expression,
+    ) -> Result<FoldMembers, CoreError> {
         let members = self.members(value)?;
-        self.check_fold_order(&members)?;
-        Ok(members)
+        let replacement = self.check_fold_order(&members, fold)?;
+        Ok(FoldMembers {
+            members,
+            replacement,
+        })
     }
-    fn check_fold_order(&mut self, values: &[Scalar]) -> Result<(), CoreError> {
+    pub fn require_comparable_members(
+        &mut self,
+        value: Scalar,
+        message: &'static str,
+    ) -> Result<(), CoreError> {
+        let Ok(Cell::Set(members)) = self.cell(value) else {
+            return Ok(());
+        };
+        let width = members.len();
+        self.consume(width)?;
+        let Ok(Cell::Set(members)) = self.cell(value) else {
+            return Ok(());
+        };
+        let members = members.clone();
+        let kind = |value: Scalar| match value {
+            Scalar::Int(_) => Some(0),
+            Scalar::Bool(_) => Some(1),
+            Scalar::Ref(_) => matches!(self.cell(value), Ok(Cell::String(_))).then_some(2),
+        };
+        if members.first().is_none_or(|first| {
+            members
+                .iter()
+                .all(|member| kind(*member) == kind(*first) && kind(*first).is_some())
+        }) {
+            return Ok(());
+        }
+        match self.check_nested_kinds(value) {
+            Err(error) if !matches!(error.code, "budget" | "evaluation-budget") => {
+                Err(CoreError::protocol(message))
+            }
+            outcome => outcome,
+        }
+    }
+    fn check_nested_kinds(&mut self, root: Scalar) -> Result<(), CoreError> {
+        self.walk_nested_kinds(vec![root])
+    }
+    fn walk_nested_kinds(&mut self, mut pending: Vec<Scalar>) -> Result<(), CoreError> {
+        let mut visited = HashSet::new();
+        while let Some(value) = pending.pop() {
+            let Scalar::Ref(index) = value else {
+                continue;
+            };
+            if !visited.insert(index) {
+                continue;
+            }
+            self.tick()?;
+            let width = match self.cell(value) {
+                Ok(Cell::Set(members)) => members.len(),
+                Ok(Cell::Function(entries)) => entries.len(),
+                _ => continue,
+            };
+            self.consume(width)?;
+            match self.cell(value) {
+                Ok(Cell::Set(members)) => {
+                    let members = members.clone();
+                    self.same_kinds_within(&members)?;
+                    pending.extend(members);
+                }
+                Ok(Cell::Function(entries)) => {
+                    let (keys, values): (Vec<Scalar>, Vec<Scalar>) = entries.iter().unzip();
+                    self.same_kinds_within(&keys)?;
+                    pending.extend(keys);
+                    pending.extend(values);
+                }
+                _ => {}
+            }
+        }
+        Ok(())
+    }
+    fn same_kinds(&mut self, left: Scalar, right: Scalar) -> Result<(), CoreError> {
+        self.tick()?;
+        if left == right
+            || matches!(
+                (left, right),
+                (Scalar::Int(_), Scalar::Int(_)) | (Scalar::Bool(_), Scalar::Bool(_))
+            )
+            || self.model_comparison(left, right)?
+        {
+            return Ok(());
+        }
+        if self.rank(left) != self.rank(right) {
+            return Err(CoreError::protocol("Incomparable TLA values"));
+        }
+        if let (Ok(Cell::Set(first)), Ok(Cell::Set(second))) = (self.cell(left), self.cell(right)) {
+            if first.len() != second.len() {
+                return Ok(());
+            }
+            let width = first.len() + second.len();
+            self.consume(width)?;
+            let (Ok(Cell::Set(first)), Ok(Cell::Set(second))) = (self.cell(left), self.cell(right))
+            else {
+                return Ok(());
+            };
+            let (first, second) = (first.clone(), second.clone());
+            for first in &first {
+                for second in &second {
+                    self.same_kinds(*first, *second)?;
+                }
+            }
+            return Ok(());
+        }
+        let (Ok(Cell::Function(first)), Ok(Cell::Function(second))) =
+            (self.cell(left), self.cell(right))
+        else {
+            return Ok(());
+        };
+        let width = first.len() + second.len();
+        self.consume(width)?;
+        let (Ok(Cell::Function(left)), Ok(Cell::Function(right))) =
+            (self.cell(left), self.cell(right))
+        else {
+            return Ok(());
+        };
+        let left: Vec<(Scalar, Scalar)> = left.iter().collect();
+        let right: Vec<(Scalar, Scalar)> = right.iter().collect();
+        let left_named = self.named_entries(&left);
+        let right_named = self.named_entries(&right);
+        if (left_named && !right.is_empty() && !right_named)
+            || (right_named && !left.is_empty() && !left_named)
+        {
+            return Err(CoreError::protocol("Incomparable TLA values"));
+        }
+        if left.len() != right.len() {
+            return Ok(());
+        }
+        if left_named {
+            return self.same_kinds_by_name(&left, &right);
+        }
+        let integer_keys = left
+            .iter()
+            .chain(right.iter())
+            .all(|(key, _)| matches!(key, Scalar::Int(_)));
+        if integer_keys {
+            for (left, right) in left.iter().zip(right.iter()) {
+                self.tick()?;
+                if left.0 != right.0 {
+                    if let (Scalar::Int(first), Scalar::Int(second)) = (left.0, right.0)
+                        && first.abs_diff(second) > i32::MAX as u32
+                    {
+                        return Err(CoreError::protocol("Incomparable TLA values"));
+                    }
+                    break;
+                }
+                self.same_kinds(left.1, right.1)?;
+                if !self.equal(left.1, right.1)? {
+                    break;
+                }
+            }
+            return Ok(());
+        }
+        for (first, _) in &left {
+            for (second, _) in &right {
+                self.same_kinds(*first, *second)?;
+            }
+        }
+        for (_, first) in &left {
+            for (_, second) in &right {
+                self.same_kinds(*first, *second)?;
+            }
+        }
+        Ok(())
+    }
+    fn same_kinds_within(&mut self, members: &[Scalar]) -> Result<(), CoreError> {
+        let kind = |value: &Scalar| match value {
+            Scalar::Int(_) => Some(0),
+            Scalar::Bool(_) => Some(1),
+            Scalar::Ref(_) => matches!(self.cell(*value), Ok(Cell::String(_))).then_some(2),
+        };
+        if members.first().is_some_and(|first| {
+            members
+                .iter()
+                .all(|member| kind(member) == kind(first) && kind(first).is_some())
+        }) {
+            return Ok(());
+        }
+        for (index, first) in members.iter().enumerate() {
+            for second in &members[index + 1..] {
+                self.same_kinds(*first, *second)?;
+            }
+        }
+        Ok(())
+    }
+    fn named_entries(&self, entries: &[(Scalar, Scalar)]) -> bool {
+        !entries.is_empty()
+            && entries
+                .iter()
+                .all(|(key, _)| matches!(self.cell(*key), Ok(Cell::String(_))))
+    }
+    fn same_kinds_by_name(
+        &mut self,
+        left: &[(Scalar, Scalar)],
+        right: &[(Scalar, Scalar)],
+    ) -> Result<(), CoreError> {
+        let (mut first, mut second) = (0, 0);
+        while first < left.len() && second < right.len() {
+            self.tick()?;
+            match self.total(left[first].0, right[second].0) {
+                Ordering::Less => first += 1,
+                Ordering::Greater => second += 1,
+                Ordering::Equal => {
+                    self.same_kinds(left[first].1, right[second].1)?;
+                    first += 1;
+                    second += 1;
+                }
+            }
+        }
+        Ok(())
+    }
+    fn fold_independence(&self, fold: &Expression) -> OrderIndependence {
+        match self.prepared {
+            Some(prepared) => prepared.fold_independence(fold, self.definitions),
+            None => match fold {
+                Expression::Fold {
+                    accumulator, body, ..
+                } => classify(*accumulator, body, self.definitions),
+                _ => OrderIndependence::Dependent,
+            },
+        }
+    }
+    fn check_fold_order(
+        &mut self,
+        values: &[Scalar],
+        fold: &Expression,
+    ) -> Result<Option<&'static str>, CoreError> {
+        let single = values.len() <= 1;
+        let mut text = None;
+        let mut independence = OrderIndependence::Dependent;
         let mut pending: Vec<_> = values.iter().rev().map(|value| (*value, false)).collect();
         let mut visited = HashSet::new();
         let mut keys = None;
         while let Some((value, is_key)) = pending.pop() {
             if is_key {
                 let Scalar::Int(key) = value else {
-                    return Err(unsupported_fold_order());
+                    return self.refuse_fold_order(values, single, text, unsupported_fold_order());
                 };
                 keys = Some(match keys {
                     Some((minimum, maximum)) => (key.min(minimum), key.max(maximum)),
@@ -860,44 +1094,117 @@ impl<'scope> Arena<'scope> {
                 self.tick()?;
                 match self.cell(value)? {
                     Cell::ModelValue(_) => {
-                        return Err(CoreError::protocol(
-                            "Unsupported TLA input: set fold order for model values is not implemented",
-                        ));
+                        return self.refuse_fold_order(
+                            values,
+                            single,
+                            text,
+                            CoreError::protocol(
+                                "Unsupported TLA input: set fold order for model values is not implemented",
+                            ),
+                        );
                     }
                     Cell::String(_) => {
-                        return Err(CoreError::protocol(
-                            "Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR",
-                        ));
+                        if text.is_none() {
+                            if single {
+                                return self.exempt_singleton(
+                                    values,
+                                    CoreError::protocol(STRING_FOLD_ORDER),
+                                );
+                            }
+                            independence = self.text_fold_order(fold, STRING_FOLD_ORDER)?;
+                            text = Some(STRING_FOLD_ORDER);
+                        }
                     }
                     Cell::Set(values) => {
                         pending.extend(values.iter().rev().map(|value| (*value, false)));
                     }
                     Cell::Function(entries) => {
-                        if !entries.is_empty()
+                        let record = !entries.is_empty()
                             && entries
                                 .iter()
-                                .all(|entry| matches!(self.cell(entry.0), Ok(Cell::String(_))))
-                        {
-                            return Err(CoreError::protocol(
-                                "Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR",
-                            ));
+                                .all(|entry| matches!(self.cell(entry.0), Ok(Cell::String(_))));
+                        if record && text.is_none() {
+                            if single {
+                                return self.exempt_singleton(
+                                    values,
+                                    CoreError::protocol(RECORD_FOLD_ORDER),
+                                );
+                            }
+                            independence = self.text_fold_order(fold, RECORD_FOLD_ORDER)?;
+                            text = Some(RECORD_FOLD_ORDER);
                         }
                         for (key, value) in entries.iter().rev() {
                             pending.push((value, false));
-                            pending.push((key, true));
+                            if !record {
+                                pending.push((key, true));
+                            }
                         }
                     }
                 }
             }
         }
+        if let (Some(message), false, true) =
+            (text, single, independence != OrderIndependence::Dependent)
+        {
+            let comparable = self
+                .same_kinds_within(values)
+                .and_then(|()| self.walk_nested_kinds(values.to_vec()));
+            if let Err(error) = comparable {
+                return Err(match error.code {
+                    "budget" | "evaluation-budget" => error,
+                    _ => CoreError::protocol(message),
+                });
+            }
+        }
         if let Some((minimum, maximum)) = keys
             && maximum.abs_diff(minimum) > i32::MAX as u32
         {
-            return Err(CoreError::protocol(
-                "Unsupported TLA input: set fold order for integer function domains spanning more than i32::MAX",
-            ));
+            return self.refuse_fold_order(
+                values,
+                single,
+                text,
+                CoreError::protocol(
+                    "Unsupported TLA input: set fold order for integer function domains spanning more than i32::MAX",
+                ),
+            );
         }
-        Ok(())
+        Ok((independence == OrderIndependence::Union)
+            .then_some(text)
+            .flatten())
+    }
+    fn text_fold_order(
+        &self,
+        fold: &Expression,
+        message: &'static str,
+    ) -> Result<OrderIndependence, CoreError> {
+        match self.fold_independence(fold) {
+            OrderIndependence::Dependent => Err(CoreError::protocol(message)),
+            independence => Ok(independence),
+        }
+    }
+    fn exempt_singleton(
+        &mut self,
+        values: &[Scalar],
+        refusal: CoreError,
+    ) -> Result<Option<&'static str>, CoreError> {
+        match self.walk_nested_kinds(values.to_vec()) {
+            Ok(()) => Ok(None),
+            Err(error) if matches!(error.code, "budget" | "evaluation-budget") => Err(error),
+            Err(_) => Err(refusal),
+        }
+    }
+    fn refuse_fold_order(
+        &mut self,
+        values: &[Scalar],
+        single: bool,
+        text: Option<&'static str>,
+        error: CoreError,
+    ) -> Result<Option<&'static str>, CoreError> {
+        if single {
+            self.exempt_singleton(values, text.map_or(error, CoreError::protocol))
+        } else {
+            Err(text.map_or(error, CoreError::protocol))
+        }
     }
     pub fn contains(&self, value: Scalar, set: Scalar) -> Result<bool, CoreError> {
         let Cell::Set(values) = self.cell(set)? else {
@@ -1172,6 +1479,16 @@ impl<'scope> Arena<'scope> {
     }
 }
 
+const STRING_FOLD_ORDER: &str =
+    "Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR";
+const RECORD_FOLD_ORDER: &str = "Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR";
+
+#[derive(Debug)]
+pub(crate) struct FoldMembers {
+    pub members: Vec<Scalar>,
+    pub replacement: Option<&'static str>,
+}
+
 fn unsupported_fold_order() -> CoreError {
     CoreError::protocol("Unsupported TLA input: set fold order for strings, records or functions")
 }
@@ -1216,7 +1533,7 @@ impl ValueRemap {
 #[cfg(test)]
 mod tests {
     use super::{Arena, Cell, ValueHasher};
-    use crate::ir::Scalar;
+    use crate::ir::{Expression, FoldOrder, Scalar};
     use std::hash::{Hash, Hasher};
 
     #[test]
@@ -1230,10 +1547,17 @@ mod tests {
         let second = arena.tuple(vec![Scalar::Int(2), deep]).unwrap();
         let members = arena.set(vec![first, second]).unwrap();
         let before = arena.work;
-        let result = arena.fold_members(members);
+        let fold = Expression::Fold {
+            accumulator: 0,
+            initial: Box::new(Expression::Old),
+            collection: Box::new(Expression::Old),
+            order: FoldOrder::SetMembers,
+            body: Box::new(Expression::Old),
+        };
+        let result = arena.fold_members(members, &fold);
         assert_eq!(arena.work - before, 50);
-        assert_eq!(result.unwrap(), vec![first, second]);
-        let error = arena.fold_members(members).unwrap_err();
+        assert_eq!(result.unwrap().members, vec![first, second]);
+        let error = arena.fold_members(members, &fold).unwrap_err();
         assert_eq!(error.code, "budget");
         assert_eq!(error.message, "Safety work budget exhausted");
         assert_eq!(arena.work, 150);

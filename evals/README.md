@@ -18,6 +18,8 @@
 
 [0089: Quint IRを直接読むfrontend](iterations/0089-quint-ir-frontend.md)は、Quint CLIのJSON IRを標準のTLA+へ写すcrate rquintを作った。Apalacheを経由せずに、0044の12件でTLCと判定・状態数・生成数が一致し、builtinの事実もQuintのsimulatorと同じ判定になった。
 
+[0089: 順序に依存しない集合 fold をrecord・文字列を含む要素でも受理する](iterations/0089-record-fold-order.md)は、TLCのintern IDなしで結果がTLCと同じになると分かる3つの形（要素1個以下、bodyが要素を読まない、累積値への`\union`）だけをrtlcが受理する。固定TLCで22入力を採取し、宣言した9件と新しい対照がログと一致した。今受理される入力の結果・work・IRは変わらない。
+
 [0088: 総当たりとSATのportfolio](iterations/0088-ralloy-portfolio.md)は、総当たりを5000 workで先に走らせてSATへ切り替える方法を実装し、正しさの検査を通した。速度の2回の測定は関係のないプロセスの負荷（8〜22）に埋もれて`hold`になり、変更を戻した。
 
 [0087: SATと総当たりの切り替えの境界](iterations/0087-ralloy-backend-threshold.md)は、171 commandで両backendを測った。合計が最小の4 bitは、小さい探索を2〜13倍遅くして`hold`になり、24 bitに戻した。幅は、解がすぐ見つかるかを表さないため、backendの選択の目安にならなかった。

@@ -1,0 +1,97 @@
+{
+  "driver": "evals/experiments/fold-order/fold_cost.rs",
+  "supersedes": "0089k-new-path (kept unchanged); tree that refuses integer keys whose difference exceeds i32 in a result comparison, charges the result scan and function widths before copying, and searches ENABLED operands",
+  "preregistered": "evals/plans/0089-record-fold-order.md, 12th addendum",
+  "method": "release build, 400 check calls per cell, median, three runs",
+  "note": "Time is recorded, not judged.",
+  "table": [
+    {
+      "irVersion": "v1",
+      "states": 1,
+      "elements": "integers",
+      "work": 2340,
+      "runsMicroseconds": [
+        45.5,
+        38.1,
+        38.0
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 1,
+      "elements": "records",
+      "work": 23080,
+      "runsMicroseconds": [
+        364.2,
+        366.3,
+        370.5
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 64,
+      "elements": "integers",
+      "work": 141570,
+      "runsMicroseconds": [
+        2066.8,
+        2072.8,
+        2123.7
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 64,
+      "elements": "records",
+      "work": 1464835,
+      "runsMicroseconds": [
+        22978.2,
+        23000.4,
+        23548.3
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 1,
+      "elements": "integers",
+      "work": 2532,
+      "runsMicroseconds": [
+        52.4,
+        50.8,
+        51.6
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 1,
+      "elements": "records",
+      "work": 23272,
+      "runsMicroseconds": [
+        397.7,
+        394.6,
+        412.8
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 64,
+      "elements": "integers",
+      "work": 153858,
+      "runsMicroseconds": [
+        2336.8,
+        2329.1,
+        2414.9
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 64,
+      "elements": "records",
+      "work": 1477123,
+      "runsMicroseconds": [
+        23442.2,
+        23307.8,
+        24216.0
+      ]
+    }
+  ]
+}

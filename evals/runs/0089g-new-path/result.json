@@ -1,0 +1,98 @@
+{
+  "driver": "evals/experiments/fold-order/fold_cost.rs",
+  "supersedes": "0089f-new-path (kept unchanged); tree whose result check visits every set in the result for mixed kinds, instead of checking only the pairs inside the pairs being compared",
+  "preregistered": "evals/plans/0089-record-fold-order.md, 7th addendum (conditions of the 6th addendum, restated after the run)",
+  "method": "release build, 400 check calls per cell, median, three runs",
+  "loadAverageAtStart": "3.00",
+  "table": [
+    {
+      "irVersion": "v1",
+      "states": 1,
+      "elements": "integers",
+      "work": 2340,
+      "runsMicroseconds": [
+        44.6,
+        37.8,
+        38.1
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 1,
+      "elements": "records",
+      "work": 12679,
+      "runsMicroseconds": [
+        276.5,
+        277.5,
+        276.8
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 64,
+      "elements": "integers",
+      "work": 141570,
+      "runsMicroseconds": [
+        2065.0,
+        2089.9,
+        2093.1
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 64,
+      "elements": "records",
+      "work": 799171,
+      "runsMicroseconds": [
+        17695.4,
+        17689.1,
+        17665.2
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 1,
+      "elements": "integers",
+      "work": 2532,
+      "runsMicroseconds": [
+        53.7,
+        54.2,
+        53.2
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 1,
+      "elements": "records",
+      "work": 12871,
+      "runsMicroseconds": [
+        307.5,
+        316.2,
+        309.4
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 64,
+      "elements": "integers",
+      "work": 153858,
+      "runsMicroseconds": [
+        2348.6,
+        2479.3,
+        2425.0
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 64,
+      "elements": "records",
+      "work": 811459,
+      "runsMicroseconds": [
+        18026.8,
+        18100.5,
+        18274.0
+      ]
+    }
+  ],
+  "note": "Integer work is identical to 0089f-new-path. Record work rises by about 0.5 percent (v1 states=1: 12613 to 12679) from the one-time walk over the result. Time is recorded, not judged."
+}

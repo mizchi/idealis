@@ -1,0 +1,97 @@
+{
+  "driver": "evals/experiments/fold-order/fold_cost.rs",
+  "supersedes": "0089g-new-path (kept unchanged); tree whose result walk checks function domains and charges entry counts",
+  "preregistered": "evals/plans/0089-record-fold-order.md, 7th addendum conditions",
+  "method": "release build, 400 check calls per cell, median, three runs",
+  "table": [
+    {
+      "irVersion": "v1",
+      "states": 1,
+      "elements": "integers",
+      "work": 2340,
+      "runsMicroseconds": [
+        41.0,
+        40.3,
+        39.7
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 1,
+      "elements": "records",
+      "work": 12807,
+      "runsMicroseconds": [
+        291.9,
+        309.0,
+        306.5
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 64,
+      "elements": "integers",
+      "work": 141570,
+      "runsMicroseconds": [
+        2284.4,
+        2302.4,
+        2315.7
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 64,
+      "elements": "records",
+      "work": 807363,
+      "runsMicroseconds": [
+        18753.1,
+        19379.4,
+        19084.2
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 1,
+      "elements": "integers",
+      "work": 2532,
+      "runsMicroseconds": [
+        58.5,
+        56.1,
+        58.5
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 1,
+      "elements": "records",
+      "work": 12999,
+      "runsMicroseconds": [
+        328.5,
+        330.1,
+        326.6
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 64,
+      "elements": "integers",
+      "work": 153858,
+      "runsMicroseconds": [
+        2534.3,
+        2569.7,
+        2575.7
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 64,
+      "elements": "records",
+      "work": 819651,
+      "runsMicroseconds": [
+        19573.0,
+        19458.1,
+        19325.4
+      ]
+    }
+  ],
+  "note": "Integer work identical to 0089g-new-path. Record work rises (v1 states=1: 12679 to 12807) from the charged entry counts. Record medians are 5 to 8 percent above 0089g (v1 states=1: 292 to 309 us vs 276 to 278 us), recorded and not judged (load average not recorded)."
+}

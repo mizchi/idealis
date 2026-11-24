@@ -1,0 +1,97 @@
+{
+  "driver": "evals/experiments/fold-order/fold_cost.rs",
+  "supersedes": "0089i-new-path (kept unchanged); tree that checks the nested values of a singleton source before the singleton exemption",
+  "preregistered": "evals/plans/0089-record-fold-order.md, 10th addendum",
+  "method": "release build, 400 check calls per cell, median, three runs",
+  "note": "Time is recorded, not judged.",
+  "table": [
+    {
+      "irVersion": "v1",
+      "states": 1,
+      "elements": "integers",
+      "work": 2340,
+      "runsMicroseconds": [
+        69.2,
+        37.0,
+        39.9
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 1,
+      "elements": "records",
+      "work": 23016,
+      "runsMicroseconds": [
+        361.4,
+        365.5,
+        362.1
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 64,
+      "elements": "integers",
+      "work": 141570,
+      "runsMicroseconds": [
+        2042.5,
+        2058.2,
+        2083.5
+      ]
+    },
+    {
+      "irVersion": "v1",
+      "states": 64,
+      "elements": "records",
+      "work": 1460739,
+      "runsMicroseconds": [
+        22542.4,
+        22647.5,
+        22525.4
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 1,
+      "elements": "integers",
+      "work": 2532,
+      "runsMicroseconds": [
+        51.3,
+        51.8,
+        51.8
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 1,
+      "elements": "records",
+      "work": 23208,
+      "runsMicroseconds": [
+        382.4,
+        384.3,
+        380.9
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 64,
+      "elements": "integers",
+      "work": 153858,
+      "runsMicroseconds": [
+        2316.7,
+        2322.2,
+        2362.2
+      ]
+    },
+    {
+      "irVersion": "v2",
+      "states": 64,
+      "elements": "records",
+      "work": 1473027,
+      "runsMicroseconds": [
+        22820.2,
+        22971.5,
+        22733.0
+      ]
+    }
+  ]
+}

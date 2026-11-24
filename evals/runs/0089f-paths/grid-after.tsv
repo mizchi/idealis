@@ -1,0 +1,85 @@
+unsupported-string-direct	append	accepted	v1v2same=false	v1=ok:invariant-violation:9	v2=ok:invariant-violation:13
+unsupported-string-direct	plus-one	accepted	v1v2same=false	v1=ok:invariant-violation:7	v2=ok:invariant-violation:10
+unsupported-string-direct	union	accepted	v1v2same=false	v1=ok:invariant-violation:9	v2=ok:invariant-violation:13
+unsupported-string-direct	union-left	accepted	v1v2same=false	v1=ok:invariant-violation:13	v2=ok:invariant-violation:17
+unsupported-string-direct	union-nonset-init	other	v1v2same=true	v1=err:Expected a finite set	v2=err:Expected a finite set
+unsupported-string-direct	reads-acc	accepted	v1v2same=false	v1=ok:invariant-violation:13	v2=ok:invariant-violation:18
+unsupported-string-tuple	append	accepted	v1v2same=false	v1=ok:invariant-violation:12	v2=ok:invariant-violation:16
+unsupported-string-tuple	plus-one	accepted	v1v2same=false	v1=ok:invariant-violation:10	v2=ok:invariant-violation:13
+unsupported-string-tuple	union	accepted	v1v2same=false	v1=ok:invariant-violation:12	v2=ok:invariant-violation:16
+unsupported-string-tuple	union-left	accepted	v1v2same=false	v1=ok:invariant-violation:16	v2=ok:invariant-violation:20
+unsupported-string-tuple	union-nonset-init	other	v1v2same=true	v1=err:Expected a finite set	v2=err:Expected a finite set
+unsupported-string-tuple	reads-acc	accepted	v1v2same=false	v1=ok:invariant-violation:16	v2=ok:invariant-violation:21
+unsupported-string-set	append	accepted	v1v2same=false	v1=ok:invariant-violation:12	v2=ok:invariant-violation:16
+unsupported-string-set	plus-one	accepted	v1v2same=false	v1=ok:invariant-violation:10	v2=ok:invariant-violation:13
+unsupported-string-set	union	accepted	v1v2same=false	v1=ok:invariant-violation:12	v2=ok:invariant-violation:16
+unsupported-string-set	union-left	accepted	v1v2same=false	v1=ok:invariant-violation:16	v2=ok:invariant-violation:20
+unsupported-string-set	union-nonset-init	other	v1v2same=true	v1=err:Expected a finite set	v2=err:Expected a finite set
+unsupported-string-set	reads-acc	accepted	v1v2same=false	v1=ok:invariant-violation:16	v2=ok:invariant-violation:21
+unsupported-record-direct	append	accepted	v1v2same=false	v1=ok:invariant-violation:11	v2=ok:invariant-violation:15
+unsupported-record-direct	plus-one	accepted	v1v2same=false	v1=ok:invariant-violation:9	v2=ok:invariant-violation:12
+unsupported-record-direct	union	accepted	v1v2same=false	v1=ok:invariant-violation:11	v2=ok:invariant-violation:15
+unsupported-record-direct	union-left	accepted	v1v2same=false	v1=ok:invariant-violation:15	v2=ok:invariant-violation:19
+unsupported-record-direct	union-nonset-init	other	v1v2same=true	v1=err:Expected a finite set	v2=err:Expected a finite set
+unsupported-record-direct	reads-acc	accepted	v1v2same=false	v1=ok:invariant-violation:15	v2=ok:invariant-violation:20
+unsupported-record-tuple	append	accepted	v1v2same=false	v1=ok:invariant-violation:14	v2=ok:invariant-violation:18
+unsupported-record-tuple	plus-one	accepted	v1v2same=false	v1=ok:invariant-violation:12	v2=ok:invariant-violation:15
+unsupported-record-tuple	union	accepted	v1v2same=false	v1=ok:invariant-violation:14	v2=ok:invariant-violation:18
+unsupported-record-tuple	union-left	accepted	v1v2same=false	v1=ok:invariant-violation:18	v2=ok:invariant-violation:22
+unsupported-record-tuple	union-nonset-init	other	v1v2same=true	v1=err:Expected a finite set	v2=err:Expected a finite set
+unsupported-record-tuple	reads-acc	accepted	v1v2same=false	v1=ok:invariant-violation:18	v2=ok:invariant-violation:23
+unsupported-record-set	append	accepted	v1v2same=false	v1=ok:invariant-violation:14	v2=ok:invariant-violation:18
+unsupported-record-set	plus-one	accepted	v1v2same=false	v1=ok:invariant-violation:12	v2=ok:invariant-violation:15
+unsupported-record-set	union	accepted	v1v2same=false	v1=ok:invariant-violation:14	v2=ok:invariant-violation:18
+unsupported-record-set	union-left	accepted	v1v2same=false	v1=ok:invariant-violation:18	v2=ok:invariant-violation:22
+unsupported-record-set	union-nonset-init	other	v1v2same=true	v1=err:Expected a finite set	v2=err:Expected a finite set
+unsupported-record-set	reads-acc	accepted	v1v2same=false	v1=ok:invariant-violation:18	v2=ok:invariant-violation:23
+set-strings	append	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR
+set-strings	plus-one	accepted	v1v2same=false	v1=ok:invariant-violation:27	v2=ok:invariant-violation:40
+set-strings	union	accepted	v1v2same=false	v1=ok:invariant-violation:59	v2=ok:invariant-violation:78
+set-strings	union-left	accepted	v1v2same=false	v1=ok:invariant-violation:138	v2=ok:invariant-violation:157
+set-strings	union-nonset-init	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR
+set-strings	reads-acc	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR
+set-strings-reversed	append	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR
+set-strings-reversed	plus-one	accepted	v1v2same=false	v1=ok:invariant-violation:27	v2=ok:invariant-violation:40
+set-strings-reversed	union	accepted	v1v2same=false	v1=ok:invariant-violation:59	v2=ok:invariant-violation:78
+set-strings-reversed	union-left	accepted	v1v2same=false	v1=ok:invariant-violation:138	v2=ok:invariant-violation:157
+set-strings-reversed	union-nonset-init	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR
+set-strings-reversed	reads-acc	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR
+set-records	append	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR
+set-records	plus-one	accepted	v1v2same=false	v1=ok:invariant-violation:21	v2=ok:invariant-violation:28
+set-records	union	accepted	v1v2same=false	v1=ok:invariant-violation:45	v2=ok:invariant-violation:55
+set-records	union-left	accepted	v1v2same=false	v1=ok:invariant-violation:64	v2=ok:invariant-violation:74
+set-records	union-nonset-init	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR
+set-records	reads-acc	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR
+set-record-fields	append	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR
+set-record-fields	plus-one	accepted	v1v2same=false	v1=ok:invariant-violation:15	v2=ok:invariant-violation:20
+set-record-fields	union	accepted	v1v2same=false	v1=ok:invariant-violation:25	v2=ok:invariant-violation:32
+set-record-fields	union-left	accepted	v1v2same=false	v1=ok:invariant-violation:35	v2=ok:invariant-violation:42
+set-record-fields	union-nonset-init	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR
+set-record-fields	reads-acc	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR
+set-nested-strings	append	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR
+set-nested-strings	plus-one	accepted	v1v2same=false	v1=ok:invariant-violation:17	v2=ok:invariant-violation:22
+set-nested-strings	union	accepted	v1v2same=false	v1=ok:invariant-violation:28	v2=ok:invariant-violation:35
+set-nested-strings	union-left	accepted	v1v2same=false	v1=ok:invariant-violation:38	v2=ok:invariant-violation:45
+set-nested-strings	union-nonset-init	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR
+set-nested-strings	reads-acc	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR
+set-sets-of-strings	append	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR
+set-sets-of-strings	plus-one	accepted	v1v2same=false	v1=ok:invariant-violation:17	v2=ok:invariant-violation:22
+set-sets-of-strings	union	accepted	v1v2same=false	v1=ok:invariant-violation:25	v2=ok:invariant-violation:32
+set-sets-of-strings	union-left	accepted	v1v2same=false	v1=ok:invariant-violation:35	v2=ok:invariant-violation:42
+set-sets-of-strings	union-nonset-init	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR
+set-sets-of-strings	reads-acc	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR
+set-functions-with-strings	append	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR
+set-functions-with-strings	plus-one	accepted	v1v2same=false	v1=ok:invariant-violation:17	v2=ok:invariant-violation:22
+set-functions-with-strings	union	accepted	v1v2same=false	v1=ok:invariant-violation:28	v2=ok:invariant-violation:35
+set-functions-with-strings	union-left	accepted	v1v2same=false	v1=ok:invariant-violation:38	v2=ok:invariant-violation:45
+set-functions-with-strings	union-nonset-init	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR
+set-functions-with-strings	reads-acc	refused	v1v2same=true	v1=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR	v2=err:Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR
+set-functions-with-records	append	accepted	v1v2same=false	v1=ok:invariant-violation:14	v2=ok:invariant-violation:18
+set-functions-with-records	plus-one	accepted	v1v2same=false	v1=ok:invariant-violation:12	v2=ok:invariant-violation:15
+set-functions-with-records	union	accepted	v1v2same=false	v1=ok:invariant-violation:14	v2=ok:invariant-violation:18
+set-functions-with-records	union-left	accepted	v1v2same=false	v1=ok:invariant-violation:18	v2=ok:invariant-violation:22
+set-functions-with-records	union-nonset-init	other	v1v2same=true	v1=err:Expected a finite set	v2=err:Expected a finite set
+set-functions-with-records	reads-acc	accepted	v1v2same=false	v1=ok:invariant-violation:18	v2=ok:invariant-violation:23
+TOTAL accepted=56 refused=21 other=7 v1v2differ=56

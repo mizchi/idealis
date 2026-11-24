@@ -1,0 +1,17 @@
+{
+  "driver": "evals/experiments/fold-order/fold_cost.rs",
+  "supersedes": "0089c-new-path (kept unchanged); tree whose comparable-members check pairs record fields by name and checks the members inside sets of different sizes",
+  "method": "release build, 400 check calls per cell, median, three runs",
+  "loadAverageAtStart": "2.82",
+  "table": [
+    {"irVersion": "v1", "states": 1, "elements": "integers", "work": 2340, "runsMicroseconds": [76.6, 37.3, 38.6]},
+    {"irVersion": "v1", "states": 1, "elements": "records", "work": 6565, "runsMicroseconds": [271.0, 264.3, 267.5]},
+    {"irVersion": "v1", "states": 64, "elements": "integers", "work": 141570, "runsMicroseconds": [2081.6, 2056.5, 2083.9]},
+    {"irVersion": "v1", "states": 64, "elements": "records", "work": 407875, "runsMicroseconds": [16404.6, 16344.2, 16711.3]},
+    {"irVersion": "v2", "states": 1, "elements": "integers", "work": 2532, "runsMicroseconds": [51.5, 51.5, 52.0]},
+    {"irVersion": "v2", "states": 1, "elements": "records", "work": 6757, "runsMicroseconds": [285.9, 287.2, 287.9]},
+    {"irVersion": "v2", "states": 64, "elements": "integers", "work": 153858, "runsMicroseconds": [2338.5, 2343.8, 2370.7]},
+    {"irVersion": "v2", "states": 64, "elements": "records", "work": 420163, "runsMicroseconds": [16676.8, 16709.5, 17004.2]}
+  ],
+  "note": "Record work is lower than 0089c-new-path (v1 states=1: 8581 to 6565) because field names are no longer ticked as pairs; median time is unchanged within noise. The first integer v1 states=1 run (76.6) is a cold outlier."
+}
