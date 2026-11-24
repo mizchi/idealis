@@ -1,0 +1,30 @@
+model G7130
+sig S0
+rel r0: S0 -> some S0
+var v1: lone S0
+record R { n: Int, b: Bool }
+var w0: S0 -> one Int
+var w1: S0 -> one R
+fact { some (S0 & (r0.S0)) }
+init { ((some q1: S0 | (q1.w0 + 1) != q1.w1.n) implies r0 = (v1 -> S0)) }
+init { all x: S0 | x.w0 = 0 }
+init { all x: S0 | x.w1 = R { n: 0, b: false } }
+action set0(x: S0, k: Int) {
+  2 > 1
+  w0' = w0 - x -> x.w0 + x -> ((x.w1.n - x.w0))
+}
+action set1(x: S0, k: Int) {
+  w1' = w1 - x -> x.w1 + x -> (R { n: k, b: true })
+}
+action a0(p0_0: S0) {
+  p0_0.w1.b
+  v1' = (((S0 -> S0).p0_0) + p0_0)
+}
+action a1() {
+  not ((some q2: S0 | q2.w1.b))
+  (all q3: S0 | q3.w1.b)
+  v1' = ((S0.r0) + S0)
+}
+invariant Inv { ((all q4: S0 | q4.w1.n != (2 + 2)) implies (not ((r0 - r0) = (S0 -> v1)) or (((S0 -> S0).v1).r0) != ((S0 - v1) & v1))) }
+reachable Goal { (((#(v1.r0) > 0 implies v1 in ((S0.r0) - (v1 + v1))) implies (some q5: S0 | q5.w1.n < 0)) and (all q6: S0 | (0 * 1) < (q6.w0 - #q6))) }
+scope S0 = 2, Int = 0..2, steps = 6

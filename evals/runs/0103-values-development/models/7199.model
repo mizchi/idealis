@@ -1,0 +1,20 @@
+model G7199
+sig S0
+enum E = Ea | Eb
+rel r0: S0 -> lone S0
+var v1: E -> lone E
+var v2: set S0
+record R { n: Int, b: Bool }
+var w0: S0 -> one R
+fact { (some q1: E | (#Ea <= 0 or (E -> E) = (q1 -> q1))) }
+init { ((((v2 -> E).(E -> S0)).S0) not in S0 implies r0 = (r0 & (v2 -> S0))) }
+init { all x: S0 | x.w0 = R { n: 0, b: false } }
+action set0(x: S0, k: Int) {
+  w0' = w0 - x -> x.w0 + x -> (R { n: (x.w0.n * x.w0.n), b: false })
+}
+action a0() {
+  v2' = v2
+}
+invariant Inv { (#((S0 -> S0).v2) != 2 and (some q5: S0 | (q5.w0.n + q5.w0.n) != 2)) }
+reachable Goal { ((all q6: S0 | (1 - 0) >= #v2) and some S0) }
+scope S0 = 3, Int = 0..2, steps = 6

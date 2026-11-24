@@ -1,0 +1,23 @@
+model G8166
+sig S0
+rel r0: S0 -> set S0
+rel r1: lone S0
+var v2: S0 -> set S0
+var v3: lone S0
+init { not (some v3) }
+action a0(p0_0: S0, p0_1: S0) {
+  ((v2.(p0_0 -> p0_1)) = ((r1 -> S0).v2) implies #(S0.r0) <= 2)
+  (v2 in (r0.v2) or (r1 -> p0_0) in v2)
+  v3' = ((S0.(p0_1 -> p0_0)) + (r0.v3))
+}
+action a1() {
+  (some ((S0 - v3) & ((r1 -> S0).r1)) implies some (v3.v2))
+  ((v3 -> r1) = (r0.(v3 -> r1)) implies some v3)
+  v2' = ((v2.r0) & (r1 -> r1))
+}
+action a2() {
+  v2' = (r0.((r1 -> v3).r0))
+}
+invariant Inv { (not (r0 in ((v3 -> S0).r0)) and lone ((r0.v3).v2)) }
+reachable Goal { (some q1: S0 | some (none & v3)) }
+scope S0 = 3, steps = 6

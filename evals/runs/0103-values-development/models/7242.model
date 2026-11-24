@@ -1,0 +1,33 @@
+model G7242
+sig S0
+var v0: S0 -> set S0
+var v1: lone S0
+record R { n: Int, b: Bool }
+var w0: S0 -> one Int
+var w1: S0 -> one Bool
+var w2: S0 -> one R
+init { (some q4: S0 | (q4.w0 - 1) < (#S0 * #v1)) }
+init { all x: S0 | x.w0 = 0 }
+init { all x: S0 | x.w1 = true }
+init { all x: S0 | x.w2 = R { n: 0, b: false } }
+action set0(x: S0, k: Int) {
+  w0' = w0 - x -> x.w0 + x -> ((k + x.w0))
+}
+action set1(x: S0) {
+  not x.w1
+  w1' = w1 - x -> x.w1 + x -> (false)
+}
+action set2(x: S0, k: Int) {
+  k < (0 + 1)
+  w2' = w2 - x -> x.w2 + x -> (R { n: x.w0, b: true })
+}
+action a0() {
+  (S0 -> v1) = (S0 -> S0)
+  v1' = ((v0.(S0 -> S0)).(v0.v1))
+}
+action a1(p1_0: S0, p1_1: S0) {
+  v0' = ((v1 -> v1).((p1_1 -> S0).v0))
+}
+invariant Inv { v0 = v0 }
+reachable Goal { (S0 not in (v1 & v1) or (all q6: S0 | 0 >= (q6.w2.n + q6.w0))) }
+scope S0 = 1, Int = 0..2, steps = 6

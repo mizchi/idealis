@@ -1,0 +1,32 @@
+model G7088
+sig S0
+sig S1
+var v0: S1 -> lone S0
+var v1: set S1
+record R { n: Int, b: Bool }
+var w0: S0 -> one Int
+var w1: S0 -> one R
+init { ((v1 -> S0).S0) not in S1 }
+init { all x: S0 | x.w0 = 0 }
+init { all x: S0 | x.w1 = R { n: 0, b: false } }
+action set0(x: S0, k: Int) {
+  x.w1.b
+  w0' = w0 - x -> x.w0 + x -> ((x.w0 * k))
+}
+action set1(x: S0, k: Int) {
+  0 <= x.w1.n
+  w1' = w1 - x -> x.w1 + x -> (R { n: 2, b: false })
+}
+action a0(p0_0: S0) {
+  one (((S1 -> v1).v1) + (S0.(S0 -> S1)))
+  (some ((S0 -> v1).v1) and some (S0.(p0_0 -> S1)))
+  v1' = v1
+}
+action a1() {
+  (some ((S0 -> v1).(v0.S0)) and some v1)
+  (S1 -> v1) = ((S1 -> v1).(v1 -> S1))
+  v0' = (v1 -> S0)
+}
+invariant Inv { #(v1 & S1) > 3 }
+reachable Goal { ((S1 -> v1) = (v1 -> v1) or some (S1.v0)) }
+scope S0 = 2, S1 = 3, Int = 0..2, steps = 6

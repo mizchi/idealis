@@ -209,3 +209,47 @@ fn explicit_configurations_count_against_the_budget() {
         started.elapsed()
     );
 }
+
+const ESCAPING: &str = "model Bank
+sig Account
+var balance: Account -> one Int
+init { all a: Account | a.balance = 0 }
+action deposit(a: Account, n: Int) {
+  n > 0
+  balance' = balance - a -> a.balance + a -> (a.balance + n)
+}
+invariant NonNegative { all a: Account | a.balance >= 0 }
+reachable Rich { some a: Account | a.balance >= 3 }
+scope Account = 1, Int = 0..4, steps = 3";
+
+/// Plan 0103: integers that leave the scope make every negative answer
+/// unknown, and SAT declines integer values.
+#[test]
+fn values_leave_the_scope_and_sat_declines_them() {
+    let model = rmodel::parse(ESCAPING).unwrap();
+    let report = rcheck::check(&model, "NonNegative", &Selection::All, Budget::default()).unwrap();
+    let checkers: Vec<_> = report.answers.iter().map(|a| a.checker).collect();
+    assert_eq!(checkers, ["reference", "explicit"]);
+    for answer in &report.answers {
+        assert_eq!(answer.verdict, Verdict::Unknown, "{answer:?}");
+    }
+    let rich = rcheck::check(&model, "Rich", &Selection::All, Budget::default()).unwrap();
+    for answer in &rich.answers {
+        assert_eq!(
+            (&answer.verdict, answer.depth),
+            (&Verdict::Reachable, Some(1)),
+            "{answer:?}"
+        );
+    }
+    match rcheck::check(
+        &model,
+        "Rich",
+        &Selection::Named("sat".into()),
+        Budget::default(),
+    ) {
+        Err(Error::Unsupported(_, reasons)) => {
+            assert!(reasons[0].1.contains("integer"), "{reasons:?}")
+        }
+        other => panic!("{other:?}"),
+    }
+}

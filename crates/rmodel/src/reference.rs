@@ -18,8 +18,8 @@
 //!   violation or reached state is definite; `holds` and `unreachable`
 //!   need the whole space within the budget, otherwise `unknown`.
 use crate::syntax::{
-    Check, CheckKind, Compare, Expr, Formula, Int, IntCompare, Model, Mult, Quantifier, SetOp,
-    Shape,
+    Arith, Check, CheckKind, Compare, Expr, Formula, Int, IntCompare, Model, Mult, Quantifier,
+    SetOp, Shape,
 };
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
@@ -45,7 +45,14 @@ pub struct Verdict {
     pub outcome: Outcome,
 }
 
-type Atom = u16;
+/// An element of a tuple: an atom of a signature or enum, or a value
+/// (plan 0103). Values compare by their content.
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+enum Atom {
+    Id(u16),
+    Int(i64),
+    Record(Box<[Atom]>),
+}
 type Tuple = Vec<Atom>;
 type Value = BTreeSet<Tuple>;
 
@@ -58,23 +65,26 @@ struct Universe<'a> {
     sorts: BTreeMap<&'a str, Vec<Atom>>,
     /// The atom of each enum member.
     members: BTreeMap<&'a str, Atom>,
+    /// The scope's integers, `lo..=hi`.
+    ints: Option<(i64, i64)>,
+    model: &'a Model,
 }
 
 impl<'a> Universe<'a> {
     fn new(model: &'a Model) -> Self {
-        let mut next: Atom = 0;
+        let mut next: u16 = 0;
         let mut sorts = BTreeMap::new();
         let mut members = BTreeMap::new();
         for sig in &model.sigs {
-            let size = model.scope.sizes[sig];
-            sorts.insert(sig.as_str(), (next..next + size as Atom).collect());
-            next += size as Atom;
+            let size = model.scope.sizes[sig] as u16;
+            sorts.insert(sig.as_str(), (next..next + size).map(Atom::Id).collect());
+            next += size;
         }
         for (name, enum_members) in &model.enums {
             let mut atoms = Vec::new();
             for member in enum_members {
-                members.insert(member.as_str(), next);
-                atoms.push(next);
+                members.insert(member.as_str(), Atom::Id(next));
+                atoms.push(Atom::Id(next));
                 next += 1;
             }
             sorts.insert(name.as_str(), atoms);
@@ -87,14 +97,52 @@ impl<'a> Universe<'a> {
                 .collect();
             sorts.insert(name.as_str(), atoms);
         }
-        Self { sorts, members }
+        // Values enumerate the scope: its integers, and records of every
+        // combination of their fields (plan 0103).
+        if let Some((low, high)) = model.scope.ints {
+            sorts.insert(crate::syntax::INT, (low..=high).map(Atom::Int).collect());
+        }
+        for record in &model.records {
+            let mut all: Vec<Vec<Atom>> = vec![Vec::new()];
+            for (_, sort) in &record.fields {
+                all = all
+                    .into_iter()
+                    .flat_map(|prefix| {
+                        sorts[sort.as_str()].iter().map(move |atom: &Atom| {
+                            let mut next = prefix.clone();
+                            next.push(atom.clone());
+                            next
+                        })
+                    })
+                    .collect();
+            }
+            sorts.insert(
+                record.name.as_str(),
+                all.into_iter()
+                    .map(|fields| Atom::Record(fields.into()))
+                    .collect(),
+            );
+        }
+        Self {
+            sorts,
+            members,
+            ints: model.scope.ints,
+            model,
+        }
     }
     fn domain(&self, shape: &Shape) -> Vec<Tuple> {
         match shape {
-            Shape::Unary { sig, .. } => self.sorts[sig.as_str()].iter().map(|&a| vec![a]).collect(),
+            Shape::Unary { sig, .. } => self.sorts[sig.as_str()]
+                .iter()
+                .map(|a| vec![a.clone()])
+                .collect(),
             Shape::Binary { from, to, .. } => self.sorts[from.as_str()]
                 .iter()
-                .flat_map(|&a| self.sorts[to.as_str()].iter().map(move |&b| vec![a, b]))
+                .flat_map(|a| {
+                    self.sorts[to.as_str()]
+                        .iter()
+                        .map(move |b| vec![a.clone(), b.clone()])
+                })
                 .collect(),
         }
     }
@@ -109,11 +157,31 @@ impl<'a> Universe<'a> {
             Shape::Unary { mult, .. } => fits(*mult, value.len()),
             Shape::Binary { from, mult, .. } => self.sorts[from.as_str()]
                 .iter()
-                .all(|&a| fits(*mult, value.iter().filter(|t| t[0] == a).count())),
+                .all(|a| fits(*mult, value.iter().filter(|t| &t[0] == a).count())),
         }
     }
     /// Every value of a relation that meets its type and multiplicity, or
     /// `None` when the domain is too large to enumerate.
+    /// Whether every integer in a value lies in the scope (plan 0103).
+    fn in_scope(&self, value: &Value) -> bool {
+        fn inside(ints: Option<(i64, i64)>, atom: &Atom) -> bool {
+            match atom {
+                Atom::Id(_) => true,
+                Atom::Int(value) => ints.is_some_and(|(low, high)| (low..=high).contains(value)),
+                Atom::Record(fields) => fields.iter().all(|field| inside(ints, field)),
+            }
+        }
+        value
+            .iter()
+            .all(|tuple| tuple.iter().all(|a| inside(self.ints, a)))
+    }
+    /// The only integer of a set the checker proved singular.
+    fn int(&self, value: &Value) -> i64 {
+        match value.iter().next().map(|tuple| &tuple[0]) {
+            Some(Atom::Int(value)) => *value,
+            other => unreachable!("one integer by the checker, got {other:?}"),
+        }
+    }
     fn candidates(&self, shape: &Shape) -> Option<Vec<Value>> {
         let domain = self.domain(shape);
         if domain.len() > MAX_DOMAIN {
@@ -141,21 +209,71 @@ struct Scene<'s> {
     bound: &'s BTreeMap<String, Atom>,
 }
 
+fn singleton(atom: Atom) -> Value {
+    [vec![atom]].into()
+}
+
 impl Universe<'_> {
     fn expression(&self, expression: &Expr, scene: &Scene<'_>) -> Value {
         match expression {
             Expr::None => Value::new(),
             Expr::Name(name) => {
-                if let Some(&atom) = scene.bound.get(name) {
-                    return [vec![atom]].into();
+                if let Some(atom) = scene.bound.get(name) {
+                    return singleton(atom.clone());
                 }
                 if let Some(value) = scene.relations.get(name.as_str()) {
                     return value.clone();
                 }
-                if let Some(&atom) = self.members.get(name.as_str()) {
-                    return [vec![atom]].into();
+                if let Some(atom) = self.members.get(name.as_str()) {
+                    return singleton(atom.clone());
                 }
-                self.sorts[name.as_str()].iter().map(|&a| vec![a]).collect()
+                self.sorts[name.as_str()]
+                    .iter()
+                    .map(|a| vec![a.clone()])
+                    .collect()
+            }
+            Expr::Literal(value) => singleton(Atom::Int(*value)),
+            Expr::Count(counted) => {
+                singleton(Atom::Int(self.expression(counted, scene).len() as i64))
+            }
+            Expr::Arith(operator, left, right) => {
+                let (left, right) = (
+                    self.int(&self.expression(left, scene)),
+                    self.int(&self.expression(right, scene)),
+                );
+                // Mathematical integers: an i64 overflow is far outside any
+                // scope, so it saturates and leaves the scope.
+                singleton(Atom::Int(match operator {
+                    Arith::Add => left.saturating_add(right),
+                    Arith::Sub => left.saturating_sub(right),
+                    Arith::Mul => left.saturating_mul(right),
+                }))
+            }
+            Expr::Record(_, values) => {
+                let fields: Vec<Atom> = values
+                    .iter()
+                    .map(|value| {
+                        let value = self.expression(value, scene);
+                        value.into_iter().next().expect("one value by the checker")[0].clone()
+                    })
+                    .collect();
+                singleton(Atom::Record(fields.into()))
+            }
+            Expr::Binary(SetOp::Join, left, right)
+                if matches!(right.as_ref(), Expr::Name(name)
+                    if !scene.bound.contains_key(name) && self.model.field(name).is_some()) =>
+            {
+                let Expr::Name(field) = right.as_ref() else {
+                    unreachable!()
+                };
+                let (_, index) = self.model.field(field).expect("a field");
+                self.expression(left, scene)
+                    .into_iter()
+                    .map(|tuple| match &tuple[0] {
+                        Atom::Record(fields) => vec![fields[index].clone()],
+                        other => unreachable!("a record by the checker, got {other:?}"),
+                    })
+                    .collect()
             }
             Expr::Binary(operator, left, right) => {
                 let (left, right) = (self.expression(left, scene), self.expression(right, scene));
@@ -176,6 +294,7 @@ impl Universe<'_> {
                                 .map(move |r| [&l[..l.len() - 1], &r[1..]].concat())
                         })
                         .collect(),
+                    SetOp::Multiply => unreachable!("the checker rewrites *"),
                 }
             }
         }
@@ -196,6 +315,7 @@ impl Universe<'_> {
                     match int {
                         Int::Count(counted) => self.expression(counted, scene).len() as i64,
                         Int::Literal(value) => *value,
+                        Int::Value(value) => self.int(&self.expression(value, scene)),
                     }
                 };
                 let (left, right) = (int(left), int(right));
@@ -225,9 +345,9 @@ impl Universe<'_> {
                 !self.formula(left, scene) || self.formula(right, scene)
             }
             Formula::Quantified(quantifier, variable, sig, body) => {
-                let test = |atom: Atom| {
+                let test = |atom: &Atom| {
                     let mut bound = scene.bound.clone();
-                    bound.insert(variable.clone(), atom);
+                    bound.insert(variable.clone(), atom.clone());
                     self.formula(
                         body,
                         &Scene {
@@ -238,15 +358,14 @@ impl Universe<'_> {
                 };
                 let atoms = &self.sorts[sig.as_str()];
                 match quantifier {
-                    Quantifier::All => atoms.iter().all(|&a| test(a)),
-                    Quantifier::Some => atoms.iter().any(|&a| test(a)),
+                    Quantifier::All => atoms.iter().all(test),
+                    Quantifier::Some => atoms.iter().any(test),
                 }
             }
         }
     }
 }
 
-/// Every combination of one value per relation.
 /// Every combination of one value per relation, produced one at a time:
 /// materializing them exhausted memory before the budget applied (seed
 /// 5141, plan 0101).
@@ -283,9 +402,9 @@ fn bindings(universe: &Universe<'_>, params: &[(String, String)]) -> Vec<BTreeMa
         all = all
             .into_iter()
             .flat_map(|prefix| {
-                universe.sorts[sig.as_str()].iter().map(move |&atom| {
+                universe.sorts[sig.as_str()].iter().map(move |atom| {
                     let mut next = prefix.clone();
-                    next.insert(name.clone(), atom);
+                    next.insert(name.clone(), atom.clone());
                     next
                 })
             })
@@ -309,6 +428,10 @@ pub struct Report {
     /// `Violated` with the shortest depth of the breaking state, `Holds`,
     /// `Empty` or `Unknown`.
     pub declarations: Outcome,
+    /// Whether a state leaves the scope's integers (plan 0103): `Violated`
+    /// with the shortest depth of such a state. Leaving makes the search
+    /// incomplete, so checks without a witness are then `Unknown`.
+    pub scope: Outcome,
     pub enabled: Vec<(String, Option<bool>)>,
 }
 
@@ -335,6 +458,7 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
     let mut found: Vec<Option<usize>> = vec![None; model.checks.len()];
     let mut enabled = vec![false; model.actions.len()];
     let mut broken: Option<usize> = None;
+    let mut escaped: Option<usize> = None;
     let unknown = |model: &Model| {
         model
             .checks
@@ -357,6 +481,7 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
         return Report {
             verdicts: unknown(model),
             declarations: Outcome::Unknown,
+            scope: Outcome::Unknown,
             enabled: model
                 .actions
                 .iter()
@@ -452,18 +577,30 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
                     // (plan 0099).
                     let mut next = state.clone();
                     let mut valid = true;
+                    let mut inside = true;
                     for (var, value) in &action.assignments {
                         let position = vars
                             .iter()
                             .position(|r| &r.name == var)
                             .expect("checked var");
                         let value = universe.expression(value, &scene);
+                        if !universe.in_scope(&value) {
+                            inside = false;
+                        }
                         if !universe.admits(&vars[position].shape, &value) {
                             valid = false;
                         }
                         next[position] = value;
                     }
                     enabled[action_index] = true;
+                    // A state with an integer outside the scope is not
+                    // explored: the search is no longer complete (plan 0103).
+                    if !inside {
+                        if escaped.is_none_or(|known| depth + 1 < known) {
+                            escaped = Some(depth + 1);
+                        }
+                        continue;
+                    }
                     if !valid {
                         if broken.is_none_or(|known| depth + 1 < known) {
                             broken = Some(depth + 1);
@@ -477,6 +614,13 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
             }
         }
     }
+    let scope = match (escaped, complete) {
+        (Some(depth), _) => Outcome::Violated { depth },
+        (None, true) if !initial => Outcome::Empty,
+        (None, true) => Outcome::Holds,
+        (None, false) => Outcome::Unknown,
+    };
+    let complete = complete && escaped.is_none();
     let verdicts = model
         .checks
         .iter()
@@ -501,6 +645,7 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
             (None, true) => Outcome::Holds,
             (None, false) => Outcome::Unknown,
         },
+        scope,
         enabled: model
             .actions
             .iter()

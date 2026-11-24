@@ -1,0 +1,27 @@
+model G8223
+sig S0
+enum E = Ea | Eb
+type P = S0 + E
+rel r0: one S0
+var v1: S0 -> some P
+record R { n: Int, b: Bool }
+var w0: S0 -> one R
+fact { some Ea }
+init { ((S0 -> Ea).(E -> P)) in (v1 + v1) }
+init { all x: S0 | x.w0 = R { n: 0, b: false } }
+action set0(x: S0, k: Int) {
+  x.w0.b
+  w0' = w0 - x -> x.w0 + x -> (R { n: 0, b: true })
+}
+action a0() {
+  (all q3: S0 | 1 <= 1)
+  not ((some q4: S0 | 2 != (2 + #r0)))
+  v1' = (v1 - ((r0 -> P) + v1))
+}
+action a1(p1_0: E, p1_1: E) {
+  (no r0 implies (p1_0 -> S0) in (p1_0 -> S0))
+  v1' = v1
+}
+invariant Inv { some ((v1.P).((r0 -> E).(Eb -> Ea))) }
+reachable Goal { some v1 }
+scope S0 = 3, Int = 0..2, steps = 6

@@ -99,7 +99,7 @@ impl Checker for Explicit {
             Err(error) => return failed(error.message),
         };
         let found = result.violation.is_some();
-        let verdict = match (result.status.as_str(), found, question.kind) {
+        let mut verdict = match (result.status.as_str(), found, question.kind) {
             (_, true, Kind::Invariant) => Verdict::Violated,
             (_, true, Kind::Reachable) => Verdict::Reachable,
             ("empty", _, _) => Verdict::Empty,
@@ -107,9 +107,26 @@ impl Checker for Explicit {
             ("complete", _, Kind::Reachable) => Verdict::Unreachable,
             _ => Verdict::Unknown,
         };
+        let mut detail = (verdict == Verdict::Unknown).then(|| result.status.clone());
+        // A negative answer covers only the states within the integer scope:
+        // when a state leaves it, the search is not complete (plan 0103).
+        if model.has_values() && matches!(verdict, Verdict::Holds | Verdict::Unreachable) {
+            let scope = Question {
+                name: rmodel::SCOPE.to_owned(),
+                kind: Kind::Invariant,
+            };
+            let left = self.answer(model, &scope, budget);
+            if left.verdict != Verdict::Holds {
+                verdict = Verdict::Unknown;
+                detail = Some(match left.verdict {
+                    Verdict::Violated => "a state leaves the Int scope".to_owned(),
+                    other => format!("the Int scope check is {other:?}"),
+                });
+            }
+        }
         Answer {
             depth: found.then_some(result.depth as usize),
-            detail: (verdict == Verdict::Unknown).then(|| result.status.clone()),
+            detail,
             ..answer(self.name(), question, Coverage::Complete, verdict)
         }
     }
@@ -123,9 +140,12 @@ impl Checker for Sat {
         "sat"
     }
     fn supports(&self, model: &rmodel::Model, _: &Question) -> Support {
-        Support::Yes(Coverage::Bounded {
-            steps: model.scope.steps,
-        })
+        match rmodel::alloy_supports(model) {
+            Ok(()) => Support::Yes(Coverage::Bounded {
+                steps: model.scope.steps,
+            }),
+            Err(reason) => Support::No(reason),
+        }
     }
     fn answer(&self, model: &rmodel::Model, question: &Question, budget: Budget) -> Answer {
         let coverage = Coverage::Bounded {

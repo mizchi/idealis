@@ -1,0 +1,25 @@
+model G7039
+sig S0
+rel r0: S0 -> one S0
+rel r1: set S0
+var v2: S0 -> set S0
+var v3: S0 -> some S0
+var w0: S0 -> one Int
+var w1: S0 -> one Bool
+fact { (some q1: S0 | r1 = none) }
+init { ((all q2: S0 | (1 + q2.w0) > 0) or v3 in (r1 -> r1)) }
+init { all x: S0 | x.w0 = 0 }
+init { all x: S0 | x.w1 = true }
+action set0(x: S0, k: Int) {
+  not x.w1
+  w0' = w0 - x -> x.w0 + x -> ((k + x.w0))
+}
+action set1(x: S0) {
+  w1' = w1 - x -> x.w1 + x -> (false)
+}
+action a0(p0_0: S0) {
+  v2' = r0
+}
+invariant Inv { ((some q3: S0 | not q3.w1) or ((all q4: S0 | 1 != #r1) implies ((r0.r0).(S0.v3)) != (r1 - r1))) }
+reachable Goal { (((some q7: S0 | not q7.w1) implies not (some (r1.v2))) implies (some (r1 - r1) or v2 = (r0 + r0))) }
+scope S0 = 2, Int = -1..2, steps = 6

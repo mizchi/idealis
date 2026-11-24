@@ -1,0 +1,21 @@
+model G8281
+sig S0
+sig S1
+rel r0: S1 -> set S0
+var v1: S0 -> set S1
+var v2: S1 -> lone S0
+var w0: S0 -> one Int
+fact { not (not (some none)) }
+init { (#(S1.(S1 -> S1)) > 0 implies (S1.(S1 -> S1)) != ((v2.S0) + none)) }
+init { all x: S0 | x.w0 = 0 }
+action set0(x: S0, k: Int) {
+  k < 2
+  w0' = w0 - x -> x.w0 + x -> ((#x + k))
+}
+action a0(p0_0: S1) {
+  ((all q7: S0 | q7.w0 < (q7.w0 * 0)) or ((p0_0 -> S0) - r0) in (r0.(S0 -> S0)))
+  v1' = v1
+}
+invariant Inv { (S0 not in ((S1.v2) - (S0 + S0)) or (S0 -> S0) = (S0 -> S0)) }
+reachable Goal { (v2.(S0 -> S1)) = ((S1 -> S1).(S1 -> S1)) }
+scope S0 = 2, S1 = 2, Int = -1..2, steps = 6

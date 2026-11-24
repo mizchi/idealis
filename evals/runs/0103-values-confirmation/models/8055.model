@@ -1,0 +1,44 @@
+model G8055
+sig S0
+sig S1
+enum E = Ea | Eb
+rel r0: lone S0
+rel r1: lone S1
+var v2: one S0
+record R { n: Int, b: Bool }
+var w0: S0 -> one Int
+var w1: S0 -> one Bool
+var w2: S0 -> one R
+fact { some ((r1 -> r1).S1) }
+init { (some ((v2 -> v2).r0) and (some q6: S0 | q6.w2.b)) }
+init { all x: S0 | x.w0 = 0 }
+init { all x: S0 | x.w1 = false }
+init { all x: S0 | x.w2 = R { n: 0, b: false } }
+action set0(x: S0, k: Int) {
+  x.w0 < (k * k)
+  w0' = w0 - x -> x.w0 + x -> (x.w2.n)
+}
+action set1(x: S0) {
+  x.w2.b
+  w1' = w1 - x -> x.w1 + x -> (false)
+}
+action set2(x: S0, k: Int) {
+  x.w1
+  w2' = w2 - x -> x.w2 + x -> (R { n: k, b: false })
+}
+action a0(p0_0: S0, p0_1: S1) {
+  some (S0.(v2 -> Eb))
+  v2' = (((v2 -> Eb).(Eb -> r1)).S1)
+}
+action a1(p1_0: E) {
+  (all q7: S0 | (q7.w0 - #p1_0) >= (q7.w0 + 2))
+  ((S1 -> S1).(S1 -> E)) = (r1 -> E)
+  v2' = S0
+}
+action a2(p2_0: E, p2_1: E) {
+  (some q8: S0 | q8.w2.b)
+  v2' = none
+}
+invariant Inv { (not (((all q9: S0 | q9.w1) implies #((v2 -> E).E) > 0)) and (some q10: S0 | q10.w2.b)) }
+reachable Goal { ((Ea -> r1) = (Ea -> S1) and (E -> r1) = ((Eb -> v2).(S0 -> S1))) }
+scope S0 = 2, S1 = 3, Int = 0..2, steps = 6

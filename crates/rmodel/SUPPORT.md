@@ -17,6 +17,8 @@
 
 - [x] 和のsort `type Party = Person + Org`: sig・enumをまとめた、自分のatomを持たないsort。和・比較・joinは部分型の関係で型を付け、Alloyでは`abstract sig`と`extends`、TLA+では子の集合の和に写す。1つのsigが属する和は1つまで、和の入れ子はない（0100）。
 
+- [x] 値（0103）: `Int`（scopeの`Int = lo..hi`、数学の整数、範囲の外は組み込みのcheck `Scope`）、`Bool`、`record`（構造で等しい値、literal `R { f: e }`、field `x.f`）。値への関係は`one`・`lone`、算術`+ - *`と整数の比較は値が1つに決まる式だけ。TLA+へ写し、Alloyへは写さない（`alloy_supports`）。
+
 ## 照合
 
 - [x] corpusの5モデル・20 checkで、ralloyのSAT・rtlc・Alloy 6.2.0・TLC 1.8.0の判定が、結果の前に書いた期待とすべて一致する。明示状態の深さはstepsの内側（0091）。

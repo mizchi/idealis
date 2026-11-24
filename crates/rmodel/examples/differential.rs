@@ -21,7 +21,20 @@ fn reference_word(outcome: rmodel::reference::Outcome) -> (String, Option<usize>
     }
 }
 
+/// rtlc's verdict; a negative one is unknown when a state leaves the
+/// integer scope (plan 0103).
 fn explicit(model: &rmodel::Model, name: &str, kind: rmodel::CheckKind) -> String {
+    let verdict = explicit_raw(model, name, kind);
+    if model.has_values()
+        && (verdict == "holds" || verdict == "unreachable")
+        && explicit_raw(model, rmodel::SCOPE, rmodel::CheckKind::Invariant) != "holds"
+    {
+        return "unknown".into();
+    }
+    verdict
+}
+
+fn explicit_raw(model: &rmodel::Model, name: &str, kind: rmodel::CheckKind) -> String {
     let Ok((source, config)) = rmodel::to_tla(model, name) else {
         return "lowering-error".into();
     };
@@ -107,15 +120,23 @@ fn one(seed: u64, output: &str) -> String {
         rmodel::CheckKind::Invariant,
         report.declarations,
     ));
-    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).map_err(|e| e.to_string());
+    // Models with integer or record values have no Alloy lowering.
+    let alloy = rmodel::alloy_supports(&model)
+        .ok()
+        .map(|()| ralloy::Model::parse(&rmodel::to_alloy(&model)).map_err(|e| e.to_string()));
     let mut keep = false;
     for (name, kind, outcome) in &checks {
         let (reference, depth) = reference_word(*outcome);
         let explicit = explicit(&model, name, *kind);
-        let sat = sat(&alloy, name, *kind);
+        let sat = alloy
+            .as_ref()
+            .map_or("unsupported".to_owned(), |alloy| sat(alloy, name, *kind));
         let deep = depth.is_some_and(|d| d >= model.scope.steps);
         let explicit_agrees = explicit == reference;
-        let sat_agrees = sat == reference || deep || reference == "empty" && sat == "unreachable";
+        let sat_agrees = sat == "unsupported"
+            || sat == reference
+            || deep
+            || reference == "empty" && sat == "unreachable";
         if !explicit_agrees || !sat_agrees || reference == "unknown" {
             keep = true;
         }

@@ -1,0 +1,18 @@
+model G7063
+sig S0
+sig S1
+enum E = Ea | Eb
+type P = S0 + S1
+rel r0: S1 -> some P
+var v1: E -> set S1
+var v2: S0 -> lone S1
+fact { (all q1: E | #S1 != 3) }
+init { (one ((Eb + E) + ((Ea -> S0).S0)) or (Eb + (Ea.(Eb -> E))) in (v1.(S0.(S0 -> S1)))) }
+action a0() {
+  not ((((S0 -> P).P) - ((S0 -> P).P)) in (((S0 -> S0).(S0 -> S0)).(S0 - S0)))
+  (#none < 1 and #(S0.(S0 -> P)) > 2)
+  v1' = (Ea -> S1)
+}
+invariant Inv { ((((E & E) in ((Ea -> P).P) and some (v2.S1)) implies some (S0.(S0 -> Eb))) implies not ((some (Eb.(Eb -> S1)) and #(S0.(S0 -> Ea)) <= 1))) }
+reachable Goal { (some (Eb.v1) or ((some ((S1 -> Eb).Ea) or some S0) implies ((P -> P).(P -> S1)) = (P -> S1))) }
+scope S0 = 2, S1 = 3, steps = 6

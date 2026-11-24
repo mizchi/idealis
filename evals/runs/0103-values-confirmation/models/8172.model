@@ -1,0 +1,17 @@
+model G8172
+sig S0
+enum E = Ea | Eb
+type P = S0 + E
+rel r0: E -> set P
+var v1: E -> one S0
+var v2: P -> one S0
+fact { lone P }
+init { not ((P -> S0) in v2) }
+action a0() {
+  ((E -> S0) in (v1 & (Eb -> S0)) and no (S0.(S0 -> S0)))
+  ((((S0 -> S0).(S0 -> P)).P) = (((S0 -> S0).S0) - (S0 + S0)) and (v1.(S0 - S0)) != (P.(v2.(S0 -> E))))
+  v1' = (v1.(S0 -> S0))
+}
+invariant Inv { v1 = (v1.(S0 -> S0)) }
+reachable Goal { not (((S0 -> Eb).v1) = (S0 -> S0)) }
+scope S0 = 2, steps = 6

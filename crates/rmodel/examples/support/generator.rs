@@ -42,6 +42,9 @@ struct Generator {
     fresh: usize,
     /// Sum sorts with their children (plan 0100).
     sums: Vec<(String, Vec<String>)>,
+    /// Since 0103: var attributes of one value, `name: from -> one sort`,
+    /// where sort is Int, Bool or the record R (fields n: Int, b: Bool).
+    values: Vec<(String, String, String)>,
 }
 
 type Locals = Vec<(String, String)>;
@@ -159,8 +162,77 @@ impl Generator {
             }
         }
     }
+    /// One integer: a literal, a count, an attribute of a local, or
+    /// arithmetic on two of them (plan 0103).
+    fn int(&mut self, depth: usize, locals: &Locals) -> String {
+        let mut options = vec![self.random.below(3).to_string()];
+        for (name, from, sort) in self.values.clone() {
+            for (local, local_sort) in locals {
+                if *local_sort == from && sort == "Int" {
+                    options.push(format!("{local}.{name}"));
+                }
+                if *local_sort == from && sort == "R" {
+                    options.push(format!("{local}.{name}.n"));
+                }
+            }
+        }
+        for (local, local_sort) in locals {
+            if local_sort == "Int" {
+                options.push(local.clone());
+            }
+        }
+        if depth > 0 && self.random.chance(40) {
+            let op = self.random.pick(&["+", "-", "*"]);
+            let (l, r) = (self.int(depth - 1, locals), self.int(depth - 1, locals));
+            return format!("({l} {op} {r})");
+        }
+        if self.random.chance(15) {
+            let sort = self.random.pick(&self.sorts.clone());
+            return format!("#{}", self.join_set(&sort, 0, locals, true));
+        }
+        self.random.pick(&options)
+    }
+    /// A formula over values: an integer comparison or a Bool attribute.
+    fn value_formula(&mut self, locals: &Locals) -> Option<String> {
+        let (name, from, sort) = self.random.pick(&self.values.clone());
+        let local = locals
+            .iter()
+            .find(|(_, s)| *s == from)
+            .map(|(l, _)| l.clone());
+        let Some(local) = local else {
+            // Quantify over the attribute's sort to reach a value.
+            self.fresh += 1;
+            let bound = format!("q{}", self.fresh);
+            let mut inner = locals.clone();
+            inner.push((bound.clone(), from.clone()));
+            let word = self.random.pick(&["all", "some"]);
+            let body = self.value_formula(&inner)?;
+            return Some(format!("({word} {bound}: {from} | {body})"));
+        };
+        Some(match sort.as_str() {
+            "Bool" => {
+                let not = if self.random.chance(50) { "not " } else { "" };
+                format!("{not}{local}.{name}")
+            }
+            "R" if self.random.chance(40) => format!("{local}.{name}.b"),
+            _ => {
+                let op = self.random.pick(&["<", "<=", ">", ">=", "=", "!="]);
+                let (l, r) = (self.int(1, locals), self.int(1, locals));
+                // An integer comparison starting with a literal parses as
+                // one; `a.x = 1` is a set comparison of the same meaning.
+                format!("{l} {op} {r}")
+            }
+        })
+    }
     fn formula(&mut self, depth: usize, locals: &Locals, vars: bool) -> String {
         let sort = self.random.pick(&self.sorts.clone());
+        if vars
+            && !self.values.is_empty()
+            && self.random.chance(25)
+            && let Some(formula) = self.value_formula(locals)
+        {
+            return formula;
+        }
         if depth == 0 || self.random.chance(35) {
             return match self.random.below(5) {
                 0 => {
@@ -252,6 +324,7 @@ pub fn generate(seed: u64) -> String {
         rels: Vec::new(),
         fresh: 0,
         sums: Vec::new(),
+        values: Vec::new(),
     };
     let mut out = format!("model G{seed}\n");
     let mut scope = Vec::new();
@@ -298,12 +371,73 @@ pub fn generate(seed: u64) -> String {
             to: binary.then_some(to),
         });
     }
+    // Since 0103: value attributes of the first sort.
+    let host = g.sorts[0].clone();
+    let record = g.random.chance(15);
+    if record {
+        out.push_str("record R { n: Int, b: Bool }\n");
+    }
+    for (sort, percent) in [
+        ("Int", 30),
+        ("Bool", 30),
+        ("R", if record { 100 } else { 0 }),
+    ] {
+        if g.random.chance(percent) {
+            let name = format!("w{}", g.values.len());
+            out.push_str(&format!("var {name}: {host} -> one {sort}\n"));
+            g.values.push((name, host.clone(), sort.to_owned()));
+        }
+    }
+    let uses_int = g.values.iter().any(|(_, _, sort)| sort != "Bool");
+    if uses_int {
+        // Records multiply their fields' values: a smaller range keeps the
+        // reference's domains enumerable.
+        scope.push(if record {
+            "Int = 0..2".to_owned()
+        } else {
+            "Int = -1..2".to_owned()
+        });
+    }
     if statics > 0 && g.random.chance(60) {
         let fact = g.formula(2, &Vec::new(), false);
         out.push_str(&format!("fact {{ {fact} }}\n"));
     }
     let init = g.state_formula(1, &Vec::new());
     out.push_str(&format!("init {{ {init} }}\n"));
+    for (name, from, sort) in g.values.clone() {
+        let value = match sort.as_str() {
+            "Int" => "0".to_owned(),
+            "Bool" => g.random.pick(&["true", "false"]).to_owned(),
+            _ => "R { n: 0, b: false }".to_owned(),
+        };
+        out.push_str(&format!("init {{ all x: {from} | x.{name} = {value} }}\n"));
+    }
+    // One action per value attribute, setting it for a parameter.
+    for (index, (name, from, sort)) in g.values.clone().into_iter().enumerate() {
+        let mut params: Locals = vec![("x".to_owned(), from.clone())];
+        if sort != "Bool" {
+            params.push(("k".to_owned(), "Int".to_owned()));
+        }
+        let mut body = String::new();
+        if g.random.chance(50) {
+            let _ = writeln!(body, "  {}", g.value_formula(&params).unwrap());
+        }
+        let value = match sort.as_str() {
+            "Int" => g.int(1, &params),
+            "Bool" => g.random.pick(&["true", "false"]).to_owned(),
+            _ => format!(
+                "R {{ n: {}, b: {} }}",
+                g.int(1, &params),
+                g.random.pick(&["true", "false"])
+            ),
+        };
+        let _ = writeln!(body, "  {name}' = {name} - x -> x.{name} + x -> ({value})");
+        let signature: Vec<String> = params.iter().map(|(n, s)| format!("{n}: {s}")).collect();
+        out.push_str(&format!(
+            "action set{index}({}) {{\n{body}}}\n",
+            signature.join(", ")
+        ));
+    }
     for index in 0..1 + g.random.below(3) {
         let params: Locals = (0..g.random.below(3))
             .map(|p| (format!("p{index}_{p}"), g.random.pick(&g.sorts.clone())))

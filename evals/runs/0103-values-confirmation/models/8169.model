@@ -1,0 +1,25 @@
+model G8169
+sig S0
+sig S1
+enum E = Ea | Eb
+type P = S0 + S1
+rel r0: S0 -> set P
+rel r1: lone S1
+var v2: lone E
+var v3: P -> some E
+var w0: S0 -> one Bool
+init { (#(S0 - S1) != 1 or #((v2 -> Eb).E) != 2) }
+init { all x: S0 | x.w0 = true }
+action set0(x: S0) {
+  w0' = w0 - x -> x.w0 + x -> (false)
+}
+action a0(p0_0: P, p0_1: S1) {
+  v3' = (P -> v2)
+}
+action a1() {
+  ((all q5: S0 | not q5.w0) implies (all q6: S0 | not q6.w0))
+  v3' = (P -> Ea)
+}
+invariant Inv { not (not ((some q19: S0 | (Ea -> P) = (v2 -> P)))) }
+reachable Goal { ((all q23: S0 | ((q23 -> P) in ((q23 -> S1).(r1 -> P)) and ((q23 -> v2).Ea) in ((S1.(S1 -> q23)) + (q23 + q23)))) and ((#S0 <= 2 or (S1 + (S1 + r1)) = (((S1 -> S0) & (r1 -> S0)).((S0 -> E).v2))) and (some q24: S0 | not q24.w0))) }
+scope S0 = 3, S1 = 2, steps = 6

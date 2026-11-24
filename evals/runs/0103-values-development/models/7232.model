@@ -1,0 +1,20 @@
+model G7232
+sig S0
+enum E = Ea | Eb
+rel r0: one S0
+rel r1: E -> set S0
+var v2: set S0
+var w0: S0 -> one Int
+fact { not (#E = 1) }
+init { (Eb != (S0.(S0 -> E)) and (v2.(r0 -> S0)) != (v2.((r0 -> E).r1))) }
+init { all x: S0 | x.w0 = 0 }
+action set0(x: S0, k: Int) {
+  k != 0
+  w0' = w0 - x -> x.w0 + x -> (2)
+}
+action a0(p0_0: S0, p0_1: S0) {
+  v2' = r0
+}
+invariant Inv { (((all q1: E | lone ((r0.(S0 -> v2)) & (Ea.r1))) or (all q2: S0 | (2 - 0) != (2 * q2.w0))) and (all q3: S0 | q3.w0 >= q3.w0)) }
+reachable Goal { S0 not in v2 }
+scope S0 = 3, Int = -1..2, steps = 6

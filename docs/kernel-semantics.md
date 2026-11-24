@@ -9,6 +9,8 @@
 - **型**: 式の型は「sort Sの集合」か「sort Aからsort Bへの二項関係」で、静的に検査する（[0099](../evals/plans/0099-sorts-and-violations.md)）。和・差・積と比較は両辺が同じ型、joinは繋ぐsortが同じ、代入は変数と同じ型でなければ型エラー。`none`はどの型にも合う。sortの違う集合を混ぜる式は書けない。
 - **和のsort**: `type Party = Person + Org`は子のatomの和で、自分のatomを持たない。子は和の部分型で、同じ和の子どうしの和・比較は和の型を持つ（[0100](../evals/plans/0100-sum-sorts.md)）。
 - **整数**: 数学の整数。桁は回らない。有界な検査器（SATなど）が範囲を超えたら、判定は未確定にする（[0096](../evals/iterations/0096-quint-overflow.md)の規則）。
+- **値**（[0103](../evals/plans/0103-values.md)）: `Int`、`Bool`（`true`と`false`のenum）、`record Money { amount: Int, currency: Currency }`。値はatomではなく構造で等しい。関係は値を1つ（`one`）か高々1つ（`lone`）持ち、値の集合は宣言できない。scopeの`Int = lo..hi`は、初期状態・引数・recordで数え上げる整数。遷移が範囲の外の値を作った状態は探索せず（組み込みのcheck `Scope`の違反）、探索は完全でなくなる。witnessのないcheckは未確定になる。値のsortは量化しない。
+- **算術**: 両辺がInt型の`+`・`-`・`*`は算術。被演算子と整数の比較（`<`など）は、静的に値が1つに決まる式（literal、`#`、束縛変数、`one`の単項の関係、値が1つの式の`one`の関係・fieldのjoin）に限る。空になりうる`lone`の値は型エラーで、実行時の部分的な演算は起きない。
 - **部分的な演算**（0での除算、空の集合からの選択など）: 未定義のエラー。そこへ至るtraceをwitnessとして報告し、偽や空に読み替えない。
 
 ## 構造と状態

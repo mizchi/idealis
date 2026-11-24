@@ -1,0 +1,29 @@
+model G7090
+sig S0
+enum E = Ea | Eb
+type P = S0 + E
+rel r0: P -> set E
+rel r1: E -> some S0
+var v2: P -> set P
+var v3: S0 -> set E
+record R { n: Int, b: Bool }
+var w0: S0 -> one Bool
+var w1: S0 -> one R
+fact { (r1.(S0 -> Eb)) in ((Ea -> E) + (E -> Ea)) }
+init { ((P -> P) - v2) in (P -> P) }
+init { all x: S0 | x.w0 = false }
+init { all x: S0 | x.w1 = R { n: 0, b: false } }
+action set0(x: S0) {
+  w0' = w0 - x -> x.w0 + x -> (false)
+}
+action set1(x: S0, k: Int) {
+  w1' = w1 - x -> x.w1 + x -> (R { n: 2, b: true })
+}
+action a0(p0_0: P, p0_1: P) {
+  (some P or (P.(r0.(Eb -> E))) in ((v3.Ea).((S0 -> E).(Eb -> Ea))))
+  (some q6: S0 | q6.w0)
+  v2' = (P -> P)
+}
+invariant Inv { (one (v2.P) or (some q10: P | (no (Ea - (Ea.(E -> E))) and (all q11: S0 | not q11.w0)))) }
+reachable Goal { not ((((some q27: S0 | not q27.w0) or (some q28: S0 | q28.w1.n = 0)) or (((Eb -> E) & (Ea -> E)) = (r1.v3) and (all q29: S0 | not q29.w0)))) }
+scope S0 = 1, Int = 0..2, steps = 6

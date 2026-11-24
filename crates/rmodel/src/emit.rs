@@ -12,8 +12,8 @@
 //! Every relation is typed and has its multiplicity in every state.
 use crate::Error;
 use crate::syntax::{
-    Check, CheckKind, Compare, Expr, Formula, Int, IntCompare, Model, Mult, Quantifier, SetOp,
-    Shape,
+    Arith, Check, CheckKind, Compare, Expr, Formula, INT, Int, IntCompare, Model, Mult, Quantifier,
+    SetOp, Shape,
 };
 use std::collections::BTreeMap;
 
@@ -228,6 +228,10 @@ pub fn to_alloy(model: &Model) -> String {
 /// The name of the built-in check that no transition breaks a var's
 /// multiplicity (plan 0099).
 pub const DECLARATIONS: &str = "Declarations";
+/// The built-in check that every state reached keeps its integers within
+/// the scope's `Int = lo..hi` (plan 0103). When it fails, the search is not
+/// complete and a check without a witness is unknown.
+pub const SCOPE: &str = "Scope";
 
 /// Every var's multiplicity as one Alloy formula, or `None` when no var has
 /// one.
@@ -265,6 +269,21 @@ fn alloy_mult(mult: Mult) -> &'static str {
     }
 }
 
+/// Whether the Alloy lowering can express the model: Alloy integers wrap
+/// at their bit width, and the value semantics of records has no lowering
+/// yet (plan 0103).
+pub fn alloy_supports(model: &Model) -> Result<(), String> {
+    if model.scope.ints.is_some() {
+        return Err("integer values: Alloy integers wrap at their bit width".into());
+    }
+    if !model.records.is_empty() {
+        return Err("records: no Alloy lowering of value semantics".into());
+    }
+    Ok(())
+}
+
+const VALUES: &str = "alloy_supports rejects models with values";
+
 /// Whether an expression denotes a binary relation.
 fn is_pair(model: &Model, expression: &Expr, scope: &Scope) -> bool {
     match expression {
@@ -281,6 +300,7 @@ fn is_pair(model: &Model, expression: &Expr, scope: &Scope) -> bool {
             is_pair(model, left, scope) && is_pair(model, right, scope)
         }
         Expr::Binary(_, left, right) => is_pair(model, left, scope) || is_pair(model, right, scope),
+        Expr::Literal(_) | Expr::Count(_) | Expr::Arith(..) | Expr::Record(..) => false,
     }
 }
 
@@ -332,6 +352,7 @@ fn alloy_expression(model: &Model, expression: &Expr, scope: &Scope) -> String {
                 SetOp::Intersection => "&",
                 SetOp::Product => "->",
                 SetOp::Join => ".",
+                SetOp::Multiply => unreachable!("{VALUES}"),
             };
             let pair = matches!(
                 operator,
@@ -342,6 +363,9 @@ fn alloy_expression(model: &Model, expression: &Expr, scope: &Scope) -> String {
                 alloy_as(model, left, scope, pair),
                 alloy_as(model, right, scope, pair)
             )
+        }
+        Expr::Literal(_) | Expr::Count(_) | Expr::Arith(..) | Expr::Record(..) => {
+            unreachable!("{VALUES}")
         }
     }
 }
@@ -366,6 +390,7 @@ fn alloy_formula(model: &Model, formula: &Formula, scope: &Scope) -> String {
             let int = |int: &Int| match int {
                 Int::Count(counted) => format!("#{}", expression(counted)),
                 Int::Literal(value) => value.to_string(),
+                Int::Value(_) => unreachable!("{VALUES}"),
             };
             let symbol = match operator {
                 IntCompare::Less => "<",
@@ -417,9 +442,11 @@ fn alloy_formula(model: &Model, formula: &Formula, scope: &Scope) -> String {
 /// A TLA+ module and TLC configuration checking one check of the model.
 pub fn to_tla(model: &Model, check: &str) -> Result<(String, String), Error> {
     let target = if check == DECLARATIONS {
-        None
+        Target::Declarations
+    } else if check == SCOPE {
+        Target::Scope
     } else {
-        Some(
+        Target::Check(
             model
                 .checks
                 .iter()
@@ -434,6 +461,12 @@ pub fn to_tla(model: &Model, check: &str) -> Result<(String, String), Error> {
     ))
 }
 
+enum Target<'a> {
+    Declarations,
+    Scope,
+    Check(&'a Check),
+}
+
 struct Tla<'a> {
     model: &'a Model,
     fresh: usize,
@@ -445,7 +478,7 @@ enum Arity {
     Pair,
 }
 impl Tla<'_> {
-    fn module(&mut self, check: Option<&Check>) -> String {
+    fn module(&mut self, check: Target<'_>) -> String {
         let model = self.model;
         let mut out = format!(
             "---- MODULE {} ----\nEXTENDS Integers, FiniteSets\n",
@@ -476,6 +509,20 @@ impl Tla<'_> {
             let parts: Vec<String> = children.iter().map(|child| format!("s_{child}")).collect();
             out.push_str(&format!("s_{name} == {}\n", parts.join(" \\cup ")));
         }
+        // Values (plan 0103): the scope's integers, and records over their
+        // fields' sorts. Both bound only the enumeration; arithmetic leaves
+        // them, which InScope detects.
+        if let Some((low, high)) = model.scope.ints {
+            out.push_str(&format!("s_{INT} == {low}..{high}\n"));
+        }
+        for record in &model.records {
+            let fields: Vec<String> = record
+                .fields
+                .iter()
+                .map(|(field, sort)| format!("f_{field} : s_{sort}"))
+                .collect();
+            out.push_str(&format!("s_{} == [{}]\n", record.name, fields.join(", ")));
+        }
         for relation in &model.relations {
             let (domain, shape) = match &relation.shape {
                 Shape::Unary { sig, mult } => (
@@ -504,10 +551,19 @@ impl Tla<'_> {
                 }
             };
             out.push_str(&format!("D_{} == {domain}\n", relation.name));
-            out.push_str(&format!(
-                "T_{}(V) == V \\subseteq D_{} /\\ {shape}\n",
-                relation.name, relation.name
-            ));
+            // Values are typed statically; their range is InScope's.
+            let target = match &relation.shape {
+                Shape::Unary { sig, .. } => sig,
+                Shape::Binary { to, .. } => to,
+            };
+            if model.is_value(target) {
+                out.push_str(&format!("T_{}(V) == {shape}\n", relation.name));
+            } else {
+                out.push_str(&format!(
+                    "T_{}(V) == V \\subseteq D_{} /\\ {shape}\n",
+                    relation.name, relation.name
+                ));
+            }
         }
         let empty = BTreeMap::new();
         let mut init: Vec<String> = model
@@ -585,20 +641,49 @@ impl Tla<'_> {
             declared.join(" /\\ ")
         };
         out.push_str(&format!("TypeOK == {declared}\n"));
+        // A state with an integer outside the scope is not explored further
+        // (plan 0103). Models without values keep their earlier output.
+        let valid = if model.has_values() {
+            let ranged: Vec<String> = model
+                .vars()
+                .filter(|relation| {
+                    let target = match &relation.shape {
+                        Shape::Unary { sig, .. } => sig,
+                        Shape::Binary { to, .. } => to,
+                    };
+                    model.is_value(target)
+                })
+                .map(|relation| format!("r_{0} \\subseteq D_{0}", relation.name))
+                .collect();
+            let ranged = if ranged.is_empty() {
+                "TRUE".to_owned()
+            } else {
+                ranged.join(" /\\ ")
+            };
+            out.push_str(&format!("InScope == {ranged}\n"));
+            "(TypeOK /\\ InScope)"
+        } else {
+            "TypeOK"
+        };
         // A state that breaks a multiplicity stays as it is, like the Alloy
         // lowering, rather than deadlocking.
         out.push_str(&format!(
-            "Next == (TypeOK /\\ ({})) \\/ (~TypeOK /\\ UNCHANGED <<{}>>)\n",
+            "Next == ({valid} /\\ ({})) \\/ (~{valid} /\\ UNCHANGED <<{}>>)\n",
             steps.join(" \\/ "),
             variables.join(", ")
         ));
         let (name, body) = match check {
-            None => (DECLARATIONS, "TypeOK".to_owned()),
-            Some(check) => {
+            Target::Declarations if model.has_values() => {
+                (DECLARATIONS, "(InScope => TypeOK)".to_owned())
+            }
+            Target::Declarations => (DECLARATIONS, "TypeOK".to_owned()),
+            Target::Scope if model.has_values() => (SCOPE, "InScope".to_owned()),
+            Target::Scope => (SCOPE, "TRUE".to_owned()),
+            Target::Check(check) => {
                 let formula = self.formula(&check.formula, &empty);
                 let body = match check.kind {
-                    CheckKind::Invariant => format!("(TypeOK => {formula})"),
-                    CheckKind::Reachable => format!("~(TypeOK /\\ {formula})"),
+                    CheckKind::Invariant => format!("({valid} => {formula})"),
+                    CheckKind::Reachable => format!("~({valid} /\\ {formula})"),
                 };
                 (check.name.as_str(), body)
             }
@@ -632,6 +717,61 @@ impl Tla<'_> {
                     (format!("s_{name}"), Arity::Set)
                 }
             }
+            // Values (plan 0103): sets of one integer or record.
+            Expr::Literal(value) => (format!("{{{value}}}"), Arity::Set),
+            Expr::Count(counted) => (
+                format!("{{Cardinality({})}}", self.expression(counted, scope).0),
+                Arity::Set,
+            ),
+            Expr::Arith(operator, left, right) => {
+                let id = self.next();
+                let (left, _) = self.expression(left, scope);
+                let (right, _) = self.expression(right, scope);
+                let symbol = match operator {
+                    Arith::Add => "+",
+                    Arith::Sub => "-",
+                    Arith::Mul => "*",
+                };
+                (
+                    pairwise(&format!("x{id} {symbol} y{id}"), &left, &right, id),
+                    Arity::Set,
+                )
+            }
+            Expr::Record(name, values) => {
+                let id = self.next();
+                let record = self.model.record(name).expect("a declared record");
+                let mut fields = Vec::new();
+                let mut ranges = Vec::new();
+                for (index, ((field, _), value)) in record.fields.iter().zip(values).enumerate() {
+                    let (value, _) = self.expression(value, scope);
+                    fields.push(format!("f_{field} |-> x{id}_{index}"));
+                    ranges.push((format!("x{id}_{index}"), value));
+                }
+                // Nested maps of one binder each, innermost the last field.
+                let mut set = format!("{{[{}]}}", fields.join(", "));
+                for (index, (binder, range)) in ranges.iter().enumerate().rev() {
+                    set = if index == 0 && ranges.len() == 1 {
+                        format!("{{[{}] : {binder} \\in {range}}}", fields.join(", "))
+                    } else {
+                        format!("UNION {{{set} : {binder} \\in {range}}}")
+                    };
+                }
+                (set, Arity::Set)
+            }
+            Expr::Binary(SetOp::Join, left, right)
+                if matches!(right.as_ref(), Expr::Name(name)
+                    if !scope.contains_key(name) && self.model.field(name).is_some()) =>
+            {
+                let Expr::Name(field) = right.as_ref() else {
+                    unreachable!()
+                };
+                let id = self.next();
+                let (left, _) = self.expression(left, scope);
+                (
+                    format!("{{t{id}.f_{field} : t{id} \\in {left}}}"),
+                    Arity::Set,
+                )
+            }
             Expr::Binary(operator, left, right) => {
                 let (left, left_arity) = self.expression(left, scope);
                 let (right, right_arity) = self.expression(right, scope);
@@ -649,6 +789,7 @@ impl Tla<'_> {
                         pick(left_arity, right_arity),
                     ),
                     SetOp::Product => (product(&left, &right, self.next()), Arity::Pair),
+                    SetOp::Multiply => unreachable!("the checker rewrites * to arithmetic"),
                     SetOp::Join => {
                         let id = self.next();
                         let (t, u) = (format!("t{id}"), format!("u{id}"));
@@ -695,6 +836,10 @@ impl Tla<'_> {
                         format!("Cardinality({})", self.expression(counted, scope).0)
                     }
                     Int::Literal(value) => value.to_string(),
+                    // One integer, by the checker (plan 0103).
+                    Int::Value(value) => {
+                        format!("(CHOOSE x \\in {} : TRUE)", self.expression(value, scope).0)
+                    }
                 };
                 let (left, right) = (int(left), int(right));
                 let symbol = match operator {
@@ -759,6 +904,14 @@ fn pick(left: Arity, right: Arity) -> Arity {
 }
 
 /// `{<<x, y>> : x \in A, y \in B}`; rtlc has no `\X`.
+/// One binder per set map: rtlc rejects a map with two binders whose
+/// domain holds another comprehension ("Invalid safety variable read",
+/// "Invalid bound variable slot", issue #112; plan 0103).
 fn product(left: &str, right: &str, id: usize) -> String {
-    format!("{{<<x{id}, y{id}>> : x{id} \\in {left}, y{id} \\in {right}}}")
+    pairwise(&format!("<<x{id}, y{id}>>"), left, right, id)
+}
+
+/// `{f(x, y) : x \in left, y \in right}` with one binder per map.
+fn pairwise(element: &str, left: &str, right: &str, id: usize) -> String {
+    format!("UNION {{{{{element} : y{id} \\in {right}}} : x{id} \\in {left}}}")
 }

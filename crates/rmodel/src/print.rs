@@ -8,7 +8,8 @@
 //! `action a(x: T) = all { ... }` with an implicit frame, and `invariant` /
 //! `reachable` properties.
 use crate::syntax::{
-    CheckKind, Compare, Expr, Formula, Int, IntCompare, Model, Mult, Quantifier, SetOp, Shape,
+    Arith, CheckKind, Compare, Expr, Formula, Int, IntCompare, Model, Mult, Quantifier, SetOp,
+    Shape,
 };
 use std::collections::BTreeSet;
 
@@ -51,6 +52,18 @@ impl QuintLike<'_> {
         // A union of sorts, not a tagged sum: `+` as for sets (plan 0100).
         for (name, children) in &model.sums {
             out.push_str(&format!("  type {name} = {}\n", children.join(" + ")));
+        }
+        for record in &model.records {
+            let fields: Vec<String> = record
+                .fields
+                .iter()
+                .map(|(field, sort)| format!("{field}: {sort}"))
+                .collect();
+            out.push_str(&format!(
+                "  type {} = {{ {} }}\n",
+                record.name,
+                fields.join(", ")
+            ));
         }
         for relation in &model.relations {
             let keyword = if relation.var { "var" } else { "const" };
@@ -138,6 +151,7 @@ impl QuintLike<'_> {
             Expr::Binary(SetOp::Product, _, _) => true,
             Expr::Binary(SetOp::Join, left, right) => self.is_pair(left) && self.is_pair(right),
             Expr::Binary(_, left, right) => self.is_pair(left) || self.is_pair(right),
+            Expr::Literal(_) | Expr::Count(_) | Expr::Arith(..) | Expr::Record(..) => false,
         }
     }
     /// A set-valued expression; a single atom is written `Set(x)`.
@@ -151,11 +165,38 @@ impl QuintLike<'_> {
         match expression {
             Expr::None => "Set()".into(),
             Expr::Name(name) => name.clone(),
+            // Values (plan 0103), written as in Quint.
+            Expr::Literal(value) => value.to_string(),
+            Expr::Count(counted) => format!("{}.size()", self.set(counted)),
+            Expr::Arith(operator, left, right) => {
+                let symbol = match operator {
+                    Arith::Add => "+",
+                    Arith::Sub => "-",
+                    Arith::Mul => "*",
+                };
+                format!(
+                    "({} {symbol} {})",
+                    self.expression(left),
+                    self.expression(right)
+                )
+            }
+            Expr::Record(name, values) => {
+                let record = self.model.record(name).expect("a declared record");
+                let fields: Vec<String> = record
+                    .fields
+                    .iter()
+                    .zip(values)
+                    .map(|((field, _), value)| format!("{field}: {}", self.expression(value)))
+                    .collect();
+                format!("{{ {} }}", fields.join(", "))
+            }
+            Expr::Binary(SetOp::Multiply, ..) => unreachable!("the checker rewrites *"),
             Expr::Binary(operator, left, right) => match operator {
                 SetOp::Union => format!("{}.union({})", self.set(left), self.set(right)),
                 SetOp::Difference => format!("{}.exclude({})", self.set(left), self.set(right)),
                 SetOp::Intersection => format!("{}.intersect({})", self.set(left), self.set(right)),
                 SetOp::Product => format!("tuples({}, {})", self.set(left), self.set(right)),
+                SetOp::Multiply => unreachable!("the checker rewrites *"),
                 SetOp::Join => match (self.is_pair(left), self.is_pair(right)) {
                     (false, true) => {
                         format!("{}.image({})", self.expression(right), self.set(left))
@@ -192,6 +233,7 @@ impl QuintLike<'_> {
                 let int = |int: &Int| match int {
                     Int::Count(counted) => format!("{}.size()", self.set(counted)),
                     Int::Literal(value) => value.to_string(),
+                    Int::Value(value) => self.expression(value),
                 };
                 let symbol = match operator {
                     IntCompare::Less => "<",

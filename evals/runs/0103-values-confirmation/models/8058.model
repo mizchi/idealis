@@ -1,0 +1,32 @@
+model G8058
+sig S0
+sig S1
+enum E = Ea | Eb
+var v0: E -> one E
+record R { n: Int, b: Bool }
+var w0: S0 -> one Bool
+var w1: S0 -> one R
+init { (some ((Eb.v0).(Ea -> Ea)) and (all q3: S0 | not q3.w0)) }
+init { all x: S0 | x.w0 = true }
+init { all x: S0 | x.w1 = R { n: 0, b: false } }
+action set0(x: S0) {
+  w0' = w0 - x -> x.w0 + x -> (true)
+}
+action set1(x: S0, k: Int) {
+  w1' = w1 - x -> x.w1 + x -> (R { n: (k - k), b: true })
+}
+action a0(p0_0: E) {
+  v0' = (((E -> S0).(S0 -> p0_0)) + (Eb -> p0_0))
+}
+action a1(p1_0: S1) {
+  (some q4: S0 | (S1 -> q4) = ((S1 -> q4) + (S1 -> S0)))
+  (some q5: S0 | q5.w1.n <= (2 - 2))
+  v0' = v0
+}
+action a2(p2_0: E, p2_1: S0) {
+  v0 = v0
+  v0' = (((Ea -> E) & (E -> Ea)).v0)
+}
+invariant Inv { some v0 }
+reachable Goal { (#(S0.(S0 -> S0)) != 2 and (((S1 -> S1) in (S1 -> S1) and v0 = (Eb -> Ea)) implies not (#(Ea.v0) >= 1))) }
+scope S0 = 3, S1 = 3, Int = 0..2, steps = 6

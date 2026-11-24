@@ -1,0 +1,21 @@
+model G7096
+sig S0
+enum E = Ea | Eb
+rel r0: E -> set E
+var v1: E -> some S0
+var v2: E -> set E
+var w0: S0 -> one Bool
+init { not (((E -> S0).S0) = (((Ea -> E).Ea) - (v2.Eb))) }
+init { all x: S0 | x.w0 = false }
+action set0(x: S0) {
+  w0' = w0 - x -> x.w0 + x -> (true)
+}
+action a0(p0_0: E, p0_1: S0) {
+  v1' = v1
+}
+action a1(p1_0: S0, p1_1: S0) {
+  v2' = v2
+}
+invariant Inv { ((some q4: S0 | q4.w0) or (((v2.(Eb & E)) in Eb implies (some q5: S0 | not q5.w0)) and (some q6: E | (some q7: S0 | not q7.w0)))) }
+reachable Goal { ((not (((S0 -> E).v1) = (S0 -> S0)) or (S0 -> S0) in (S0 -> S0)) implies (all q12: S0 | not q12.w0)) }
+scope S0 = 3, steps = 6

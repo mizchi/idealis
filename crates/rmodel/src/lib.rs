@@ -9,12 +9,12 @@ mod print;
 pub mod reference;
 mod syntax;
 
-pub use emit::{DECLARATIONS, alloy_label, to_alloy, to_tla};
+pub use emit::{DECLARATIONS, SCOPE, alloy_label, alloy_supports, to_alloy, to_tla};
 pub use print::quint_like;
 use std::fmt;
 pub use syntax::{
-    Action, Check, CheckKind, Compare, Expr, Formula, Int, IntCompare, Model, Mult, Quantifier,
-    Relation, Scope, SetOp, Shape,
+    Action, Arith, BOOL, Check, CheckKind, Compare, Expr, Formula, INT, Int, IntCompare, Model,
+    Mult, Quantifier, Record, Relation, Scope, SetOp, Shape,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

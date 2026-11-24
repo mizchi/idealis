@@ -1,0 +1,28 @@
+model G7067
+sig S0
+var v0: S0 -> set S0
+var v1: some S0
+var w0: S0 -> one Int
+var w1: S0 -> one Bool
+init { (v1 != (((v1 -> S0).v0).v1) implies #(v0.v1) > 1) }
+init { all x: S0 | x.w0 = 0 }
+init { all x: S0 | x.w1 = true }
+action set0(x: S0, k: Int) {
+  w0' = w0 - x -> x.w0 + x -> (k)
+}
+action set1(x: S0) {
+  w1' = w1 - x -> x.w1 + x -> (true)
+}
+action a0(p0_0: S0, p0_1: S0) {
+  p0_1.w0 >= p0_1.w0
+  not p0_0.w1
+  v0' = ((S0.v0) -> S0)
+}
+action a1(p1_0: S0, p1_1: S0) {
+  (p1_1 -> p1_0) = (v1 -> p1_0)
+  (some q3: S0 | (v0.v0) in (p1_0 -> S0))
+  v1' = ((S0 -> S0).(p1_1 & v1))
+}
+invariant Inv { (v0 + v0) = (v0.(S0 -> S0)) }
+reachable Goal { (S0 in ((v1 - v1) - (S0 + S0)) and #(S0 + S0) < 3) }
+scope S0 = 3, Int = -1..2, steps = 6

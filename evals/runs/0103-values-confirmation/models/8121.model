@@ -1,0 +1,18 @@
+model G8121
+sig S0
+sig S1
+type P = S0 + S1
+var v0: P -> set S0
+init { (no (((P -> P).v0).S0) or ((S1 -> S1).S1) != ((S1 -> S1).(S0.(S0 -> S1)))) }
+action a0(p0_0: S1) {
+  (((P -> S1) - (P -> p0_0)) = ((P -> p0_0).(S1 -> p0_0)) implies (S0 -> P) in ((S0 -> P) - (S0 -> P)))
+  ((S0.(S0 -> P)) & (P - none)) in (P.(P -> P))
+  v0' = v0
+}
+action a1(p1_0: P) {
+  ((S0 -> S1) = (S0 -> S1) or #S1 < 1)
+  v0' = ((v0.(S0 -> S0)) & ((P -> P).v0))
+}
+invariant Inv { (((S0 + S0) - (P.v0)) != S0 or v0 in v0) }
+reachable Goal { (P -> S0) in (v0.(S0 -> S0)) }
+scope S0 = 3, S1 = 3, steps = 6

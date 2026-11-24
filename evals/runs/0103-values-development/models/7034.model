@@ -1,0 +1,17 @@
+model G7034
+sig S0
+enum E = Ea | Eb
+type P = S0 + E
+rel r0: S0 -> set S0
+rel r1: E -> set S0
+var v2: lone E
+var v3: S0 -> set S0
+fact { ((#(S0 + S0) >= 3 implies (P -> E) in (P -> E)) implies ((P -> Eb).r1) in ((P -> S0) + (P -> S0))) }
+init { (no ((Ea & none).(v2 -> Ea)) or (((S0 -> P) & (S0 -> P)).P) in ((Eb.(v2 -> Ea)).r1)) }
+action a0() {
+  (#(v2.(Ea -> P)) = 2 or Eb = (E.(E -> Ea)))
+  v3' = (v3 - v3)
+}
+invariant Inv { (one (((S0 -> Ea) + (S0 -> v2)).Ea) implies (some q5: S0 | ((S0 -> P) = (q5 -> P) and ((P -> E).Eb) in none))) }
+reachable Goal { (some q6: S0 | (not (v2 not in ((r1.(q6 -> P)).P)) or not (#(E & Ea) > 1))) }
+scope S0 = 3, steps = 6

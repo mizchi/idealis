@@ -1,0 +1,23 @@
+model G8067
+sig S0
+sig S1
+enum E = Ea | Eb
+var v0: E -> set S0
+var w0: S0 -> one Int
+var w1: S0 -> one Bool
+init { some v0 }
+init { all x: S0 | x.w0 = 0 }
+init { all x: S0 | x.w1 = false }
+action set0(x: S0, k: Int) {
+  w0' = w0 - x -> x.w0 + x -> ((k - #x))
+}
+action set1(x: S0) {
+  x.w1
+  w1' = w1 - x -> x.w1 + x -> (false)
+}
+action a0(p0_0: S1) {
+  v0' = ((E -> S0) - (Eb -> S0))
+}
+invariant Inv { ((none + Ea).(v0 - v0)) = S0 }
+reachable Goal { ((E.v0).(S0 -> S0)) not in S0 }
+scope S0 = 2, S1 = 3, Int = -1..2, steps = 6

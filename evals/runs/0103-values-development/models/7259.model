@@ -1,0 +1,32 @@
+model G7259
+sig S0
+enum E = Ea | Eb
+type P = S0 + E
+rel r0: some E
+rel r1: one E
+var v2: P -> set P
+var v3: S0 -> set P
+var w0: S0 -> one Bool
+init { not (no (P.v2)) }
+init { all x: S0 | x.w0 = true }
+action set0(x: S0) {
+  x.w0
+  w0' = w0 - x -> x.w0 + x -> (true)
+}
+action a0(p0_0: E, p0_1: E) {
+  ((some q5: S0 | q5.w0) implies (all q6: S0 | q6.w0))
+  (some (S0.(S0 -> E)) or S0 not in ((S0 + S0) - ((S0 -> E).r1)))
+  v3' = (S0 -> P)
+}
+action a1() {
+  (some q7: S0 | q7.w0)
+  v3' = (((S0 -> S0).(S0 -> S0)).((S0 -> r0).(r0 -> P)))
+}
+action a2() {
+  (P.((P -> E).(Eb -> r1))) not in (Eb.(Ea -> Ea))
+  (all q8: S0 | q8.w0)
+  v2' = ((P -> S0).(S0 -> P))
+}
+invariant Inv { ((P.((P -> S0).v3)) in P implies (((r0 -> S0).v3).P) not in (P.((P -> r1) & (P -> Ea)))) }
+reachable Goal { (v2 in v2 implies (some q9: P | (all q10: S0 | q10.w0))) }
+scope S0 = 3, steps = 6

@@ -1,0 +1,16 @@
+model G8226
+sig S0
+sig S1
+rel r0: S1 -> some S1
+rel r1: some S0
+var v2: some S1
+var v3: S1 -> lone S1
+init { (lone r1 implies #(v2 - v2) > 1) }
+action a0(p0_0: S0, p0_1: S0) {
+  (all q1: S1 | #(v3.S1) = 2)
+  (v3.(v2 -> p0_0)) = ((S1 -> S0) & (v2 -> S0))
+  v3' = r0
+}
+invariant Inv { (some q2: S1 | ((((q2 -> r1).(S0 -> S1)) in (v2 -> S1) implies #(r1.(r1 -> r1)) = 3) or not (q2 not in (S0.(r1 -> v2))))) }
+reachable Goal { (((lone S0 or some S1) implies (#r1 <= 3 and some (v2.(S1 -> S1)))) and ((v2.r0) - (none - S1)) = ((S0.(S0 -> v2)) & (S1.v3))) }
+scope S0 = 3, S1 = 3, steps = 6

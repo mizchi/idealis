@@ -1,0 +1,26 @@
+model G8126
+sig S0
+sig S1
+rel r0: S0 -> set S0
+rel r1: lone S0
+var v2: S1 -> set S0
+record R { n: Int, b: Bool }
+var w0: S0 -> one R
+fact { not (not ((r1 -> S1) in (S0 -> S1))) }
+init { (#r1 > 3 implies (S1 -> S0) = v2) }
+init { all x: S0 | x.w0 = R { n: 0, b: false } }
+action set0(x: S0, k: Int) {
+  w0' = w0 - x -> x.w0 + x -> (R { n: k, b: true })
+}
+action a0(p0_0: S1) {
+  not (#(S1 + S1) = 1)
+  v2' = (S1 -> (S1.v2))
+}
+action a1(p1_0: S1, p1_1: S0) {
+  #(S0.(r1 -> p1_0)) = 0
+  not (p1_1.w0.b)
+  v2' = v2
+}
+invariant Inv { ((#(v2.r1) != 2 or some ((S0 -> S1).S1)) implies (some q1: S1 | (some q2: S0 | (q2.w0.n + 2) = 2))) }
+reachable Goal { #(S1.v2) <= 3 }
+scope S0 = 2, S1 = 3, Int = 0..2, steps = 6

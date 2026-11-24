@@ -1,0 +1,25 @@
+model G7194
+sig S0
+sig S1
+rel r0: S1 -> lone S0
+rel r1: set S0
+var v2: one S0
+var v3: S0 -> some S1
+var w0: S0 -> one Bool
+fact { (not (((S1.(S1 -> S1)) + S1) != ((S1 & S1) + S1)) or S1 not in ((r0.r1).(S1 -> S1))) }
+init { ((S1.r0).v3) not in S1 }
+init { all x: S0 | x.w0 = false }
+action set0(x: S0) {
+  w0' = w0 - x -> x.w0 + x -> (false)
+}
+action a0() {
+  ((some q2: S0 | not q2.w0) and ((v2 -> S0).(S0 -> r1)) = (v3.(S1 -> r1)))
+  v3' = ((S1.r0) -> S1)
+}
+action a1(p1_0: S1, p1_1: S0) {
+  not (some (p1_1.v3))
+  v3' = (p1_1 -> p1_0)
+}
+invariant Inv { ((S0 -> v2).(r1 -> S1)) in (r1 -> S1) }
+reachable Goal { not ((not ((r1 -> S0) in (r1 -> v2)) and (all q7: S0 | q7.w0))) }
+scope S0 = 2, S1 = 3, steps = 6

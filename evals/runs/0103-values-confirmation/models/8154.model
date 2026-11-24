@@ -1,0 +1,36 @@
+model G8154
+sig S0
+sig S1
+enum E = Ea | Eb
+type P = S0 + S1
+rel r0: one E
+var v1: some S0
+var v2: set S0
+record R { n: Int, b: Bool }
+var w0: S0 -> one Int
+var w1: S0 -> one R
+init { (S1 -> v2) in ((S1 -> S0) & (S1 -> S0)) }
+init { all x: S0 | x.w0 = 0 }
+init { all x: S0 | x.w1 = R { n: 0, b: false } }
+action set0(x: S0, k: Int) {
+  x.w0 >= k
+  w0' = w0 - x -> x.w0 + x -> (k)
+}
+action set1(x: S0, k: Int) {
+  (k + 2) < x.w0
+  w1' = w1 - x -> x.w1 + x -> (R { n: 1, b: true })
+}
+action a0(p0_0: S1, p0_1: S0) {
+  p0_1.w0 <= (0 * p0_1.w0)
+  v1' = ((p0_1 & v1).((p0_1 -> p0_1) & (p0_1 -> p0_1)))
+}
+action a1(p1_0: P) {
+  (all q4: S0 | #S1 = #S1)
+  v2' = v1
+}
+action a2(p2_0: S1) {
+  v1' = S0
+}
+invariant Inv { ((v1 -> S1).(S1 -> P)) in (v2 -> P) }
+reachable Goal { no v2 }
+scope S0 = 2, S1 = 2, Int = 0..2, steps = 6

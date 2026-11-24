@@ -37,6 +37,14 @@ pub enum SetOp {
     Intersection,
     Product,
     Join,
+    /// `*`: only between integers; the checker rewrites it to arithmetic.
+    Multiply,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Arith {
+    Add,
+    Sub,
+    Mul,
 }
 #[derive(Clone, Debug)]
 pub enum Expr {
@@ -44,6 +52,17 @@ pub enum Expr {
     Name(String),
     None,
     Binary(SetOp, Box<Expr>, Box<Expr>),
+    /// An integer literal, the set of one integer (plan 0103).
+    Literal(i64),
+    /// `#e`, the set of one integer.
+    Count(Box<Expr>),
+    /// Arithmetic on two expressions of one integer each. The parser reads
+    /// `+` and `-` as set operations; the checker rewrites them when both
+    /// sides are integers.
+    Arith(Arith, Box<Expr>, Box<Expr>),
+    /// `Money { amount: e, currency: c }`, the set of one record, fields in
+    /// declaration order.
+    Record(String, Vec<Expr>),
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Compare {
@@ -65,6 +84,8 @@ pub enum IntCompare {
 pub enum Int {
     Count(Expr),
     Literal(i64),
+    /// An expression of one integer (plan 0103).
+    Value(Expr),
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Quantifier {
@@ -106,10 +127,22 @@ pub struct Check {
     pub kind: CheckKind,
     pub formula: Formula,
 }
+/// `record Money { amount: Int, currency: Currency }`: a value compared by
+/// its fields (plan 0103).
+#[derive(Clone, Debug)]
+pub struct Record {
+    pub name: String,
+    /// Field names and their sorts.
+    pub fields: Vec<(String, String)>,
+}
 #[derive(Clone, Debug)]
 pub struct Scope {
     /// Exactly this many atoms per sig.
     pub sizes: BTreeMap<String, usize>,
+    /// `Int = lo..hi`: the integers enumerated for initial states,
+    /// parameters and records. Values are mathematical; a state with an
+    /// integer outside leaves the scope (plan 0103).
+    pub ints: Option<(i64, i64)>,
     /// The SAT engine's trace length.
     pub steps: usize,
 }
@@ -122,6 +155,7 @@ pub struct Model {
     /// `type Party = Person + Org`: a union of signatures and enums with no
     /// atoms of its own (plan 0100).
     pub sums: Vec<(String, Vec<String>)>,
+    pub records: Vec<Record>,
     pub relations: Vec<Relation>,
     pub facts: Vec<Formula>,
     pub init: Vec<Formula>,
@@ -164,6 +198,27 @@ impl Model {
             }
         }
     }
+    pub fn record(&self, name: &str) -> Option<&Record> {
+        self.records.iter().find(|record| record.name == name)
+    }
+    /// The record a field belongs to, and the field's position.
+    pub fn field(&self, name: &str) -> Option<(&Record, usize)> {
+        self.records.iter().find_map(|record| {
+            record
+                .fields
+                .iter()
+                .position(|(field, _)| field == name)
+                .map(|index| (record, index))
+        })
+    }
+    /// Values are integers and records; atoms are everything else.
+    pub fn is_value(&self, sort: &str) -> bool {
+        sort == INT || self.record(sort).is_some()
+    }
+    /// Whether the model has integer or record values (plan 0103).
+    pub fn has_values(&self) -> bool {
+        self.scope.ints.is_some() || !self.records.is_empty()
+    }
     pub fn is_sum(&self, name: &str) -> bool {
         self.sums.iter().any(|(sum, _)| sum == name)
     }
@@ -177,8 +232,15 @@ impl Model {
     }
 }
 
+/// The built-in sorts (plan 0103). Bool is an enum of `true` and `false`,
+/// added when the model mentions it.
+pub const INT: &str = "Int";
+pub const BOOL: &str = "Bool";
 const KEYWORDS: &[&str] = &[
     "model",
+    "record",
+    "true",
+    "false",
     "enum",
     "type",
     "sig",
@@ -234,7 +296,7 @@ fn tokens(source: &str) -> Result<Vec<String>, Error> {
             characters[position..].starts_with(&operator.chars().collect::<Vec<_>>())
         }) {
             position += operator.len();
-        } else if "{}():,.+-&#=<>'|".contains(character) {
+        } else if "{}():,.+-*&#=<>'|".contains(character) {
             position += 1;
         } else {
             return Err(Error::syntax(format!("unexpected character {character:?}")));
@@ -252,6 +314,8 @@ struct Parser {
     /// Formulas and expressions parsed in the current declaration (issue
     /// #106): bounds the tree the checker and Drop recurse over.
     nodes: usize,
+    /// Declared records and their field names, for record literals.
+    records: BTreeMap<String, Vec<String>>,
 }
 /// Nesting and operator chains are bounded, so neither the parser nor the
 /// checks after it can exhaust the stack.
@@ -325,6 +389,7 @@ impl Parser {
             sigs: Vec::new(),
             enums: Vec::new(),
             sums: Vec::new(),
+            records: Vec::new(),
             relations: Vec::new(),
             facts: Vec::new(),
             init: Vec::new(),
@@ -332,6 +397,7 @@ impl Parser {
             checks: Vec::new(),
             scope: Scope {
                 sizes: BTreeMap::new(),
+                ints: None,
                 steps: 0,
             },
         };
@@ -359,6 +425,31 @@ impl Parser {
                         children.push(self.name()?);
                     }
                     model.sums.push((name, children));
+                }
+                "record" => {
+                    self.position += 1;
+                    let name = self.name()?;
+                    self.expect("{")?;
+                    let mut fields = Vec::new();
+                    while !self.take("}") {
+                        if !fields.is_empty() {
+                            self.expect(",")?;
+                            if self.take("}") {
+                                break;
+                            }
+                        }
+                        let field = self.name()?;
+                        self.expect(":")?;
+                        fields.push((field, self.name()?));
+                    }
+                    if fields.is_empty() {
+                        return Err(Error::syntax(format!("record {name} has no fields")));
+                    }
+                    self.records.insert(
+                        name.clone(),
+                        fields.iter().map(|(field, _)| field.clone()).collect(),
+                    );
+                    model.records.push(Record { name, fields });
                 }
                 "sig" => {
                     self.position += 1;
@@ -428,6 +519,19 @@ impl Parser {
                         if self.take("steps") {
                             self.expect("=")?;
                             model.scope.steps = self.size(32)?;
+                        } else if self.peek() == INT {
+                            self.position += 1;
+                            self.expect("=")?;
+                            let low = self.signed()?;
+                            self.expect(".")?;
+                            self.expect(".")?;
+                            let high = self.signed()?;
+                            if low > high || high - low >= 20 || model.scope.ints.is_some() {
+                                return Err(Error::syntax(format!(
+                                    "Int = {low}..{high}: at most one range of at most 20 integers"
+                                )));
+                            }
+                            model.scope.ints = Some((low, high));
                         } else {
                             let sig = self.name()?;
                             self.expect("=")?;
@@ -448,6 +552,11 @@ impl Parser {
             return Err(Error::syntax("the model needs a scope with steps"));
         }
         Ok(model)
+    }
+    fn signed(&mut self) -> Result<i64, Error> {
+        let negative = self.take("-");
+        let value = self.number()?;
+        Ok(if negative { -value } else { value })
     }
     fn size(&mut self, maximum: usize) -> Result<usize, Error> {
         let value = self.number()?;
@@ -619,34 +728,41 @@ impl Parser {
                 self.expect(")")?;
                 Ok(formula)
             });
+            // Integer comparisons and `*` follow parenthesized integers
+            // (plan 0103, found by the generated models).
             let comparison_follows = matches!(
                 self.peek(),
-                "in" | "=" | "!=" | "." | "+" | "-" | "&" | "->"
+                "in" | "=" | "!=" | "." | "+" | "-" | "&" | "->" | "*" | "<" | "<=" | ">" | ">="
             ) || self.peek() == "not" && self.peek_at(1) == "in";
             match formula {
                 Ok(formula) if !comparison_follows => return Ok(formula),
                 _ => (self.position, self.depth, self.nodes) = start,
             }
         }
-        if self.peek() == "#" || self.peek().bytes().all(|byte| byte.is_ascii_digit()) {
-            let left = self.int()?;
-            let operator = match self.peek() {
-                "<" => IntCompare::Less,
-                "<=" => IntCompare::LessEqual,
-                ">" => IntCompare::Greater,
-                ">=" => IntCompare::GreaterEqual,
-                "=" => IntCompare::Equal,
-                "!=" => IntCompare::NotEqual,
-                other => {
-                    return Err(Error::syntax(format!(
-                        "expected an integer comparison, got {other:?}"
-                    )));
-                }
-            };
-            self.position += 1;
-            return Ok(Formula::Ints(operator, left, self.int()?));
-        }
+        let integer = self.peek() == "#"
+            || self.peek() == "-"
+            || self.peek().bytes().all(|byte| byte.is_ascii_digit());
         let left = self.expression(0)?;
+        let ordering = match self.peek() {
+            "<" => Some(IntCompare::Less),
+            "<=" => Some(IntCompare::LessEqual),
+            ">" => Some(IntCompare::Greater),
+            ">=" => Some(IntCompare::GreaterEqual),
+            "=" if integer => Some(IntCompare::Equal),
+            "!=" if integer => Some(IntCompare::NotEqual),
+            _ => None,
+        };
+        if let Some(operator) = ordering {
+            self.position += 1;
+            let right = self.expression(0)?;
+            return Ok(Formula::Ints(operator, Self::int(left), Self::int(right)));
+        }
+        if integer {
+            return Err(Error::syntax(format!(
+                "expected an integer comparison, got {:?}",
+                self.peek()
+            )));
+        }
         let operator = match self.peek() {
             "in" => Compare::In,
             "=" => Compare::Equal,
@@ -655,26 +771,52 @@ impl Parser {
                 self.position += 1;
                 Compare::NotIn
             }
-            other => {
-                return Err(Error::syntax(format!(
-                    "expected a comparison, got {other:?}"
-                )));
+            // A Bool expression on its own holds when it is true (plan
+            // 0103); the checker rejects any other expression here.
+            _ => {
+                return Ok(Formula::Compare(
+                    Compare::Equal,
+                    left,
+                    Expr::Name("true".into()),
+                ));
             }
         };
         self.position += 1;
         Ok(Formula::Compare(operator, left, self.expression(0)?))
     }
-    fn int(&mut self) -> Result<Int, Error> {
-        if self.take("#") {
-            return Ok(Int::Count(self.expression(4)?));
+    /// A record literal: every declared field once, in any order.
+    fn record(&mut self, name: String, declared: &[String]) -> Result<Expr, Error> {
+        self.expect("{")?;
+        let mut given: BTreeMap<String, Expr> = BTreeMap::new();
+        while !self.take("}") {
+            if !given.is_empty() {
+                self.expect(",")?;
+            }
+            let field = self.name()?;
+            self.expect(":")?;
+            let value = self.expression(0)?;
+            if !declared.contains(&field) || given.insert(field.clone(), value).is_some() {
+                return Err(Error::syntax(format!("{name}: unexpected field {field}")));
+            }
         }
-        let value = self.number()?;
-        if value > MAX_LITERAL {
-            return Err(Error::syntax(format!(
-                "literal {value} above {MAX_LITERAL}"
-            )));
+        let values = declared
+            .iter()
+            .map(|field| {
+                given
+                    .remove(field)
+                    .ok_or_else(|| Error::syntax(format!("{name}: missing field {field}")))
+            })
+            .collect::<Result<_, _>>()?;
+        Ok(Expr::Record(name, values))
+    }
+    /// `#e` and literals keep their own forms, which the Alloy lowering
+    /// writes as Alloy integers.
+    fn int(expression: Expr) -> Int {
+        match expression {
+            Expr::Count(counted) => Int::Count(*counted),
+            Expr::Literal(value) => Int::Literal(value),
+            other => Int::Value(other),
         }
-        Ok(Int::Literal(value))
     }
     /// `+ -` (1) < `&` (2) < `->` (3) < `.` (4).
     fn expression(&mut self, minimum: u8) -> Result<Expr, Error> {
@@ -691,14 +833,27 @@ impl Parser {
             inner
         } else if self.take("none") {
             Expr::None
+        } else if self.take("true") {
+            Expr::Name("true".into())
+        } else if self.take("false") {
+            Expr::Name("false".into())
+        } else if self.take("#") {
+            Expr::Count(Box::new(self.expression(4)?))
+        } else if self.peek() == "-" || self.peek().bytes().all(|byte| byte.is_ascii_digit()) {
+            Expr::Literal(self.signed()?)
         } else {
-            Expr::Name(self.name()?)
+            let name = self.name()?;
+            match self.records.get(&name).cloned() {
+                Some(declared) if self.peek() == "{" => self.record(name, &declared)?,
+                _ => Expr::Name(name),
+            }
         };
         loop {
             let (operator, precedence) = match self.peek() {
                 "+" => (SetOp::Union, 1),
                 "-" => (SetOp::Difference, 1),
                 "&" => (SetOp::Intersection, 2),
+                "*" => (SetOp::Multiply, 2),
                 "->" => (SetOp::Product, 3),
                 "." => (SetOp::Join, 4),
                 _ => break,
@@ -797,12 +952,99 @@ impl Checker<'_> {
             ))),
         }
     }
-    fn expression(&self, expression: &Expr, bound: &Bound, vars: bool) -> Result<Type, Error> {
+    /// Whether an expression has exactly one element in every state, so
+    /// arithmetic and integer comparisons on it are total (plan 0103).
+    fn singular(&self, expression: &Expr, bound: &Bound) -> bool {
+        match expression {
+            Expr::Literal(_) | Expr::Count(_) | Expr::Arith(..) => true,
+            Expr::Name(name) => {
+                bound.contains_key(name)
+                    || self.model.member(name).is_some()
+                    || self.model.relation(name).is_some_and(|relation| {
+                        matches!(
+                            relation.shape,
+                            Shape::Unary {
+                                mult: Mult::One,
+                                ..
+                            }
+                        )
+                    })
+            }
+            Expr::Record(_, values) => values.iter().all(|value| self.singular(value, bound)),
+            Expr::Binary(SetOp::Join, left, right) => {
+                self.singular(left, bound)
+                    && match right.as_ref() {
+                        Expr::Name(name) => {
+                            self.model.field(name).is_some()
+                                || self.model.relation(name).is_some_and(|relation| {
+                                    matches!(
+                                        relation.shape,
+                                        Shape::Binary {
+                                            mult: Mult::One,
+                                            ..
+                                        }
+                                    )
+                                })
+                        }
+                        _ => false,
+                    }
+            }
+            _ => false,
+        }
+    }
+    fn integer(&self, expression: &Expr, bound: &Bound, what: &str) -> Result<(), Error> {
+        if !self.singular(expression, bound) {
+            return Err(Error::kind(format!(
+                "{what} needs exactly one integer on each side; this one may be empty or several"
+            )));
+        }
+        Ok(())
+    }
+    fn expression(&self, expression: &mut Expr, bound: &Bound, vars: bool) -> Result<Type, Error> {
+        let int = || Type::Set(INT.to_owned());
         Ok(match expression {
             Expr::None => Type::Any,
+            Expr::Literal(_) => {
+                if self.model.scope.ints.is_none() {
+                    return Err(Error::kind("an integer value needs a scope Int = lo..hi"));
+                }
+                int()
+            }
+            Expr::Count(counted) => {
+                if matches!(self.expression(counted, bound, vars)?, Type::Pair(..)) {
+                    return Err(Error::kind("# counts only sets"));
+                }
+                int()
+            }
+            Expr::Arith(_, left, right) => {
+                for side in [left, right] {
+                    if self.expression(side, bound, vars)? != int() {
+                        return Err(Error::kind("arithmetic needs integers"));
+                    }
+                    self.integer(side, bound, "arithmetic")?;
+                }
+                int()
+            }
+            Expr::Record(name, values) => {
+                let record = self.model.record(name).expect("parsed against the records");
+                for (value, (field, sort)) in values.iter_mut().zip(&record.fields) {
+                    let found = self.expression(value, bound, vars)?;
+                    if !self.fits(&found, &Type::Set(sort.clone())) || !self.singular(value, bound)
+                    {
+                        return Err(Error::kind(format!(
+                            "{name}.{field} needs one value of {sort}"
+                        )));
+                    }
+                }
+                Type::Set(name.clone())
+            }
             Expr::Name(name) => {
                 if let Some(sort) = bound.get(name) {
                     Type::Set(sort.clone())
+                } else if self.model.is_value(name) {
+                    return Err(Error::kind(format!(
+                        "{name} is a sort of values, not a set to use in an expression"
+                    )));
                 } else if self.sigs.contains(name.as_str()) {
                     Type::Set(name.clone())
                 } else if let Some(enumeration) = self.model.member(name) {
@@ -812,13 +1054,38 @@ impl Checker<'_> {
                         return Err(Error::kind(format!("fact refers to the var {name}")));
                     }
                     Self::shape(&relation.shape)
+                } else if let Some((record, index)) = self.model.field(name) {
+                    Type::Pair(record.name.clone(), record.fields[index].1.clone())
                 } else {
                     return Err(Error::kind(format!("unknown name {name}")));
                 }
             }
-            Expr::Binary(operator, left, right) => {
-                let left = self.expression(left, bound, vars)?;
-                let right = self.expression(right, bound, vars)?;
+            Expr::Binary(operator, left_expression, right_expression) => {
+                let left = self.expression(left_expression, bound, vars)?;
+                let right = self.expression(right_expression, bound, vars)?;
+                // `+`, `-` and `*` between integers are arithmetic (plan 0103).
+                let arith = match operator {
+                    SetOp::Union => Some(Arith::Add),
+                    SetOp::Difference => Some(Arith::Sub),
+                    SetOp::Multiply => Some(Arith::Mul),
+                    _ => None,
+                };
+                if let Some(arith) = arith
+                    && left == int()
+                    && right == int()
+                {
+                    self.integer(left_expression, bound, "arithmetic")?;
+                    self.integer(right_expression, bound, "arithmetic")?;
+                    let (l, r) = (
+                        std::mem::replace(left_expression.as_mut(), Expr::None),
+                        std::mem::replace(right_expression.as_mut(), Expr::None),
+                    );
+                    *expression = Expr::Arith(arith, Box::new(l), Box::new(r));
+                    return Ok(int());
+                }
+                if *operator == SetOp::Multiply {
+                    return Err(Error::kind("* needs integers"));
+                }
                 match operator {
                     SetOp::Product => match (left, right) {
                         (Type::Pair(..), _) | (_, Type::Pair(..)) => {
@@ -859,21 +1126,52 @@ impl Checker<'_> {
             }
         })
     }
-    fn formula(&self, formula: &Formula, bound: &Bound, vars: bool) -> Result<(), Error> {
+    fn formula(&self, formula: &mut Formula, bound: &Bound, vars: bool) -> Result<(), Error> {
         match formula {
-            Formula::Compare(_, left, right) => {
-                let (left, right) = (
-                    self.expression(left, bound, vars)?,
-                    self.expression(right, bound, vars)?,
-                );
+            Formula::Compare(operator, left, right) => {
+                let truth = *operator == Compare::Equal
+                    && matches!(right, Expr::Name(name) if name == "true");
+                let left = self.expression(left, bound, vars)?;
+                if truth && left != Type::Set(BOOL.to_owned()) {
+                    return Err(Error::kind(format!(
+                        "expected a comparison, or an expression of Bool; got {}",
+                        left.describe()
+                    )));
+                }
+                let right = self.expression(right, bound, vars)?;
                 self.same(left, right, "comparison")?;
             }
             Formula::Ints(_, left, right) => {
+                let counts = matches!(left, Int::Count(_)) || matches!(right, Int::Count(_));
                 for int in [left, right] {
-                    if let Int::Count(expression) = int
-                        && matches!(self.expression(expression, bound, vars)?, Type::Pair(..))
-                    {
-                        return Err(Error::kind("# counts only sets"));
+                    match int {
+                        Int::Count(expression) => {
+                            if matches!(self.expression(expression, bound, vars)?, Type::Pair(..)) {
+                                return Err(Error::kind("# counts only sets"));
+                            }
+                        }
+                        // Counts are Alloy integers of a few bits; integer
+                        // values have their own scope (plan 0103).
+                        Int::Literal(value) => {
+                            if self.model.scope.ints.is_none() && *value > MAX_LITERAL {
+                                return Err(Error::syntax(format!(
+                                    "literal {value} above {MAX_LITERAL}"
+                                )));
+                            }
+                            if !counts && self.model.scope.ints.is_none() {
+                                return Err(Error::kind(
+                                    "an integer value needs a scope Int = lo..hi",
+                                ));
+                            }
+                        }
+                        Int::Value(expression) => {
+                            if self.expression(expression, bound, vars)?
+                                != Type::Set(INT.to_owned())
+                            {
+                                return Err(Error::kind("an integer comparison needs integers"));
+                            }
+                            self.integer(expression, bound, "an integer comparison")?;
+                        }
                     }
                 }
             }
@@ -891,6 +1189,11 @@ impl Checker<'_> {
                 self.formula(right, bound, vars)?;
             }
             Formula::Quantified(_, variable, sig, body) => {
+                if self.model.is_value(sig) {
+                    return Err(Error::kind(format!(
+                        "quantifying over {sig}: only atoms are quantified, values have no fixed set"
+                    )));
+                }
                 if !self.sigs.contains(sig.as_str()) {
                     return Err(Error::kind(format!("unknown sig {sig}")));
                 }
@@ -907,6 +1210,7 @@ impl Checker<'_> {
             || self.sigs.contains(name)
             || self.model.member(name).is_some()
             || self.model.relation(name).is_some()
+            || self.model.field(name).is_some()
         {
             return Err(Error::kind(format!("{name} shadows another name")));
         }
@@ -918,18 +1222,34 @@ pub(crate) fn parse(source: &str) -> Result<Model, Error> {
     if source.len() > 1 << 20 {
         return Err(Error::syntax("source exceeds 1 MiB"));
     }
+    let tokens = tokens(source)?;
+    let boolean = tokens
+        .iter()
+        .any(|token| [BOOL, "true", "false"].contains(&token.as_str()));
     let mut parser = Parser {
-        tokens: tokens(source)?,
+        tokens,
         position: 0,
         depth: 0,
         nodes: 0,
+        records: BTreeMap::new(),
     };
-    let model = parser.model()?;
-    check(&model)?;
+    let mut model = parser.model()?;
+    if boolean {
+        model
+            .enums
+            .push((BOOL.to_owned(), vec!["false".into(), "true".into()]));
+    }
+    check(&mut model)?;
     Ok(model)
 }
 
-fn check(model: &Model) -> Result<(), Error> {
+fn check(model: &mut Model) -> Result<(), Error> {
+    // The checker reads a snapshot and rewrites arithmetic in the model.
+    let snapshot = model.clone();
+    check_in(&snapshot, model)
+}
+
+fn check_in(model: &Model, target: &mut Model) -> Result<(), Error> {
     let mut names = BTreeSet::new();
     for name in model
         .sigs
@@ -941,12 +1261,18 @@ fn check(model: &Model) -> Result<(), Error> {
                 .flat_map(|(name, members)| std::iter::once(name).chain(members)),
         )
         .chain(model.sums.iter().map(|(name, _)| name))
+        .chain(model.records.iter().flat_map(|record| {
+            std::iter::once(&record.name).chain(record.fields.iter().map(|(field, _)| field))
+        }))
         .chain(model.relations.iter().map(|relation| &relation.name))
         .chain(model.actions.iter().map(|action| &action.name))
         .chain(model.checks.iter().map(|check| &check.name))
     {
         if !names.insert(name.as_str()) {
             return Err(Error::kind(format!("duplicate name {name}")));
+        }
+        if name == INT || name == crate::SCOPE {
+            return Err(Error::kind(format!("{name} is a built-in name")));
         }
         if name == crate::DECLARATIONS {
             return Err(Error::kind(format!(
@@ -985,10 +1311,47 @@ fn check(model: &Model) -> Result<(), Error> {
             }
         }
     }
-    let sigs: BTreeSet<&str> = sigs
+    // Values (plan 0103): Int with its scope, and records whose fields are
+    // declared sorts or earlier records.
+    let mut sigs: BTreeSet<&str> = sigs
         .into_iter()
         .chain(model.sums.iter().map(|(name, _)| name.as_str()))
         .collect();
+    let mentions_int = model
+        .records
+        .iter()
+        .flat_map(|record| record.fields.iter().map(|(_, sort)| sort))
+        .chain(
+            model
+                .relations
+                .iter()
+                .flat_map(|relation| match &relation.shape {
+                    Shape::Unary { sig, .. } => vec![sig],
+                    Shape::Binary { from, to, .. } => vec![from, to],
+                }),
+        )
+        .chain(
+            model
+                .actions
+                .iter()
+                .flat_map(|action| action.params.iter().map(|(_, sort)| sort)),
+        )
+        .any(|sort| sort == INT);
+    if mentions_int && model.scope.ints.is_none() {
+        return Err(Error::kind("Int needs a scope Int = lo..hi"));
+    }
+    sigs.insert(INT);
+    for record in &model.records {
+        for (field, sort) in &record.fields {
+            if !sigs.contains(sort.as_str()) {
+                return Err(Error::kind(format!(
+                    "{}.{field}: unknown sort {sort}",
+                    record.name
+                )));
+            }
+        }
+        sigs.insert(record.name.as_str());
+    }
     for relation in &model.relations {
         let used = match &relation.shape {
             Shape::Unary { sig, .. } => vec![sig],
@@ -996,6 +1359,26 @@ fn check(model: &Model) -> Result<(), Error> {
         };
         if let Some(sig) = used.iter().find(|sig| !sigs.contains(sig.as_str())) {
             return Err(Error::kind(format!("{}: unknown sig {sig}", relation.name)));
+        }
+        // A relation holds at most one value of a value sort per atom: no
+        // sets of values in v1.
+        let (target, mult) = match &relation.shape {
+            Shape::Unary { sig, mult } => (sig, *mult),
+            Shape::Binary { from, to, mult } => {
+                if model.is_value(from) {
+                    return Err(Error::kind(format!(
+                        "{}: a relation starts at atoms, not at the values of {from}",
+                        relation.name
+                    )));
+                }
+                (to, *mult)
+            }
+        };
+        if model.is_value(target) && !matches!(mult, Mult::One | Mult::Lone) {
+            return Err(Error::kind(format!(
+                "{}: a relation to {target} holds one or lone value, not a set",
+                relation.name
+            )));
         }
     }
     // Counts are integers in the Alloy lowering, at most 5 bits (-16..15);
@@ -1008,17 +1391,17 @@ fn check(model: &Model) -> Result<(), Error> {
     }
     let checker = Checker { model, sigs };
     let none = Bound::new();
-    for fact in &model.facts {
+    for fact in &mut target.facts {
         checker.formula(fact, &none, false)?;
     }
-    for formula in model
+    for formula in target
         .init
-        .iter()
-        .chain(model.checks.iter().map(|check| &check.formula))
+        .iter_mut()
+        .chain(target.checks.iter_mut().map(|check| &mut check.formula))
     {
         checker.formula(formula, &none, true)?;
     }
-    for action in &model.actions {
+    for (action, written) in model.actions.iter().zip(&mut target.actions) {
         let mut bound = Bound::new();
         for (param, sig) in &action.params {
             if !checker.sigs.contains(sig.as_str()) {
@@ -1027,11 +1410,12 @@ fn check(model: &Model) -> Result<(), Error> {
             checker.fresh(param, &bound)?;
             bound.insert(param.clone(), sig.clone());
         }
-        for guard in &action.guards {
+        for guard in &mut written.guards {
             checker.formula(guard, &bound, true)?;
         }
         let mut assigned = BTreeSet::new();
-        for (var, value) in &action.assignments {
+        for (var, value) in written.assignments.iter_mut() {
+            let var = &*var;
             let relation = model
                 .relation(var)
                 .filter(|relation| relation.var)

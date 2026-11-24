@@ -1,0 +1,23 @@
+model G8210
+sig S0
+var v0: S0 -> lone S0
+record R { n: Int, b: Bool }
+var w0: S0 -> one R
+init { (no ((v0 & (S0 -> S0)).(v0.S0)) implies v0 = (S0 -> S0)) }
+init { all x: S0 | x.w0 = R { n: 0, b: false } }
+action set0(x: S0, k: Int) {
+  w0' = w0 - x -> x.w0 + x -> (R { n: #x, b: true })
+}
+action a0(p0_0: S0, p0_1: S0) {
+  v0' = (v0.(p0_1 -> p0_1))
+}
+action a1(p1_0: S0, p1_1: S0) {
+  (1 + #p1_0) = (p1_1.w0.n * 1)
+  v0' = (v0.v0)
+}
+action a2(p2_0: S0, p2_1: S0) {
+  v0' = ((p2_1.v0) -> (p2_0.v0))
+}
+invariant Inv { (v0.S0) not in S0 }
+reachable Goal { not ((S0.v0) not in S0) }
+scope S0 = 3, Int = 0..2, steps = 6
