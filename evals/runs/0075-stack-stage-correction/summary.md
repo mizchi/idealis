@@ -20,5 +20,5 @@
 
 ## 訂正
 
-- 0075-stack-stage の「上記以外の 33 セル ... 終了コード 0、`chain complete 6 7 20`」は、after の build では正しい。before の build では 33 セルのうち 25 が完了で、8 が checker の入れ子 48 の拒否だった（上の 8 セル）。
+- 0075-stack-stage の「上記以外の 33 セル ... 4 つの build すべてで終了コード 0、`chain complete 6 7 20`」は、セルの数も結果も誤っていた。1 つの build で SIGABRT でないセルは 18 - 3 = 15 で、4 つの build で 60 セル。after の build ではこの 15 セルすべてが `chain complete 6 7 20`。before の build では 15 セルのうち 7 が完了で、8 が checker の入れ子 48 の拒否だった（上の 8 セル）。
 - 3 つの SIGABRT のセル（`if 127`、`if 128`、`case 128`）の記述は変わらない。
