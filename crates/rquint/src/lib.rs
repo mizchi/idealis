@@ -68,13 +68,19 @@ pub fn translate(ir: &str, options: &Options) -> Result<Translation> {
     let mut definitions = BTreeMap::new();
     for declaration in module["declarations"].as_array().into_iter().flatten() {
         match declaration["kind"].as_str() {
-            Some("var") => variables.push(text(&declaration["name"])?.to_owned()),
+            Some("var") => {
+                let name = text(&declaration["name"])?;
+                reserved(name)?;
+                variables.push(name.to_owned());
+            }
             Some("def") => {
                 let name = text(&declaration["name"])?;
-                // Quint's own aliases for the entry points.
-                if name.contains("::") {
+                // Quint's own aliases for the entry points; namespaced
+                // definitions of a flattened import are kept.
+                if name.starts_with("q::") {
                     continue;
                 }
+                reserved(name)?;
                 if let Some(qualifier @ ("temporal" | "run")) = declaration["qualifier"].as_str() {
                     return unsupported(format!("{qualifier} definition {name}"));
                 }
@@ -107,11 +113,15 @@ pub fn translate(ir: &str, options: &Options) -> Result<Translation> {
     };
     let mut emitted = BTreeMap::new();
     for (name, declaration) in &definitions {
-        // TLA+'s Init is a predicate over unprimed variables; Quint's init
-        // assigns them.
-        emitter.initial = name == &options.init;
         emitted.insert(name.clone(), emitter.definition(name, declaration)?);
     }
+    // TLA+'s Init is a predicate over unprimed variables; Quint's init
+    // assigns them. The init action keeps its transition form for any step
+    // that calls it, and the configuration's INIT is this separate
+    // predicate (review of #102).
+    emitter.initial = true;
+    let initial = emitter.expression(&definitions[&options.init]["expr"])?;
+    emitter.initial = false;
     let mut source = format!(
         "---- MODULE {} ----\nEXTENDS Integers, Sequences, FiniteSets, TLC\n",
         identifier(main)
@@ -124,16 +134,27 @@ pub fn translate(ir: &str, options: &Options) -> Result<Translation> {
         source.push_str(&emitted[&name]);
         source.push('\n');
     }
+    source.push_str(&format!("{INITIAL} == {initial}\n"));
     source.push_str("====\n");
-    let mut config = format!(
-        "INIT {}\nNEXT {}\n",
-        identifier(&options.init),
-        identifier(&options.step)
-    );
+    let mut config = format!("INIT {INITIAL}\nNEXT {}\n", identifier(&options.step));
     for invariant in &options.invariants {
         config.push_str(&format!("INVARIANT {}\n", identifier(invariant)));
     }
     Ok(Translation { source, config })
+}
+
+/// The predicate the TLC configuration's INIT names.
+const INITIAL: &str = "q_init";
+
+/// Generated names begin with `q_`; a Quint name with that prefix could
+/// collide with one, so it is refused.
+fn reserved(name: &str) -> Result<()> {
+    if name.starts_with("q_") {
+        return unsupported(format!(
+            "name {name}: the q_ prefix is reserved for generated names"
+        ));
+    }
+    Ok(())
 }
 
 pub(crate) fn text(value: &Value) -> Result<&str> {
@@ -156,6 +177,13 @@ fn order(definitions: &BTreeMap<String, Value>) -> Result<Vec<String>> {
                     && names.contains_key(name)
                 {
                     found.insert(name.to_owned());
+                }
+                // A call of a global operator is a dependency too.
+                if object.get("kind").and_then(Value::as_str) == Some("app")
+                    && let Some(opcode) = object.get("opcode").and_then(Value::as_str)
+                    && names.contains_key(opcode)
+                {
+                    found.insert(opcode.to_owned());
                 }
                 for child in object.values() {
                     uses(child, names, found);
@@ -369,6 +397,18 @@ impl Emitter<'_> {
     fn application(&mut self, expression: &Value) -> Result<String> {
         let opcode = text(&expression["opcode"])?;
         let arguments = expression["args"].as_array().cloned().unwrap_or_default();
+        // In the initial phase, an action called with arguments is inlined
+        // with its parameters bound, so its assignments constrain the first
+        // state (review of #102).
+        if self.initial
+            && !self.scopes.iter().any(|(quint, _)| quint == opcode)
+            && let Some(definition) = self.definitions.get(opcode)
+            && definition["qualifier"] == "action"
+        {
+            let values = self.all(&arguments)?;
+            let lambda = definition["expr"].clone();
+            return self.apply(&lambda, &values);
+        }
         // A user operator applied to arguments.
         if self.globals.contains(opcode) || self.scopes.iter().any(|(quint, _)| quint == opcode) {
             let target = self
@@ -418,8 +458,30 @@ impl Emitter<'_> {
             "iadd" => binary(self, "+")?,
             "isub" => binary(self, "-")?,
             "imul" => binary(self, "*")?,
-            "idiv" => binary(self, "\\div")?,
-            "imod" => binary(self, "%")?,
+            // Quint truncates toward zero and the remainder takes the
+            // dividend's sign; TLA+'s \div and % floor (review of #102).
+            "idiv" | "imod" => {
+                let left = self.expression(at(0)?)?;
+                let right = self.expression(at(1)?)?;
+                self.fresh += 1;
+                let id = self.fresh;
+                let (a, b, q) = (
+                    format!("q_a_{id}"),
+                    format!("q_b_{id}"),
+                    format!("q_q_{id}"),
+                );
+                let magnitude = format!(
+                    "(IF {a} < 0 THEN -{a} ELSE {a}) \\div (IF {b} < 0 THEN -{b} ELSE {b})"
+                );
+                let quotient =
+                    format!("IF ({a} < 0) = ({b} < 0) THEN {magnitude} ELSE -({magnitude})");
+                let result = if opcode == "idiv" {
+                    q.clone()
+                } else {
+                    format!("{a} - {q} * {b}")
+                };
+                format!("(LET {a} == {left}  {b} == {right}  {q} == {quotient} IN {result})")
+            }
             "ipow" => binary(self, "^")?,
             "iuminus" => format!("(-{})", self.expression(at(0)?)?),
             "ilt" => binary(self, "<")?,
@@ -676,9 +738,9 @@ mod tests {
         assert_eq!(
             translation.source,
             "---- MODULE M ----\nEXTENDS Integers, Sequences, FiniteSets, TLC\nVARIABLES x\n\
-             init == (x = 0)\ninv == (x >= 0)\nstep == (x' = x)\n====\n"
+             init == (x' = 0)\ninv == (x >= 0)\nstep == (x' = x)\nq_init == (x = 0)\n====\n"
         );
-        assert_eq!(translation.config, "INIT init\nNEXT step\nINVARIANT inv\n");
+        assert_eq!(translation.config, "INIT q_init\nNEXT step\nINVARIANT inv\n");
     }
 
     #[test]
