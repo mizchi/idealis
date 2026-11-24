@@ -84,7 +84,7 @@
 - [x] v2の型所属はidentity range map-setを列挙せず判定する。通常値のmap-setとv1の評価は列挙を維持する。
 - [x] v2の動的評価の入れ子は128までで、再帰経路の超過はbounded/evaluation、通常の不正な深さはprotocolエラー。定義内expression深さ48や既存v1の制限とは別に扱う。
 - [x] workはwall timeや厳密なメモリ上限ではない。並列探索のworkと予算境界の部分結果は逐次と同じとは限らない。
-- [x] 集合foldの文字列・record、関数key幅等の制限を維持する。ただし要素が1個以下、body が要素を読まない、body が累積値に`\union`で集合を足す（足す集合とIFの条件が累積値を読まない）fold は、文字列・recordを含んでも受理し、固定TLCのログと照合する。累積値に足すfoldのbodyが評価エラーなら従来の拒否を返す。要素が2個以上でmodel valueを含む集合foldは未対応。汎用Valueのvariantの存在だけで対応とは数えない。
+- [x] 集合foldの文字列・record、関数key幅等の制限を維持する。ただし要素が1個以下、body が要素を読まない、body が累積値に`\union`で集合を足す（足す集合とIFの条件が累積値を読まない）fold は、文字列・recordを含んでも受理し、固定TLCのログと照合する。累積値に足すfoldのbodyが評価エラーの場合と、結果の要素に比較できない組（整数と型付きmodel valueなど）がある場合は、従来の拒否を返す。置き換えない例外は、要素が1個の集合（bodyのエラーをそのまま返す）、`Unsupported TLA input`で始まる別の拒否、予算切れ（`budget`・`evaluation-budget`）。要素が2個以上でmodel valueを含む集合foldは未対応。汎用Valueのvariantの存在だけで対応とは数えない。
 
 [README](README.md)、[IR](src/ir.rs)、[探索](src/safety.rs)、[関数値](src/safety_functions.rs)、[値の登録・移送](src/safety_values.rs)、[時間的性質](src/temporal.rs)、[定数の準備](src/safety_prepared.rs)、[限定symmetry](src/safety_symmetry.rs)、[適用条件](../../docs/symmetry.md)、[並列探索](src/safety_parallel.rs)、[回帰](tests/parallel_safety.rs)、[有限対応の比較入力](../rtla-compiler/tests/finite-support.json)、[対応fragment](../../docs/rust-safety.md)を参照。
 

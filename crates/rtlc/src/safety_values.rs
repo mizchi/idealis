@@ -846,6 +846,34 @@ impl<'scope> Arena<'scope> {
             replacement,
         })
     }
+    pub fn require_comparable_members(
+        &mut self,
+        value: Scalar,
+        message: &'static str,
+    ) -> Result<(), CoreError> {
+        let members = self.members(value)?;
+        let kind = |value: Scalar| match value {
+            Scalar::Int(_) => Some(0),
+            Scalar::Bool(_) => Some(1),
+            Scalar::Ref(_) => matches!(self.cell(value), Ok(Cell::String(_))).then_some(2),
+        };
+        if members.first().is_none_or(|first| {
+            members
+                .iter()
+                .all(|member| kind(*member) == kind(*first) && kind(*first).is_some())
+        }) {
+            return Ok(());
+        }
+        for (index, left) in members.iter().enumerate() {
+            for right in &members[index + 1..] {
+                self.tick()?;
+                if self.equal(*left, *right).is_err() || self.equal(*right, *left).is_err() {
+                    return Err(CoreError::protocol(message));
+                }
+            }
+        }
+        Ok(())
+    }
     fn fold_independence(&self, fold: &Expression) -> OrderIndependence {
         match self.prepared {
             Some(prepared) => prepared.fold_independence(fold, self.definitions),

@@ -690,3 +690,65 @@ fn a_union_fold_nested_in_a_union_fold_is_accepted() {
         assert!(!holds(&wrong, "nested"), "v{version} control");
     }
 }
+
+fn branching_union_body(first: &str, then: Vec<Value>, otherwise: Vec<Value>) -> Value {
+    cup(
+        acc(),
+        json!({"op":"if","condition":{"op":"eq","left":elem(),"right":text(first)},
+            "consequent":set(then),"alternative":set(otherwise)}),
+    )
+}
+
+#[test]
+fn a_union_that_mixes_integers_with_typed_model_values_is_refused_in_either_element_order() {
+    let collection = set(vec![text("a"), text("b")]);
+    for version in [1, 2] {
+        for first in ["a", "b"] {
+            let body = branching_union_body(
+                first,
+                vec![model_value("m_1")],
+                vec![model_value("m_1"), int(1)],
+            );
+            let program = fold_program(version, &set(vec![]), &collection, &body, &set(vec![]));
+            assert_eq!(refusal(&program), STRINGS, "v{version} first={first}");
+        }
+    }
+}
+
+#[test]
+fn a_union_of_comparable_typed_model_values_is_accepted_in_either_element_order() {
+    let collection = set(vec![text("a"), text("b")]);
+    let expected = set(vec![model_value("m_1"), model_value("m_2")]);
+    for version in [1, 2] {
+        for first in ["a", "b"] {
+            let body = branching_union_body(
+                first,
+                vec![model_value("m_1")],
+                vec![model_value("m_1"), model_value("m_2")],
+            );
+            let program = fold_program(version, &set(vec![]), &collection, &body, &expected);
+            assert!(holds(&program, "typed"), "v{version} first={first}");
+        }
+    }
+}
+
+#[test]
+fn a_union_fold_that_exceeds_the_evaluation_nesting_reports_the_bound() {
+    let looping = json!({"id":1,"recursive":true,"parameterCount":1,"captureCount":0,"bodyKind":"expression","localScope":0,
+        "body":{"op":"call","definition":1,"arguments":[parameter(0)],"captures":[]}});
+    let callback = cup(
+        parameter(0),
+        json!({"op":"call","definition":1,"arguments":[parameter(1)],"captures":[]}),
+    );
+    let fold = json!({"op":"fold","accumulator":0,"initial":set(vec![]),"collection":set(vec![text("a"), text("b")]),"order":"set-members",
+        "body":{"op":"call","definition":0,"arguments":[bound(0),bound(1)],"captures":[]}});
+    let program = wire(
+        2,
+        set(vec![]),
+        fold,
+        vec![definition(0, callback, 0), looping],
+    );
+    let result = run(&program).unwrap();
+    assert_eq!(result.status, "bounded");
+    assert_eq!(result.reason.as_deref(), Some("evaluation"));
+}

@@ -1325,6 +1325,7 @@ impl Expression {
                         .map_err(|error| match replacement {
                             Some(message)
                                 if error.code != "budget"
+                                    && error.code != "evaluation-budget"
                                     && !error.message.starts_with("Unsupported TLA input") =>
                             {
                                 CoreError::protocol(message)
@@ -1332,6 +1333,9 @@ impl Expression {
                             _ => error,
                         })?;
                     locals.truncate(ctx.locals.len());
+                }
+                if let Some(message) = replacement {
+                    arena.require_comparable_members(result, message)?;
                 }
                 result
             }
