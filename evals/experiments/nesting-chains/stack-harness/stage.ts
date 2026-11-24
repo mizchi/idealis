@@ -23,6 +23,8 @@ if (binary === undefined || output === undefined) {
   process.exit(2);
 }
 
+await writeFile(output, "", { flag: "wx" });
+
 const cells: Cell[] = [];
 for (const family of families.split(",")) {
   for (const length of lengths.split(",")) {
