@@ -21,7 +21,8 @@ const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as Binaries;
 let failed = false;
 for (const name of names) {
   const base = join(run, name);
-  await mkdir(base, { recursive: true });
+  await mkdir(run, { recursive: true });
+  await mkdir(base);
   const records: SampleRecord[] = [];
   for (const [index, side] of sampleSides.entries()) {
     const binary = manifest[side][name];
