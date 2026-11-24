@@ -14,6 +14,11 @@ import {
   type Surface,
 } from "../../evals/experiments/nesting-chains/corpora.js";
 import {
+  addedCases,
+  type Records0075,
+  updatedCases,
+} from "../../evals/experiments/nesting-chains/expectations-0075.js";
+import {
   type Check,
   type Compile,
   nativeFrontend,
@@ -50,6 +55,12 @@ const baseline = (await readJson(`${directory}/baseline.json`)) as Baseline;
 const cases = (await readJson(
   `${directory}/cases.json`,
 )) as readonly ChainCase[];
+const cases0075 = (await readJson(
+  `${directory}/cases-0075.json`,
+)) as readonly ChainCase[];
+const records0075 = (await readJson(
+  `${directory}/records-0075.json`,
+)) as Records0075;
 const sizes = (await readJson(`${directory}/sizes.json`)) as Record<
   string,
   Record<SizeSurface, unknown>
@@ -151,7 +162,21 @@ const compiled = (
   return created;
 };
 
-for (const entry of cases)
+const wasmReplyRefusals = new Set([
+  "flat-and-128",
+  "flat-or-128",
+  "flat-and-129",
+  "flat-or-129",
+  "case-other-128",
+]);
+const expectedOn = (path: Path, entry: ChainCase, irVersion: 1 | 2): Outcome =>
+  path.label === "Rust frontend Wasm" &&
+  irVersion === 1 &&
+  wasmReplyRefusals.has(entry.name)
+    ? { stage: "compile", message: "Invalid compiled expression" }
+    : entry.expect[path.frontend][`v${irVersion}`];
+
+for (const entry of [...cases, ...cases0075])
   test(`nesting chains ${entry.group}: ${entry.name}`, async () => {
     for (const irVersion of [1, 2] as const) {
       const input: Input = {
@@ -161,9 +186,11 @@ for (const entry of cases)
       };
       const partner =
         entry.equivalent &&
-        cases.find((other) => other.name === entry.equivalent);
+        [...cases, ...cases0075].find(
+          (other) => other.name === entry.equivalent,
+        );
       for (const path of paths) {
-        const expected = entry.expect[path.frontend][`v${irVersion}`];
+        const expected = expectedOn(path, entry, irVersion);
         const observation = await observe(path.compile, path.check, input);
         assert.deepEqual(
           comparable(observation.outcome, expected),
@@ -201,7 +228,7 @@ for (const entry of cases)
   });
 
 const find = (name: string): ChainCase => {
-  const found = cases.find((entry) => entry.name === name);
+  const found = [...cases, ...cases0075].find((entry) => entry.name === name);
   assert.ok(found, name);
   return found;
 };
@@ -221,55 +248,65 @@ const refusal = (stage: "compile" | "check", text: string): Outcome => ({
   message: text,
 });
 
-test("nesting chains fixtures follow from the recorded baseline and the plan", async () => {
-  assert.deepEqual(cases, chainCases(baseline));
+test("nesting chains fixtures follow from the recorded baselines and the plan", async () => {
+  assert.deepEqual(cases, updatedCases(chainCases(baseline), records0075));
+  assert.deepEqual(cases0075, addedCases(records0075));
   assert.ok(cases.length >= 200);
+  assert.ok(cases0075.length >= 80);
 });
+
+const completes = (outcome: Outcome): boolean =>
+  outcome.stage === "result" && outcome.status === "complete";
 
 test("nesting chains v2 expectations count a chain as one level", () => {
   for (const frontend of ["ts", "rust"] as const) {
-    for (const form of ["paren-and", "paren-or"])
-      for (const length of [2, 3, 4, 24, 25, 38, 39, 40, 44, 47, 48]) {
-        const expected = find(`${form}-${length}`).expect[frontend].v2;
+    for (const form of [
+      "paren-and",
+      "paren-or",
+      "if-chain",
+      "flat-and",
+      "flat-or",
+      "case-other",
+    ])
+      for (const length of [
+        2, 3, 4, 24, 25, 38, 39, 40, 44, 47, 48, 49, 54, 61,
+      ])
         assert.ok(
-          expected.stage === "result" && expected.status === "complete",
+          completes(find(`${form}-${length}`).expect[frontend].v2),
           `${frontend} ${form}-${length}`,
         );
-      }
-    for (const length of [2, 3, 4, 24, 25, 38, 39, 40, 44, 47]) {
-      const expected = find(`if-chain-${length}`).expect[frontend].v2;
-      assert.ok(
-        expected.stage === "result" && expected.status === "complete",
-        `${frontend} if-chain-${length}`,
-      );
+    const decoder = (outcome: Outcome): boolean =>
+      outcome.stage === "check" &&
+      outcome.message.startsWith("recursion limit exceeded");
+    for (const form of ["flat-and", "flat-or"]) {
+      assert.ok(completes(find(`${form}-100`).expect[frontend].v2));
+      for (const length of [127, 128])
+        assert.ok(
+          decoder(find(`${form}-${length}`).expect[frontend].v2),
+          `${frontend} ${form}-${length}`,
+        );
     }
+    assert.ok(completes(find("case-other-100").expect[frontend].v2));
+    for (const length of [126, 127])
+      assert.ok(
+        decoder(find(`case-other-${length}`).expect[frontend].v2),
+        `${frontend} case-other-${length}`,
+      );
   }
   assert.deepEqual(find("flat-and-44").expect.ts.v2, complete(6, 7, 20));
   assert.deepEqual(find("paren-and-44").expect.ts.v2, complete(6, 7, 20));
   assert.deepEqual(find("paren-and-44").expect.rust.v2, complete(6, 7, 20));
 });
 
-test("nesting chains v2 expectations keep the checker limit and the parser limit", () => {
-  const checker = refusal("check", checkerLimit);
+test("nesting chains v2 expectations keep the output limit and the parser limit", () => {
+  const output = refusal("compile", "compiled expression nesting exceeds 128");
   for (const frontend of ["ts", "rust"] as const) {
-    for (const length of [49, 54, 61]) {
-      assert.deepEqual(
-        find(`paren-and-${length}`).expect[frontend].v2,
-        checker,
-      );
-      assert.deepEqual(find(`paren-or-${length}`).expect[frontend].v2, checker);
-      assert.deepEqual(find(`flat-and-${length}`).expect[frontend].v2, checker);
-    }
-    for (const length of [48, 49, 54, 61]) {
-      assert.deepEqual(find(`if-chain-${length}`).expect[frontend].v2, checker);
-      assert.deepEqual(
-        find(`case-other-${length}`).expect[frontend].v2,
-        checker,
-      );
-    }
+    assert.deepEqual(find("flat-and-129").expect[frontend].v2, output);
+    assert.deepEqual(find("flat-or-129").expect[frontend].v2, output);
+    assert.deepEqual(find("case-other-128").expect[frontend].v2, output);
   }
   for (const form of ["paren-and", "paren-or", "if-chain"]) {
-    assert.deepEqual(find(`${form}-62`).expect.ts.v2, checker);
+    assert.ok(completes(find(`${form}-62`).expect.ts.v2), `ts ${form}-62`);
     for (const version of ["v1", "v2"] as const) {
       const rust = find(`${form}-62`).expect.rust[version];
       assert.ok(
@@ -345,7 +382,7 @@ test("nesting chains Quint output of a 44 term conjunction is checked as the fla
   }
 });
 
-test("nesting chains Quint output of a 54 branch IF chain compiles and stops at the checker", async () => {
+test("nesting chains Quint output of a 54 branch IF chain is checked like TLC", async () => {
   const source = await readFile(`${directory}/quint/LongIfChain.tla`, "utf8");
   assert.equal(
     createHash("sha256").update(source).digest("hex"),
@@ -372,10 +409,18 @@ test("nesting chains Quint output of a 54 branch IF chain compiles and stops at 
         config,
         irVersion: 2,
       });
-      assert.ok(v2.program, `${path.label} ${property} compiles`);
+      const expected: Outcome =
+        property === "safety"
+          ? complete(56, 57, null)
+          : {
+              stage: "result",
+              status: "invariant-violation",
+              trace: 54,
+              work: null,
+            };
       assert.deepEqual(
-        v2.outcome,
-        refusal("check", checkerLimit),
+        comparable(v2.outcome, expected),
+        expected,
         `${path.label} ${property}`,
       );
     }

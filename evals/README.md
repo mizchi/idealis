@@ -44,6 +44,8 @@
 
 [0075/0076: check cacheの往復費用とengine側のstore](iterations/0076-smt-cache-store.md)は、JSON/Wasm protocolでsnapshotを往復させる費用を測り、N=512でhitがcacheなしのcheckの21〜28倍になることを確かめた。engine側のstoreを追加し、hitはNによらずnative 4.6 µs・Wasm 9.9 µsになった。snapshotを往復させた場合との2400要求の完全応答一致も記録した。
 
+[0075: 連鎖をcheckerの検証と評価でも1段と数える](iterations/0075-nesting-chains-ir-eval.md)は、rtlcのv2で連言・選言とELSE IFの連鎖を明示的なloopでたどり、checker 48と動的評価128の1段と数える。54枝のLongIfChainはTLCと同じ56状態・57生成で検査でき、今受理される入力のIR・結果・workは変えない。評価の再帰の腕を分け、9種類の入れ子がdebugの2 MiBのthreadで動的評価128に届くようにした（#83）。JSONの要求のdecoder 128により、平たい連言127項とCASE 126枝からは型付きで拒否される。
+
 [0074: SMT contextの増分解析とcheck cache](iterations/0074-smt-incremental-cache.md)は、assertで追加した式だけを解析する変更と既定無効のcheck cacheを、bcf018be1との交互順Criterion、旧native/Wasmとの完全応答、Z3照合で評価する。保存runで見つけた2回の後退と追記plan、0074bの`prepared-128`の1組の後退と、0074dの再測定で再現しなかったことも記録した。
 
 [0074: 連言・選言とELSE IFの連鎖](iterations/0074-nesting-chains.md)は、Quint生成物の長い括弧つき連言とIF連鎖を、IR v2の両frontendで1段の入れ子として数える。44項の連言はTLCと同じ6状態・7生成で検査でき、連鎖をたどる処理は段ごとに再帰しなくなり、61段の連鎖もdebugの2 MiBのthreadでcompileできる。今受理される入力のIRは4,651入力・27,906セルで一致し、完全応答と時間論理の照合も一致した。Criterionに再現する後退はない。54枝のIF連鎖はcheckerの48で止まり、0075で扱う。

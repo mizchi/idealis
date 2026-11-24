@@ -1,0 +1,2634 @@
+[
+  {
+    "name": "flat-and-100",
+    "group": "length-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x /= 200 /\\ x /= 201 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ x /= 226 /\\ x /= 227 /\\ x /= 228 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ x /= 253 /\\ x /= 254 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259 /\\ x /= 260 /\\ x /= 261 /\\ x /= 262 /\\ x /= 263 /\\ x /= 264 /\\ x /= 265 /\\ x /= 266 /\\ x /= 267 /\\ x /= 268 /\\ x /= 269 /\\ x /= 270 /\\ x /= 271 /\\ x /= 272 /\\ x /= 273 /\\ x /= 274 /\\ x /= 275 /\\ x /= 276 /\\ x /= 277 /\\ x /= 278 /\\ x /= 279 /\\ x /= 280 /\\ x /= 281 /\\ x /= 282 /\\ x /= 283 /\\ x /= 284 /\\ x /= 285 /\\ x /= 286 /\\ x /= 287 /\\ x /= 288 /\\ x /= 289 /\\ x /= 290 /\\ x /= 291 /\\ x /= 292 /\\ x /= 293 /\\ x /= 294 /\\ x /= 295 /\\ x /= 296 /\\ x /= 297 /\\ x /= 298 /\\ x /= 299\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 20
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 20
+        }
+      }
+    }
+  },
+  {
+    "name": "flat-or-100",
+    "group": "length-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x = 200 \\/ x = 201 \\/ x = 202 \\/ x = 203 \\/ x = 204 \\/ x = 205 \\/ x = 206 \\/ x = 207 \\/ x = 208 \\/ x = 209 \\/ x = 210 \\/ x = 211 \\/ x = 212 \\/ x = 213 \\/ x = 214 \\/ x = 215 \\/ x = 216 \\/ x = 217 \\/ x = 218 \\/ x = 219 \\/ x = 220 \\/ x = 221 \\/ x = 222 \\/ x = 223 \\/ x = 224 \\/ x = 225 \\/ x = 226 \\/ x = 227 \\/ x = 228 \\/ x = 229 \\/ x = 230 \\/ x = 231 \\/ x = 232 \\/ x = 233 \\/ x = 234 \\/ x = 235 \\/ x = 236 \\/ x = 237 \\/ x = 238 \\/ x = 239 \\/ x = 240 \\/ x = 241 \\/ x = 242 \\/ x = 243 \\/ x = 244 \\/ x = 245 \\/ x = 246 \\/ x = 247 \\/ x = 248 \\/ x = 249 \\/ x = 250 \\/ x = 251 \\/ x = 252 \\/ x = 253 \\/ x = 254 \\/ x = 255 \\/ x = 256 \\/ x = 257 \\/ x = 258 \\/ x = 259 \\/ x = 260 \\/ x = 261 \\/ x = 262 \\/ x = 263 \\/ x = 264 \\/ x = 265 \\/ x = 266 \\/ x = 267 \\/ x = 268 \\/ x = 269 \\/ x = 270 \\/ x = 271 \\/ x = 272 \\/ x = 273 \\/ x = 274 \\/ x = 275 \\/ x = 276 \\/ x = 277 \\/ x = 278 \\/ x = 279 \\/ x = 280 \\/ x = 281 \\/ x = 282 \\/ x = 283 \\/ x = 284 \\/ x = 285 \\/ x = 286 \\/ x = 287 \\/ x = 288 \\/ x = 289 \\/ x = 290 \\/ x = 291 \\/ x = 292 \\/ x = 293 \\/ x = 294 \\/ x = 295 \\/ x = 296 \\/ x = 297 \\/ x = 298 \\/ x >= 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 20
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 20
+        }
+      }
+    }
+  },
+  {
+    "name": "flat-and-127",
+    "group": "length-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x /= 200 /\\ x /= 201 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ x /= 226 /\\ x /= 227 /\\ x /= 228 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ x /= 253 /\\ x /= 254 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259 /\\ x /= 260 /\\ x /= 261 /\\ x /= 262 /\\ x /= 263 /\\ x /= 264 /\\ x /= 265 /\\ x /= 266 /\\ x /= 267 /\\ x /= 268 /\\ x /= 269 /\\ x /= 270 /\\ x /= 271 /\\ x /= 272 /\\ x /= 273 /\\ x /= 274 /\\ x /= 275 /\\ x /= 276 /\\ x /= 277 /\\ x /= 278 /\\ x /= 279 /\\ x /= 280 /\\ x /= 281 /\\ x /= 282 /\\ x /= 283 /\\ x /= 284 /\\ x /= 285 /\\ x /= 286 /\\ x /= 287 /\\ x /= 288 /\\ x /= 289 /\\ x /= 290 /\\ x /= 291 /\\ x /= 292 /\\ x /= 293 /\\ x /= 294 /\\ x /= 295 /\\ x /= 296 /\\ x /= 297 /\\ x /= 298 /\\ x /= 299 /\\ x /= 300 /\\ x /= 301 /\\ x /= 302 /\\ x /= 303 /\\ x /= 304 /\\ x /= 305 /\\ x /= 306 /\\ x /= 307 /\\ x /= 308 /\\ x /= 309 /\\ x /= 310 /\\ x /= 311 /\\ x /= 312 /\\ x /= 313 /\\ x /= 314 /\\ x /= 315 /\\ x /= 316 /\\ x /= 317 /\\ x /= 318 /\\ x /= 319 /\\ x /= 320 /\\ x /= 321 /\\ x /= 322 /\\ x /= 323 /\\ x /= 324 /\\ x /= 325 /\\ x /= 326\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 3032"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 3236"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 3032"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 3236"
+        }
+      }
+    }
+  },
+  {
+    "name": "flat-or-127",
+    "group": "length-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x = 200 \\/ x = 201 \\/ x = 202 \\/ x = 203 \\/ x = 204 \\/ x = 205 \\/ x = 206 \\/ x = 207 \\/ x = 208 \\/ x = 209 \\/ x = 210 \\/ x = 211 \\/ x = 212 \\/ x = 213 \\/ x = 214 \\/ x = 215 \\/ x = 216 \\/ x = 217 \\/ x = 218 \\/ x = 219 \\/ x = 220 \\/ x = 221 \\/ x = 222 \\/ x = 223 \\/ x = 224 \\/ x = 225 \\/ x = 226 \\/ x = 227 \\/ x = 228 \\/ x = 229 \\/ x = 230 \\/ x = 231 \\/ x = 232 \\/ x = 233 \\/ x = 234 \\/ x = 235 \\/ x = 236 \\/ x = 237 \\/ x = 238 \\/ x = 239 \\/ x = 240 \\/ x = 241 \\/ x = 242 \\/ x = 243 \\/ x = 244 \\/ x = 245 \\/ x = 246 \\/ x = 247 \\/ x = 248 \\/ x = 249 \\/ x = 250 \\/ x = 251 \\/ x = 252 \\/ x = 253 \\/ x = 254 \\/ x = 255 \\/ x = 256 \\/ x = 257 \\/ x = 258 \\/ x = 259 \\/ x = 260 \\/ x = 261 \\/ x = 262 \\/ x = 263 \\/ x = 264 \\/ x = 265 \\/ x = 266 \\/ x = 267 \\/ x = 268 \\/ x = 269 \\/ x = 270 \\/ x = 271 \\/ x = 272 \\/ x = 273 \\/ x = 274 \\/ x = 275 \\/ x = 276 \\/ x = 277 \\/ x = 278 \\/ x = 279 \\/ x = 280 \\/ x = 281 \\/ x = 282 \\/ x = 283 \\/ x = 284 \\/ x = 285 \\/ x = 286 \\/ x = 287 \\/ x = 288 \\/ x = 289 \\/ x = 290 \\/ x = 291 \\/ x = 292 \\/ x = 293 \\/ x = 294 \\/ x = 295 \\/ x = 296 \\/ x = 297 \\/ x = 298 \\/ x = 299 \\/ x = 300 \\/ x = 301 \\/ x = 302 \\/ x = 303 \\/ x = 304 \\/ x = 305 \\/ x = 306 \\/ x = 307 \\/ x = 308 \\/ x = 309 \\/ x = 310 \\/ x = 311 \\/ x = 312 \\/ x = 313 \\/ x = 314 \\/ x = 315 \\/ x = 316 \\/ x = 317 \\/ x = 318 \\/ x = 319 \\/ x = 320 \\/ x = 321 \\/ x = 322 \\/ x = 323 \\/ x = 324 \\/ x = 325 \\/ x >= 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 2910"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 3114"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 2910"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 3114"
+        }
+      }
+    }
+  },
+  {
+    "name": "flat-and-128",
+    "group": "length-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x /= 200 /\\ x /= 201 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ x /= 226 /\\ x /= 227 /\\ x /= 228 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ x /= 253 /\\ x /= 254 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259 /\\ x /= 260 /\\ x /= 261 /\\ x /= 262 /\\ x /= 263 /\\ x /= 264 /\\ x /= 265 /\\ x /= 266 /\\ x /= 267 /\\ x /= 268 /\\ x /= 269 /\\ x /= 270 /\\ x /= 271 /\\ x /= 272 /\\ x /= 273 /\\ x /= 274 /\\ x /= 275 /\\ x /= 276 /\\ x /= 277 /\\ x /= 278 /\\ x /= 279 /\\ x /= 280 /\\ x /= 281 /\\ x /= 282 /\\ x /= 283 /\\ x /= 284 /\\ x /= 285 /\\ x /= 286 /\\ x /= 287 /\\ x /= 288 /\\ x /= 289 /\\ x /= 290 /\\ x /= 291 /\\ x /= 292 /\\ x /= 293 /\\ x /= 294 /\\ x /= 295 /\\ x /= 296 /\\ x /= 297 /\\ x /= 298 /\\ x /= 299 /\\ x /= 300 /\\ x /= 301 /\\ x /= 302 /\\ x /= 303 /\\ x /= 304 /\\ x /= 305 /\\ x /= 306 /\\ x /= 307 /\\ x /= 308 /\\ x /= 309 /\\ x /= 310 /\\ x /= 311 /\\ x /= 312 /\\ x /= 313 /\\ x /= 314 /\\ x /= 315 /\\ x /= 316 /\\ x /= 317 /\\ x /= 318 /\\ x /= 319 /\\ x /= 320 /\\ x /= 321 /\\ x /= 322 /\\ x /= 323 /\\ x /= 324 /\\ x /= 325 /\\ x /= 326 /\\ x /= 327\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 3032"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 3236"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 3032"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 3236"
+        }
+      }
+    }
+  },
+  {
+    "name": "flat-or-128",
+    "group": "length-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x = 200 \\/ x = 201 \\/ x = 202 \\/ x = 203 \\/ x = 204 \\/ x = 205 \\/ x = 206 \\/ x = 207 \\/ x = 208 \\/ x = 209 \\/ x = 210 \\/ x = 211 \\/ x = 212 \\/ x = 213 \\/ x = 214 \\/ x = 215 \\/ x = 216 \\/ x = 217 \\/ x = 218 \\/ x = 219 \\/ x = 220 \\/ x = 221 \\/ x = 222 \\/ x = 223 \\/ x = 224 \\/ x = 225 \\/ x = 226 \\/ x = 227 \\/ x = 228 \\/ x = 229 \\/ x = 230 \\/ x = 231 \\/ x = 232 \\/ x = 233 \\/ x = 234 \\/ x = 235 \\/ x = 236 \\/ x = 237 \\/ x = 238 \\/ x = 239 \\/ x = 240 \\/ x = 241 \\/ x = 242 \\/ x = 243 \\/ x = 244 \\/ x = 245 \\/ x = 246 \\/ x = 247 \\/ x = 248 \\/ x = 249 \\/ x = 250 \\/ x = 251 \\/ x = 252 \\/ x = 253 \\/ x = 254 \\/ x = 255 \\/ x = 256 \\/ x = 257 \\/ x = 258 \\/ x = 259 \\/ x = 260 \\/ x = 261 \\/ x = 262 \\/ x = 263 \\/ x = 264 \\/ x = 265 \\/ x = 266 \\/ x = 267 \\/ x = 268 \\/ x = 269 \\/ x = 270 \\/ x = 271 \\/ x = 272 \\/ x = 273 \\/ x = 274 \\/ x = 275 \\/ x = 276 \\/ x = 277 \\/ x = 278 \\/ x = 279 \\/ x = 280 \\/ x = 281 \\/ x = 282 \\/ x = 283 \\/ x = 284 \\/ x = 285 \\/ x = 286 \\/ x = 287 \\/ x = 288 \\/ x = 289 \\/ x = 290 \\/ x = 291 \\/ x = 292 \\/ x = 293 \\/ x = 294 \\/ x = 295 \\/ x = 296 \\/ x = 297 \\/ x = 298 \\/ x = 299 \\/ x = 300 \\/ x = 301 \\/ x = 302 \\/ x = 303 \\/ x = 304 \\/ x = 305 \\/ x = 306 \\/ x = 307 \\/ x = 308 \\/ x = 309 \\/ x = 310 \\/ x = 311 \\/ x = 312 \\/ x = 313 \\/ x = 314 \\/ x = 315 \\/ x = 316 \\/ x = 317 \\/ x = 318 \\/ x = 319 \\/ x = 320 \\/ x = 321 \\/ x = 322 \\/ x = 323 \\/ x = 324 \\/ x = 325 \\/ x = 326 \\/ x >= 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 2910"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 3114"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 2910"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 3114"
+        }
+      }
+    }
+  },
+  {
+    "name": "flat-and-129",
+    "group": "length-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x /= 200 /\\ x /= 201 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ x /= 226 /\\ x /= 227 /\\ x /= 228 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ x /= 253 /\\ x /= 254 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259 /\\ x /= 260 /\\ x /= 261 /\\ x /= 262 /\\ x /= 263 /\\ x /= 264 /\\ x /= 265 /\\ x /= 266 /\\ x /= 267 /\\ x /= 268 /\\ x /= 269 /\\ x /= 270 /\\ x /= 271 /\\ x /= 272 /\\ x /= 273 /\\ x /= 274 /\\ x /= 275 /\\ x /= 276 /\\ x /= 277 /\\ x /= 278 /\\ x /= 279 /\\ x /= 280 /\\ x /= 281 /\\ x /= 282 /\\ x /= 283 /\\ x /= 284 /\\ x /= 285 /\\ x /= 286 /\\ x /= 287 /\\ x /= 288 /\\ x /= 289 /\\ x /= 290 /\\ x /= 291 /\\ x /= 292 /\\ x /= 293 /\\ x /= 294 /\\ x /= 295 /\\ x /= 296 /\\ x /= 297 /\\ x /= 298 /\\ x /= 299 /\\ x /= 300 /\\ x /= 301 /\\ x /= 302 /\\ x /= 303 /\\ x /= 304 /\\ x /= 305 /\\ x /= 306 /\\ x /= 307 /\\ x /= 308 /\\ x /= 309 /\\ x /= 310 /\\ x /= 311 /\\ x /= 312 /\\ x /= 313 /\\ x /= 314 /\\ x /= 315 /\\ x /= 316 /\\ x /= 317 /\\ x /= 318 /\\ x /= 319 /\\ x /= 320 /\\ x /= 321 /\\ x /= 322 /\\ x /= 323 /\\ x /= 324 /\\ x /= 325 /\\ x /= 326 /\\ x /= 327 /\\ x /= 328\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 3032"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "compiled expression nesting exceeds 128"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 3032"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "compiled expression nesting exceeds 128"
+        }
+      }
+    }
+  },
+  {
+    "name": "flat-or-129",
+    "group": "length-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x = 200 \\/ x = 201 \\/ x = 202 \\/ x = 203 \\/ x = 204 \\/ x = 205 \\/ x = 206 \\/ x = 207 \\/ x = 208 \\/ x = 209 \\/ x = 210 \\/ x = 211 \\/ x = 212 \\/ x = 213 \\/ x = 214 \\/ x = 215 \\/ x = 216 \\/ x = 217 \\/ x = 218 \\/ x = 219 \\/ x = 220 \\/ x = 221 \\/ x = 222 \\/ x = 223 \\/ x = 224 \\/ x = 225 \\/ x = 226 \\/ x = 227 \\/ x = 228 \\/ x = 229 \\/ x = 230 \\/ x = 231 \\/ x = 232 \\/ x = 233 \\/ x = 234 \\/ x = 235 \\/ x = 236 \\/ x = 237 \\/ x = 238 \\/ x = 239 \\/ x = 240 \\/ x = 241 \\/ x = 242 \\/ x = 243 \\/ x = 244 \\/ x = 245 \\/ x = 246 \\/ x = 247 \\/ x = 248 \\/ x = 249 \\/ x = 250 \\/ x = 251 \\/ x = 252 \\/ x = 253 \\/ x = 254 \\/ x = 255 \\/ x = 256 \\/ x = 257 \\/ x = 258 \\/ x = 259 \\/ x = 260 \\/ x = 261 \\/ x = 262 \\/ x = 263 \\/ x = 264 \\/ x = 265 \\/ x = 266 \\/ x = 267 \\/ x = 268 \\/ x = 269 \\/ x = 270 \\/ x = 271 \\/ x = 272 \\/ x = 273 \\/ x = 274 \\/ x = 275 \\/ x = 276 \\/ x = 277 \\/ x = 278 \\/ x = 279 \\/ x = 280 \\/ x = 281 \\/ x = 282 \\/ x = 283 \\/ x = 284 \\/ x = 285 \\/ x = 286 \\/ x = 287 \\/ x = 288 \\/ x = 289 \\/ x = 290 \\/ x = 291 \\/ x = 292 \\/ x = 293 \\/ x = 294 \\/ x = 295 \\/ x = 296 \\/ x = 297 \\/ x = 298 \\/ x = 299 \\/ x = 300 \\/ x = 301 \\/ x = 302 \\/ x = 303 \\/ x = 304 \\/ x = 305 \\/ x = 306 \\/ x = 307 \\/ x = 308 \\/ x = 309 \\/ x = 310 \\/ x = 311 \\/ x = 312 \\/ x = 313 \\/ x = 314 \\/ x = 315 \\/ x = 316 \\/ x = 317 \\/ x = 318 \\/ x = 319 \\/ x = 320 \\/ x = 321 \\/ x = 322 \\/ x = 323 \\/ x = 324 \\/ x = 325 \\/ x = 326 \\/ x = 327 \\/ x >= 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 2910"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "compiled expression nesting exceeds 128"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 2910"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "compiled expression nesting exceeds 128"
+        }
+      }
+    }
+  },
+  {
+    "name": "case-other-100",
+    "group": "length-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == CASE x = 20 -> FALSE [] x = 21 -> FALSE [] x = 22 -> FALSE [] x = 23 -> FALSE [] x = 24 -> FALSE [] x = 25 -> FALSE [] x = 26 -> FALSE [] x = 27 -> FALSE [] x = 28 -> FALSE [] x = 29 -> FALSE [] x = 30 -> FALSE [] x = 31 -> FALSE [] x = 32 -> FALSE [] x = 33 -> FALSE [] x = 34 -> FALSE [] x = 35 -> FALSE [] x = 36 -> FALSE [] x = 37 -> FALSE [] x = 38 -> FALSE [] x = 39 -> FALSE [] x = 40 -> FALSE [] x = 41 -> FALSE [] x = 42 -> FALSE [] x = 43 -> FALSE [] x = 44 -> FALSE [] x = 45 -> FALSE [] x = 46 -> FALSE [] x = 47 -> FALSE [] x = 48 -> FALSE [] x = 49 -> FALSE [] x = 50 -> FALSE [] x = 51 -> FALSE [] x = 52 -> FALSE [] x = 53 -> FALSE [] x = 54 -> FALSE [] x = 55 -> FALSE [] x = 56 -> FALSE [] x = 57 -> FALSE [] x = 58 -> FALSE [] x = 59 -> FALSE [] x = 60 -> FALSE [] x = 61 -> FALSE [] x = 62 -> FALSE [] x = 63 -> FALSE [] x = 64 -> FALSE [] x = 65 -> FALSE [] x = 66 -> FALSE [] x = 67 -> FALSE [] x = 68 -> FALSE [] x = 69 -> FALSE [] x = 70 -> FALSE [] x = 71 -> FALSE [] x = 72 -> FALSE [] x = 73 -> FALSE [] x = 74 -> FALSE [] x = 75 -> FALSE [] x = 76 -> FALSE [] x = 77 -> FALSE [] x = 78 -> FALSE [] x = 79 -> FALSE [] x = 80 -> FALSE [] x = 81 -> FALSE [] x = 82 -> FALSE [] x = 83 -> FALSE [] x = 84 -> FALSE [] x = 85 -> FALSE [] x = 86 -> FALSE [] x = 87 -> FALSE [] x = 88 -> FALSE [] x = 89 -> FALSE [] x = 90 -> FALSE [] x = 91 -> FALSE [] x = 92 -> FALSE [] x = 93 -> FALSE [] x = 94 -> FALSE [] x = 95 -> FALSE [] x = 96 -> FALSE [] x = 97 -> FALSE [] x = 98 -> FALSE [] x = 99 -> FALSE [] x = 100 -> FALSE [] x = 101 -> FALSE [] x = 102 -> FALSE [] x = 103 -> FALSE [] x = 104 -> FALSE [] x = 105 -> FALSE [] x = 106 -> FALSE [] x = 107 -> FALSE [] x = 108 -> FALSE [] x = 109 -> FALSE [] x = 110 -> FALSE [] x = 111 -> FALSE [] x = 112 -> FALSE [] x = 113 -> FALSE [] x = 114 -> FALSE [] x = 115 -> FALSE [] x = 116 -> FALSE [] x = 117 -> FALSE [] x = 118 -> FALSE [] x = 119 -> FALSE [] OTHER -> TRUE\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 20
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 20
+        }
+      }
+    }
+  },
+  {
+    "name": "case-other-126",
+    "group": "length-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == CASE x = 20 -> FALSE [] x = 21 -> FALSE [] x = 22 -> FALSE [] x = 23 -> FALSE [] x = 24 -> FALSE [] x = 25 -> FALSE [] x = 26 -> FALSE [] x = 27 -> FALSE [] x = 28 -> FALSE [] x = 29 -> FALSE [] x = 30 -> FALSE [] x = 31 -> FALSE [] x = 32 -> FALSE [] x = 33 -> FALSE [] x = 34 -> FALSE [] x = 35 -> FALSE [] x = 36 -> FALSE [] x = 37 -> FALSE [] x = 38 -> FALSE [] x = 39 -> FALSE [] x = 40 -> FALSE [] x = 41 -> FALSE [] x = 42 -> FALSE [] x = 43 -> FALSE [] x = 44 -> FALSE [] x = 45 -> FALSE [] x = 46 -> FALSE [] x = 47 -> FALSE [] x = 48 -> FALSE [] x = 49 -> FALSE [] x = 50 -> FALSE [] x = 51 -> FALSE [] x = 52 -> FALSE [] x = 53 -> FALSE [] x = 54 -> FALSE [] x = 55 -> FALSE [] x = 56 -> FALSE [] x = 57 -> FALSE [] x = 58 -> FALSE [] x = 59 -> FALSE [] x = 60 -> FALSE [] x = 61 -> FALSE [] x = 62 -> FALSE [] x = 63 -> FALSE [] x = 64 -> FALSE [] x = 65 -> FALSE [] x = 66 -> FALSE [] x = 67 -> FALSE [] x = 68 -> FALSE [] x = 69 -> FALSE [] x = 70 -> FALSE [] x = 71 -> FALSE [] x = 72 -> FALSE [] x = 73 -> FALSE [] x = 74 -> FALSE [] x = 75 -> FALSE [] x = 76 -> FALSE [] x = 77 -> FALSE [] x = 78 -> FALSE [] x = 79 -> FALSE [] x = 80 -> FALSE [] x = 81 -> FALSE [] x = 82 -> FALSE [] x = 83 -> FALSE [] x = 84 -> FALSE [] x = 85 -> FALSE [] x = 86 -> FALSE [] x = 87 -> FALSE [] x = 88 -> FALSE [] x = 89 -> FALSE [] x = 90 -> FALSE [] x = 91 -> FALSE [] x = 92 -> FALSE [] x = 93 -> FALSE [] x = 94 -> FALSE [] x = 95 -> FALSE [] x = 96 -> FALSE [] x = 97 -> FALSE [] x = 98 -> FALSE [] x = 99 -> FALSE [] x = 100 -> FALSE [] x = 101 -> FALSE [] x = 102 -> FALSE [] x = 103 -> FALSE [] x = 104 -> FALSE [] x = 105 -> FALSE [] x = 106 -> FALSE [] x = 107 -> FALSE [] x = 108 -> FALSE [] x = 109 -> FALSE [] x = 110 -> FALSE [] x = 111 -> FALSE [] x = 112 -> FALSE [] x = 113 -> FALSE [] x = 114 -> FALSE [] x = 115 -> FALSE [] x = 116 -> FALSE [] x = 117 -> FALSE [] x = 118 -> FALSE [] x = 119 -> FALSE [] x = 120 -> FALSE [] x = 121 -> FALSE [] x = 122 -> FALSE [] x = 123 -> FALSE [] x = 124 -> FALSE [] x = 125 -> FALSE [] x = 126 -> FALSE [] x = 127 -> FALSE [] x = 128 -> FALSE [] x = 129 -> FALSE [] x = 130 -> FALSE [] x = 131 -> FALSE [] x = 132 -> FALSE [] x = 133 -> FALSE [] x = 134 -> FALSE [] x = 135 -> FALSE [] x = 136 -> FALSE [] x = 137 -> FALSE [] x = 138 -> FALSE [] x = 139 -> FALSE [] x = 140 -> FALSE [] x = 141 -> FALSE [] x = 142 -> FALSE [] x = 143 -> FALSE [] x = 144 -> FALSE [] x = 145 -> FALSE [] OTHER -> TRUE\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 27161"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 27365"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 27161"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 27365"
+        }
+      }
+    }
+  },
+  {
+    "name": "case-other-127",
+    "group": "length-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == CASE x = 20 -> FALSE [] x = 21 -> FALSE [] x = 22 -> FALSE [] x = 23 -> FALSE [] x = 24 -> FALSE [] x = 25 -> FALSE [] x = 26 -> FALSE [] x = 27 -> FALSE [] x = 28 -> FALSE [] x = 29 -> FALSE [] x = 30 -> FALSE [] x = 31 -> FALSE [] x = 32 -> FALSE [] x = 33 -> FALSE [] x = 34 -> FALSE [] x = 35 -> FALSE [] x = 36 -> FALSE [] x = 37 -> FALSE [] x = 38 -> FALSE [] x = 39 -> FALSE [] x = 40 -> FALSE [] x = 41 -> FALSE [] x = 42 -> FALSE [] x = 43 -> FALSE [] x = 44 -> FALSE [] x = 45 -> FALSE [] x = 46 -> FALSE [] x = 47 -> FALSE [] x = 48 -> FALSE [] x = 49 -> FALSE [] x = 50 -> FALSE [] x = 51 -> FALSE [] x = 52 -> FALSE [] x = 53 -> FALSE [] x = 54 -> FALSE [] x = 55 -> FALSE [] x = 56 -> FALSE [] x = 57 -> FALSE [] x = 58 -> FALSE [] x = 59 -> FALSE [] x = 60 -> FALSE [] x = 61 -> FALSE [] x = 62 -> FALSE [] x = 63 -> FALSE [] x = 64 -> FALSE [] x = 65 -> FALSE [] x = 66 -> FALSE [] x = 67 -> FALSE [] x = 68 -> FALSE [] x = 69 -> FALSE [] x = 70 -> FALSE [] x = 71 -> FALSE [] x = 72 -> FALSE [] x = 73 -> FALSE [] x = 74 -> FALSE [] x = 75 -> FALSE [] x = 76 -> FALSE [] x = 77 -> FALSE [] x = 78 -> FALSE [] x = 79 -> FALSE [] x = 80 -> FALSE [] x = 81 -> FALSE [] x = 82 -> FALSE [] x = 83 -> FALSE [] x = 84 -> FALSE [] x = 85 -> FALSE [] x = 86 -> FALSE [] x = 87 -> FALSE [] x = 88 -> FALSE [] x = 89 -> FALSE [] x = 90 -> FALSE [] x = 91 -> FALSE [] x = 92 -> FALSE [] x = 93 -> FALSE [] x = 94 -> FALSE [] x = 95 -> FALSE [] x = 96 -> FALSE [] x = 97 -> FALSE [] x = 98 -> FALSE [] x = 99 -> FALSE [] x = 100 -> FALSE [] x = 101 -> FALSE [] x = 102 -> FALSE [] x = 103 -> FALSE [] x = 104 -> FALSE [] x = 105 -> FALSE [] x = 106 -> FALSE [] x = 107 -> FALSE [] x = 108 -> FALSE [] x = 109 -> FALSE [] x = 110 -> FALSE [] x = 111 -> FALSE [] x = 112 -> FALSE [] x = 113 -> FALSE [] x = 114 -> FALSE [] x = 115 -> FALSE [] x = 116 -> FALSE [] x = 117 -> FALSE [] x = 118 -> FALSE [] x = 119 -> FALSE [] x = 120 -> FALSE [] x = 121 -> FALSE [] x = 122 -> FALSE [] x = 123 -> FALSE [] x = 124 -> FALSE [] x = 125 -> FALSE [] x = 126 -> FALSE [] x = 127 -> FALSE [] x = 128 -> FALSE [] x = 129 -> FALSE [] x = 130 -> FALSE [] x = 131 -> FALSE [] x = 132 -> FALSE [] x = 133 -> FALSE [] x = 134 -> FALSE [] x = 135 -> FALSE [] x = 136 -> FALSE [] x = 137 -> FALSE [] x = 138 -> FALSE [] x = 139 -> FALSE [] x = 140 -> FALSE [] x = 141 -> FALSE [] x = 142 -> FALSE [] x = 143 -> FALSE [] x = 144 -> FALSE [] x = 145 -> FALSE [] x = 146 -> FALSE [] OTHER -> TRUE\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 27161"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 27365"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 27161"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 27365"
+        }
+      }
+    }
+  },
+  {
+    "name": "case-other-128",
+    "group": "length-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == CASE x = 20 -> FALSE [] x = 21 -> FALSE [] x = 22 -> FALSE [] x = 23 -> FALSE [] x = 24 -> FALSE [] x = 25 -> FALSE [] x = 26 -> FALSE [] x = 27 -> FALSE [] x = 28 -> FALSE [] x = 29 -> FALSE [] x = 30 -> FALSE [] x = 31 -> FALSE [] x = 32 -> FALSE [] x = 33 -> FALSE [] x = 34 -> FALSE [] x = 35 -> FALSE [] x = 36 -> FALSE [] x = 37 -> FALSE [] x = 38 -> FALSE [] x = 39 -> FALSE [] x = 40 -> FALSE [] x = 41 -> FALSE [] x = 42 -> FALSE [] x = 43 -> FALSE [] x = 44 -> FALSE [] x = 45 -> FALSE [] x = 46 -> FALSE [] x = 47 -> FALSE [] x = 48 -> FALSE [] x = 49 -> FALSE [] x = 50 -> FALSE [] x = 51 -> FALSE [] x = 52 -> FALSE [] x = 53 -> FALSE [] x = 54 -> FALSE [] x = 55 -> FALSE [] x = 56 -> FALSE [] x = 57 -> FALSE [] x = 58 -> FALSE [] x = 59 -> FALSE [] x = 60 -> FALSE [] x = 61 -> FALSE [] x = 62 -> FALSE [] x = 63 -> FALSE [] x = 64 -> FALSE [] x = 65 -> FALSE [] x = 66 -> FALSE [] x = 67 -> FALSE [] x = 68 -> FALSE [] x = 69 -> FALSE [] x = 70 -> FALSE [] x = 71 -> FALSE [] x = 72 -> FALSE [] x = 73 -> FALSE [] x = 74 -> FALSE [] x = 75 -> FALSE [] x = 76 -> FALSE [] x = 77 -> FALSE [] x = 78 -> FALSE [] x = 79 -> FALSE [] x = 80 -> FALSE [] x = 81 -> FALSE [] x = 82 -> FALSE [] x = 83 -> FALSE [] x = 84 -> FALSE [] x = 85 -> FALSE [] x = 86 -> FALSE [] x = 87 -> FALSE [] x = 88 -> FALSE [] x = 89 -> FALSE [] x = 90 -> FALSE [] x = 91 -> FALSE [] x = 92 -> FALSE [] x = 93 -> FALSE [] x = 94 -> FALSE [] x = 95 -> FALSE [] x = 96 -> FALSE [] x = 97 -> FALSE [] x = 98 -> FALSE [] x = 99 -> FALSE [] x = 100 -> FALSE [] x = 101 -> FALSE [] x = 102 -> FALSE [] x = 103 -> FALSE [] x = 104 -> FALSE [] x = 105 -> FALSE [] x = 106 -> FALSE [] x = 107 -> FALSE [] x = 108 -> FALSE [] x = 109 -> FALSE [] x = 110 -> FALSE [] x = 111 -> FALSE [] x = 112 -> FALSE [] x = 113 -> FALSE [] x = 114 -> FALSE [] x = 115 -> FALSE [] x = 116 -> FALSE [] x = 117 -> FALSE [] x = 118 -> FALSE [] x = 119 -> FALSE [] x = 120 -> FALSE [] x = 121 -> FALSE [] x = 122 -> FALSE [] x = 123 -> FALSE [] x = 124 -> FALSE [] x = 125 -> FALSE [] x = 126 -> FALSE [] x = 127 -> FALSE [] x = 128 -> FALSE [] x = 129 -> FALSE [] x = 130 -> FALSE [] x = 131 -> FALSE [] x = 132 -> FALSE [] x = 133 -> FALSE [] x = 134 -> FALSE [] x = 135 -> FALSE [] x = 136 -> FALSE [] x = 137 -> FALSE [] x = 138 -> FALSE [] x = 139 -> FALSE [] x = 140 -> FALSE [] x = 141 -> FALSE [] x = 142 -> FALSE [] x = 143 -> FALSE [] x = 144 -> FALSE [] x = 145 -> FALSE [] x = 146 -> FALSE [] x = 147 -> FALSE [] OTHER -> TRUE\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 27161"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "compiled expression nesting exceeds 128"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "recursion limit exceeded at line 1 column 27161"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "compiled expression nesting exceeds 128"
+        }
+      }
+    }
+  },
+  {
+    "name": "split-if-2x38",
+    "group": "split",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nD1(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE IF x = 50 THEN FALSE ELSE IF x = 51 THEN FALSE ELSE IF x = 52 THEN FALSE ELSE IF x = 53 THEN FALSE ELSE IF x = 54 THEN FALSE ELSE IF x = 55 THEN FALSE ELSE IF x = 56 THEN FALSE ELSE IF x = 57 THEN FALSE ELSE TRUE\nD0(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE IF x = 50 THEN FALSE ELSE IF x = 51 THEN FALSE ELSE IF x = 52 THEN FALSE ELSE IF x = 53 THEN FALSE ELSE IF x = 54 THEN FALSE ELSE IF x = 55 THEN FALSE ELSE IF x = 56 THEN FALSE ELSE IF x = 57 THEN FALSE ELSE D1(k)\nInv == D0(1)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 32
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 32
+        }
+      }
+    }
+  },
+  {
+    "name": "split-and-2x38",
+    "group": "split",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nD1(k) == ((((((((((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ x /= 230) /\\ x /= 231) /\\ x /= 232) /\\ x /= 233) /\\ x /= 234) /\\ x /= 235) /\\ x /= 236) /\\ x /= 237) /\\ TRUE)\nD0(k) == ((((((((((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ x /= 230) /\\ x /= 231) /\\ x /= 232) /\\ x /= 233) /\\ x /= 234) /\\ x /= 235) /\\ x /= 236) /\\ x /= 237) /\\ D1(k))\nInv == D0(1)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 32
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 32
+        }
+      }
+    }
+  },
+  {
+    "name": "split-if-2x47",
+    "group": "split",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nD1(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE IF x = 50 THEN FALSE ELSE IF x = 51 THEN FALSE ELSE IF x = 52 THEN FALSE ELSE IF x = 53 THEN FALSE ELSE IF x = 54 THEN FALSE ELSE IF x = 55 THEN FALSE ELSE IF x = 56 THEN FALSE ELSE IF x = 57 THEN FALSE ELSE IF x = 58 THEN FALSE ELSE IF x = 59 THEN FALSE ELSE IF x = 60 THEN FALSE ELSE IF x = 61 THEN FALSE ELSE IF x = 62 THEN FALSE ELSE IF x = 63 THEN FALSE ELSE IF x = 64 THEN FALSE ELSE IF x = 65 THEN FALSE ELSE IF x = 66 THEN FALSE ELSE TRUE\nD0(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE IF x = 50 THEN FALSE ELSE IF x = 51 THEN FALSE ELSE IF x = 52 THEN FALSE ELSE IF x = 53 THEN FALSE ELSE IF x = 54 THEN FALSE ELSE IF x = 55 THEN FALSE ELSE IF x = 56 THEN FALSE ELSE IF x = 57 THEN FALSE ELSE IF x = 58 THEN FALSE ELSE IF x = 59 THEN FALSE ELSE IF x = 60 THEN FALSE ELSE IF x = 61 THEN FALSE ELSE IF x = 62 THEN FALSE ELSE IF x = 63 THEN FALSE ELSE IF x = 64 THEN FALSE ELSE IF x = 65 THEN FALSE ELSE IF x = 66 THEN FALSE ELSE D1(k)\nInv == D0(1)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 32
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 32
+        }
+      }
+    }
+  },
+  {
+    "name": "split-and-2x47",
+    "group": "split",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nD1(k) == (((((((((((((((((((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ x /= 230) /\\ x /= 231) /\\ x /= 232) /\\ x /= 233) /\\ x /= 234) /\\ x /= 235) /\\ x /= 236) /\\ x /= 237) /\\ x /= 238) /\\ x /= 239) /\\ x /= 240) /\\ x /= 241) /\\ x /= 242) /\\ x /= 243) /\\ x /= 244) /\\ x /= 245) /\\ x /= 246) /\\ TRUE)\nD0(k) == (((((((((((((((((((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ x /= 230) /\\ x /= 231) /\\ x /= 232) /\\ x /= 233) /\\ x /= 234) /\\ x /= 235) /\\ x /= 236) /\\ x /= 237) /\\ x /= 238) /\\ x /= 239) /\\ x /= 240) /\\ x /= 241) /\\ x /= 242) /\\ x /= 243) /\\ x /= 244) /\\ x /= 245) /\\ x /= 246) /\\ D1(k))\nInv == D0(1)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 32
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 32
+        }
+      }
+    }
+  },
+  {
+    "name": "split-if-3x38",
+    "group": "split",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nD2(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE IF x = 50 THEN FALSE ELSE IF x = 51 THEN FALSE ELSE IF x = 52 THEN FALSE ELSE IF x = 53 THEN FALSE ELSE IF x = 54 THEN FALSE ELSE IF x = 55 THEN FALSE ELSE IF x = 56 THEN FALSE ELSE IF x = 57 THEN FALSE ELSE TRUE\nD1(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE IF x = 50 THEN FALSE ELSE IF x = 51 THEN FALSE ELSE IF x = 52 THEN FALSE ELSE IF x = 53 THEN FALSE ELSE IF x = 54 THEN FALSE ELSE IF x = 55 THEN FALSE ELSE IF x = 56 THEN FALSE ELSE IF x = 57 THEN FALSE ELSE D2(k)\nD0(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE IF x = 50 THEN FALSE ELSE IF x = 51 THEN FALSE ELSE IF x = 52 THEN FALSE ELSE IF x = 53 THEN FALSE ELSE IF x = 54 THEN FALSE ELSE IF x = 55 THEN FALSE ELSE IF x = 56 THEN FALSE ELSE IF x = 57 THEN FALSE ELSE D1(k)\nInv == D0(1)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 38
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 38
+        }
+      }
+    }
+  },
+  {
+    "name": "split-and-3x38",
+    "group": "split",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nD2(k) == ((((((((((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ x /= 230) /\\ x /= 231) /\\ x /= 232) /\\ x /= 233) /\\ x /= 234) /\\ x /= 235) /\\ x /= 236) /\\ x /= 237) /\\ TRUE)\nD1(k) == ((((((((((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ x /= 230) /\\ x /= 231) /\\ x /= 232) /\\ x /= 233) /\\ x /= 234) /\\ x /= 235) /\\ x /= 236) /\\ x /= 237) /\\ D2(k))\nD0(k) == ((((((((((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ x /= 230) /\\ x /= 231) /\\ x /= 232) /\\ x /= 233) /\\ x /= 234) /\\ x /= 235) /\\ x /= 236) /\\ x /= 237) /\\ D1(k))\nInv == D0(1)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 38
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 38
+        }
+      }
+    }
+  },
+  {
+    "name": "split-if-3x40",
+    "group": "split",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nD2(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE IF x = 50 THEN FALSE ELSE IF x = 51 THEN FALSE ELSE IF x = 52 THEN FALSE ELSE IF x = 53 THEN FALSE ELSE IF x = 54 THEN FALSE ELSE IF x = 55 THEN FALSE ELSE IF x = 56 THEN FALSE ELSE IF x = 57 THEN FALSE ELSE IF x = 58 THEN FALSE ELSE IF x = 59 THEN FALSE ELSE TRUE\nD1(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE IF x = 50 THEN FALSE ELSE IF x = 51 THEN FALSE ELSE IF x = 52 THEN FALSE ELSE IF x = 53 THEN FALSE ELSE IF x = 54 THEN FALSE ELSE IF x = 55 THEN FALSE ELSE IF x = 56 THEN FALSE ELSE IF x = 57 THEN FALSE ELSE IF x = 58 THEN FALSE ELSE IF x = 59 THEN FALSE ELSE D2(k)\nD0(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE IF x = 50 THEN FALSE ELSE IF x = 51 THEN FALSE ELSE IF x = 52 THEN FALSE ELSE IF x = 53 THEN FALSE ELSE IF x = 54 THEN FALSE ELSE IF x = 55 THEN FALSE ELSE IF x = 56 THEN FALSE ELSE IF x = 57 THEN FALSE ELSE IF x = 58 THEN FALSE ELSE IF x = 59 THEN FALSE ELSE D1(k)\nInv == D0(1)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 38
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 38
+        }
+      }
+    }
+  },
+  {
+    "name": "split-and-3x40",
+    "group": "split",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nD2(k) == ((((((((((((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ x /= 230) /\\ x /= 231) /\\ x /= 232) /\\ x /= 233) /\\ x /= 234) /\\ x /= 235) /\\ x /= 236) /\\ x /= 237) /\\ x /= 238) /\\ x /= 239) /\\ TRUE)\nD1(k) == ((((((((((((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ x /= 230) /\\ x /= 231) /\\ x /= 232) /\\ x /= 233) /\\ x /= 234) /\\ x /= 235) /\\ x /= 236) /\\ x /= 237) /\\ x /= 238) /\\ x /= 239) /\\ D2(k))\nD0(k) == ((((((((((((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ x /= 230) /\\ x /= 231) /\\ x /= 232) /\\ x /= 233) /\\ x /= 234) /\\ x /= 235) /\\ x /= 236) /\\ x /= 237) /\\ x /= 238) /\\ x /= 239) /\\ D1(k))\nInv == D0(1)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 38
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 38
+        }
+      }
+    }
+  },
+  {
+    "name": "split-if-3x41",
+    "group": "split",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nD2(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE IF x = 50 THEN FALSE ELSE IF x = 51 THEN FALSE ELSE IF x = 52 THEN FALSE ELSE IF x = 53 THEN FALSE ELSE IF x = 54 THEN FALSE ELSE IF x = 55 THEN FALSE ELSE IF x = 56 THEN FALSE ELSE IF x = 57 THEN FALSE ELSE IF x = 58 THEN FALSE ELSE IF x = 59 THEN FALSE ELSE IF x = 60 THEN FALSE ELSE TRUE\nD1(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE IF x = 50 THEN FALSE ELSE IF x = 51 THEN FALSE ELSE IF x = 52 THEN FALSE ELSE IF x = 53 THEN FALSE ELSE IF x = 54 THEN FALSE ELSE IF x = 55 THEN FALSE ELSE IF x = 56 THEN FALSE ELSE IF x = 57 THEN FALSE ELSE IF x = 58 THEN FALSE ELSE IF x = 59 THEN FALSE ELSE IF x = 60 THEN FALSE ELSE D2(k)\nD0(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE IF x = 50 THEN FALSE ELSE IF x = 51 THEN FALSE ELSE IF x = 52 THEN FALSE ELSE IF x = 53 THEN FALSE ELSE IF x = 54 THEN FALSE ELSE IF x = 55 THEN FALSE ELSE IF x = 56 THEN FALSE ELSE IF x = 57 THEN FALSE ELSE IF x = 58 THEN FALSE ELSE IF x = 59 THEN FALSE ELSE IF x = 60 THEN FALSE ELSE D1(k)\nInv == D0(1)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 38
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 38
+        }
+      }
+    }
+  },
+  {
+    "name": "split-and-3x41",
+    "group": "split",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nD2(k) == (((((((((((((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ x /= 230) /\\ x /= 231) /\\ x /= 232) /\\ x /= 233) /\\ x /= 234) /\\ x /= 235) /\\ x /= 236) /\\ x /= 237) /\\ x /= 238) /\\ x /= 239) /\\ x /= 240) /\\ TRUE)\nD1(k) == (((((((((((((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ x /= 230) /\\ x /= 231) /\\ x /= 232) /\\ x /= 233) /\\ x /= 234) /\\ x /= 235) /\\ x /= 236) /\\ x /= 237) /\\ x /= 238) /\\ x /= 239) /\\ x /= 240) /\\ D2(k))\nD0(k) == (((((((((((((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ x /= 230) /\\ x /= 231) /\\ x /= 232) /\\ x /= 233) /\\ x /= 234) /\\ x /= 235) /\\ x /= 236) /\\ x /= 237) /\\ x /= 238) /\\ x /= 239) /\\ x /= 240) /\\ D1(k))\nInv == D0(1)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 38
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 38
+        }
+      }
+    }
+  },
+  {
+    "name": "split-if-4x30",
+    "group": "split",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nD3(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE TRUE\nD2(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE D3(k)\nD1(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE D2(k)\nD0(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE D1(k)\nInv == D0(1)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 44
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 44
+        }
+      }
+    }
+  },
+  {
+    "name": "split-and-4x30",
+    "group": "split",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nD3(k) == ((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ TRUE)\nD2(k) == ((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ D3(k))\nD1(k) == ((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ D2(k))\nD0(k) == ((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ D1(k))\nInv == D0(1)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 44
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 44
+        }
+      }
+    }
+  },
+  {
+    "name": "split-if-4x31",
+    "group": "split",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nD3(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE IF x = 50 THEN FALSE ELSE TRUE\nD2(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE IF x = 50 THEN FALSE ELSE D3(k)\nD1(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE IF x = 50 THEN FALSE ELSE D2(k)\nD0(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE IF x = 45 THEN FALSE ELSE IF x = 46 THEN FALSE ELSE IF x = 47 THEN FALSE ELSE IF x = 48 THEN FALSE ELSE IF x = 49 THEN FALSE ELSE IF x = 50 THEN FALSE ELSE D1(k)\nInv == D0(1)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 44
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 44
+        }
+      }
+    }
+  },
+  {
+    "name": "split-and-4x31",
+    "group": "split",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nD3(k) == (((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ x /= 230) /\\ TRUE)\nD2(k) == (((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ x /= 230) /\\ D3(k))\nD1(k) == (((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ x /= 230) /\\ D2(k))\nD0(k) == (((((((((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ x /= 225) /\\ x /= 226) /\\ x /= 227) /\\ x /= 228) /\\ x /= 229) /\\ x /= 230) /\\ D1(k))\nInv == D0(1)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 44
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 44
+        }
+      }
+    }
+  },
+  {
+    "name": "split-if-5x24",
+    "group": "split",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nD4(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE TRUE\nD3(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE D4(k)\nD2(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE D3(k)\nD1(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE D2(k)\nD0(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE D1(k)\nInv == D0(1)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 50
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 50
+        }
+      }
+    }
+  },
+  {
+    "name": "split-and-5x24",
+    "group": "split",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nD4(k) == ((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ TRUE)\nD3(k) == ((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ D4(k))\nD2(k) == ((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ D3(k))\nD1(k) == ((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ D2(k))\nD0(k) == ((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ D1(k))\nInv == D0(1)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 50
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 50
+        }
+      }
+    }
+  },
+  {
+    "name": "split-if-5x25",
+    "group": "split",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nD4(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE TRUE\nD3(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE D4(k)\nD2(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE D3(k)\nD1(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE D2(k)\nD0(k) == IF x = 20 THEN FALSE ELSE IF x = 21 THEN FALSE ELSE IF x = 22 THEN FALSE ELSE IF x = 23 THEN FALSE ELSE IF x = 24 THEN FALSE ELSE IF x = 25 THEN FALSE ELSE IF x = 26 THEN FALSE ELSE IF x = 27 THEN FALSE ELSE IF x = 28 THEN FALSE ELSE IF x = 29 THEN FALSE ELSE IF x = 30 THEN FALSE ELSE IF x = 31 THEN FALSE ELSE IF x = 32 THEN FALSE ELSE IF x = 33 THEN FALSE ELSE IF x = 34 THEN FALSE ELSE IF x = 35 THEN FALSE ELSE IF x = 36 THEN FALSE ELSE IF x = 37 THEN FALSE ELSE IF x = 38 THEN FALSE ELSE IF x = 39 THEN FALSE ELSE IF x = 40 THEN FALSE ELSE IF x = 41 THEN FALSE ELSE IF x = 42 THEN FALSE ELSE IF x = 43 THEN FALSE ELSE IF x = 44 THEN FALSE ELSE D1(k)\nInv == D0(1)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 50
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 50
+        }
+      }
+    }
+  },
+  {
+    "name": "split-and-5x25",
+    "group": "split",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nD4(k) == (((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ TRUE)\nD3(k) == (((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ D4(k))\nD2(k) == (((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ D3(k))\nD1(k) == (((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ D2(k))\nD0(k) == (((((((((((((((((((((((((x /= 200 /\\ x /= 201) /\\ x /= 202) /\\ x /= 203) /\\ x /= 204) /\\ x /= 205) /\\ x /= 206) /\\ x /= 207) /\\ x /= 208) /\\ x /= 209) /\\ x /= 210) /\\ x /= 211) /\\ x /= 212) /\\ x /= 213) /\\ x /= 214) /\\ x /= 215) /\\ x /= 216) /\\ x /= 217) /\\ x /= 218) /\\ x /= 219) /\\ x /= 220) /\\ x /= 221) /\\ x /= 222) /\\ x /= 223) /\\ x /= 224) /\\ D1(k))\nInv == D0(1)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 50
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 50
+        }
+      }
+    }
+  },
+  {
+    "name": "and-false-1",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x /= 3 /\\ x /= 201 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ x /= 226 /\\ x /= 227 /\\ x /= 228 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ x /= 253 /\\ x /= 254 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "invariant-violation",
+          "trace": 4,
+          "work": 12
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "invariant-violation",
+          "trace": 4,
+          "work": 12
+        }
+      }
+    }
+  },
+  {
+    "name": "and-false-skips-1",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x /= 3 /\\ 10 \\div (3 - x) /= 0 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ x /= 226 /\\ x /= 227 /\\ x /= 228 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ x /= 253 /\\ x /= 254 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "invariant-violation",
+          "trace": 4,
+          "work": 12
+        }
+      }
+    }
+  },
+  {
+    "name": "and-error-first-1",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == 10 \\div (3 - x) /= 0 /\\ x /= 3 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ x /= 226 /\\ x /= 227 /\\ x /= 228 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ x /= 253 /\\ x /= 254 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Integer division by zero"
+        }
+      }
+    }
+  },
+  {
+    "name": "and-non-boolean-1",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == 1 /\\ x /= 201 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ x /= 226 /\\ x /= 227 /\\ x /= 228 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ x /= 253 /\\ x /= 254 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Expected a boolean"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Expected a boolean"
+        }
+      }
+    }
+  },
+  {
+    "name": "or-true-skips-1",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x >= 0 \\/ (1 \\div 0) = 0 \\/ x = 302 \\/ x = 303 \\/ x = 304 \\/ x = 305 \\/ x = 306 \\/ x = 307 \\/ x = 308 \\/ x = 309 \\/ x = 310 \\/ x = 311 \\/ x = 312 \\/ x = 313 \\/ x = 314 \\/ x = 315 \\/ x = 316 \\/ x = 317 \\/ x = 318 \\/ x = 319 \\/ x = 320 \\/ x = 321 \\/ x = 322 \\/ x = 323 \\/ x = 324 \\/ x = 325 \\/ x = 326 \\/ x = 327 \\/ x = 328 \\/ x = 329 \\/ x = 330 \\/ x = 331 \\/ x = 332 \\/ x = 333 \\/ x = 334 \\/ x = 335 \\/ x = 336 \\/ x = 337 \\/ x = 338 \\/ x = 339 \\/ x = 340 \\/ x = 341 \\/ x = 342 \\/ x = 343 \\/ x = 344 \\/ x = 345 \\/ x = 346 \\/ x = 347 \\/ x = 348 \\/ x = 349 \\/ x = 350 \\/ x = 351 \\/ x = 352 \\/ x = 353 \\/ x = 354 \\/ x = 355 \\/ x = 356 \\/ x = 357 \\/ x = 358 \\/ x = 359\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 20
+        }
+      }
+    }
+  },
+  {
+    "name": "if-selects-1",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == IF x >= 0 THEN x /= 3 ELSE IF x = 1001 THEN (1 \\div 0) = 0 ELSE IF x = 1002 THEN (1 \\div 0) = 0 ELSE IF x = 1003 THEN (1 \\div 0) = 0 ELSE IF x = 1004 THEN (1 \\div 0) = 0 ELSE IF x = 1005 THEN (1 \\div 0) = 0 ELSE IF x = 1006 THEN (1 \\div 0) = 0 ELSE IF x = 1007 THEN (1 \\div 0) = 0 ELSE IF x = 1008 THEN (1 \\div 0) = 0 ELSE IF x = 1009 THEN (1 \\div 0) = 0 ELSE IF x = 1010 THEN (1 \\div 0) = 0 ELSE IF x = 1011 THEN (1 \\div 0) = 0 ELSE IF x = 1012 THEN (1 \\div 0) = 0 ELSE IF x = 1013 THEN (1 \\div 0) = 0 ELSE IF x = 1014 THEN (1 \\div 0) = 0 ELSE IF x = 1015 THEN (1 \\div 0) = 0 ELSE IF x = 1016 THEN (1 \\div 0) = 0 ELSE IF x = 1017 THEN (1 \\div 0) = 0 ELSE IF x = 1018 THEN (1 \\div 0) = 0 ELSE IF x = 1019 THEN (1 \\div 0) = 0 ELSE IF x = 1020 THEN (1 \\div 0) = 0 ELSE IF x = 1021 THEN (1 \\div 0) = 0 ELSE IF x = 1022 THEN (1 \\div 0) = 0 ELSE IF x = 1023 THEN (1 \\div 0) = 0 ELSE IF x = 1024 THEN (1 \\div 0) = 0 ELSE IF x = 1025 THEN (1 \\div 0) = 0 ELSE IF x = 1026 THEN (1 \\div 0) = 0 ELSE IF x = 1027 THEN (1 \\div 0) = 0 ELSE IF x = 1028 THEN (1 \\div 0) = 0 ELSE IF x = 1029 THEN (1 \\div 0) = 0 ELSE IF x = 1030 THEN (1 \\div 0) = 0 ELSE IF x = 1031 THEN (1 \\div 0) = 0 ELSE IF x = 1032 THEN (1 \\div 0) = 0 ELSE IF x = 1033 THEN (1 \\div 0) = 0 ELSE IF x = 1034 THEN (1 \\div 0) = 0 ELSE IF x = 1035 THEN (1 \\div 0) = 0 ELSE IF x = 1036 THEN (1 \\div 0) = 0 ELSE IF x = 1037 THEN (1 \\div 0) = 0 ELSE IF x = 1038 THEN (1 \\div 0) = 0 ELSE IF x = 1039 THEN (1 \\div 0) = 0 ELSE IF x = 1040 THEN (1 \\div 0) = 0 ELSE IF x = 1041 THEN (1 \\div 0) = 0 ELSE IF x = 1042 THEN (1 \\div 0) = 0 ELSE IF x = 1043 THEN (1 \\div 0) = 0 ELSE IF x = 1044 THEN (1 \\div 0) = 0 ELSE IF x = 1045 THEN (1 \\div 0) = 0 ELSE IF x = 1046 THEN (1 \\div 0) = 0 ELSE IF x = 1047 THEN (1 \\div 0) = 0 ELSE IF x = 1048 THEN (1 \\div 0) = 0 ELSE IF x = 1049 THEN (1 \\div 0) = 0 ELSE IF x = 1050 THEN (1 \\div 0) = 0 ELSE IF x = 1051 THEN (1 \\div 0) = 0 ELSE IF x = 1052 THEN (1 \\div 0) = 0 ELSE IF x = 1053 THEN (1 \\div 0) = 0 ELSE (1 \\div 0) = 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "invariant-violation",
+          "trace": 4,
+          "work": 12
+        }
+      }
+    }
+  },
+  {
+    "name": "if-condition-non-boolean-1",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == IF 5 THEN TRUE ELSE IF x = 1001 THEN (1 \\div 0) = 0 ELSE IF x = 1002 THEN (1 \\div 0) = 0 ELSE IF x = 1003 THEN (1 \\div 0) = 0 ELSE IF x = 1004 THEN (1 \\div 0) = 0 ELSE IF x = 1005 THEN (1 \\div 0) = 0 ELSE IF x = 1006 THEN (1 \\div 0) = 0 ELSE IF x = 1007 THEN (1 \\div 0) = 0 ELSE IF x = 1008 THEN (1 \\div 0) = 0 ELSE IF x = 1009 THEN (1 \\div 0) = 0 ELSE IF x = 1010 THEN (1 \\div 0) = 0 ELSE IF x = 1011 THEN (1 \\div 0) = 0 ELSE IF x = 1012 THEN (1 \\div 0) = 0 ELSE IF x = 1013 THEN (1 \\div 0) = 0 ELSE IF x = 1014 THEN (1 \\div 0) = 0 ELSE IF x = 1015 THEN (1 \\div 0) = 0 ELSE IF x = 1016 THEN (1 \\div 0) = 0 ELSE IF x = 1017 THEN (1 \\div 0) = 0 ELSE IF x = 1018 THEN (1 \\div 0) = 0 ELSE IF x = 1019 THEN (1 \\div 0) = 0 ELSE IF x = 1020 THEN (1 \\div 0) = 0 ELSE IF x = 1021 THEN (1 \\div 0) = 0 ELSE IF x = 1022 THEN (1 \\div 0) = 0 ELSE IF x = 1023 THEN (1 \\div 0) = 0 ELSE IF x = 1024 THEN (1 \\div 0) = 0 ELSE IF x = 1025 THEN (1 \\div 0) = 0 ELSE IF x = 1026 THEN (1 \\div 0) = 0 ELSE IF x = 1027 THEN (1 \\div 0) = 0 ELSE IF x = 1028 THEN (1 \\div 0) = 0 ELSE IF x = 1029 THEN (1 \\div 0) = 0 ELSE IF x = 1030 THEN (1 \\div 0) = 0 ELSE IF x = 1031 THEN (1 \\div 0) = 0 ELSE IF x = 1032 THEN (1 \\div 0) = 0 ELSE IF x = 1033 THEN (1 \\div 0) = 0 ELSE IF x = 1034 THEN (1 \\div 0) = 0 ELSE IF x = 1035 THEN (1 \\div 0) = 0 ELSE IF x = 1036 THEN (1 \\div 0) = 0 ELSE IF x = 1037 THEN (1 \\div 0) = 0 ELSE IF x = 1038 THEN (1 \\div 0) = 0 ELSE IF x = 1039 THEN (1 \\div 0) = 0 ELSE IF x = 1040 THEN (1 \\div 0) = 0 ELSE IF x = 1041 THEN (1 \\div 0) = 0 ELSE IF x = 1042 THEN (1 \\div 0) = 0 ELSE IF x = 1043 THEN (1 \\div 0) = 0 ELSE IF x = 1044 THEN (1 \\div 0) = 0 ELSE IF x = 1045 THEN (1 \\div 0) = 0 ELSE IF x = 1046 THEN (1 \\div 0) = 0 ELSE IF x = 1047 THEN (1 \\div 0) = 0 ELSE IF x = 1048 THEN (1 \\div 0) = 0 ELSE IF x = 1049 THEN (1 \\div 0) = 0 ELSE IF x = 1050 THEN (1 \\div 0) = 0 ELSE IF x = 1051 THEN (1 \\div 0) = 0 ELSE IF x = 1052 THEN (1 \\div 0) = 0 ELSE IF x = 1053 THEN (1 \\div 0) = 0 ELSE (1 \\div 0) = 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Expected a boolean"
+        }
+      }
+    }
+  },
+  {
+    "name": "if-condition-error-1",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == IF 10 \\div (3 - x) /= 0 THEN TRUE ELSE IF x = 1001 THEN (1 \\div 0) = 0 ELSE IF x = 1002 THEN (1 \\div 0) = 0 ELSE IF x = 1003 THEN (1 \\div 0) = 0 ELSE IF x = 1004 THEN (1 \\div 0) = 0 ELSE IF x = 1005 THEN (1 \\div 0) = 0 ELSE IF x = 1006 THEN (1 \\div 0) = 0 ELSE IF x = 1007 THEN (1 \\div 0) = 0 ELSE IF x = 1008 THEN (1 \\div 0) = 0 ELSE IF x = 1009 THEN (1 \\div 0) = 0 ELSE IF x = 1010 THEN (1 \\div 0) = 0 ELSE IF x = 1011 THEN (1 \\div 0) = 0 ELSE IF x = 1012 THEN (1 \\div 0) = 0 ELSE IF x = 1013 THEN (1 \\div 0) = 0 ELSE IF x = 1014 THEN (1 \\div 0) = 0 ELSE IF x = 1015 THEN (1 \\div 0) = 0 ELSE IF x = 1016 THEN (1 \\div 0) = 0 ELSE IF x = 1017 THEN (1 \\div 0) = 0 ELSE IF x = 1018 THEN (1 \\div 0) = 0 ELSE IF x = 1019 THEN (1 \\div 0) = 0 ELSE IF x = 1020 THEN (1 \\div 0) = 0 ELSE IF x = 1021 THEN (1 \\div 0) = 0 ELSE IF x = 1022 THEN (1 \\div 0) = 0 ELSE IF x = 1023 THEN (1 \\div 0) = 0 ELSE IF x = 1024 THEN (1 \\div 0) = 0 ELSE IF x = 1025 THEN (1 \\div 0) = 0 ELSE IF x = 1026 THEN (1 \\div 0) = 0 ELSE IF x = 1027 THEN (1 \\div 0) = 0 ELSE IF x = 1028 THEN (1 \\div 0) = 0 ELSE IF x = 1029 THEN (1 \\div 0) = 0 ELSE IF x = 1030 THEN (1 \\div 0) = 0 ELSE IF x = 1031 THEN (1 \\div 0) = 0 ELSE IF x = 1032 THEN (1 \\div 0) = 0 ELSE IF x = 1033 THEN (1 \\div 0) = 0 ELSE IF x = 1034 THEN (1 \\div 0) = 0 ELSE IF x = 1035 THEN (1 \\div 0) = 0 ELSE IF x = 1036 THEN (1 \\div 0) = 0 ELSE IF x = 1037 THEN (1 \\div 0) = 0 ELSE IF x = 1038 THEN (1 \\div 0) = 0 ELSE IF x = 1039 THEN (1 \\div 0) = 0 ELSE IF x = 1040 THEN (1 \\div 0) = 0 ELSE IF x = 1041 THEN (1 \\div 0) = 0 ELSE IF x = 1042 THEN (1 \\div 0) = 0 ELSE IF x = 1043 THEN (1 \\div 0) = 0 ELSE IF x = 1044 THEN (1 \\div 0) = 0 ELSE IF x = 1045 THEN (1 \\div 0) = 0 ELSE IF x = 1046 THEN (1 \\div 0) = 0 ELSE IF x = 1047 THEN (1 \\div 0) = 0 ELSE IF x = 1048 THEN (1 \\div 0) = 0 ELSE IF x = 1049 THEN (1 \\div 0) = 0 ELSE IF x = 1050 THEN (1 \\div 0) = 0 ELSE IF x = 1051 THEN (1 \\div 0) = 0 ELSE IF x = 1052 THEN (1 \\div 0) = 0 ELSE IF x = 1053 THEN (1 \\div 0) = 0 ELSE (1 \\div 0) = 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Integer division by zero"
+        }
+      }
+    }
+  },
+  {
+    "name": "and-false-27",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x /= 200 /\\ x /= 201 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ x /= 3 /\\ x /= 227 /\\ x /= 228 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ x /= 253 /\\ x /= 254 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "invariant-violation",
+          "trace": 4,
+          "work": 12
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "invariant-violation",
+          "trace": 4,
+          "work": 12
+        }
+      }
+    }
+  },
+  {
+    "name": "and-false-skips-27",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x /= 200 /\\ x /= 201 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ x /= 3 /\\ 10 \\div (3 - x) /= 0 /\\ x /= 228 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ x /= 253 /\\ x /= 254 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "invariant-violation",
+          "trace": 4,
+          "work": 12
+        }
+      }
+    }
+  },
+  {
+    "name": "and-error-first-27",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x /= 200 /\\ x /= 201 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ 10 \\div (3 - x) /= 0 /\\ x /= 3 /\\ x /= 228 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ x /= 253 /\\ x /= 254 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Integer division by zero"
+        }
+      }
+    }
+  },
+  {
+    "name": "and-non-boolean-27",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x /= 200 /\\ x /= 201 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ 1 /\\ x /= 227 /\\ x /= 228 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ x /= 253 /\\ x /= 254 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Expected a boolean"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Expected a boolean"
+        }
+      }
+    }
+  },
+  {
+    "name": "or-true-skips-27",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x = 300 \\/ x = 301 \\/ x = 302 \\/ x = 303 \\/ x = 304 \\/ x = 305 \\/ x = 306 \\/ x = 307 \\/ x = 308 \\/ x = 309 \\/ x = 310 \\/ x = 311 \\/ x = 312 \\/ x = 313 \\/ x = 314 \\/ x = 315 \\/ x = 316 \\/ x = 317 \\/ x = 318 \\/ x = 319 \\/ x = 320 \\/ x = 321 \\/ x = 322 \\/ x = 323 \\/ x = 324 \\/ x = 325 \\/ x >= 0 \\/ (1 \\div 0) = 0 \\/ x = 328 \\/ x = 329 \\/ x = 330 \\/ x = 331 \\/ x = 332 \\/ x = 333 \\/ x = 334 \\/ x = 335 \\/ x = 336 \\/ x = 337 \\/ x = 338 \\/ x = 339 \\/ x = 340 \\/ x = 341 \\/ x = 342 \\/ x = 343 \\/ x = 344 \\/ x = 345 \\/ x = 346 \\/ x = 347 \\/ x = 348 \\/ x = 349 \\/ x = 350 \\/ x = 351 \\/ x = 352 \\/ x = 353 \\/ x = 354 \\/ x = 355 \\/ x = 356 \\/ x = 357 \\/ x = 358 \\/ x = 359\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 20
+        }
+      }
+    }
+  },
+  {
+    "name": "if-selects-27",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == IF x = 1000 THEN (1 \\div 0) = 0 ELSE IF x = 1001 THEN (1 \\div 0) = 0 ELSE IF x = 1002 THEN (1 \\div 0) = 0 ELSE IF x = 1003 THEN (1 \\div 0) = 0 ELSE IF x = 1004 THEN (1 \\div 0) = 0 ELSE IF x = 1005 THEN (1 \\div 0) = 0 ELSE IF x = 1006 THEN (1 \\div 0) = 0 ELSE IF x = 1007 THEN (1 \\div 0) = 0 ELSE IF x = 1008 THEN (1 \\div 0) = 0 ELSE IF x = 1009 THEN (1 \\div 0) = 0 ELSE IF x = 1010 THEN (1 \\div 0) = 0 ELSE IF x = 1011 THEN (1 \\div 0) = 0 ELSE IF x = 1012 THEN (1 \\div 0) = 0 ELSE IF x = 1013 THEN (1 \\div 0) = 0 ELSE IF x = 1014 THEN (1 \\div 0) = 0 ELSE IF x = 1015 THEN (1 \\div 0) = 0 ELSE IF x = 1016 THEN (1 \\div 0) = 0 ELSE IF x = 1017 THEN (1 \\div 0) = 0 ELSE IF x = 1018 THEN (1 \\div 0) = 0 ELSE IF x = 1019 THEN (1 \\div 0) = 0 ELSE IF x = 1020 THEN (1 \\div 0) = 0 ELSE IF x = 1021 THEN (1 \\div 0) = 0 ELSE IF x = 1022 THEN (1 \\div 0) = 0 ELSE IF x = 1023 THEN (1 \\div 0) = 0 ELSE IF x = 1024 THEN (1 \\div 0) = 0 ELSE IF x = 1025 THEN (1 \\div 0) = 0 ELSE IF x >= 0 THEN x /= 3 ELSE IF x = 1027 THEN (1 \\div 0) = 0 ELSE IF x = 1028 THEN (1 \\div 0) = 0 ELSE IF x = 1029 THEN (1 \\div 0) = 0 ELSE IF x = 1030 THEN (1 \\div 0) = 0 ELSE IF x = 1031 THEN (1 \\div 0) = 0 ELSE IF x = 1032 THEN (1 \\div 0) = 0 ELSE IF x = 1033 THEN (1 \\div 0) = 0 ELSE IF x = 1034 THEN (1 \\div 0) = 0 ELSE IF x = 1035 THEN (1 \\div 0) = 0 ELSE IF x = 1036 THEN (1 \\div 0) = 0 ELSE IF x = 1037 THEN (1 \\div 0) = 0 ELSE IF x = 1038 THEN (1 \\div 0) = 0 ELSE IF x = 1039 THEN (1 \\div 0) = 0 ELSE IF x = 1040 THEN (1 \\div 0) = 0 ELSE IF x = 1041 THEN (1 \\div 0) = 0 ELSE IF x = 1042 THEN (1 \\div 0) = 0 ELSE IF x = 1043 THEN (1 \\div 0) = 0 ELSE IF x = 1044 THEN (1 \\div 0) = 0 ELSE IF x = 1045 THEN (1 \\div 0) = 0 ELSE IF x = 1046 THEN (1 \\div 0) = 0 ELSE IF x = 1047 THEN (1 \\div 0) = 0 ELSE IF x = 1048 THEN (1 \\div 0) = 0 ELSE IF x = 1049 THEN (1 \\div 0) = 0 ELSE IF x = 1050 THEN (1 \\div 0) = 0 ELSE IF x = 1051 THEN (1 \\div 0) = 0 ELSE IF x = 1052 THEN (1 \\div 0) = 0 ELSE IF x = 1053 THEN (1 \\div 0) = 0 ELSE (1 \\div 0) = 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "invariant-violation",
+          "trace": 4,
+          "work": 12
+        }
+      }
+    }
+  },
+  {
+    "name": "if-condition-non-boolean-27",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == IF x = 1000 THEN (1 \\div 0) = 0 ELSE IF x = 1001 THEN (1 \\div 0) = 0 ELSE IF x = 1002 THEN (1 \\div 0) = 0 ELSE IF x = 1003 THEN (1 \\div 0) = 0 ELSE IF x = 1004 THEN (1 \\div 0) = 0 ELSE IF x = 1005 THEN (1 \\div 0) = 0 ELSE IF x = 1006 THEN (1 \\div 0) = 0 ELSE IF x = 1007 THEN (1 \\div 0) = 0 ELSE IF x = 1008 THEN (1 \\div 0) = 0 ELSE IF x = 1009 THEN (1 \\div 0) = 0 ELSE IF x = 1010 THEN (1 \\div 0) = 0 ELSE IF x = 1011 THEN (1 \\div 0) = 0 ELSE IF x = 1012 THEN (1 \\div 0) = 0 ELSE IF x = 1013 THEN (1 \\div 0) = 0 ELSE IF x = 1014 THEN (1 \\div 0) = 0 ELSE IF x = 1015 THEN (1 \\div 0) = 0 ELSE IF x = 1016 THEN (1 \\div 0) = 0 ELSE IF x = 1017 THEN (1 \\div 0) = 0 ELSE IF x = 1018 THEN (1 \\div 0) = 0 ELSE IF x = 1019 THEN (1 \\div 0) = 0 ELSE IF x = 1020 THEN (1 \\div 0) = 0 ELSE IF x = 1021 THEN (1 \\div 0) = 0 ELSE IF x = 1022 THEN (1 \\div 0) = 0 ELSE IF x = 1023 THEN (1 \\div 0) = 0 ELSE IF x = 1024 THEN (1 \\div 0) = 0 ELSE IF x = 1025 THEN (1 \\div 0) = 0 ELSE IF 5 THEN TRUE ELSE IF x = 1027 THEN (1 \\div 0) = 0 ELSE IF x = 1028 THEN (1 \\div 0) = 0 ELSE IF x = 1029 THEN (1 \\div 0) = 0 ELSE IF x = 1030 THEN (1 \\div 0) = 0 ELSE IF x = 1031 THEN (1 \\div 0) = 0 ELSE IF x = 1032 THEN (1 \\div 0) = 0 ELSE IF x = 1033 THEN (1 \\div 0) = 0 ELSE IF x = 1034 THEN (1 \\div 0) = 0 ELSE IF x = 1035 THEN (1 \\div 0) = 0 ELSE IF x = 1036 THEN (1 \\div 0) = 0 ELSE IF x = 1037 THEN (1 \\div 0) = 0 ELSE IF x = 1038 THEN (1 \\div 0) = 0 ELSE IF x = 1039 THEN (1 \\div 0) = 0 ELSE IF x = 1040 THEN (1 \\div 0) = 0 ELSE IF x = 1041 THEN (1 \\div 0) = 0 ELSE IF x = 1042 THEN (1 \\div 0) = 0 ELSE IF x = 1043 THEN (1 \\div 0) = 0 ELSE IF x = 1044 THEN (1 \\div 0) = 0 ELSE IF x = 1045 THEN (1 \\div 0) = 0 ELSE IF x = 1046 THEN (1 \\div 0) = 0 ELSE IF x = 1047 THEN (1 \\div 0) = 0 ELSE IF x = 1048 THEN (1 \\div 0) = 0 ELSE IF x = 1049 THEN (1 \\div 0) = 0 ELSE IF x = 1050 THEN (1 \\div 0) = 0 ELSE IF x = 1051 THEN (1 \\div 0) = 0 ELSE IF x = 1052 THEN (1 \\div 0) = 0 ELSE IF x = 1053 THEN (1 \\div 0) = 0 ELSE (1 \\div 0) = 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Expected a boolean"
+        }
+      }
+    }
+  },
+  {
+    "name": "if-condition-error-27",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == IF x = 1000 THEN (1 \\div 0) = 0 ELSE IF x = 1001 THEN (1 \\div 0) = 0 ELSE IF x = 1002 THEN (1 \\div 0) = 0 ELSE IF x = 1003 THEN (1 \\div 0) = 0 ELSE IF x = 1004 THEN (1 \\div 0) = 0 ELSE IF x = 1005 THEN (1 \\div 0) = 0 ELSE IF x = 1006 THEN (1 \\div 0) = 0 ELSE IF x = 1007 THEN (1 \\div 0) = 0 ELSE IF x = 1008 THEN (1 \\div 0) = 0 ELSE IF x = 1009 THEN (1 \\div 0) = 0 ELSE IF x = 1010 THEN (1 \\div 0) = 0 ELSE IF x = 1011 THEN (1 \\div 0) = 0 ELSE IF x = 1012 THEN (1 \\div 0) = 0 ELSE IF x = 1013 THEN (1 \\div 0) = 0 ELSE IF x = 1014 THEN (1 \\div 0) = 0 ELSE IF x = 1015 THEN (1 \\div 0) = 0 ELSE IF x = 1016 THEN (1 \\div 0) = 0 ELSE IF x = 1017 THEN (1 \\div 0) = 0 ELSE IF x = 1018 THEN (1 \\div 0) = 0 ELSE IF x = 1019 THEN (1 \\div 0) = 0 ELSE IF x = 1020 THEN (1 \\div 0) = 0 ELSE IF x = 1021 THEN (1 \\div 0) = 0 ELSE IF x = 1022 THEN (1 \\div 0) = 0 ELSE IF x = 1023 THEN (1 \\div 0) = 0 ELSE IF x = 1024 THEN (1 \\div 0) = 0 ELSE IF x = 1025 THEN (1 \\div 0) = 0 ELSE IF 10 \\div (3 - x) /= 0 THEN TRUE ELSE IF x = 1027 THEN (1 \\div 0) = 0 ELSE IF x = 1028 THEN (1 \\div 0) = 0 ELSE IF x = 1029 THEN (1 \\div 0) = 0 ELSE IF x = 1030 THEN (1 \\div 0) = 0 ELSE IF x = 1031 THEN (1 \\div 0) = 0 ELSE IF x = 1032 THEN (1 \\div 0) = 0 ELSE IF x = 1033 THEN (1 \\div 0) = 0 ELSE IF x = 1034 THEN (1 \\div 0) = 0 ELSE IF x = 1035 THEN (1 \\div 0) = 0 ELSE IF x = 1036 THEN (1 \\div 0) = 0 ELSE IF x = 1037 THEN (1 \\div 0) = 0 ELSE IF x = 1038 THEN (1 \\div 0) = 0 ELSE IF x = 1039 THEN (1 \\div 0) = 0 ELSE IF x = 1040 THEN (1 \\div 0) = 0 ELSE IF x = 1041 THEN (1 \\div 0) = 0 ELSE IF x = 1042 THEN (1 \\div 0) = 0 ELSE IF x = 1043 THEN (1 \\div 0) = 0 ELSE IF x = 1044 THEN (1 \\div 0) = 0 ELSE IF x = 1045 THEN (1 \\div 0) = 0 ELSE IF x = 1046 THEN (1 \\div 0) = 0 ELSE IF x = 1047 THEN (1 \\div 0) = 0 ELSE IF x = 1048 THEN (1 \\div 0) = 0 ELSE IF x = 1049 THEN (1 \\div 0) = 0 ELSE IF x = 1050 THEN (1 \\div 0) = 0 ELSE IF x = 1051 THEN (1 \\div 0) = 0 ELSE IF x = 1052 THEN (1 \\div 0) = 0 ELSE IF x = 1053 THEN (1 \\div 0) = 0 ELSE (1 \\div 0) = 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Integer division by zero"
+        }
+      }
+    }
+  },
+  {
+    "name": "and-false-28",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x /= 200 /\\ x /= 201 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ x /= 226 /\\ x /= 3 /\\ x /= 228 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ x /= 253 /\\ x /= 254 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "invariant-violation",
+          "trace": 4,
+          "work": 12
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "invariant-violation",
+          "trace": 4,
+          "work": 12
+        }
+      }
+    }
+  },
+  {
+    "name": "and-false-skips-28",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x /= 200 /\\ x /= 201 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ x /= 226 /\\ x /= 3 /\\ 10 \\div (3 - x) /= 0 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ x /= 253 /\\ x /= 254 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "invariant-violation",
+          "trace": 4,
+          "work": 12
+        }
+      }
+    }
+  },
+  {
+    "name": "and-error-first-28",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x /= 200 /\\ x /= 201 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ x /= 226 /\\ 10 \\div (3 - x) /= 0 /\\ x /= 3 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ x /= 253 /\\ x /= 254 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Integer division by zero"
+        }
+      }
+    }
+  },
+  {
+    "name": "and-non-boolean-28",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x /= 200 /\\ x /= 201 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ x /= 226 /\\ 1 /\\ x /= 228 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ x /= 253 /\\ x /= 254 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Expected a boolean"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Expected a boolean"
+        }
+      }
+    }
+  },
+  {
+    "name": "or-true-skips-28",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x = 300 \\/ x = 301 \\/ x = 302 \\/ x = 303 \\/ x = 304 \\/ x = 305 \\/ x = 306 \\/ x = 307 \\/ x = 308 \\/ x = 309 \\/ x = 310 \\/ x = 311 \\/ x = 312 \\/ x = 313 \\/ x = 314 \\/ x = 315 \\/ x = 316 \\/ x = 317 \\/ x = 318 \\/ x = 319 \\/ x = 320 \\/ x = 321 \\/ x = 322 \\/ x = 323 \\/ x = 324 \\/ x = 325 \\/ x = 326 \\/ x >= 0 \\/ (1 \\div 0) = 0 \\/ x = 329 \\/ x = 330 \\/ x = 331 \\/ x = 332 \\/ x = 333 \\/ x = 334 \\/ x = 335 \\/ x = 336 \\/ x = 337 \\/ x = 338 \\/ x = 339 \\/ x = 340 \\/ x = 341 \\/ x = 342 \\/ x = 343 \\/ x = 344 \\/ x = 345 \\/ x = 346 \\/ x = 347 \\/ x = 348 \\/ x = 349 \\/ x = 350 \\/ x = 351 \\/ x = 352 \\/ x = 353 \\/ x = 354 \\/ x = 355 \\/ x = 356 \\/ x = 357 \\/ x = 358 \\/ x = 359\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 20
+        }
+      }
+    }
+  },
+  {
+    "name": "if-selects-28",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == IF x = 1000 THEN (1 \\div 0) = 0 ELSE IF x = 1001 THEN (1 \\div 0) = 0 ELSE IF x = 1002 THEN (1 \\div 0) = 0 ELSE IF x = 1003 THEN (1 \\div 0) = 0 ELSE IF x = 1004 THEN (1 \\div 0) = 0 ELSE IF x = 1005 THEN (1 \\div 0) = 0 ELSE IF x = 1006 THEN (1 \\div 0) = 0 ELSE IF x = 1007 THEN (1 \\div 0) = 0 ELSE IF x = 1008 THEN (1 \\div 0) = 0 ELSE IF x = 1009 THEN (1 \\div 0) = 0 ELSE IF x = 1010 THEN (1 \\div 0) = 0 ELSE IF x = 1011 THEN (1 \\div 0) = 0 ELSE IF x = 1012 THEN (1 \\div 0) = 0 ELSE IF x = 1013 THEN (1 \\div 0) = 0 ELSE IF x = 1014 THEN (1 \\div 0) = 0 ELSE IF x = 1015 THEN (1 \\div 0) = 0 ELSE IF x = 1016 THEN (1 \\div 0) = 0 ELSE IF x = 1017 THEN (1 \\div 0) = 0 ELSE IF x = 1018 THEN (1 \\div 0) = 0 ELSE IF x = 1019 THEN (1 \\div 0) = 0 ELSE IF x = 1020 THEN (1 \\div 0) = 0 ELSE IF x = 1021 THEN (1 \\div 0) = 0 ELSE IF x = 1022 THEN (1 \\div 0) = 0 ELSE IF x = 1023 THEN (1 \\div 0) = 0 ELSE IF x = 1024 THEN (1 \\div 0) = 0 ELSE IF x = 1025 THEN (1 \\div 0) = 0 ELSE IF x = 1026 THEN (1 \\div 0) = 0 ELSE IF x >= 0 THEN x /= 3 ELSE IF x = 1028 THEN (1 \\div 0) = 0 ELSE IF x = 1029 THEN (1 \\div 0) = 0 ELSE IF x = 1030 THEN (1 \\div 0) = 0 ELSE IF x = 1031 THEN (1 \\div 0) = 0 ELSE IF x = 1032 THEN (1 \\div 0) = 0 ELSE IF x = 1033 THEN (1 \\div 0) = 0 ELSE IF x = 1034 THEN (1 \\div 0) = 0 ELSE IF x = 1035 THEN (1 \\div 0) = 0 ELSE IF x = 1036 THEN (1 \\div 0) = 0 ELSE IF x = 1037 THEN (1 \\div 0) = 0 ELSE IF x = 1038 THEN (1 \\div 0) = 0 ELSE IF x = 1039 THEN (1 \\div 0) = 0 ELSE IF x = 1040 THEN (1 \\div 0) = 0 ELSE IF x = 1041 THEN (1 \\div 0) = 0 ELSE IF x = 1042 THEN (1 \\div 0) = 0 ELSE IF x = 1043 THEN (1 \\div 0) = 0 ELSE IF x = 1044 THEN (1 \\div 0) = 0 ELSE IF x = 1045 THEN (1 \\div 0) = 0 ELSE IF x = 1046 THEN (1 \\div 0) = 0 ELSE IF x = 1047 THEN (1 \\div 0) = 0 ELSE IF x = 1048 THEN (1 \\div 0) = 0 ELSE IF x = 1049 THEN (1 \\div 0) = 0 ELSE IF x = 1050 THEN (1 \\div 0) = 0 ELSE IF x = 1051 THEN (1 \\div 0) = 0 ELSE IF x = 1052 THEN (1 \\div 0) = 0 ELSE IF x = 1053 THEN (1 \\div 0) = 0 ELSE (1 \\div 0) = 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "invariant-violation",
+          "trace": 4,
+          "work": 12
+        }
+      }
+    }
+  },
+  {
+    "name": "if-condition-non-boolean-28",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == IF x = 1000 THEN (1 \\div 0) = 0 ELSE IF x = 1001 THEN (1 \\div 0) = 0 ELSE IF x = 1002 THEN (1 \\div 0) = 0 ELSE IF x = 1003 THEN (1 \\div 0) = 0 ELSE IF x = 1004 THEN (1 \\div 0) = 0 ELSE IF x = 1005 THEN (1 \\div 0) = 0 ELSE IF x = 1006 THEN (1 \\div 0) = 0 ELSE IF x = 1007 THEN (1 \\div 0) = 0 ELSE IF x = 1008 THEN (1 \\div 0) = 0 ELSE IF x = 1009 THEN (1 \\div 0) = 0 ELSE IF x = 1010 THEN (1 \\div 0) = 0 ELSE IF x = 1011 THEN (1 \\div 0) = 0 ELSE IF x = 1012 THEN (1 \\div 0) = 0 ELSE IF x = 1013 THEN (1 \\div 0) = 0 ELSE IF x = 1014 THEN (1 \\div 0) = 0 ELSE IF x = 1015 THEN (1 \\div 0) = 0 ELSE IF x = 1016 THEN (1 \\div 0) = 0 ELSE IF x = 1017 THEN (1 \\div 0) = 0 ELSE IF x = 1018 THEN (1 \\div 0) = 0 ELSE IF x = 1019 THEN (1 \\div 0) = 0 ELSE IF x = 1020 THEN (1 \\div 0) = 0 ELSE IF x = 1021 THEN (1 \\div 0) = 0 ELSE IF x = 1022 THEN (1 \\div 0) = 0 ELSE IF x = 1023 THEN (1 \\div 0) = 0 ELSE IF x = 1024 THEN (1 \\div 0) = 0 ELSE IF x = 1025 THEN (1 \\div 0) = 0 ELSE IF x = 1026 THEN (1 \\div 0) = 0 ELSE IF 5 THEN TRUE ELSE IF x = 1028 THEN (1 \\div 0) = 0 ELSE IF x = 1029 THEN (1 \\div 0) = 0 ELSE IF x = 1030 THEN (1 \\div 0) = 0 ELSE IF x = 1031 THEN (1 \\div 0) = 0 ELSE IF x = 1032 THEN (1 \\div 0) = 0 ELSE IF x = 1033 THEN (1 \\div 0) = 0 ELSE IF x = 1034 THEN (1 \\div 0) = 0 ELSE IF x = 1035 THEN (1 \\div 0) = 0 ELSE IF x = 1036 THEN (1 \\div 0) = 0 ELSE IF x = 1037 THEN (1 \\div 0) = 0 ELSE IF x = 1038 THEN (1 \\div 0) = 0 ELSE IF x = 1039 THEN (1 \\div 0) = 0 ELSE IF x = 1040 THEN (1 \\div 0) = 0 ELSE IF x = 1041 THEN (1 \\div 0) = 0 ELSE IF x = 1042 THEN (1 \\div 0) = 0 ELSE IF x = 1043 THEN (1 \\div 0) = 0 ELSE IF x = 1044 THEN (1 \\div 0) = 0 ELSE IF x = 1045 THEN (1 \\div 0) = 0 ELSE IF x = 1046 THEN (1 \\div 0) = 0 ELSE IF x = 1047 THEN (1 \\div 0) = 0 ELSE IF x = 1048 THEN (1 \\div 0) = 0 ELSE IF x = 1049 THEN (1 \\div 0) = 0 ELSE IF x = 1050 THEN (1 \\div 0) = 0 ELSE IF x = 1051 THEN (1 \\div 0) = 0 ELSE IF x = 1052 THEN (1 \\div 0) = 0 ELSE IF x = 1053 THEN (1 \\div 0) = 0 ELSE (1 \\div 0) = 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Expected a boolean"
+        }
+      }
+    }
+  },
+  {
+    "name": "if-condition-error-28",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == IF x = 1000 THEN (1 \\div 0) = 0 ELSE IF x = 1001 THEN (1 \\div 0) = 0 ELSE IF x = 1002 THEN (1 \\div 0) = 0 ELSE IF x = 1003 THEN (1 \\div 0) = 0 ELSE IF x = 1004 THEN (1 \\div 0) = 0 ELSE IF x = 1005 THEN (1 \\div 0) = 0 ELSE IF x = 1006 THEN (1 \\div 0) = 0 ELSE IF x = 1007 THEN (1 \\div 0) = 0 ELSE IF x = 1008 THEN (1 \\div 0) = 0 ELSE IF x = 1009 THEN (1 \\div 0) = 0 ELSE IF x = 1010 THEN (1 \\div 0) = 0 ELSE IF x = 1011 THEN (1 \\div 0) = 0 ELSE IF x = 1012 THEN (1 \\div 0) = 0 ELSE IF x = 1013 THEN (1 \\div 0) = 0 ELSE IF x = 1014 THEN (1 \\div 0) = 0 ELSE IF x = 1015 THEN (1 \\div 0) = 0 ELSE IF x = 1016 THEN (1 \\div 0) = 0 ELSE IF x = 1017 THEN (1 \\div 0) = 0 ELSE IF x = 1018 THEN (1 \\div 0) = 0 ELSE IF x = 1019 THEN (1 \\div 0) = 0 ELSE IF x = 1020 THEN (1 \\div 0) = 0 ELSE IF x = 1021 THEN (1 \\div 0) = 0 ELSE IF x = 1022 THEN (1 \\div 0) = 0 ELSE IF x = 1023 THEN (1 \\div 0) = 0 ELSE IF x = 1024 THEN (1 \\div 0) = 0 ELSE IF x = 1025 THEN (1 \\div 0) = 0 ELSE IF x = 1026 THEN (1 \\div 0) = 0 ELSE IF 10 \\div (3 - x) /= 0 THEN TRUE ELSE IF x = 1028 THEN (1 \\div 0) = 0 ELSE IF x = 1029 THEN (1 \\div 0) = 0 ELSE IF x = 1030 THEN (1 \\div 0) = 0 ELSE IF x = 1031 THEN (1 \\div 0) = 0 ELSE IF x = 1032 THEN (1 \\div 0) = 0 ELSE IF x = 1033 THEN (1 \\div 0) = 0 ELSE IF x = 1034 THEN (1 \\div 0) = 0 ELSE IF x = 1035 THEN (1 \\div 0) = 0 ELSE IF x = 1036 THEN (1 \\div 0) = 0 ELSE IF x = 1037 THEN (1 \\div 0) = 0 ELSE IF x = 1038 THEN (1 \\div 0) = 0 ELSE IF x = 1039 THEN (1 \\div 0) = 0 ELSE IF x = 1040 THEN (1 \\div 0) = 0 ELSE IF x = 1041 THEN (1 \\div 0) = 0 ELSE IF x = 1042 THEN (1 \\div 0) = 0 ELSE IF x = 1043 THEN (1 \\div 0) = 0 ELSE IF x = 1044 THEN (1 \\div 0) = 0 ELSE IF x = 1045 THEN (1 \\div 0) = 0 ELSE IF x = 1046 THEN (1 \\div 0) = 0 ELSE IF x = 1047 THEN (1 \\div 0) = 0 ELSE IF x = 1048 THEN (1 \\div 0) = 0 ELSE IF x = 1049 THEN (1 \\div 0) = 0 ELSE IF x = 1050 THEN (1 \\div 0) = 0 ELSE IF x = 1051 THEN (1 \\div 0) = 0 ELSE IF x = 1052 THEN (1 \\div 0) = 0 ELSE IF x = 1053 THEN (1 \\div 0) = 0 ELSE (1 \\div 0) = 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Integer division by zero"
+        }
+      }
+    }
+  },
+  {
+    "name": "and-false-54",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x /= 200 /\\ x /= 201 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ x /= 226 /\\ x /= 227 /\\ x /= 228 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ x /= 3 /\\ x /= 254 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "invariant-violation",
+          "trace": 4,
+          "work": 12
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "invariant-violation",
+          "trace": 4,
+          "work": 12
+        }
+      }
+    }
+  },
+  {
+    "name": "and-false-skips-54",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x /= 200 /\\ x /= 201 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ x /= 226 /\\ x /= 227 /\\ x /= 228 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ x /= 3 /\\ 10 \\div (3 - x) /= 0 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "invariant-violation",
+          "trace": 4,
+          "work": 12
+        }
+      }
+    }
+  },
+  {
+    "name": "and-error-first-54",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x /= 200 /\\ x /= 201 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ x /= 226 /\\ x /= 227 /\\ x /= 228 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ 10 \\div (3 - x) /= 0 /\\ x /= 3 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Integer division by zero"
+        }
+      }
+    }
+  },
+  {
+    "name": "and-non-boolean-54",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x /= 200 /\\ x /= 201 /\\ x /= 202 /\\ x /= 203 /\\ x /= 204 /\\ x /= 205 /\\ x /= 206 /\\ x /= 207 /\\ x /= 208 /\\ x /= 209 /\\ x /= 210 /\\ x /= 211 /\\ x /= 212 /\\ x /= 213 /\\ x /= 214 /\\ x /= 215 /\\ x /= 216 /\\ x /= 217 /\\ x /= 218 /\\ x /= 219 /\\ x /= 220 /\\ x /= 221 /\\ x /= 222 /\\ x /= 223 /\\ x /= 224 /\\ x /= 225 /\\ x /= 226 /\\ x /= 227 /\\ x /= 228 /\\ x /= 229 /\\ x /= 230 /\\ x /= 231 /\\ x /= 232 /\\ x /= 233 /\\ x /= 234 /\\ x /= 235 /\\ x /= 236 /\\ x /= 237 /\\ x /= 238 /\\ x /= 239 /\\ x /= 240 /\\ x /= 241 /\\ x /= 242 /\\ x /= 243 /\\ x /= 244 /\\ x /= 245 /\\ x /= 246 /\\ x /= 247 /\\ x /= 248 /\\ x /= 249 /\\ x /= 250 /\\ x /= 251 /\\ x /= 252 /\\ 1 /\\ x /= 254 /\\ x /= 255 /\\ x /= 256 /\\ x /= 257 /\\ x /= 258 /\\ x /= 259\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Expected a boolean"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Expected a boolean"
+        }
+      }
+    }
+  },
+  {
+    "name": "or-true-skips-54",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == x = 300 \\/ x = 301 \\/ x = 302 \\/ x = 303 \\/ x = 304 \\/ x = 305 \\/ x = 306 \\/ x = 307 \\/ x = 308 \\/ x = 309 \\/ x = 310 \\/ x = 311 \\/ x = 312 \\/ x = 313 \\/ x = 314 \\/ x = 315 \\/ x = 316 \\/ x = 317 \\/ x = 318 \\/ x = 319 \\/ x = 320 \\/ x = 321 \\/ x = 322 \\/ x = 323 \\/ x = 324 \\/ x = 325 \\/ x = 326 \\/ x = 327 \\/ x = 328 \\/ x = 329 \\/ x = 330 \\/ x = 331 \\/ x = 332 \\/ x = 333 \\/ x = 334 \\/ x = 335 \\/ x = 336 \\/ x = 337 \\/ x = 338 \\/ x = 339 \\/ x = 340 \\/ x = 341 \\/ x = 342 \\/ x = 343 \\/ x = 344 \\/ x = 345 \\/ x = 346 \\/ x = 347 \\/ x = 348 \\/ x = 349 \\/ x = 350 \\/ x = 351 \\/ x = 352 \\/ x >= 0 \\/ (1 \\div 0) = 0 \\/ x = 355 \\/ x = 356 \\/ x = 357 \\/ x = 358 \\/ x = 359\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety expression nesting exceeds 48"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 20
+        }
+      }
+    }
+  },
+  {
+    "name": "if-selects-54",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == IF x = 1000 THEN (1 \\div 0) = 0 ELSE IF x = 1001 THEN (1 \\div 0) = 0 ELSE IF x = 1002 THEN (1 \\div 0) = 0 ELSE IF x = 1003 THEN (1 \\div 0) = 0 ELSE IF x = 1004 THEN (1 \\div 0) = 0 ELSE IF x = 1005 THEN (1 \\div 0) = 0 ELSE IF x = 1006 THEN (1 \\div 0) = 0 ELSE IF x = 1007 THEN (1 \\div 0) = 0 ELSE IF x = 1008 THEN (1 \\div 0) = 0 ELSE IF x = 1009 THEN (1 \\div 0) = 0 ELSE IF x = 1010 THEN (1 \\div 0) = 0 ELSE IF x = 1011 THEN (1 \\div 0) = 0 ELSE IF x = 1012 THEN (1 \\div 0) = 0 ELSE IF x = 1013 THEN (1 \\div 0) = 0 ELSE IF x = 1014 THEN (1 \\div 0) = 0 ELSE IF x = 1015 THEN (1 \\div 0) = 0 ELSE IF x = 1016 THEN (1 \\div 0) = 0 ELSE IF x = 1017 THEN (1 \\div 0) = 0 ELSE IF x = 1018 THEN (1 \\div 0) = 0 ELSE IF x = 1019 THEN (1 \\div 0) = 0 ELSE IF x = 1020 THEN (1 \\div 0) = 0 ELSE IF x = 1021 THEN (1 \\div 0) = 0 ELSE IF x = 1022 THEN (1 \\div 0) = 0 ELSE IF x = 1023 THEN (1 \\div 0) = 0 ELSE IF x = 1024 THEN (1 \\div 0) = 0 ELSE IF x = 1025 THEN (1 \\div 0) = 0 ELSE IF x = 1026 THEN (1 \\div 0) = 0 ELSE IF x = 1027 THEN (1 \\div 0) = 0 ELSE IF x = 1028 THEN (1 \\div 0) = 0 ELSE IF x = 1029 THEN (1 \\div 0) = 0 ELSE IF x = 1030 THEN (1 \\div 0) = 0 ELSE IF x = 1031 THEN (1 \\div 0) = 0 ELSE IF x = 1032 THEN (1 \\div 0) = 0 ELSE IF x = 1033 THEN (1 \\div 0) = 0 ELSE IF x = 1034 THEN (1 \\div 0) = 0 ELSE IF x = 1035 THEN (1 \\div 0) = 0 ELSE IF x = 1036 THEN (1 \\div 0) = 0 ELSE IF x = 1037 THEN (1 \\div 0) = 0 ELSE IF x = 1038 THEN (1 \\div 0) = 0 ELSE IF x = 1039 THEN (1 \\div 0) = 0 ELSE IF x = 1040 THEN (1 \\div 0) = 0 ELSE IF x = 1041 THEN (1 \\div 0) = 0 ELSE IF x = 1042 THEN (1 \\div 0) = 0 ELSE IF x = 1043 THEN (1 \\div 0) = 0 ELSE IF x = 1044 THEN (1 \\div 0) = 0 ELSE IF x = 1045 THEN (1 \\div 0) = 0 ELSE IF x = 1046 THEN (1 \\div 0) = 0 ELSE IF x = 1047 THEN (1 \\div 0) = 0 ELSE IF x = 1048 THEN (1 \\div 0) = 0 ELSE IF x = 1049 THEN (1 \\div 0) = 0 ELSE IF x = 1050 THEN (1 \\div 0) = 0 ELSE IF x = 1051 THEN (1 \\div 0) = 0 ELSE IF x = 1052 THEN (1 \\div 0) = 0 ELSE IF x >= 0 THEN x /= 3 ELSE (1 \\div 0) = 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "invariant-violation",
+          "trace": 4,
+          "work": 12
+        }
+      }
+    }
+  },
+  {
+    "name": "if-condition-non-boolean-54",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == IF x = 1000 THEN (1 \\div 0) = 0 ELSE IF x = 1001 THEN (1 \\div 0) = 0 ELSE IF x = 1002 THEN (1 \\div 0) = 0 ELSE IF x = 1003 THEN (1 \\div 0) = 0 ELSE IF x = 1004 THEN (1 \\div 0) = 0 ELSE IF x = 1005 THEN (1 \\div 0) = 0 ELSE IF x = 1006 THEN (1 \\div 0) = 0 ELSE IF x = 1007 THEN (1 \\div 0) = 0 ELSE IF x = 1008 THEN (1 \\div 0) = 0 ELSE IF x = 1009 THEN (1 \\div 0) = 0 ELSE IF x = 1010 THEN (1 \\div 0) = 0 ELSE IF x = 1011 THEN (1 \\div 0) = 0 ELSE IF x = 1012 THEN (1 \\div 0) = 0 ELSE IF x = 1013 THEN (1 \\div 0) = 0 ELSE IF x = 1014 THEN (1 \\div 0) = 0 ELSE IF x = 1015 THEN (1 \\div 0) = 0 ELSE IF x = 1016 THEN (1 \\div 0) = 0 ELSE IF x = 1017 THEN (1 \\div 0) = 0 ELSE IF x = 1018 THEN (1 \\div 0) = 0 ELSE IF x = 1019 THEN (1 \\div 0) = 0 ELSE IF x = 1020 THEN (1 \\div 0) = 0 ELSE IF x = 1021 THEN (1 \\div 0) = 0 ELSE IF x = 1022 THEN (1 \\div 0) = 0 ELSE IF x = 1023 THEN (1 \\div 0) = 0 ELSE IF x = 1024 THEN (1 \\div 0) = 0 ELSE IF x = 1025 THEN (1 \\div 0) = 0 ELSE IF x = 1026 THEN (1 \\div 0) = 0 ELSE IF x = 1027 THEN (1 \\div 0) = 0 ELSE IF x = 1028 THEN (1 \\div 0) = 0 ELSE IF x = 1029 THEN (1 \\div 0) = 0 ELSE IF x = 1030 THEN (1 \\div 0) = 0 ELSE IF x = 1031 THEN (1 \\div 0) = 0 ELSE IF x = 1032 THEN (1 \\div 0) = 0 ELSE IF x = 1033 THEN (1 \\div 0) = 0 ELSE IF x = 1034 THEN (1 \\div 0) = 0 ELSE IF x = 1035 THEN (1 \\div 0) = 0 ELSE IF x = 1036 THEN (1 \\div 0) = 0 ELSE IF x = 1037 THEN (1 \\div 0) = 0 ELSE IF x = 1038 THEN (1 \\div 0) = 0 ELSE IF x = 1039 THEN (1 \\div 0) = 0 ELSE IF x = 1040 THEN (1 \\div 0) = 0 ELSE IF x = 1041 THEN (1 \\div 0) = 0 ELSE IF x = 1042 THEN (1 \\div 0) = 0 ELSE IF x = 1043 THEN (1 \\div 0) = 0 ELSE IF x = 1044 THEN (1 \\div 0) = 0 ELSE IF x = 1045 THEN (1 \\div 0) = 0 ELSE IF x = 1046 THEN (1 \\div 0) = 0 ELSE IF x = 1047 THEN (1 \\div 0) = 0 ELSE IF x = 1048 THEN (1 \\div 0) = 0 ELSE IF x = 1049 THEN (1 \\div 0) = 0 ELSE IF x = 1050 THEN (1 \\div 0) = 0 ELSE IF x = 1051 THEN (1 \\div 0) = 0 ELSE IF x = 1052 THEN (1 \\div 0) = 0 ELSE IF 5 THEN TRUE ELSE (1 \\div 0) = 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Expected a boolean"
+        }
+      }
+    }
+  },
+  {
+    "name": "if-condition-error-54",
+    "group": "semantics-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == IF x = 1000 THEN (1 \\div 0) = 0 ELSE IF x = 1001 THEN (1 \\div 0) = 0 ELSE IF x = 1002 THEN (1 \\div 0) = 0 ELSE IF x = 1003 THEN (1 \\div 0) = 0 ELSE IF x = 1004 THEN (1 \\div 0) = 0 ELSE IF x = 1005 THEN (1 \\div 0) = 0 ELSE IF x = 1006 THEN (1 \\div 0) = 0 ELSE IF x = 1007 THEN (1 \\div 0) = 0 ELSE IF x = 1008 THEN (1 \\div 0) = 0 ELSE IF x = 1009 THEN (1 \\div 0) = 0 ELSE IF x = 1010 THEN (1 \\div 0) = 0 ELSE IF x = 1011 THEN (1 \\div 0) = 0 ELSE IF x = 1012 THEN (1 \\div 0) = 0 ELSE IF x = 1013 THEN (1 \\div 0) = 0 ELSE IF x = 1014 THEN (1 \\div 0) = 0 ELSE IF x = 1015 THEN (1 \\div 0) = 0 ELSE IF x = 1016 THEN (1 \\div 0) = 0 ELSE IF x = 1017 THEN (1 \\div 0) = 0 ELSE IF x = 1018 THEN (1 \\div 0) = 0 ELSE IF x = 1019 THEN (1 \\div 0) = 0 ELSE IF x = 1020 THEN (1 \\div 0) = 0 ELSE IF x = 1021 THEN (1 \\div 0) = 0 ELSE IF x = 1022 THEN (1 \\div 0) = 0 ELSE IF x = 1023 THEN (1 \\div 0) = 0 ELSE IF x = 1024 THEN (1 \\div 0) = 0 ELSE IF x = 1025 THEN (1 \\div 0) = 0 ELSE IF x = 1026 THEN (1 \\div 0) = 0 ELSE IF x = 1027 THEN (1 \\div 0) = 0 ELSE IF x = 1028 THEN (1 \\div 0) = 0 ELSE IF x = 1029 THEN (1 \\div 0) = 0 ELSE IF x = 1030 THEN (1 \\div 0) = 0 ELSE IF x = 1031 THEN (1 \\div 0) = 0 ELSE IF x = 1032 THEN (1 \\div 0) = 0 ELSE IF x = 1033 THEN (1 \\div 0) = 0 ELSE IF x = 1034 THEN (1 \\div 0) = 0 ELSE IF x = 1035 THEN (1 \\div 0) = 0 ELSE IF x = 1036 THEN (1 \\div 0) = 0 ELSE IF x = 1037 THEN (1 \\div 0) = 0 ELSE IF x = 1038 THEN (1 \\div 0) = 0 ELSE IF x = 1039 THEN (1 \\div 0) = 0 ELSE IF x = 1040 THEN (1 \\div 0) = 0 ELSE IF x = 1041 THEN (1 \\div 0) = 0 ELSE IF x = 1042 THEN (1 \\div 0) = 0 ELSE IF x = 1043 THEN (1 \\div 0) = 0 ELSE IF x = 1044 THEN (1 \\div 0) = 0 ELSE IF x = 1045 THEN (1 \\div 0) = 0 ELSE IF x = 1046 THEN (1 \\div 0) = 0 ELSE IF x = 1047 THEN (1 \\div 0) = 0 ELSE IF x = 1048 THEN (1 \\div 0) = 0 ELSE IF x = 1049 THEN (1 \\div 0) = 0 ELSE IF x = 1050 THEN (1 \\div 0) = 0 ELSE IF x = 1051 THEN (1 \\div 0) = 0 ELSE IF x = 1052 THEN (1 \\div 0) = 0 ELSE IF 10 \\div (3 - x) /= 0 THEN TRUE ELSE (1 \\div 0) = 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply \\div"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Integer division by zero"
+        }
+      }
+    }
+  },
+  {
+    "name": "membership-if-54",
+    "group": "position-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nTypes == IF x = 20 THEN {100} ELSE IF x = 21 THEN {101} ELSE IF x = 22 THEN {102} ELSE IF x = 23 THEN {103} ELSE IF x = 24 THEN {104} ELSE IF x = 25 THEN {105} ELSE IF x = 26 THEN {106} ELSE IF x = 27 THEN {107} ELSE IF x = 28 THEN {108} ELSE IF x = 29 THEN {109} ELSE IF x = 30 THEN {110} ELSE IF x = 31 THEN {111} ELSE IF x = 32 THEN {112} ELSE IF x = 33 THEN {113} ELSE IF x = 34 THEN {114} ELSE IF x = 35 THEN {115} ELSE IF x = 36 THEN {116} ELSE IF x = 37 THEN {117} ELSE IF x = 38 THEN {118} ELSE IF x = 39 THEN {119} ELSE IF x = 40 THEN {120} ELSE IF x = 41 THEN {121} ELSE IF x = 42 THEN {122} ELSE IF x = 43 THEN {123} ELSE IF x = 44 THEN {124} ELSE IF x = 45 THEN {125} ELSE IF x = 46 THEN {126} ELSE IF x = 47 THEN {127} ELSE IF x = 48 THEN {128} ELSE IF x = 49 THEN {129} ELSE IF x = 50 THEN {130} ELSE IF x = 51 THEN {131} ELSE IF x = 52 THEN {132} ELSE IF x = 53 THEN {133} ELSE IF x = 54 THEN {134} ELSE IF x = 55 THEN {135} ELSE IF x = 56 THEN {136} ELSE IF x = 57 THEN {137} ELSE IF x = 58 THEN {138} ELSE IF x = 59 THEN {139} ELSE IF x = 60 THEN {140} ELSE IF x = 61 THEN {141} ELSE IF x = 62 THEN {142} ELSE IF x = 63 THEN {143} ELSE IF x = 64 THEN {144} ELSE IF x = 65 THEN {145} ELSE IF x = 66 THEN {146} ELSE IF x = 67 THEN {147} ELSE IF x = 68 THEN {148} ELSE IF x = 69 THEN {149} ELSE IF x = 70 THEN {150} ELSE IF x = 71 THEN {151} ELSE IF x = 72 THEN {152} ELSE IF x = 73 THEN {153} ELSE {0, 1, 2, 3, 4, 5}\nInv == x \\in Types\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 33
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 33
+        }
+      }
+    }
+  },
+  {
+    "name": "lazy-body-if-54",
+    "group": "position-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nF == [k \\in 0..5 |-> IF k = 20 THEN FALSE ELSE IF k = 21 THEN FALSE ELSE IF k = 22 THEN FALSE ELSE IF k = 23 THEN FALSE ELSE IF k = 24 THEN FALSE ELSE IF k = 25 THEN FALSE ELSE IF k = 26 THEN FALSE ELSE IF k = 27 THEN FALSE ELSE IF k = 28 THEN FALSE ELSE IF k = 29 THEN FALSE ELSE IF k = 30 THEN FALSE ELSE IF k = 31 THEN FALSE ELSE IF k = 32 THEN FALSE ELSE IF k = 33 THEN FALSE ELSE IF k = 34 THEN FALSE ELSE IF k = 35 THEN FALSE ELSE IF k = 36 THEN FALSE ELSE IF k = 37 THEN FALSE ELSE IF k = 38 THEN FALSE ELSE IF k = 39 THEN FALSE ELSE IF k = 40 THEN FALSE ELSE IF k = 41 THEN FALSE ELSE IF k = 42 THEN FALSE ELSE IF k = 43 THEN FALSE ELSE IF k = 44 THEN FALSE ELSE IF k = 45 THEN FALSE ELSE IF k = 46 THEN FALSE ELSE IF k = 47 THEN FALSE ELSE IF k = 48 THEN FALSE ELSE IF k = 49 THEN FALSE ELSE IF k = 50 THEN FALSE ELSE IF k = 51 THEN FALSE ELSE IF k = 52 THEN FALSE ELSE IF k = 53 THEN FALSE ELSE IF k = 54 THEN FALSE ELSE IF k = 55 THEN FALSE ELSE IF k = 56 THEN FALSE ELSE IF k = 57 THEN FALSE ELSE IF k = 58 THEN FALSE ELSE IF k = 59 THEN FALSE ELSE IF k = 60 THEN FALSE ELSE IF k = 61 THEN FALSE ELSE IF k = 62 THEN FALSE ELSE IF k = 63 THEN FALSE ELSE IF k = 64 THEN FALSE ELSE IF k = 65 THEN FALSE ELSE IF k = 66 THEN FALSE ELSE IF k = 67 THEN FALSE ELSE IF k = 68 THEN FALSE ELSE IF k = 69 THEN FALSE ELSE IF k = 70 THEN FALSE ELSE IF k = 71 THEN FALSE ELSE IF k = 72 THEN FALSE ELSE IF k = 73 THEN FALSE ELSE TRUE]\nInv == F[x]\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 32
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 32
+        }
+      }
+    }
+  },
+  {
+    "name": "recursive-if-54-from-3",
+    "group": "position-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nRECURSIVE R(_)\nR(n) == IF x = 1000 THEN FALSE ELSE IF x = 1001 THEN FALSE ELSE IF x = 1002 THEN FALSE ELSE IF x = 1003 THEN FALSE ELSE IF x = 1004 THEN FALSE ELSE IF x = 1005 THEN FALSE ELSE IF x = 1006 THEN FALSE ELSE IF x = 1007 THEN FALSE ELSE IF x = 1008 THEN FALSE ELSE IF x = 1009 THEN FALSE ELSE IF x = 1010 THEN FALSE ELSE IF x = 1011 THEN FALSE ELSE IF x = 1012 THEN FALSE ELSE IF x = 1013 THEN FALSE ELSE IF x = 1014 THEN FALSE ELSE IF x = 1015 THEN FALSE ELSE IF x = 1016 THEN FALSE ELSE IF x = 1017 THEN FALSE ELSE IF x = 1018 THEN FALSE ELSE IF x = 1019 THEN FALSE ELSE IF x = 1020 THEN FALSE ELSE IF x = 1021 THEN FALSE ELSE IF x = 1022 THEN FALSE ELSE IF x = 1023 THEN FALSE ELSE IF x = 1024 THEN FALSE ELSE IF x = 1025 THEN FALSE ELSE IF x = 1026 THEN FALSE ELSE IF x = 1027 THEN FALSE ELSE IF x = 1028 THEN FALSE ELSE IF x = 1029 THEN FALSE ELSE IF x = 1030 THEN FALSE ELSE IF x = 1031 THEN FALSE ELSE IF x = 1032 THEN FALSE ELSE IF x = 1033 THEN FALSE ELSE IF x = 1034 THEN FALSE ELSE IF x = 1035 THEN FALSE ELSE IF x = 1036 THEN FALSE ELSE IF x = 1037 THEN FALSE ELSE IF x = 1038 THEN FALSE ELSE IF x = 1039 THEN FALSE ELSE IF x = 1040 THEN FALSE ELSE IF x = 1041 THEN FALSE ELSE IF x = 1042 THEN FALSE ELSE IF x = 1043 THEN FALSE ELSE IF x = 1044 THEN FALSE ELSE IF x = 1045 THEN FALSE ELSE IF x = 1046 THEN FALSE ELSE IF x = 1047 THEN FALSE ELSE IF x = 1048 THEN FALSE ELSE IF x = 1049 THEN FALSE ELSE IF x = 1050 THEN FALSE ELSE IF x = 1051 THEN FALSE ELSE IF x = 1052 THEN FALSE ELSE IF x = 1053 THEN FALSE ELSE IF n = 0 THEN x >= 0 ELSE R(n - 1)\nInv == R(3)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": "recursive-plain-from-3",
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator R"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "recursive operator definitions"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator $linked3"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 110
+        }
+      }
+    }
+  },
+  {
+    "name": "recursive-plain-from-3",
+    "group": "position-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nRECURSIVE R(_)\nR(n) == IF n = 0 THEN x >= 0 ELSE R(n - 1)\nInv == R(3)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator R"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "recursive operator definitions"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator $linked3"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 110
+        }
+      }
+    }
+  },
+  {
+    "name": "recursive-if-54-from-30",
+    "group": "position-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nRECURSIVE R(_)\nR(n) == IF x = 1000 THEN FALSE ELSE IF x = 1001 THEN FALSE ELSE IF x = 1002 THEN FALSE ELSE IF x = 1003 THEN FALSE ELSE IF x = 1004 THEN FALSE ELSE IF x = 1005 THEN FALSE ELSE IF x = 1006 THEN FALSE ELSE IF x = 1007 THEN FALSE ELSE IF x = 1008 THEN FALSE ELSE IF x = 1009 THEN FALSE ELSE IF x = 1010 THEN FALSE ELSE IF x = 1011 THEN FALSE ELSE IF x = 1012 THEN FALSE ELSE IF x = 1013 THEN FALSE ELSE IF x = 1014 THEN FALSE ELSE IF x = 1015 THEN FALSE ELSE IF x = 1016 THEN FALSE ELSE IF x = 1017 THEN FALSE ELSE IF x = 1018 THEN FALSE ELSE IF x = 1019 THEN FALSE ELSE IF x = 1020 THEN FALSE ELSE IF x = 1021 THEN FALSE ELSE IF x = 1022 THEN FALSE ELSE IF x = 1023 THEN FALSE ELSE IF x = 1024 THEN FALSE ELSE IF x = 1025 THEN FALSE ELSE IF x = 1026 THEN FALSE ELSE IF x = 1027 THEN FALSE ELSE IF x = 1028 THEN FALSE ELSE IF x = 1029 THEN FALSE ELSE IF x = 1030 THEN FALSE ELSE IF x = 1031 THEN FALSE ELSE IF x = 1032 THEN FALSE ELSE IF x = 1033 THEN FALSE ELSE IF x = 1034 THEN FALSE ELSE IF x = 1035 THEN FALSE ELSE IF x = 1036 THEN FALSE ELSE IF x = 1037 THEN FALSE ELSE IF x = 1038 THEN FALSE ELSE IF x = 1039 THEN FALSE ELSE IF x = 1040 THEN FALSE ELSE IF x = 1041 THEN FALSE ELSE IF x = 1042 THEN FALSE ELSE IF x = 1043 THEN FALSE ELSE IF x = 1044 THEN FALSE ELSE IF x = 1045 THEN FALSE ELSE IF x = 1046 THEN FALSE ELSE IF x = 1047 THEN FALSE ELSE IF x = 1048 THEN FALSE ELSE IF x = 1049 THEN FALSE ELSE IF x = 1050 THEN FALSE ELSE IF x = 1051 THEN FALSE ELSE IF x = 1052 THEN FALSE ELSE IF x = 1053 THEN FALSE ELSE IF n = 0 THEN x >= 0 ELSE R(n - 1)\nInv == R(30)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": "recursive-plain-from-30",
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator R"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "recursive operator definitions"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator $linked3"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 3188
+        }
+      }
+    }
+  },
+  {
+    "name": "recursive-plain-from-30",
+    "group": "position-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nRECURSIVE R(_)\nR(n) == IF n = 0 THEN x >= 0 ELSE R(n - 1)\nInv == R(30)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator R"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "recursive operator definitions"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator $linked3"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 3188
+        }
+      }
+    }
+  },
+  {
+    "name": "recursive-if-54-from-40",
+    "group": "position-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nRECURSIVE R(_)\nR(n) == IF x = 1000 THEN FALSE ELSE IF x = 1001 THEN FALSE ELSE IF x = 1002 THEN FALSE ELSE IF x = 1003 THEN FALSE ELSE IF x = 1004 THEN FALSE ELSE IF x = 1005 THEN FALSE ELSE IF x = 1006 THEN FALSE ELSE IF x = 1007 THEN FALSE ELSE IF x = 1008 THEN FALSE ELSE IF x = 1009 THEN FALSE ELSE IF x = 1010 THEN FALSE ELSE IF x = 1011 THEN FALSE ELSE IF x = 1012 THEN FALSE ELSE IF x = 1013 THEN FALSE ELSE IF x = 1014 THEN FALSE ELSE IF x = 1015 THEN FALSE ELSE IF x = 1016 THEN FALSE ELSE IF x = 1017 THEN FALSE ELSE IF x = 1018 THEN FALSE ELSE IF x = 1019 THEN FALSE ELSE IF x = 1020 THEN FALSE ELSE IF x = 1021 THEN FALSE ELSE IF x = 1022 THEN FALSE ELSE IF x = 1023 THEN FALSE ELSE IF x = 1024 THEN FALSE ELSE IF x = 1025 THEN FALSE ELSE IF x = 1026 THEN FALSE ELSE IF x = 1027 THEN FALSE ELSE IF x = 1028 THEN FALSE ELSE IF x = 1029 THEN FALSE ELSE IF x = 1030 THEN FALSE ELSE IF x = 1031 THEN FALSE ELSE IF x = 1032 THEN FALSE ELSE IF x = 1033 THEN FALSE ELSE IF x = 1034 THEN FALSE ELSE IF x = 1035 THEN FALSE ELSE IF x = 1036 THEN FALSE ELSE IF x = 1037 THEN FALSE ELSE IF x = 1038 THEN FALSE ELSE IF x = 1039 THEN FALSE ELSE IF x = 1040 THEN FALSE ELSE IF x = 1041 THEN FALSE ELSE IF x = 1042 THEN FALSE ELSE IF x = 1043 THEN FALSE ELSE IF x = 1044 THEN FALSE ELSE IF x = 1045 THEN FALSE ELSE IF x = 1046 THEN FALSE ELSE IF x = 1047 THEN FALSE ELSE IF x = 1048 THEN FALSE ELSE IF x = 1049 THEN FALSE ELSE IF x = 1050 THEN FALSE ELSE IF x = 1051 THEN FALSE ELSE IF x = 1052 THEN FALSE ELSE IF x = 1053 THEN FALSE ELSE IF n = 0 THEN x >= 0 ELSE R(n - 1)\nInv == R(40)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": "recursive-plain-from-40",
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator R"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "recursive operator definitions"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator $linked3"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "bounded",
+          "reason": "evaluation",
+          "work": 563
+        }
+      }
+    }
+  },
+  {
+    "name": "recursive-plain-from-40",
+    "group": "position-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nRECURSIVE R(_)\nR(n) == IF n = 0 THEN x >= 0 ELSE R(n - 1)\nInv == R(40)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator R"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "recursive operator definitions"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator $linked3"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "bounded",
+          "reason": "evaluation",
+          "work": 563
+        }
+      }
+    }
+  },
+  {
+    "name": "recursive-if-54-from-60",
+    "group": "position-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nRECURSIVE R(_)\nR(n) == IF x = 1000 THEN FALSE ELSE IF x = 1001 THEN FALSE ELSE IF x = 1002 THEN FALSE ELSE IF x = 1003 THEN FALSE ELSE IF x = 1004 THEN FALSE ELSE IF x = 1005 THEN FALSE ELSE IF x = 1006 THEN FALSE ELSE IF x = 1007 THEN FALSE ELSE IF x = 1008 THEN FALSE ELSE IF x = 1009 THEN FALSE ELSE IF x = 1010 THEN FALSE ELSE IF x = 1011 THEN FALSE ELSE IF x = 1012 THEN FALSE ELSE IF x = 1013 THEN FALSE ELSE IF x = 1014 THEN FALSE ELSE IF x = 1015 THEN FALSE ELSE IF x = 1016 THEN FALSE ELSE IF x = 1017 THEN FALSE ELSE IF x = 1018 THEN FALSE ELSE IF x = 1019 THEN FALSE ELSE IF x = 1020 THEN FALSE ELSE IF x = 1021 THEN FALSE ELSE IF x = 1022 THEN FALSE ELSE IF x = 1023 THEN FALSE ELSE IF x = 1024 THEN FALSE ELSE IF x = 1025 THEN FALSE ELSE IF x = 1026 THEN FALSE ELSE IF x = 1027 THEN FALSE ELSE IF x = 1028 THEN FALSE ELSE IF x = 1029 THEN FALSE ELSE IF x = 1030 THEN FALSE ELSE IF x = 1031 THEN FALSE ELSE IF x = 1032 THEN FALSE ELSE IF x = 1033 THEN FALSE ELSE IF x = 1034 THEN FALSE ELSE IF x = 1035 THEN FALSE ELSE IF x = 1036 THEN FALSE ELSE IF x = 1037 THEN FALSE ELSE IF x = 1038 THEN FALSE ELSE IF x = 1039 THEN FALSE ELSE IF x = 1040 THEN FALSE ELSE IF x = 1041 THEN FALSE ELSE IF x = 1042 THEN FALSE ELSE IF x = 1043 THEN FALSE ELSE IF x = 1044 THEN FALSE ELSE IF x = 1045 THEN FALSE ELSE IF x = 1046 THEN FALSE ELSE IF x = 1047 THEN FALSE ELSE IF x = 1048 THEN FALSE ELSE IF x = 1049 THEN FALSE ELSE IF x = 1050 THEN FALSE ELSE IF x = 1051 THEN FALSE ELSE IF x = 1052 THEN FALSE ELSE IF x = 1053 THEN FALSE ELSE IF n = 0 THEN x >= 0 ELSE R(n - 1)\nInv == R(60)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": "recursive-plain-from-60",
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator R"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "recursive operator definitions"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator $linked3"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "bounded",
+          "reason": "evaluation",
+          "work": 563
+        }
+      }
+    }
+  },
+  {
+    "name": "recursive-plain-from-60",
+    "group": "position-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nRECURSIVE R(_)\nR(n) == IF n = 0 THEN x >= 0 ELSE R(n - 1)\nInv == R(60)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator R"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "recursive operator definitions"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator $linked3"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "bounded",
+          "reason": "evaluation",
+          "work": 563
+        }
+      }
+    }
+  },
+  {
+    "name": "implies-47",
+    "group": "boundary-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == ((((((((((((((((((((((((((((((((((((((((((((((x /= 200 => x /= 201) => x /= 202) => x /= 203) => x /= 204) => x /= 205) => x /= 206) => x /= 207) => x /= 208) => x /= 209) => x /= 210) => x /= 211) => x /= 212) => x /= 213) => x /= 214) => x /= 215) => x /= 216) => x /= 217) => x /= 218) => x /= 219) => x /= 220) => x /= 221) => x /= 222) => x /= 223) => x /= 224) => x /= 225) => x /= 226) => x /= 227) => x /= 228) => x /= 229) => x /= 230) => x /= 231) => x /= 232) => x /= 233) => x /= 234) => x /= 235) => x /= 236) => x /= 237) => x /= 238) => x /= 239) => x /= 240) => x /= 241) => x /= 242) => x /= 243) => x /= 244) => x /= 245) => x /= 246)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        }
+      }
+    }
+  },
+  {
+    "name": "implies-48",
+    "group": "boundary-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == (((((((((((((((((((((((((((((((((((((((((((((((x /= 200 => x /= 201) => x /= 202) => x /= 203) => x /= 204) => x /= 205) => x /= 206) => x /= 207) => x /= 208) => x /= 209) => x /= 210) => x /= 211) => x /= 212) => x /= 213) => x /= 214) => x /= 215) => x /= 216) => x /= 217) => x /= 218) => x /= 219) => x /= 220) => x /= 221) => x /= 222) => x /= 223) => x /= 224) => x /= 225) => x /= 226) => x /= 227) => x /= 228) => x /= 229) => x /= 230) => x /= 231) => x /= 232) => x /= 233) => x /= 234) => x /= 235) => x /= 236) => x /= 237) => x /= 238) => x /= 239) => x /= 240) => x /= 241) => x /= 242) => x /= 243) => x /= 244) => x /= 245) => x /= 246) => x /= 247)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        }
+      }
+    }
+  },
+  {
+    "name": "implies-49",
+    "group": "boundary-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == ((((((((((((((((((((((((((((((((((((((((((((((((x /= 200 => x /= 201) => x /= 202) => x /= 203) => x /= 204) => x /= 205) => x /= 206) => x /= 207) => x /= 208) => x /= 209) => x /= 210) => x /= 211) => x /= 212) => x /= 213) => x /= 214) => x /= 215) => x /= 216) => x /= 217) => x /= 218) => x /= 219) => x /= 220) => x /= 221) => x /= 222) => x /= 223) => x /= 224) => x /= 225) => x /= 226) => x /= 227) => x /= 228) => x /= 229) => x /= 230) => x /= 231) => x /= 232) => x /= 233) => x /= 234) => x /= 235) => x /= 236) => x /= 237) => x /= 238) => x /= 239) => x /= 240) => x /= 241) => x /= 242) => x /= 243) => x /= 244) => x /= 245) => x /= 246) => x /= 247) => x /= 248)\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        }
+      }
+    }
+  },
+  {
+    "name": "right-or-47",
+    "group": "boundary-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == (x >= 0 \\/ (x = 245 \\/ (x = 244 \\/ (x = 243 \\/ (x = 242 \\/ (x = 241 \\/ (x = 240 \\/ (x = 239 \\/ (x = 238 \\/ (x = 237 \\/ (x = 236 \\/ (x = 235 \\/ (x = 234 \\/ (x = 233 \\/ (x = 232 \\/ (x = 231 \\/ (x = 230 \\/ (x = 229 \\/ (x = 228 \\/ (x = 227 \\/ (x = 226 \\/ (x = 225 \\/ (x = 224 \\/ (x = 223 \\/ (x = 222 \\/ (x = 221 \\/ (x = 220 \\/ (x = 219 \\/ (x = 218 \\/ (x = 217 \\/ (x = 216 \\/ (x = 215 \\/ (x = 214 \\/ (x = 213 \\/ (x = 212 \\/ (x = 211 \\/ (x = 210 \\/ (x = 209 \\/ (x = 208 \\/ (x = 207 \\/ (x = 206 \\/ (x = 205 \\/ (x = 204 \\/ (x = 203 \\/ (x = 202 \\/ (x = 201 \\/ x = 200))))))))))))))))))))))))))))))))))))))))))))))\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "TLA parsing: Expression nesting exceeds 64"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "TLA parsing: Expression nesting exceeds 64"
+        }
+      }
+    }
+  },
+  {
+    "name": "right-or-48",
+    "group": "boundary-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == (x >= 0 \\/ (x = 246 \\/ (x = 245 \\/ (x = 244 \\/ (x = 243 \\/ (x = 242 \\/ (x = 241 \\/ (x = 240 \\/ (x = 239 \\/ (x = 238 \\/ (x = 237 \\/ (x = 236 \\/ (x = 235 \\/ (x = 234 \\/ (x = 233 \\/ (x = 232 \\/ (x = 231 \\/ (x = 230 \\/ (x = 229 \\/ (x = 228 \\/ (x = 227 \\/ (x = 226 \\/ (x = 225 \\/ (x = 224 \\/ (x = 223 \\/ (x = 222 \\/ (x = 221 \\/ (x = 220 \\/ (x = 219 \\/ (x = 218 \\/ (x = 217 \\/ (x = 216 \\/ (x = 215 \\/ (x = 214 \\/ (x = 213 \\/ (x = 212 \\/ (x = 211 \\/ (x = 210 \\/ (x = 209 \\/ (x = 208 \\/ (x = 207 \\/ (x = 206 \\/ (x = 205 \\/ (x = 204 \\/ (x = 203 \\/ (x = 202 \\/ (x = 201 \\/ x = 200)))))))))))))))))))))))))))))))))))))))))))))))\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "TLA parsing: Expression nesting exceeds 64"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "TLA parsing: Expression nesting exceeds 64"
+        }
+      }
+    }
+  },
+  {
+    "name": "right-or-49",
+    "group": "boundary-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nInv == (x >= 0 \\/ (x = 247 \\/ (x = 246 \\/ (x = 245 \\/ (x = 244 \\/ (x = 243 \\/ (x = 242 \\/ (x = 241 \\/ (x = 240 \\/ (x = 239 \\/ (x = 238 \\/ (x = 237 \\/ (x = 236 \\/ (x = 235 \\/ (x = 234 \\/ (x = 233 \\/ (x = 232 \\/ (x = 231 \\/ (x = 230 \\/ (x = 229 \\/ (x = 228 \\/ (x = 227 \\/ (x = 226 \\/ (x = 225 \\/ (x = 224 \\/ (x = 223 \\/ (x = 222 \\/ (x = 221 \\/ (x = 220 \\/ (x = 219 \\/ (x = 218 \\/ (x = 217 \\/ (x = 216 \\/ (x = 215 \\/ (x = 214 \\/ (x = 213 \\/ (x = 212 \\/ (x = 211 \\/ (x = 210 \\/ (x = 209 \\/ (x = 208 \\/ (x = 207 \\/ (x = 206 \\/ (x = 205 \\/ (x = 204 \\/ (x = 203 \\/ (x = 202 \\/ (x = 201 \\/ x = 200))))))))))))))))))))))))))))))))))))))))))))))))\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "TLA parsing: Expression nesting exceeds 64"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "TLA parsing: Expression nesting exceeds 64"
+        }
+      }
+    }
+  },
+  {
+    "name": "calls-127",
+    "group": "boundary-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nC126 == x >= 0\nC125 == C126\nC124 == C125\nC123 == C124\nC122 == C123\nC121 == C122\nC120 == C121\nC119 == C120\nC118 == C119\nC117 == C118\nC116 == C117\nC115 == C116\nC114 == C115\nC113 == C114\nC112 == C113\nC111 == C112\nC110 == C111\nC109 == C110\nC108 == C109\nC107 == C108\nC106 == C107\nC105 == C106\nC104 == C105\nC103 == C104\nC102 == C103\nC101 == C102\nC100 == C101\nC99 == C100\nC98 == C99\nC97 == C98\nC96 == C97\nC95 == C96\nC94 == C95\nC93 == C94\nC92 == C93\nC91 == C92\nC90 == C91\nC89 == C90\nC88 == C89\nC87 == C88\nC86 == C87\nC85 == C86\nC84 == C85\nC83 == C84\nC82 == C83\nC81 == C82\nC80 == C81\nC79 == C80\nC78 == C79\nC77 == C78\nC76 == C77\nC75 == C76\nC74 == C75\nC73 == C74\nC72 == C73\nC71 == C72\nC70 == C71\nC69 == C70\nC68 == C69\nC67 == C68\nC66 == C67\nC65 == C66\nC64 == C65\nC63 == C64\nC62 == C63\nC61 == C62\nC60 == C61\nC59 == C60\nC58 == C59\nC57 == C58\nC56 == C57\nC55 == C56\nC54 == C55\nC53 == C54\nC52 == C53\nC51 == C52\nC50 == C51\nC49 == C50\nC48 == C49\nC47 == C48\nC46 == C47\nC45 == C46\nC44 == C45\nC43 == C44\nC42 == C43\nC41 == C42\nC40 == C41\nC39 == C40\nC38 == C39\nC37 == C38\nC36 == C37\nC35 == C36\nC34 == C35\nC33 == C34\nC32 == C33\nC31 == C32\nC30 == C31\nC29 == C30\nC28 == C29\nC27 == C28\nC26 == C27\nC25 == C26\nC24 == C25\nC23 == C24\nC22 == C23\nC21 == C22\nC20 == C21\nC19 == C20\nC18 == C19\nC17 == C18\nC16 == C17\nC15 == C16\nC14 == C15\nC13 == C14\nC12 == C13\nC11 == C12\nC10 == C11\nC9 == C10\nC8 == C9\nC7 == C8\nC6 == C7\nC5 == C6\nC4 == C5\nC3 == C4\nC2 == C3\nC1 == C2\nC0 == C1\nInv == C0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 128"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 128"
+        }
+      }
+    }
+  },
+  {
+    "name": "calls-128",
+    "group": "boundary-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nC127 == x >= 0\nC126 == C127\nC125 == C126\nC124 == C125\nC123 == C124\nC122 == C123\nC121 == C122\nC120 == C121\nC119 == C120\nC118 == C119\nC117 == C118\nC116 == C117\nC115 == C116\nC114 == C115\nC113 == C114\nC112 == C113\nC111 == C112\nC110 == C111\nC109 == C110\nC108 == C109\nC107 == C108\nC106 == C107\nC105 == C106\nC104 == C105\nC103 == C104\nC102 == C103\nC101 == C102\nC100 == C101\nC99 == C100\nC98 == C99\nC97 == C98\nC96 == C97\nC95 == C96\nC94 == C95\nC93 == C94\nC92 == C93\nC91 == C92\nC90 == C91\nC89 == C90\nC88 == C89\nC87 == C88\nC86 == C87\nC85 == C86\nC84 == C85\nC83 == C84\nC82 == C83\nC81 == C82\nC80 == C81\nC79 == C80\nC78 == C79\nC77 == C78\nC76 == C77\nC75 == C76\nC74 == C75\nC73 == C74\nC72 == C73\nC71 == C72\nC70 == C71\nC69 == C70\nC68 == C69\nC67 == C68\nC66 == C67\nC65 == C66\nC64 == C65\nC63 == C64\nC62 == C63\nC61 == C62\nC60 == C61\nC59 == C60\nC58 == C59\nC57 == C58\nC56 == C57\nC55 == C56\nC54 == C55\nC53 == C54\nC52 == C53\nC51 == C52\nC50 == C51\nC49 == C50\nC48 == C49\nC47 == C48\nC46 == C47\nC45 == C46\nC44 == C45\nC43 == C44\nC42 == C43\nC41 == C42\nC40 == C41\nC39 == C40\nC38 == C39\nC37 == C38\nC36 == C37\nC35 == C36\nC34 == C35\nC33 == C34\nC32 == C33\nC31 == C32\nC30 == C31\nC29 == C30\nC28 == C29\nC27 == C28\nC26 == C27\nC25 == C26\nC24 == C25\nC23 == C24\nC22 == C23\nC21 == C22\nC20 == C21\nC19 == C20\nC18 == C19\nC17 == C18\nC16 == C17\nC15 == C16\nC14 == C15\nC13 == C14\nC12 == C13\nC11 == C12\nC10 == C11\nC9 == C10\nC8 == C9\nC7 == C8\nC6 == C7\nC5 == C6\nC4 == C5\nC3 == C4\nC2 == C3\nC1 == C2\nC0 == C1\nInv == C0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 128"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 128"
+        }
+      }
+    }
+  },
+  {
+    "name": "calls-129",
+    "group": "boundary-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nC128 == x >= 0\nC127 == C128\nC126 == C127\nC125 == C126\nC124 == C125\nC123 == C124\nC122 == C123\nC121 == C122\nC120 == C121\nC119 == C120\nC118 == C119\nC117 == C118\nC116 == C117\nC115 == C116\nC114 == C115\nC113 == C114\nC112 == C113\nC111 == C112\nC110 == C111\nC109 == C110\nC108 == C109\nC107 == C108\nC106 == C107\nC105 == C106\nC104 == C105\nC103 == C104\nC102 == C103\nC101 == C102\nC100 == C101\nC99 == C100\nC98 == C99\nC97 == C98\nC96 == C97\nC95 == C96\nC94 == C95\nC93 == C94\nC92 == C93\nC91 == C92\nC90 == C91\nC89 == C90\nC88 == C89\nC87 == C88\nC86 == C87\nC85 == C86\nC84 == C85\nC83 == C84\nC82 == C83\nC81 == C82\nC80 == C81\nC79 == C80\nC78 == C79\nC77 == C78\nC76 == C77\nC75 == C76\nC74 == C75\nC73 == C74\nC72 == C73\nC71 == C72\nC70 == C71\nC69 == C70\nC68 == C69\nC67 == C68\nC66 == C67\nC65 == C66\nC64 == C65\nC63 == C64\nC62 == C63\nC61 == C62\nC60 == C61\nC59 == C60\nC58 == C59\nC57 == C58\nC56 == C57\nC55 == C56\nC54 == C55\nC53 == C54\nC52 == C53\nC51 == C52\nC50 == C51\nC49 == C50\nC48 == C49\nC47 == C48\nC46 == C47\nC45 == C46\nC44 == C45\nC43 == C44\nC42 == C43\nC41 == C42\nC40 == C41\nC39 == C40\nC38 == C39\nC37 == C38\nC36 == C37\nC35 == C36\nC34 == C35\nC33 == C34\nC32 == C33\nC31 == C32\nC30 == C31\nC29 == C30\nC28 == C29\nC27 == C28\nC26 == C27\nC25 == C26\nC24 == C25\nC23 == C24\nC22 == C23\nC21 == C22\nC20 == C21\nC19 == C20\nC18 == C19\nC17 == C18\nC16 == C17\nC15 == C16\nC14 == C15\nC13 == C14\nC12 == C13\nC11 == C12\nC10 == C11\nC9 == C10\nC8 == C9\nC7 == C8\nC6 == C7\nC5 == C6\nC4 == C5\nC3 == C4\nC2 == C3\nC1 == C2\nC0 == C1\nInv == C0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 128"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 128"
+        }
+      }
+    }
+  }
+]
