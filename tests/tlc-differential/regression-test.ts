@@ -60,6 +60,15 @@ const golden = (
     }),
   )
 ).flat();
+const bodyErrors = new Map([
+  [
+    "fold-singleton-error",
+    {
+      idealis: "Head of an empty sequence",
+      tlc: "Attempted to apply Head to the empty sequence.",
+    },
+  ],
+]);
 const core = await createCiWasm();
 for (const input of [
   ...boundaries(),
@@ -131,11 +140,21 @@ for (const input of [
       assert.ok(error?.message.includes(fixture.unsupported), error?.message);
       return;
     }
-    if (fixture?.status === "error")
+    if (fixture?.status === "error") {
       assert.ok(
         error && !error.message.includes("set fold order"),
         `${input.name}: ${error?.message}`,
       );
+      const expectedError = bodyErrors.get(input.name);
+      if (expectedError) {
+        assert.equal(error.message, expectedError.idealis, input.name);
+        const log = await readFile(
+          `fixtures/${fixture.directory}/${fixture.log}`,
+          "utf8",
+        );
+        assert.ok(log.includes(expectedError.tlc), input.name);
+      }
+    }
     if (fixture?.values)
       assert.deepEqual(result?.violation?.trace[0]?.values, fixture.values);
     if (fixture?.trace)

@@ -103,3 +103,13 @@ CodeRabbit の指摘（[#101](https://github.com/mizchi/idealis/pull/101)）を�
 ## レビューへの対応（3 回目）
 
 - **kind 比較の予算切れが順序の拒否に置き換わる（Minor）: 有効。** `same_kinds` は tick で `budget` を返すが、呼び出し側が全てのエラーを順序の拒否に替えていた。`budget` と `evaluation-budget` はそのまま返し、比較の不一致だけを拒否の文言にする。回帰: `a_record_result_exhausts_its_budget_while_comparing_kinds_instead_of_turning_into_a_refusal`（v1・v2。全ての予算で `bounded`。修正前は拒否の `protocol` エラーで失敗）。測定値の変更はない。
+
+## レビューへの対応（4 回目）
+
+- **長さが違う集合の中身を確認せずに止める（Major）: 有効。** `same_kinds` は集合の長さが違うと、中身を見ずに通した。`{ {}, {r, s} }` で `r = [a |-> 0, b |-> FALSE]`、`s = [a |-> 1, b |-> 0]` のように `{r, s}` の内側に種類の違う組があっても受理していた。TLC は各集合を正規化してから大きさを比べるので、内側の比較でエラーになりうる。長さが違う時は、各集合の中の全ての組を再帰で確かめる。同じ長さの組の対応づけは変えない。回帰: `sets_of_different_sizes_are_checked_for_mixed_kinds_inside_each_set`（修正前は受理で失敗）。
+- **record の field を位置で対応づける（Major）: 有効。** 名前の違う field の key 同士は文字列として通り、値は位置で組になった。`{a:1, b:1}` と `{a:2, c:TRUE}` は、`b` と `c` の値の `1` と `TRUE` が比べられて拒否になった。key が全て文字列の関数は、名前が同じ field の値だけを組にする。回帰: `record_fields_are_paired_by_name_not_by_position`（修正前は拒否で失敗）。名前が共通しない field は比べない。名前の違う record 同士を TLC が比べた時の挙動は固定 TLC で採取しておらず、ここでの根拠はレビューの指摘と rtlc の評価の読みである。
+- **非整数 key の関数の拒否は要素が 2 個以上の時だけ（Minor）: 有効。** `docs/rust-frontend.md` と `docs/rust-safety.md` の該当文の頭に「要素が 2 個以上の集合 fold では、」を足した。
+- **`TLC_JAR` の相対パス（Minor）: 有効。** child の cwd がケースのディレクトリなので、相対パスの jar が見つからなかった。`realpathSync` で解決して渡す。TLC は実行していない。
+- **`fold-singleton-error` の期待（Minor）: 有効。** 順序の拒否でないことしか見ていなかった。回帰テストは、エラー文言が `Head of an empty sequence` と一致し、採取したログに TLC の `Attempted to apply Head to the empty sequence.` があることを確かめる。Rust 側の `a_singleton_body_error_is_reported_as_it_is` も同じ文言を確かめる。`expected.json` の `message` は TLC と rtlc の文言が同じ時の欄で、ここでは違うので、採取済みの fixture は変えず、テスト内の表に置いた。
+
+測定: [0089d-new-path](../runs/0089d-new-path/result.json) は、record の fold の work が v1 の 64 要素・状態数 1 で 8,581 から 6,565 になった（field 名の組に tick を使わなくなったため）。中央値時間は 0089c と差が出ていない。整数の fold は work・時間とも変わらない。[0089d-paths](../runs/0089d-paths/result.json) は 84 入力の status と拒否の文言が 0089c-paths と同じで、work が変わったのは 4 入力（1〜2 減）。`0089c-*` は変更しない。

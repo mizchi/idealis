@@ -370,7 +370,7 @@ fn a_singleton_body_error_is_reported_as_it_is() {
         let body = json!({"op":"head","argument":tuple(vec![])});
         let program = fold_program(version, &int(0), &set(vec![text("only")]), &body, &int(0));
         let error = run(&program).unwrap_err();
-        assert!(!error.message.contains("fold order"), "{}", error.message);
+        assert_eq!(error.message, "Head of an empty sequence", "v{version}");
     }
 }
 
@@ -850,5 +850,44 @@ fn a_record_result_exhausts_its_budget_while_comparing_kinds_instead_of_turning_
             let result = program.check(bounds(budget)).unwrap();
             assert_eq!(result.status, "bounded", "v{version} budget {budget}");
         }
+    }
+}
+
+fn kinds_record(first: Value, second: Value) -> Value {
+    record(vec![("a", first), ("b", second)])
+}
+
+#[test]
+fn sets_of_different_sizes_are_checked_for_mixed_kinds_inside_each_set() {
+    let collection = set(vec![text("p"), text("q")]);
+    let mixed = set(vec![
+        kinds_record(int(0), truth()),
+        kinds_record(int(1), int(0)),
+    ]);
+    let uniform = set(vec![
+        kinds_record(int(0), truth()),
+        kinds_record(int(1), truth()),
+    ]);
+    for version in [1, 2] {
+        let body = branching_union_body("p", vec![set(vec![])], vec![mixed.clone()]);
+        let program = fold_program(version, &set(vec![]), &collection, &body, &set(vec![]));
+        assert_eq!(refusal(&program), STRINGS, "v{version} mixed");
+        let body = branching_union_body("p", vec![set(vec![])], vec![uniform.clone()]);
+        let expected = set(vec![set(vec![]), uniform.clone()]);
+        let program = fold_program(version, &set(vec![]), &collection, &body, &expected);
+        assert!(holds(&program, "uniform nested set"), "v{version} uniform");
+    }
+}
+
+#[test]
+fn record_fields_are_paired_by_name_not_by_position() {
+    let collection = set(vec![text("p"), text("q")]);
+    let first = vec![("a", int(1)), ("b", int(1))];
+    let second = vec![("a", int(2)), ("c", truth())];
+    let expected = set(vec![record(first.clone()), record(second.clone())]);
+    for version in [1, 2] {
+        let body = selected_record_body(first.clone(), second.clone());
+        let program = fold_program(version, &set(vec![]), &collection, &body, &expected);
+        assert!(holds(&program, "differently named fields"), "v{version}");
     }
 }

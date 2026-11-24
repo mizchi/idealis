@@ -897,11 +897,40 @@ impl<'scope> Arena<'scope> {
             (Ok(Cell::Set(left)), Ok(Cell::Set(right))) if left.len() == right.len() => {
                 left.iter().copied().zip(right.iter().copied()).collect()
             }
+            (Ok(Cell::Set(left)), Ok(Cell::Set(right))) => {
+                let within = |members: &[Scalar]| -> Vec<(Scalar, Scalar)> {
+                    members
+                        .iter()
+                        .enumerate()
+                        .flat_map(|(index, first)| {
+                            members[index + 1..].iter().map(|second| (*first, *second))
+                        })
+                        .collect()
+                };
+                within(left).into_iter().chain(within(right)).collect()
+            }
             (Ok(Cell::Function(left)), Ok(Cell::Function(right))) if left.len() == right.len() => {
-                left.iter()
-                    .zip(right.iter())
-                    .flat_map(|(left, right)| [(left.0, right.0), (left.1, right.1)])
-                    .collect()
+                let left: Vec<_> = left.iter().collect();
+                let right: Vec<_> = right.iter().collect();
+                let named = left
+                    .iter()
+                    .chain(right.iter())
+                    .all(|(key, _)| matches!(self.cell(*key), Ok(Cell::String(_))));
+                if named {
+                    left.iter()
+                        .filter_map(|(key, value)| {
+                            right
+                                .iter()
+                                .find(|(other, _)| self.total(*key, *other) == Ordering::Equal)
+                                .map(|(_, other)| (*value, *other))
+                        })
+                        .collect()
+                } else {
+                    left.iter()
+                        .zip(right.iter())
+                        .flat_map(|(left, right)| [(left.0, right.0), (left.1, right.1)])
+                        .collect()
+                }
             }
             _ => vec![],
         };

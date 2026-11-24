@@ -155,7 +155,7 @@ for (const input of foldIndependentControls()) {
       "-Xmx256m",
       `-Djava.io.tmpdir=${temporaryDirectory}`,
       "-cp",
-      TLC_JAR,
+      realpathSync(TLC_JAR),
       "tlc2.TLC",
       "-workers",
       "1",
