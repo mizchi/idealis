@@ -99,6 +99,16 @@ pub fn translate(ir: &str, options: &Options) -> Result<Translation> {
             return Err(Error(format!("definition {name} not found")));
         }
     }
+    // Distinct Quint names must stay distinct in TLA+ (issue #105).
+    let mut lowered: BTreeMap<String, &str> = BTreeMap::new();
+    for name in variables.iter().chain(definitions.keys()) {
+        if let Some(other) = lowered.insert(identifier(name), name) {
+            return unsupported(format!(
+                "names {other} and {name} collide as {}",
+                identifier(name)
+            ));
+        }
+    }
     let globals: BTreeSet<String> = variables
         .iter()
         .cloned()
@@ -169,27 +179,71 @@ fn identifier(name: &str) -> String {
 
 /// Definitions in an order where each one follows the ones it uses.
 fn order(definitions: &BTreeMap<String, Value>) -> Result<Vec<String>> {
-    fn uses(value: &Value, names: &BTreeMap<String, Value>, found: &mut BTreeSet<String>) {
+    /// Global names used by `value`, leaving out lambda parameters and
+    /// `let` names bound around the use (issue #105).
+    fn uses(
+        value: &Value,
+        names: &BTreeMap<String, Value>,
+        bound: &BTreeSet<String>,
+        found: &mut BTreeSet<String>,
+    ) {
         match value {
             Value::Object(object) => {
-                if object.get("kind").and_then(Value::as_str) == Some("name")
-                    && let Some(name) = object.get("name").and_then(Value::as_str)
-                    && names.contains_key(name)
-                {
-                    found.insert(name.to_owned());
-                }
-                // A call of a global operator is a dependency too.
-                if object.get("kind").and_then(Value::as_str) == Some("app")
-                    && let Some(opcode) = object.get("opcode").and_then(Value::as_str)
-                    && names.contains_key(opcode)
-                {
-                    found.insert(opcode.to_owned());
+                let kind = object.get("kind").and_then(Value::as_str);
+                let global = |name: &str| names.contains_key(name) && !bound.contains(name);
+                match kind {
+                    Some("name") => {
+                        if let Some(name) = object.get("name").and_then(Value::as_str)
+                            && global(name)
+                        {
+                            found.insert(name.to_owned());
+                        }
+                    }
+                    Some("lambda") => {
+                        let mut inner = bound.clone();
+                        for param in object
+                            .get("params")
+                            .and_then(Value::as_array)
+                            .into_iter()
+                            .flatten()
+                        {
+                            if let Some(name) = param["name"].as_str() {
+                                inner.insert(name.to_owned());
+                            }
+                        }
+                        if let Some(body) = object.get("expr") {
+                            uses(body, names, &inner, found);
+                        }
+                        return;
+                    }
+                    Some("let") => {
+                        let definition = &object["opdef"];
+                        uses(&definition["expr"], names, bound, found);
+                        let mut inner = bound.clone();
+                        if let Some(name) = definition["name"].as_str() {
+                            inner.insert(name.to_owned());
+                        }
+                        if let Some(body) = object.get("expr") {
+                            uses(body, names, &inner, found);
+                        }
+                        return;
+                    }
+                    Some("app") => {
+                        if let Some(opcode) = object.get("opcode").and_then(Value::as_str)
+                            && global(opcode)
+                        {
+                            found.insert(opcode.to_owned());
+                        }
+                    }
+                    _ => {}
                 }
                 for child in object.values() {
-                    uses(child, names, found);
+                    uses(child, names, bound, found);
                 }
             }
-            Value::Array(values) => values.iter().for_each(|child| uses(child, names, found)),
+            Value::Array(values) => values
+                .iter()
+                .for_each(|child| uses(child, names, bound, found)),
             _ => {}
         }
     }
@@ -197,7 +251,12 @@ fn order(definitions: &BTreeMap<String, Value>) -> Result<Vec<String>> {
         .iter()
         .map(|(name, declaration)| {
             let mut found = BTreeSet::new();
-            uses(&declaration["expr"], definitions, &mut found);
+            uses(
+                &declaration["expr"],
+                definitions,
+                &BTreeSet::new(),
+                &mut found,
+            );
             found.remove(name);
             (name.clone(), found)
         })
@@ -342,7 +401,10 @@ impl Emitter<'_> {
                     && let Some(definition) = self.definitions.get(name)
                     && definition["qualifier"] == "action"
                 {
-                    return Ok(format!("({})", self.expression(&definition["expr"])?));
+                    let callers = std::mem::take(&mut self.scopes);
+                    let inlined = self.expression(&definition["expr"]);
+                    self.scopes = callers;
+                    return Ok(format!("({})", inlined?));
                 }
                 if self.globals.contains(name) {
                     return Ok(identifier(name));
@@ -407,7 +469,12 @@ impl Emitter<'_> {
         {
             let values = self.all(&arguments)?;
             let lambda = definition["expr"].clone();
-            return self.apply(&lambda, &values);
+            // The body sees its parameters and the globals, never the
+            // caller's local bindings (issue #105).
+            let callers = std::mem::take(&mut self.scopes);
+            let inlined = self.apply(&lambda, &values);
+            self.scopes = callers;
+            return inlined;
         }
         // A user operator applied to arguments.
         if self.globals.contains(opcode) || self.scopes.iter().any(|(quint, _)| quint == opcode) {
