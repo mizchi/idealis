@@ -299,7 +299,7 @@ action によって変わる関係（rmodel の var、Alloy の var field）の�
 
 ### ORACLE-ALLOWED-SETS
 
-どちらの観測も未確定・無効・エラーでないとき、基準が許容値の集合なら、含まれる値は一致、含まれない値は不一致。空の集合との比較は無効。
+どちらの観測も未確定・無効・エラーでないとき、基準が許容値の集合なら、含まれる値は一致、含まれない値は不一致で、空の集合との比較は無効。
 
 - `spec/models/roracle-compare.model` の `EmptyAllowedIsInvalid` は reachable
 - `spec/models/roracle-compare.model` の `AllowedMismatch` は reachable
