@@ -135,6 +135,23 @@ pub fn to_alloy(ir: &str, options: &Options, bounds: Bounds) -> Result<String> {
             return Err(Error(format!("definition {name} not found")));
         }
     }
+    // ralloy's integers have 1 to 5 bits; the guard owns c_overflow (review
+    // of #103).
+    if !(1..=5).contains(&bounds.bitwidth) {
+        return Err(Error(format!(
+            "bit width {} outside 1..=5",
+            bounds.bitwidth
+        )));
+    }
+    if options
+        .invariants
+        .iter()
+        .any(|name| format!("c_{name}") == OVERFLOW_LABEL)
+    {
+        return Err(Error(format!(
+            "invariant name overflow collides with {OVERFLOW_LABEL}"
+        )));
+    }
     let tags = sums
         .iter()
         .flat_map(|(sum, tags)| tags.iter().map(move |tag| (tag.clone(), sum.clone())))
@@ -206,8 +223,23 @@ pub fn to_alloy(ir: &str, options: &Options, bounds: Bounds) -> Result<String> {
 
 type Env = [(String, Binding)];
 
-fn arguments(expression: &Json) -> &[Json] {
-    expression["args"].as_array().map_or(&[], Vec::as_slice)
+/// The arguments of an application, checked against its opcode's arity so
+/// a malformed IR is an error rather than a panic (review of #103).
+fn arguments(expression: &Json) -> Result<&[Json]> {
+    let args = expression["args"].as_array().map_or(&[][..], Vec::as_slice);
+    let opcode = expression["opcode"].as_str().unwrap_or("");
+    let fits = match opcode {
+        "not" | "iuminus" | "oneOf" => args.len() == 1,
+        "assign" | "variant" | "implies" | "iff" | "eq" | "neq" | "ilt" | "ilte" | "igt"
+        | "igte" | "iadd" | "isub" | "imul" | "idiv" | "imod" => args.len() == 2,
+        "ite" | "fold" | "foldl" => args.len() == 3,
+        "matchVariant" => args.len() >= 3 && args.len() % 2 == 1,
+        _ => true,
+    };
+    if !fits {
+        return Err(Error(format!("{opcode} with {} arguments", args.len())));
+    }
+    Ok(args)
 }
 
 impl Lowering<'_> {
@@ -248,7 +280,7 @@ impl Lowering<'_> {
             }
             Some("app") => {
                 let opcode = text(&expression["opcode"])?;
-                let args = arguments(expression);
+                let args = arguments(expression)?;
                 if opcode == "variant" {
                     return Ok(Some(Value::Variant(text(&args[0]["value"])?.to_owned())));
                 }
@@ -289,10 +321,10 @@ impl Lowering<'_> {
                     other => Err(Error(format!("{opcode} expects booleans, got {other:?}"))),
                 };
                 match opcode {
-                    "iadd" => Value::Int(int(0)? + int(1)?),
-                    "isub" => Value::Int(int(0)? - int(1)?),
-                    "imul" => Value::Int(int(0)? * int(1)?),
-                    "iuminus" => Value::Int(-int(0)?),
+                    "iadd" => Value::Int(checked(int(0)?.checked_add(int(1)?))?),
+                    "isub" => Value::Int(checked(int(0)?.checked_sub(int(1)?))?),
+                    "imul" => Value::Int(checked(int(0)?.checked_mul(int(1)?))?),
+                    "iuminus" => Value::Int(checked(int(0)?.checked_neg())?),
                     "ilt" => Value::Bool(int(0)? < int(1)?),
                     "ilte" => Value::Bool(int(0)? <= int(1)?),
                     "igt" => Value::Bool(int(0)? > int(1)?),
@@ -348,15 +380,13 @@ impl Lowering<'_> {
                         self.bounds.bitwidth
                     )));
                 }
-                Ok(if *value < 0 {
-                    format!("negate[{}]", -value)
-                } else {
-                    value.to_string()
-                })
+                // A signed literal: negate[16] would need 16, outside 5 bits.
+                Ok(value.to_string())
             }
             Value::Variant(tag) if self.tags.contains_key(tag) => Ok(format!("V_{tag}")),
             Value::Bool(true) => Ok("(no none)".into()),
-            Value::Bool(false) => Ok("(some univ)".into()),
+            // univ always holds State's atom, so false is `some none`.
+            Value::Bool(false) => Ok("(some none)".into()),
             other => unsupported(format!("value {other:?} for SAT")),
         }
     }
@@ -378,7 +408,7 @@ impl Lowering<'_> {
             }
             Some("app") => {
                 let opcode = text(&expression["opcode"])?;
-                let args = arguments(expression);
+                let args = arguments(expression)?;
                 let minimum = -(1i64 << (self.bounds.bitwidth - 1));
                 match opcode {
                     "iuminus" => {
@@ -437,7 +467,7 @@ impl Lowering<'_> {
             }
             Some("app") => {
                 let opcode = text(&expression["opcode"])?;
-                let args = arguments(expression);
+                let args = arguments(expression)?;
                 Ok(match opcode {
                     "and" | "or" => {
                         let parts = args
@@ -541,9 +571,12 @@ impl Lowering<'_> {
                 if definition["qualifier"] != "nondet" || value["opcode"] != "oneOf" {
                     return unsupported("let other than nondet oneOf for SAT");
                 }
-                let Some(Value::Set(set)) = self.evaluate(&arguments(value)[0], env)? else {
+                let Some(Value::Set(set)) = self.evaluate(&arguments(value)?[0], env)? else {
                     return unsupported("oneOf over a non-constant set for SAT");
                 };
+                if set.iter().any(|member| !matches!(member, Value::Int(_))) {
+                    return unsupported("oneOf over non-integer values for SAT");
+                }
                 self.fresh += 1;
                 let atom = format!("q_{}", self.fresh);
                 let members = set
@@ -551,7 +584,7 @@ impl Lowering<'_> {
                     .map(|member| Ok(format!("{atom} = {}", self.literal(member)?)))
                     .collect::<Result<Vec<_>>>()?;
                 if members.is_empty() {
-                    return Ok("(some univ)".into());
+                    return Ok("(some none)".into());
                 }
                 let mut inner = env.to_vec();
                 inner.push((
@@ -566,7 +599,7 @@ impl Lowering<'_> {
             }
             Some("app") => {
                 let opcode = text(&expression["opcode"])?;
-                let args = arguments(expression);
+                let args = arguments(expression)?;
                 match opcode {
                     "assign" => {
                         let variable = text(&args[0]["name"])?;
@@ -605,7 +638,7 @@ impl Lowering<'_> {
     }
     fn assignment(&mut self, target: &str, value: &Json, env: &Env) -> Result<String> {
         if self.evaluate(value, env)?.is_none() && value["kind"] == "app" {
-            let args = arguments(value);
+            let args = arguments(value)?;
             match value["opcode"].as_str() {
                 Some("ite") => {
                     let condition = self.formula(&args[0], env)?;
@@ -627,4 +660,8 @@ impl Lowering<'_> {
         }
         Ok(format!("{target} = {}", self.term(value, env)?))
     }
+}
+
+fn checked(value: Option<i64>) -> Result<i64> {
+    value.ok_or_else(|| Error("constant arithmetic beyond 64-bit integers".into()))
 }

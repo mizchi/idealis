@@ -334,3 +334,125 @@ fn malformed_enums_are_rejected() {
         assert!(error.message.contains(needle), "{source}: {error}");
     }
 }
+
+/// Review of #102: a count can exceed one signature's scope, so the Alloy
+/// bit width covers every atom in scope.
+#[test]
+fn counts_across_signatures_do_not_wrap() {
+    let model = rmodel::parse(
+        "model Count
+sig A
+sig B
+var marked: set A
+init { no marked }
+action mark(a: A) { marked' = marked + a }
+reachable Big { #(marked + B) > 7 }
+reachable AllMarked { #marked = 4 }
+scope A = 4, B = 4, steps = 6",
+    )
+    .unwrap();
+    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
+    for (check, want) in [("Big", "reachable"), ("AllMarked", "reachable")] {
+        let check = model
+            .checks
+            .iter()
+            .find(|candidate| candidate.name == check)
+            .unwrap();
+        assert_eq!(
+            explicit(&model, check).verdict,
+            want,
+            "{} explicit",
+            check.name
+        );
+        assert_eq!(sat(&model, &alloy, check), want, "{} SAT", check.name);
+    }
+    // Beyond 15 atoms no supported width holds every count.
+    let error = rmodel::parse(
+        "model Wide\nsig A\nsig B\nsig C\ninvariant I { #(A + B + C) > 0 }\nscope A = 6, B = 6, C = 6, steps = 1",
+    )
+    .unwrap_err();
+    assert!(error.message.contains("15"), "{error}");
+}
+
+/// Review of #102: `none` takes the arity of the relation it stands for.
+#[test]
+fn none_for_a_binary_relation() {
+    let model = rmodel::parse(
+        "model Clear
+sig A
+var edges: A -> set A
+init { some edges }
+action clear() { edges' = none }
+action link(a: A, b: A) { edges' = edges + a -> b }
+reachable Cleared { edges = none }
+invariant Within { edges in A -> A }
+scope A = 2, steps = 4",
+    )
+    .unwrap();
+    let source = rmodel::to_alloy(&model);
+    let alloy = ralloy::Model::parse(&source).unwrap_or_else(|error| panic!("{error}\n{source}"));
+    for (check, want) in [("Cleared", "reachable"), ("Within", "holds")] {
+        let check = model
+            .checks
+            .iter()
+            .find(|candidate| candidate.name == check)
+            .unwrap();
+        assert_eq!(
+            explicit(&model, check).verdict,
+            want,
+            "{} explicit",
+            check.name
+        );
+        assert_eq!(sat(&model, &alloy, check), want, "{} SAT", check.name);
+    }
+}
+
+/// Review of #102: deep nesting is an error, never a stack overflow.
+#[test]
+fn deep_inputs_are_refused() {
+    let base = "model M\nsig A\nvar v: set A\n";
+    let scope = "\nscope A = 1, steps = 1";
+    let nested = format!(
+        "invariant I {{ {}some v{} }}",
+        "(".repeat(5_000),
+        ")".repeat(5_000)
+    );
+    assert!(rmodel::parse(&format!("{base}{nested}{scope}")).is_err());
+    let chain = format!("invariant I {{ {} }}", vec!["some v"; 5_000].join(" or "));
+    assert!(rmodel::parse(&format!("{base}{chain}{scope}")).is_err());
+    let joins = format!("invariant I {{ some {} }}", vec!["v"; 5_000].join(" + "));
+    assert!(rmodel::parse(&format!("{base}{joins}{scope}")).is_err());
+}
+
+/// Review of #103: an enum member named like a generated sig atom stays a
+/// different atom.
+#[test]
+fn enum_atoms_are_distinct_from_sig_atoms() {
+    let model = rmodel::parse(
+        "model Names
+enum E = S0
+sig S
+var on: set S
+init { no on }
+action add(s: S) { on' = on + s }
+invariant Disjoint { no S & E }
+reachable Lit { some on }
+scope S = 1, steps = 3",
+    )
+    .unwrap();
+    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
+    for (check, want) in [("Disjoint", "holds"), ("Lit", "reachable")] {
+        let check = model
+            .checks
+            .iter()
+            .find(|candidate| candidate.name == check)
+            .unwrap();
+        assert_eq!(
+            explicit(&model, check).verdict,
+            want,
+            "{} explicit",
+            check.name
+        );
+        assert_eq!(sat(&model, &alloy, check), want, "{} SAT", check.name);
+    }
+}

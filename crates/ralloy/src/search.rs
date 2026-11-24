@@ -10,8 +10,8 @@ pub(crate) fn analyze(
     max_work: u64,
 ) -> Result<Analysis, Error> {
     // Temporal models are only unrolled by SAT (plan 0090).
-    if module.temporal() {
-        if !crate::sat::supported(module) {
+    if module.temporal_for(body) {
+        if !crate::sat::supported_for(module, body) {
             return Err(Error::new(
                 ErrorKind::Unsupported,
                 "temporal models with div or rem",
@@ -20,7 +20,7 @@ pub(crate) fn analyze(
         return Ok(crate::sat::analyze(module, command, body, max_work));
     }
     // Wide searches of the relational core go to SAT (plan 0085).
-    if crate::sat::supported(module) && crate::sat::width(module, command) > 24 {
+    if crate::sat::supported_for(module, body) && crate::sat::width(module, command) > 24 {
         return Ok(crate::sat::analyze(module, command, body, max_work));
     }
     Ok(enumerate(module, command, body, max_work))

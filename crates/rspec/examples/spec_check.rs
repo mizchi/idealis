@@ -77,6 +77,7 @@ pub fn drift_manifest(root: &Path) -> serde_json::Value {
             ),
         ],
     })
+    .unwrap_or_else(|clash| panic!("{clash}"))
 }
 
 fn main() {

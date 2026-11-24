@@ -177,7 +177,7 @@ impl Model {
         sat: bool,
     ) -> Result<Option<Analysis>, Error> {
         let (metadata, body) = self.get_command(command)?;
-        if !sat::supported(&self.syntax) || !sat && self.syntax.temporal() {
+        if !sat::supported_for(&self.syntax, body) || !sat && self.syntax.temporal_for(body) {
             return Ok(None);
         }
         Ok(Some(if sat {

@@ -412,8 +412,8 @@ spec: s.Spec = new {
     new {
       id = "ORACLE-ACTUAL-IS-A-VALUE"
       text = s.text(
-        "一致するのは実装の観測が値のときだけ。実装が許容値の集合を返したら、比較は無効。",
-        "A comparison matches only when the actual observation is a value; an actual allowed set makes it invalid.",
+        "一致するのは実装の観測が値のときだけ。どちらの観測も未確定・無効・エラーでないとき、実装が許容値の集合を返したら、比較は無効。",
+        "A comparison matches only when the actual observation is a value. When neither observation is unknown, invalid or an error, an actual allowed set makes it invalid.",
       )
       terms { "compare.actual"; "compare.value"; "compare.allowed"; "compare.invalid" }
       claims { s.claim(compare, "MatchedNeedsActualValue", "holds"); s.claim(compare, "ActualAllowedIsInvalid", "holds") }
@@ -421,8 +421,8 @@ spec: s.Spec = new {
     new {
       id = "ORACLE-ALLOWED-SETS"
       text = s.text(
-        "基準が許容値の集合なら、含まれる値は一致、含まれない値は不一致。空の集合との比較は無効。",
-        "Against an allowed set, a member matches and a non-member mismatches; comparing with an empty set is invalid.",
+        "どちらの観測も未確定・無効・エラーでないとき、基準が許容値の集合なら、含まれる値は一致、含まれない値は不一致。空の集合との比較は無効。",
+        "When neither observation is unknown, invalid or an error, a member of a reference allowed set matches and a non-member mismatches; comparing with an empty set is invalid.",
       )
       terms { "compare.allowed"; "compare.reference"; "compare.mismatch"; "compare.invalid" }
       claims { s.claim(compare, "EmptyAllowedIsInvalid", "reachable"); s.claim(compare, "AllowedMismatch", "reachable") }
