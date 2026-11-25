@@ -1,0 +1,60 @@
+test safety_definition_tests::v2_shared_range_membership_avoids_enumeration_and_preserves_call_charges ... ok
+test safety_definition_tests::v2_range_descriptor_keeps_integer_errors_and_empty_range_order ... ok
+test safety_definition_tests::v2_unknown_definition_ids_are_refused_at_roots_and_in_definitions ... ok
+test safety_expressions::tests::a_continuation_crossing_the_run_wide_budget_is_not_recorded_and_not_replayed ... ok
+test safety_expressions::tests::cached_type_results_compare_descriptors_after_hash_collisions ... ok
+test safety_expressions::tests::cached_membership_values_and_descriptors_remap_with_worker_references ... ok
+test safety_definition_tests::v2_unused_arguments_still_require_valid_references_and_local_slots ... ok
+test safety_definition_tests::anonymous_frame_bodies_cannot_hide_cycles_or_bypass_aggregate_limits ... ok
+test safety_expressions::tests::fold_charges_each_iteration_and_exhaustion_is_an_error ... ok
+test safety_expressions::tests::leaf_evaluation_preserves_context_errors_and_lazy_branches ... ok
+test safety_expressions::tests::preparing_types_does_not_evaluate_an_unreached_branch_or_cache_an_error ... ok
+test safety_expressions::tests::fold_slots_are_scoped_and_collection_uses_outer_scope ... ok
+test safety_expressions::tests::record_types_depending_on_bound_variables_are_not_reused ... ok
+test safety_definition_tests::v2_phase_summary_validation_does_not_expand_nested_actuals_exponentially ... ok
+test safety_expressions::tests::fold_reserves_two_slots_without_raising_the_bound_limit ... ok
+test safety_expressions::tests::successful_record_type_checks_reuse_their_work ... ok
+test safety_expressions::tests::v1_enabled_subscript_keeps_the_existing_long_branch_limit ... ok
+test safety_symmetry::tests::colliding_canonical_hashes_use_the_complete_key ... ok
+test safety_prepared::tests::fold_order_classes_are_computed_on_first_use_and_only_once ... ok
+test safety_symmetry::tests::identical_records_keep_canonical_and_representative_work ... ok
+test safety_symmetry::tests::row_storage_does_not_change_canonical_work ... ok
+test safety_symmetry::tests::joint_rows_preserve_correlations_global_values_and_variable_positions ... ok
+test safety_symmetry::tests::scalar_only_states_keep_the_first_node_as_representative ... ok
+test safety_symmetry::tests::records_and_node_sets_preserve_joint_membership_and_schema ... ok
+test safety_symmetry::tests::unsupported_shapes_and_incomplete_keys_are_errors ... ok
+test safety_values::compact_domain_collision_tests::packed_functions_compare_domains_after_a_domain_hash_collision ... ok
+test safety_values::binary_membership_tests::bulk_membership_requires_the_exact_type_range_and_packed_width ... ok
+test safety_values::compact_domain_owner_tests::a_worker_created_domain_is_registered_in_the_root_and_reused ... ok
+test safety_values::compact_worker_alias_tests::worker_updates_use_private_counters_and_merge_back_to_the_shared_root ... ok
+test safety_values::compact_overlay_tests::overlays_remap_function_keys_and_payloads_without_mutating_the_base ... ok
+test safety_values::function_probe_tests::packed_values_and_repacking_keep_the_existing_canonical_path ... ok
+test safety_values::function_probe_tests::an_update_collision_in_the_base_does_not_replace_the_local_value ... ok
+test safety_values::functions::packed_hash_tests::finalizer_matches_upstream_cpp_vectors ... ok
+test safety_values::compact_function_tests::updates_share_immutable_domains_and_preserve_typed_canonical_values ... ok
+test safety_values::packed_hash_tests::an_int_bool_hash_collision_preserves_type_and_canonical_identity ... ok
+test safety_values::prepared_data_tests::cached_worker_references_are_remapped_when_merged ... ok
+test safety_values::prepared_data_tests::constants_are_lazy_and_cached_only_after_success_in_each_arena ... ok
+test safety_values::prepared_data_tests::untaken_data_and_unregistered_expressions_keep_interpreter_behavior ... ok
+test safety_values::tests::colliding_function_hashes_keep_distinct_values ... ok
+test safety_values::tests::collisions_in_an_overlay_keep_base_and_local_values_distinct ... ok
+test safety_values::tests::fold_order_visits_shared_cells_once_per_call_and_obeys_the_work_budget ... ok
+test safety_values::tests::model_value_lookup_preserves_semantic_order_and_missing_keys ... ok
+test safety_values::tests::integer_positions_preserve_sparse_domains_and_missing_keys ... ok
+test safety_values::tests::replacement_keeps_the_normalized_domain_and_canonical_identity ... ok
+test safety_values::tests::sparse_model_value_domains_preserve_updates_and_missing_keys ... ok
+test safety_values::tests::worker_values_share_the_base_and_remap_conflicting_local_references ... ok
+test safety_definition_tests::v2_recursive_call_depth_keeps_the_former_limit ... ok
+test safety_work::tests::another_worker_can_spend_unused_credit_below_the_reservation_size ... ok
+test safety_work::tests::oversized_consumption_returns_the_actual_remaining_work ... ok
+test safety_values::function_probe_tests::borrowed_updates_match_independently_constructed_values_and_hashes ... ok
+test safety_work::tests::concurrent_workers_consume_exactly_the_global_budget ... ok
+test safety_prepared::tests::bind_plans_are_found_only_for_the_program_own_branches ... ok
+
+thread 'safety_definition_tests::v2_enabled_subscripts_keep_the_depth_of_live_branch_steps' (146855423) has overflowed its stack
+fatal runtime error: stack overflow, aborting
+error: test failed, to rerun pass `--lib`
+
+Caused by:
+  process didn't exit successfully: `<after>/crates/rtlc/target/debug/build/rtlc/7fc68475e2678feb/out/rtlc-7fc68475e2678feb` (signal: 6, SIGABRT: process abort signal)
+error: recipe `rtlc-test` failed on line 832 with exit code 101

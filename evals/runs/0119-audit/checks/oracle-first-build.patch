@@ -1,0 +1,64 @@
+diff -ruN before/crates/rtlc/src/lib.rs oracle/crates/rtlc/src/lib.rs
+--- before/crates/rtlc/src/lib.rs	2026-11-26 05:36:44
++++ oracle/crates/rtlc/src/lib.rs	2026-11-26 05:44:39
+@@ -27,3 +27,14 @@
+ };
+ pub use safety::{PreparedSafetyProgram, SafetyGraph};
+ pub use value::{CoreError, Value};
++
++pub const PROBE_LIMIT: u16 = 4096;
++static PROBE_PEAK: std::sync::atomic::AtomicU16 = std::sync::atomic::AtomicU16::new(0);
++
++pub fn probe_peak() -> u16 {
++    PROBE_PEAK.load(std::sync::atomic::Ordering::Relaxed)
++}
++
++pub(crate) fn probe_record(depth: u16) {
++    PROBE_PEAK.fetch_max(depth, std::sync::atomic::Ordering::Relaxed);
++}
+diff -ruN before/crates/rtlc/src/safety_expressions.rs oracle/crates/rtlc/src/safety_expressions.rs
+--- before/crates/rtlc/src/safety_expressions.rs	2026-11-26 05:36:44
++++ oracle/crates/rtlc/src/safety_expressions.rs	2026-11-26 06:05:10
+@@ -22,7 +22,7 @@
+     pub old: Option<Scalar>,
+     pub prime: bool,
+     pub(crate) frame: Option<&'a CallFrame>,
+-    pub(crate) evaluation_depth: u8,
++    pub(crate) evaluation_depth: u16,
+     pub(crate) recursive: bool,
+ }
+ 
+@@ -122,8 +122,11 @@
+                     message: "Recursive safety evaluation nesting exceeds 128".into(),
+                 });
+             }
+-            return Err(CoreError::protocol("Safety evaluation nesting exceeds 128"));
++            if self.evaluation_depth >= crate::PROBE_LIMIT {
++                return Err(CoreError::protocol("Safety evaluation nesting exceeds 128"));
++            }
+         }
++        crate::probe_record(self.evaluation_depth);
+         self.evaluation_depth += 1;
+         Ok(())
+     }
+@@ -1215,7 +1218,7 @@
+                                     locals: ctx.locals,
+                                     frame: ctx.frame,
+                                     evaluation_depth: ctx.evaluation_depth.saturating_add(
+-                                        u8::try_from(branch.steps.len() + 1).unwrap_or(u8::MAX),
++                                        u16::try_from(branch.steps.len() + 1).unwrap_or(u16::MAX),
+                                     ),
+                                     old,
+                                     ..EvalContext::new(&current, next)
+diff -ruN before/crates/rtlc/src/safety_lazy.rs oracle/crates/rtlc/src/safety_lazy.rs
+--- before/crates/rtlc/src/safety_lazy.rs	2026-11-26 05:36:44
++++ oracle/crates/rtlc/src/safety_lazy.rs	2026-11-26 05:44:39
+@@ -11,7 +11,7 @@
+     old: Option<Scalar>,
+     prime: bool,
+     frame: Option<Arc<CallFrame>>,
+-    evaluation_depth: u8,
++    evaluation_depth: u16,
+     recursive: bool,
+ }
+ 

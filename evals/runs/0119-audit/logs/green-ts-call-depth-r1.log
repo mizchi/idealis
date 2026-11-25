@@ -1,0 +1,91 @@
+✔ call depth fixtures follow from the recorded baselines and the plan (2.884666ms)
+✔ call depth hop: hop-40 (330.774791ms)
+✔ call depth hop: hop-41 (11.0535ms)
+✔ call depth hop: hop-76 (14.705875ms)
+✔ call depth hop: hop-83 (12.038375ms)
+✔ call depth hop: hop-84 (11.058ms)
+✔ call depth hop: hop-85 (10.907916ms)
+✔ call depth hop: hop-168 (18.653167ms)
+✔ call depth hop: hop-169 (17.990417ms)
+✔ call depth hop: hop-invariant-40 (13.572291ms)
+✔ call depth hop: hop-invariant-41 (9.29125ms)
+✔ call depth hop: hop-invariant-76 (14.982458ms)
+✔ call depth hop: hop-invariant-83 (15.262042ms)
+✔ call depth hop: hop-invariant-84 (14.011042ms)
+✔ call depth hop: hop-invariant-85 (13.659042ms)
+✔ call depth hop: hop-invariant-168 (25.633459ms)
+✔ call depth hop: hop-invariant-169 (27.383375ms)
+✔ call depth hop: chain-N50 (7.166667ms)
+✔ call depth semantic: division-by-zero-70 (9.569209ms)
+✔ call depth semantic: unevaluated-if-300 (51.835416ms)
+✔ call depth semantic: unevaluated-and-300 (48.52275ms)
+✔ call depth semantic: violation-76 (13.764833ms)
+✔ call depth limit: unchanged-6 (6.264667ms)
+✔ call depth limit: unchanged-7 (6.695125ms)
+✖ call depth limit: unchanged-8 (8.510291ms)
+✔ call depth limit: unchanged-9 (12.990542ms)
+✔ call depth recursion: recursion-loop (3.9685ms)
+✔ call depth recursion: recursion-sum-200 (1.396208ms)
+✔ call depth recursion: recursion-from-hop-50 (8.523917ms)
+✔ call depth boundary-0075: calls-127 (7.584084ms)
+✔ call depth boundary-0075: calls-128 (7.091084ms)
+✔ call depth boundary-0075: calls-129 (7.18525ms)
+✔ call depth layered calls complete up to depth 255 and refuse depth 256 on every path (0.161458ms)
+✖ call depth keeps the recursive limit and the frontend limits (0.114125ms)
+✔ a typed refusal leaves the same Wasm instance able to check the next request (3.498125ms)
+ℹ tests 35
+ℹ suites 0
+ℹ pass 33
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 855.144417
+
+✖ failing tests:
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth limit: unchanged-8 (8.510291ms)
+  AssertionError [ERR_ASSERTION]: TS frontend to Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 256',
+  +   stage: 'check'
+  -   generated: 2,
+  -   stage: 'result',
+  -   states: 1,
+  -   status: 'complete',
+  -   work: 260
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 256' },
+    expected: { stage: 'result', status: 'complete', states: 1, generated: 2, work: 260 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:120:1
+✖ call depth keeps the recursive limit and the frontend limits (0.114125ms)
+  AssertionError [ERR_ASSERTION]: recursion-from-hop-50
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:127:16)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

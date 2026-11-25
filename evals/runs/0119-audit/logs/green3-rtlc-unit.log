@@ -1,0 +1,31 @@
+   Compiling rtlc v0.1.0-alpha.0 (<after>/crates/rtlc)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.91s
+     Running unittests src/lib.rs (crates/rtlc/target/debug/build/rtlc/7fc68475e2678feb/out/rtlc-7fc68475e2678feb)
+
+running 23 tests
+test safety_definition_tests::v2_nested_identity_has_exactly_four_units_of_work ... ok
+test safety_definition_tests::v2_local_scope_does_not_raise_the_existing_binder_limit ... ok
+test safety_definition_tests::v2_definition_acceptance_is_paired_with_self_cycle_refusal ... ok
+test safety_definition_tests::v2_mutual_cycle_is_refused_even_in_an_unreached_branch ... ok
+test safety_definition_tests::v2_except_old_requires_explicit_capture_and_keeps_its_lexical_value ... ok
+test safety_definition_tests::v2_definition_ids_are_dense_and_follow_table_order ... ok
+test safety_definition_tests::v2_membership_branch_keeps_descriptor_purpose_and_short_circuiting ... ok
+test safety_definition_tests::v2_callee_and_argument_binders_both_start_at_frame_local_slot_zero ... ok
+test safety_definition_tests::v2_parameter_and_capture_slots_cannot_escape_the_lexical_frame ... ok
+test safety_definition_tests::v2_phase_summary_validation_does_not_expand_nested_actuals_exponentially ... ok
+test safety_definition_tests::v2_definition_local_depth_keeps_the_existing_48_boundary ... ok
+test safety_definition_tests::v2_call_arity_and_capture_count_are_checked_before_evaluation ... ok
+test safety_definition_tests::v2_repeated_parameter_reads_reexecute_the_argument_without_a_value_cache ... ok
+test safety_definition_tests::v2_decoding_is_versioned_and_rejects_unknown_fields ... ok
+test safety_definition_tests::v2_range_descriptor_does_not_change_value_enumeration_or_v1_membership ... ok
+test safety_definition_tests::v2_shared_range_membership_avoids_enumeration_and_preserves_call_charges ... ok
+test safety_definition_tests::v2_phase_validation_follows_calls_and_primed_parameters ... ok
+test safety_definition_tests::v2_unknown_definition_ids_are_refused_at_roots_and_in_definitions ... ok
+test safety_definition_tests::v2_unused_arguments_still_require_valid_references_and_local_slots ... ok
+test safety_definition_tests::v2_range_descriptor_keeps_integer_errors_and_empty_range_order ... ok
+test safety_definition_tests::v2_recursive_call_depth_keeps_the_former_limit ... ok
+test safety_definition_tests::v2_enabled_subscripts_keep_the_depth_of_live_branch_steps ... ok
+test safety_definition_tests::v2_dynamic_call_depth_is_checked_before_exhausting_the_native_stack ... ok
+
+test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 119 filtered out; finished in 0.01s
+

@@ -1,0 +1,633 @@
+✖ call depth fixtures follow from the recorded baselines and the plan (7.200708ms)
+✔ call depth hop: hop-40 (250.725375ms)
+✖ call depth hop: hop-41 (7.772583ms)
+✖ call depth hop: hop-76 (11.853834ms)
+✖ call depth hop: hop-84 (10.729ms)
+✖ call depth hop: hop-85 (10.268792ms)
+✖ call depth hop: hop-168 (16.549292ms)
+✖ call depth hop: hop-169 (15.186292ms)
+✔ call depth hop: hop-invariant-40 (13.929542ms)
+✖ call depth hop: hop-invariant-41 (4.97425ms)
+✖ call depth hop: hop-invariant-76 (8.618667ms)
+✖ call depth hop: hop-invariant-84 (9.940167ms)
+✖ call depth hop: hop-invariant-85 (8.808458ms)
+✖ call depth hop: hop-invariant-168 (13.113916ms)
+✖ call depth hop: hop-invariant-169 (12.061292ms)
+✖ call depth hop: chain-N50 (5.072667ms)
+✖ call depth semantic: division-by-zero-100 (10.022833ms)
+✔ call depth semantic: unevaluated-if-300 (53.456042ms)
+✔ call depth semantic: unevaluated-and-300 (60.007084ms)
+✖ call depth semantic: violation-168 (12.974792ms)
+✔ call depth limit: unchanged-6 (7.600042ms)
+✖ call depth limit: unchanged-7 (4.672084ms)
+✖ call depth limit: unchanged-8 (8.582917ms)
+✔ call depth limit: unchanged-9 (13.228708ms)
+✔ call depth recursion: recursion-loop (4.291833ms)
+✔ call depth recursion: recursion-sum-200 (1.492666ms)
+✖ call depth recursion: recursion-from-hop-100 (13.246875ms)
+✖ call depth boundary-0075: calls-127 (3.524084ms)
+✖ call depth boundary-0075: calls-128 (3.6895ms)
+✖ call depth boundary-0075: calls-129 (3.045542ms)
+✔ call depth layered calls complete up to depth 509 and refuse depth 512 on every path (0.2155ms)
+✔ call depth keeps the recursive limit and the frontend limits (0.051958ms)
+✖ a typed refusal leaves the same Wasm instance able to check the next request (4.719792ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 10
+ℹ fail 23
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 710.877916
+
+✖ failing tests:
+
+test at dist/tests/call-depth/contract-test.js:72:1
+✖ call depth fixtures follow from the recorded baselines and the plan (7.200708ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(cases.length >= 30)
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:74:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth hop: hop-41 (7.772583ms)
+  AssertionError [ERR_ASSERTION]: Rust frontend Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  +   stage: 'check'
+  -   generated: 6,
+  -   stage: 'result',
+  -   states: 5,
+  -   status: 'complete',
+  -   work: 442
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'result', status: 'complete', states: 5, generated: 6, work: 442 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth hop: hop-76 (11.853834ms)
+  AssertionError [ERR_ASSERTION]: Rust frontend Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  +   stage: 'check'
+  -   generated: 6,
+  -   stage: 'result',
+  -   states: 5,
+  -   status: 'complete',
+  -   work: 792
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'result', status: 'complete', states: 5, generated: 6, work: 792 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth hop: hop-84 (10.729ms)
+  AssertionError [ERR_ASSERTION]: Rust frontend Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  +   stage: 'check'
+  -   generated: 2,
+  -   stage: 'result',
+  -   states: 1,
+  -   status: 'complete',
+  -   work: 176
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'result', status: 'complete', states: 1, generated: 2, work: 176 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth hop: hop-85 (10.268792ms)
+  AssertionError [ERR_ASSERTION]: Rust frontend Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  +   stage: 'check'
+  -   generated: 6,
+  -   stage: 'result',
+  -   states: 5,
+  -   status: 'complete',
+  -   work: 882
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'result', status: 'complete', states: 5, generated: 6, work: 882 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth hop: hop-168 (16.549292ms)
+  AssertionError [ERR_ASSERTION]: Rust frontend Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  +   stage: 'check'
+  -   generated: 6,
+  -   stage: 'result',
+  -   states: 5,
+  -   status: 'complete',
+  -   work: 1712
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'result', status: 'complete', states: 5, generated: 6, work: 1712 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth hop: hop-169 (15.186292ms)
+  AssertionError [ERR_ASSERTION]: Rust frontend Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  -   message: 'Safety evaluation nesting exceeds 512',
+      stage: 'check'
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'check', message: 'Safety evaluation nesting exceeds 512' },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth hop: hop-invariant-41 (4.97425ms)
+  AssertionError [ERR_ASSERTION]: TS frontend to Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  +   stage: 'check'
+  -   generated: 6,
+  -   stage: 'result',
+  -   states: 5,
+  -   status: 'complete',
+  -   work: 442
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'result', status: 'complete', states: 5, generated: 6, work: 442 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth hop: hop-invariant-76 (8.618667ms)
+  AssertionError [ERR_ASSERTION]: TS frontend to Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  +   stage: 'check'
+  -   generated: 6,
+  -   stage: 'result',
+  -   states: 5,
+  -   status: 'complete',
+  -   work: 792
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'result', status: 'complete', states: 5, generated: 6, work: 792 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth hop: hop-invariant-84 (9.940167ms)
+  AssertionError [ERR_ASSERTION]: TS frontend to Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  +   stage: 'check'
+  -   generated: 6,
+  -   stage: 'result',
+  -   states: 5,
+  -   status: 'complete',
+  -   work: 872
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'result', status: 'complete', states: 5, generated: 6, work: 872 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth hop: hop-invariant-85 (8.808458ms)
+  AssertionError [ERR_ASSERTION]: TS frontend to Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  +   stage: 'check'
+  -   generated: 6,
+  -   stage: 'result',
+  -   states: 5,
+  -   status: 'complete',
+  -   work: 882
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'result', status: 'complete', states: 5, generated: 6, work: 882 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth hop: hop-invariant-168 (13.113916ms)
+  AssertionError [ERR_ASSERTION]: TS frontend to Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  +   stage: 'check'
+  -   generated: 6,
+  -   stage: 'result',
+  -   states: 5,
+  -   status: 'complete',
+  -   work: 1712
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'result', status: 'complete', states: 5, generated: 6, work: 1712 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth hop: hop-invariant-169 (12.061292ms)
+  AssertionError [ERR_ASSERTION]: TS frontend to Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  -   message: 'Safety evaluation nesting exceeds 512',
+      stage: 'check'
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'check', message: 'Safety evaluation nesting exceeds 512' },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth hop: chain-N50 (5.072667ms)
+  AssertionError [ERR_ASSERTION]: Rust frontend Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  +   stage: 'check'
+  -   generated: 6,
+  -   stage: 'result',
+  -   states: 5,
+  -   status: 'complete',
+  -   work: 532
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'result', status: 'complete', states: 5, generated: 6, work: 532 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth semantic: division-by-zero-100 (10.022833ms)
+  AssertionError [ERR_ASSERTION]: Rust frontend Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  -   message: 'Integer division by zero',
+      stage: 'check'
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'check', message: 'Integer division by zero' },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth semantic: violation-168 (12.974792ms)
+  AssertionError [ERR_ASSERTION]: TS frontend to Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  +   stage: 'check'
+  -   stage: 'result',
+  -   status: 'invariant-violation',
+  -   trace: 4,
+  -   work: 1368
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'result', status: 'invariant-violation', trace: 4, work: 1368 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth limit: unchanged-7 (4.672084ms)
+  AssertionError [ERR_ASSERTION]: TS frontend to Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  +   stage: 'check'
+  -   generated: 2,
+  -   stage: 'result',
+  -   states: 1,
+  -   status: 'complete',
+  -   work: 132
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'result', status: 'complete', states: 1, generated: 2, work: 132 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth limit: unchanged-8 (8.582917ms)
+  AssertionError [ERR_ASSERTION]: TS frontend to Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  +   stage: 'check'
+  -   generated: 2,
+  -   stage: 'result',
+  -   states: 1,
+  -   status: 'complete',
+  -   work: 260
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'result', status: 'complete', states: 1, generated: 2, work: 260 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth recursion: recursion-from-hop-100 (13.246875ms)
+  AssertionError [ERR_ASSERTION]: Rust frontend Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  +   stage: 'check'
+  -   reason: 'evaluation',
+  -   stage: 'result',
+  -   status: 'bounded',
+  -   work: 209
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'result', status: 'bounded', reason: 'evaluation', work: 209 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth boundary-0075: calls-127 (3.524084ms)
+  AssertionError [ERR_ASSERTION]: TS frontend to Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  +   stage: 'check'
+  -   generated: 7,
+  -   stage: 'result',
+  -   states: 6,
+  -   status: 'complete',
+  -   work: 782
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'result', status: 'complete', states: 6, generated: 7, work: 782 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth boundary-0075: calls-128 (3.6895ms)
+  AssertionError [ERR_ASSERTION]: TS frontend to Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  +   stage: 'check'
+  -   generated: 7,
+  -   stage: 'result',
+  -   states: 6,
+  -   status: 'complete',
+  -   work: 788
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'result', status: 'complete', states: 6, generated: 7, work: 788 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:77:5
+✖ call depth boundary-0075: calls-129 (3.045542ms)
+  AssertionError [ERR_ASSERTION]: TS frontend to Wasm v2
+  + actual - expected
+  
+    {
+  +   message: 'Safety evaluation nesting exceeds 128',
+  +   stage: 'check'
+  -   generated: 7,
+  -   stage: 'result',
+  -   states: 6,
+  -   status: 'complete',
+  -   work: 794
+    }
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:88:24)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { stage: 'check', message: 'Safety evaluation nesting exceeds 128' },
+    expected: { stage: 'result', status: 'complete', states: 6, generated: 7, work: 794 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at dist/tests/call-depth/contract-test.js:140:1
+✖ a typed refusal leaves the same Wasm instance able to check the next request (4.719792ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(refusedAtTheLimit(first.outcome))
+  
+      at TestContext.<anonymous> (file://<after>/dist/tests/call-depth/contract-test.js:148:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

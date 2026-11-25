@@ -1,0 +1,28 @@
+cargo build --release --locked --manifest-path crates/roracle/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/roracle/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --locked --manifest-path crates/idealis-core/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/idealis-core/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --locked --manifest-path crates/rtla/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.00s
+cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/rtla/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.02s
+pnpm exec tsc -p packages/idealis/tsconfig.json
+pnpm exec tsc -p tsconfig.json
+pnpm exec playwright test --project portable rtla
+
+Running 8 tests using 2 workers
+
+  ✓  1 [rtla] › tests/rtla.browser.spec.ts:49:1 › rtla parses TLA/config in Chromium and reuses memory after a syntax error (63ms)
+  ✓  2 [portable] › tests/portable.browser.spec.ts:107:1 › runs the shared Rust core in Chromium without host imports or cross-origin isolation (186ms)
+  ✓  3 [portable] › tests/portable.browser.spec.ts:134:1 › reduces a model-value symmetry group in Chromium without host imports (69ms)
+  ✓  4 [portable] › tests/portable.browser.spec.ts:162:1 › executes shared operator IR and bounds exponential work in Chromium (69ms)
+  ✓  5 [portable] › tests/portable.browser.spec.ts:187:1 › executes the completed Rust frontend and recursion budget in Chromium (118ms)
+  ✓  6 [portable] › tests/portable.browser.spec.ts:211:1 › generates recursive assignment actions and keeps budget exhaustion inconclusive in Chromium (99ms)
+  ✓  7 [portable] › tests/portable.browser.spec.ts:234:1 › checks levels, lazy functions and shared templates in Chromium (114ms)
+  ✓  8 [portable] › tests/portable.browser.spec.ts:258:1 › refuses layered calls past the nesting limit and keeps the instance usable in Chromium (73ms)
+
+  8 passed (1.3s)

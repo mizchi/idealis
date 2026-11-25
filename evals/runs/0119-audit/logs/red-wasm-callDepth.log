@@ -1,0 +1,25 @@
+✖ portable Wasm runCallDepth retains its verdicts (58.243167ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 222.016292
+
+✖ failing tests:
+
+test at dist/tests/wasm-host/contract.js:10:37
+✖ portable Wasm runCallDepth retains its verdicts (58.243167ms)
+  Error [PortableCoreError]: Safety evaluation nesting exceeds 128
+      at Object.request (file://<after>/dist/packages/idealis/src/portable-wasm.js:141:23)
+      at checkTlaSource (file://<after>/dist/packages/idealis/src/tla-source.js:21:25)
+      at check (file://<after>/dist/tests/portable-browser-entry.js:399:31)
+      at Module.runCallDepth (file://<after>/dist/tests/portable-browser-entry.js:406:30)
+      at async file://<after>/dist/tests/wasm-host/contract.js:120:30
+      at async withAssets (file://<after>/dist/tests/wasm-host/assets.js:74:16)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    code: 'protocol'
+  }

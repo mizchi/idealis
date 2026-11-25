@@ -1,0 +1,21 @@
+   Compiling rtlc v0.1.0-alpha.0 (<after>/crates/rtlc)
+warning: constant `WORKER_STACK_BYTES` is never used
+  --> src/safety_parallel.rs:62:7
+   |
+62 | const WORKER_STACK_BYTES: usize = 8 * 1024 * 1024;
+   |       ^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `rtlc` (lib test) generated 1 warning
+    Finished `release` profile [optimized] target(s) in 21.53s
+     Running unittests src/lib.rs (crates/rtlc/target/release/build/rtlc/ad69e235cdecb0b8/out/rtlc-ad69e235cdecb0b8)
+
+running 1 test
+
+thread '<unknown>' (147203457) has overflowed its stack
+fatal runtime error: stack overflow, aborting
+error: test failed, to rerun pass `--lib`
+
+Caused by:
+  process didn't exit successfully: `<after>/crates/rtlc/target/release/build/rtlc/ad69e235cdecb0b8/out/rtlc-ad69e235cdecb0b8 workers_run_on_a_stack_larger_than_the_default` (signal: 6, SIGABRT: process abort signal)

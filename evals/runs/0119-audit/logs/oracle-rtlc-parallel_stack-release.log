@@ -1,0 +1,88 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling version_check v0.9.5
+   Compiling serde_core v1.0.229
+   Compiling crossbeam-utils v0.8.23
+   Compiling libc v0.2.191
+   Compiling zerocopy v0.8.63
+   Compiling cfg-if v1.0.5
+   Compiling serde v1.0.229
+   Compiling crossbeam-epoch v0.9.21
+   Compiling zmij v1.0.23
+   Compiling typenum v1.20.1
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.15
+   Compiling crossbeam-deque v0.8.8
+   Compiling serde_json v1.0.154
+   Compiling either v1.19.0
+   Compiling cc v1.11.2
+   Compiling generic-array v0.14.7
+   Compiling rayon-core v1.13.0
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.19
+   Compiling autocfg v1.5.1
+   Compiling ciborium-io v0.2.2
+   Compiling regex-syntax v0.8.11
+   Compiling clap_lex v1.1.1
+   Compiling anstyle v1.0.14
+   Compiling itertools v0.13.0
+   Compiling cast v0.3.0
+   Compiling same-file v1.0.6
+   Compiling clap_builder v4.6.7
+   Compiling num-traits v0.2.19
+   Compiling walkdir v2.5.0
+   Compiling anes v0.1.6
+   Compiling oorandom v11.1.5
+   Compiling syn v3.0.10
+   Compiling syn v2.0.119
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling alloca v0.4.0
+   Compiling digest v0.10.7
+   Compiling cpufeatures v0.2.17
+   Compiling page_size v0.6.0
+   Compiling sha2 v0.10.9
+   Compiling rayon v1.12.0
+   Compiling regex-automata v0.4.18
+   Compiling criterion-plot v0.8.2
+   Compiling serde_derive v1.0.229
+   Compiling clap v4.6.7
+   Compiling zerocopy-derive v0.8.63
+   Compiling regex v1.13.1
+   Compiling tinytemplate v1.2.1
+   Compiling rtlc v0.1.0-alpha.0 (<oracle>/crates/rtlc)
+   Compiling half v2.7.1
+   Compiling ciborium-ll v0.2.2
+   Compiling ciborium v0.2.2
+   Compiling criterion v0.8.2
+    Finished `release` profile [optimized] target(s) in 19.85s
+     Running tests/parallel_stack.rs (crates/rtlc/target/release/build/rtlc/61cc4c4e2b7e6c66/out/parallel_stack-61cc4c4e2b7e6c66)
+
+running 2 tests
+test a_worker_pool_evaluates_calls_up_to_the_nesting_limit ... FAILED
+test a_worker_pool_refuses_calls_past_the_nesting_limit ... FAILED
+
+failures:
+
+---- a_worker_pool_evaluates_calls_up_to_the_nesting_limit stdout ----
+
+thread 'a_worker_pool_evaluates_calls_up_to_the_nesting_limit' (146794329) panicked at tests/parallel_stack.rs:63:5:
+assertion `left == right` failed
+  left: 10913
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- a_worker_pool_refuses_calls_past_the_nesting_limit stdout ----
+
+thread 'a_worker_pool_refuses_calls_past_the_nesting_limit' (146794330) panicked at tests/parallel_stack.rs:68:61:
+called `Result::unwrap_err()` on an `Ok` value: SafetyResult { status: "complete", reason: None, states: 32, generated: 64, depth: 0, work: 10977, violation: None }
+
+
+failures:
+    a_worker_pool_evaluates_calls_up_to_the_nesting_limit
+    a_worker_pool_refuses_calls_past_the_nesting_limit
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test parallel_stack`

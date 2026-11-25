@@ -1,0 +1,60 @@
+test source_ir_version_is_explicit_and_does_not_change_the_envelope ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests examples/counter.rs (crates/idealis-core/target/debug/build/idealis-core/e8a7e3a46c5bcbc7/out/counter-e8a7e3a46c5bcbc7)
+
+running 1 test
+test native_rust_model_and_driver_reproduce_the_saved_oracle ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+node --test dist/tests/portable/contract-test.js dist/tests/action-coverage/contract-test.js
+✔ coverage: counter (72.176625ms)
+✔ coverage: duplicate-actions (5.014458ms)
+✔ coverage: multiple-initial (4.616125ms)
+✔ coverage: rejected-initial (4.819458ms)
+✔ coverage: choose (3.847917ms)
+✔ coverage: empty (3.899958ms)
+✔ coverage: constraint (4.351083ms)
+✔ coverage: action-constraint (4.365125ms)
+✔ coverage: invariant (4.63575ms)
+✔ coverage: deadlock (3.614ms)
+✔ coverage: action-property (5.292458ms)
+✔ coverage: temporal (4.8825ms)
+✔ coverage: fair (6.11925ms)
+✔ coverage: error (3.296458ms)
+✔ independent native and Wasm instances have matching protocol lifetimes (98.149041ms)
+✔ Rust native and Wasm process the same conformance transcripts as the original TS checker (298.258666ms)
+✔ portable replay uses the saved oracle and reproduces a persistence fault (5.77225ms)
+✔ candidate histories remain consistent and invalid input never executes a driver step (3.469583ms)
+✔ the Wasm codec follows the shared fixtures and protocol rejects stale replies (5.210959ms)
+✔ driver exceptions dispose the implementation and release the core session (3.762875ms)
+✔ encoding errors clean up and lossy state encodings are rejected (3.6925ms)
+✔ sequence callbacks and Assert preserve strict portable IR fields (13.945833ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 475.932875
+node --test --test-name-pattern="portable Wasm|Quint generated|parser Wasm" dist/tests/wasm-host/contract-test.js
+✔ portable Wasm run retains its verdicts (149.72725ms)
+✔ portable Wasm runSymmetry retains its verdicts (15.792958ms)
+✔ portable Wasm runSharedIr retains its verdicts (13.491ms)
+✔ portable Wasm runFrontendCompletion retains its verdicts (93.586958ms)
+✔ portable Wasm runRecursiveActions retains its verdicts (32.212834ms)
+✔ portable Wasm runCallDepth retains its verdicts (13.863875ms)
+✔ portable Wasm runFrontendSemantics retains its verdicts (44.05475ms)
+✔ Quint generated models retain complete and counterexample outcomes (45.2205ms)
+✔ parser Wasm reuses memory after syntax and config errors (12.192916ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 543.870583

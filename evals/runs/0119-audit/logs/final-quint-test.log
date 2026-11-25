@@ -1,0 +1,57 @@
+cargo build --release --locked --manifest-path crates/roracle/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/roracle/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --locked --manifest-path crates/idealis-core/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/idealis-core/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+pnpm exec tsc -p packages/idealis/tsconfig.json
+pnpm exec tsc -p tsconfig.json
+node --test dist/tests/quint-generated/contract-test.js
+✔ Quint output is preserved byte for byte with its source provenance (7.98625ms)
+✔ Criterion corpus uses unchanged Quint output and TLC counts (0.796833ms)
+✔ Counter: generated TLA+ safety vdefault agrees in native and Wasm (89.297875ms)
+✔ Counter: generated TLA+ broken vdefault agrees in native and Wasm (2.298208ms)
+✔ SetFold: generated TLA+ safety vdefault agrees in native and Wasm (4.065209ms)
+✔ SetFold: generated TLA+ broken vdefault agrees in native and Wasm (1.192583ms)
+✔ SequenceFold: generated TLA+ safety vdefault agrees in native and Wasm (1.738833ms)
+✔ SequenceFold: generated TLA+ broken vdefault agrees in native and Wasm (1.31425ms)
+✔ Choice: generated TLA+ safety vdefault agrees in native and Wasm (2.835709ms)
+✔ Choice: generated TLA+ broken vdefault agrees in native and Wasm (1.024375ms)
+✔ Match: generated TLA+ safety vdefault agrees in native and Wasm (4.601667ms)
+✔ Match: generated TLA+ broken vdefault agrees in native and Wasm (3.099959ms)
+✔ NestedFold: generated TLA+ safety vdefault agrees in native and Wasm (1.35975ms)
+✔ NestedFold: generated TLA+ broken vdefault agrees in native and Wasm (1.240833ms)
+✔ Counter: generated TLA+ safety v1 agrees in native and Wasm (1.2045ms)
+✔ Counter: generated TLA+ broken v1 agrees in native and Wasm (1.326125ms)
+✔ SetFold: generated TLA+ safety v1 agrees in native and Wasm (1.367542ms)
+✔ SetFold: generated TLA+ broken v1 agrees in native and Wasm (2.087916ms)
+✔ SequenceFold: generated TLA+ safety v1 agrees in native and Wasm (1.314708ms)
+✔ SequenceFold: generated TLA+ broken v1 agrees in native and Wasm (1.141792ms)
+✔ Choice: generated TLA+ safety v1 agrees in native and Wasm (1.038833ms)
+✔ Choice: generated TLA+ broken v1 agrees in native and Wasm (1.202917ms)
+✔ Match: generated TLA+ safety v1 agrees in native and Wasm (2.895708ms)
+✔ Match: generated TLA+ broken v1 agrees in native and Wasm (2.461333ms)
+✔ NestedFold: generated TLA+ safety v1 agrees in native and Wasm (1.410833ms)
+✔ NestedFold: generated TLA+ broken v1 agrees in native and Wasm (1.252083ms)
+✔ Counter: generated TLA+ safety v2 agrees in native and Wasm (6.1585ms)
+✔ Counter: generated TLA+ broken v2 agrees in native and Wasm (1.031125ms)
+✔ SetFold: generated TLA+ safety v2 agrees in native and Wasm (1.344583ms)
+✔ SetFold: generated TLA+ broken v2 agrees in native and Wasm (1.054584ms)
+✔ SequenceFold: generated TLA+ safety v2 agrees in native and Wasm (1.069417ms)
+✔ SequenceFold: generated TLA+ broken v2 agrees in native and Wasm (1.05575ms)
+✔ Choice: generated TLA+ safety v2 agrees in native and Wasm (1.459334ms)
+✔ Choice: generated TLA+ broken v2 agrees in native and Wasm (0.977584ms)
+✔ Match: generated TLA+ safety v2 agrees in native and Wasm (3.089083ms)
+✔ Match: generated TLA+ broken v2 agrees in native and Wasm (2.385458ms)
+✔ NestedFold: generated TLA+ safety v2 agrees in native and Wasm (1.471375ms)
+✔ NestedFold: generated TLA+ broken v2 agrees in native and Wasm (1.921208ms)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 261.970875
