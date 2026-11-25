@@ -1,0 +1,16 @@
+model G6195
+sig S0
+enum E = Ea | Eb
+type P = S0 + E
+rel r0: set S0
+var v1: P -> some P
+fact { (some (Ea & E) and ((E -> P).P) in (((E -> Ea) & (Ea -> Ea)).Eb)) }
+init { (all q5: S0 | one (P.((P -> P).v1))) }
+action a0() {
+  (some ((r0 + r0).(S0 -> Eb)) and lone (((Ea -> P).P).(E -> Eb)))
+  #(r0.(S0 -> Ea)) <= 3
+  v1' = (P -> P)
+}
+invariant Inv { ((((Eb -> Eb) in (Ea -> Eb) and ((P -> S0).(r0 -> P)) = (v1 + (P -> P))) and (some q10: E | no S0)) and some S0) }
+reachable Goal { ((all q12: E | some (v1.P)) implies some ((Ea -> Ea).Ea)) }
+scope S0 = 3, steps = 6

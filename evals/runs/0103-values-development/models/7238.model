@@ -1,0 +1,22 @@
+model G7238
+sig S0
+rel r0: S0 -> set S0
+rel r1: one S0
+var v2: set S0
+var v3: S0 -> lone S0
+var w0: S0 -> one Int
+fact { (some q1: S0 | not ((((S0 -> q1).S0).((S0 -> q1).r0)) = ((q1.r0).(q1 -> S0)))) }
+init { (r1 = S0 and one ((v3.S0).((S0 -> S0).r0))) }
+init { all x: S0 | x.w0 = 0 }
+action set0(x: S0, k: Int) {
+  x.w0 = 1
+  w0' = w0 - x -> x.w0 + x -> (k)
+}
+action a0(p0_0: S0, p0_1: S0) {
+  (#p0_0 + p0_1.w0) = (p0_1.w0 + p0_1.w0)
+  r0 = v3
+  v2' = S0
+}
+invariant Inv { #(v2 & r1) <= 2 }
+reachable Goal { (some v2 and S0 not in ((v2.r0) - (v2.r0))) }
+scope S0 = 2, Int = -1..2, steps = 6

@@ -1,0 +1,21 @@
+model G6228
+sig S0
+sig S1
+rel r0: S1 -> set S0
+rel r1: S1 -> lone S1
+var v2: set S1
+var v3: S0 -> set S1
+init { v2 != ((S1 -> S0).S0) }
+action a0(p0_0: S0, p0_1: S0) {
+  v3' = (((p0_1 -> p0_1).p0_1) -> ((S1 -> S0).p0_0))
+}
+action a1() {
+  not (r1 = (S1 -> v2))
+  v2' = (((S1 -> S0) - r0).(v2.(S1 -> S0)))
+}
+action a2() {
+  v3' = ((S0 -> v2) - ((S0 -> S0).v3))
+}
+invariant Inv { (some (v2 + v2) or no ((S0.(S0 -> S0)) & S0)) }
+reachable Goal { (some v2 or (r1.(S1 -> S1)) = (r1.r1)) }
+scope S0 = 2, S1 = 3, steps = 6

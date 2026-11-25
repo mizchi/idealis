@@ -1,0 +1,12 @@
+model G5289
+sig S0
+sig S1
+rel r0: S0 -> lone S0
+var v1: S0 -> lone S1
+init { (some (v1.S1) and no (((S1 -> S0).S0) & S1)) }
+action a0() {
+  v1' = ((S1.(S1 -> S0)) -> (S0.v1))
+}
+invariant Inv { ((S1 - S1) - S1) in ((r0.S0).(v1.(S1 -> S1))) }
+reachable Goal { (all q3: S1 | (not ((none - (none - q3)) = q3) implies ((S0 -> S1) = ((S0 -> S1) + v1) or some (S0.v1)))) }
+scope S0 = 3, S1 = 1, steps = 6

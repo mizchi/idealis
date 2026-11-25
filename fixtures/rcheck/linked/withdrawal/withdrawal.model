@@ -1,0 +1,31 @@
+var balance: one Amount
+var beforeBalance: one Amount
+var requested: one Amount
+var result: one WithdrawalResult
+init {
+  balance = Amount { units: 2 }
+  beforeBalance = balance
+  requested = Amount { units: 0 }
+  result = Idle
+}
+behavior requestWithdrawal(amount: Amount) {
+  guard { result != Pending amount.units > 0 }
+  update { requested = amount result = Pending }
+}
+behavior withdraw() {
+  guard { result = Pending requested.units <= balance.units }
+  update {
+    beforeBalance = balance
+    balance = Amount { units: balance.units - requested.units }
+    result = Withdrawn
+  }
+}
+behavior rejectWithdrawal() {
+  guard { result = Pending requested.units > balance.units }
+  update { beforeBalance = balance result = InsufficientFunds }
+}
+invariant RejectionPreservesBalance { result = InsufficientFunds implies balance = beforeBalance }
+invariant SuccessDebitsAmount { result = Withdrawn implies balance.units + requested.units = beforeBalance.units }
+reachable CanWithdrawExactBalance { result = Withdrawn and balance.units = 0 }
+reachable CanReject { result = InsufficientFunds }
+scope Int = 0..4, steps = 6

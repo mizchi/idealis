@@ -1,0 +1,23 @@
+model G4058
+sig S0
+rel r0: set S0
+rel r1: set S0
+var v2: S0 -> set S0
+var v3: set S0
+fact { ((r0 & S0) = (((r0 -> r0).(S0 -> S0)).r1) and (some r1 implies some (r0.(r0 -> S0)))) }
+init { lone ((v2.r0).(v2.v2)) }
+action a0(p0_0: S0, p0_1: S0) {
+  (some q1: S0 | some r0)
+  #((p0_0 -> S0).v3) > 1
+  v3' = r0
+}
+action a1(p1_0: S0) {
+  (some r1 implies some (v2.r0))
+  v2' = v2
+}
+action a2(p2_0: S0) {
+  v3' = r0
+}
+invariant Inv { some (r1 & v3) }
+reachable Goal { not ((one S0 and #v3 > 3)) }
+scope S0 = 3, steps = 6

@@ -89,6 +89,28 @@
       "topic": "idealis の語彙（用語集）の定義・避ける語と、この文書での語の使い方"
     },
     {
+      "id": "terms-crates-rcheck-readme-md",
+      "mode": "terminology",
+      "reference": {
+        "source": "docs-glossary-md"
+      },
+      "target": {
+        "source": "crates-rcheck-readme-md"
+      },
+      "topic": "idealis の語彙（用語集）の定義・避ける語と、この文書での語の使い方"
+    },
+    {
+      "id": "terms-crates-rcheck-support-md",
+      "mode": "terminology",
+      "reference": {
+        "source": "docs-glossary-md"
+      },
+      "target": {
+        "source": "crates-rcheck-support-md"
+      },
+      "topic": "idealis の語彙（用語集）の定義・避ける語と、この文書での語の使い方"
+    },
+    {
       "id": "terms-crates-rmodel-readme-md",
       "mode": "terminology",
       "reference": {
@@ -541,6 +563,66 @@
       "topic": "rule SESS-LOCK-OUTLIVES-LOGOUT の文と、モデル fixtures/rmodel/sessions.model の宣言・action・checkの意味"
     },
     {
+      "id": "rule-rmodel-semantics-spec-models-rmodel-calibration-model",
+      "mode": "semantic",
+      "reference": {
+        "source": "spec-models-rmodel-calibration-model"
+      },
+      "target": {
+        "heading": "RMODEL-SEMANTICS",
+        "source": "spec-rmodel-design-md"
+      },
+      "topic": "rule RMODEL-SEMANTICS の文と、モデル spec/models/rmodel-calibration.model の宣言・action・checkの意味"
+    },
+    {
+      "id": "rule-rmodel-goal-spec-models-rmodel-calibration-model",
+      "mode": "semantic",
+      "reference": {
+        "source": "spec-models-rmodel-calibration-model"
+      },
+      "target": {
+        "heading": "RMODEL-GOAL",
+        "source": "spec-rmodel-design-md"
+      },
+      "topic": "rule RMODEL-GOAL の文と、モデル spec/models/rmodel-calibration.model の宣言・action・checkの意味"
+    },
+    {
+      "id": "rule-rmodel-swap-spec-models-rmodel-behavior-model",
+      "mode": "semantic",
+      "reference": {
+        "source": "spec-models-rmodel-behavior-model"
+      },
+      "target": {
+        "heading": "RMODEL-SWAP",
+        "source": "spec-rmodel-design-md"
+      },
+      "topic": "rule RMODEL-SWAP の文と、モデル spec/models/rmodel-behavior.model の宣言・action・checkの意味"
+    },
+    {
+      "id": "rule-rmodel-nat-fixtures-rcheck-nat-account-model",
+      "mode": "semantic",
+      "reference": {
+        "source": "fixtures-rcheck-nat-account-model"
+      },
+      "target": {
+        "heading": "RMODEL-NAT",
+        "source": "spec-rmodel-design-md"
+      },
+      "topic": "rule RMODEL-NAT の文と、モデル fixtures/rcheck/nat-account.model の宣言・action・checkの意味"
+    },
+    {
+      "id": "rule-shipment-tracking-fixtures-rcheck-structured-shipped-transition-model",
+      "mode": "semantic",
+      "reference": {
+        "source": "fixtures-rcheck-structured-shipped-transition-model"
+      },
+      "target": {
+        "heading": "SHIPMENT-TRACKING",
+        "source": "spec-rmodel-design-md"
+      },
+      "topic": "rule SHIPMENT-TRACKING の文と、モデル fixtures/rcheck/structured/shipped-transition.model の宣言・action・checkの意味"
+    },
+    {
       "id": "control-bounded-wrong",
       "mode": "terminology",
       "reference": {
@@ -620,6 +702,14 @@
       "path": "crates/ralloy/SUPPORT.md",
       "role": "document"
     },
+    "crates-rcheck-readme-md": {
+      "path": "crates/rcheck/README.md",
+      "role": "document"
+    },
+    "crates-rcheck-support-md": {
+      "path": "crates/rcheck/SUPPORT.md",
+      "role": "document"
+    },
     "crates-rmodel-readme-md": {
       "path": "crates/rmodel/README.md",
       "role": "document"
@@ -688,6 +778,14 @@
       "path": "docs/glossary.md",
       "role": "reference"
     },
+    "fixtures-rcheck-nat-account-model": {
+      "path": "fixtures/rcheck/nat-account.model",
+      "role": "reference"
+    },
+    "fixtures-rcheck-structured-shipped-transition-model": {
+      "path": "fixtures/rcheck/structured/shipped-transition.model",
+      "role": "reference"
+    },
     "fixtures-rmodel-declared-model": {
       "path": "fixtures/rmodel/declared.model",
       "role": "reference"
@@ -724,6 +822,14 @@
       "path": "fixtures/spec-controls/rule-negated.md",
       "role": "document"
     },
+    "spec-models-rmodel-behavior-model": {
+      "path": "spec/models/rmodel-behavior.model",
+      "role": "reference"
+    },
+    "spec-models-rmodel-calibration-model": {
+      "path": "spec/models/rmodel-calibration.model",
+      "role": "reference"
+    },
     "spec-models-roracle-compare-model": {
       "path": "spec/models/roracle-compare.model",
       "role": "reference"
@@ -731,6 +837,10 @@
     "spec-models-roracle-report-model": {
       "path": "spec/models/roracle-report.model",
       "role": "reference"
+    },
+    "spec-rmodel-design-md": {
+      "path": "spec/rmodel-design.md",
+      "role": "document"
     }
   },
   "roots": [
@@ -742,6 +852,8 @@
     "crates/idealis-core/SUPPORT.md",
     "crates/ralloy/README.md",
     "crates/ralloy/SUPPORT.md",
+    "crates/rcheck/README.md",
+    "crates/rcheck/SUPPORT.md",
     "crates/rmodel/README.md",
     "crates/rmodel/SUPPORT.md",
     "crates/roracle/README.md",
@@ -759,6 +871,8 @@
     "crates/rusmt/README.md",
     "crates/rusmt/SUPPORT.md",
     "docs/glossary.md",
+    "fixtures/rcheck/nat-account.model",
+    "fixtures/rcheck/structured/shipped-transition.model",
     "fixtures/rmodel/declared.model",
     "fixtures/rmodel/mutex.model",
     "fixtures/rmodel/permissions-open.model",
@@ -768,8 +882,11 @@
     "fixtures/spec-controls/bounded-right.md",
     "fixtures/spec-controls/bounded-wrong.md",
     "fixtures/spec-controls/rule-negated.md",
+    "spec/models/rmodel-behavior.model",
+    "spec/models/rmodel-calibration.model",
     "spec/models/roracle-compare.model",
-    "spec/models/roracle-report.model"
+    "spec/models/roracle-report.model",
+    "spec/rmodel-design.md"
   ],
   "schema": "jev-lint-documents-manifest-1"
 }

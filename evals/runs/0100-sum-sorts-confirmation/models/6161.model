@@ -1,0 +1,18 @@
+model G6161
+sig S0
+var v0: S0 -> one S0
+var v1: set S0
+init { (some (S0 + S0) implies (((v1 -> S0).S0).(v0.(S0 -> S0))) not in (S0.(S0 -> S0))) }
+action a0(p0_0: S0) {
+  v1' = (((S0 -> p0_0).S0).(p0_0 -> v1))
+}
+action a1(p1_0: S0) {
+  v0' = v0
+}
+action a2(p2_0: S0, p2_1: S0) {
+  (some q1: S0 | (v0 + (p2_0 -> q1)) = (S0 -> p2_1))
+  v0' = ((p2_0 - p2_0) -> (p2_0.(v1 -> v1)))
+}
+invariant Inv { ((all q2: S0 | ((v0 & (v1 -> q2)) = (v0.v0) implies q2 != ((v0.v0).(v1 + v1)))) or some (v0.S0)) }
+reachable Goal { ((v0.(v1.v0)) = ((none & v1) + (S0.v0)) or ((all q3: S0 | some (v0.v1)) implies (one ((S0 -> S0).(S0.v0)) or some S0))) }
+scope S0 = 2, steps = 6

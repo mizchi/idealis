@@ -1,0 +1,18 @@
+model G4227
+sig S0
+sig S1
+enum E = Ea | Eb
+rel r0: S0 -> some E
+var v1: E -> one S1
+var v2: S1 -> some S0
+init { ((S1 -> S1) = ((S1 -> S1) & (S1 -> S1)) implies some (v2.S0)) }
+action a0() {
+  v1' = (Ea -> ((S1 -> S1).S1))
+}
+action a1(p1_0: S1) {
+  (some q2: S0 | lone S1)
+  v1' = (Eb -> p1_0)
+}
+invariant Inv { ((((S0 -> S0).S0).(S0 -> S1)) not in (v2.(S0 - none)) or (not (((S1 -> Ea).E) != ((S1 + none).((S1 -> S0).(S0 -> S1)))) implies S1 in ((S1 -> S1).S1))) }
+reachable Goal { ((some q7: E | (((S1 - S1).(S1 -> S0)) in ((S0 -> Ea).(v1.S1)) and ((S0 -> S1).S1) not in S0)) or (S1 - ((S1 -> S1).S1)) not in S1) }
+scope S0 = 1, S1 = 3, steps = 6

@@ -1,0 +1,23 @@
+BoundedContext ClientService {
+  Aggregate Clients {
+    enum ServiceStatus {
+      aggregateLifecycle
+      Unrequested, Waiting, Served
+    }
+
+    Entity Client {
+      aggregateRoot
+      String clientId key
+      - ServiceStatus status required
+    }
+
+    Service RequestHandling {
+      @Client register() : write [ -> Unrequested ];
+      void request(@Client client) : write [ Unrequested -> Waiting ];
+      void serve(@Client client) : write [ Waiting -> Served* ];
+    }
+  }
+}
+// Workaround: waiting and served sets are determined by each client's single
+// lifecycle tag. Disjoint is structural in this representation. The CLI has
+// no fairness or temporal verification for EventuallyServed.

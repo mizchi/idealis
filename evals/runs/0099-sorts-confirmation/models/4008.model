@@ -1,0 +1,15 @@
+model G4008
+sig S0
+sig S1
+enum E = Ea | Eb
+rel r0: S0 -> lone S1
+rel r1: set E
+var v2: E -> set E
+fact { ((Eb -> E) + (r1 -> E)) in (r1 -> E) }
+init { (#(E - E) >= 2 or some ((S0.(S0 -> E)).(v2.(Eb -> Eb)))) }
+action a0() {
+  v2' = ((Eb.(Ea -> Ea)) -> (S0.(S0 -> r1)))
+}
+invariant Inv { no (v2.(v2.r1)) }
+reachable Goal { (v2 - v2) = (E -> E) }
+scope S0 = 2, S1 = 3, steps = 6

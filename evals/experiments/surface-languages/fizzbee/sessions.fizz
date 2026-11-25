@@ -1,0 +1,41 @@
+USERS = [0, 1, 2]
+
+atomic action Init:
+    admins = oneof [[0], [1], [2], [0, 1], [0, 2], [1, 2], USERS]
+    active = set()
+    locked = None
+
+atomic action Login:
+    u = oneof USERS
+    require u not in active and len(active) < 2
+    active.add(u)
+
+atomic action Logout:
+    u = oneof USERS
+    require u in active
+    active.remove(u)
+
+atomic action Lock:
+    u = oneof USERS
+    require locked == None and u in admins and u in active
+    locked = u
+
+atomic action Unlock:
+    u = oneof USERS
+    require locked == u
+    locked = None
+
+always assertion Capacity:
+    return len(active) <= 2
+
+always assertion LockedByAdmin:
+    return locked == None or locked in admins
+
+exists assertion Full:
+    return len(active) == 2 and locked != None
+
+always assertion NoThreeActive:
+    return len(active) != 3
+
+exists assertion LockedInactive:
+    return locked != None and locked not in active

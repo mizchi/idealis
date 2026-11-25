@@ -1,0 +1,20 @@
+model G4078
+sig S0
+rel r0: one S0
+var v1: S0 -> lone S0
+fact { (r0 -> S0) = (r0 -> r0) }
+init { (S0 & (S0.v1)) not in ((S0 -> r0).(S0.(r0 -> S0))) }
+action a0() {
+  v1' = ((r0.v1) -> S0)
+}
+action a1(p1_0: S0, p1_1: S0) {
+  v1' = v1
+}
+action a2() {
+  (v1 & v1) = v1
+  not (some (r0 + S0))
+  v1' = ((r0.v1) -> (S0.v1))
+}
+invariant Inv { (#(r0 & r0) < 2 implies (some q1: S0 | ((q1 -> S0) in (v1 + (q1 -> r0)) and some S0))) }
+reachable Goal { v1 = (v1 - v1) }
+scope S0 = 1, steps = 6

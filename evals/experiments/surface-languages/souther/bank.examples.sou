@@ -1,0 +1,16 @@
+examples for comparison.bank
+
+let alice = Account("a")
+let bob = Account("b")
+let accounts = Set.fromList([alice, bob])
+let funded = Balances { balance = Map.fromList([(alice, 3), (bob, 0)]) }
+
+example firstDeposit
+    | (accounts, alice, 3) -> Balances { balance = Map.fromList([(alice, 3), (bob, 0)]) }
+    | (accounts, alice, 5) -> Disabled
+    | (accounts, alice, 0) -> Disabled
+
+example withdraw
+    | (funded, alice, 3) -> Balances { balance = Map.fromList([(alice, 0), (bob, 0)]) }
+    | (funded, alice, 4) -> Disabled
+    | (funded, bob, 1)   -> Disabled

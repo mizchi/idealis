@@ -1,0 +1,30 @@
+model G8082
+sig S0
+sig S1
+rel r0: set S0
+var v1: S0 -> one S0
+var v2: set S0
+var w0: S0 -> one Int
+var w1: S0 -> one Bool
+fact { ((S0 -> S1) in ((r0 -> S1) - (r0 -> S1)) or ((S1 -> S1) in ((S1 -> S1).(S1 -> S1)) and #S1 <= 0)) }
+init { (((v2 -> S1).(S1 -> r0)) = (S0 -> v2) and v1 = (v1 + (S0 -> r0))) }
+init { all x: S0 | x.w0 = 0 }
+init { all x: S0 | x.w1 = true }
+action set0(x: S0, k: Int) {
+  w0' = w0 - x -> x.w0 + x -> (0)
+}
+action set1(x: S0) {
+  w1' = w1 - x -> x.w1 + x -> (false)
+}
+action a0(p0_0: S1) {
+  (some q1: S1 | ((q1.(p0_0 -> p0_0)).((p0_0 -> S0) + (q1 -> v2))) = (r0 + (v1.r0)))
+  (p0_0 -> S1) in (p0_0 -> S1)
+  v2' = (((S0 -> p0_0).S1) - S0)
+}
+action a1(p1_0: S0) {
+  (no (S1.((S1 -> r0) - (S1 -> p1_0))) or lone ((v1.r0).(v1.(S0 -> S1))))
+  v1' = ((S1.(S1 -> v2)) -> ((v2 -> S1).S1))
+}
+invariant Inv { (not ((all q3: S0 | #(v2.v1) >= 3)) or ((all q4: S0 | q4.w1) and (some q5: S0 | (q5.w0 * 1) < (q5.w0 - q5.w0)))) }
+reachable Goal { ((v1.(S0 -> S1)) in ((r0 -> S1) - (v2 -> S1)) or not ((all q6: S0 | ((S1 -> v2).(v2 -> S1)) in (S1 -> S1)))) }
+scope S0 = 2, S1 = 2, Int = -1..2, steps = 6

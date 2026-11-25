@@ -13,6 +13,11 @@ const SPECS: &[(&str, &str, &str)] = &[
         "fixtures/rmodel/spec.json",
         "fixtures/rmodel/spec.md",
     ),
+    (
+        "spec/rmodel-design.pkl",
+        "spec/rmodel-design.json",
+        "spec/rmodel-design.md",
+    ),
 ];
 
 fn load(path: &str) -> Value {
@@ -253,5 +258,46 @@ fn manifest_sources_are_distinct_and_registered() {
         roots
             .iter()
             .any(|root| root == "fixtures/spec-controls/bounded-right.md")
+    );
+}
+
+#[test]
+fn shipment_rule_links_to_the_transition_and_rejects_a_stale_name() {
+    let mut spec = load("spec/rmodel-design.json");
+    let index = spec["spec"]["rules"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .position(|rule| rule["id"] == "SHIPMENT-TRACKING")
+        .expect("linked shipment requirement");
+    assert_eq!(
+        spec["spec"]["rules"][index]["claims"][0]["check"],
+        "ShippedStays"
+    );
+
+    let mut wrong_kind = spec.clone();
+    wrong_kind["spec"]["rules"][index]["claims"][0]["expect"] = json!("reachable");
+    let invalid_expectation = problems(&wrong_kind);
+    assert!(
+        invalid_expectation.iter().any(|(kind, message)| {
+            kind == "D4" && message.contains("expects reachable of a Transition check")
+        }),
+        "{invalid_expectation:?}"
+    );
+    spec["spec"]["rules"][index]["claims"][0]["check"] = json!("RenamedShipmentCheck");
+    let found = problems(&spec);
+    assert!(
+        found.iter().any(|(kind, message)| {
+            kind == "D4"
+                && message.contains("SHIPMENT-TRACKING")
+                && message.contains("RenamedShipmentCheck")
+        }),
+        "{found:?}"
+    );
+    assert!(
+        found
+            .iter()
+            .any(|(kind, message)| { kind == "D3" && message.contains("ShippedStays") }),
+        "{found:?}"
     );
 }

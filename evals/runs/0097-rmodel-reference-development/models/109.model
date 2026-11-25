@@ -1,0 +1,25 @@
+model G109
+sig S0
+enum E = Ea | Eb
+rel r0: set E
+rel r1: E -> some E
+var v2: S0 -> set E
+var v3: S0 -> one E
+init { (one none and (v3.(r0.v2)) != ((E.v3) - S0)) }
+action a0() {
+  not ((v2.(Ea -> Ea)) in r1)
+  v2' = ((r0 -> S0).(Eb -> Eb))
+}
+action a1(p1_0: E) {
+  (no (Eb & none) implies #p1_0 > 0)
+  (no ((S0 & Ea).(S0 -> S0)) and lone (((Eb -> r0).v2).p1_0))
+  v2' = (r0 -> ((S0 -> r0).E))
+}
+action a2(p2_0: S0, p2_1: S0) {
+  (some q1: S0 | no q1)
+  Ea != (S0 & (E - E))
+  v3' = ((v3 - v3).v2)
+}
+invariant Inv { ((v3.Eb) - S0) not in Ea }
+reachable Goal { (v3.v3) = v3 }
+scope S0 = 1, steps = 6

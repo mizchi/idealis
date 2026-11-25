@@ -1,0 +1,22 @@
+model G1002
+sig S0
+enum E = Ea | Eb
+rel r0: some S0
+rel r1: S0 -> set E
+var v2: E -> lone S0
+var v3: E -> set E
+init { ((Eb -> E) in (none -> S0) or (Eb -> none) = (v3 & r1)) }
+action a0(p0_0: S0, p0_1: S0) {
+  v2' = ((S0 -> r0) & (p0_1 -> r0))
+}
+action a1(p1_0: S0) {
+  v3' = ((r1 - r1) & (v2.v3))
+}
+action a2(p2_0: E, p2_1: E) {
+  not (#none > 2)
+  no p2_0
+  v3' = ((r1.r1).(E -> Ea))
+}
+invariant Inv { (no (((Ea -> Ea).S0).(v2.v2)) implies (not ((Ea -> r0) = v2) implies (all q2: S0 | lone ((q2.v3).((q2 -> E) + r1))))) }
+reachable Goal { ((#(Ea - Eb) = 1 and not (#r0 < 1)) or ((all q3: E | #Eb >= 3) and (some E implies v3 in (v3.(Eb -> Eb))))) }
+scope S0 = 3, steps = 6

@@ -1,0 +1,261 @@
+import "Schema.pkl" as s
+
+local calibration = "spec/models/rmodel-calibration.model"
+local behavior = "spec/models/rmodel-behavior.model"
+local shipment = "fixtures/rcheck/structured/shipped-transition.model"
+local natAccount = "fixtures/rcheck/nat-account.model"
+local syntax = "crates/rmodel/src/syntax.rs"
+local behaviorTest = "crates/rmodel/tests/behavior.rs"
+local calibrationTest = "crates/rmodel/tests/calibration.rs"
+local termGroup = "文法変更と遷移"
+
+local function term(termId: String, termKind: s.Kind, ja: String, en: String, jaDefinition: String, enDefinition: String, file: String, declarations: Listing<String>): s.Term = new {
+  id = termId
+  kind = termKind
+  group = termGroup
+  name = s.text(ja, en)
+  definition = s.text(jaDefinition, enDefinition)
+  model {
+    for (name in declarations) {
+      s.model(file, name)
+    }
+  }
+}
+
+spec: s.Spec = new {
+  id = "rmodel-design"
+  name = s.text("rmodel の文法設計仕様", "rmodel grammar design specification")
+  groups { termGroup }
+  terms {
+    term("shipment-carrier", "entity", "追跡方法", "tracking method", "発送時に選んだ Post または Courier。", "Post or Courier, selected at shipment.", shipment, new Listing { "Carrier"; "Post"; "Courier" })
+    term("shipment-status", "state", "発送状態", "shipment status", "未発送または、追跡方法を持つ発送済み。", "Ready, or Shipped with a tracking method.", shipment, new Listing { "status" })
+    term("ship-order", "action", "発送する", "ship the order", "未発送の注文を、指定した追跡方法で発送済みにする。", "Moves a ready order to shipped with the specified tracking method.", shipment, new Listing { "ship" })
+    term("acknowledge-shipment", "action", "発送を確認する", "acknowledge shipment", "注文の発送を確認済みにする。", "Records that shipment has been acknowledged.", shipment, new Listing { "acknowledge"; "acknowledged"; "Bool"; "true"; "false" })
+    term("adoption", "state", "採用判断", "adoption decision", "変更を評価中にするか採用するかの状態。", "Whether the change is a trial or adopted.", calibration, new Listing { "Decision"; "Trial"; "Adopted"; "decision" })
+    term("semantic-evidence", "state", "意味の証拠", "semantic evidence", "対照との一致、差異、結果の欠落、空、探索未完了、未確認を記録する。", "Records equivalence, divergence, missing comparison, empty check, incomplete search or unchecked.", calibration, new Listing { "SemanticEvidence"; "Unchecked"; "Equivalent"; "Diverges"; "EmptyCheck"; "Incomplete"; "MissingComparison"; "semantics" })
+    term("goal-evidence", "state", "ゴールの証拠", "goal evidence", "事前の基準に照らした改善、改善なし、悪化、未測定を記録する。", "Records improvement, no gain, regression or no measurement against the declared criteria.", calibration, new Listing { "GoalEvidence"; "Unmeasured"; "Improved"; "NoGain"; "Regressed"; "goal" })
+    term("record-semantics", "action", "意味の証拠を記録", "record semantic evidence", "評価中で意味が未確認の版に、結果を記録する。", "Record a result for a trial revision without recorded semantic evidence.", calibration, new Listing { "recordSemantics" })
+    term("record-goal", "action", "ゴールの証拠を記録", "record goal evidence", "評価中でゴールが未測定の版に、測定結果を記録する。", "Record measurement for a trial revision with an unmeasured goal.", calibration, new Listing { "recordGoal" })
+    term("adopt", "action", "採用", "adopt", "評価中の版の意味とゴールの証拠を確認し、採用に進める。", "Advance a trial to adoption after considering both kinds of evidence.", calibration, new Listing { "adopt" })
+    term("revise", "action", "改版", "revise", "次の版を評価中に戻し、証拠を取り直す。", "Start a new trial and require fresh evidence.", calibration, new Listing { "revise" })
+    term("toggle-value", "concept", "値", "toggle value", "例の変数に入る二通りの値。", "The two values in the example.", behavior, new Listing { "Value"; "On"; "Off" })
+    term("toggle-state", "state", "状態変数", "state variables", "入れ替える二変数と、代入せずに保持する変数。", "The pair to swap and a third variable kept by the frame.", behavior, new Listing { "left"; "right"; "update" })
+    term("swap", "action", "入れ替え", "swap", "左が Off かつ右が On のとき、二変数を同時に入れ替える。", "Swap the two values simultaneously when left is Off and right is On.", behavior, new Listing { "swap" })
+    new {
+      id = "entity"
+      kind = "entity"
+      group = termGroup
+      name = s.text("個体型", "entity sort")
+      definition = s.text("ドメインの個体を区別する有限の型。モデル中で使う名前に、用語の説明を添えられる。", "A finite type whose identities distinguish domain objects. Its model name can carry a glossary definition.")
+      code { s.code(syntax, "entity_definitions") }
+    }
+    new {
+      id = "dead-behavior"
+      kind = "concept"
+      group = termGroup
+      name = s.text("到達しない操作", "dead behavior")
+      definition = s.text("到達できる状態と引数のどの組でもガードが成立しない操作。", "An action whose guard is false at every reachable state for every argument binding.")
+      code { s.code("crates/rmodel/src/reference.rs", "enabled") }
+    }
+    new {
+      id = "snapshot-oracle"
+      kind = "concept"
+      group = termGroup
+      name = s.text("状態の oracle", "snapshot oracle")
+      definition = s.text("到達した設定と状態を入力に受け取り、別のファイルで定義した命題の真偽を返す。", "Receives a reachable configuration and state and decides a proposition defined in a separate file.")
+      code { s.code("formal/rmodel/Bank.lean", "checkBank") }
+    }
+    new {
+      id = "linked-model"
+      kind = "concept"
+      group = termGroup
+      name = s.text("分割モデル", "linked model")
+      definition = s.text("順序付きの宣言ファイルから構成し、型名と操作名を一つのモデルで解決する。", "Composes ordered source fragments and resolves types and actions within one model.")
+      code { s.code("crates/rcheck/src/project.rs", "load_source") }
+    }
+    new {
+      id = "guard-boundary"
+      kind = "concept"
+      group = termGroup
+      name = s.text("ガードの境界", "guard boundary")
+      definition = s.text("隣接する整数入力または一遷移の差で、同じ操作を受け付けるかどうかが変わる、到達可能な二例の組。", "Two reachable cases where an adjacent integer or one extra transition flips acceptance of the same action.")
+      code { s.code("crates/rcheck/src/conform/boundaries.rs", "boundary_cases") }
+    }
+    term("nat-balance", "state", "残高", "balance", "出金例の現在の残高。", "The current balance of the withdrawal example.", natAccount, new Listing { "balance" })
+    term("nat-limit", "concept", "残高の上限", "balance limit", "出金例の設定で決まる残高の上限。", "The configured balance limit in the withdrawal example.", natAccount, new Listing { "limit" })
+    term("nat-withdraw", "action", "出金", "withdraw", "正の額が残高以下なら残高から引く。", "Debit a positive amount that fits within the balance.", natAccount, new Listing { "withdraw" })
+    new {
+      id = "natural-value"
+      kind = "concept"
+      group = termGroup
+      name = s.text("自然数", "natural number")
+      definition = s.text("整数スコープのうち0以上で、Nat の設定、操作引数や状態に使える値。", "A nonnegative value of the integer scope, usable as a Nat in configuration, command arguments and state.")
+      code { s.code(syntax, "NAT") }
+    }
+    new {
+      id = "command-validation"
+      kind = "action"
+      group = termGroup
+      name = s.text("処理前の検証", "command validation")
+      definition = s.text("実装の処理に渡す前に、入力の型、現在のガード、予測した状態の宣言と不変条件を検査する。", "Check input types, the current guard, declarations and invariants of the predicted state before handing the command to an implementation.")
+      code { s.code("crates/rcheck/src/conform/validation.rs", "dispatch") }
+    }
+    new {
+      id = "bounded-sequence"
+      kind = "concept"
+      group = termGroup
+      name = s.text("有限列", "bounded sequence")
+      definition = s.text("長さに上限があり、順序と重複を保持する。", "Preserves order and duplicates up to a length bound.")
+      code { s.code("crates/rmodel/src/structured.rs", "Sequence") }
+    }
+    new {
+      id = "payload-variant"
+      kind = "concept"
+      group = termGroup
+      name = s.text("値付き variant", "payload variant")
+      definition = s.text("タグが値の型を決め、値のないタグも持てる。", "The tag determines the payload type or the absence of a payload.")
+      code { s.code("crates/rmodel/src/structured.rs", "Variant") }
+    }
+    new {
+      id = "progress-obligation"
+      kind = "concept"
+      group = termGroup
+      name = s.text("進行性の問い", "progress obligation")
+      definition = s.text("指定した公平性を満たす実行について、いつか応答が起きることを求める。", "Requires an eventual response in executions that satisfy the fairness assumptions.")
+      code { s.code(syntax, "TemporalCheck") }
+    }
+    new {
+      id = "transition-property"
+      kind = "concept"
+      group = termGroup
+      name = s.text("遷移の性質", "transition property")
+      definition = s.text("実行可能な一操作の直前と直後を比較する条件。", "A condition over the snapshots immediately before and after an enabled operation.")
+      code { s.code(syntax, "TransitionCheck") }
+    }
+  }
+  rules {
+    new {
+      id = "RMODEL-SEMANTICS"
+      text = s.text("採用した版には意味の一致が必要。差異、空、探索未完了、比較相手の欠落は、ゴールが改善しても一致として扱わない。", "Adoption requires semantic equivalence. Divergence, an empty check, incomplete search and a missing comparison do not count as equivalence even when the goal improves.")
+      terms { "adoption"; "semantic-evidence"; "goal-evidence"; "adopt" }
+      claims {
+        s.claim(calibration, "AdoptionNeedsEquivalence", "holds")
+        s.claim(calibration, "ImprovedButDiverges", "reachable")
+        s.claim(calibration, "ImprovedButEmpty", "reachable")
+        s.claim(calibration, "ImprovedButIncomplete", "reachable")
+        s.claim(calibration, "ImprovedButMissingComparison", "reachable")
+      }
+    }
+    new {
+      id = "RMODEL-GOAL"
+      text = s.text("採用した版にはゴールの改善が必要。意味だけが一致した版は評価中にでき、意味の一致とゴールの改善がそろった版は採用に進める。", "Adoption requires goal improvement. Equivalence alone can leave a trial open, and a trial with both kinds of favorable evidence can be adopted.")
+      terms { "adoption"; "goal-evidence"; "semantic-evidence"; "adopt" }
+      claims {
+        s.claim(calibration, "AdoptionNeedsImprovement", "holds")
+        s.claim(calibration, "EquivalentButUnmeasured", "reachable")
+        s.claim(calibration, "SupportedAdoption", "reachable")
+      }
+    }
+    new {
+      id = "RMODEL-REVISION"
+      text = s.text("改版した候補は評価中になり、旧版で集めた意味とゴールの証拠を取り直す。", "A new revision re-enters trial status and requires fresh semantic and goal evidence.")
+      terms { "adoption"; "semantic-evidence"; "goal-evidence"; "revise" }
+      unformalized = "遷移の前後を比較する条件は、calibration.rs の the_next_revision_must_collect_new_evidence が参照評価器で検査する。"
+    }
+    new {
+      id = "RMODEL-SWAP"
+      text = s.text("入れ替え例では左と右を遷移前の値から同時に更新する。二つの値は異なり続け、入れ替え後の状態に到達でき、両方が On の状態には到達しない。代入しない変数 update は Off のままにする。", "The example swaps left and right simultaneously using the old state. The values remain distinct, the swapped state is reachable, both On is unreachable, and the unassigned variable update stays Off.")
+      terms { "swap"; "toggle-value"; "toggle-state" }
+      claims {
+        s.claim(behavior, "Distinct", "holds")
+        s.claim(behavior, "Swapped", "reachable")
+        s.claim(behavior, "BothOn", "unreachable")
+        s.claim(behavior, "PreservesUpdate", "holds")
+      }
+    }
+    new {
+      id = "RMODEL-ENTITY"
+      text = s.text("個体型の宣言を型と用語の正本とする。同じ名前を二重に宣言した場合や存在しない型を参照した場合は拒否する。用語の説明は IR、Rust と TypeScript の型、用語集へ引き継ぐ。", "The entity declaration defines both its type and its term. Duplicate names and unknown type references are rejected. The definition carries through the IR, the Rust and TypeScript types, and the glossary.")
+      terms { "entity" }
+      unformalized = "名前解決と生成物は rmodel の entity.rs、IR の往復は rcheck の ir.rs、生成した型を使う入出金の照合は rcheck の domain.rs と typescript.rs で検査する。"
+    }
+    new {
+      id = "RMODEL-DEAD-CODE"
+      text = s.text("ガードの成立例があれば到達可能とする。成立例なしをデッドと呼べるのは、初期状態が存在し、探索が完了したとき。探索の予算切れや範囲逸脱、初期状態なしは区別する。", "A guard witness makes an action reachable. An action with no witness is dead only after a complete search with an initial state. Exhausted budgets, scope exits and empty models have distinct treatment.")
+      terms { "dead-behavior" }
+      unformalized = "操作の到達結果と完了状態の区別は rcheck の CLI テスト dead_code.rs で実行する。"
+    }
+    new {
+      id = "RMODEL-LEAN-ORACLE"
+      text = s.text("完全探索した非空の範囲に限り、各設定・状態に Lean の命題を照合できる。偽ならその観測を返し、探索が未完了または Lean の出力が不正なら区別して扱う。", "A Lean proposition can be checked over each configuration and state after a complete nonempty search. A false result identifies the observation, separately from incomplete exploration or an invalid response.")
+      terms { "snapshot-oracle" }
+      unformalized = "別プロセスとの照合と失敗の区別を rcheck の lean_oracle.rs で検査する。"
+    }
+    new {
+      id = "RMODEL-LINKED"
+      text = s.text("分割した宣言を一つのモデルとして解決し、業務上の拒否と分散プロトコルの安全性を同じ型・操作・検査で記述できる。", "Declarations in linked fragments resolve as a single model. The same types, actions and checks can describe business rejections and protocol safety.")
+      terms { "linked-model" }
+      unformalized = "出金と Raft の選挙の例は、マニフェストを入力にする linked_projects.rs の CLI テストで検査する。"
+    }
+    new {
+      id = "RMODEL-BOUNDARY"
+      text = s.text("ガードの境界は宣言した有限の範囲を完全探索した後で選び、先行操作、受付結果、直後の状態を生成テストに渡す。", "Select guard boundary witnesses after complete exploration of the declared finite scope. Pass their prefixes, acceptance and resulting states to the generated property.")
+      terms { "guard-boundary" }
+      unformalized = "境界の選出と探索未完了の扱いは linked_projects.rs、仕様と独立実装の差は withdrawal.pbt.test.ts で検査する。"
+    }
+    new {
+      id = "RMODEL-NAT"
+      text = s.text("出金例は Nat の金額を使い、残高を上限以下に保つ。残高をちょうど0にすることができる。", "The withdrawal example uses Nat amounts, keeps the balance within its limit, and can reach a zero balance.")
+      terms { "natural-value"; "nat-balance"; "nat-limit"; "nat-withdraw" }
+      claims {
+        s.claim(natAccount, "WithinLimit", "holds")
+        s.claim(natAccount, "EmptyBalance", "reachable")
+      }
+    }
+    new {
+      id = "RMODEL-VALIDATE"
+      text = s.text("入力・設定・状態がモデルに適合し、ガードが成立し、遷移先が範囲と不変条件を満たすときに実装の処理を呼ぶ。実装の応答がモデルと異なったセッションでは後続処理を呼ばない。", "Call the implementation after validating inputs, configuration and state, a true guard, and the scope and invariants of the predicted state. Withhold later calls if an implementation response diverges from the model.")
+      terms { "command-validation"; "natural-value" }
+      unformalized = "validation.rs のテストで実装の呼び出しを計測する。"
+    }
+    new {
+      id = "RMODEL-STRUCTURED"
+      text = s.text("生成した値と観測は列の順序・重複と variant のタグ・値の型を保つ。", "Generated values and observations preserve sequence order and duplicates, and variant tags and payload types.")
+      terms { "bounded-sequence"; "payload-variant" }
+      unformalized = "structured_temporal.rs で順序を入れ替えた観測を検出し、列の上限と値付きタグの型を検査する。"
+    }
+    new {
+      id = "RMODEL-PROGRESS"
+      text = s.text("同じ配信モデルでも、問いが指定する公平性によって進行性の判定が変わる。空や探索の打ち切りを成立としない。", "Progress over the same delivery model can depend on the fairness of the obligation. Empty or incomplete exploration does not satisfy it.")
+      terms { "progress-obligation" }
+      unformalized = "rcheck の structured_temporal.rs と TLC の 0116 評価で公平性ありとなしを照合する。"
+    }
+    new {
+      id = "SHIPMENT-TRACKING"
+      text = s.text("注文が発送済みなら、実行可能な操作の直後も発送済みであり、追跡方法は操作直前と同じでなければならない。", "Once an order is shipped, every enabled operation must leave it shipped with the same tracking method it had immediately before the operation.")
+      terms { "shipment-carrier"; "shipment-status"; "ship-order"; "acknowledge-shipment" }
+      claims {
+        s.claim(shipment, "ShippedStays", "holds")
+        s.claim(shipment, "WasShipped", "reachable")
+      }
+    }
+    new {
+      id = "RMODEL-TRANSITION"
+      text = s.text("遷移の性質を破る操作は実装を呼ぶ前に検出する。", "An operation that violates a transition property is detected before calling the implementation.")
+      terms { "transition-property"; "command-validation" }
+      unformalized = "transition.rs で正常版と追跡方法を書き換える故障を参照評価器と rtlc で比べる。TLC は評価 0117 で照合する。"
+    }
+  }
+  groundings {
+    new {
+      model = behavior
+      implementation = s.code(syntax, "action")
+      test = s.code(behaviorTest, "behavior_has_the_same_guard_parallel_updates_and_frame_as_action")
+    }
+    new {
+      model = calibration
+      implementation = s.code("crates/rmodel/src/reference.rs", "steps")
+      test = s.code(calibrationTest, "the_next_revision_must_collect_new_evidence")
+    }
+  }
+}

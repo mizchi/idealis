@@ -1,0 +1,10 @@
+// Rejected: a Carrier stored where the status (a Status) is expected, and
+// `next` inside an invariant.
+amends "../order.pkl"
+actions = List(
+  action("ship", List(param("o", sort("Order")), param("c", dataT("Carrier"))), List(),
+    List(assign("status", List(v("o")), v("c")))),
+)
+props = List(
+  prop("Frozen", "invariant", "holds", all("o", "Order", (o) -> eq(next(at("status", List(o))), at("status", List(o))))),
+)

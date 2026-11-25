@@ -1,0 +1,15 @@
+model G182
+sig S0
+sig S1
+rel r0: S1 -> some S0
+rel r1: S1 -> lone S1
+var v2: S0 -> some S0
+fact { (all q1: S0 | some none) }
+init { none in ((r0.S1).v2) }
+action a0(p0_0: S0) {
+  p0_0 = none
+  v2' = (p0_0 -> (S0.(S1 -> p0_0)))
+}
+invariant Inv { not (not ((((S1 & S0) + (S0.(S0 -> S0))) = (S0 - (r1.S0)) and r1 = (v2 & r0)))) }
+reachable Goal { ((some S1 or lone ((S1 + S1) & (S0 + S0))) or (some q3: S1 | (all q4: S0 | ((q3 -> q4) & r0) = v2))) }
+scope S0 = 3, S1 = 3, steps = 6

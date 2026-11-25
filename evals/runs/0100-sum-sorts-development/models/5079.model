@@ -1,0 +1,18 @@
+model G5079
+sig S0
+sig S1
+rel r0: set S1
+rel r1: S1 -> one S0
+var v2: S0 -> some S1
+var v3: S0 -> set S1
+fact { (S1 = r0 implies #((S0 -> S0).S0) != 2) }
+init { (((S0 + none).v2) not in S1 and #S0 >= 2) }
+action a0(p0_0: S0) {
+  v2' = (p0_0 -> S1)
+}
+action a1() {
+  v2' = (S0 -> r0)
+}
+invariant Inv { (all q1: S0 | (((S1 -> S0).S0).(S1 -> r0)) not in (((q1 -> S0).q1).v2)) }
+reachable Goal { ((((S1.(r0 -> r0)).(r1.(S0 -> S0))) not in S0 implies (#S1 < 3 implies no (v2.(r0 - S1)))) or (no ((r0 + r0).((S1 -> S0).(S0 -> S0))) or (some S0 and #((S1 -> r0).r0) >= 2))) }
+scope S0 = 3, S1 = 3, steps = 6

@@ -1,0 +1,40 @@
+model G7158
+sig S0
+enum E = Ea | Eb
+type P = S0 + E
+rel r0: set P
+var v1: E -> set E
+record R { n: Int, b: Bool }
+var w0: S0 -> one Int
+var w1: S0 -> one Bool
+var w2: S0 -> one R
+fact { some S0 }
+init { ((S0 -> E).v1) in ((S0 -> Ea) + (S0 -> Ea)) }
+init { all x: S0 | x.w0 = 0 }
+init { all x: S0 | x.w1 = true }
+init { all x: S0 | x.w2 = R { n: 0, b: false } }
+action set0(x: S0, k: Int) {
+  w0' = w0 - x -> x.w0 + x -> ((x.w0 - x.w0))
+}
+action set1(x: S0) {
+  w1' = w1 - x -> x.w1 + x -> (false)
+}
+action set2(x: S0, k: Int) {
+  w2' = w2 - x -> x.w2 + x -> (R { n: 0, b: false })
+}
+action a0() {
+  not (#(P.(P -> P)) > 1)
+  some Eb
+  v1' = ((P.(P -> Ea)) -> (none - Ea))
+}
+action a1() {
+  (all q3: S0 | not q3.w1)
+  (all q4: P | S0 != (r0 - (S0.(S0 -> P))))
+  v1' = v1
+}
+action a2(p2_0: S0) {
+  v1' = ((v1 & v1) - ((Ea -> P).(P -> E)))
+}
+invariant Inv { ((((some q12: S0 | not q12.w1) and #((P -> E).Eb) != 0) or not (no ((S0 -> Eb).(v1.Eb)))) and #S0 >= 0) }
+reachable Goal { ((not (#(Ea.(Ea -> P)) = 0) or ((some q21: S0 | (q21.w0 + 2) != (#P * 0)) or (Eb -> Eb) in (v1.v1))) or (P -> P) = ((P -> P) & (P -> P))) }
+scope S0 = 3, Int = 0..2, steps = 6

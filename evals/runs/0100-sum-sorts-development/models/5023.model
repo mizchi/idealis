@@ -1,0 +1,23 @@
+model G5023
+sig S0
+enum E = Ea | Eb
+type P = S0 + E
+rel r0: set P
+rel r1: some E
+var v2: E -> lone E
+fact { P in ((S0 & S0).((S0 -> E).(Ea -> P))) }
+init { not ((S0 -> Eb) = ((S0 -> Eb).v2)) }
+action a0() {
+  v2' = v2
+}
+action a1(p1_0: S0, p1_1: E) {
+  v2' = ((S0.(p1_0 -> Eb)) -> (E.(Ea -> Eb)))
+}
+action a2(p2_0: P, p2_1: S0) {
+  ((v2.Eb) + (p2_1.(p2_1 -> r1))) = r1
+  (all q1: E | (P -> S0) in (P -> p2_1))
+  v2' = v2
+}
+invariant Inv { ((not (one ((S0 - S0).((S0 -> Ea) + (S0 -> r1)))) and not (some (Eb.(r1 -> P)))) and ((v2.(Eb -> S0)) in (E -> S0) implies (P in P or lone (S0 - ((S0 -> r1).r1))))) }
+reachable Goal { ((S0 -> Eb) in (S0 -> Eb) or (((P -> r1) in ((P -> r1).v2) or #((E -> P).P) > 0) or (((P -> P).P) in (E + (P + P)) implies #E >= 2))) }
+scope S0 = 2, steps = 6

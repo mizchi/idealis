@@ -1,0 +1,22 @@
+model G5042
+sig S0
+rel r0: S0 -> set S0
+var v1: S0 -> set S0
+fact { (S0 -> S0) in (S0 -> S0) }
+init { some (S0.v1) }
+action a0(p0_0: S0) {
+  #p0_0 < 0
+  v1' = ((p0_0 -> S0) + (S0 -> p0_0))
+}
+action a1(p1_0: S0, p1_1: S0) {
+  (no ((S0 + none) + p1_1) implies ((p1_1.r0).(v1 & r0)) in ((p1_0.v1).(p1_1 -> p1_1)))
+  v1' = (S0 -> (S0 + S0))
+}
+action a2() {
+  (S0 -> S0) in v1
+  some S0
+  v1' = (S0 -> S0)
+}
+invariant Inv { (not ((S0 -> S0) = v1) or (some q1: S0 | (r0 in (S0 -> S0) or some S0))) }
+reachable Goal { (not ((some q2: S0 | #(v1.q2) != 0)) or (lone ((r0.r0).S0) or not (#S0 < 0))) }
+scope S0 = 3, steps = 6

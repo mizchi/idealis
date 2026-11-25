@@ -1,0 +1,15 @@
+model G4037
+sig S0
+rel r0: S0 -> set S0
+var v1: S0 -> lone S0
+fact { some S0 }
+init { not (#(S0.v1) != 0) }
+action a0() {
+  v1' = (S0 -> (S0.(S0 -> S0)))
+}
+action a1(p1_0: S0, p1_1: S0) {
+  v1' = ((p1_1 -> p1_0).(p1_0 -> p1_1))
+}
+invariant Inv { (v1.S0) in S0 }
+reachable Goal { (S0 != (r0.S0) or not ((v1 = (S0 -> S0) implies ((S0 - S0) + (S0 + S0)) != S0))) }
+scope S0 = 2, steps = 6

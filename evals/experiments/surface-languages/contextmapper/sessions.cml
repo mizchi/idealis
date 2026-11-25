@@ -1,0 +1,26 @@
+BoundedContext Sessions {
+  Aggregate SessionRegistries {
+    Entity User {
+      String userId key
+    }
+
+    Entity SessionRegistry {
+      aggregateRoot
+      - Set<User> admins notEmpty
+      - Set<User> active size = "0,2"
+      - User locked nullable
+
+      // Starts with no active or locked users. Login adds an inactive user
+      // only while fewer than two are active. Logout removes an active user
+      // and leaves the lock intact. Lock requires no lock and an active admin.
+      // Unlock clears the lock only when it belongs to the caller.
+      def void login(@User user) : write;
+      def void logout(@User user) : write;
+      def void lock(@User user) : write;
+      def void unlock(@User user) : write;
+    }
+  }
+}
+// CML validates the declarations. It cannot establish Capacity or
+// LockedByAdmin, show the logout counterexample to LockedIsActive, or check
+// reachability of Full and ThreeActive.

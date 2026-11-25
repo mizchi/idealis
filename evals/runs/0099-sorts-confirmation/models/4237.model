@@ -1,0 +1,15 @@
+model G4237
+sig S0
+sig S1
+rel r0: S0 -> lone S1
+rel r1: set S0
+var v2: S0 -> one S0
+init { (some q1: S1 | some ((q1.(S1 -> r1)) & (v2.r1))) }
+action a0(p0_0: S0, p0_1: S1) {
+  some (r1 - r1)
+  (some q2: S0 | some ((p0_1 -> p0_1).p0_1))
+  v2' = (v2.v2)
+}
+invariant Inv { ((r1 in ((v2.(S0 -> S0)).r1) implies some S0) or (all q3: S1 | (some none implies some q3))) }
+reachable Goal { (((some q4: S0 | (r1 -> S0) = v2) or (all q5: S0 | S0 != (S1.((S1 -> q5) - (S1 -> q5))))) or ((r1 - (S0 & r1)) = ((S0 & S0) & (r1.v2)) and #(S1 + S1) != 2)) }
+scope S0 = 3, S1 = 3, steps = 6

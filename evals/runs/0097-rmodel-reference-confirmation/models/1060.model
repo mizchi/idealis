@@ -1,0 +1,13 @@
+model G1060
+sig S0
+sig S1
+var v0: one S1
+var v1: S0 -> lone S0
+init { (none in v0 implies v0 not in ((S1.(v0 -> v0)).v1)) }
+action a0(p0_0: S1) {
+  (some (v1.S0) implies #(p0_0.(S0 -> S0)) = 2)
+  v1' = (p0_0 -> (S0.v1))
+}
+invariant Inv { some ((v1.S0) - S1) }
+reachable Goal { ((#v0 <= 0 and (#S1 >= 1 implies #(v0 & S0) < 2)) implies (not (some v0) and (some (S1.v1) implies ((v0 & S0).v1) != S0))) }
+scope S0 = 2, S1 = 3, steps = 6

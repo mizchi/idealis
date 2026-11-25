@@ -1,0 +1,55 @@
+# 0102: ドメインのモデルからTypeScriptの型を生成し、実装を照合する
+
+mizchiの方針（DDD）: ドメイン記述言語としてドメインをモデル化し、各検査器とシームレスに繋げる。[0101](0101-checker-registry.md)の共通の枠に、実装の照合を検査器の1つとして載せる。 ドメインをモデルにし、そこから各言語の型定義を生成し、各言語で実装して、実装がモデルに従うかを検査する。最初の言語はTypeScript。値オブジェクト（record）は後で足す。
+
+## 生成する型（`rmodel::typescript(model)`）
+
+| モデル                    | TypeScript                                                               |
+| ------------------------- | ------------------------------------------------------------------------ |
+| sig（entity）             | branded string `type User = string & { readonly __sort: "User" }`        |
+| enum                      | 文字列のunion `type Status = "Matched" \| "Mismatch"`                    |
+| 和のsort                  | 子の型のunion `type Party = Customer \| Staff`                           |
+| `rel`（設定）             | `interface Config`のfield                                                |
+| `var`（状態）             | `interface State`のfield                                                 |
+| 集合（`set`・`some`）     | `ReadonlySet<T>`                                                         |
+| 集合（`lone`・`one`）     | `T \| undefined`・`T`                                                    |
+| 二項関係（`set`・`some`） | `ReadonlyMap<A, ReadonlySet<B>>`                                         |
+| 二項関係（`lone`・`one`） | `ReadonlyMap<A, B>`（`lone`は鍵がないことがある）                        |
+| action（command）         | 判別union `{ readonly kind: "read"; readonly u: User; readonly d: Doc }` |
+
+実装が満たすinterface: `create(config: Config): Domain`、`Domain.state: State`、`Domain.apply(command: Command): boolean`（受け付けたか）。atomの値と状態をJSONへ写す関数も生成する。
+
+## 照合
+
+- 意味論は参照評価器だけに置く。TypeScriptの実装は、JSON Linesで話すdriver（`reset(config)`・`apply(command)`、答えは受け付けたかと状態）として、Rustの照合器から動かす。Rust・Goの実装も同じprotocolのdriverで照合できる。
+- 照合器は、factを満たす設定ごとに、実装の初期状態がモデルの初期状態（型・多重度・`init`）であることを確かめ、実装が到達する状態を幅優先で辿る。各状態・各actionの引数の組で、モデルの条件が成り立つかと実装が受け付けたかが一致し、受け付けたときの次の状態がモデルの次の状態と一致すること。実装の状態は、初期状態からのcommandの列を新しいインスタンスで再生して作る。
+- 結果は、一致・不一致（最短のcommandの列と、期待と実測）・未確定（予算切れ）を区別する。
+
+## 正しさ（結果を見る前に固定）
+
+- corpusの`permissions.model`と`sessions.model`をTypeScriptで実装し、照合が一致すること。
+- 人工故障: `read`で付与を確かめない、`close`で文書を外さない、`login`で定員を確かめない、の3件を照合が不一致として検出し、最短のcommandの列を示すこと。
+- 生成した型が`tsc`の型検査を通り、生成物が古くないこと（再生成との一致）。
+
+## 範囲外
+
+- Rust・Goの型生成、値オブジェクト・整数の状態、実装の状態の一部だけを観測すること。
+
+## 改訂（結果の前、mizchiと相談）
+
+- 生成する言語にRustを加える。Rustは、actionをmethodに持つtraitを生成し、実装がそれを満たすことを要求する。
+
+  ```rust
+  pub trait Permissions: Sized {
+      fn new(config: &Config) -> Self;
+      fn state(&self) -> State;
+      fn read(&mut self, u: User, d: Doc) -> bool; // 受け付けたか
+      fn close(&mut self, u: User, d: Doc) -> bool;
+  }
+  ```
+
+  methodの形はcompilerが検査し、振る舞いは同じプロセスの照合（`conformance::<Impl>(budget)`）が参照評価器と照らす。atomは`User(u8)`のようなnewtype、enumはRustのenum、集合と関係は`BTreeSet`・`BTreeMap`。
+
+- 汎用の検査器として、モデルの型からConfig・State・CommandのJSON Schema（draft 2020-12）を生成する。sortのatomの集合、enum、多重度（`one`・`lone`・`some`）を制約に写す。照合器は、driverの答えをまずschemaで検査し、形が違えば意味の照合の前にinvalidとして報告する。外部のvalidatorでも同じschemaを使える。
+- 値の種類（[0103](0103-values.md)）を先に入れ、型の生成はInt・Bool・recordも扱う（TypeScriptでは`number`・`boolean`・readonlyのobject、Rustでは`i64`・`bool`・struct）。
+- 正しさに加える: `permissions`・`sessions`と0103の口座のモデルをRustでも実装し、照合が一致すること。同じ3件の人工故障をRustでも検出すること。生成したschemaが、照合で得た全状態を受け付け、多重度を破る状態（手で作った3件）を拒むこと。

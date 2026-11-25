@@ -271,13 +271,33 @@ rspec-test:
   cargo clippy --all-targets --locked --manifest-path crates/rspec/Cargo.toml -- -D warnings
   cargo test --all-targets --locked --manifest-path crates/rspec/Cargo.toml
 
-# Static links, claims through both engines, and freshness of the generated
+# Static links, model claims, and freshness of the generated
 # JSON, Markdown and jev-lint manifest (plan 0092). Needs pkl on PATH.
 spec-check:
   cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check
 
 spec-write:
   cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check -- --write
+
+rmodel-design-write:
+  cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check -- --rmodel-design --write
+
+rmodel-design-check:
+  cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check -- --rmodel-design
+  cargo test --locked --manifest-path crates/rmodel/Cargo.toml --test calibration --test behavior --test entity
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test dead_code
+
+[positional-arguments]
+rmodel-design-drift *args:
+  cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check -- --rmodel-design >&2
+  pnpm exec jev-lint docs --document-manifest spec/rmodel-design-documents.json --ledger .jev-lint/judgments/rmodel-design "$@"
+
+rmodel-readability-eval output study="behavior":
+  cargo build --release --locked --manifest-path crates/rcheck/Cargo.toml
+  node evals/experiments/rmodel-readability/run.mjs run {{quote(output)}} {{quote(study)}}
+
+rmodel-readability-replay output study="behavior":
+  node evals/experiments/rmodel-readability/run.mjs replay {{quote(output)}} {{quote(study)}}
 
 # Advisory semantic drift between the glossary, crate documents, rules and
 # models (plan 0092). Appends to the ledger; never a CI gate.
@@ -293,8 +313,107 @@ rmodel-test:
   cargo test --all-targets --locked --manifest-path crates/rmodel/Cargo.toml
   cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/rmodel/Cargo.toml
 
+rcheck-test:
+  cargo fmt --manifest-path crates/rcheck/Cargo.toml -- --check
+  cargo clippy --all-targets --locked --manifest-path crates/rcheck/Cargo.toml -- -D warnings
+  cargo test --all-targets --locked --manifest-path crates/rcheck/Cargo.toml
+
+rcheck-lean-oracle:
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test lean_oracle -- --include-ignored
+
+# The generated fast-check property and its seeded fault control.
+rcheck-boundaries: build
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test linked_projects --test withdrawal
+  node --test dist/tests/rcheck/withdrawal.pbt.test.js
+
+rcheck-transition:
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test transition
+
+# Shipment requirement, generated bindings and model-derived ITF.
+shipment-build:
+  cargo build --locked --manifest-path crates/rcheck/Cargo.toml --bin rcheck
+
+shipment-write: shipment-build
+  python3 evals/experiments/shipment/trace.py --write
+
+shipment-test: shipment-build build
+  cargo test --locked --manifest-path crates/rspec/Cargo.toml --test links
+  cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check -- --rmodel-design
+  python3 evals/experiments/shipment/trace.py
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test shipment
+  node --test dist/tests/rcheck/shipment.pbt.test.js
+  cd tests/rcheck/go && CGO_ENABLED=0 go test -count=1 -v ./shipment
+
+shipment-drift output:
+  cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check -- --rmodel-design
+  python3 evals/experiments/shipment/drift.py {{quote(output)}}
+
+rmodel-transition-tlc output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" tlc=".artifacts/0068-tlc-1.8.0.jar":
+  cargo build --locked --manifest-path crates/rmodel/Cargo.toml --example emit
+  python3 evals/experiments/rmodel/structured-tlc.py {{quote(absolute_path(java))}} {{quote(absolute_path(tlc))}} {{quote(absolute_path(output))}} --transition
+
+rcheck-structured:
+  cargo test --locked --manifest-path crates/rmodel/Cargo.toml --test structured_temporal
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test structured_temporal
+
+rmodel-structured-tlc output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" tlc=".artifacts/0068-tlc-1.8.0.jar":
+  cargo build --locked --manifest-path crates/rmodel/Cargo.toml --example emit
+  python3 evals/experiments/rmodel/structured-tlc.py {{quote(absolute_path(java))}} {{quote(absolute_path(tlc))}} {{quote(absolute_path(output))}}
+
+rcheck-validation:
+  cargo test --locked --manifest-path crates/rmodel/Cargo.toml --test values
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test validation
+
+# TypeScript implementations against the generated bindings and ajv on the
+# generated JSON Schema (plan 0102).
+rcheck-typescript: build
+  node --test dist/tests/rcheck/schema.test.js dist/tests/rcheck/withdrawal.pbt.test.js
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test typescript -- --ignored
+
+# Go implementations against the generated interfaces (plan 0104).
+rcheck-go:
+  test -z "$(gofmt -l tests/rcheck/go)"
+  cd tests/rcheck/go && go vet ./...
+  cd tests/rcheck/go && CGO_ENABLED=0 go test -count=1 ./...
+  cd tests/rcheck/go && CGO_ENABLED=0 go build -o ../../../.artifacts/rcheck-go/ ./cmd/...
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test go -- --ignored
+
+# MoonBit implementations against the generated traits, on the JS target
+# (plan 0105).
+rcheck-moonbit:
+  cargo build --release --locked --manifest-path crates/rcheck/Cargo.toml
+  scripts/rcheck-moonbit-fresh.sh
+  cd tests/rcheck/moonbit && moon check --deny-warn --target js
+  cd tests/rcheck/moonbit && moon test --target js
+  cd tests/rcheck/moonbit && moon build --target js
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test moonbit -- --ignored
+
+# Adapters write the kernel IR; roracle compares their verdicts with the
+# rmodel source's (plan 0108). Needs pkl on PATH.
+rcheck-adapters:
+  scripts/rcheck-adapters-fresh.sh
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test adapters --test ir
+
+# The surface-language evaluation loop with pluggable axes (plan 0109).
+# Tools are found through ISABELLE, IDRIS2_PREFIX and VEIL_HOME; a missing
+# one makes its candidate's checks unavailable, never passed.
+[positional-arguments]
+surface-eval-prepare plan run: build
+  cargo build --release --locked --manifest-path crates/rcheck/Cargo.toml
+  node dist/evals/experiments/surface-eval/run.js prepare "$1" "$2"
+
+[positional-arguments]
+surface-eval-score plan run: build
+  node dist/evals/experiments/surface-eval/run.js score "$1" "$2"
+
 rmodel-oracle output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" alloy=".artifacts/alloy-subset/org.alloytools.alloy.dist.jar" tlc=".artifacts/0068-tlc-1.8.0.jar":
   evals/experiments/rmodel/oracle.sh {{quote(absolute_path(java))}} {{quote(absolute_path(alloy))}} {{quote(absolute_path(tlc))}} {{quote(absolute_path(output))}}
+
+# Plan 0114: source/IR, registered checkers and independent JVM tools.
+rmodel-portability output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" alloy=".artifacts/alloy-subset/org.alloytools.alloy.dist.jar" tlc=".artifacts/0068-tlc-1.8.0.jar":
+  cargo build --locked --manifest-path crates/rmodel/Cargo.toml --example emit
+  cargo build --locked --manifest-path crates/rcheck/Cargo.toml
+  python3 evals/experiments/rmodel/portability.py {{quote(absolute_path(java))}} {{quote(absolute_path(tlc))}} {{quote(absolute_path(alloy))}} {{quote(absolute_path(output))}}
 
 rquint-tlc output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" jar=".artifacts/0068-tlc-1.8.0.jar":
   evals/experiments/quint-ir/tlc.sh {{quote(absolute_path(java))}} {{quote(absolute_path(jar))}} {{quote(absolute_path(output))}}

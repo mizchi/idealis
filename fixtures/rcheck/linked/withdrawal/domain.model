@@ -1,0 +1,5 @@
+model Withdrawal
+// Amount is an amount of money in integer units. Balance equal to the requested
+// amount is sufficient. InsufficientFunds is a completed business rejection.
+record Amount { units: Int }
+enum WithdrawalResult = Idle | Pending | Withdrawn | InsufficientFunds

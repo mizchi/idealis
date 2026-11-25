@@ -1,0 +1,61 @@
+{
+  "#meta": {
+    "format": "ITF",
+    "source": "fixtures/rcheck/structured/shipped-transition.model"
+  },
+  "vars": [
+    "config",
+    "command",
+    "observation"
+  ],
+  "states": [
+    {
+      "#meta": {
+        "index": 0
+      },
+      "config": {},
+      "command": {
+        "kind": "init"
+      },
+      "observation": {
+        "status": {
+          "tag": "Ready"
+        },
+        "acknowledged": false
+      }
+    },
+    {
+      "#meta": {
+        "index": 1
+      },
+      "config": {},
+      "command": {
+        "kind": "ship",
+        "method": "Post"
+      },
+      "observation": {
+        "acknowledged": false,
+        "status": {
+          "tag": "Shipped",
+          "value": "Post"
+        }
+      }
+    },
+    {
+      "#meta": {
+        "index": 2
+      },
+      "config": {},
+      "command": {
+        "kind": "acknowledge"
+      },
+      "observation": {
+        "acknowledged": true,
+        "status": {
+          "tag": "Shipped",
+          "value": "Post"
+        }
+      }
+    }
+  ]
+}

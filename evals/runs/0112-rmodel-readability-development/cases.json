@@ -1,0 +1,110 @@
+[
+  {
+    "id": "bank",
+    "baseline": "evals/experiments/surface-languages/rmodel/bank.model",
+    "questions": [
+      {
+        "text": "口座 a の残高が 3 のとき、どの操作が許されるか。",
+        "options": [
+          "deposit(a, 2)",
+          "withdraw(a, 4)",
+          "deposit(a, 1)",
+          "withdraw(a, 0)"
+        ],
+        "correct": 2
+      },
+      {
+        "text": "a の残高 0、b の残高 2 で deposit(a, 3) が成立した直後に変わる値はどれか。",
+        "options": [
+          "a の残高だけ",
+          "b の残高だけ",
+          "両方の残高",
+          "どちらも変わらない"
+        ],
+        "correct": 0
+      },
+      {
+        "text": "残高 0 から deposit(a, 3)、withdraw(a, 2)、deposit(a, 4) を順番に試す。拒否された操作は状態を変えない。最後の残高は何か。",
+        "options": [
+          "0",
+          "1",
+          "4",
+          "5"
+        ],
+        "correct": 1
+      }
+    ]
+  },
+  {
+    "id": "mutex",
+    "baseline": "fixtures/rmodel/mutex.model",
+    "questions": [
+      {
+        "text": "ロック l はプロセス p が保持し、ロック m は空いている。p と q が別のとき、どの操作が許されるか。",
+        "options": [
+          "acquire(p, l)",
+          "acquire(q, l)",
+          "release(q, l)",
+          "acquire(q, m)"
+        ],
+        "correct": 3
+      },
+      {
+        "text": "p が l と m の両方を保持している。release(p, l) が成立したとき、どの保持関係が変わるか。",
+        "options": [
+          "m と p の保持だけ消える",
+          "l と p の保持だけ消える",
+          "両方の保持が消える",
+          "両方の保持が残る"
+        ],
+        "correct": 1
+      },
+      {
+        "text": "l が空の状態から acquire(p, l)、release(q, l)、acquire(q, l) を順番に試す。p と q は別で、拒否された操作は状態を変えない。最後の l の保持者は誰か。",
+        "options": [
+          "q のみ",
+          "誰もいない",
+          "p のみ",
+          "p と q"
+        ],
+        "correct": 2
+      }
+    ]
+  },
+  {
+    "id": "sessions",
+    "baseline": "evals/experiments/surface-languages/rmodel/sessions.model",
+    "questions": [
+      {
+        "text": "u が唯一の管理者で u と v がともにログイン中、誰もロックしていない。別の利用者 w もいる。許される操作はどれか。",
+        "options": [
+          "login(w)",
+          "lock(v)",
+          "unlock(u)",
+          "lock(u)"
+        ],
+        "correct": 3
+      },
+      {
+        "text": "u はログイン中でロックを保持している。logout(u) で変わる状態はどれか。",
+        "options": [
+          "active と locked の両方",
+          "locked だけ",
+          "active だけ",
+          "どちらも変わらない"
+        ],
+        "correct": 2
+      },
+      {
+        "text": "u は唯一の管理者。初期状態から login(u)、lock(u)、logout(u)、login(v)、unlock(v) を順番に試す。拒否された操作は状態を変えない。最後の状態はどれか。",
+        "options": [
+          "v がログイン中で u がロック保持",
+          "v がログイン中でロックなし",
+          "誰もログインしていないが u がロック保持",
+          "u と v がログイン中で v がロック保持"
+        ],
+        "correct": 0
+      }
+    ]
+  }
+]

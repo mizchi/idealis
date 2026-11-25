@@ -1,0 +1,22 @@
+// Election Safety, Raft section 5.2. Vote grants represent a delivered vote.
+// A server and the candidate it voted for form one pair.
+var candidates: set Server
+var votes: Server -> set Server
+var leaders: set Server
+init { no candidates no votes no leaders }
+behavior start(s: Server) {
+  guard { no s.votes }
+  update { candidates = candidates + s votes = votes + s -> s }
+}
+behavior grantVote(v: Server, c: Server) {
+  guard { c in candidates v != c no v.votes }
+  update { votes = votes + v -> c }
+}
+behavior elect(c: Server) {
+  guard { c in candidates #(votes.c) > 1 }
+  update { leaders = leaders + c }
+}
+invariant ElectionSafety { lone leaders }
+reachable SomeLeader { some leaders }
+reachable SplitVote { candidates = Server and all c: Server | #(votes.c) = 1 }
+scope Server = 3, steps = 8

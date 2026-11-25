@@ -1,0 +1,27 @@
+model G7056
+sig S0
+enum E = Ea | Eb
+rel r0: one E
+var v1: set E
+var w0: S0 -> one Int
+fact { not (not (#((r0 -> Eb).E) = 1)) }
+init { ((r0 & r0).((Eb -> S0) + (v1 -> S0))) in ((S0 + S0).((S0 -> S0) + (S0 -> S0))) }
+init { all x: S0 | x.w0 = 0 }
+action set0(x: S0, k: Int) {
+  (x.w0 + k) > x.w0
+  w0' = w0 - x -> x.w0 + x -> ((x.w0 + k))
+}
+action a0(p0_0: S0, p0_1: E) {
+  #p0_1 < 3
+  p0_0.w0 <= (0 - 1)
+  v1' = (E.((E -> S0).(p0_0 -> v1)))
+}
+action a1() {
+  v1' = Ea
+}
+action a2(p2_0: E, p2_1: E) {
+  v1' = p2_0
+}
+invariant Inv { v1 = Eb }
+reachable Goal { ((r0 -> S0) - (Ea -> S0)) in (v1 -> S0) }
+scope S0 = 1, Int = -1..2, steps = 6

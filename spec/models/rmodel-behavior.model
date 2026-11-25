@@ -1,0 +1,17 @@
+model Toggle
+enum Value = On | Off
+var left: one Value
+var right: one Value
+var update: one Value
+init { left = Off right = On update = Off }
+
+behavior swap() {
+  guard { left = Off right = On }
+  update { left = right right = left }
+}
+
+invariant PreservesUpdate { update = Off }
+invariant Distinct { left != right }
+reachable Swapped { left = On and right = Off }
+reachable BothOn { left = On and right = On }
+scope steps = 3

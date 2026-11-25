@@ -1,0 +1,6 @@
+// Control: cancel also takes a Shipped order. ShippedStays must fail.
+amends "../order.pkl"
+actions = super.actions.filter((a) -> a.name != "cancel") + List(
+  action("cancel", List(param("o", sort("Order")), param("r", dataT("Reason"))), List(),
+    List(assign("status", List(v("o")), ctor("Status", "Cancelled", List(v("r")))))),
+)

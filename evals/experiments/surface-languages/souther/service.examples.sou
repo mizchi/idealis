@@ -1,0 +1,21 @@
+examples for comparison.service
+
+// A finite completed example witnesses one successful service trace. Souther
+// has no infinite trace or weak fairness claim for EventuallyServed.
+let alice = Client("a")
+let bob = Client("b")
+let holding = Queue { ...empty, waiting = Set.singleton(alice) }
+let finished = Queue { ...empty, served = Set.singleton(alice) }
+
+example request
+    | (empty, alice)    -> holding
+    | (holding, alice)  -> Disabled
+    | (finished, alice) -> Disabled
+    | (finished, bob)   -> Queue { ...finished, waiting = Set.singleton(bob) }
+
+example serve
+    | (holding, alice) -> finished
+    | (holding, bob)   -> Disabled
+
+example requestThenServe
+    | (alice) -> finished

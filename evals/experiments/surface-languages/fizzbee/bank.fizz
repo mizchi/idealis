@@ -1,0 +1,23 @@
+# Two fixed identities for this finite check. Dynamic values have no static types.
+ACCOUNTS = [0, 1]
+
+action Init:
+    balance = {a: 0 for a in ACCOUNTS}
+
+atomic action Deposit:
+    a = oneof ACCOUNTS
+    n = oneof range(-4, 5)
+    require n > 0 and balance[a] + n <= 4
+    balance[a] += n
+
+atomic action Withdraw:
+    a = oneof ACCOUNTS
+    n = oneof range(-4, 5)
+    require n > 0 and balance[a] >= n
+    balance[a] -= n
+
+always assertion NonNegative:
+    return all([balance[a] >= 0 for a in ACCOUNTS])
+
+exists assertion Rich:
+    return any([balance[a] >= 3 for a in ACCOUNTS])

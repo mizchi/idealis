@@ -1,0 +1,17 @@
+model OrderedLog
+enum Entry = A | B
+sequence Journal = Entry, max = 2
+variant Result = Pending | Added(Entry)
+var log: one Journal
+var result: one Result
+init { log = Journal[] result = Pending() }
+behavior add(e: Entry) {
+  guard { len(log) < 2 }
+  update { log = append(log, e) result = Added(e) }
+}
+invariant ValidResult { is(result, Added) implies some payload(result, Added) }
+invariant Bounded { len(log) <= 2 }
+reachable Ordered { log = Journal[A, B] at(log, 0) = A at(log, 1) = B result = Added(B) }
+reachable Repeated { log = Journal[A, A] }
+reachable Missing { no at(log, -1) no at(log, 2) }
+scope Int = 0..2, steps = 4

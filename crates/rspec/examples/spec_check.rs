@@ -1,18 +1,40 @@
 //! spec_check [--write]: for every registered specification, evaluates the
 //! Pkl source with `pkl eval -f json` and compares it with the committed
 //! JSON (D6), checks the links (D1..D4), compares the rendered Markdown (D6)
-//! and runs every claim through ralloy's SAT and rtlc (D5). `--write`
+//! and runs claims with the declared evaluator (D5). `--write`
 //! regenerates the JSON and Markdown instead of comparing them (plan 0092).
 use std::path::Path;
 use std::process::Command;
 
-/// Pkl source, evaluated JSON, rendered Markdown.
-pub const SPECS: &[(&str, &str, &str)] = &[
-    ("spec/idealis.pkl", "spec/idealis.json", "docs/glossary.md"),
+#[derive(Clone, Copy)]
+enum Checker {
+    Backends,
+    Reference,
+}
+
+const DESIGN_JSON: &str = "spec/rmodel-design.json";
+const DESIGN_MARKDOWN: &str = "spec/rmodel-design.md";
+const DESIGN_MANIFEST: &str = "spec/rmodel-design-documents.json";
+
+/// Pkl source, evaluated JSON, rendered Markdown, checker.
+const SPECS: &[(&str, &str, &str, Checker)] = &[
+    (
+        "spec/idealis.pkl",
+        "spec/idealis.json",
+        "docs/glossary.md",
+        Checker::Backends,
+    ),
     (
         "fixtures/rmodel/spec.pkl",
         "fixtures/rmodel/spec.json",
         "fixtures/rmodel/spec.md",
+        Checker::Backends,
+    ),
+    (
+        "spec/rmodel-design.pkl",
+        DESIGN_JSON,
+        DESIGN_MARKDOWN,
+        Checker::Reference,
     ),
 ];
 
@@ -33,7 +55,7 @@ pub fn drift_manifest(root: &Path) -> serde_json::Value {
     documents.sort();
     let specs: Vec<(String, rspec::Spec)> = SPECS
         .iter()
-        .map(|(_, json, markdown)| {
+        .map(|(_, json, markdown, _)| {
             let spec =
                 rspec::from_json(&std::fs::read_to_string(root.join(json)).unwrap()).unwrap();
             (markdown.to_string(), spec)
@@ -81,10 +103,15 @@ pub fn drift_manifest(root: &Path) -> serde_json::Value {
 }
 
 fn main() {
-    let write = std::env::args().any(|argument| argument == "--write");
+    let args: Vec<_> = std::env::args().skip(1).collect();
+    let write = args.iter().any(|argument| argument == "--write");
+    let design_only = args.iter().any(|argument| argument == "--rmodel-design");
     let root = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
     let mut failures = 0;
-    for (pkl, json, markdown) in SPECS {
+    for (pkl, json, markdown, checker) in SPECS {
+        if design_only && *json != DESIGN_JSON {
+            continue;
+        }
         let output = Command::new("pkl")
             .args(["eval", "-f", "json", pkl])
             .current_dir(root)
@@ -109,13 +136,23 @@ fn main() {
                 }
             }
         }
-        for problem in rspec::links(&spec, root) {
-            eprintln!("{} {pkl}: {}", problem.check, problem.message);
-            failures += 1;
+        let problems = rspec::links(&spec, root);
+        if !problems.is_empty() {
+            for problem in &problems {
+                eprintln!("{} {pkl}: {}", problem.check, problem.message);
+            }
+            failures += problems.len();
+            continue;
         }
         for rule in &spec.rules {
             for claim in &rule.claims {
-                let verdicts = engines(root, &claim.model, &claim.check);
+                let verdicts = match checker {
+                    Checker::Backends => engines(root, &claim.model, &claim.check),
+                    Checker::Reference => vec![(
+                        "rmodel",
+                        reference(root, &claim.model, &claim.check).to_owned(),
+                    )],
+                };
                 for (engine, verdict) in verdicts {
                     if verdict != claim.expect {
                         eprintln!(
@@ -128,14 +165,21 @@ fn main() {
             }
         }
     }
-    // The jev-lint docs manifest, derived from the specifications.
-    let manifest = serde_json::to_string_pretty(&drift_manifest(root)).unwrap() + "\n";
-    let path = root.join(MANIFEST);
-    if write {
-        std::fs::write(&path, &manifest).unwrap();
-    } else if std::fs::read_to_string(&path).ok().as_deref() != Some(manifest.as_str()) {
-        eprintln!("D6 {MANIFEST} is stale; run spec_check --write");
-        failures += 1;
+    // Both manifests use the same checked rule text and model links.
+    let mut manifests = vec![(DESIGN_MANIFEST, design_drift_manifest(root))];
+    if !design_only || write {
+        manifests.push((MANIFEST, drift_manifest(root)));
+    }
+    for (path, manifest) in manifests {
+        let manifest = serde_json::to_string_pretty(&manifest).unwrap() + "\n";
+        if write {
+            std::fs::write(root.join(path), &manifest).unwrap();
+        } else if std::fs::read_to_string(root.join(path)).ok().as_deref()
+            != Some(manifest.as_str())
+        {
+            eprintln!("D6 {path} is stale; run spec_check --write");
+            failures += 1;
+        }
     }
     if failures > 0 {
         eprintln!("{failures} problems");
@@ -144,8 +188,43 @@ fn main() {
     println!("specifications checked");
 }
 
+fn design_drift_manifest(root: &Path) -> serde_json::Value {
+    let spec = rspec::from_json(&std::fs::read_to_string(root.join(DESIGN_JSON)).unwrap()).unwrap();
+    rspec::documents_manifest(&rspec::Drift {
+        glossary: DESIGN_MARKDOWN,
+        documents: vec![],
+        rules: vec![(DESIGN_MARKDOWN, &spec)],
+        controls: vec![],
+    })
+    .unwrap()
+}
+
+fn reference(root: &Path, path: &str, name: &str) -> &'static str {
+    let model = rmodel::parse(&std::fs::read_to_string(root.join(path)).unwrap()).unwrap();
+    reference_verdict(&model, path, name)
+}
+
+fn reference_verdict(model: &rmodel::Model, path: &str, name: &str) -> &'static str {
+    use rmodel::reference::Outcome;
+    let verdict = rmodel::reference::evaluate(model, 2_000_000)
+        .into_iter()
+        .find(|verdict| verdict.check == name)
+        .unwrap_or_else(|| panic!("{path}: no check {name}"));
+    match verdict.outcome {
+        Outcome::Holds => "holds",
+        Outcome::Violated { .. } => "violated",
+        Outcome::Reachable { .. } => "reachable",
+        Outcome::Unreachable => "unreachable",
+        Outcome::Empty => "empty",
+        Outcome::Unknown => "unknown",
+    }
+}
+
 fn engines(root: &Path, path: &str, name: &str) -> Vec<(&'static str, String)> {
     let model = rmodel::parse(&std::fs::read_to_string(root.join(path)).unwrap()).unwrap();
+    if model.transitions.iter().any(|check| check.name == name) {
+        return vec![("rmodel", reference_verdict(&model, path, name).to_owned())];
+    }
     let check = model
         .checks
         .iter()

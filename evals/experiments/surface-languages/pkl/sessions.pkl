@@ -1,0 +1,34 @@
+// sessions (SPEC 4). Source: fixtures/rmodel/sessions.model.
+amends "Model.pkl"
+
+name = "Sessions"
+sorts = List("User")
+rels = List(
+  config("admins", List(), "set", sort("User")),
+  state("active", List(), "set", sort("User"), empty()),
+  state("locked", List(), "lone", sort("User"), empty()),
+)
+local admins = img("admins", List())
+local active = img("active", List())
+local locked = img("locked", List())
+local user = List(param("u", sort("User")))
+facts = List(cmp(">", count(admins), i(0)))
+actions = List(
+  action("login", user, List(not(mem(v("u"), active)), cmp("<", count(active), i(2))),
+    List(insert("active", List(), v("u")))),
+  action("logout", user, List(mem(v("u"), active)),
+    List(remove("active", List(), v("u")))),
+  action("lock", user, List(no(locked), mem(v("u"), admins), mem(v("u"), active)),
+    List(setLone("locked", List(), v("u")))),
+  action("unlock", user, List(mem(v("u"), locked)),
+    List(setLone("locked", List(), null))),
+)
+props = List(
+  prop("Capacity", "invariant", "holds", cmp("<=", count(active), i(2))),
+  prop("LockedByAdmin", "invariant", "holds", all("u", "User", (u) -> implies(mem(u, locked), mem(u, admins)))),
+  // Violated: logout leaves the lock in place.
+  prop("LockedIsActive", "invariant", "violated", all("u", "User", (u) -> implies(mem(u, locked), mem(u, active)))),
+  prop("Full", "reachable", "reachable", and(List(eq(count(active), i(2)), cmp(">", count(locked), i(0))))),
+  prop("ThreeActive", "reachable", "unreachable", eq(count(active), i(3))),
+)
+check = scope(Map("User", 3), 0, 0, 8)

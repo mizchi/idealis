@@ -1,0 +1,400 @@
+{
+  "version": 1,
+  "name": "Sessions",
+  "sigs": [
+    "User"
+  ],
+  "enums": [],
+  "relations": [
+    {
+      "name": "admins",
+      "var": false,
+      "shape": {
+        "kind": "unary",
+        "sort": "User",
+        "mult": "set"
+      }
+    },
+    {
+      "name": "active",
+      "var": true,
+      "shape": {
+        "kind": "unary",
+        "sort": "User",
+        "mult": "set"
+      }
+    },
+    {
+      "name": "locked",
+      "var": true,
+      "shape": {
+        "kind": "unary",
+        "sort": "User",
+        "mult": "lone"
+      }
+    }
+  ],
+  "facts": [
+    {
+      "op": "gt",
+      "left": {
+        "kind": "count",
+        "of": {
+          "op": "name",
+          "name": "admins"
+        }
+      },
+      "right": {
+        "kind": "literal",
+        "value": 0
+      }
+    }
+  ],
+  "init": [
+    {
+      "op": "no",
+      "of": {
+        "op": "name",
+        "name": "active"
+      }
+    },
+    {
+      "op": "no",
+      "of": {
+        "op": "name",
+        "name": "locked"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "name": "login",
+      "params": [
+        {
+          "name": "u",
+          "sort": "User"
+        }
+      ],
+      "guards": [
+        {
+          "op": "not",
+          "arg": {
+            "op": "in",
+            "left": {
+              "op": "name",
+              "name": "u"
+            },
+            "right": {
+              "op": "name",
+              "name": "active"
+            }
+          }
+        },
+        {
+          "op": "lt",
+          "left": {
+            "kind": "count",
+            "of": {
+              "op": "name",
+              "name": "active"
+            }
+          },
+          "right": {
+            "kind": "literal",
+            "value": 2
+          }
+        }
+      ],
+      "assignments": [
+        {
+          "var": "active",
+          "value": {
+            "op": "union",
+            "left": {
+              "op": "name",
+              "name": "active"
+            },
+            "right": {
+              "op": "name",
+              "name": "u"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "logout",
+      "params": [
+        {
+          "name": "u",
+          "sort": "User"
+        }
+      ],
+      "guards": [
+        {
+          "op": "in",
+          "left": {
+            "op": "name",
+            "name": "u"
+          },
+          "right": {
+            "op": "name",
+            "name": "active"
+          }
+        }
+      ],
+      "assignments": [
+        {
+          "var": "active",
+          "value": {
+            "op": "difference",
+            "left": {
+              "op": "name",
+              "name": "active"
+            },
+            "right": {
+              "op": "name",
+              "name": "u"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "lock",
+      "params": [
+        {
+          "name": "u",
+          "sort": "User"
+        }
+      ],
+      "guards": [
+        {
+          "op": "int_eq",
+          "left": {
+            "kind": "count",
+            "of": {
+              "op": "name",
+              "name": "locked"
+            }
+          },
+          "right": {
+            "kind": "literal",
+            "value": 0
+          }
+        },
+        {
+          "op": "in",
+          "left": {
+            "op": "name",
+            "name": "u"
+          },
+          "right": {
+            "op": "name",
+            "name": "admins"
+          }
+        },
+        {
+          "op": "in",
+          "left": {
+            "op": "name",
+            "name": "u"
+          },
+          "right": {
+            "op": "name",
+            "name": "active"
+          }
+        }
+      ],
+      "assignments": [
+        {
+          "var": "locked",
+          "value": {
+            "op": "name",
+            "name": "u"
+          }
+        }
+      ]
+    },
+    {
+      "name": "unlock",
+      "params": [
+        {
+          "name": "u",
+          "sort": "User"
+        }
+      ],
+      "guards": [
+        {
+          "op": "in",
+          "left": {
+            "op": "name",
+            "name": "u"
+          },
+          "right": {
+            "op": "name",
+            "name": "locked"
+          }
+        }
+      ],
+      "assignments": [
+        {
+          "var": "locked",
+          "value": {
+            "op": "none"
+          }
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "name": "Capacity",
+      "kind": "invariant",
+      "formula": {
+        "op": "le",
+        "left": {
+          "kind": "count",
+          "of": {
+            "op": "name",
+            "name": "active"
+          }
+        },
+        "right": {
+          "kind": "literal",
+          "value": 2
+        }
+      }
+    },
+    {
+      "name": "LockedByAdmin",
+      "kind": "invariant",
+      "formula": {
+        "op": "all",
+        "var": "u",
+        "sort": "User",
+        "body": {
+          "op": "implies",
+          "left": {
+            "op": "in",
+            "left": {
+              "op": "name",
+              "name": "u"
+            },
+            "right": {
+              "op": "name",
+              "name": "locked"
+            }
+          },
+          "right": {
+            "op": "in",
+            "left": {
+              "op": "name",
+              "name": "u"
+            },
+            "right": {
+              "op": "name",
+              "name": "admins"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "LockedIsActive",
+      "kind": "invariant",
+      "formula": {
+        "op": "all",
+        "var": "u",
+        "sort": "User",
+        "body": {
+          "op": "implies",
+          "left": {
+            "op": "in",
+            "left": {
+              "op": "name",
+              "name": "u"
+            },
+            "right": {
+              "op": "name",
+              "name": "locked"
+            }
+          },
+          "right": {
+            "op": "in",
+            "left": {
+              "op": "name",
+              "name": "u"
+            },
+            "right": {
+              "op": "name",
+              "name": "active"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Full",
+      "kind": "reachable",
+      "formula": {
+        "op": "and",
+        "args": [
+          {
+            "op": "int_eq",
+            "left": {
+              "kind": "count",
+              "of": {
+                "op": "name",
+                "name": "active"
+              }
+            },
+            "right": {
+              "kind": "literal",
+              "value": 2
+            }
+          },
+          {
+            "op": "gt",
+            "left": {
+              "kind": "count",
+              "of": {
+                "op": "name",
+                "name": "locked"
+              }
+            },
+            "right": {
+              "kind": "literal",
+              "value": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ThreeActive",
+      "kind": "reachable",
+      "formula": {
+        "op": "int_eq",
+        "left": {
+          "kind": "count",
+          "of": {
+            "op": "name",
+            "name": "active"
+          }
+        },
+        "right": {
+          "kind": "literal",
+          "value": 3
+        }
+      }
+    }
+  ],
+  "scope": {
+    "sizes": {
+      "User": 3
+    },
+    "steps": 8
+  },
+  "omitted": []
+}

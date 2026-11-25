@@ -1,0 +1,13 @@
+model G4173
+sig S0
+var v0: S0 -> one S0
+init { (some S0 and ((S0 -> S0).(S0.v0)) != (S0 & S0)) }
+action a0() {
+  v0' = ((S0.v0) -> (S0.v0))
+}
+action a1(p1_0: S0) {
+  v0' = ((S0 -> S0).(v0 + v0))
+}
+invariant Inv { (((S0 + none) + S0) = S0 and (one ((S0 -> S0).(S0.v0)) implies (S0 - (S0 - S0)) not in S0)) }
+reachable Goal { ((((S0 + S0) + (S0.v0)) in ((v0.S0).(v0 + v0)) or (((S0.(S0 -> S0)) + (S0.v0)) in ((S0.v0).v0) or v0 = (v0 - v0))) and not ((S0 -> S0) = (v0.(S0 -> S0)))) }
+scope S0 = 1, steps = 6

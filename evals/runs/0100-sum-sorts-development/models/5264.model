@@ -1,0 +1,13 @@
+model G5264
+sig S0
+sig S1
+enum E = Ea | Eb
+type P = S0 + S1
+var v0: S1 -> some P
+init { ((S1.((S1 -> P) & v0)) not in (P.((P -> P) + (P -> P))) implies #(E - Ea) >= 1) }
+action a0() {
+  v0' = ((S1 -> E).((E -> P) - (Ea -> P)))
+}
+invariant Inv { ((((v0 & (S1 -> P)) in ((S1 -> S0).(S0 -> P)) and none != ((P -> S1).(S1 - S1))) and (S1 -> P) in (v0.(P -> P))) and not ((all q6: S0 | #S1 > 2))) }
+reachable Goal { not ((all q9: P | not (some ((v0.P).((S1 -> S1) & (S1 -> S1)))))) }
+scope S0 = 3, S1 = 3, steps = 6

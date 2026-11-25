@@ -1,0 +1,202 @@
+{
+  "version": 1,
+  "name": "Service",
+  "sigs": [
+    "Client"
+  ],
+  "enums": [],
+  "sums": [],
+  "records": [],
+  "relations": [
+    {
+      "name": "waiting",
+      "var": true,
+      "shape": {
+        "kind": "unary",
+        "sort": "Client",
+        "mult": "set"
+      }
+    },
+    {
+      "name": "served",
+      "var": true,
+      "shape": {
+        "kind": "unary",
+        "sort": "Client",
+        "mult": "set"
+      }
+    }
+  ],
+  "facts": [],
+  "init": [
+    {
+      "op": "and",
+      "args": [
+        {
+          "op": "no",
+          "of": {
+            "op": "name",
+            "name": "waiting"
+          }
+        },
+        {
+          "op": "no",
+          "of": {
+            "op": "name",
+            "name": "served"
+          }
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "name": "request",
+      "params": [
+        {
+          "name": "c",
+          "sort": "Client"
+        }
+      ],
+      "guards": [
+        {
+          "op": "not_in",
+          "left": {
+            "op": "name",
+            "name": "c"
+          },
+          "right": {
+            "op": "union",
+            "left": {
+              "op": "name",
+              "name": "waiting"
+            },
+            "right": {
+              "op": "name",
+              "name": "served"
+            }
+          }
+        }
+      ],
+      "assignments": [
+        {
+          "var": "waiting",
+          "value": {
+            "op": "union",
+            "left": {
+              "op": "name",
+              "name": "waiting"
+            },
+            "right": {
+              "op": "name",
+              "name": "c"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "serve",
+      "params": [
+        {
+          "name": "c",
+          "sort": "Client"
+        }
+      ],
+      "guards": [
+        {
+          "op": "in",
+          "left": {
+            "op": "name",
+            "name": "c"
+          },
+          "right": {
+            "op": "name",
+            "name": "waiting"
+          }
+        }
+      ],
+      "assignments": [
+        {
+          "var": "waiting",
+          "value": {
+            "op": "difference",
+            "left": {
+              "op": "name",
+              "name": "waiting"
+            },
+            "right": {
+              "op": "name",
+              "name": "c"
+            }
+          }
+        },
+        {
+          "var": "served",
+          "value": {
+            "op": "union",
+            "left": {
+              "op": "name",
+              "name": "served"
+            },
+            "right": {
+              "op": "name",
+              "name": "c"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "name": "Disjoint",
+      "kind": "invariant",
+      "formula": {
+        "op": "and",
+        "args": [
+          {
+            "op": "no",
+            "of": {
+              "op": "intersection",
+              "left": {
+                "op": "name",
+                "name": "waiting"
+              },
+              "right": {
+                "op": "name",
+                "name": "served"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AllServed",
+      "kind": "reachable",
+      "formula": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "op": "name",
+              "name": "served"
+            },
+            "right": {
+              "op": "name",
+              "name": "Client"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "scope": {
+    "sizes": {
+      "Client": 2
+    },
+    "steps": 4
+  }
+}

@@ -1,0 +1,27 @@
+model G7286
+sig S0
+enum E = Ea | Eb
+type P = S0 + E
+var v0: S0 -> one E
+record R { n: Int, b: Bool }
+var w0: S0 -> one R
+init { (some (v0.Ea) or (v0 & (S0 -> E)) = (S0 -> E)) }
+init { all x: S0 | x.w0 = R { n: 0, b: false } }
+action set0(x: S0, k: Int) {
+  k <= k
+  w0' = w0 - x -> x.w0 + x -> (R { n: (k - x.w0.n), b: false })
+}
+action a0(p0_0: E, p0_1: P) {
+  (some (S0 + S0) or S0 not in (((Eb -> p0_0).E).((Ea -> S0).(S0 -> P))))
+  (some q4: S0 | q4.w0.n <= q4.w0.n)
+  v0' = ((S0 -> Eb) - ((S0 -> E).(p0_0 -> p0_0)))
+}
+action a1(p1_0: P) {
+  v0' = v0
+}
+action a2(p2_0: S0, p2_1: E) {
+  v0' = ((p2_0 -> S0).(v0.(p2_1 -> Eb)))
+}
+invariant Inv { (not (((Eb -> P) = ((Ea -> P) + (Eb -> P)) or (E + (S0.(S0 -> Eb))) not in (((Ea -> E).Eb) + (S0.v0)))) or (all q9: S0 | q9.w0.b)) }
+reachable Goal { not (((v0 - (S0 -> E)).((E -> S0).S0)) != (P.((P -> S0).(S0 -> S0)))) }
+scope S0 = 2, Int = 0..2, steps = 6

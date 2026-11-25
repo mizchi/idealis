@@ -1,0 +1,20 @@
+model G4158
+sig S0
+enum E = Ea | Eb
+rel r0: S0 -> set S0
+rel r1: S0 -> set E
+var v2: one S0
+var v3: E -> set E
+fact { not ((S0 -> S0) in (S0 -> S0)) }
+init { ((Eb -> v2) = (E -> v2) or (v2.(r0.r1)) not in ((E -> Eb).Ea)) }
+action a0() {
+  (some none and ((v2.r1) + (none + Eb)) in ((E -> v2).((v2 -> v2).v2)))
+  v3' = ((E -> Ea).(Eb -> E))
+}
+action a1() {
+  (v3 = (E -> Eb) or ((E -> S0) & (E -> v2)) = (E -> v2))
+  v2' = (v2 + (Eb.(Eb -> S0)))
+}
+invariant Inv { ((some (S0.r1) implies not (some Ea)) or some (E - ((Ea -> v2).S0))) }
+reachable Goal { ((((Ea -> v2).(v2 - v2)) not in ((Eb.v3) + (v3.Eb)) and some none) implies (some (v2.r1) or ((E.(E -> v2)).(S0 -> v2)) != ((v2 & v2) - (v2 - S0)))) }
+scope S0 = 3, steps = 6

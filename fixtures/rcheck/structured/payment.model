@@ -1,0 +1,18 @@
+model Payment
+record Amount { units: Nat }
+enum Reason = Declined | Offline
+variant Outcome = Pending | Paid(Amount) | Rejected(Reason)
+var result: one Outcome
+init { result = Pending() }
+behavior complete(outcome: Outcome) {
+  guard {
+    is(result, Pending)
+    not is(outcome, Pending)
+    payload(outcome, Paid) != Amount { units: 0 }
+  }
+  update { result = outcome }
+}
+invariant NoZeroPayment { payload(result, Paid) != Amount { units: 0 } }
+reachable PaidExactly { result = Paid(Amount { units: 2 }) }
+reachable CanReject { result = Rejected(Declined) }
+scope Int = 0..2, steps = 3

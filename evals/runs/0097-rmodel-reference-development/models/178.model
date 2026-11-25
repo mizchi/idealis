@@ -1,0 +1,17 @@
+model G178
+sig S0
+sig S1
+var v0: S1 -> set S1
+init { (some q1: S1 | ((S1 -> none) - v0) in v0) }
+action a0(p0_0: S0) {
+  (none in (v0.S0) or some S0)
+  #(S0 - p0_0) > 2
+  v0' = (S1 -> S1)
+}
+action a1(p1_0: S1, p1_1: S1) {
+  (v0 = (p1_1 -> none) or (v0 - (p1_0 -> p1_0)) in (p1_1 -> p1_0))
+  v0' = ((p1_0.v0) -> ((S1 -> p1_1).p1_1))
+}
+invariant Inv { ((one ((S0 -> S0).S1) or (all q5: S0 | ((v0.(S1 -> q5)).(S0 - S1)) in S1)) and some (S0 - (v0.S1))) }
+reachable Goal { #(v0.S1) < 2 }
+scope S0 = 3, S1 = 2, steps = 6

@@ -1,0 +1,39 @@
+{
+  "kind": "two cold simulated readers",
+  "fixture": "fixtures/rmodel-readability/transition-cases.json",
+  "instructions": "Read each declaration as a rule over adjacent model states. Unmarked expressions refer to the earlier state, prime reads the later state, and before/after read their named states.",
+  "optionOrder": {
+    "shipment": [[1, 0, 2, 3], [1, 2, 3, 0], [1, 2, 0, 3]],
+    "retry": [[1, 2, 0, 3], [1, 0, 2, 3], [2, 3, 1, 0]]
+  },
+  "responses": [
+    {
+      "reader": "A",
+      "id": "shipment",
+      "variant": "explicit",
+      "choices": ["B", "D", "C"],
+      "reason": "`is(before(status), Shipped)`、前後の `payload` の等号、隣接するモデル状態に適用する `transition`"
+    },
+    {
+      "reader": "A",
+      "id": "retry",
+      "variant": "prime",
+      "choices": ["C", "B", "D"],
+      "reason": "`status = Sent and status' = Sent`、`attempt' >= attempt`、`status' = Sent`"
+    },
+    {
+      "reader": "B",
+      "id": "shipment",
+      "variant": "prime",
+      "choices": ["B", "D", "C"],
+      "reason": "`is(status, Shipped)`、`payload(status, Shipped) = payload(status', Shipped)`、`transition`"
+    },
+    {
+      "reader": "B",
+      "id": "retry",
+      "variant": "explicit",
+      "choices": ["C", "B", "D"],
+      "reason": "`before(status) = Sent and after(status) = Sent`、`after(attempt) >= before(attempt)`、`after(status) = Sent`"
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "$defs": {
+    "Account": {
+      "enum": [
+        "Account0",
+        "Account1"
+      ]
+    },
+    "Command": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "a": {
+              "$ref": "#/$defs/Account"
+            },
+            "kind": {
+              "const": "deposit"
+            },
+            "n": {
+              "$ref": "#/$defs/Int"
+            }
+          },
+          "required": [
+            "kind",
+            "a",
+            "n"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "a": {
+              "$ref": "#/$defs/Account"
+            },
+            "kind": {
+              "const": "withdraw"
+            },
+            "n": {
+              "$ref": "#/$defs/Int"
+            }
+          },
+          "required": [
+            "kind",
+            "a",
+            "n"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Config": {
+      "additionalProperties": false,
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "Int": {
+      "type": "integer"
+    },
+    "State": {
+      "additionalProperties": false,
+      "properties": {
+        "balance": {
+          "additionalProperties": false,
+          "properties": {
+            "Account0": {
+              "$ref": "#/$defs/Int"
+            },
+            "Account1": {
+              "$ref": "#/$defs/Int"
+            }
+          },
+          "required": [
+            "Account0",
+            "Account1"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "balance"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Bank"
+}

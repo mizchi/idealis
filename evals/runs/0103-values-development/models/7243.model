@@ -1,0 +1,30 @@
+model G7243
+sig S0
+enum E = Ea | Eb
+rel r0: E -> one S0
+rel r1: E -> lone E
+var v2: lone E
+record R { n: Int, b: Bool }
+var w0: S0 -> one R
+init { some ((r1 - (v2 -> v2)).Ea) }
+init { all x: S0 | x.w0 = R { n: 0, b: false } }
+action set0(x: S0, k: Int) {
+  (x.w0.n - 0) >= x.w0.n
+  w0' = w0 - x -> x.w0 + x -> (R { n: x.w0.n, b: false })
+}
+action a0(p0_0: E, p0_1: E) {
+  (all q5: S0 | some q5)
+  not (((none + S0).(S0 -> Ea)) in (((E -> Ea) - (E -> Ea)).(p0_1 - Ea)))
+  v2' = Ea
+}
+action a1(p1_0: S0) {
+  lone (r1.Ea)
+  ((p1_0 -> E) - (S0 -> E)) = ((S0 -> E) + (p1_0 -> v2))
+  v2' = ((v2.r0).(S0 -> Eb))
+}
+action a2(p2_0: S0) {
+  v2' = E
+}
+invariant Inv { (((some ((S0 -> E).(S0.(S0 -> v2))) and #(S0 & S0) <= 3) and (all q6: S0 | (q6.w0.n - 2) != 0)) implies (some q7: S0 | (q7 -> S0) = (q7 -> q7))) }
+reachable Goal { (some q10: S0 | q10.w0.n != #v2) }
+scope S0 = 3, Int = 0..2, steps = 6

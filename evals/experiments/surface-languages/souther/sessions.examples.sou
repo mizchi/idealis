@@ -1,0 +1,29 @@
+examples for comparison.sessions
+
+let alice = User("a")
+let bob = User("b")
+let carol = User("c")
+let settings = Settings { admins = Set.singleton(alice) }
+let empty = Sessions { settings = settings, active = Set.empty, locked = None }
+let atCapacity = Sessions { ...empty, active = Set.fromList([alice, bob]), locked = alice }
+
+// A reachable counterexample to LockedIsActive and a witness for Full.
+example lockAndLogout
+    | (settings, alice) -> Sessions { ...empty, locked = alice }
+
+example addSecondUser
+    | (settings, alice, bob) -> atCapacity
+
+// One checked boundary case; the type invariant prevents constructing
+// three active sessions, without model checking the transition graph.
+example login
+    | (atCapacity, carol) -> Disabled
+    | (atCapacity, alice) -> Disabled
+
+example lock
+    | (Sessions { ...empty, active = Set.singleton(bob) }, bob) -> Disabled
+    | (empty, alice)                                            -> Disabled
+
+example unlock
+    | (atCapacity, alice) -> Sessions { ...atCapacity, locked = None }
+    | (atCapacity, bob)   -> Disabled

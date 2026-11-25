@@ -1,0 +1,21 @@
+model G8185
+sig S0
+rel r0: S0 -> some S0
+rel r1: S0 -> set S0
+var v2: S0 -> one S0
+fact { #(S0.r1) > 1 }
+init { ((S0 -> S0) in (S0 -> S0) implies (r0.v2) in v2) }
+action a0(p0_0: S0) {
+  (#S0 = 3 implies ((S0 -> p0_0).p0_0) in S0)
+  v2' = (((S0 -> p0_0) + v2).v2)
+}
+action a1(p1_0: S0, p1_1: S0) {
+  some (S0 & S0)
+  v2' = (p1_1 -> S0)
+}
+action a2(p2_0: S0, p2_1: S0) {
+  v2' = (v2.(r1.r1))
+}
+invariant Inv { not ((some none implies (v2 - r0) in r1)) }
+reachable Goal { (((((S0 -> S0).S0) not in (S0 & (r0.S0)) and some (S0.r1)) implies (some S0 implies #(S0 + none) <= 3)) or (r0.r0) in v2) }
+scope S0 = 3, steps = 6

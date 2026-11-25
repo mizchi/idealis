@@ -1,0 +1,17 @@
+model G8044
+sig S0
+sig S1
+type P = S0 + S1
+rel r0: lone P
+rel r1: set P
+var v2: S1 -> lone S1
+init { (((P -> S1).v2) = (P -> S1) implies (S0 -> S1) = (S0 -> S1)) }
+action a0() {
+  v2' = ((S1 -> S1).(S1 -> S1))
+}
+action a1(p1_0: S0) {
+  v2' = (S1 -> S1)
+}
+invariant Inv { ((lone ((v2.S1) & S1) and r1 != ((P -> S0).(S0.(S0 -> S0)))) or (some q7: P | (some (S0 & q7) implies some (S0 + S0)))) }
+reachable Goal { (all q8: S0 | (v2 = (S1 -> S1) and lone r1)) }
+scope S0 = 3, S1 = 3, steps = 6

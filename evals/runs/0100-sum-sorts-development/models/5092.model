@@ -1,0 +1,21 @@
+model G5092
+sig S0
+enum E = Ea | Eb
+var v0: S0 -> some S0
+init { (((S0 -> S0) & v0).(S0 & S0)) = S0 }
+action a0(p0_0: S0, p0_1: S0) {
+  (E -> p0_0) = ((E -> p0_0).v0)
+  v0' = (p0_0 -> p0_0)
+}
+action a1() {
+  lone ((E -> S0).S0)
+  v0' = (((S0 -> Eb).(Eb -> S0)) + (S0 -> S0))
+}
+action a2() {
+  (one E implies (Ea -> E) = ((E -> S0).(S0 -> Ea)))
+  #none >= 1
+  v0' = ((S0 - S0) -> (v0.S0))
+}
+invariant Inv { (((S0 -> S0).((S0 -> E).Eb)) != ((S0 & S0).v0) and (#Ea <= 3 implies some (S0 & S0))) }
+reachable Goal { (some Eb or #(S0.v0) <= 3) }
+scope S0 = 1, steps = 6

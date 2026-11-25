@@ -1,0 +1,42 @@
+examples for comparison.order
+
+let first = OrderId("first")
+let second = OrderId("second")
+let orders = Set.fromList([first, second])
+let dispatched =
+    Orders { status = Map.fromList([(first, Shipped { tracking = Courier }), (second, Draft)]) }
+
+example firstCancellation
+    | (orders, first, Fraud)
+        -> Orders {
+            status = Map.fromList([(first, Cancelled { reason = Fraud }), (second, Draft)])
+        }
+
+example placedThenShipped
+    | (orders, first, Courier) -> dispatched
+
+// ShippedStays: the guards reject updates to the shipped order, and
+// Map.insert on a different order leaves the shipped payload intact.
+// Examples cover each action but are not a temporal proof.
+example place
+    | (dispatched, first) -> Disabled
+    | (dispatched, second)
+        -> Orders {
+            status = Map.fromList([(first, Shipped { tracking = Courier }), (second, Placed)])
+        }
+
+example ship
+    | (dispatched, first, Post) -> Disabled
+
+example cancel
+    | (dispatched, first, Fraud) -> Disabled
+
+example shippedWith
+    | (Shipped { tracking = Courier }, Courier) -> true
+    | (Shipped { tracking = Post }, Courier)    -> false
+    | (Cancelled { reason = Fraud }, Courier)   -> false
+
+example cancelledFor
+    | (Cancelled { reason = Fraud }, Fraud)    -> true
+    | (Cancelled { reason = Customer }, Fraud) -> false
+    | (Shipped { tracking = Courier }, Fraud)  -> false

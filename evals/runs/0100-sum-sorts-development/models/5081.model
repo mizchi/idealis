@@ -1,0 +1,14 @@
+model G5081
+sig S0
+sig S1
+rel r0: S0 -> some S0
+rel r1: S0 -> set S1
+var v2: S0 -> some S1
+init { (#S1 != 2 implies (S0.v2) = none) }
+action a0() {
+  (all q5: S1 | lone q5)
+  v2' = v2
+}
+invariant Inv { (not (((S0 & (S0 + S0)) not in S0 implies lone ((r1.(S1 -> S0)).S0))) implies (all q6: S0 | (((v2.S1).(r1 & v2)) not in (((S1 -> S0).(S0 -> S1)).S1) and some (S0.r0)))) }
+reachable Goal { ((((S0 -> S1) in (r1 - v2) implies some S0) or (all q7: S0 | lone S0)) implies (all q8: S0 | (((S0 -> S0).q8) = ((q8 - q8) - ((q8 -> q8).S0)) or ((r1.(S1 -> S0)).S0) in ((r0.r0).(q8.r0))))) }
+scope S0 = 3, S1 = 3, steps = 6

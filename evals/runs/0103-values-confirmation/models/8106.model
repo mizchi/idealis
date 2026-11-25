@@ -1,0 +1,27 @@
+model G8106
+sig S0
+sig S1
+type P = S0 + S1
+var v0: S0 -> one P
+var v1: lone S0
+record R { n: Int, b: Bool }
+var w0: S0 -> one R
+init { (some S1 and (v0 - (v1 -> P)) = (v0 + v0)) }
+init { all x: S0 | x.w0 = R { n: 0, b: false } }
+action set0(x: S0, k: Int) {
+  w0' = w0 - x -> x.w0 + x -> (R { n: (1 * 0), b: true })
+}
+action a0() {
+  (some q5: S0 | q5.w0.b)
+  not ((some q6: S0 | (#S0 + q6.w0.n) <= q6.w0.n))
+  v0' = (v1 -> P)
+}
+action a1(p1_0: S1, p1_1: S0) {
+  v0' = v0
+}
+action a2(p2_0: P) {
+  v0' = (((S0 -> S1).(S1 -> S0)).v0)
+}
+invariant Inv { (((some q10: S0 | q10.w0.b) implies not ((P.(P -> S0)) in v1)) implies (all q11: S0 | (0 + q11.w0.n) != 1)) }
+reachable Goal { (some q15: S0 | ((some S0 and ((q15 -> S1) - (v1 -> S1)) = (q15 -> S1)) implies (some q16: S1 | one (((q15 -> q15).v1) - v1)))) }
+scope S0 = 3, S1 = 2, Int = 0..2, steps = 6

@@ -1,0 +1,30 @@
+model G8004
+sig S0
+sig S1
+type P = S0 + S1
+var v0: set S0
+var w0: S0 -> one Int
+var w1: S0 -> one Bool
+init { ((S1 -> P).(P -> v0)) in (S1 -> v0) }
+init { all x: S0 | x.w0 = 0 }
+init { all x: S0 | x.w1 = false }
+action set0(x: S0, k: Int) {
+  w0' = w0 - x -> x.w0 + x -> ((#v0 - k))
+}
+action set1(x: S0) {
+  w1' = w1 - x -> x.w1 + x -> (true)
+}
+action a0(p0_0: P) {
+  v0' = S0
+}
+action a1(p1_0: S1) {
+  some S0
+  v0' = (((S0 -> P).(P -> P)).P)
+}
+action a2(p2_0: S0) {
+  one S1
+  v0' = S0
+}
+invariant Inv { ((S0 -> S0).(P.(P -> v0))) != S0 }
+reachable Goal { ((all q16: S0 | (q16.w0 + #P) <= #P) implies (v0 -> S0) in (v0 -> S0)) }
+scope S0 = 2, S1 = 1, Int = -1..2, steps = 6

@@ -1,0 +1,310 @@
+/// An adapter (plan 0108): writes a model of Model.pkl as the idealis
+/// kernel IR, version 1 (crates/rcheck/src/ir.rs). Expressions become the
+/// IR's relational trees: `Image`/`App` a join, `Insert`/`Remove` a union
+/// or difference, `Assign`/`SetLone` a replacement at one key.
+/// Single-payload constructors and formula matches use tagged values.
+/// Eventually and quantified response properties carry per-property fairness.
+module ToIR
+
+import "Model.pkl"
+
+/// `ADAPTER_FAULT` in the environment selects an artificial fault for the
+/// differential test (plan 0108): "swap-insert-remove" or "flip-join".
+local fault: String = read?("env:ADAPTER_FAULT") ?? ""
+
+local function name(n: String): Dynamic = new { op = "name"; name = n }
+local function bin(o: String, l: Dynamic, r: Dynamic): Dynamic = new { op = o; left = l; right = r }
+
+/// The kernel's name for a type.
+local function typeName(t: Model.Type): String =
+  if (t is Model.SortT) t.name
+  else if (t is Model.DataT) t.name
+  else if (t is Model.IntT) "Int"
+  else "Bool"
+
+local function rel(m, n: String): Model.Rel = m.rels.find((r) -> r.name == n)
+
+local function data(m, n: String): Model.Data = m.data.find((d) -> d.name == n)
+
+local function tagged(d: Model.Data): Boolean = d.variants.any((v) -> !v.fields.isEmpty)
+
+local function sortOf(m, ctx: Map<String, String>, e: Model.Expr): String? =
+  if (e is Model.Ctor) e.data
+  else if (e is Model.Var) ctx.getOrNull(e.name)
+  else if (e is Model.App || e is Model.Image) typeName(rel(m, e.rel).cod)
+  else null
+
+/// The reason an expression is outside the kernel, or null.
+function unsupported(m, e: Model.Expr): String? = unsupportedPhase(m, e, false, List())
+
+local function unsupportedPhase(m, e: Model.Expr, step: Boolean, projected: List<String>): String? =
+  if (e is Model.Next)
+    if (!step) "a step or temporal operator"
+    else if (!(e.arg is Model.App || e.arg is Model.Image))
+      "next of an expression other than a relation read"
+    else if (e.arg.args.any((arg) -> !(arg is Model.Var) || projected.contains(arg.name)))
+      "next of a relation with nonstable arguments"
+    else unsupportedPhase(m, e.arg, false, projected)
+  else if (e is Model.Always || e is Model.Eventually) "a step or temporal operator"
+  else if (e is Model.Match)
+    unsupportedPhase(m, e.scrutinee, step, projected)
+      ?? e.cases.map((c) -> unsupportedPhase(m, c.body, step, projected + c.binds)).filterNonNull().firstOrNull
+  else if (e is Model.All || e is Model.Exists)
+    unsupportedPhase(m, e.body, step, projected.filter((n) -> n != e.var))
+  else if ((e is Model.App || e is Model.Image) && e.args.length > 1) "a relation over two or more sorts"
+  else
+    let (children =
+      if (e is Model.Ctor) e.args
+      else if (e is Model.In) List(e.elem, e.set)
+      else if (e is Model.Count) List(e.set)
+      else if (e is Model.Not) List(e.arg)
+      else if (e is Model.And || e is Model.Or) e.args
+      else if (e is Model.Implies || e is Model.Cmp || e is Model.Arith) List(e.lhs, e.rhs)
+      else if (e is Model.App || e is Model.Image) e.args
+      else List())
+      children.map((c) -> unsupportedPhase(m, c, step, projected)).filterNonNull().firstOrNull
+
+/// Whether an expression denotes one integer.
+local function isInt(m, ctx: Map<String, String>, e: Model.Expr): Boolean =
+  (e is Model.Next && isInt(m, ctx, e.arg)) || e is Model.IntLit || e is Model.Count || e is Model.Arith
+    || (e is Model.Var && ctx.getOrNull(e.name) == "Int")
+    || ((e is Model.App || e is Model.Image) && rel(m, e.rel).cod is Model.IntT)
+
+/// A set or relation expression.
+function expr(m, ctx: Map<String, String>, e: Model.Expr): Dynamic =
+  expression(m, ctx, Map(), e)
+
+local function expression(m, ctx: Map<String, String>, bindings: Map<String, Dynamic>, e: Model.Expr): Dynamic =
+  if (e is Model.Var) bindings.getOrNull(e.name) ?? name(e.name)
+  else if (e is Model.Next) new { op = "after"; of = expression(m, ctx, bindings, e.arg) }
+  else if (e is Model.IntLit) new { op = "literal"; value = e.value }
+  else if (e is Model.BoolLit) name(e.value.toString())
+  else if (e is Model.Ctor)
+    if (tagged(data(m, e.data))) new Dynamic {
+      op = "variant"
+      tag = e.variant
+      payload = if (e.args.isEmpty) null else expression(m, ctx, bindings, e.args.first)
+    } else name(e.variant)
+  else if (e is Model.Universe) name(e.sort)
+  else if (e is Model.Count) new { op = "count"; of = expression(m, ctx, bindings, e.set) }
+  else if (e is Model.Arith) bin(if (e.fn == "+") "add" else "sub", expression(m, ctx, bindings, e.lhs), expression(m, ctx, bindings, e.rhs))
+  else if (e is Model.App || e is Model.Image)
+    if (e.args.isEmpty) name(e.rel)
+    else if (fault == "flip-join") bin("join", name(e.rel), expression(m, ctx, bindings, e.args.first))
+    else bin("join", expression(m, ctx, bindings, e.args.first), name(e.rel))
+  else throw("not a set expression: \(e.op)")
+
+local function int(m, ctx: Map<String, String>, e: Model.Expr): Dynamic = integer(m, ctx, Map(), e)
+
+local function integer(m, ctx: Map<String, String>, bindings: Map<String, Dynamic>, e: Model.Expr): Dynamic =
+  if (e is Model.Count) new { kind = "count"; of = expression(m, ctx, bindings, e.set) }
+  else if (e is Model.IntLit) new { kind = "literal"; value = e.value }
+  else new { kind = "value"; of = expression(m, ctx, bindings, e) }
+
+local function orAll(args: List<Dynamic>): Dynamic =
+  if (args.length == 1) args.first
+  else bin("or", args.first, orAll(args.drop(1)))
+
+local cmpOps = Map("<", "lt", "<=", "le", ">", "gt", ">=", "ge", "=", "int_eq", "!=", "int_ne")
+
+function formula(m, ctx: Map<String, String>, e: Model.Expr): Dynamic =
+  predicate(m, ctx, Map(), e)
+
+local function branch(m, ctx: Map<String, String>, bindings: Map<String, Dynamic>,
+    d: Model.Data, subject: Dynamic, arm: Model.Case): Dynamic =
+  let (constructor = d.variants.find((v) -> v.name == arm.variant))
+  let (test = if (tagged(d)) new Dynamic { op = "has_tag"; of = subject; tag = arm.variant }
+    else bin("eq", subject, name(arm.variant)))
+  let (pred = if (arm.binds.isEmpty) predicate(m, ctx, bindings, arm.body)
+    else
+      let (field = constructor.fields.first)
+      let (param = arm.binds.first)
+      let (projection = new Dynamic { op = "payload"; of = subject; tag = arm.variant })
+      predicate(m, ctx.put(param, typeName(field.type)), bindings.put(param, projection), arm.body))
+  new { op = "and"; args = List(test, pred) }
+
+// Compare the tag and payload separately. A match-bound payload is
+// available in that branch, even though an IR payload projection itself
+// can yield no value on a different tag.
+local function comparesPayload(m, e: Model.Expr): Boolean =
+  e is Model.Ctor && e.args.length == 1 && tagged(data(m, e.data))
+
+local function constructorComparison(m, ctx: Map<String, String>, bindings: Map<String, Dynamic>,
+    subjectExpr: Model.Expr, ctor: Model.Ctor, op: String): Dynamic =
+  let (subject = expression(m, ctx, bindings, subjectExpr))
+  let (tagTest = new Dynamic { op = "has_tag"; of = subject; tag = ctor.variant })
+  let (projection = new Dynamic { op = "payload"; of = subject; tag = ctor.variant })
+  let (equals = new Dynamic { op = "and"; args = List(tagTest, bin("eq", projection, expression(m, ctx, bindings, ctor.args.first))) })
+    if (op == "=") equals else new Dynamic { op = "not"; arg = equals }
+
+local function predicate(m, ctx: Map<String, String>, bindings: Map<String, Dynamic>, e: Model.Expr): Dynamic =
+  if (e is Model.BoolLit)
+    if (e.value) new Dynamic { op = "and"; args = List() }
+    else new Dynamic { op = "not"; arg = new Dynamic { op = "and"; args = List() } }
+  else if (e is Model.Match)
+    let (d = data(m, sortOf(m, ctx, e.scrutinee) ?? throw("unknown match subject type")))
+    let (subject = expression(m, ctx, bindings, e.scrutinee))
+      orAll(e.cases.map((arm) -> branch(m, ctx, bindings, d, subject, arm)))
+  else if (e is Model.In) bin("in", expression(m, ctx, bindings, e.elem), expression(m, ctx, bindings, e.set))
+  else if (e is Model.Not) new { op = "not"; arg = predicate(m, ctx, bindings, e.arg) }
+  else if (e is Model.And) new { op = "and"; args = e.args.map((a) -> predicate(m, ctx, bindings, a)) }
+  else if (e is Model.Or) orAll(e.args.map((a) -> predicate(m, ctx, bindings, a)))
+  else if (e is Model.Implies) bin("implies", predicate(m, ctx, bindings, e.lhs), predicate(m, ctx, bindings, e.rhs))
+  else if (e is Model.All || e is Model.Exists)
+    let (inner = ctx.put(e.var, e.sort))
+      new {
+        op = if (e is Model.All) "all" else "exists"
+        var = e.var
+        sort = e.sort
+        body = predicate(m, inner, bindings.remove(e.var), e.body)
+      }
+  else if (e is Model.Cmp)
+    if (List("=", "!=").contains(e.rel) && comparesPayload(m, e.rhs) && !comparesPayload(m, e.lhs))
+      constructorComparison(m, ctx, bindings, e.lhs, e.rhs as Model.Ctor, e.rel)
+    else if (List("=", "!=").contains(e.rel) && comparesPayload(m, e.lhs) && !comparesPayload(m, e.rhs))
+      constructorComparison(m, ctx, bindings, e.rhs, e.lhs as Model.Ctor, e.rel)
+    else if (isInt(m, ctx, e.lhs) || isInt(m, ctx, e.rhs) || !List("=", "!=").contains(e.rel))
+      new { op = cmpOps[e.rel]; left = integer(m, ctx, bindings, e.lhs); right = integer(m, ctx, bindings, e.rhs) }
+    else bin(if (e.rel == "=") "eq" else "ne", expression(m, ctx, bindings, e.lhs), expression(m, ctx, bindings, e.rhs))
+  else throw("not a formula: \(e.op)")
+
+/// The tuple `args -> elem` as an expression.
+local function tuple(m, ctx: Map<String, String>, args: List<Model.Expr>, elem: Dynamic): Dynamic =
+  if (args.isEmpty) elem else bin("product", expr(m, ctx, args.first), elem)
+
+/// The relation at the key `args`, as a set of tuples.
+local function at(m, ctx: Map<String, String>, r: String, args: List<Model.Expr>): Dynamic =
+  tuple(m, ctx, args, bin("join", expr(m, ctx, args.first), name(r)))
+
+/// Applies one update to the relation's current value.
+local function update(m, ctx: Map<String, String>, current: Dynamic, u: Model.Update): Dynamic =
+  let (insert = if (fault == "swap-insert-remove") "difference" else "union")
+  let (remove = if (fault == "swap-insert-remove") "union" else "difference")
+  if (u is Model.Insert) bin(insert, current, tuple(m, ctx, u.args, expr(m, ctx, u.elem)))
+  else if (u is Model.Remove) bin(remove, current, tuple(m, ctx, u.args, expr(m, ctx, u.elem)))
+  else if (u is Model.Assign)
+    if (u.args.isEmpty) expr(m, ctx, u.value)
+    else bin("union", bin("difference", current, at(m, ctx, u.rel, u.args)), tuple(m, ctx, u.args, expr(m, ctx, u.value)))
+  else if (u is Model.SetLone)
+    let (cleared = if (u.args.isEmpty) new Dynamic { op = "none" } else bin("difference", current, at(m, ctx, u.rel, u.args)))
+      if (u.value == null) cleared
+      else if (u.args.isEmpty) expr(m, ctx, u.value)
+      else bin("union", cleared, tuple(m, ctx, u.args, expr(m, ctx, u.value)))
+  else throw("not an update: \(u.tag)")
+
+local function shape(r: Model.Rel): Dynamic =
+  if (r.dom.isEmpty) new { kind = "unary"; sort = typeName(r.cod); mult = r.mult }
+  else new { kind = "binary"; from = typeName(r.dom.first); to = typeName(r.cod); mult = r.mult }
+
+local function initOf(m, r: Model.Rel): Dynamic =
+  if (r.initial is Model.Empty) new { op = "no"; of = name(r.name) }
+  else if (r.dom.isEmpty)
+    if (r.cod is Model.IntT) new { op = "int_eq"; left = new Dynamic { kind = "value"; of = name(r.name) }; right = int(m, Map(), r.initial.value) }
+    else bin("eq", name(r.name), expr(m, Map(), r.initial.value))
+  else
+    let (key = "k_" + r.name)
+    let (value = bin("join", name(key), name(r.name)))
+      new {
+        op = "all"
+        var = key
+        sort = typeName(r.dom.first)
+        body =
+          if (r.cod is Model.IntT) new Dynamic { op = "int_eq"; left = new Dynamic { kind = "value"; of = value }; right = int(m, Map(), r.initial.value) }
+          else bin("eq", value, expr(m, Map(), r.initial.value))
+      }
+
+/// Reasons the whole model is outside the kernel.
+function blockers(m): List<String> =
+  m.data.filter((d) -> d.variants.any((v) -> v.fields.length > 1)).map((d) -> "data \(d.name) has a case with multiple fields")
+  + m.rels.filter((r) -> r.dom.length > 1).map((r) -> "relation \(r.name) over two or more sorts")
+  + m.facts.map((f) -> unsupported(m, f)).filterNonNull()
+  + m.actions.flatMap((a) -> (a.guard.map((g) -> unsupported(m, g))
+      + a.updates.flatMap((u) -> u.args + (if (u is Model.Assign) List(u.value) else if (u is Model.SetLone && u.value != null) List(u.value) else if (u is Model.Insert || u is Model.Remove) List(u.elem) else List())).map((x) -> unsupported(m, x)))
+      .filterNonNull().map((reason) -> "action \(a.name): \(reason)"))
+
+local function temporalParts(e: Model.Expr, params: List<Dynamic>): Dynamic? =
+  if (e is Model.All)
+    temporalParts(e.body, params + List(new Dynamic { name = e.var; sort = e.sort }))
+  else if (e is Model.Eventually)
+    new Dynamic { parameters = params; trigger = null; body = e.arg }
+  else if (e is Model.Always && e.arg is Model.Implies && e.arg.rhs is Model.Eventually)
+    new Dynamic { parameters = params; trigger = e.arg.lhs; body = e.arg.rhs.arg }
+  else null
+
+local function propReason(m, p: Model.Prop): String? =
+  if (p.kind == "temporal")
+    let (parts = temporalParts(p.formula, List()))
+      if (parts == null) "unsupported temporal formula"
+      else unsupported(m, parts.body) ?? (if (parts.trigger == null) null else unsupported(m, parts.trigger))
+  else if (p.kind == "step") unsupportedPhase(m, p.formula, true, List())
+  else if (!List("invariant", "reachable").contains(p.kind)) "a \(p.kind) property"
+  else unsupported(m, p.formula)
+
+local function temporal(m, p: Model.Prop): Dynamic =
+  let (parts = temporalParts(p.formula, List())!!)
+  let (ctx = parts.parameters.toMap((p) -> p.name, (p) -> p.sort))
+    new {
+      name = p.name
+      formula = formula(m, ctx, parts.body)
+      when (!parts.parameters.isEmpty) { params = parts.parameters }
+      when (parts.trigger != null) { trigger = formula(m, ctx, parts.trigger) }
+      fairness = p.fairness.map((f) -> new Dynamic { kind = f.strength; action = f.action })
+    }
+
+local function usesInt(m): Boolean =
+  m.rels.any((r) -> r.cod is Model.IntT || r.dom.any((t) -> t is Model.IntT))
+    || m.actions.any((a) -> a.params.any((p) -> p.type is Model.IntT))
+    || m.data.any((d) -> d.variants.any((v) -> v.fields.any((f) -> f.type is Model.IntT)))
+
+/// The IR, or `{ unsupported }` when the model is outside the kernel.
+function convert(m): Dynamic =
+  let (blocked = blockers(m))
+    if (!blocked.isEmpty) new { unsupported = blocked.join("; ") }
+    else
+      new {
+        version = 1
+        name = m.name
+        sigs = m.sorts
+        enums = m.data.filter((d) -> !tagged(d)).map((d) -> new Dynamic { name = d.name; members = d.variants.map((v) -> v.name) })
+        when (m.data.any((d) -> tagged(d))) {
+          variants = m.data.filter((d) -> tagged(d)).map((d) -> new Dynamic {
+            name = d.name
+            cases = d.variants.map((v) -> new Dynamic {
+              tag = v.name
+              when (!v.fields.isEmpty) { payload = typeName(v.fields.first.type) }
+            })
+          })
+        }
+        relations = m.rels.map((r) -> new Dynamic { name = r.name; var = r.mutable; shape = shape(r) })
+        facts = m.facts.map((f) -> formula(m, Map(), f))
+        init = m.rels.filter((r) -> r.mutable).map((r) -> initOf(m, r))
+        actions = m.actions.map((a) ->
+          let (ctx = a.params.toMap((p) -> p.name, (p) -> typeName(p.type)))
+            new Dynamic {
+              name = a.name
+              params = a.params.map((p) -> new Dynamic { name = p.name; sort = typeName(p.type) })
+              guards = a.guard.map((g) -> formula(m, ctx, g))
+              assignments = a.updates.map((u) -> u.rel).distinct.map((r) ->
+                new Dynamic {
+                  var = r
+                  value = a.updates.filter((u) -> u.rel == r).fold(name(r), (current, u) -> update(m, ctx, current, u))
+                })
+            })
+        checks = m.props.filter((p) -> List("invariant", "reachable").contains(p.kind) && propReason(m, p) == null).map((p) ->
+          new Dynamic { name = p.name; kind = p.kind; formula = formula(m, Map(), p.formula) })
+        when (m.props.any((p) -> p.kind == "temporal" && propReason(m, p) == null)) {
+          temporal = m.props.filter((p) -> p.kind == "temporal" && propReason(m, p) == null)
+            .map((p) -> temporal(m, p))
+        }
+        when (m.props.any((p) -> p.kind == "step" && propReason(m, p) == null)) {
+          transitions = m.props.filter((p) -> p.kind == "step" && propReason(m, p) == null).map((p) ->
+            new Dynamic { name = p.name; formula = formula(m, Map(), p.formula) })
+        }
+        scope = new Dynamic {
+          sizes = m.check.sizes
+          when (usesInt(m)) { ints = List(m.check.intMin, m.check.intMax) }
+          steps = m.check.steps
+        }
+        omitted = m.props.filter((p) -> propReason(m, p) != null).map((p) ->
+          new Dynamic { name = p.name; reason = propReason(m, p) })
+      }

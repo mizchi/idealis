@@ -1,0 +1,514 @@
+{
+  "version": 1,
+  "source": "evals/experiments/surface-languages (plan 0107); evidence values are 0107's table: direct 1, workaround 0.5, not expressible 0",
+  "candidates": [
+    {
+      "id": "rmodel",
+      "dir": "evals/experiments/surface-languages/rmodel",
+      "files": {
+        "permissions": "permissions.model",
+        "bank": "bank.model",
+        "order": "order.model",
+        "sessions": "sessions.model",
+        "service": "service.model"
+      },
+      "shared": [],
+      "comments": {
+        "line": "//"
+      },
+      "check": [
+        {
+          "cwd": ".",
+          "run": ["crates/rcheck/target/release/rcheck", "{dir}/{file}"],
+          "each": true
+        }
+      ],
+      "adapter": "fixtures/rcheck/adapters/rmodel",
+      "tree": 1,
+      "verification": ["complete-search", "bounded", "inductive"],
+      "evidence": {
+        "identity": 1,
+        "config": 1,
+        "join": 1,
+        "ints": 1,
+        "adt": 0.5,
+        "typeExclusion": 0,
+        "step": 0,
+        "count": 1,
+        "lone": 1,
+        "liveness": 0,
+        "codegen": 1,
+        "conformance": 1,
+        "enforcement": 0.5
+      }
+    },
+    {
+      "id": "quint",
+      "dir": "evals/experiments/surface-languages/quint",
+      "files": {
+        "permissions": "permissions.qnt",
+        "bank": "bank.qnt",
+        "order": "order.qnt",
+        "sessions": "sessions.qnt",
+        "service": "service.qnt"
+      },
+      "shared": [],
+      "comments": {
+        "line": "//"
+      },
+      "check": [
+        {
+          "cwd": "{dir}",
+          "run": [
+            "pnpm",
+            "dlx",
+            "@informalsystems/quint@0.33.1",
+            "typecheck",
+            "{file}"
+          ],
+          "each": true
+        }
+      ],
+      "adapter": null,
+      "tree": 1,
+      "verification": ["bounded", "complete-search"],
+      "evidence": {
+        "identity": 0.5,
+        "config": 0.5,
+        "join": 1,
+        "ints": 1,
+        "adt": 1,
+        "typeExclusion": 1,
+        "step": 0.5,
+        "count": 1,
+        "lone": 1,
+        "liveness": 1,
+        "codegen": 0,
+        "conformance": 0.5,
+        "enforcement": 0
+      }
+    },
+    {
+      "id": "ocaml",
+      "dir": "evals/experiments/surface-languages/ocaml",
+      "files": {
+        "permissions": "permissions.ml",
+        "bank": "bank.ml",
+        "order": "order.ml",
+        "sessions": "sessions.ml",
+        "service": "service.ml"
+      },
+      "shared": ["model.ml"],
+      "comments": {
+        "block": ["(*", "*)"]
+      },
+      "check": [
+        {
+          "cwd": "{dir}",
+          "run": ["./run.sh"],
+          "each": false
+        }
+      ],
+      "adapter": null,
+      "tree": 0,
+      "verification": ["complete-search"],
+      "evidence": {
+        "identity": 1,
+        "config": 1,
+        "join": 0.5,
+        "ints": 0.5,
+        "adt": 1,
+        "typeExclusion": 1,
+        "step": 1,
+        "count": 1,
+        "lone": 1,
+        "liveness": 0.5,
+        "codegen": 0.5,
+        "conformance": 0,
+        "enforcement": 0.5
+      }
+    },
+    {
+      "id": "isabelle",
+      "dir": "evals/experiments/surface-languages/isabelle",
+      "files": {
+        "permissions": "Permissions.thy",
+        "bank": "Bank.thy",
+        "order": "Order.thy",
+        "sessions": "Sessions.thy",
+        "service": "Service.thy"
+      },
+      "shared": ["Model.thy"],
+      "comments": {
+        "block": ["(*", "*)"]
+      },
+      "check": [
+        {
+          "cwd": ".",
+          "run": ["{env:ISABELLE}", "build", "-c", "-D", "{dir}"],
+          "each": false
+        }
+      ],
+      "adapter": null,
+      "tree": 0.5,
+      "verification": ["proof"],
+      "evidence": {
+        "identity": 1,
+        "config": 1,
+        "join": 1,
+        "ints": 1,
+        "adt": 1,
+        "typeExclusion": 0.5,
+        "step": 1,
+        "count": 0.5,
+        "lone": 1,
+        "liveness": 1,
+        "codegen": 0.5,
+        "conformance": 0,
+        "enforcement": 0.5
+      }
+    },
+    {
+      "id": "idris",
+      "dir": "evals/experiments/surface-languages/idris",
+      "files": {
+        "permissions": "Permissions.idr",
+        "bank": "Bank.idr",
+        "order": "Order.idr",
+        "sessions": "Sessions.idr",
+        "service": "Service.idr"
+      },
+      "shared": ["TS.idr"],
+      "comments": {
+        "line": "--",
+        "block": ["{-", "-}"]
+      },
+      "check": [
+        {
+          "cwd": "{dir}",
+          "run": ["idris2", "--check", "{file}"],
+          "each": true,
+          "env": ["IDRIS2_PREFIX"]
+        }
+      ],
+      "adapter": null,
+      "tree": 0,
+      "verification": ["complete-search"],
+      "evidence": {
+        "identity": 1,
+        "config": 1,
+        "join": 0.5,
+        "ints": 0.5,
+        "adt": 1,
+        "typeExclusion": 1,
+        "step": 1,
+        "count": 1,
+        "lone": 1,
+        "liveness": 0.5,
+        "codegen": 0.5,
+        "conformance": 0,
+        "enforcement": 0.5
+      }
+    },
+    {
+      "id": "pkl",
+      "dir": "evals/experiments/surface-languages/pkl",
+      "files": {
+        "permissions": "permissions.pkl",
+        "bank": "bank.pkl",
+        "order": "order.pkl",
+        "sessions": "sessions.pkl",
+        "service": "service.pkl"
+      },
+      "shared": ["Model.pkl"],
+      "comments": {
+        "line": "//"
+      },
+      "check": [
+        {
+          "cwd": "{dir}",
+          "run": ["pkl", "eval", "{file}"],
+          "each": true
+        }
+      ],
+      "adapter": "fixtures/rcheck/adapters/pkl",
+      "tree": 1,
+      "verification": ["complete-search"],
+      "evidence": {
+        "identity": 1,
+        "config": 1,
+        "join": 0.5,
+        "ints": 1,
+        "adt": 1,
+        "typeExclusion": 0,
+        "step": 1,
+        "count": 1,
+        "lone": 1,
+        "liveness": 0.5,
+        "codegen": 0.5,
+        "conformance": 0,
+        "enforcement": 0
+      }
+    },
+    {
+      "id": "veil",
+      "dir": "evals/experiments/surface-languages/veil",
+      "files": {
+        "permissions": "Permissions.lean",
+        "bank": "Bank.lean",
+        "order": "Order.lean",
+        "sessions": "Sessions.lean",
+        "service": "Service.lean"
+      },
+      "shared": [],
+      "comments": {
+        "line": "--",
+        "block": ["/-", "-/"]
+      },
+      "check": [
+        {
+          "cwd": "{env:VEIL_HOME}",
+          "run": ["lake", "lean", "{abs}"],
+          "each": true,
+          "env": ["VEIL_HOME"]
+        }
+      ],
+      "adapter": null,
+      "tree": 0.5,
+      "verification": ["complete-search", "bounded", "inductive"],
+      "evidence": {
+        "identity": 1,
+        "config": 1,
+        "join": 1,
+        "ints": 0.5,
+        "adt": 0.5,
+        "typeExclusion": 1,
+        "step": 1,
+        "count": 0.5,
+        "lone": 0.5,
+        "liveness": 0.5,
+        "codegen": 0,
+        "conformance": 0,
+        "enforcement": 0
+      }
+    },
+    {
+      "id": "souther",
+      "dir": "evals/experiments/surface-languages/souther",
+      "files": {
+        "permissions": "permissions.sou",
+        "bank": "bank.sou",
+        "order": "order.sou",
+        "sessions": "sessions.sou",
+        "service": "service.sou"
+      },
+      "shared": [],
+      "comments": {
+        "line": "//"
+      },
+      "check": [
+        {
+          "cwd": "{dir}",
+          "run": ["bash", "check.sh"],
+          "each": false,
+          "env": ["SOUTHER"]
+        }
+      ],
+      "adapter": null,
+      "tree": 0.5,
+      "verification": [],
+      "evidence": {
+        "identity": 0.5,
+        "config": 1,
+        "join": 0.5,
+        "ints": 0.5,
+        "adt": 1,
+        "typeExclusion": 1,
+        "step": 1,
+        "count": 1,
+        "lone": 1,
+        "liveness": 0,
+        "codegen": 0.5,
+        "conformance": 1,
+        "enforcement": 1
+      },
+      "checkInputs": [
+        "check.sh",
+        "permissions.examples.sou",
+        "bank.examples.sou",
+        "order.examples.sou",
+        "sessions.examples.sou",
+        "service.examples.sou"
+      ]
+    },
+    {
+      "id": "koine",
+      "dir": "evals/experiments/surface-languages/koine",
+      "files": {
+        "permissions": "permissions.koi",
+        "bank": "bank.koi",
+        "order": "order.koi",
+        "sessions": "sessions.koi",
+        "service": "service.koi"
+      },
+      "shared": [],
+      "comments": {
+        "line": "//"
+      },
+      "check": [
+        {
+          "cwd": "{dir}",
+          "run": ["bash", "check.sh"],
+          "each": false,
+          "env": ["KOINE"]
+        }
+      ],
+      "adapter": null,
+      "tree": 1,
+      "verification": [],
+      "evidence": {
+        "identity": 0.5,
+        "config": 0.5,
+        "join": 0.5,
+        "ints": 0.5,
+        "adt": 0.5,
+        "typeExclusion": 0,
+        "step": 0.5,
+        "count": 0.5,
+        "lone": 1,
+        "liveness": 0,
+        "codegen": 1,
+        "conformance": 0,
+        "enforcement": 1
+      },
+      "checkInputs": ["check.sh", "Checks.cs"]
+    },
+    {
+      "id": "contextmapper",
+      "dir": "evals/experiments/surface-languages/contextmapper",
+      "files": {
+        "permissions": "permissions.cml",
+        "bank": "bank.cml",
+        "order": "order.cml",
+        "sessions": "sessions.cml",
+        "service": "service.cml"
+      },
+      "shared": [],
+      "comments": {
+        "line": "//"
+      },
+      "check": [
+        {
+          "cwd": "{dir}",
+          "run": ["bash", "check.sh"],
+          "each": false,
+          "env": ["CONTEXT_MAPPER"]
+        }
+      ],
+      "adapter": null,
+      "tree": 1,
+      "verification": [],
+      "evidence": {
+        "identity": 0.5,
+        "config": 0.5,
+        "join": 0,
+        "ints": 1,
+        "adt": 0.5,
+        "typeExclusion": 0.5,
+        "step": 0.5,
+        "count": 0.5,
+        "lone": 1,
+        "liveness": 0,
+        "codegen": 0.5,
+        "conformance": 0.5,
+        "enforcement": 0
+      },
+      "checkInputs": ["check.sh"]
+    },
+    {
+      "id": "fizzbee",
+      "dir": "evals/experiments/surface-languages/fizzbee",
+      "files": {
+        "permissions": "permissions.fizz",
+        "bank": "bank.fizz",
+        "order": "order.fizz",
+        "sessions": "sessions.fizz",
+        "service": "service.fizz"
+      },
+      "shared": [],
+      "comments": {
+        "line": "#"
+      },
+      "check": [
+        {
+          "cwd": "{dir}",
+          "run": ["bash", "check.sh"],
+          "each": false,
+          "env": ["FIZZBEE"]
+        }
+      ],
+      "adapter": null,
+      "tree": 1,
+      "verification": ["complete-search"],
+      "evidence": {
+        "identity": 0.5,
+        "config": 0.5,
+        "join": 0.5,
+        "ints": 1,
+        "adt": 0.5,
+        "typeExclusion": 0,
+        "step": 1,
+        "count": 1,
+        "lone": 0.5,
+        "liveness": 1,
+        "codegen": 0,
+        "conformance": 1,
+        "enforcement": 0
+      },
+      "checkInputs": ["check.sh"]
+    },
+    {
+      "id": "p",
+      "dir": "evals/experiments/surface-languages/p",
+      "files": {
+        "permissions": "permissions.p",
+        "bank": "bank.p",
+        "order": "order.p",
+        "sessions": "sessions.p",
+        "service": "service.p"
+      },
+      "shared": [],
+      "comments": {
+        "line": "//"
+      },
+      "check": [
+        {
+          "cwd": "{dir}",
+          "run": ["bash", "check.sh"],
+          "each": false,
+          "env": ["P_CLI"]
+        }
+      ],
+      "adapter": null,
+      "tree": 0.5,
+      "verification": ["bounded"],
+      "evidence": {
+        "identity": 0.5,
+        "config": 0.5,
+        "join": 0.5,
+        "ints": 0.5,
+        "adt": 0.5,
+        "typeExclusion": 0.5,
+        "step": 1,
+        "count": 1,
+        "lone": 0.5,
+        "liveness": 0.5,
+        "codegen": 0,
+        "conformance": 1,
+        "enforcement": 0.5
+      },
+      "checkInputs": ["check.sh"]
+    }
+  ],
+  "implSource": "impl (plan 0110): rubric of tool capabilities, with measured and documented evidence distinguished in the candidate reports"
+}

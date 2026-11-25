@@ -1,0 +1,32 @@
+model G8130
+sig S0
+enum E = Ea | Eb
+var v0: E -> set E
+record R { n: Int, b: Bool }
+var w0: S0 -> one Bool
+var w1: S0 -> one R
+init { one ((v0.(Eb -> S0)).(E.(Eb -> S0))) }
+init { all x: S0 | x.w0 = false }
+init { all x: S0 | x.w1 = R { n: 0, b: false } }
+action set0(x: S0) {
+  not x.w0
+  w0' = w0 - x -> x.w0 + x -> (true)
+}
+action set1(x: S0, k: Int) {
+  w1' = w1 - x -> x.w1 + x -> (R { n: k, b: false })
+}
+action a0(p0_0: S0) {
+  p0_0.w0
+  #(Ea - Ea) < 0
+  v0' = v0
+}
+action a1() {
+  v0' = (E -> Eb)
+}
+action a2(p2_0: E) {
+  #(Eb - E) <= 2
+  v0' = v0
+}
+invariant Inv { (((#Eb >= 1 implies no none) and (some ((S0 -> S0).(Ea.(Ea -> S0))) and (all q10: S0 | not q10.w0))) implies (((E -> Ea) in ((Eb -> Ea) + v0) or #(E.(Ea -> S0)) > 1) or (some q11: E | some S0))) }
+reachable Goal { ((lone ((Eb & Eb) - (v0.E)) and (some q14: S0 | q14.w1.b)) or ((all q15: S0 | q15.w0) or (some q16: S0 | q16.w1.n > (q16.w1.n * 0)))) }
+scope S0 = 3, Int = 0..2, steps = 6

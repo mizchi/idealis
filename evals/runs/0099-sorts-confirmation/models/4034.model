@@ -1,0 +1,14 @@
+model G4034
+sig S0
+var v0: S0 -> set S0
+var v1: S0 -> lone S0
+init { (v0.v0) in ((S0 -> S0) + (S0 -> S0)) }
+action a0(p0_0: S0, p0_1: S0) {
+  v0' = ((S0.v1) -> (S0.(p0_1 -> p0_1)))
+}
+action a1(p1_0: S0) {
+  v0' = v0
+}
+invariant Inv { (some q1: S0 | (all q2: S0 | (#q1 > 3 and (S0 -> S0) in ((q1 -> q2).v0)))) }
+reachable Goal { (some ((S0.(S0 -> S0)) & (S0 + S0)) or some (S0.v0)) }
+scope S0 = 1, steps = 6

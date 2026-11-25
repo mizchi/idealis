@@ -1,0 +1,74 @@
+module comparison.order
+
+data OrderId = String
+data Carrier = Post | Courier
+data Reason = Customer | Fraud
+
+data Shipped =
+    { tracking: Carrier
+    }
+data Cancelled =
+    { reason: Reason
+    }
+// The two payload-bearing alternatives cannot coexist for a single order.
+data Status = Draft | Placed | Shipped | Cancelled
+
+data Orders =
+    { status: Map<OrderId, Status>
+    }
+data Disabled
+data Change = Orders | Disabled
+
+behavior initial : (orders: Set<OrderId>) -> Orders
+let initial (orders) =
+    Orders { status = Map.fromList(List.map(o -> (o, Draft), Set.toList(orders))) }
+
+let updated (s: Orders, o: OrderId, status: Status) = Map.insert(o, status, s.status)
+
+behavior place : (s: Orders, o: OrderId) -> Change
+let place (s, o) =
+    match Map.get(o, s.status) with
+        | None -> Disabled
+        | Some status
+            -> match status with
+                | Draft -> Orders { status = updated(s, o, Placed) }
+                | Placed | Shipped | Cancelled -> Disabled
+
+behavior ship : (s: Orders, o: OrderId, tracking: Carrier) -> Change
+let ship (s, o, tracking) =
+    match Map.get(o, s.status) with
+        | None -> Disabled
+        | Some status
+            -> match status with
+                | Placed -> Orders { status = updated(s, o, Shipped { tracking = tracking }) }
+                | Draft | Shipped | Cancelled -> Disabled
+
+behavior cancel : (s: Orders, o: OrderId, reason: Reason) -> Change
+let cancel (s, o, reason) =
+    match Map.get(o, s.status) with
+        | None -> Disabled
+        | Some status
+            -> match status with
+                | Draft | Placed -> Orders { status = updated(s, o, Cancelled { reason = reason }) }
+                | Shipped | Cancelled -> Disabled
+
+behavior firstCancellation : (orders: Set<OrderId>, o: OrderId, reason: Reason) -> Change
+let firstCancellation (orders, o, reason) = cancel(initial(orders), o, reason)
+
+behavior placedThenShipped : (orders: Set<OrderId>, o: OrderId, tracking: Carrier) -> Change
+let placedThenShipped (orders, o, tracking) =
+    match place(initial(orders), o) with
+        | Disabled -> Disabled
+        | Orders as s -> ship(s, o, tracking)
+
+behavior shippedWith : (status: Status, carrier: Carrier) -> Bool
+let shippedWith (status, carrier) =
+    match status with
+        | Shipped { tracking } -> tracking == carrier
+        | Draft | Placed | Cancelled -> false
+
+behavior cancelledFor : (status: Status, expected: Reason) -> Bool
+let cancelledFor (status, expected) =
+    match status with
+        | Cancelled { reason } -> reason == expected
+        | Draft | Placed | Shipped -> false

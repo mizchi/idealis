@@ -1,0 +1,21 @@
+model G7049
+sig S0
+sig S1
+rel r0: S0 -> some S1
+rel r1: S1 -> set S1
+var v2: lone S1
+record R { n: Int, b: Bool }
+var w0: S0 -> one R
+fact { ((some S1 and lone S1) or not (some S1)) }
+init { (#(S1.(v2 -> S0)) > 0 implies (all q2: S0 | 2 <= (#q2 + 2))) }
+init { all x: S0 | x.w0 = R { n: 0, b: false } }
+action set0(x: S0, k: Int) {
+  w0' = w0 - x -> x.w0 + x -> (R { n: (1 * 1), b: false })
+}
+action a0(p0_0: S0) {
+  p0_0.w0.n <= #v2
+  v2' = (S0.r0)
+}
+invariant Inv { (some q3: S1 | not ((((v2 -> v2) + (v2 -> q3)) = r1 implies (r0 & (S0 -> S1)) in r0))) }
+reachable Goal { (some q4: S0 | #v2 <= 1) }
+scope S0 = 3, S1 = 3, Int = 0..2, steps = 6

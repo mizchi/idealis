@@ -1,0 +1,17 @@
+model G1054
+sig S0
+sig S1
+enum E = Ea | Eb
+rel r0: S1 -> set S1
+rel r1: S0 -> some S1
+var v2: E -> lone S1
+fact { lone none }
+init { (v2 = (r0 - r1) and one S0) }
+action a0(p0_0: S0, p0_1: S0) {
+  (some Ea implies some none)
+  (p0_1 not in ((r1.p0_0).(r0 + r1)) implies some (v2.p0_0))
+  v2' = ((Ea + Eb) -> ((S0 -> E).p0_1))
+}
+invariant Inv { (all q1: S0 | (one ((Ea - S0).(r0.v2)) or ((Eb -> E) - r1) = (Ea -> none))) }
+reachable Goal { (((some (v2.S0) or (S1 -> E) = (v2.v2)) or some (S1.r1)) and ((r1 & r0) = (S1 -> none) implies ((r1 - (Eb -> none)) in v2 or lone Eb))) }
+scope S0 = 3, S1 = 3, steps = 6

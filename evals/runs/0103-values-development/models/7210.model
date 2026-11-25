@@ -1,0 +1,27 @@
+model G7210
+sig S0
+sig S1
+enum E = Ea | Eb
+type P = S0 + S1
+rel r0: S0 -> one E
+rel r1: one P
+var v2: one E
+var v3: P -> set P
+var w0: S0 -> one Int
+var w1: S0 -> one Bool
+fact { lone S1 }
+init { (lone ((S0 -> S0).(v2.(Ea -> S0))) and (some q2: S0 | #v2 <= 1)) }
+init { all x: S0 | x.w0 = 0 }
+init { all x: S0 | x.w1 = true }
+action set0(x: S0, k: Int) {
+  w0' = w0 - x -> x.w0 + x -> ((k * #P))
+}
+action set1(x: S0) {
+  w1' = w1 - x -> x.w1 + x -> (false)
+}
+action a0(p0_0: S1) {
+  v3' = (((P -> S0).r0).((v2 -> P) + (Ea -> P)))
+}
+invariant Inv { not (not (not (((S1 -> Eb).Ea) != ((v2 & v2).((Ea -> P).(P -> S1)))))) }
+reachable Goal { (#S1 = 2 or (S1 + ((S1 -> P).P)) = (v2.((E -> S1) + (Eb -> S1)))) }
+scope S0 = 2, S1 = 3, Int = -1..2, steps = 6

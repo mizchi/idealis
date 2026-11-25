@@ -1,0 +1,31 @@
+module comparison.service
+
+data Client = String
+data Queue =
+    { waiting: Set<Client>
+    , served: Set<Client>
+    }
+    invariant Disjoint = Set.isEmpty(Set.intersection(waiting, served))
+
+data Disabled
+data Change = Queue | Disabled
+
+let empty = Queue { waiting = Set.empty, served = Set.empty }
+
+behavior request : (s: Queue, c: Client) -> Change
+let request (s, c) = {
+    guard Bool.not(Set.contains(c, s.waiting)) && Bool.not(Set.contains(c, s.served)) else Disabled
+    Queue { ...s, waiting = Set.insert(c, s.waiting) }
+}
+
+behavior serve : (s: Queue, c: Client) -> Change
+let serve (s, c) = {
+    guard Set.contains(c, s.waiting) else Disabled
+    Queue { waiting = Set.remove(c, s.waiting), served = Set.insert(c, s.served) }
+}
+
+behavior requestThenServe : (c: Client) -> Change
+let requestThenServe (c) =
+    match request(empty, c) with
+        | Disabled -> Disabled
+        | Queue as s -> serve(s, c)

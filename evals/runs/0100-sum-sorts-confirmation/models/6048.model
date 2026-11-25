@@ -1,0 +1,22 @@
+model G6048
+sig S0
+enum E = Ea | Eb
+rel r0: S0 -> set S0
+var v1: E -> some S0
+var v2: E -> set S0
+init { (some q1: E | ((q1.v1).((S0 -> Ea) + (S0 -> Ea))) in E) }
+action a0(p0_0: E) {
+  #(Eb.v1) < 3
+  not ((S0 -> S0) = (r0.r0))
+  v1' = v1
+}
+action a1(p1_0: E) {
+  (lone p1_0 and (Eb -> p1_0) in (v2.(S0 -> p1_0)))
+  v2' = (E -> (S0 & S0))
+}
+action a2(p2_0: S0, p2_1: E) {
+  v1' = (((E -> p2_0) + (Ea -> p2_0)) & (v2 & (E -> S0)))
+}
+invariant Inv { (Eb -> S0) = (v1 & v1) }
+reachable Goal { (all q3: E | v2 = (Eb -> S0)) }
+scope S0 = 3, steps = 6

@@ -1,0 +1,23 @@
+model G6207
+sig S0
+sig S1
+rel r0: S0 -> one S0
+rel r1: set S1
+var v2: S0 -> set S0
+var v3: S0 -> some S0
+fact { (some r1 or some (S1.(r1 -> S0))) }
+init { (all q7: S1 | ((S0.(S0 -> q7)) & none) = ((q7 -> S0).(S0.v3))) }
+action a0() {
+  v2' = (((S0 -> r1).S1) -> (S0.r0))
+}
+action a1() {
+  v3' = (((S0 -> S0).(S0 -> S0)).(r0 - r0))
+}
+action a2(p2_0: S0, p2_1: S1) {
+  (#((r1 -> S0).S0) = 1 implies #((r1 -> S0).p2_0) = 2)
+  (#((r1 -> S0).p2_0) > 1 or ((S0 - S0) & ((p2_0 -> p2_1).p2_1)) in ((v2.v3).((p2_0 -> p2_1).S1)))
+  v3' = v3
+}
+invariant Inv { ((some (S1 + (r1 - S1)) and no ((v3 - r0).S0)) and not ((lone (r1.((S1 -> S0).(S0 -> r1))) implies one ((v3 - r0).((S0 -> r1).S1))))) }
+reachable Goal { (((S0 in (v2.(none - S0)) implies #S0 < 1) and (#((S1 -> S0).S0) != 1 and some ((S1 -> S1).r1))) implies (some q10: S0 | (#S0 <= 0 or (q10 -> S1) = (r0.(S0 -> r1))))) }
+scope S0 = 2, S1 = 1, steps = 6

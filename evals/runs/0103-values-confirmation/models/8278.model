@@ -1,0 +1,25 @@
+model G8278
+sig S0
+sig S1
+enum E = Ea | Eb
+type P = S0 + S1
+rel r0: lone S1
+var v1: S1 -> lone S1
+var w0: S0 -> one Bool
+init { some (S1.v1) }
+init { all x: S0 | x.w0 = true }
+action set0(x: S0) {
+  not x.w0
+  w0' = w0 - x -> x.w0 + x -> (true)
+}
+action a0() {
+  (all q3: S0 | #(P.(P -> S0)) > 3)
+  v1' = v1
+}
+action a1(p1_0: S1, p1_1: S0) {
+  not p1_1.w0
+  v1' = (((S1 -> S1) + v1).v1)
+}
+invariant Inv { some v1 }
+reachable Goal { some v1 }
+scope S0 = 3, S1 = 3, steps = 6

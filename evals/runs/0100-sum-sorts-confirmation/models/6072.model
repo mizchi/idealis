@@ -1,0 +1,15 @@
+model G6072
+sig S0
+rel r0: S0 -> one S0
+rel r1: one S0
+var v2: S0 -> one S0
+var v3: S0 -> one S0
+fact { ((lone ((S0.(S0 -> S0)) & (S0 - S0)) implies some none) implies some ((r0.r1).r0)) }
+init { not (#(v3.S0) > 3) }
+action a0(p0_0: S0) {
+  (S0 -> p0_0) = ((S0 -> S0).r0)
+  v2' = v3
+}
+invariant Inv { ((#(S0.r0) > 0 and some S0) implies no (r1 - (S0.v3))) }
+reachable Goal { ((r1 -> S0).v3) = v2 }
+scope S0 = 3, steps = 6

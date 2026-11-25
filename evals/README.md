@@ -2,6 +2,50 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0118: 発送の仕様と3言語の再生](iterations/0118-shipment-drift-and-replay.md)は、自然言語の要件を遷移の性質に結び、二つの ITF を Rust・TypeScript・Go で再生した。
+
+[0117: 遷移前後の検査と読み取り](iterations/0117-transition-readability.md)は、出荷の二状態の条件を直接記述し、参照評価器・rtlc・TLCの対照と二人の代理読み手で確認した。
+
+[0116: 有限列、値付き variant、公平性](iterations/0116-structured-temporal.md)は、ログ・決済・配信を IR、生成型、rtlc、TLC に通した。既存の Pkl の注文とサービスも変換した。
+
+[0115: Nat と処理前のモデル検証](iterations/0115-nat-validation.md)は、整数範囲の契約を検査器ごとに明示し、Nat の出金を使って実装を呼ぶ前のガードと不変条件の検査を確認した。`just rcheck-validation` で回帰テストを再生できる。
+
+[0114: rmodel の核と移植先の再検証](iterations/0114-rmodel-portability.md)は、出金・Raft・ACL と対照モデルを IR、rtlc、ralloy、TLC、Alloy Analyzer に渡し、表現の限界と検査器間の不整合を区別した。
+
+[0113: 仕様から境界を導き PBT で再生](iterations/0113-linked-boundaries.md)は、分割した出金モデルと3ノードの選挙モデルから境界を選び、Rust と TypeScript の出金実装および故障対照で検査した。`just rcheck-boundaries` で再現できる。
+
+[0112: 条件と更新の読み取り](iterations/0112-rmodel-readability.md)は、同じ三題材の `action` と `behavior` を比較した。rmodel の意味は一致し、代理読み手の正答は26/27と27/27だった。
+
+[0111: 自然言語の仕様から文法の検査を回す](iterations/0111-rmodel-spec-drift.md)は、rmodel の規則と検査を rspec と Jev につなぎ、`behavior` で最初の一周を回した。
+
+[0110: 候補の追加と絞り込み](iterations/0110-more-candidates.md)は、Souther・Koine・Context Mapper・FizzBee・P を加えて12候補を比較した。追加候補では Souther と FizzBee が次の比較に残った。読みやすさは Haiku の週次上限により未測定。
+
+[0109: 表の構文の評価ループ](iterations/0109-surface-eval.md)は、DDD記述・形式化との相性・機械と人間の理解・費用の軸を差し替えられるループを作り、7候補で回した。軸ごとの数は0107の結論と同じ形で、人間の軸は満点に張り付いて候補を見分けなかった。
+
+[0108: 核のIRのJSONと、任意のadapter、roracleでの差分テスト](iterations/0108-ir-adapters.md)は、rmodelの構文木をJSONの契約にし、PklからIRを書くadapterの判定をroracleでrmodelの文と照らした。写せる4題材で一致し、adapterの人工故障2件を検出した。
+
+[0107: モデルの書き方の比較](iterations/0107-surface-languages.md)は、5つの題材をrmodel・Quint・OCaml・Isabelle・Idris 2・Pkl・Veilで書いて検査した。すべてSPECと一致し、詰む場所は系統で分かれた。ホストの関数で書くと解析できず、SMTに渡す言語は断片で詰む。
+
+[0106: 帰納法の検査器の試作（proto）](iterations/0106-induction-proto.md)は、核のIRからVCを作りz3で帰納的な不変条件を検査する試作で、CTIを参照評価器で検査し直す。直した後のcorpusと生成したモデルで食い違いは0件、断片は狭い（生成したモデルの4%）。
+
+[0105: MoonBitのtraitとdecodeの生成](iterations/0105-moonbit-bindings.md)は、同じJSONの契約でMoonBitのtrait・厳密なdecoder・`Server::handle`を生成し、MoonBitの2実装の照合と、3件の人工故障の検出を確かめた。
+
+[0104: Goのinterfaceとdecodeの生成](iterations/0104-go-bindings.md)は、同じJSONの契約でGoのinterface・厳密なdecoder・driverを生成し、Goの2実装の照合と、3件の人工故障の検出を確かめた。
+
+[0102: ドメインのモデルから型を生成し、実装を照合する](iterations/0102-domain-bindings.md)は、モデルからRustのtrait・TypeScriptの型・JSON Schemaを生成し、参照評価器を正本に実装を照合した。Rustの3実装・TypeScriptの2実装が一致し、3件の人工故障を両言語で最短の列で検出した。
+
+[0103: 値の種類（整数・bool・record）](iterations/0103-values.md)は、`Int`・`Bool`・`record`を値として入れ、整数が範囲の外へ出たら未確定と答えるようにした。生成した600モデル・1800 checkで参照評価器と明示状態の判定は食い違わず、TLA+の直積の写し方を変えてrtlcのエラーが0件になった。
+
+[0101: 検査器の共通の枠と、1つの入口](iterations/0101-checker-registry.md)は、crate `rcheck`で、検査器ごとにcomplete・bounded・対応しないを宣言させ、`auto`・`all`で答えを用語集の語で返した。corpusの32 claimで一致し、0100でcrashした2 seedから、参照評価器の予算の数え方の穴を直した。
+
+[0100: 和のsort（多態のentity）](iterations/0100-sum-sorts.md)は、`type Party = Person + Org`で、型検査で書けなくなった多態の表現を部分型として戻した。生成した598モデル・1794 checkで3つのengineの判定は食い違わず、crashした2つのseedは参照評価器の予算の数え方の穴だった。
+
+[0099: sortの静的な型検査と、多重度の違反の報告](iterations/0099-sorts-and-violations.md)は、rmodelにsortの型検査を入れ、多重度を破る遷移を`Declarations`の違反として報告するようにした。生成した600モデル・1800 checkで3つのengineの判定は食い違わず、読み手の誤答からsortの合わない式が消えた。
+
+[0098: 文法の候補を、意味と結果が読み取れるかで評価するループ](iterations/0098-syntax-readability.md)は、Quint風のprinterと、参照評価器から問いと正解を作る仕組みを作り、文脈のない読み手で42問中36問の正答を得た。誤答6件はすべてsortの合わない式で、静的な型検査の必要を示した。
+
+[0097: rmodelの参照評価器と、写し方の差分テスト](iterations/0097-rmodel-reference.md)は、意味論の正本として参照評価器を作り、生成した600モデル・1200 checkで参照評価器・rtlc・ralloyのSATを比べた。判定の食い違いは0件で、rtlcのバグ（#112）が見つかった。
+
 [0096: SATの経路で整数の桁あふれを検出し、判定を未確定にする](iterations/0096-quint-overflow.md)は、状態に依存する足し算・引き算・符号反転の桁あふれを`c_overflow`で検出するようにした。桁あふれで偽の反例が出るモデルで、それを検出して未確定にできる。
 
 [0095: QuintのモデルをSATでも有界に検査し、明示状態の経路と比べる](iterations/0095-quint-sat.md)は、Quint IRをAlloy 6へ写し、0044の12件のうち10件でralloyのSATとAlloy 6.2.0がTLCと一致した。5 bitに収まらないSequenceFoldは拒否した。状態の少ないモデルでは、rtlcがSATより2〜4桁速かった。

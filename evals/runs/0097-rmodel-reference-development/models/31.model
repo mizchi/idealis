@@ -1,0 +1,15 @@
+model G31
+sig S0
+var v0: S0 -> some S0
+init { (all q1: S0 | (v0.v0) = v0) }
+action a0(p0_0: S0) {
+  (one (S0.((S0 -> S0).v0)) and some p0_0)
+  v0' = ((p0_0.v0) -> (v0.S0))
+}
+action a1(p1_0: S0, p1_1: S0) {
+  some S0
+  v0' = ((none & p1_0) -> (p1_1.(p1_1 -> p1_0)))
+}
+invariant Inv { (((some q2: S0 | (none -> S0) in (q2 -> q2)) and (some ((S0.(S0 -> S0)) & (S0 - S0)) or ((S0 -> S0).(S0 -> S0)) = (none -> S0))) implies (not (lone (S0.(v0 & v0))) or (some q3: S0 | #(S0.v0) >= 3))) }
+reachable Goal { (some S0 implies #(S0.v0) > 3) }
+scope S0 = 2, steps = 6

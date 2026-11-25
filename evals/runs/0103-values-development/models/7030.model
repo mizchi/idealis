@@ -1,0 +1,25 @@
+model G7030
+sig S0
+enum E = Ea | Eb
+rel r0: set S0
+rel r1: set S0
+var v2: E -> some E
+var v3: E -> set S0
+var w0: S0 -> one Int
+init { (one ((E.v2) - (v3.r1)) implies (some q7: S0 | q7.w0 >= (q7.w0 * 2))) }
+init { all x: S0 | x.w0 = 0 }
+action set0(x: S0, k: Int) {
+  (x.w0 * 1) = (k + x.w0)
+  w0' = w0 - x -> x.w0 + x -> ((0 - 0))
+}
+action a0(p0_0: E) {
+  (some q8: S0 | q8.w0 < q8.w0)
+  (E -> S0) in (E -> S0)
+  v2' = (v2.(p0_0 -> p0_0))
+}
+action a1(p1_0: E, p1_1: S0) {
+  v3' = (v2.((E -> r0) & v3))
+}
+invariant Inv { (Ea -> r1) = ((Ea -> r1) - v3) }
+reachable Goal { ((v3 & v3).(r0.(S0 -> S0))) != (Ea + E) }
+scope S0 = 3, Int = -1..2, steps = 6

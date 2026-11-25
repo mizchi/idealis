@@ -1,0 +1,16 @@
+model G3049
+sig S0
+sig S1
+var v0: S0 -> lone S0
+init { S0 in ((v0.S0) & S0) }
+action a0() {
+  (#((S0 -> S1).S1) = 0 or one S0)
+  (#(S1.(S1 -> S0)) = 0 implies one S0)
+  v0' = (v0 + v0)
+}
+action a1(p1_0: S1) {
+  v0' = (S0 -> ((S0 -> p1_0).p1_0))
+}
+invariant Inv { v0 in v0 }
+reachable Goal { (v0 - v0) = (v0.(S0 -> S0)) }
+scope S0 = 3, S1 = 2, steps = 6

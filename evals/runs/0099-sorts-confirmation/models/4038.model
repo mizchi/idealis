@@ -1,0 +1,23 @@
+model G4038
+sig S0
+rel r0: set S0
+var v1: S0 -> set S0
+var v2: S0 -> set S0
+fact { some (none + S0) }
+init { (all q1: S0 | (r0 -> S0) = v1) }
+action a0(p0_0: S0) {
+  ((S0 -> S0) in v2 or some ((S0.v1).(v1.(p0_0 -> r0))))
+  (no p0_0 implies p0_0 = p0_0)
+  v2' = ((v1 + v2) & v2)
+}
+action a1(p1_0: S0, p1_1: S0) {
+  (v1 in (v2 - v2) and no r0)
+  (r0 in r0 or one p1_0)
+  v2' = (p1_1 -> p1_1)
+}
+action a2() {
+  v1' = ((r0 -> r0).((r0 -> S0).v1))
+}
+invariant Inv { (#(S0 & none) < 2 and (v2.(v1.r0)) not in S0) }
+reachable Goal { (not ((lone (S0 & ((r0 -> S0).r0)) or (S0.(S0 -> r0)) in ((S0 & S0).v1))) or (some (r0.v1) implies not (some (((r0 -> r0) + v1).(v1.r0))))) }
+scope S0 = 3, steps = 6

@@ -1,0 +1,21 @@
+model G6254
+sig S0
+sig S1
+enum E = Ea | Eb
+type P = S0 + S1
+var v0: some E
+var v1: S1 -> lone P
+init { (Eb in none or (S1 -> Eb) in ((S1 -> v0) + (S1 -> Ea))) }
+action a0() {
+  not (((E -> S0) - (v0 -> S0)) = (Eb -> S0))
+  ((P.(P -> P)) = (((P -> S0) - (P -> S0)).((S0 -> S0).S0)) implies ((S0 -> S0).(S0 -> S1)) in (S0 -> S1))
+  v1' = (((S1 -> Ea) & (S1 -> E)).((Eb -> P).(P -> P)))
+}
+action a1() {
+  not (#(E.(Ea -> S1)) < 1)
+  (Ea not in ((v0 -> P).P) and one (((P -> S0).(S0 -> S0)).(S0.(S0 -> S0))))
+  v0' = ((E -> P).P)
+}
+invariant Inv { (some q1: E | ((lone (((S1 -> S0).(S0 -> E)).(S0.(S0 -> Eb))) and some (S1 + S0)) and (no v0 and #(S0.(S0 -> S1)) != 2))) }
+reachable Goal { ((S1 != ((S1 -> S1).S1) implies some (v0 & v0)) or not (#(S1.v1) >= 0)) }
+scope S0 = 3, S1 = 3, steps = 6

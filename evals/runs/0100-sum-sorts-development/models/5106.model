@@ -1,0 +1,23 @@
+model G5106
+sig S0
+sig S1
+type P = S0 + S1
+var v0: set P
+var v1: P -> one P
+init { one (P.v1) }
+action a0(p0_0: P) {
+  (no S1 and lone v0)
+  (P.(v1.(P -> S1))) != S1
+  v1' = (P -> P)
+}
+action a1(p1_0: S0, p1_1: S1) {
+  ((p1_1 + S1).((p1_1 -> P) + (S1 -> P))) = ((S1 & P) - (P & S0))
+  v0' = ((P -> S0).(p1_0 + S0))
+}
+action a2(p2_0: S1) {
+  (p2_0 -> P) in (p2_0 -> P)
+  v0' = (((P -> S0).(S0 -> P)).P)
+}
+invariant Inv { (all q7: S0 | v0 = (v0 - S1)) }
+reachable Goal { ((all q9: S1 | #(v0 & none) >= 2) and some (S1 - none)) }
+scope S0 = 3, S1 = 2, steps = 6

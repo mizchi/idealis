@@ -1,0 +1,13 @@
+model G6286
+sig S0
+var v0: S0 -> one S0
+var v1: S0 -> set S0
+init { (all q1: S0 | S0 != ((q1 - q1).((S0 -> q1).v0))) }
+action a0(p0_0: S0) {
+  not (some (S0 - p0_0))
+  (some q2: S0 | some q2)
+  v1' = (p0_0 -> (S0.v0))
+}
+invariant Inv { not ((#S0 > 0 implies ((S0 - none) + (S0.v1)) = ((S0.(S0 -> S0)) - S0))) }
+reachable Goal { #(S0.v1) != 3 }
+scope S0 = 2, steps = 6

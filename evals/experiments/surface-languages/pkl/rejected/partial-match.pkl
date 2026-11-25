@@ -1,0 +1,10 @@
+// Rejected: the match in cancel has no case for Cancelled.
+amends "../order.pkl"
+actions = List(
+  action("cancel", List(param("o", sort("Order")), param("r", dataT("Reason"))),
+    List(match(at("status", List(v("o"))), List(
+      alt("Draft", List(), lit(true)),
+      alt("Placed", List(), lit(true)),
+      alt("Shipped", List("t"), lit(false))))),
+    List(assign("status", List(v("o")), ctor("Status", "Cancelled", List(v("r")))))),
+)

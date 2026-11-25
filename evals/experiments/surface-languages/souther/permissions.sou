@@ -1,0 +1,74 @@
+module comparison.permissions
+
+data User = String
+data Role = String
+data Doc = String
+data Grant =
+    { user: User
+    , role: Role
+    }
+data ReadPermission =
+    { role: Role
+    , doc: Doc
+    }
+data View =
+    { user: User
+    , doc: Doc
+    }
+
+let permitted (u: User, d: Doc, grants: Set<Grant>, reads: Set<ReadPermission>) =
+    List.any(
+        p -> p.doc == d && List.any(g -> g.user == u && g.role == p.role, Set.toList(grants)),
+        Set.toList(reads)
+    )
+
+data Settings =
+    { grants: Set<Grant>
+    , reads: Set<ReadPermission>
+    , secret: Set<Doc>
+    , cleared: Set<User>
+    }
+    invariant SecretRolesOnlyForClearedUsers = List.all(
+        g -> Set.contains(g.user, cleared)
+            || List.all(
+                p -> p.role /= g.role || Bool.not(Set.contains(p.doc, secret)),
+                Set.toList(reads)
+            ),
+        Set.toList(grants)
+    )
+
+data Permissions =
+    { settings: Settings
+    , openDocs: Set<View>
+    }
+    invariant NoLeak = List.all(
+        v -> Bool.not(Set.contains(v.doc, settings.secret))
+            || Set.contains(v.user, settings.cleared),
+        Set.toList(openDocs)
+    )
+    invariant OnlyGranted = List.all(
+        v -> permitted(v.user, v.doc, settings.grants, settings.reads),
+        Set.toList(openDocs)
+    )
+
+data Disabled
+data Change = Permissions | Disabled
+
+behavior initial : (settings: Settings) -> Permissions
+let initial (settings) = Permissions { settings = settings, openDocs = Set.empty }
+
+behavior read : (s: Permissions, u: User, d: Doc) -> Change
+let read (s, u, d) = {
+    guard permitted(u, d, s.settings.grants, s.settings.reads) else Disabled
+    Permissions { ...s, openDocs = Set.insert(View { user = u, doc = d }, s.openDocs) }
+}
+
+behavior close : (s: Permissions, u: User, d: Doc) -> Change
+let close (s, u, d) = {
+    let view = View { user = u, doc = d }
+    guard Set.contains(view, s.openDocs) else Disabled
+    Permissions { ...s, openDocs = Set.remove(view, s.openDocs) }
+}
+
+behavior firstRead : (settings: Settings, u: User, d: Doc) -> Change
+let firstRead (settings, u, d) = read(initial(settings), u, d)

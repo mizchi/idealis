@@ -1,0 +1,7 @@
+// Control: serve drops the client without marking it served.
+// EventuallyServed must fail even under weak fairness.
+amends "../service.pkl"
+actions = super.actions.filter((a) -> a.name != "serve") + List(
+  action("serve", List(param("c", sort("Client"))), List(mem(v("c"), img("waiting", List()))),
+    List(remove("waiting", List(), v("c")))),
+)

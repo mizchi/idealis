@@ -1,0 +1,175 @@
+{
+  "$defs": {
+    "Command": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "d": {
+              "$ref": "#/$defs/Doc"
+            },
+            "kind": {
+              "const": "read"
+            },
+            "u": {
+              "$ref": "#/$defs/User"
+            }
+          },
+          "required": [
+            "kind",
+            "u",
+            "d"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "d": {
+              "$ref": "#/$defs/Doc"
+            },
+            "kind": {
+              "const": "close"
+            },
+            "u": {
+              "$ref": "#/$defs/User"
+            }
+          },
+          "required": [
+            "kind",
+            "u",
+            "d"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Config": {
+      "additionalProperties": false,
+      "properties": {
+        "cleared": {
+          "items": {
+            "$ref": "#/$defs/User"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "grants": {
+          "additionalProperties": false,
+          "properties": {
+            "User0": {
+              "items": {
+                "$ref": "#/$defs/Role"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "User1": {
+              "items": {
+                "$ref": "#/$defs/Role"
+              },
+              "type": "array",
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "User0",
+            "User1"
+          ],
+          "type": "object"
+        },
+        "reads": {
+          "additionalProperties": false,
+          "properties": {
+            "Role0": {
+              "items": {
+                "$ref": "#/$defs/Doc"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "Role1": {
+              "items": {
+                "$ref": "#/$defs/Doc"
+              },
+              "type": "array",
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "Role0",
+            "Role1"
+          ],
+          "type": "object"
+        },
+        "secret": {
+          "items": {
+            "$ref": "#/$defs/Doc"
+          },
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "grants",
+        "reads",
+        "secret",
+        "cleared"
+      ],
+      "type": "object"
+    },
+    "Doc": {
+      "enum": [
+        "Doc0",
+        "Doc1"
+      ]
+    },
+    "Role": {
+      "enum": [
+        "Role0",
+        "Role1"
+      ]
+    },
+    "State": {
+      "additionalProperties": false,
+      "properties": {
+        "open": {
+          "additionalProperties": false,
+          "properties": {
+            "User0": {
+              "items": {
+                "$ref": "#/$defs/Doc"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "User1": {
+              "items": {
+                "$ref": "#/$defs/Doc"
+              },
+              "type": "array",
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "User0",
+            "User1"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "open"
+      ],
+      "type": "object"
+    },
+    "User": {
+      "enum": [
+        "User0",
+        "User1"
+      ]
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Permissions"
+}

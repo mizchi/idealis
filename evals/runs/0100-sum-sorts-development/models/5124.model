@@ -1,0 +1,21 @@
+model G5124
+sig S0
+sig S1
+type P = S0 + S1
+rel r0: S0 -> lone S1
+rel r1: S1 -> set P
+var v2: lone S1
+init { ((S1 -> P) = ((S1 -> S0).(S0 -> P)) or ((v2 -> S0).(S0 -> S0)) = (v2 -> S0)) }
+action a0(p0_0: S1, p0_1: S0) {
+  v2' = (((v2 -> v2).(p0_0 -> p0_1)).p0_1)
+}
+action a1() {
+  v2' = (v2 & none)
+}
+action a2(p2_0: S1, p2_1: S1) {
+  not (S0 in (((p2_1 -> S1).p2_1).(p2_0 -> S0)))
+  v2' = p2_0
+}
+invariant Inv { (P -> v2) = (P -> v2) }
+reachable Goal { not ((S1 -> P) in ((v2 -> P) & r1)) }
+scope S0 = 3, S1 = 3, steps = 6

@@ -1,0 +1,26 @@
+model G7226
+sig S0
+enum E = Ea | Eb
+type P = S0 + E
+rel r0: E -> some P
+rel r1: P -> set P
+var v2: S0 -> lone P
+var w0: S0 -> one Int
+var w1: S0 -> one Bool
+init { (some (v2.P) implies #Ea > 3) }
+init { all x: S0 | x.w0 = 0 }
+init { all x: S0 | x.w1 = true }
+action set0(x: S0, k: Int) {
+  w0' = w0 - x -> x.w0 + x -> (k)
+}
+action set1(x: S0) {
+  x.w1
+  w1' = w1 - x -> x.w1 + x -> (true)
+}
+action a0(p0_0: S0, p0_1: E) {
+  some Ea
+  v2' = v2
+}
+invariant Inv { lone ((S0 & S0).(v2.(P -> S0))) }
+reachable Goal { (((#S0 = 1 implies #((P -> S0).S0) != 1) implies #(v2.P) <= 2) implies (not ((all q35: S0 | q35.w1)) implies (all q36: S0 | q36.w0 > (0 + q36.w0)))) }
+scope S0 = 2, Int = -1..2, steps = 6

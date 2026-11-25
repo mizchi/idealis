@@ -1,0 +1,25 @@
+model G1208
+sig S0
+sig S1
+rel r0: S1 -> some S1
+rel r1: S0 -> lone S0
+var v2: one S1
+var v3: set S1
+init { (((v3 -> v2) + r0) in (r0 & r1) or #(v3.(v3 -> S1)) < 1) }
+action a0(p0_0: S1) {
+  (r0 - (v3 -> v3)) = (r1 - r0)
+  not ((r1 - r1) = r1)
+  v2' = (v3.r0)
+}
+action a1(p1_0: S0, p1_1: S1) {
+  (one (S1.(r0 & r0)) implies #(p1_1.r1) != 0)
+  (#(p1_1 - S1) = 2 or one ((p1_1.r0) - ((S0 -> S1).v2)))
+  v2' = v2
+}
+action a2(p2_0: S1, p2_1: S0) {
+  (((v3 - p2_1).(v3 -> v3)) not in (none - (S0 - p2_1)) implies v2 = p2_0)
+  v2' = (((S0 -> v3).S1) & p2_0)
+}
+invariant Inv { (v3.(r1 & (S1 -> v2))) not in (r1.v3) }
+reachable Goal { (all q2: S1 | (all q3: S0 | not (some (v3.r0)))) }
+scope S0 = 3, S1 = 3, steps = 6

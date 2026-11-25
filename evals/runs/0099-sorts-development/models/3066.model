@@ -1,0 +1,24 @@
+model G3066
+sig S0
+sig S1
+rel r0: S1 -> some S1
+rel r1: set S1
+var v2: S1 -> some S1
+var v3: set S1
+fact { ((all q1: S1 | r1 in ((S1 -> S0).((S0 -> r1).q1))) or one ((r1 -> S0).((S0 -> r1).r1))) }
+init { (#v3 <= 1 and (S0 -> S0) = (S0 -> S0)) }
+action a0(p0_0: S1, p0_1: S1) {
+  v3' = ((S1 -> v3).(v2.p0_0))
+}
+action a1(p1_0: S1, p1_1: S1) {
+  (some S1 or some (S1.r0))
+  (p1_1 -> S0) in (p1_1 -> S0)
+  v3' = (r0.p1_0)
+}
+action a2() {
+  ((r1 -> S0) + (v3 -> S0)) = (r1 -> S0)
+  v2' = v2
+}
+invariant Inv { ((((S0 -> S1) in (S0 -> S1) or some (r1.(v3 -> S0))) implies (no ((r1 -> S0).(S0.(S0 -> S0))) or (r1 - r1) in v3)) or (all q2: S0 | ((q2 -> r1) - (S0 -> S1)) in ((S0 -> r1) & (S0 -> v3)))) }
+reachable Goal { no ((S0 -> v3).(v3 + r1)) }
+scope S0 = 2, S1 = 3, steps = 6

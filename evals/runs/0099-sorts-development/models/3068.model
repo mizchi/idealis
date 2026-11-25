@@ -1,0 +1,21 @@
+model G3068
+sig S0
+rel r0: S0 -> one S0
+rel r1: S0 -> lone S0
+var v2: set S0
+init { r0 in (v2 -> S0) }
+action a0(p0_0: S0, p0_1: S0) {
+  (v2 != (r1.v2) or #S0 > 2)
+  (some S0 and lone ((r1.S0) + (v2 & none)))
+  v2' = ((p0_1 -> S0).(v2 & v2))
+}
+action a1(p1_0: S0) {
+  ((S0 -> p1_0) in r1 and ((v2 -> v2).r1) in (S0 -> S0))
+  v2' = ((p1_0 - v2).r1)
+}
+action a2(p2_0: S0) {
+  v2' = ((r1.S0).(r1 - r0))
+}
+invariant Inv { ((not (#(r1.S0) = 3) and some (v2.(S0 -> S0))) or not (some ((v2 -> v2).v2))) }
+reachable Goal { (some q1: S0 | ((some ((S0.r1).r0) or lone (r0.v2)) or ((v2 -> q1) in ((v2 -> q1) & r1) and #(S0 & S0) > 1))) }
+scope S0 = 3, steps = 6

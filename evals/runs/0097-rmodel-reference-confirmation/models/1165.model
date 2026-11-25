@@ -1,0 +1,16 @@
+model G1165
+sig S0
+sig S1
+var v0: S1 -> set S0
+init { v0 = (none -> S1) }
+action a0() {
+  not (some S0)
+  v0' = v0
+}
+action a1() {
+  (v0 = (v0.v0) or v0 in v0)
+  v0' = (S0 -> (S1.v0))
+}
+invariant Inv { (((some (S0 + S0) or #(S0 - S1) > 3) implies v0 = v0) and (all q1: S0 | not ((v0.(q1 - S0)) = ((q1.v0).v0)))) }
+reachable Goal { ((S0.(S0 -> S1)) != ((v0.S1).(v0 - (S0 -> S0))) and #(S0.v0) >= 2) }
+scope S0 = 2, S1 = 1, steps = 6

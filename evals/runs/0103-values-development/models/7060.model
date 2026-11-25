@@ -1,0 +1,25 @@
+model G7060
+sig S0
+sig S1
+enum E = Ea | Eb
+rel r0: S0 -> one S1
+var v1: S1 -> some S1
+var w0: S0 -> one Int
+fact { (((E -> S0) + (Ea -> S0)) = (Eb -> S0) implies some (S1 - S1)) }
+init { ((S1 -> E).E) != ((S1.v1) - S1) }
+init { all x: S0 | x.w0 = 0 }
+action set0(x: S0, k: Int) {
+  w0' = w0 - x -> x.w0 + x -> ((1 + x.w0))
+}
+action a0(p0_0: E, p0_1: S1) {
+  ((all q16: S0 | (q16.w0 - q16.w0) <= 0) or some S1)
+  v1' = (p0_1 -> S1)
+}
+action a1(p1_0: S0, p1_1: E) {
+  not (one ((S1 -> S0).p1_0))
+  not (one (S1.(v1.(S1 -> Eb))))
+  v1' = v1
+}
+invariant Inv { (((((E -> E).(Eb -> E)) in (E -> Eb) and (all q36: S0 | 2 < (1 * q36.w0))) or some (E.(E -> S0))) or (not (S1 != (S1 & (S1 & S1))) implies v1 = ((S1 -> Eb).(E -> S1)))) }
+reachable Goal { v1 = v1 }
+scope S0 = 2, S1 = 1, Int = -1..2, steps = 6

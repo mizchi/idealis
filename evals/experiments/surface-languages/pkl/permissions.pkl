@@ -1,0 +1,48 @@
+// permissions (SPEC 1). Source: fixtures/rmodel/permissions.model.
+amends "Model.pkl"
+
+name = "Permissions"
+sorts = List("User", "Role", "Doc")
+rels = List(
+  config("grants", List(sort("User")), "set", sort("Role")),
+  config("reads", List(sort("Role")), "set", sort("Doc")),
+  config("secret", List(), "set", sort("Doc")),
+  config("cleared", List(), "set", sort("User")),
+  state("open", List(sort("User")), "set", sort("Doc"), empty()),
+)
+local secret = img("secret", List())
+local cleared = img("cleared", List())
+local function grants(u: Expr): Expr = img("grants", List(u))
+local function reads(r: Expr): Expr = img("reads", List(r))
+local function opened(u: Expr): Expr = img("open", List(u))
+// Workaround: no relational join. `d in u.grants.reads` is an existential
+// over Role with the same meaning.
+local function canRead(u: Expr, d: Expr): Expr =
+  some("r", "Role", (r) -> and(List(mem(r, grants(u)), mem(d, reads(r)))))
+local function secretOpen(u: Expr): Expr =
+  some("d", "Doc", (d) -> and(List(mem(d, opened(u)), mem(d, secret))))
+
+// A role that reads a secret document is granted only to cleared users.
+facts = List(
+  all("r", "Role", (r) -> all("d", "Doc", (d) -> all("u", "User", (u) ->
+    implies(and(List(mem(d, reads(r)), mem(d, secret), mem(r, grants(u)))), mem(u, cleared))))),
+)
+actions = List(
+  action("read", List(param("u", sort("User")), param("d", sort("Doc"))),
+    List(canRead(v("u"), v("d"))),
+    List(insert("open", List(v("u")), v("d")))),
+  action("close", List(param("u", sort("User")), param("d", sort("Doc"))),
+    List(mem(v("d"), opened(v("u")))),
+    List(remove("open", List(v("u")), v("d")))),
+)
+props = List(
+  prop("NoLeak", "invariant", "holds",
+    all("u", "User", (u) -> implies(secretOpen(u), mem(u, cleared)))),
+  prop("OnlyGranted", "invariant", "holds",
+    all("u", "User", (u) -> all("d", "Doc", (d) -> implies(mem(d, opened(u)), canRead(u, d))))),
+  prop("SecretRead", "reachable", "reachable",
+    some("u", "User", (u) -> secretOpen(u))),
+  prop("UnclearedSecret", "reachable", "unreachable",
+    some("u", "User", (u) -> and(List(not(mem(u, cleared)), secretOpen(u))))),
+)
+check = scope(Map("User", 2, "Role", 2, "Doc", 2), 0, 0, 6)

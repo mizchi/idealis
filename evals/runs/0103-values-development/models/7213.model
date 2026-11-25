@@ -1,0 +1,31 @@
+model G7213
+sig S0
+sig S1
+enum E = Ea | Eb
+type P = S0 + S1
+rel r0: S1 -> lone S1
+rel r1: E -> some S1
+var v2: S0 -> some P
+var v3: E -> lone E
+var w0: S0 -> one Bool
+init { not (lone ((S0.(S0 -> E)).v3)) }
+init { all x: S0 | x.w0 = false }
+action set0(x: S0) {
+  w0' = w0 - x -> x.w0 + x -> (false)
+}
+action a0(p0_0: E) {
+  (#(S1.(S1 -> E)) = 3 and ((P + S1) + (P.(P -> P))) != ((Eb.(Ea -> P)) & S1))
+  (some q18: S0 | q18.w0)
+  v3' = ((v3 + (Eb -> E)) & ((p0_0 -> E).(Ea -> E)))
+}
+action a1() {
+  ((all q19: S0 | q19.w0) and no Ea)
+  v3' = ((E -> Ea) & (Ea -> E))
+}
+action a2() {
+  (some q20: S0 | q20.w0)
+  v2' = (S0 -> P)
+}
+invariant Inv { ((S1 -> S0).(v2.P)) in (((S1 -> S1) - r0).(S1 + S1)) }
+reachable Goal { (((Eb -> S0).(S0 -> E)) = (v3 - v3) implies ((all q33: S0 | not q33.w0) and not (some S0))) }
+scope S0 = 2, S1 = 3, steps = 6

@@ -1,0 +1,17 @@
+model G3273
+sig S0
+sig S1
+enum E = Ea | Eb
+rel r0: set S0
+var v1: E -> one S0
+var v2: E -> lone S1
+fact { (((Ea -> S0).S0).((Ea -> S0) & (Eb -> S0))) in r0 }
+init { (((S0 -> S0) - (r0 -> S0)) in (S0 -> r0) implies (v1.(S0 -> Ea)) = (v2.(S1 -> E))) }
+action a0(p0_0: S0, p0_1: S1) {
+  #Ea < 3
+  not (one S0)
+  v1' = ((v1.p0_0) -> (E.(E -> S0)))
+}
+invariant Inv { (all q6: E | ((S1 -> S1).(S1 & S1)) not in ((v2.S1).(v2 & (E -> S1)))) }
+reachable Goal { ((some (r0.(r0 -> S1)) implies one (((S1 -> r0).S0).((S1 -> S1).(S1 -> r0)))) or not (((E -> S1) + v2) in (E -> S1))) }
+scope S0 = 2, S1 = 1, steps = 6

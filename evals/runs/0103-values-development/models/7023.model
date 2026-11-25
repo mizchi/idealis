@@ -1,0 +1,27 @@
+model G7023
+sig S0
+sig S1
+enum E = Ea | Eb
+rel r0: S1 -> some S1
+var v1: E -> one E
+var w0: S0 -> one Int
+var w1: S0 -> one Bool
+fact { not (some (S1.r0)) }
+init { some v1 }
+init { all x: S0 | x.w0 = 0 }
+init { all x: S0 | x.w1 = false }
+action set0(x: S0, k: Int) {
+  w0' = w0 - x -> x.w0 + x -> (1)
+}
+action set1(x: S0) {
+  x.w0 = 0
+  w1' = w1 - x -> x.w1 + x -> (true)
+}
+action a0(p0_0: E, p0_1: S1) {
+  (all q23: S0 | #S1 >= (q23.w0 - 2))
+  ((p0_1 -> S0) in ((p0_1 -> S0) - (S1 -> S0)) implies no S0)
+  v1' = ((v1.Eb) -> ((Eb -> S0).S0))
+}
+invariant Inv { ((not (lone (Eb.(Ea -> S1))) implies ((some q45: S0 | q45.w1) implies (all q46: S0 | not q46.w1))) implies (Ea -> E) = v1) }
+reachable Goal { (lone none and ((r0 in (r0.(S1 -> S1)) and (S1 -> S0) = (S1 -> S0)) or not ((v1.(S1.(S1 -> E))) = ((Ea -> S0).(S0.(S0 -> S0)))))) }
+scope S0 = 3, S1 = 3, Int = -1..2, steps = 6

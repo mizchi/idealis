@@ -1,0 +1,37 @@
+model G8139
+sig S0
+rel r0: S0 -> lone S0
+var v1: S0 -> set S0
+var v2: S0 -> set S0
+record R { n: Int, b: Bool }
+var w0: S0 -> one Int
+var w1: S0 -> one Bool
+var w2: S0 -> one R
+fact { (((S0 -> S0) in (r0 & (S0 -> S0)) implies #(r0.S0) != 0) and r0 in r0) }
+init { ((v2 - (S0 -> S0)) in (S0 -> S0) implies S0 not in S0) }
+init { all x: S0 | x.w0 = 0 }
+init { all x: S0 | x.w1 = false }
+init { all x: S0 | x.w2 = R { n: 0, b: false } }
+action set0(x: S0, k: Int) {
+  w0' = w0 - x -> x.w0 + x -> (2)
+}
+action set1(x: S0) {
+  w1' = w1 - x -> x.w1 + x -> (true)
+}
+action set2(x: S0, k: Int) {
+  not x.w1
+  w2' = w2 - x -> x.w2 + x -> (R { n: k, b: false })
+}
+action a0() {
+  (((S0 -> S0).S0).(v1.v2)) != (((S0 -> S0).S0).(S0 -> S0))
+  (all q1: S0 | not q1.w1)
+  v1' = v1
+}
+action a1(p1_0: S0, p1_1: S0) {
+  (some p1_0 or p1_1.w2.n >= (p1_1.w2.n + 1))
+  v2 in (r0.(p1_0 -> S0))
+  v1' = ((S0.v2) -> p1_1)
+}
+invariant Inv { ((all q5: S0 | q5.w1) or not ((v2 = (r0.v1) and none = ((S0.v1) + (S0.v2))))) }
+reachable Goal { ((some q11: S0 | (((S0 -> q11) - v1) in (q11 -> q11) or #q11 != 2)) or (some q12: S0 | q12.w1)) }
+scope S0 = 3, Int = 0..2, steps = 6

@@ -1,0 +1,16 @@
+model G145
+sig S0
+var v0: S0 -> lone S0
+var v1: S0 -> some S0
+init { some (v1.S0) }
+action a0(p0_0: S0) {
+  v0' = ((p0_0 + S0) -> (S0.(p0_0 -> p0_0)))
+}
+action a1(p1_0: S0) {
+  lone p1_0
+  one p1_0
+  v0' = (p1_0 -> p1_0)
+}
+invariant Inv { not ((#S0 >= 2 and (lone (S0.(v1 & v1)) or #(S0 & S0) <= 2))) }
+reachable Goal { (some S0 or some ((S0.v0) - none)) }
+scope S0 = 3, steps = 6

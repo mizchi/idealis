@@ -1,0 +1,124 @@
+{
+  "$defs": {
+    "Command": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "login"
+            },
+            "u": {
+              "$ref": "#/$defs/User"
+            }
+          },
+          "required": [
+            "kind",
+            "u"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "logout"
+            },
+            "u": {
+              "$ref": "#/$defs/User"
+            }
+          },
+          "required": [
+            "kind",
+            "u"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "lock"
+            },
+            "u": {
+              "$ref": "#/$defs/User"
+            }
+          },
+          "required": [
+            "kind",
+            "u"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "unlock"
+            },
+            "u": {
+              "$ref": "#/$defs/User"
+            }
+          },
+          "required": [
+            "kind",
+            "u"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Config": {
+      "additionalProperties": false,
+      "properties": {
+        "admins": {
+          "items": {
+            "$ref": "#/$defs/User"
+          },
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "admins"
+      ],
+      "type": "object"
+    },
+    "State": {
+      "additionalProperties": false,
+      "properties": {
+        "active": {
+          "items": {
+            "$ref": "#/$defs/User"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "locked": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/User"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "active",
+        "locked"
+      ],
+      "type": "object"
+    },
+    "User": {
+      "enum": [
+        "User0",
+        "User1",
+        "User2"
+      ]
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sessions"
+}

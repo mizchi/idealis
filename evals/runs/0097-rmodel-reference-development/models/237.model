@@ -1,0 +1,20 @@
+model G237
+sig S0
+rel r0: lone S0
+rel r1: S0 -> lone S0
+var v2: S0 -> set S0
+fact { not (#S0 <= 1) }
+init { ((r1 + v2) in ((r0 -> S0) & v2) or lone r0) }
+action a0(p0_0: S0) {
+  v2' = (p0_0 -> (S0.(p0_0 -> r0)))
+}
+action a1(p1_0: S0, p1_1: S0) {
+  (S0 + ((r0 -> p1_0).S0)) not in (v2.(p1_0.(p1_0 -> r0)))
+  v2' = v2
+}
+action a2(p2_0: S0, p2_1: S0) {
+  v2' = ((p2_1 -> r0).(v2 - r1))
+}
+invariant Inv { not (((lone ((r0 -> r0).(S0.v2)) or (r1 - v2) = ((r0 -> r0).r1)) or (((r1.S0).(S0 -> S0)) = ((v2.S0) - r0) or r0 in ((r0 + S0).(v2.(r0 -> r0)))))) }
+reachable Goal { (some q2: S0 | (v2.S0) not in ((q2 & S0).(S0 -> S0))) }
+scope S0 = 2, steps = 6

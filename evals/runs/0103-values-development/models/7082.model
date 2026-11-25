@@ -1,0 +1,25 @@
+model G7082
+sig S0
+sig S1
+rel r0: S1 -> some S1
+var v1: S0 -> set S1
+var v2: S1 -> one S1
+var w0: S0 -> one Int
+var w1: S0 -> one Bool
+init { ((all q3: S0 | not q3.w1) implies (v2 + r0) = (S1 -> S1)) }
+init { all x: S0 | x.w0 = 0 }
+init { all x: S0 | x.w1 = true }
+action set0(x: S0, k: Int) {
+  w0' = w0 - x -> x.w0 + x -> (#x)
+}
+action set1(x: S0) {
+  x.w0 = x.w0
+  w1' = w1 - x -> x.w1 + x -> (true)
+}
+action a0() {
+  (all q4: S0 | q4.w1)
+  v1' = v1
+}
+invariant Inv { ((all q5: S0 | 1 > q5.w0) or (v1.(S1 -> S1)) = (S0 -> S1)) }
+reachable Goal { one ((none - S1) & (v2.S1)) }
+scope S0 = 2, S1 = 2, Int = -1..2, steps = 6

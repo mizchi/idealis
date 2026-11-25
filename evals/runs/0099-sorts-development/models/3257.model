@@ -1,0 +1,20 @@
+model G3257
+sig S0
+sig S1
+rel r0: one S0
+var v1: S0 -> some S0
+var v2: set S0
+fact { (((S1 -> S0) in (S1 -> r0) and #(r0.(S0 -> S1)) > 2) or (all q1: S1 | S1 in (((q1 -> r0).(r0 -> S1)).S1))) }
+init { (one (S1 & S1) or some ((v2 -> S1).S1)) }
+action a0(p0_0: S0, p0_1: S0) {
+  v1' = (p0_0 -> (v1.S0))
+}
+action a1(p1_0: S0, p1_1: S0) {
+  v1' = v1
+}
+action a2(p2_0: S0, p2_1: S0) {
+  v1' = (r0 -> r0)
+}
+invariant Inv { not (((((S1 -> S1) + (S1 -> S1)) in ((S1 -> r0).(S0 -> S1)) implies some S0) and (v2 -> S0) in (v1.v1))) }
+reachable Goal { (not ((all q3: S0 | no S0)) and (one S0 and (all q4: S0 | lone (v1.((S0 -> q4).S0))))) }
+scope S0 = 2, S1 = 1, steps = 6

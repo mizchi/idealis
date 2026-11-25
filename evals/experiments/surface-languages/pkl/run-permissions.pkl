@@ -1,0 +1,5 @@
+// Runs the Pkl evaluator on one model; one file per model so each can be
+// timed and failed separately.
+import "Interp.pkl"
+import "permissions.pkl" as model
+output { value = Interp.run(model) }

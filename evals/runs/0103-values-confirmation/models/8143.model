@@ -1,0 +1,22 @@
+model G8143
+sig S0
+sig S1
+rel r0: S1 -> lone S1
+var v1: some S1
+var w0: S0 -> one Int
+fact { some ((S0 -> S0).S0) }
+init { (S0 -> v1) = (S0 -> S1) }
+init { all x: S0 | x.w0 = 0 }
+action set0(x: S0, k: Int) {
+  w0' = w0 - x -> x.w0 + x -> (1)
+}
+action a0(p0_0: S0, p0_1: S0) {
+  v1' = ((S0.(p0_0 -> S1)) + v1)
+}
+action a1(p1_0: S0, p1_1: S1) {
+  (0 - 0) <= 0
+  v1' = (p1_1.(p1_1 -> p1_1))
+}
+invariant Inv { (some q8: S0 | (#S0 - #S0) > #v1) }
+reachable Goal { (some q11: S1 | (((all q12: S0 | q12.w0 < 2) implies some S1) implies (((q11 -> v1).r0).(S0.(S0 -> v1))) in (S1 & v1))) }
+scope S0 = 3, S1 = 3, Int = -1..2, steps = 6

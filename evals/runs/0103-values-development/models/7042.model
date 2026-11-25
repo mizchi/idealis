@@ -1,0 +1,31 @@
+model G7042
+sig S0
+enum E = Ea | Eb
+type P = S0 + E
+rel r0: S0 -> lone E
+rel r1: set S0
+var v2: S0 -> one P
+var v3: P -> some P
+var w0: S0 -> one Bool
+fact { some r1 }
+init { (some q14: E | (v3.(P -> E)) = ((P -> Eb).(E -> Ea))) }
+init { all x: S0 | x.w0 = true }
+action set0(x: S0) {
+  not x.w0
+  w0' = w0 - x -> x.w0 + x -> (true)
+}
+action a0() {
+  (all q15: P | P in S0)
+  v3' = ((P -> P).(P -> P))
+}
+action a1(p1_0: E, p1_1: E) {
+  v3' = v3
+}
+action a2(p2_0: P) {
+  (some q16: S0 | q16.w0)
+  one r1
+  v2' = (((S0 -> r1).v2).(P -> P))
+}
+invariant Inv { ((not (#(r1 + r1) < 3) implies ((r1 -> P).v3) = ((S0 -> P) & v2)) or #none = 1) }
+reachable Goal { (one Eb or (P -> P) = ((P -> S0).v2)) }
+scope S0 = 2, steps = 6

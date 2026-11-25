@@ -1,0 +1,24 @@
+model G6061
+sig S0
+sig S1
+type P = S0 + S1
+rel r0: set P
+rel r1: S0 -> lone P
+var v2: P -> some P
+fact { not (some P) }
+init { v2 = ((P -> P) - v2) }
+action a0() {
+  some (S1.(S1 -> S0))
+  r0 in ((P -> P).P)
+  v2' = (v2.v2)
+}
+action a1() {
+  (((P.(P -> S1)) & ((S1 -> P).P)) in (S1 & ((S1 -> P).P)) and S1 != (S1 + S1))
+  v2' = v2
+}
+action a2(p2_0: S0) {
+  v2' = v2
+}
+invariant Inv { (v2 & v2) = v2 }
+reachable Goal { (not ((some S0 implies ((P.v2) + P) not in r0)) implies some S0) }
+scope S0 = 2, S1 = 3, steps = 6

@@ -1,0 +1,15 @@
+model G220
+sig S0
+enum E = Ea | Eb
+var v0: S0 -> lone E
+init { (v0.v0) in v0 }
+action a0(p0_0: E) {
+  (some (E.(E -> Eb)) implies #((S0 -> Eb).Ea) = 3)
+  v0' = (((S0 -> Ea).v0) & ((Eb -> S0).(p0_0 -> Ea)))
+}
+action a1(p1_0: S0) {
+  v0' = ((p1_0.v0) -> ((Ea -> S0).p1_0))
+}
+invariant Inv { (#(Eb.v0) >= 3 and not ((#Ea < 1 and (v0.v0) in (none -> Ea)))) }
+reachable Goal { (not ((some S0 implies lone ((v0 - v0).((S0 -> Eb).E)))) or not (not (some Ea))) }
+scope S0 = 3, steps = 6

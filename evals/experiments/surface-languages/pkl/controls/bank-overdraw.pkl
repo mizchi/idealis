@@ -1,0 +1,6 @@
+// Control: withdraw without the balance guard. NonNegative must fail.
+amends "../bank.pkl"
+actions = super.actions.filter((a) -> a.name != "withdraw") + List(
+  action("withdraw", List(param("a", sort("Account")), param("n", int())), List(cmp(">", v("n"), i(0))),
+    List(assign("balance", List(v("a")), minus(at("balance", List(v("a"))), v("n"))))),
+)

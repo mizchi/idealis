@@ -1,0 +1,21 @@
+model Bank
+entity Account "入出金によって残高が変わる口座。"
+var balance: Account -> one Int
+init { all a: Account | a.balance = 0 }
+behavior deposit(a: Account, n: Int) {
+  guard {
+    n > 0
+    a.balance + n <= 4
+  }
+  update { balance = balance - a -> a.balance + a -> (a.balance + n) }
+}
+behavior withdraw(a: Account, n: Int) {
+  guard {
+    n > 0
+    a.balance >= n
+  }
+  update { balance = balance - a -> a.balance + a -> (a.balance - n) }
+}
+invariant NonNegative { all a: Account | a.balance >= 0 }
+reachable Rich { some a: Account | a.balance >= 3 }
+scope Account = 2, Int = -4..4, steps = 4

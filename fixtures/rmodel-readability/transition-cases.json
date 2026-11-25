@@ -1,0 +1,44 @@
+[
+  {
+    "id": "shipment",
+    "baseline": "fixtures/rcheck/structured/shipped-transition.model",
+    "questions": [
+      {
+        "text": "Ready から Shipped(Courier) になった一歩について、ShippedStays は何を求めるか。",
+        "options": ["この一歩には保存の条件を課さない", "遷移前に Courier であることを求める", "Ready のままでいることを求める", "次回の確認操作まで発送を延期することを求める"],
+        "correct": 0
+      },
+      {
+        "text": "ある操作の前が Shipped(Courier)、直後が Shipped(Post) だった場合、判定はどうなるか。",
+        "options": ["追跡方法が変わったので違反", "タグが同じなので成立", "Post が後から Courier に戻れば成立", "初期状態だけを見るため対象外"],
+        "correct": 0
+      },
+      {
+        "text": "ShippedStays はどの操作の前後に適用されるか。",
+        "options": ["実行可能な全操作", "ship だけ", "acknowledge だけ", "明示的に status を代入する操作だけ"],
+        "correct": 0
+      }
+    ]
+  },
+  {
+    "id": "retry",
+    "baseline": "fixtures/rcheck/structured/retry-transition.model",
+    "questions": [
+      {
+        "text": "回数の大小を比較するのはどのときか。",
+        "options": ["一歩の前後がどちらも Sent", "一歩の前だけが Sent", "一歩の後だけが Sent", "いつか Sent になる全状態"],
+        "correct": 0
+      },
+      {
+        "text": "仮に追加の操作で Sent のまま attempt が 2 から 1 になれば、この規則を満たすか。",
+        "options": ["満たさない", "回数は非負なので満たす", "後から 2 に戻れば満たす", "status を更新しない操作なので対象外"],
+        "correct": 0
+      },
+      {
+        "text": "confirm が Sent を Confirmed にして attempt を 0 に戻す場合はどうなるか。",
+        "options": ["後が Sent ではないのでこの規則には違反しない", "前が Sent なので必ず違反する", "前の回数を記録しているので常に違反する", "再送が起こるまで結論できない"],
+        "correct": 0
+      }
+    ]
+  }
+]

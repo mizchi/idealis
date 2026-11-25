@@ -1,0 +1,13 @@
+model G4117
+sig S0
+var v0: S0 -> some S0
+var v1: S0 -> set S0
+init { (#S0 != 2 and #(v1.S0) >= 3) }
+action a0() {
+  not (v0 = (S0 -> S0))
+  some (v1.(v1.S0))
+  v0' = v1
+}
+invariant Inv { ((v1.S0) = ((S0 + none).(S0 -> S0)) or (lone S0 implies (S0 = S0 or some (S0.v1)))) }
+reachable Goal { lone (v0.S0) }
+scope S0 = 3, steps = 6

@@ -73,6 +73,8 @@ jobs:
       - run: cargo test --all-targets --locked --manifest-path crates/ralloy/Cargo.toml
       - run: just rquint-test
       - run: just rmodel-test
+      - run: just rcheck-test
+      - run: just rcheck-typescript
       - name: Install Pkl 0.31.1
         run: |
           curl -fsSL -o "$RUNNER_TEMP/pkl" https://github.com/apple/pkl/releases/download/0.31.1/pkl-linux-amd64
@@ -81,6 +83,7 @@ jobs:
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
       - run: just rspec-test
       - run: just spec-check
+      - run: just rcheck-adapters
       - run: cargo fmt --manifest-path crates/rusmt/Cargo.toml -- --check
       - run: cargo clippy --all-targets --locked --manifest-path crates/rusmt/Cargo.toml -- -D warnings
       - run: cargo test --all-targets --locked --manifest-path crates/rusmt/Cargo.toml
@@ -305,6 +308,21 @@ jobs:
             .artifacts/shared-oracle
             .artifacts/async-tuning
           if-no-files-found: warn
+      - run: just rcheck-go
+
+  moonbit:
+    name: MoonBit bindings
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      # The installer is not pinned; moon fmt and the freshness check
+      # follow the installed toolchain (plan 0105).
+      - name: Install MoonBit
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+      - run: just rcheck-moonbit
 
   cache-proof:
     runs-on: ubuntu-latest

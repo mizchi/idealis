@@ -1,0 +1,15 @@
+model G1126
+sig S0
+rel r0: S0 -> lone S0
+rel r1: S0 -> some S0
+var v2: set S0
+var v3: S0 -> some S0
+init { (one ((r0.S0).(r1 + (S0 -> S0))) or some (v2.(v2 -> S0))) }
+action a0(p0_0: S0) {
+  (((v2 -> v2).S0).(S0 -> v2)) = ((p0_0 -> p0_0).((S0 -> p0_0).p0_0))
+  (some q1: S0 | #v2 < 3)
+  v3' = ((S0.(p0_0 -> S0)) -> p0_0)
+}
+invariant Inv { not ((lone ((v2.(S0 -> S0)).(r0.v3)) or (all q2: S0 | #none <= 0))) }
+reachable Goal { ((v3.(v2 -> v2)) in (S0 -> S0) or ((some S0 and #(S0.r1) >= 1) or (some v2 or some (r1.S0)))) }
+scope S0 = 3, steps = 6

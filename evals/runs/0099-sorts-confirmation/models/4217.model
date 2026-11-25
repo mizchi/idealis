@@ -1,0 +1,21 @@
+model G4217
+sig S0
+sig S1
+rel r0: S1 -> one S1
+rel r1: S1 -> set S1
+var v2: S1 -> set S1
+var v3: S1 -> one S0
+fact { (some S0 or (some ((S1 -> S0).S0) or S0 = ((S0 -> S1).(S1 & S1)))) }
+init { (some q2: S1 | v3 = (q2 -> S0)) }
+action a0(p0_0: S0, p0_1: S1) {
+  ((p0_1 - (r0.p0_1)) != ((S1 -> S0).p0_0) implies lone ((p0_0 - p0_0) & ((p0_0 -> p0_0).S0)))
+  (((p0_0 -> p0_1).r0) = (p0_0 -> S1) or some ((p0_0 & none).(S0 -> p0_1)))
+  v2' = v2
+}
+action a1() {
+  (all q3: S1 | some (q3 & q3))
+  v2' = (S1 -> S1)
+}
+invariant Inv { (not ((no ((S0.(S0 -> S1)).(v2 - r1)) or one ((S0 & S0).((S0 -> S1).v3)))) and not (some S1)) }
+reachable Goal { (not ((some S1 or ((S0 & S0).(S0 -> S0)) in (((S0 -> S1).S1) & (S0.(S0 -> S0))))) implies not ((some (r0.S1) implies v3 = v3))) }
+scope S0 = 2, S1 = 3, steps = 6

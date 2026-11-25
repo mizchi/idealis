@@ -1,0 +1,16 @@
+model G106
+sig S0
+sig S1
+var v0: S1 -> some S0
+init { (no ((S1.v0) + S1) and (v0.(S0 + S0)) != none) }
+action a0() {
+  no ((S1 -> S1).(v0.S1))
+  v0' = (S1 -> (S0.v0))
+}
+action a1() {
+  #(S0.(S1 -> S1)) > 2
+  v0' = v0
+}
+invariant Inv { (v0 in (S1 -> S1) and (some q1: S0 | (some S0 or some S0))) }
+reachable Goal { (all q2: S1 | (v0 & v0) = (S0 -> S0)) }
+scope S0 = 1, S1 = 1, steps = 6

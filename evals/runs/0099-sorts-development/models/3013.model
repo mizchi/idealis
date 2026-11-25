@@ -1,0 +1,14 @@
+model G3013
+sig S0
+rel r0: lone S0
+rel r1: one S0
+var v2: S0 -> lone S0
+var v3: S0 -> set S0
+fact { some ((r1 -> S0).S0) }
+init { (some (none + S0) or ((r1 -> S0) + v2) in (S0 -> S0)) }
+action a0() {
+  v2' = (((S0 -> r1).S0) -> (v2.S0))
+}
+invariant Inv { #(v3.r0) < 2 }
+reachable Goal { (((r0 -> r1).r0).v2) not in r0 }
+scope S0 = 1, steps = 6

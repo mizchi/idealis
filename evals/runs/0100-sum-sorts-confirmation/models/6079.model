@@ -1,0 +1,26 @@
+model G6079
+sig S0
+sig S1
+rel r0: S0 -> set S0
+rel r1: S1 -> set S0
+var v2: S1 -> set S1
+var v3: S0 -> some S1
+fact { ((S1 -> S1) = (S1 -> S1) or (some q1: S1 | #((S0 -> S1).S1) < 1)) }
+init { (some S0 or (S0 -> S1) = v3) }
+action a0(p0_0: S0, p0_1: S0) {
+  (all q2: S1 | S0 != p0_1)
+  ((p0_0 + (p0_1 + p0_1)) not in p0_1 or p0_0 not in S0)
+  v2' = ((v2 + v2).(S1 -> S1))
+}
+action a1(p1_0: S1, p1_1: S0) {
+  some (r0.S0)
+  (some (v2.S1) and r1 = r1)
+  v2' = (S1 -> p1_0)
+}
+action a2(p2_0: S0) {
+  p2_0 in none
+  v3' = ((p2_0.(S0 -> p2_0)) -> ((S1 -> p2_0).p2_0))
+}
+invariant Inv { #(v2.S1) != 1 }
+reachable Goal { (((v2.(S1 - none)) = S1 implies (r0 = r0 or ((S0 -> S1) + v3) = (v3.v2))) implies ((S0 = (S0 - S0) and S0 not in S0) or (S0 -> S0) in ((S0 -> S0) & (S0 -> S0)))) }
+scope S0 = 2, S1 = 2, steps = 6

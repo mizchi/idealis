@@ -1,0 +1,15 @@
+model G8087
+sig S0
+enum E = Ea | Eb
+type P = S0 + E
+rel r0: set S0
+rel r1: P -> some P
+var v2: set E
+fact { ((all q1: P | no S0) implies (some (S0.(S0 -> r0)) and some Ea)) }
+init { (all q2: S0 | lone ((q2 -> v2).E)) }
+action a0() {
+  v2' = (S0.((r0 -> S0).(r0 -> Ea)))
+}
+invariant Inv { not (not ((some q7: S0 | #v2 = 2))) }
+reachable Goal { (all q8: S0 | (not ((P -> P) = ((P -> q8).(r0 -> P))) and (#(r0 + q8) > 2 implies ((P -> E) + (P -> E)) in (P -> v2)))) }
+scope S0 = 3, steps = 6

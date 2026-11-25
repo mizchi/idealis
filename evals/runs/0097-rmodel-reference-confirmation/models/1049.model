@@ -1,0 +1,15 @@
+model G1049
+sig S0
+sig S1
+rel r0: S1 -> set S0
+rel r1: S0 -> one S0
+var v2: S1 -> set S1
+fact { some S1 }
+init { (r0 = (v2.v2) or some (S0 - S0)) }
+action a0(p0_0: S1, p0_1: S0) {
+  (all q3: S0 | #(q3.(S1 -> S0)) < 1)
+  v2' = ((p0_1 -> S0).(r1.r1))
+}
+invariant Inv { ((all q4: S0 | (some (q4 - S0) or some (q4.(S0 -> q4)))) and ((S1 - S0) + (S1.v2)) != ((S0.v2).(S1 -> S0))) }
+reachable Goal { ((v2.S1) + (S0.v2)) in (S0.(S0 -> S0)) }
+scope S0 = 2, S1 = 3, steps = 6

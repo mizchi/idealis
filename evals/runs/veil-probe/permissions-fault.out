@@ -1,0 +1,78 @@
+Examples/Idealis/PermissionsFault.lean:51:0: error: ❌ Violation: safety_failure (violates: no_leak, only_granted)
+  Theory:
+    grants = {(0, 0)}
+    reads = {(0, 1)}
+    secret = {1}
+    cleared = {0}
+  State 0 (via init):
+    opened = {}
+  State 1 (via read(u=1, d=1)):
+    opened = {(1, 1)}
+Examples/Idealis/PermissionsFault.lean:58:0: error: Initialization must establish the invariant:
+  doesNotThrow ... ✅
+  no_leak ... ✅
+  only_granted ... ✅
+The following set of actions must preserve the invariant and successfully terminate:
+  close
+    doesNotThrow ... ✅
+    no_leak ... ✅
+    only_granted ... ✅
+  read
+    doesNotThrow ... ✅
+    no_leak ... ❌
+      Counterexample (WP):
+        Theory:
+          grants = {(0, 0)}
+          reads = {}
+          secret = {0}
+          cleared = {}
+        Pre-state:
+          opened = {}
+        Action: read(u=0, d=0)
+      Counterexample (TR):
+        Theory:
+          grants = {(0, 0)}
+          reads = {}
+          secret = {0}
+          cleared = {}
+        Pre-state:
+          opened = {}
+        Action: read(u=0, d=0)
+        Post-state:
+          opened = {(0, 0)}
+    only_granted ... ❌
+      Counterexample (WP):
+        Theory:
+          grants = {}
+          reads = {(0, 0)}
+          secret = {0}
+          cleared = {0}
+        Pre-state:
+          opened = {}
+        Action: read(u=0, d=0)
+      Counterexample (TR):
+        Theory:
+          grants = {}
+          reads = {(0, 0)}
+          secret = {0}
+          cleared = {0}
+        Pre-state:
+          opened = {}
+        Action: read(u=0, d=0)
+        Post-state:
+          opened = {(0, 0)}
+Examples/Idealis/PermissionsFault.lean:58:0: warning: Trusting SMT solver for 4 goals. `set_option veil.smt.trust false` to enable proof reconstruction.
+✅ Satisfying trace found
+  Instantiation:
+    doc = Fin 1
+    role = Fin 1
+    user = Fin 1
+  Theory:
+    grants = {(0, 0)}
+    reads = {}
+    secret = {0}
+    cleared = {0}
+  State 0 (via init):
+    opened = {}
+  State 1 (via read(u=0, d=0)):
+    opened = {(0, 0)}
