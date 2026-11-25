@@ -44,25 +44,50 @@ fn bound(variable: &str, set: &Expression) -> Bound {
     }
 }
 
+struct Names {
+    entry: String,
+    key: String,
+    matched: String,
+    left: String,
+    right: String,
+}
+
+fn fresh_names(set: &Expression) -> Names {
+    let text = serde_json::to_string(set).unwrap_or_default();
+    let mut prefix = String::from("__SetAsFun");
+    while text.contains(&prefix) {
+        prefix.push('_');
+    }
+    let derive = |suffix: &str| format!("{prefix}_{suffix}");
+    Names {
+        entry: derive("entry"),
+        key: derive("key"),
+        matched: derive("match"),
+        left: derive("left"),
+        right: derive("right"),
+    }
+}
+
 pub(crate) fn expand(set: &Expression, location: Location) -> Expansion {
+    let names = fresh_names(set);
     let first_keys = node(
         E::SetMap {
-            expression: Box::new(component("__SetAsFun_entry", 1, location)),
-            bounds: vec![bound("__SetAsFun_entry", set)],
+            expression: Box::new(component(&names.entry, 1, location)),
+            bounds: vec![bound(&names.entry, set)],
         },
         location,
     );
     let chosen_entry = node(
         E::Choose {
             pattern: Pattern::Name {
-                name: "__SetAsFun_match".into(),
+                name: names.matched.clone(),
             },
             set: Some(Box::new(set.clone())),
             body: Box::new(apply(
                 "=",
                 vec![
-                    component("__SetAsFun_match", 1, location),
-                    name("__SetAsFun_key", location),
+                    component(&names.matched, 1, location),
+                    name(&names.key, location),
                 ],
                 location,
             )),
@@ -73,7 +98,7 @@ pub(crate) fn expand(set: &Expression, location: Location) -> Expansion {
         E::FunctionConstruction {
             bounds: vec![Bound {
                 pattern: Pattern::Name {
-                    name: "__SetAsFun_key".into(),
+                    name: names.key.clone(),
                 },
                 set: first_keys,
             }],
@@ -93,16 +118,16 @@ pub(crate) fn expand(set: &Expression, location: Location) -> Expansion {
             apply(
                 "=",
                 vec![
-                    component("__SetAsFun_left", 1, location),
-                    component("__SetAsFun_right", 1, location),
+                    component(&names.left, 1, location),
+                    component(&names.right, 1, location),
                 ],
                 location,
             ),
             apply(
                 "=",
                 vec![
-                    component("__SetAsFun_left", 2, location),
-                    component("__SetAsFun_right", 2, location),
+                    component(&names.left, 2, location),
+                    component(&names.right, 2, location),
                 ],
                 location,
             ),
@@ -111,10 +136,10 @@ pub(crate) fn expand(set: &Expression, location: Location) -> Expansion {
     );
     let single_valued = node(
         E::Forall {
-            bounds: vec![bound("__SetAsFun_left", set)],
+            bounds: vec![bound(&names.left, set)],
             body: Box::new(node(
                 E::Forall {
-                    bounds: vec![bound("__SetAsFun_right", set)],
+                    bounds: vec![bound(&names.right, set)],
                     body: Box::new(agreement),
                 },
                 location,

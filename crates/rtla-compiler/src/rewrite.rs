@@ -301,6 +301,7 @@ impl Rewriter {
                             | "Tail"
                             | "Append"
                             | "Cardinality"
+                            | "SetAsFun"
                     )
                     && name.starts_with(char::is_alphabetic)
                 {

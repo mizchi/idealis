@@ -36,8 +36,8 @@ pub(crate) fn standard_arity(name: &str) -> Option<usize> {
         "+" | "-" | "*" | "/" | "\\div" | "%" | "^" | "=" | "#" | "<" | ">" | "<=" | ">="
         | ".." | "\\in" | "\\notin" | "\\subseteq" | "\\cup" | "\\cap" | "\\" | "\\o" | "=>"
         | "<=>" | "/\\" | "\\/" | "Append" | "SelectSeq" | "SortSeq" | "Assert" => 2,
-        "~" | "-." | "DOMAIN" | "SUBSET" | "UNION" | "Len" | "Head" | "Tail" | "Cardinality"
-        | "ENABLED" | "UNCHANGED" | "[]" | "<>" => 1,
+        "SetAsFun" | "~" | "-." | "DOMAIN" | "SUBSET" | "UNION" | "Len" | "Head" | "Tail"
+        | "Cardinality" | "ENABLED" | "UNCHANGED" | "[]" | "<>" => 1,
         "SubSeq" | "ApaFoldSet" | "ApaFoldSeqLeft" => 3,
         _ => return None,
     })

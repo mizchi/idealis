@@ -165,3 +165,45 @@ fn set_as_fun_requires_extends_apalache() {
         assert!(check(&source, version).is_err(), "{version:?}");
     }
 }
+
+#[test]
+fn caller_names_that_look_like_generated_binders_are_not_captured() {
+    for version in VERSIONS {
+        for name in [
+            "__SetAsFun_left",
+            "__SetAsFun_right",
+            "__SetAsFun_key",
+            "__SetAsFun_entry",
+            "__SetAsFun_match",
+        ] {
+            let source = model(
+                "Integers, Apalache",
+                "Make({<<1, 10>>, <<2, 20>>})",
+                "DOMAIN f = {1, 2} /\\ f[1] = 10 /\\ f[2] = 20",
+                &format!("Make({name}) == SetAsFun({name})"),
+            );
+            assert_eq!(
+                check(&source, version),
+                Ok("complete".into()),
+                "{version:?} {name}"
+            );
+        }
+    }
+}
+
+#[test]
+fn set_as_fun_can_be_passed_as_an_operator_argument() {
+    for version in VERSIONS {
+        let source = model(
+            "Integers, Apalache",
+            "Use(SetAsFun, {<<1, 10>>})",
+            "DOMAIN f = {1} /\\ f[1] = 10",
+            "Use(F(_), s) == F(s)",
+        );
+        assert_eq!(
+            check(&source, version),
+            Ok("complete".into()),
+            "{version:?}"
+        );
+    }
+}
