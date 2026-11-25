@@ -4,44 +4,134 @@
     {
       "id": "permissions",
       "questions": [
-        { "id": "noRole", "text": "Can a user end up with a document open that none of the user's roles can read?", "options": ["yes", "no"], "answer": "no" },
-        { "id": "close", "text": "After a user closes a document the user had open, is that document still open for that user?", "options": ["yes", "no"], "answer": "no" },
-        { "id": "uncleared", "text": "Can a user who is not cleared ever have a secret document open?", "options": ["yes", "no"], "answer": "no" },
-        { "id": "grants", "text": "Can any action change which roles a user is granted?", "options": ["yes", "no"], "answer": "no" }
+        {
+          "id": "noRole",
+          "text": "Can a user end up with a document open that none of the user's roles can read?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        },
+        {
+          "id": "close",
+          "text": "After a user closes a document the user had open, is that document still open for that user?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        },
+        {
+          "id": "uncleared",
+          "text": "Can a user who is not cleared ever have a secret document open?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        },
+        {
+          "id": "grants",
+          "text": "Can any action change which roles a user is granted?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        }
       ]
     },
     {
       "id": "bank",
       "questions": [
-        { "id": "cap", "text": "Can a deposit take an account's balance above 4?", "options": ["yes", "no"], "answer": "no" },
-        { "id": "overdraw", "text": "With a balance of 2, can a withdrawal of 3 be applied?", "options": ["yes", "no"], "answer": "no" },
-        { "id": "steps", "text": "Starting from the initial state, what is the fewest number of actions after which some account has a balance of at least 3?", "options": ["0", "1", "2", "3", "never"], "answer": "1" }
+        {
+          "id": "cap",
+          "text": "Can a deposit take an account's balance above 4?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        },
+        {
+          "id": "overdraw",
+          "text": "With a balance of 2, can a withdrawal of 3 be applied?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        },
+        {
+          "id": "steps",
+          "text": "Starting from the initial state, what is the fewest number of actions after which some account has a balance of at least 3?",
+          "options": ["0", "1", "2", "3", "never"],
+          "answer": "1"
+        }
       ]
     },
     {
       "id": "order",
       "questions": [
-        { "id": "shippedCancel", "text": "Can an order that has been shipped later become cancelled?", "options": ["yes", "no"], "answer": "no" },
-        { "id": "draftShip", "text": "Can an order go directly from draft to shipped in one action?", "options": ["yes", "no"], "answer": "no" },
-        { "id": "tracking", "text": "After an order is shipped with the carrier Post, which carrier does its state record?", "options": ["Post", "Courier", "none"], "answer": "Post" },
-        { "id": "fraud", "text": "Can an order that was placed be cancelled with the reason Fraud?", "options": ["yes", "no"], "answer": "yes" }
+        {
+          "id": "shippedCancel",
+          "text": "Can an order that has been shipped later become cancelled?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        },
+        {
+          "id": "draftShip",
+          "text": "Can an order go directly from draft to shipped in one action?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        },
+        {
+          "id": "tracking",
+          "text": "After an order is shipped with the carrier Post, which carrier does its state record?",
+          "options": ["Post", "Courier", "none"],
+          "answer": "Post"
+        },
+        {
+          "id": "fraud",
+          "text": "Can an order that was placed be cancelled with the reason Fraud?",
+          "options": ["yes", "no"],
+          "answer": "yes"
+        }
       ]
     },
     {
       "id": "sessions",
       "questions": [
-        { "id": "max", "text": "What is the largest number of users that can be active at the same time?", "options": ["1", "2", "3"], "answer": "2" },
-        { "id": "lockedInactive", "text": "Can there be a locked user who is not active?", "options": ["yes", "no"], "answer": "yes" },
-        { "id": "nonAdmin", "text": "Can a user who is not an admin become the locked user?", "options": ["yes", "no"], "answer": "no" },
-        { "id": "twoLocked", "text": "Can two different users be locked at the same time?", "options": ["yes", "no"], "answer": "no" }
+        {
+          "id": "max",
+          "text": "What is the largest number of users that can be active at the same time?",
+          "options": ["1", "2", "3"],
+          "answer": "2"
+        },
+        {
+          "id": "lockedInactive",
+          "text": "Can there be a locked user who is not active?",
+          "options": ["yes", "no"],
+          "answer": "yes"
+        },
+        {
+          "id": "nonAdmin",
+          "text": "Can a user who is not an admin become the locked user?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        },
+        {
+          "id": "twoLocked",
+          "text": "Can two different users be locked at the same time?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        }
       ]
     },
     {
       "id": "service",
       "questions": [
-        { "id": "both", "text": "Can a client be waiting and served at the same time?", "options": ["yes", "no"], "answer": "no" },
-        { "id": "unfair", "text": "If nothing forces the serve action to happen, must every waiting client eventually be served?", "options": ["yes", "no"], "answer": "no" },
-        { "id": "again", "text": "Can a client that has been served make a new request?", "options": ["yes", "no"], "answer": "no" }
+        {
+          "id": "both",
+          "text": "Can a client be waiting and served at the same time?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        },
+        {
+          "id": "unfair",
+          "text": "If nothing forces the serve action to happen, must every waiting client eventually be served?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        },
+        {
+          "id": "again",
+          "text": "Can a client that has been served make a new request?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        }
       ]
     }
   ]

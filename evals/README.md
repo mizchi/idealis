@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0109: 表の構文の評価ループ](iterations/0109-surface-eval.md)は、DDD記述・形式化との相性・機械と人間の理解・費用の軸を差し替えられるループを作り、7候補で回した。軸ごとの数は0107の結論と同じ形で、人間の軸は満点に張り付いて候補を見分けなかった。
+
 [0108: 核のIRのJSONと、任意のadapter、roracleでの差分テスト](iterations/0108-ir-adapters.md)は、rmodelの構文木をJSONの契約にし、PklからIRを書くadapterの判定をroracleでrmodelの文と照らした。写せる4題材で一致し、adapterの人工故障2件を検出した。
 
 [0107: モデルの書き方の比較](iterations/0107-surface-languages.md)は、5つの題材をrmodel・Quint・OCaml・Isabelle・Idris 2・Pkl・Veilで書いて検査した。すべてSPECと一致し、詰む場所は系統で分かれた。ホストの関数で書くと解析できず、SMTに渡す言語は断片で詰む。

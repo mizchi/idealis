@@ -328,6 +328,18 @@ rcheck-adapters:
   scripts/rcheck-adapters-fresh.sh
   cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test adapters --test ir
 
+# The surface-language evaluation loop with pluggable axes (plan 0109).
+# Tools are found through ISABELLE, IDRIS2_PREFIX and VEIL_HOME; a missing
+# one makes its candidate's checks unavailable, never passed.
+[positional-arguments]
+surface-eval-prepare plan run: build
+  cargo build --release --locked --manifest-path crates/rcheck/Cargo.toml
+  node dist/evals/experiments/surface-eval/run.js prepare "$1" "$2"
+
+[positional-arguments]
+surface-eval-score plan run: build
+  node dist/evals/experiments/surface-eval/run.js score "$1" "$2"
+
 rmodel-oracle output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" alloy=".artifacts/alloy-subset/org.alloytools.alloy.dist.jar" tlc=".artifacts/0068-tlc-1.8.0.jar":
   evals/experiments/rmodel/oracle.sh {{quote(absolute_path(java))}} {{quote(absolute_path(alloy))}} {{quote(absolute_path(tlc))}} {{quote(absolute_path(output))}}
 

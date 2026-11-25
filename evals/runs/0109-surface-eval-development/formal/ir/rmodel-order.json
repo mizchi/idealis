@@ -1,0 +1,652 @@
+{
+  "version": 1,
+  "name": "Order",
+  "sigs": [
+    "Order"
+  ],
+  "enums": [
+    {
+      "name": "Status",
+      "members": [
+        "Draft",
+        "Placed",
+        "Shipped",
+        "Cancelled"
+      ]
+    },
+    {
+      "name": "Carrier",
+      "members": [
+        "Post",
+        "Courier"
+      ]
+    },
+    {
+      "name": "Reason",
+      "members": [
+        "Customer",
+        "Fraud"
+      ]
+    }
+  ],
+  "sums": [],
+  "records": [],
+  "relations": [
+    {
+      "name": "status",
+      "var": true,
+      "shape": {
+        "kind": "binary",
+        "from": "Order",
+        "to": "Status",
+        "mult": "one"
+      }
+    },
+    {
+      "name": "tracking",
+      "var": true,
+      "shape": {
+        "kind": "binary",
+        "from": "Order",
+        "to": "Carrier",
+        "mult": "lone"
+      }
+    },
+    {
+      "name": "reason",
+      "var": true,
+      "shape": {
+        "kind": "binary",
+        "from": "Order",
+        "to": "Reason",
+        "mult": "lone"
+      }
+    }
+  ],
+  "facts": [],
+  "init": [
+    {
+      "op": "all",
+      "var": "o",
+      "sort": "Order",
+      "body": {
+        "op": "eq",
+        "left": {
+          "op": "join",
+          "left": {
+            "op": "name",
+            "name": "o"
+          },
+          "right": {
+            "op": "name",
+            "name": "status"
+          }
+        },
+        "right": {
+          "op": "name",
+          "name": "Draft"
+        }
+      }
+    },
+    {
+      "op": "and",
+      "args": [
+        {
+          "op": "no",
+          "of": {
+            "op": "name",
+            "name": "tracking"
+          }
+        },
+        {
+          "op": "no",
+          "of": {
+            "op": "name",
+            "name": "reason"
+          }
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "name": "place",
+      "params": [
+        {
+          "name": "o",
+          "sort": "Order"
+        }
+      ],
+      "guards": [
+        {
+          "op": "eq",
+          "left": {
+            "op": "join",
+            "left": {
+              "op": "name",
+              "name": "o"
+            },
+            "right": {
+              "op": "name",
+              "name": "status"
+            }
+          },
+          "right": {
+            "op": "name",
+            "name": "Draft"
+          }
+        }
+      ],
+      "assignments": [
+        {
+          "var": "status",
+          "value": {
+            "op": "union",
+            "left": {
+              "op": "difference",
+              "left": {
+                "op": "name",
+                "name": "status"
+              },
+              "right": {
+                "op": "product",
+                "left": {
+                  "op": "name",
+                  "name": "o"
+                },
+                "right": {
+                  "op": "name",
+                  "name": "Draft"
+                }
+              }
+            },
+            "right": {
+              "op": "product",
+              "left": {
+                "op": "name",
+                "name": "o"
+              },
+              "right": {
+                "op": "name",
+                "name": "Placed"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ship",
+      "params": [
+        {
+          "name": "o",
+          "sort": "Order"
+        },
+        {
+          "name": "c",
+          "sort": "Carrier"
+        }
+      ],
+      "guards": [
+        {
+          "op": "eq",
+          "left": {
+            "op": "join",
+            "left": {
+              "op": "name",
+              "name": "o"
+            },
+            "right": {
+              "op": "name",
+              "name": "status"
+            }
+          },
+          "right": {
+            "op": "name",
+            "name": "Placed"
+          }
+        }
+      ],
+      "assignments": [
+        {
+          "var": "status",
+          "value": {
+            "op": "union",
+            "left": {
+              "op": "difference",
+              "left": {
+                "op": "name",
+                "name": "status"
+              },
+              "right": {
+                "op": "product",
+                "left": {
+                  "op": "name",
+                  "name": "o"
+                },
+                "right": {
+                  "op": "name",
+                  "name": "Placed"
+                }
+              }
+            },
+            "right": {
+              "op": "product",
+              "left": {
+                "op": "name",
+                "name": "o"
+              },
+              "right": {
+                "op": "name",
+                "name": "Shipped"
+              }
+            }
+          }
+        },
+        {
+          "var": "tracking",
+          "value": {
+            "op": "union",
+            "left": {
+              "op": "name",
+              "name": "tracking"
+            },
+            "right": {
+              "op": "product",
+              "left": {
+                "op": "name",
+                "name": "o"
+              },
+              "right": {
+                "op": "name",
+                "name": "c"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "cancel",
+      "params": [
+        {
+          "name": "o",
+          "sort": "Order"
+        },
+        {
+          "name": "r",
+          "sort": "Reason"
+        }
+      ],
+      "guards": [
+        {
+          "op": "in",
+          "left": {
+            "op": "join",
+            "left": {
+              "op": "name",
+              "name": "o"
+            },
+            "right": {
+              "op": "name",
+              "name": "status"
+            }
+          },
+          "right": {
+            "op": "union",
+            "left": {
+              "op": "name",
+              "name": "Draft"
+            },
+            "right": {
+              "op": "name",
+              "name": "Placed"
+            }
+          }
+        }
+      ],
+      "assignments": [
+        {
+          "var": "status",
+          "value": {
+            "op": "union",
+            "left": {
+              "op": "difference",
+              "left": {
+                "op": "name",
+                "name": "status"
+              },
+              "right": {
+                "op": "product",
+                "left": {
+                  "op": "name",
+                  "name": "o"
+                },
+                "right": {
+                  "op": "join",
+                  "left": {
+                    "op": "name",
+                    "name": "o"
+                  },
+                  "right": {
+                    "op": "name",
+                    "name": "status"
+                  }
+                }
+              }
+            },
+            "right": {
+              "op": "product",
+              "left": {
+                "op": "name",
+                "name": "o"
+              },
+              "right": {
+                "op": "name",
+                "name": "Cancelled"
+              }
+            }
+          }
+        },
+        {
+          "var": "reason",
+          "value": {
+            "op": "union",
+            "left": {
+              "op": "name",
+              "name": "reason"
+            },
+            "right": {
+              "op": "product",
+              "left": {
+                "op": "name",
+                "name": "o"
+              },
+              "right": {
+                "op": "name",
+                "name": "r"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "name": "PayloadsMatch",
+      "kind": "invariant",
+      "formula": {
+        "op": "and",
+        "args": [
+          {
+            "op": "all",
+            "var": "o",
+            "sort": "Order",
+            "body": {
+              "op": "and",
+              "args": [
+                {
+                  "op": "implies",
+                  "left": {
+                    "op": "eq",
+                    "left": {
+                      "op": "join",
+                      "left": {
+                        "op": "name",
+                        "name": "o"
+                      },
+                      "right": {
+                        "op": "name",
+                        "name": "status"
+                      }
+                    },
+                    "right": {
+                      "op": "name",
+                      "name": "Shipped"
+                    }
+                  },
+                  "right": {
+                    "op": "some",
+                    "of": {
+                      "op": "join",
+                      "left": {
+                        "op": "name",
+                        "name": "o"
+                      },
+                      "right": {
+                        "op": "name",
+                        "name": "tracking"
+                      }
+                    }
+                  }
+                },
+                {
+                  "op": "implies",
+                  "left": {
+                    "op": "some",
+                    "of": {
+                      "op": "join",
+                      "left": {
+                        "op": "name",
+                        "name": "o"
+                      },
+                      "right": {
+                        "op": "name",
+                        "name": "tracking"
+                      }
+                    }
+                  },
+                  "right": {
+                    "op": "eq",
+                    "left": {
+                      "op": "join",
+                      "left": {
+                        "op": "name",
+                        "name": "o"
+                      },
+                      "right": {
+                        "op": "name",
+                        "name": "status"
+                      }
+                    },
+                    "right": {
+                      "op": "name",
+                      "name": "Shipped"
+                    }
+                  }
+                },
+                {
+                  "op": "implies",
+                  "left": {
+                    "op": "eq",
+                    "left": {
+                      "op": "join",
+                      "left": {
+                        "op": "name",
+                        "name": "o"
+                      },
+                      "right": {
+                        "op": "name",
+                        "name": "status"
+                      }
+                    },
+                    "right": {
+                      "op": "name",
+                      "name": "Cancelled"
+                    }
+                  },
+                  "right": {
+                    "op": "some",
+                    "of": {
+                      "op": "join",
+                      "left": {
+                        "op": "name",
+                        "name": "o"
+                      },
+                      "right": {
+                        "op": "name",
+                        "name": "reason"
+                      }
+                    }
+                  }
+                },
+                {
+                  "op": "implies",
+                  "left": {
+                    "op": "some",
+                    "of": {
+                      "op": "join",
+                      "left": {
+                        "op": "name",
+                        "name": "o"
+                      },
+                      "right": {
+                        "op": "name",
+                        "name": "reason"
+                      }
+                    }
+                  },
+                  "right": {
+                    "op": "eq",
+                    "left": {
+                      "op": "join",
+                      "left": {
+                        "op": "name",
+                        "name": "o"
+                      },
+                      "right": {
+                        "op": "name",
+                        "name": "status"
+                      }
+                    },
+                    "right": {
+                      "op": "name",
+                      "name": "Cancelled"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FraudCancelled",
+      "kind": "reachable",
+      "formula": {
+        "op": "and",
+        "args": [
+          {
+            "op": "exists",
+            "var": "o",
+            "sort": "Order",
+            "body": {
+              "op": "and",
+              "args": [
+                {
+                  "op": "eq",
+                  "left": {
+                    "op": "join",
+                    "left": {
+                      "op": "name",
+                      "name": "o"
+                    },
+                    "right": {
+                      "op": "name",
+                      "name": "status"
+                    }
+                  },
+                  "right": {
+                    "op": "name",
+                    "name": "Cancelled"
+                  }
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "op": "join",
+                    "left": {
+                      "op": "name",
+                      "name": "o"
+                    },
+                    "right": {
+                      "op": "name",
+                      "name": "reason"
+                    }
+                  },
+                  "right": {
+                    "op": "name",
+                    "name": "Fraud"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ShippedCancelled",
+      "kind": "reachable",
+      "formula": {
+        "op": "and",
+        "args": [
+          {
+            "op": "exists",
+            "var": "o",
+            "sort": "Order",
+            "body": {
+              "op": "and",
+              "args": [
+                {
+                  "op": "eq",
+                  "left": {
+                    "op": "join",
+                    "left": {
+                      "op": "name",
+                      "name": "o"
+                    },
+                    "right": {
+                      "op": "name",
+                      "name": "status"
+                    }
+                  },
+                  "right": {
+                    "op": "name",
+                    "name": "Shipped"
+                  }
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "op": "join",
+                    "left": {
+                      "op": "name",
+                      "name": "o"
+                    },
+                    "right": {
+                      "op": "name",
+                      "name": "status"
+                    }
+                  },
+                  "right": {
+                    "op": "name",
+                    "name": "Cancelled"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "scope": {
+    "sizes": {
+      "Order": 2
+    },
+    "steps": 4
+  }
+}

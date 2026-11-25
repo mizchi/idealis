@@ -1,0 +1,86 @@
+{
+  "plan": "0109-surface-eval",
+  "axes": [
+    {
+      "id": "ddd",
+      "title": "DDD記述",
+      "question": "DDDの概念をそのまま書けるか",
+      "kind": "rubric",
+      "scoring": "0107の証拠（直接1・回避0.5・書けない0）の、DDDの概念7つの平均",
+      "score": {
+        "rmodel": 0.6428571428571429,
+        "quint": 0.7857142857142857,
+        "ocaml": 0.9285714285714286,
+        "isabelle": 0.9285714285714286,
+        "idris": 0.9285714285714286,
+        "pkl": 0.8571428571428571,
+        "veil": 0.7857142857142857
+      }
+    },
+    {
+      "id": "formal",
+      "title": "形式化との相性",
+      "question": "核のIRと検査器にどこまで載るか",
+      "kind": "mixed",
+      "scoring": "IRに写せて参照評価器の判定がrmodelと一致した題材の割合（adapterがなければ0）と、答えを出せた検査の種類の割合（4種類）の平均",
+      "score": {
+        "rmodel": 0.875,
+        "quint": 0.25,
+        "ocaml": 0.125,
+        "isabelle": 0.125,
+        "idris": 0.125,
+        "pkl": 0.525,
+        "veil": 0.375
+      }
+    },
+    {
+      "id": "machine",
+      "title": "機械での理解容易性",
+      "question": "道具がモデルを解析し、検査できるか",
+      "kind": "mixed",
+      "scoring": "解析できる木（rubric: 1・0.5・0）と、toolchainの検査が今通るか（1・0、使えなければ未測定）の平均",
+      "score": {
+        "rmodel": 1,
+        "quint": 1,
+        "ocaml": 0.5,
+        "isabelle": 0.75,
+        "idris": 0.5,
+        "pkl": 1,
+        "veil": 0.75
+      }
+    },
+    {
+      "id": "human",
+      "title": "人間への理解容易性（代理）",
+      "question": "構文の説明なしで、読み手が振る舞いを読み取れるか",
+      "kind": "agent",
+      "scoring": "新しい読み手の、振る舞いの問いの正答率（本物の人間ではない）",
+      "score": {
+        "rmodel": 1,
+        "quint": 1,
+        "ocaml": 1,
+        "isabelle": 1,
+        "idris": 1,
+        "pkl": 1,
+        "veil": 0.9444444444444444
+      }
+    },
+    {
+      "id": "cost",
+      "title": "道具の費用",
+      "question": "書く量と検査の時間はどれだけか",
+      "kind": "automatic",
+      "scoring": "候補の中で最小の行数を1とした比（最小/自分）",
+      "score": {
+        "rmodel": 1,
+        "quint": 0.5102880658436214,
+        "ocaml": 0.7469879518072289,
+        "isabelle": 0.484375,
+        "idris": 0.3147208121827411,
+        "pkl": 0.7469879518072289,
+        "veil": 0.5904761904761905
+      }
+    }
+  ],
+  "total": null
+}
