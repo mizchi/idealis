@@ -232,10 +232,13 @@ pub fn rust(model: &Model, source: &str) -> String {
          use std::collections::{{BTreeMap, BTreeSet}};\n\n",
         model.name
     );
-    out.push_str(&format!(
-        "pub const MODEL: &str = r####\"{}\"####;\n\n",
-        source.trim_end()
-    ));
+    let source = source.trim_end();
+    let literal = if source.contains("\"####") {
+        format!("{source:?}")
+    } else {
+        format!("r####\"{source}\"####")
+    };
+    out.push_str(&format!("pub const MODEL: &str = {literal};\n\n"));
     let derive = "#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]";
     out.push_str(
         "fn to_Int(x: &i64) -> Value {\n    Value::from(*x)\n}\n\
@@ -245,6 +248,9 @@ pub fn rust(model: &Model, source: &str) -> String {
          fn key_Bool(k: &str) -> Result<bool, String> {\n    match k {\n        \"true\" => Ok(true),\n        \"false\" => Ok(false),\n        _ => Err(format!(\"not a Bool key: {k}\")),\n    }\n}\n\n",
     );
     for sig in &model.sigs {
+        if let Some(definition) = model.entity_definitions.get(sig) {
+            out.push_str(&format!("/// {definition}\n"));
+        }
         let size = model.scope.sizes[sig];
         let all: Vec<String> = (0..size).map(|index| format!("{sig}({index})")).collect();
         out.push_str(&format!(
@@ -557,6 +563,10 @@ pub fn typescript(model: &Model) -> String {
     );
     let mut converters = String::new();
     for sig in &model.sigs {
+        if let Some(definition) = model.entity_definitions.get(sig) {
+            let definition = definition.replace("*/", "*&#47;");
+            out.push_str(&format!("/** {definition} */\n"));
+        }
         let names: Vec<String> = keys(model, sig).iter().map(|k| quote(k)).collect();
         out.push_str(&format!(
             "export type {sig} = string & {{ readonly __sort: \"{sig}\" }};\nexport const {sig}s: readonly {sig}[] = [{}] as readonly string[] as readonly {sig}[];\n",

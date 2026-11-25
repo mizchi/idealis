@@ -18,6 +18,8 @@ pub struct Ir {
     pub name: String,
     #[serde(default)]
     pub sigs: Vec<String>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub entity_definitions: BTreeMap<String, String>,
     #[serde(default)]
     pub enums: Vec<Named>,
     #[serde(default)]
@@ -480,6 +482,7 @@ pub fn to_ir(model: &Model) -> Result<Ir, String> {
         version: VERSION,
         name: model.name.clone(),
         sigs: model.sigs.clone(),
+        entity_definitions: model.entity_definitions.clone(),
         enums: named(&model.enums),
         sums: named(&model.sums),
         records: model
@@ -579,6 +582,7 @@ pub fn from_ir(ir: &Ir) -> Result<Model, String> {
     let model = Model {
         name: ir.name.clone(),
         sigs: ir.sigs.clone(),
+        entity_definitions: ir.entity_definitions.clone(),
         enums: ir
             .enums
             .iter()

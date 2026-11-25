@@ -34,9 +34,9 @@ function context(planPath: string, run: string): Context {
   const candidates = json<{ candidates: Candidate[] }>(
     `${here}/candidates.json`,
   ).candidates.filter((c) => plan.candidates.includes(c.id));
-  const tasks = json<{ tasks: Task[] }>(`${here}/tasks.json`).tasks.filter(
-    (t) => plan.tasks.includes(t.id),
-  );
+  const tasks = json<{ tasks: Task[] }>(
+    `${here}/${plan.tasksFile ?? "tasks.json"}`,
+  ).tasks.filter((t) => plan.tasks.includes(t.id));
   for (const id of plan.axes)
     if (axes[id] === undefined) throw new Error(`unknown axis ${id}`);
   for (const id of plan.candidates)
@@ -142,9 +142,25 @@ function sha256(path: string): string {
 function prepare(planPath: string, run: string): void {
   if (existsSync(join(run, "manifest.json")))
     throw new Error(`${run} exists: runs are never overwritten`);
-  mkdirSync(join(run, "results"), { recursive: true });
+  const ctx = context(planPath, run);
+  const inputs = [
+    planPath,
+    `${here}/candidates.json`,
+    `${here}/${ctx.plan.tasksFile ?? "tasks.json"}`,
+    ...ctx.candidates.flatMap((candidate) =>
+      [
+        ...Object.values(candidate.files),
+        ...candidate.shared,
+        ...(candidate.checkInputs ?? []),
+      ].map((file) => join(candidate.dir, file)),
+    ),
+  ];
+  const inputHashes = Object.fromEntries(
+    inputs.map((path) => [path, sha256(path)]),
+  );
   const git = (...args: string[]) =>
     execFileSync("git", args, { cwd: root, encoding: "utf8" }).trim();
+  mkdirSync(join(run, "results"), { recursive: true });
   writeFileSync(
     join(run, "manifest.json"),
     `${JSON.stringify(
@@ -152,11 +168,7 @@ function prepare(planPath: string, run: string): void {
         plan: planPath,
         revision: git("rev-parse", "HEAD"),
         dirty: git("status", "--porcelain").split("\n").filter(Boolean),
-        inputs: Object.fromEntries(
-          [planPath, `${here}/candidates.json`, `${here}/tasks.json`].map(
-            (p) => [p, sha256(p)],
-          ),
-        ),
+        inputs: inputHashes,
         node: process.version,
         started: new Date().toISOString(),
       },
@@ -164,7 +176,6 @@ function prepare(planPath: string, run: string): void {
       2,
     )}\n`,
   );
-  const ctx = context(planPath, run);
   ctx.checks();
   for (const id of ctx.plan.axes) {
     const axis = axes[id];

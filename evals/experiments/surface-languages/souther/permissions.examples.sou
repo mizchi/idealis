@@ -1,0 +1,37 @@
+examples for comparison.permissions
+
+let alice = User("a")
+let bob = User("b")
+let privileged = Role("privileged")
+let basic = Role("basic")
+let confidential = Doc("secret")
+let bulletin = Doc("public")
+let settings =
+    Settings {
+        grants = Set.fromList(
+            [Grant { user = alice, role = privileged }, Grant { user = bob, role = basic }]
+        ),
+        reads = Set.fromList(
+            [
+                ReadPermission { role = privileged, doc = confidential },
+                ReadPermission { role = basic, doc = bulletin }
+            ]
+        ),
+        secret = Set.singleton(confidential),
+        cleared = Set.singleton(alice)
+    }
+let empty = Permissions { settings = settings, openDocs = Set.empty }
+let readingSecret =
+    Permissions { ...empty, openDocs = Set.singleton(View { user = alice, doc = confidential }) }
+
+// SecretRead has a witness. NoLeak excludes UnclearedSecret at construction;
+// the example with bob checks one disabled transition without state search.
+example firstRead
+    | (settings, alice, confidential) -> readingSecret
+    | (settings, bob, confidential)   -> Disabled
+    | (settings, bob, bulletin)
+        -> Permissions { ...empty, openDocs = Set.singleton(View { user = bob, doc = bulletin }) }
+
+example close
+    | (readingSecret, alice, confidential) -> empty
+    | (readingSecret, bob, confidential)   -> Disabled

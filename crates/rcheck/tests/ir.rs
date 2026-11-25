@@ -36,6 +36,27 @@ fn round_trip(label: &str, model: &rmodel::Model) {
 }
 
 #[test]
+fn entity_definitions_survive_ir_and_cannot_name_an_unknown_sort() {
+    let model = rmodel::parse(include_str!("../../../fixtures/rcheck/bank.model")).unwrap();
+    let mut ir = rcheck::ir::to_ir(&model).unwrap();
+    let (round_tripped, _) = rcheck::ir::parse(&serde_json::to_string(&ir).unwrap()).unwrap();
+    assert_eq!(
+        round_tripped
+            .entity_definitions
+            .get("Account")
+            .map(String::as_str),
+        Some("入出金によって残高が変わる口座。")
+    );
+    ir.entity_definitions
+        .insert("Missing".into(), "unknown entity".into());
+    assert!(
+        rcheck::ir::from_ir(&ir)
+            .unwrap_err()
+            .contains("unknown entity Missing")
+    );
+}
+
+#[test]
 fn the_corpus_round_trips() {
     let mut count = 0;
     for dir in ["fixtures/rmodel", "spec/models", "fixtures/rcheck"] {

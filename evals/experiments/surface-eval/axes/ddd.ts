@@ -16,7 +16,7 @@ export const ddd: Axis = {
   title: "DDD記述",
   question: "DDDの概念をそのまま書けるか",
   kind: "rubric",
-  scoring: "0107の証拠（直接1・回避0.5・書けない0）の、DDDの概念7つの平均",
+  scoring: "DDDの概念7つ（直接1・回避0.5・書けない0）の平均",
   measure(context) {
     const metrics: Record<string, Record<string, number | null>> = {};
     const score: Record<string, number | null> = {};
@@ -32,7 +32,7 @@ export const ddd: Axis = {
       metrics,
       score,
       notes: [
-        "rubric: the writers' 0107 reports, not measured again",
+        "rubric: evidence from each candidate's model and writer report",
         ...concepts.map(([text, key]) => `${key}: ${text}`),
       ],
     };

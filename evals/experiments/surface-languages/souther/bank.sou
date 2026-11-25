@@ -1,0 +1,41 @@
+module comparison.bank
+
+data Account = String
+
+data Balances =
+    { balance: Map<Account, Int>
+    }
+    invariant NonNegative = List.all(n -> n >= 0, Map.values(balance))
+    invariant Bounded = List.all(n -> n <= 4, Map.values(balance))
+
+data Disabled
+data Change = Balances | Disabled
+
+behavior initial : (accounts: Set<Account>) -> Balances
+let initial (accounts) =
+    Balances { balance = Map.fromList(List.map(a -> (a, 0), Set.toList(accounts))) }
+
+behavior deposit : (s: Balances, a: Account, n: Int) -> Change
+let deposit (s, a, n) =
+    match Map.get(a, s.balance) with
+        | None -> Disabled
+        | Some b
+            -> {
+                // Equivalent to b + n <= 4 without overflowing Souther's signed Int.
+                guard n > 0 && n <= 4 - b else Disabled
+                Balances { balance = Map.insert(a, b + n, s.balance) }
+            }
+
+behavior withdraw : (s: Balances, a: Account, n: Int) -> Change
+let withdraw (s, a, n) =
+    match Map.get(a, s.balance) with
+        | None -> Disabled
+        | Some b
+            -> {
+                guard n > 0 && n <= b else Disabled
+                Balances { balance = Map.insert(a, b - n, s.balance) }
+            }
+
+// An explicit trace witnesses Rich. Souther examples do not search all traces.
+behavior firstDeposit : (accounts: Set<Account>, a: Account, n: Int) -> Change
+let firstDeposit (accounts, a, n) = deposit(initial(accounts), a, n)

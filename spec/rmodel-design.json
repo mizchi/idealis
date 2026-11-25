@@ -1,0 +1,557 @@
+{
+  "spec": {
+    "id": "rmodel-design",
+    "name": {
+      "ja": "rmodel の文法設計仕様",
+      "en": "rmodel grammar design specification"
+    },
+    "groups": [
+      "文法変更と遷移"
+    ],
+    "terms": [
+      {
+        "id": "adoption",
+        "kind": "state",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "採用判断",
+          "en": "adoption decision"
+        },
+        "definition": {
+          "ja": "変更を評価中にするか採用するかの状態。",
+          "en": "Whether the change is a trial or adopted."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "Decision"
+          },
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "Trial"
+          },
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "Adopted"
+          },
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "decision"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "semantic-evidence",
+        "kind": "state",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "意味の証拠",
+          "en": "semantic evidence"
+        },
+        "definition": {
+          "ja": "対照との一致、差異、結果の欠落、空、探索未完了、未確認を記録する。",
+          "en": "Records equivalence, divergence, missing comparison, empty check, incomplete search or unchecked."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "SemanticEvidence"
+          },
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "Unchecked"
+          },
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "Equivalent"
+          },
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "Diverges"
+          },
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "EmptyCheck"
+          },
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "Incomplete"
+          },
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "MissingComparison"
+          },
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "semantics"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "goal-evidence",
+        "kind": "state",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "ゴールの証拠",
+          "en": "goal evidence"
+        },
+        "definition": {
+          "ja": "事前の基準に照らした改善、改善なし、悪化、未測定を記録する。",
+          "en": "Records improvement, no gain, regression or no measurement against the declared criteria."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "GoalEvidence"
+          },
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "Unmeasured"
+          },
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "Improved"
+          },
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "NoGain"
+          },
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "Regressed"
+          },
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "goal"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "record-semantics",
+        "kind": "action",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "意味の証拠を記録",
+          "en": "record semantic evidence"
+        },
+        "definition": {
+          "ja": "評価中で意味が未確認の版に、結果を記録する。",
+          "en": "Record a result for a trial revision without recorded semantic evidence."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "recordSemantics"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "record-goal",
+        "kind": "action",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "ゴールの証拠を記録",
+          "en": "record goal evidence"
+        },
+        "definition": {
+          "ja": "評価中でゴールが未測定の版に、測定結果を記録する。",
+          "en": "Record measurement for a trial revision with an unmeasured goal."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "recordGoal"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "adopt",
+        "kind": "action",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "採用",
+          "en": "adopt"
+        },
+        "definition": {
+          "ja": "評価中の版の意味とゴールの証拠を確認し、採用に進める。",
+          "en": "Advance a trial to adoption after considering both kinds of evidence."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "adopt"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "revise",
+        "kind": "action",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "改版",
+          "en": "revise"
+        },
+        "definition": {
+          "ja": "次の版を評価中に戻し、証拠を取り直す。",
+          "en": "Start a new trial and require fresh evidence."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/rmodel-calibration.model",
+            "name": "revise"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "toggle-value",
+        "kind": "concept",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "値",
+          "en": "toggle value"
+        },
+        "definition": {
+          "ja": "例の変数に入る二通りの値。",
+          "en": "The two values in the example."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/rmodel-behavior.model",
+            "name": "Value"
+          },
+          {
+            "path": "spec/models/rmodel-behavior.model",
+            "name": "On"
+          },
+          {
+            "path": "spec/models/rmodel-behavior.model",
+            "name": "Off"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "toggle-state",
+        "kind": "state",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "状態変数",
+          "en": "state variables"
+        },
+        "definition": {
+          "ja": "入れ替える二変数と、代入せずに保持する変数。",
+          "en": "The pair to swap and a third variable kept by the frame."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/rmodel-behavior.model",
+            "name": "left"
+          },
+          {
+            "path": "spec/models/rmodel-behavior.model",
+            "name": "right"
+          },
+          {
+            "path": "spec/models/rmodel-behavior.model",
+            "name": "update"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "swap",
+        "kind": "action",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "入れ替え",
+          "en": "swap"
+        },
+        "definition": {
+          "ja": "左が Off かつ右が On のとき、二変数を同時に入れ替える。",
+          "en": "Swap the two values simultaneously when left is Off and right is On."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/rmodel-behavior.model",
+            "name": "swap"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "entity",
+        "kind": "entity",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "個体型",
+          "en": "entity sort"
+        },
+        "definition": {
+          "ja": "ドメインの個体を区別する有限の型。モデル中で使う名前に、用語の説明を添えられる。",
+          "en": "A finite type whose identities distinguish domain objects. Its model name can carry a glossary definition."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rmodel/src/syntax.rs",
+            "symbol": "entity_definitions"
+          }
+        ]
+      },
+      {
+        "id": "dead-behavior",
+        "kind": "concept",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "到達しない操作",
+          "en": "dead behavior"
+        },
+        "definition": {
+          "ja": "到達できる状態と引数のどの組でもガードが成立しない操作。",
+          "en": "An action whose guard is false at every reachable state for every argument binding."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rmodel/src/reference.rs",
+            "symbol": "enabled"
+          }
+        ]
+      },
+      {
+        "id": "snapshot-oracle",
+        "kind": "concept",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "状態の oracle",
+          "en": "snapshot oracle"
+        },
+        "definition": {
+          "ja": "到達した設定と状態を入力に受け取り、別のファイルで定義した命題の真偽を返す。",
+          "en": "Receives a reachable configuration and state and decides a proposition defined in a separate file."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "formal/rmodel/Bank.lean",
+            "symbol": "checkBank"
+          }
+        ]
+      }
+    ],
+    "rules": [
+      {
+        "id": "RMODEL-SEMANTICS",
+        "text": {
+          "ja": "採用した版には意味の一致が必要。差異、空、探索未完了、比較相手の欠落は、ゴールが改善しても一致として扱わない。",
+          "en": "Adoption requires semantic equivalence. Divergence, an empty check, incomplete search and a missing comparison do not count as equivalence even when the goal improves."
+        },
+        "terms": [
+          "adoption",
+          "semantic-evidence",
+          "goal-evidence",
+          "adopt"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/rmodel-calibration.model",
+            "check": "AdoptionNeedsEquivalence",
+            "expect": "holds"
+          },
+          {
+            "model": "spec/models/rmodel-calibration.model",
+            "check": "ImprovedButDiverges",
+            "expect": "reachable"
+          },
+          {
+            "model": "spec/models/rmodel-calibration.model",
+            "check": "ImprovedButEmpty",
+            "expect": "reachable"
+          },
+          {
+            "model": "spec/models/rmodel-calibration.model",
+            "check": "ImprovedButIncomplete",
+            "expect": "reachable"
+          },
+          {
+            "model": "spec/models/rmodel-calibration.model",
+            "check": "ImprovedButMissingComparison",
+            "expect": "reachable"
+          }
+        ]
+      },
+      {
+        "id": "RMODEL-GOAL",
+        "text": {
+          "ja": "採用した版にはゴールの改善が必要。意味だけが一致した版は評価中にでき、意味の一致とゴールの改善がそろった版は採用に進める。",
+          "en": "Adoption requires goal improvement. Equivalence alone can leave a trial open, and a trial with both kinds of favorable evidence can be adopted."
+        },
+        "terms": [
+          "adoption",
+          "goal-evidence",
+          "semantic-evidence",
+          "adopt"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/rmodel-calibration.model",
+            "check": "AdoptionNeedsImprovement",
+            "expect": "holds"
+          },
+          {
+            "model": "spec/models/rmodel-calibration.model",
+            "check": "EquivalentButUnmeasured",
+            "expect": "reachable"
+          },
+          {
+            "model": "spec/models/rmodel-calibration.model",
+            "check": "SupportedAdoption",
+            "expect": "reachable"
+          }
+        ]
+      },
+      {
+        "id": "RMODEL-REVISION",
+        "text": {
+          "ja": "改版した候補は評価中になり、旧版で集めた意味とゴールの証拠を取り直す。",
+          "en": "A new revision re-enters trial status and requires fresh semantic and goal evidence."
+        },
+        "terms": [
+          "adoption",
+          "semantic-evidence",
+          "goal-evidence",
+          "revise"
+        ],
+        "claims": [],
+        "unformalized": "遷移の前後を比較する条件は、calibration.rs の the_next_revision_must_collect_new_evidence が参照評価器で検査する。"
+      },
+      {
+        "id": "RMODEL-SWAP",
+        "text": {
+          "ja": "入れ替え例では左と右を遷移前の値から同時に更新する。二つの値は異なり続け、入れ替え後の状態に到達でき、両方が On の状態には到達しない。代入しない変数 update は Off のままにする。",
+          "en": "The example swaps left and right simultaneously using the old state. The values remain distinct, the swapped state is reachable, both On is unreachable, and the unassigned variable update stays Off."
+        },
+        "terms": [
+          "swap",
+          "toggle-value",
+          "toggle-state"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/rmodel-behavior.model",
+            "check": "Distinct",
+            "expect": "holds"
+          },
+          {
+            "model": "spec/models/rmodel-behavior.model",
+            "check": "Swapped",
+            "expect": "reachable"
+          },
+          {
+            "model": "spec/models/rmodel-behavior.model",
+            "check": "BothOn",
+            "expect": "unreachable"
+          },
+          {
+            "model": "spec/models/rmodel-behavior.model",
+            "check": "PreservesUpdate",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "RMODEL-ENTITY",
+        "text": {
+          "ja": "個体型の宣言を型と用語の正本とする。同じ名前を二重に宣言した場合や存在しない型を参照した場合は拒否する。用語の説明は IR、Rust と TypeScript の型、用語集へ引き継ぐ。",
+          "en": "The entity declaration defines both its type and its term. Duplicate names and unknown type references are rejected. The definition carries through the IR, the Rust and TypeScript types, and the glossary."
+        },
+        "terms": [
+          "entity"
+        ],
+        "claims": [],
+        "unformalized": "名前解決と生成物は rmodel の entity.rs、IR の往復は rcheck の ir.rs、生成した型を使う入出金の照合は rcheck の domain.rs と typescript.rs で検査する。"
+      },
+      {
+        "id": "RMODEL-DEAD-CODE",
+        "text": {
+          "ja": "ガードの成立例があれば到達可能とする。成立例なしをデッドと呼べるのは、初期状態が存在し、探索が完了したとき。探索の予算切れや範囲逸脱、初期状態なしは区別する。",
+          "en": "A guard witness makes an action reachable. An action with no witness is dead only after a complete search with an initial state. Exhausted budgets, scope exits and empty models have distinct treatment."
+        },
+        "terms": [
+          "dead-behavior"
+        ],
+        "claims": [],
+        "unformalized": "操作の到達結果と完了状態の区別は rcheck の CLI テスト dead_code.rs で実行する。"
+      },
+      {
+        "id": "RMODEL-LEAN-ORACLE",
+        "text": {
+          "ja": "完全探索した非空の範囲に限り、各設定・状態に Lean の命題を照合できる。偽ならその観測を返し、探索が未完了または Lean の出力が不正なら区別して扱う。",
+          "en": "A Lean proposition can be checked over each configuration and state after a complete nonempty search. A false result identifies the observation, separately from incomplete exploration or an invalid response."
+        },
+        "terms": [
+          "snapshot-oracle"
+        ],
+        "claims": [],
+        "unformalized": "別プロセスとの照合と失敗の区別を rcheck の lean_oracle.rs で検査する。"
+      }
+    ],
+    "groundings": [
+      {
+        "model": "spec/models/rmodel-behavior.model",
+        "implementation": {
+          "path": "crates/rmodel/src/syntax.rs",
+          "symbol": "action"
+        },
+        "test": {
+          "path": "crates/rmodel/tests/behavior.rs",
+          "symbol": "behavior_has_the_same_guard_parallel_updates_and_frame_as_action"
+        }
+      },
+      {
+        "model": "spec/models/rmodel-calibration.model",
+        "implementation": {
+          "path": "crates/rmodel/src/reference.rs",
+          "symbol": "steps"
+        },
+        "test": {
+          "path": "crates/rmodel/tests/calibration.rs",
+          "symbol": "the_next_revision_must_collect_new_evidence"
+        }
+      }
+    ]
+  }
+}

@@ -2,6 +2,12 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0112: 条件と更新の読み取り](iterations/0112-rmodel-readability.md)は、同じ三題材の `action` と `behavior` を比較した。rmodel の意味は一致し、代理読み手の正答は26/27と27/27だった。
+
+[0111: 自然言語の仕様から文法の検査を回す](iterations/0111-rmodel-spec-drift.md)は、rmodel の規則と検査を rspec と Jev につなぎ、`behavior` で最初の一周を回した。
+
+[0110: 候補の追加と絞り込み](iterations/0110-more-candidates.md)は、Souther・Koine・Context Mapper・FizzBee・P を加えて12候補を比較した。追加候補では Souther と FizzBee が次の比較に残った。読みやすさは Haiku の週次上限により未測定。
+
 [0109: 表の構文の評価ループ](iterations/0109-surface-eval.md)は、DDD記述・形式化との相性・機械と人間の理解・費用の軸を差し替えられるループを作り、7候補で回した。軸ごとの数は0107の結論と同じ形で、人間の軸は満点に張り付いて候補を見分けなかった。
 
 [0108: 核のIRのJSONと、任意のadapter、roracleでの差分テスト](iterations/0108-ir-adapters.md)は、rmodelの構文木をJSONの契約にし、PklからIRを書くadapterの判定をroracleでrmodelの文と照らした。写せる4題材で一致し、adapterの人工故障2件を検出した。

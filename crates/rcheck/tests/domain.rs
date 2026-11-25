@@ -5,6 +5,8 @@
 use rcheck::conform::{Budget, Status};
 use std::collections::{BTreeMap, BTreeSet};
 
+#[path = "support/bank_trace.rs"]
+mod bank_trace;
 #[rustfmt::skip]
 #[path = "generated/permissions.rs"]
 mod permissions;
@@ -170,6 +172,11 @@ fn correct_implementations_conform() {
             report.configurations, report.states, report.transitions, report.calls
         );
     }
+}
+
+#[test]
+fn rust_replays_the_bank_snapshots() {
+    bank_trace::assert_bank_trace(&mut bank::Driver::<Bank>(None));
 }
 
 #[test]

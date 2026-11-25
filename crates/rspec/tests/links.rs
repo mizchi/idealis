@@ -13,6 +13,11 @@ const SPECS: &[(&str, &str, &str)] = &[
         "fixtures/rmodel/spec.json",
         "fixtures/rmodel/spec.md",
     ),
+    (
+        "spec/rmodel-design.pkl",
+        "spec/rmodel-design.json",
+        "spec/rmodel-design.md",
+    ),
 ];
 
 fn load(path: &str) -> Value {

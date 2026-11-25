@@ -13,7 +13,9 @@
         "service": "service.model"
       },
       "shared": [],
-      "comments": { "line": "//" },
+      "comments": {
+        "line": "//"
+      },
       "check": [
         {
           "cwd": ".",
@@ -34,7 +36,10 @@
         "step": 0,
         "count": 1,
         "lone": 1,
-        "liveness": 0
+        "liveness": 0,
+        "codegen": 1,
+        "conformance": 1,
+        "enforcement": 0.5
       }
     },
     {
@@ -48,7 +53,9 @@
         "service": "service.qnt"
       },
       "shared": [],
-      "comments": { "line": "//" },
+      "comments": {
+        "line": "//"
+      },
       "check": [
         {
           "cwd": "{dir}",
@@ -75,7 +82,10 @@
         "step": 0.5,
         "count": 1,
         "lone": 1,
-        "liveness": 1
+        "liveness": 1,
+        "codegen": 0,
+        "conformance": 0.5,
+        "enforcement": 0
       }
     },
     {
@@ -89,8 +99,16 @@
         "service": "service.ml"
       },
       "shared": ["model.ml"],
-      "comments": { "block": ["(*", "*)"] },
-      "check": [{ "cwd": "{dir}", "run": ["./run.sh"], "each": false }],
+      "comments": {
+        "block": ["(*", "*)"]
+      },
+      "check": [
+        {
+          "cwd": "{dir}",
+          "run": ["./run.sh"],
+          "each": false
+        }
+      ],
       "adapter": null,
       "tree": 0,
       "verification": ["complete-search"],
@@ -104,7 +122,10 @@
         "step": 1,
         "count": 1,
         "lone": 1,
-        "liveness": 0.5
+        "liveness": 0.5,
+        "codegen": 0.5,
+        "conformance": 0,
+        "enforcement": 0.5
       }
     },
     {
@@ -118,7 +139,9 @@
         "service": "Service.thy"
       },
       "shared": ["Model.thy"],
-      "comments": { "block": ["(*", "*)"] },
+      "comments": {
+        "block": ["(*", "*)"]
+      },
       "check": [
         {
           "cwd": ".",
@@ -139,7 +162,10 @@
         "step": 1,
         "count": 0.5,
         "lone": 1,
-        "liveness": 1
+        "liveness": 1,
+        "codegen": 0.5,
+        "conformance": 0,
+        "enforcement": 0.5
       }
     },
     {
@@ -153,7 +179,10 @@
         "service": "Service.idr"
       },
       "shared": ["TS.idr"],
-      "comments": { "line": "--", "block": ["{-", "-}"] },
+      "comments": {
+        "line": "--",
+        "block": ["{-", "-}"]
+      },
       "check": [
         {
           "cwd": "{dir}",
@@ -175,7 +204,10 @@
         "step": 1,
         "count": 1,
         "lone": 1,
-        "liveness": 0.5
+        "liveness": 0.5,
+        "codegen": 0.5,
+        "conformance": 0,
+        "enforcement": 0.5
       }
     },
     {
@@ -189,9 +221,15 @@
         "service": "service.pkl"
       },
       "shared": ["Model.pkl"],
-      "comments": { "line": "//" },
+      "comments": {
+        "line": "//"
+      },
       "check": [
-        { "cwd": "{dir}", "run": ["pkl", "eval", "{file}"], "each": true }
+        {
+          "cwd": "{dir}",
+          "run": ["pkl", "eval", "{file}"],
+          "each": true
+        }
       ],
       "adapter": "fixtures/rcheck/adapters/pkl",
       "tree": 1,
@@ -206,7 +244,10 @@
         "step": 1,
         "count": 1,
         "lone": 1,
-        "liveness": 0.5
+        "liveness": 0.5,
+        "codegen": 0.5,
+        "conformance": 0,
+        "enforcement": 0
       }
     },
     {
@@ -220,7 +261,10 @@
         "service": "Service.lean"
       },
       "shared": [],
-      "comments": { "line": "--", "block": ["/-", "-/"] },
+      "comments": {
+        "line": "--",
+        "block": ["/-", "-/"]
+      },
       "check": [
         {
           "cwd": "{env:VEIL_HOME}",
@@ -242,8 +286,229 @@
         "step": 1,
         "count": 0.5,
         "lone": 0.5,
-        "liveness": 0.5
+        "liveness": 0.5,
+        "codegen": 0,
+        "conformance": 0,
+        "enforcement": 0
       }
+    },
+    {
+      "id": "souther",
+      "dir": "evals/experiments/surface-languages/souther",
+      "files": {
+        "permissions": "permissions.sou",
+        "bank": "bank.sou",
+        "order": "order.sou",
+        "sessions": "sessions.sou",
+        "service": "service.sou"
+      },
+      "shared": [],
+      "comments": {
+        "line": "//"
+      },
+      "check": [
+        {
+          "cwd": "{dir}",
+          "run": ["bash", "check.sh"],
+          "each": false,
+          "env": ["SOUTHER"]
+        }
+      ],
+      "adapter": null,
+      "tree": 0.5,
+      "verification": [],
+      "evidence": {
+        "identity": 0.5,
+        "config": 1,
+        "join": 0.5,
+        "ints": 0.5,
+        "adt": 1,
+        "typeExclusion": 1,
+        "step": 1,
+        "count": 1,
+        "lone": 1,
+        "liveness": 0,
+        "codegen": 0.5,
+        "conformance": 1,
+        "enforcement": 1
+      },
+      "checkInputs": [
+        "check.sh",
+        "permissions.examples.sou",
+        "bank.examples.sou",
+        "order.examples.sou",
+        "sessions.examples.sou",
+        "service.examples.sou"
+      ]
+    },
+    {
+      "id": "koine",
+      "dir": "evals/experiments/surface-languages/koine",
+      "files": {
+        "permissions": "permissions.koi",
+        "bank": "bank.koi",
+        "order": "order.koi",
+        "sessions": "sessions.koi",
+        "service": "service.koi"
+      },
+      "shared": [],
+      "comments": {
+        "line": "//"
+      },
+      "check": [
+        {
+          "cwd": "{dir}",
+          "run": ["bash", "check.sh"],
+          "each": false,
+          "env": ["KOINE"]
+        }
+      ],
+      "adapter": null,
+      "tree": 1,
+      "verification": [],
+      "evidence": {
+        "identity": 0.5,
+        "config": 0.5,
+        "join": 0.5,
+        "ints": 0.5,
+        "adt": 0.5,
+        "typeExclusion": 0,
+        "step": 0.5,
+        "count": 0.5,
+        "lone": 1,
+        "liveness": 0,
+        "codegen": 1,
+        "conformance": 0,
+        "enforcement": 1
+      },
+      "checkInputs": ["check.sh", "Checks.cs"]
+    },
+    {
+      "id": "contextmapper",
+      "dir": "evals/experiments/surface-languages/contextmapper",
+      "files": {
+        "permissions": "permissions.cml",
+        "bank": "bank.cml",
+        "order": "order.cml",
+        "sessions": "sessions.cml",
+        "service": "service.cml"
+      },
+      "shared": [],
+      "comments": {
+        "line": "//"
+      },
+      "check": [
+        {
+          "cwd": "{dir}",
+          "run": ["bash", "check.sh"],
+          "each": false,
+          "env": ["CONTEXT_MAPPER"]
+        }
+      ],
+      "adapter": null,
+      "tree": 1,
+      "verification": [],
+      "evidence": {
+        "identity": 0.5,
+        "config": 0.5,
+        "join": 0,
+        "ints": 1,
+        "adt": 0.5,
+        "typeExclusion": 0.5,
+        "step": 0.5,
+        "count": 0.5,
+        "lone": 1,
+        "liveness": 0,
+        "codegen": 0.5,
+        "conformance": 0.5,
+        "enforcement": 0
+      },
+      "checkInputs": ["check.sh"]
+    },
+    {
+      "id": "fizzbee",
+      "dir": "evals/experiments/surface-languages/fizzbee",
+      "files": {
+        "permissions": "permissions.fizz",
+        "bank": "bank.fizz",
+        "order": "order.fizz",
+        "sessions": "sessions.fizz",
+        "service": "service.fizz"
+      },
+      "shared": [],
+      "comments": {
+        "line": "#"
+      },
+      "check": [
+        {
+          "cwd": "{dir}",
+          "run": ["bash", "check.sh"],
+          "each": false,
+          "env": ["FIZZBEE"]
+        }
+      ],
+      "adapter": null,
+      "tree": 1,
+      "verification": ["complete-search"],
+      "evidence": {
+        "identity": 0.5,
+        "config": 0.5,
+        "join": 0.5,
+        "ints": 1,
+        "adt": 0.5,
+        "typeExclusion": 0,
+        "step": 1,
+        "count": 1,
+        "lone": 0.5,
+        "liveness": 1,
+        "codegen": 0,
+        "conformance": 1,
+        "enforcement": 0
+      },
+      "checkInputs": ["check.sh"]
+    },
+    {
+      "id": "p",
+      "dir": "evals/experiments/surface-languages/p",
+      "files": {
+        "permissions": "permissions.p",
+        "bank": "bank.p",
+        "order": "order.p",
+        "sessions": "sessions.p",
+        "service": "service.p"
+      },
+      "shared": [],
+      "comments": {
+        "line": "//"
+      },
+      "check": [
+        {
+          "cwd": "{dir}",
+          "run": ["bash", "check.sh"],
+          "each": false,
+          "env": ["P_CLI"]
+        }
+      ],
+      "adapter": null,
+      "tree": 0.5,
+      "verification": ["bounded"],
+      "evidence": {
+        "identity": 0.5,
+        "config": 0.5,
+        "join": 0.5,
+        "ints": 0.5,
+        "adt": 0.5,
+        "typeExclusion": 0.5,
+        "step": 1,
+        "count": 1,
+        "lone": 0.5,
+        "liveness": 0.5,
+        "codegen": 0,
+        "conformance": 1,
+        "enforcement": 0.5
+      },
+      "checkInputs": ["check.sh"]
     }
-  ]
+  ],
+  "implSource": "impl (plan 0110): rubric of tool capabilities, with measured and documented evidence distinguished in the candidate reports"
 }

@@ -5,8 +5,10 @@
 ## 対応済み
 
 - [x] `sig`（scopeでちょうどの大きさ、1〜7）、静的な`rel`と状態の`var`。単項（`set`・`lone`・`one`・`some`）と二項（`A -> m B`）の関係（0091）。
+- [x] `entity Account "説明"` は個体を持つ sort と任意の1行の用語定義を宣言する。型と意味は `sig` と共通。定義は Rust・TypeScript 型と用語集に反映する。[構文の照合テスト](tests/entity.rs)。
 - [x] `enum Name = A | B`: 名前の付いた、ちょうど1つずつのatom。scopeを書かず、sigと同じく量化と関係の型に使う（0093）。
 - [x] `fact`（varを参照しない設定の制約）、`init`、引数付きの`action`。actionは連言で、`v' = 式`の代入は1つのvarに1回まで、右辺と条件にprimeを書けない。代入しないvarと`rel`は変わらない（0091）。
+- [x] `behavior 名前(引数) { guard { 条件 } update { v = 式 } }`。各ブロックは省略でき、両方を書く場合はguardが先。従来のactionと同じ型検査と同時更新を使う。[構文の照合テスト](tests/behavior.rs)。
 - [x] 式: join（単項と二項、二項同士）、`->`、`+`・`-`・`&`、`none`、単項の`#`と絶対値7以下のリテラル。論理式: `in`・`not in`・`=`・`!=`・多重度・`no`・`not`・`and`・`or`・`implies`・`all`・`some`（0091）。
 - [x] `invariant`（到達できる全状態）と`reachable`（到達できる状態がある）。関係の型と多重度は全状態で成り立ち、破る遷移は起きない（0091）。
 - [x] Alloyへの写し方（ralloyのSATで有界、stepsのlasso）とTLA+への写し方（rtlcで完全、`rel`はInitで列挙）。

@@ -1,0 +1,48 @@
+USERS = [0, 1]
+ROLES = [0, 1]
+DOCS = [0, 1]
+SUBSETS = [[], [0], [1], [0, 1]]
+
+atomic action Init:
+    grants0 = oneof SUBSETS
+    grants1 = oneof SUBSETS
+    reads0 = oneof SUBSETS
+    reads1 = oneof SUBSETS
+    secret = oneof SUBSETS
+    grants = [grants0, grants1]
+    reads = [reads0, reads1]
+    requiredClearance = set([u for r in ROLES for d in DOCS for u in USERS if d in reads[r] and d in secret and r in grants[u]])
+    cleared = oneof [subset for subset in SUBSETS if all([u in subset for u in requiredClearance])]
+    openDocs = set()
+
+func mayRead(grantedRoles, roleReads, u, d):
+    return any([d in roleReads[r] for r in grantedRoles[u]])
+
+atomic action Read:
+    u = oneof USERS
+    d = oneof DOCS
+    allowed = mayRead(grants, reads, u, d)
+    require allowed
+    openDocs.add((u, d))
+
+atomic action Close:
+    u = oneof USERS
+    d = oneof DOCS
+    require (u, d) in openDocs
+    openDocs.remove((u, d))
+
+# Stuttering at a terminal state is legal in the shared specification.
+atomic action Idle:
+    pass
+
+always assertion NoLeak:
+    return all([d not in secret or u in cleared for u, d in openDocs])
+
+always assertion OnlyGranted:
+    return all([any([d in reads[r] for r in grants[u]]) for u, d in openDocs])
+
+exists assertion SecretRead:
+    return any([d in secret for u, d in openDocs])
+
+always assertion NoUnclearedSecret:
+    return not any([d in secret and u not in cleared for u, d in openDocs])

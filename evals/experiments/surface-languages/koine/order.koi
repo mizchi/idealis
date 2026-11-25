@@ -1,0 +1,45 @@
+// Koine enums have no payload-bearing variants or total match. One tag and two
+// optional fields approximate the sum, with runtime checks for tag/payload
+// consistency. The lifecycle and lack of a payload-writing command in Shipped
+// enforce ShippedStays through the generated API, without a two-state assertion.
+context Orders {
+  enum Carrier { Post, Courier }
+  enum Reason { Customer, Fraud }
+  enum Status { Draft, Placed, Shipped, Cancelled }
+
+  aggregate Purchases root Order {
+    entity Order identified by OrderId as natural(String) {
+      status: Status = Draft
+      tracking: Carrier?
+      reason: Reason?
+
+      invariant tracking.isPresent == (status == Shipped)
+      invariant reason.isPresent == (status == Cancelled)
+
+      states status {
+        Draft -> Placed, Cancelled
+        Placed -> Shipped, Cancelled
+        Shipped
+        Cancelled
+      }
+      command place {
+        requires status == Draft
+        status -> Placed
+      }
+
+      command ship(carrier: Carrier) {
+        requires status == Placed
+        status -> Shipped
+        tracking -> carrier
+      }
+
+      command cancel(because: Reason) {
+        requires status == Draft || status == Placed
+        status -> Cancelled
+        reason -> because
+      }
+
+      create start(id: OrderId) {}
+    }
+  }
+}

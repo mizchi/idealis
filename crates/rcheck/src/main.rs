@@ -1,11 +1,26 @@
 //! rcheck <model> [--checker auto|reference|explicit|sat|all] [--question NAME]
-//! rcheck generate <model> rust|typescript|go|moonbit|ir|schema|states
+//! rcheck generate <model> rust|typescript|go|moonbit|ir|schema|states|glossary
+//! rcheck dead-code <model> [--max-states N]
+//! rcheck lean-oracle <model> <file.lean> [--max-states N]
 //! Answers every question of an rmodel model, or one, and prints JSON. Exits
 //! 1 when two definite answers disagree, 2 on a usage or model error.
 use rcheck::Selection;
+mod lean_oracle;
 
 fn main() {
     let arguments: Vec<String> = std::env::args().skip(1).collect();
+    if let Some((command, args)) = arguments.split_first()
+        && command == "dead-code"
+    {
+        dead_code(args);
+        return;
+    }
+    if let Some((command, args)) = arguments.split_first()
+        && command == "lean-oracle"
+    {
+        lean_oracle::run(args);
+        return;
+    }
     // rcheck generate <model> rust|typescript|schema (plan 0102).
     if let [command, path, target] = arguments.as_slice()
         && command == "generate"
@@ -32,6 +47,10 @@ fn main() {
                     rcheck::conform::reachable_states(&model).unwrap_or_else(|error| fail(&error));
                 format!("{}\n", serde_json::to_string_pretty(&states).expect("JSON"))
             }
+            "glossary" => format!(
+                "{}\n",
+                serde_json::to_string_pretty(&model.entity_definitions).expect("JSON")
+            ),
             _ => usage(),
         };
         print!("{text}");
@@ -57,17 +76,10 @@ fn main() {
         }
     }
     let path = path.unwrap_or_else(|| usage());
-    let source = std::fs::read_to_string(&path).unwrap_or_else(|error| fail(&error.to_string()));
-    // A `.json` input is the kernel IR an adapter wrote (plan 0108).
-    let model = if path.ends_with(".json") {
-        let (model, omitted) = rcheck::ir::parse(&source).unwrap_or_else(|error| fail(&error));
-        for part in omitted {
-            eprintln!("omitted by the adapter: {} ({})", part.name, part.reason);
-        }
-        model
-    } else {
-        rmodel::parse(&source).unwrap_or_else(|error| fail(&error.to_string()))
-    };
+    let (model, omitted) = load_model(&path);
+    for part in omitted {
+        eprintln!("omitted by the adapter: {} ({})", part.name, part.reason);
+    }
     let names: Vec<String> = match only {
         Some(name) => vec![name],
         None => rcheck::questions(&model)
@@ -88,9 +100,68 @@ fn main() {
     }
 }
 
+fn load_model(path: &str) -> (rmodel::Model, Vec<rcheck::ir::Omitted>) {
+    let source = std::fs::read_to_string(path).unwrap_or_else(|error| fail(&error.to_string()));
+    if path.ends_with(".json") {
+        rcheck::ir::parse(&source).unwrap_or_else(|error| fail(&error))
+    } else {
+        let model = rmodel::parse(&source).unwrap_or_else(|error| fail(&error.to_string()));
+        (model, Vec::new())
+    }
+}
+
+fn dead_code(args: &[String]) {
+    use rmodel::reference::Outcome;
+    let (path, max_states) = match args {
+        [path] => (path, rcheck::Budget::default().states),
+        [path, flag, limit] if flag == "--max-states" => (
+            path,
+            limit
+                .parse()
+                .unwrap_or_else(|_| fail("invalid --max-states")),
+        ),
+        _ => usage(),
+    };
+    let (model, omitted) = load_model(path);
+    if !omitted.is_empty() {
+        fail("dead-code requires a complete model; the IR has adapter omissions");
+    }
+    let report = rmodel::reference::analyze(&model, max_states);
+    let coverage = match report.scope {
+        Outcome::Holds => "complete",
+        Outcome::Empty => "empty",
+        _ => "unknown",
+    };
+    let found_dead = report
+        .enabled
+        .iter()
+        .any(|(_, enabled)| *enabled == Some(false));
+    let actions: Vec<_> = report
+        .enabled
+        .into_iter()
+        .map(|(name, enabled)| {
+            let status = match enabled {
+                Some(true) => "reachable",
+                Some(false) => "unreachable",
+                None if report.scope == Outcome::Empty => "empty",
+                None => "unknown",
+            };
+            serde_json::json!({ "name": name, "status": status })
+        })
+        .collect();
+    let output = serde_json::json!({ "coverage": coverage, "actions": actions });
+    println!("{}", serde_json::to_string_pretty(&output).expect("JSON"));
+    if coverage != "complete" {
+        std::process::exit(3);
+    }
+    if found_dead {
+        std::process::exit(1);
+    }
+}
+
 fn usage() -> ! {
     fail(
-        "usage: rcheck <model> [--checker auto|reference|explicit|sat|all] [--question NAME] | rcheck generate <model> rust|typescript|go|moonbit|ir|schema|states",
+        "usage: rcheck <model> [--checker auto|reference|explicit|sat|all] [--question NAME] | rcheck generate <model> rust|typescript|go|moonbit|ir|schema|states|glossary | rcheck dead-code <model> [--max-states N] | rcheck lean-oracle <model> <file.lean> [--max-states N]",
     )
 }
 

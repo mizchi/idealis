@@ -1,0 +1,26 @@
+CLIENTS = [0, 1]
+
+action Init:
+    waiting = set()
+    served = set()
+
+atomic action Request:
+    c = oneof CLIENTS
+    require c not in waiting and c not in served
+    waiting.add(c)
+
+atomic fair action Serve:
+    c = oneof waiting
+    waiting.remove(c)
+    served.add(c)
+
+atomic action Idle:
+    pass
+
+always assertion Disjoint:
+    return all([c not in served for c in waiting])
+
+# Waiting is removed only by serving; no client can request again.
+# In this model reaching a forever empty waiting set is equivalent to the response property.
+eventually always assertion EventuallyServed:
+    return len(waiting) == 0

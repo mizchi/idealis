@@ -1,0 +1,35 @@
+BoundedContext Ordering {
+  Aggregate Orders {
+    enum Status {
+      aggregateLifecycle
+      Draft, Placed, Shipped, Cancelled
+    }
+
+    enum Carrier {
+      Post, Courier
+    }
+
+    enum Reason {
+      Customer, Fraud
+    }
+
+    Entity Order {
+      aggregateRoot
+      String orderId key
+      - Status status required
+      - Carrier tracking nullable
+      - Reason reason nullable
+    }
+
+    Service OrderLifecycle {
+      @Order createOrder() : write [ -> Draft ];
+      void place(@Order order) : write [ Draft -> Placed ];
+      void ship(@Order order, @Carrier tracking) : write [ Placed -> Shipped* ];
+      void cancel(@Order order, @Reason reason) : write [ Draft, Placed -> Cancelled* ];
+    }
+  }
+}
+// Workaround: lifecycle enum and separate nullable payloads. The enum excludes
+// simultaneous Shipped and Cancelled tags. It cannot bind a payload to a tag
+// or offer a total match. The model declares terminal Shipped, but CML cannot
+// check tracking preservation or check reachability of Cancelled with Fraud.

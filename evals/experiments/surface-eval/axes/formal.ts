@@ -140,7 +140,7 @@ export const formal: Axis = {
       score[candidate.id] = mean([reach, breadth]);
     }
     notes.push(
-      "verification kinds: rubric from 0107 (complete-search, bounded, inductive, proof)",
+      "verification kinds: rubric from the candidate's checks (complete-search, bounded, inductive, proof)",
     );
     return { axis: "formal", metrics, score, notes };
   },

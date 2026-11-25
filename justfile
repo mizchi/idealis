@@ -271,13 +271,33 @@ rspec-test:
   cargo clippy --all-targets --locked --manifest-path crates/rspec/Cargo.toml -- -D warnings
   cargo test --all-targets --locked --manifest-path crates/rspec/Cargo.toml
 
-# Static links, claims through both engines, and freshness of the generated
+# Static links, model claims, and freshness of the generated
 # JSON, Markdown and jev-lint manifest (plan 0092). Needs pkl on PATH.
 spec-check:
   cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check
 
 spec-write:
   cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check -- --write
+
+rmodel-design-write:
+  cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check -- --rmodel-design --write
+
+rmodel-design-check:
+  cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check -- --rmodel-design
+  cargo test --locked --manifest-path crates/rmodel/Cargo.toml --test calibration --test behavior --test entity
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test dead_code
+
+[positional-arguments]
+rmodel-design-drift *args:
+  cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check -- --rmodel-design >&2
+  pnpm exec jev-lint docs --document-manifest spec/rmodel-design-documents.json --ledger .jev-lint/judgments/rmodel-design "$@"
+
+rmodel-readability-eval output:
+  cargo build --release --locked --manifest-path crates/rcheck/Cargo.toml
+  node evals/experiments/rmodel-readability/run.mjs run {{quote(output)}}
+
+rmodel-readability-replay output:
+  node evals/experiments/rmodel-readability/run.mjs replay {{quote(output)}}
 
 # Advisory semantic drift between the glossary, crate documents, rules and
 # models (plan 0092). Appends to the ledger; never a CI gate.
@@ -297,6 +317,9 @@ rcheck-test:
   cargo fmt --manifest-path crates/rcheck/Cargo.toml -- --check
   cargo clippy --all-targets --locked --manifest-path crates/rcheck/Cargo.toml -- -D warnings
   cargo test --all-targets --locked --manifest-path crates/rcheck/Cargo.toml
+
+rcheck-lean-oracle:
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test lean_oracle -- --include-ignored
 
 # TypeScript implementations against the generated bindings and ajv on the
 # generated JSON Schema (plan 0102).

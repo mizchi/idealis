@@ -1,0 +1,24 @@
+// One aggregate per account. Koine Int maps to target finite-width integers.
+// Restrict the argument before addition; these commands have the same enabled
+// step on the model's reachable balances. Rich has an example, no reachability
+// assertion in Koine.
+context Bank {
+  aggregate Accounts root Account {
+    entity Account identified by AccountId as natural(String) {
+      balance: Int = 0
+      invariant balance >= 0 && balance <= 4
+
+      command deposit(amount: Int) {
+        requires amount > 0 && amount <= 4 - balance
+        balance -> balance + amount
+      }
+
+      command withdraw(amount: Int) {
+        requires amount > 0 && amount <= balance
+        balance -> balance - amount
+      }
+
+      create start(id: AccountId) {}
+    }
+  }
+}

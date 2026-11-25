@@ -17,6 +17,9 @@
 - [x] `generate`: モデルからRustのtrait、TypeScriptの型とdriver、Goのinterfaceとdecoder（0104）、MoonBitのtraitとdecoder・`Server::handle`（0105）、JSON Schema、到達できる状態を生成する（0102）。JSON Schemaの検査は、生成するキーワードだけを扱う`schema::validate`で、知らないキーワードはエラーにする。
 
 - [x] 核のIRのJSON（version 1、`ir`、0108）: rmodelの型検査前の構文木。式・論理式は`op`で区別する木、知らないtag・欠けたfield・知らないfieldは拒む。`rcheck generate <model> ir`で書き、`.json`の入力は`rmodel::validate`で型検査してから検査器に渡す。adapterが写せなかった部分は`omitted`。
+- [x] `entity` の用語定義を IR の任意フィールド `entity_definitions` と `generate glossary` に写す。定義を持たない IR は従来の形式で読める。[IR の往復テスト](tests/ir.rs)。
+- [x] `rcheck dead-code` は参照評価器で、到達する状態で成立するガードを操作ごとに調べる。未確定、空、IR の欠落をデッド扱いしない。[到達性の CLI テスト](tests/dead_code.rs)。
+- [x] `rcheck lean-oracle` は、参照評価器が完全探索できた非空のモデルから設定と状態を抽出し、別の Lean ファイルに JSON で渡す。偽の観測と実行エラーを区別する。[入出金の命題](../../formal/rmodel/Bank.lean) · [oracle の CLI テスト](tests/lean_oracle.rs)。
 - [x] adapterの差分テスト（0108）: roracleで、rmodelの文の判定を基準に、adapterのIRの判定を照らす。unsupported・omittedはunknown、拒まれたIRはerrorで、一致に数えない。
 
 ## 照合

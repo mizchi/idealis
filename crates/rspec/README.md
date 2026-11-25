@@ -14,11 +14,13 @@ prose grounded by claims about rmodel checks.
   rule with its models (semantic). Those answers are advisory.
 
 ```sh
-just spec-check        # links, claims through ralloy's SAT and rtlc, freshness
+just spec-check        # links, model verdicts, freshness
 just spec-write        # regenerate JSON, Markdown and the manifest
 just spec-drift        # jev-lint docs, appended to .jev-lint/judgments/spec
 ```
 
 The specifications are `spec/idealis.pkl` (the vocabulary of idealis
-itself, rendered to `docs/glossary.md`) and `fixtures/rmodel/spec.pkl`.
+itself, rendered to `docs/glossary.md`), `fixtures/rmodel/spec.pkl`, and
+`spec/rmodel-design.pkl`. The first two check claims through ralloy's SAT
+and rtlc. The grammar design specification uses rmodel's reference evaluator.
 See [SUPPORT.md](SUPPORT.md).

@@ -1,0 +1,74 @@
+module comparison.sessions
+
+data User = String
+
+data Settings =
+    { admins: Set<User>
+    }
+    invariant HasAdmin = Bool.not(Set.isEmpty(admins))
+
+data Sessions =
+    { settings: Settings
+    , active: Set<User>
+    , locked: User?
+    }
+    invariant Capacity = Set.size(active) <= 2
+    invariant LockedByAdmin = match locked with
+        | None -> true
+        | Some user -> Set.contains(user, settings.admins)
+
+data Disabled
+data Change = Sessions | Disabled
+
+behavior initial : (settings: Settings) -> Sessions
+let initial (settings) = Sessions { settings = settings, active = Set.empty, locked = None }
+
+behavior login : (s: Sessions, u: User) -> Change
+let login (s, u) = {
+    guard Bool.not(Set.contains(u, s.active)) && Set.size(s.active) < 2 else Disabled
+    Sessions { ...s, active = Set.insert(u, s.active) }
+}
+
+behavior logout : (s: Sessions, u: User) -> Change
+let logout (s, u) = {
+    guard Set.contains(u, s.active) else Disabled
+    Sessions { ...s, active = Set.remove(u, s.active) }
+}
+
+behavior lock : (s: Sessions, u: User) -> Change
+let lock (s, u) =
+    match s.locked with
+        | Some -> Disabled
+        | None
+            -> {
+                guard Set.contains(u, s.settings.admins) && Set.contains(u, s.active) else Disabled
+                Sessions { ...s, locked = u }
+            }
+
+behavior unlock : (s: Sessions, u: User) -> Change
+let unlock (s, u) =
+    match s.locked with
+        | None -> Disabled
+        | Some lockedUser
+            -> {
+                guard lockedUser == u else Disabled
+                Sessions { ...s, locked = None }
+            }
+
+behavior loginAndLock : (settings: Settings, u: User) -> Change
+let loginAndLock (settings, u) =
+    match login(initial(settings), u) with
+        | Disabled -> Disabled
+        | Sessions as s -> lock(s, u)
+
+behavior lockAndLogout : (settings: Settings, u: User) -> Change
+let lockAndLogout (settings, u) =
+    match loginAndLock(settings, u) with
+        | Disabled -> Disabled
+        | Sessions as s -> logout(s, u)
+
+behavior addSecondUser : (settings: Settings, u: User, v: User) -> Change
+let addSecondUser (settings, u, v) =
+    match loginAndLock(settings, u) with
+        | Disabled -> Disabled
+        | Sessions as s -> login(s, v)

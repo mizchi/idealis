@@ -1,0 +1,56 @@
+// Three slots encode the fixed User scope. The expression language has no
+// collection update and no null literal. A private factory leaves noUser absent
+// so unlock can restore absence in the optional locked field.
+context Sessions {
+  enum UserSlot { U0, U1, U2 }
+
+  aggregate Sessions root Session {
+    entity Session identified by SessionId {
+      admin0: Bool
+      admin1: Bool
+      admin2: Bool
+      active0: Bool = false
+      active1: Bool = false
+      active2: Bool = false
+      locked: UserSlot?
+      noUser: UserSlot?
+
+      activeCount: Int = (if active0 then 1 else 0) + (if active1 then 1 else 0) + (if active2 then 1 else 0)
+
+      invariant admin0 || admin1 || admin2
+      invariant activeCount <= 2
+      invariant locked.isNone || (locked == U0 && admin0) || (locked == U1 && admin1) || (locked == U2 && admin2)
+
+      command login(user: UserSlot) {
+        requires (user == U0 && !active0) || (user == U1 && !active1) || (user == U2 && !active2)
+        requires activeCount < 2
+        active0 -> active0 || user == U0
+        active1 -> active1 || user == U1
+        active2 -> active2 || user == U2
+      }
+
+      command logout(user: UserSlot) {
+        requires (user == U0 && active0) || (user == U1 && active1) || (user == U2 && active2)
+        active0 -> active0 && user != U0
+        active1 -> active1 && user != U1
+        active2 -> active2 && user != U2
+      }
+
+      command lock(user: UserSlot) {
+        requires locked.isNone
+        requires (user == U0 && admin0 && active0) || (user == U1 && admin1 && active1) || (user == U2 && admin2 && active2)
+        locked -> user
+      }
+
+      command unlock(user: UserSlot) {
+        requires locked == user
+        locked -> noUser
+      }
+      // LockedIsActive is false: login(U0), lock(U0), logout(U0) when U0
+      // is an admin. Enforcing this as an invariant would change logout.
+      // Full and ThreeActive have no Koine reachability predicates.
+
+      create start(admin0: Bool, admin1: Bool, admin2: Bool) {}
+    }
+  }
+}

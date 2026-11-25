@@ -1,0 +1,29 @@
+BoundedContext Permissions {
+  Aggregate Access {
+    Entity User {
+      aggregateRoot
+      String userId key
+      boolean cleared not changeable
+      - Set<Role> grants
+      - Set<Doc> open
+
+      // Starts with no open docs. Read adds doc if some granted role can read
+      // it. Close removes doc if currently open. CML declares the signatures.
+      def void ^read(@Doc doc) : write;
+      def void close(@Doc doc) : write;
+    }
+
+    Entity Role {
+      String roleId key
+      - Set<Doc> reads
+    }
+
+    Entity Doc {
+      String docId key
+      boolean secret not changeable
+    }
+  }
+}
+// No scope parameters or configuration enumeration.
+// The premise (a granted role that reads a secret requires a cleared user)
+// and NoLeak, OnlyGranted, SecretRead, UnclearedSecret are outside CML checks.

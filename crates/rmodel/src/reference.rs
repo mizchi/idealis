@@ -428,7 +428,7 @@ pub fn evaluate(model: &Model, max_states: usize) -> Vec<Verdict> {
 
 /// Verdicts, and whether each action has a transition from some reachable
 /// state (plan 0098); `enabled` is `None` for an action never seen enabled
-/// in an incomplete search.
+/// in an incomplete or empty search.
 pub struct Report {
     pub verdicts: Vec<Verdict>,
     /// Whether a transition breaks a declared multiplicity (plan 0099):
@@ -660,7 +660,7 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
             .map(|(action, enabled)| {
                 (
                     action.name.clone(),
-                    (enabled || complete).then_some(enabled),
+                    (enabled || (complete && initial)).then_some(enabled),
                 )
             })
             .collect(),

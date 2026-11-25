@@ -441,13 +441,39 @@ impl Driver for Process {
 /// JSON form, canonical and sorted: the states an implementation must be
 /// able to show, and the schema must accept.
 pub fn reachable_states(model: &rmodel::Model) -> Result<Vec<Value>, String> {
-    let machine = Machine::new(model)?;
     let mut states = BTreeSet::new();
+    visit_reachable(model, |machine, _, state| {
+        states.insert(canonical(&relations(model, machine.state_data(state))).to_string());
+    })?;
+    Ok(states
+        .into_iter()
+        .map(|text| serde_json::from_str(&text).expect("JSON"))
+        .collect())
+}
+
+/// Configuration and state pairs for a snapshot oracle. Check the model
+/// and exploration budget with the reference evaluator before enumerating.
+pub fn reachable_observations(model: &rmodel::Model) -> Result<Vec<Value>, String> {
+    let mut observations = Vec::new();
+    visit_reachable(model, |machine, configuration, state| {
+        observations.push(serde_json::json!({
+            "config": canonical(&relations(model, machine.configuration_data(configuration))),
+            "state": canonical(&relations(model, machine.state_data(state))),
+        }));
+    })?;
+    Ok(observations)
+}
+
+fn visit_reachable(
+    model: &rmodel::Model,
+    mut visit: impl FnMut(&Machine<'_>, &Snapshot, &Snapshot),
+) -> Result<(), String> {
+    let machine = Machine::new(model)?;
     for configuration in machine.configurations() {
         let mut seen: BTreeSet<Snapshot> = machine.initial(&configuration).into_iter().collect();
         let mut queue: VecDeque<Snapshot> = seen.iter().cloned().collect();
         while let Some(state) = queue.pop_front() {
-            states.insert(canonical(&relations(model, machine.state_data(&state))).to_string());
+            visit(&machine, &configuration, &state);
             for step in machine.steps(&configuration, &state) {
                 if let Some(Next::State(next)) = step.next
                     && seen.insert(next.clone())
@@ -457,8 +483,5 @@ pub fn reachable_states(model: &rmodel::Model) -> Result<Vec<Value>, String> {
             }
         }
     }
-    Ok(states
-        .into_iter()
-        .map(|text| serde_json::from_str(&text).expect("JSON"))
-        .collect())
+    Ok(())
 }

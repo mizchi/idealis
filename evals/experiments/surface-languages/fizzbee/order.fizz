@@ -1,0 +1,37 @@
+ORDERS = [0, 1]
+CARRIERS = ["Post", "Courier"]
+REASONS = ["Customer", "Fraud"]
+
+# Tagged pairs model payloads; the language does not statically enforce variants.
+action Init:
+    status = {o: ("Draft", None) for o in ORDERS}
+
+atomic action Place:
+    o = oneof ORDERS
+    require status[o][0] == "Draft"
+    status[o] = ("Placed", None)
+
+atomic action Ship:
+    o = oneof ORDERS
+    carrier = oneof CARRIERS
+    require status[o][0] == "Placed"
+    status[o] = ("Shipped", carrier)
+
+atomic action Cancel:
+    o = oneof ORDERS
+    reason = oneof REASONS
+    require status[o][0] in ["Draft", "Placed"]
+    status[o] = ("Cancelled", reason)
+
+# Stuttering at a terminal state is legal in the shared specification.
+atomic action Idle:
+    pass
+
+transition assertion ShippedStays(before, after):
+    return all([before.status[o][0] != "Shipped" or after.status[o] == before.status[o] for o in ORDERS])
+
+exists assertion FraudCancelled:
+    return any([status[o] == ("Cancelled", "Fraud") for o in ORDERS])
+
+always assertion NoShippedCancelled:
+    return all([not (status[o][0] == "Shipped" and status[o][0] == "Cancelled") for o in ORDERS])

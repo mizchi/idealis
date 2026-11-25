@@ -1,0 +1,25 @@
+// One aggregate per client. The commands preserve the local partition, and
+// therefore its product over any finite set of clients. Koine has no temporal
+// or fairness assertion for EventuallyServed.
+context Service {
+  aggregate Requests root Client {
+    entity Client identified by ClientId as natural(String) {
+      waiting: Bool = false
+      served: Bool = false
+      invariant !(waiting && served)
+
+      command request {
+        requires !waiting && !served
+        waiting -> true
+      }
+
+      command serve {
+        requires waiting
+        waiting -> false
+        served -> true
+      }
+
+      create start(id: ClientId) {}
+    }
+  }
+}

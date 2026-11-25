@@ -14,7 +14,7 @@ just surface-eval-prepare evals/plans/<plan>.json evals/runs/<run>
 just surface-eval-score evals/plans/<plan>.json evals/runs/<run>
 ```
 
-- `prepare`は既存のrunを拒む（上書きしない）。manifest（plan・入力のsha256・revision・dirtyなpath）を書き、各候補の検査を1度だけ実行して`checks.json`に保存し、automaticとrubricの軸を`results/`に書き、agentの軸の問いを書く。
+- `prepare`は既存のrunを拒む（上書きしない）。manifestにplan、候補表、題材、モデル、共有定義、`checkInputs`のsha256とrevision、dirtyなpathを書き、各候補の検査を1度だけ実行して`checks.json`に保存する。automaticとrubricの軸を`results/`に保存し、agentの軸の問いを生成する。
 - `score`は保存した結果と答えから`scorecard.json`・`scorecard.md`を書く。何度やり直しても同じ成績表になる。
 - 道具が無い候補は`unavailable`で、合格に数えない（その軸は—）。
 
@@ -29,5 +29,18 @@ just surface-eval-score evals/plans/<plan>.json evals/runs/<run>
 | `machine` | mixed     | 解析できる木を残すか（rubric）と、toolchainの検査が今通るか                                                                 |
 | `human`   | agent     | 構文の説明なしで、新しい読み手が振る舞いの問いに答えた正答率（本物の人間ではない）                                          |
 | `cost`    | automatic | 空行とコメントを除いた行数（最小との比）、検査の時間                                                                        |
+| `impl`    | rubric    | 実装コードの生成、モデルと実装の照合、生成コードや型による不変条件の強制                                                    |
 
-候補は[candidates.json](candidates.json)（ファイル、コメントの書き方、検査command、adapterの出力、rubricの証拠）、題材と人間の軸の問いと答えは[tasks.json](tasks.json)。問いと答えは、結果を見る前にplanと一緒にcommitする。
+候補は[candidates.json](candidates.json)にある。題材、読み手への問い、正答はplanの`tasksFile`で選ぶ。既定値は[tasks.json](tasks.json)。問いと答えは、結果を見る前にplanと一緒にcommitする。
+
+## 0110 を実行する
+
+[0110 の実行計画](../../plans/0110-more-candidates.json)は12候補と[tasks-0110.json](tasks-0110.json)を選ぶ。追加のツールは、各候補の手順に従って環境変数で指定する。
+
+- `SOUTHER` は[Souther](../surface-languages/souther/README.md)のコンパイラ。
+- `KOINE` は[Koine](../surface-languages/koine/README.md)のCLI。
+- `CONTEXT_MAPPER` は[Context Mapper](../surface-languages/contextmapper/README.md)のCLI。
+- `FIZZBEE` は[FizzBee](../surface-languages/fizzbee/README.md)の`fizz`。
+- `P_CLI` は[P](../surface-languages/p/README.md)のCLI。
+
+`human` は候補ごとに、生成した問いだけを Haiku の独立したセッション2つに渡す。回答が2件そろわない候補の得点は未測定になる。

@@ -1,0 +1,16 @@
+BoundedContext Bank {
+  Aggregate Accounts {
+    Entity Account {
+      aggregateRoot
+      String accountId key
+      BigInteger balance min = "0" max = "4"
+
+      // Starts at 0. Deposit requires n > 0 and balance + n <= 4.
+      // Withdraw requires n > 0 and balance >= n. Both update balance.
+      def void deposit(BigInteger n) : write;
+      def void withdraw(BigInteger n) : write;
+    }
+  }
+}
+// Bounds annotate a field. CML does not execute the operation bodies, check
+// NonNegative on reachable states, or find the one-step Rich witness.

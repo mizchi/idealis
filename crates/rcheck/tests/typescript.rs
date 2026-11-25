@@ -4,18 +4,25 @@
 //! from `dist/`: `just rcheck-typescript` builds them first.
 use rcheck::conform::{Budget, Process, Status, conform};
 
-fn run(model: &str, driver: &str, fault: &str) -> rcheck::conform::Report {
+#[path = "support/bank_trace.rs"]
+mod bank_trace;
+
+fn process(driver: &str, fault: &str) -> Process {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let source = std::fs::read_to_string(root.join(model)).unwrap();
-    let model = rmodel::parse(&source).unwrap();
     let script = root.join(format!("dist/tests/rcheck/{driver}.driver.js"));
     assert!(
         script.exists(),
         "{} is missing: run just build",
         script.display()
     );
-    let mut process = Process::spawn("node", &[script.to_str().unwrap(), fault]).unwrap();
-    conform(&model, &mut process, Budget::default())
+    Process::spawn("node", &[script.to_str().unwrap(), fault]).unwrap()
+}
+
+fn run(model: &str, driver: &str, fault: &str) -> rcheck::conform::Report {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let source = std::fs::read_to_string(root.join(model)).unwrap();
+    let model = rmodel::parse(&source).unwrap();
+    conform(&model, &mut process(driver, fault), Budget::default())
 }
 
 #[test]
@@ -24,14 +31,21 @@ fn typescript_implementations_conform() {
     for (model, driver) in [
         ("fixtures/rmodel/permissions.model", "permissions"),
         ("fixtures/rmodel/sessions.model", "sessions"),
+        ("fixtures/rcheck/bank.model", "bank"),
     ] {
         let report = run(model, driver, "none");
         assert_eq!(report.status, Status::Matched, "{driver}: {report:?}");
         println!(
-            "{driver}: {} configurations, {} transitions, {} calls",
-            report.configurations, report.transitions, report.calls
+            "{driver}: {} configurations, {} states, {} transitions, {} calls",
+            report.configurations, report.states, report.transitions, report.calls
         );
     }
+}
+
+#[test]
+#[ignore = "needs the TypeScript build; run by just rcheck-typescript"]
+fn typescript_replays_the_bank_snapshots() {
+    bank_trace::assert_bank_trace(&mut process("bank", "none"));
 }
 
 #[test]
@@ -51,6 +65,7 @@ fn typescript_faults_are_found() {
             2,
         ),
         ("fixtures/rmodel/sessions.model", "sessions", "login", 3),
+        ("fixtures/rcheck/bank.model", "bank", "withdraw", 2),
     ] {
         let report = run(model, driver, fault);
         assert_eq!(

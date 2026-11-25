@@ -4,18 +4,22 @@ use serde_json::{Map, Value};
 use std::collections::{BTreeMap, BTreeSet};
 
 pub const MODEL: &str = r####"model Bank
-sig Account
+entity Account "入出金によって残高が変わる口座。"
 var balance: Account -> one Int
 init { all a: Account | a.balance = 0 }
-action deposit(a: Account, n: Int) {
-  n > 0
-  a.balance + n <= 4
-  balance' = balance - a -> a.balance + a -> (a.balance + n)
+behavior deposit(a: Account, n: Int) {
+  guard {
+    n > 0
+    a.balance + n <= 4
+  }
+  update { balance = balance - a -> a.balance + a -> (a.balance + n) }
 }
-action withdraw(a: Account, n: Int) {
-  n > 0
-  a.balance >= n
-  balance' = balance - a -> a.balance + a -> (a.balance - n)
+behavior withdraw(a: Account, n: Int) {
+  guard {
+    n > 0
+    a.balance >= n
+  }
+  update { balance = balance - a -> a.balance + a -> (a.balance - n) }
 }
 invariant NonNegative { all a: Account | a.balance >= 0 }
 reachable Rich { some a: Account | a.balance >= 3 }
@@ -41,6 +45,7 @@ fn key_Bool(k: &str) -> Result<bool, String> {
     }
 }
 
+/// 入出金によって残高が変わる口座。
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Account(pub u8);
 impl Account {

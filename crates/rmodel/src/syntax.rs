@@ -111,7 +111,7 @@ pub struct Action {
     /// Parameters and their sigs.
     pub params: Vec<(String, String)>,
     pub guards: Vec<Formula>,
-    /// `var' = expr`, at most one per var.
+    /// Simultaneous updates, at most one per var.
     pub assignments: Vec<(String, Expr)>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -150,6 +150,8 @@ pub struct Scope {
 pub struct Model {
     pub name: String,
     pub sigs: Vec<String>,
+    /// Glossary text keyed by the entity's checked sort name.
+    pub entity_definitions: BTreeMap<String, String>,
     /// `enum Name = A | B`: named atoms, one each, with no scope (0093).
     pub enums: Vec<(String, Vec<String>)>,
     /// `type Party = Person + Org`: a union of signatures and enums with no
@@ -269,6 +271,34 @@ const KEYWORDS: &[&str] = &[
 const MAX_SCOPE: usize = 7;
 const MAX_LITERAL: i64 = 7;
 
+fn definition_token(characters: &[char], position: &mut usize) -> Result<String, Error> {
+    *position += 1;
+    // The prefix distinguishes a definition token from syntax and names.
+    let mut token = String::from("\"");
+    while let Some(&character) = characters.get(*position) {
+        *position += 1;
+        match character {
+            '"' => return Ok(token),
+            '\\' => {
+                let Some(&escaped @ ('"' | '\\')) = characters.get(*position) else {
+                    return Err(Error::syntax("invalid entity definition escape"));
+                };
+                token.push(escaped);
+                *position += 1;
+            }
+            c if !definition_character(c) => {
+                return Err(Error::syntax("entity definitions must be on one line"));
+            }
+            c => token.push(c),
+        }
+    }
+    Err(Error::syntax("unterminated entity definition"))
+}
+
+fn definition_character(c: char) -> bool {
+    !c.is_control() && !matches!(c, '\u{2028}' | '\u{2029}')
+}
+
 fn tokens(source: &str) -> Result<Vec<String>, Error> {
     let mut tokens = Vec::new();
     let characters: Vec<char> = source.chars().collect();
@@ -283,6 +313,10 @@ fn tokens(source: &str) -> Result<Vec<String>, Error> {
             while position < characters.len() && characters[position] != '\n' {
                 position += 1;
             }
+            continue;
+        }
+        if character == '"' {
+            tokens.push(definition_token(&characters, &mut position)?);
             continue;
         }
         let start = position;
@@ -387,6 +421,7 @@ impl Parser {
         let mut model = Model {
             name: self.name()?,
             sigs: Vec::new(),
+            entity_definitions: BTreeMap::new(),
             enums: Vec::new(),
             sums: Vec::new(),
             records: Vec::new(),
@@ -451,9 +486,17 @@ impl Parser {
                     );
                     model.records.push(Record { name, fields });
                 }
-                "sig" => {
+                "sig" | "entity" => {
+                    let entity = self.peek() == "entity";
                     self.position += 1;
-                    model.sigs.push(self.name()?);
+                    let name = self.name()?;
+                    if entity && let Some(definition) = self.peek().strip_prefix('"') {
+                        model
+                            .entity_definitions
+                            .insert(name.clone(), definition.to_owned());
+                        self.position += 1;
+                    }
+                    model.sigs.push(name);
                 }
                 "rel" | "var" => {
                     let var = self.take("var") || {
@@ -490,9 +533,10 @@ impl Parser {
                         model.facts.extend(formulas);
                     }
                 }
-                "action" => {
+                "action" | "behavior" => {
+                    let explicit = self.peek() == "behavior";
                     self.position += 1;
-                    model.actions.push(self.action()?);
+                    model.actions.push(self.action(explicit)?);
                 }
                 "invariant" | "reachable" => {
                     let kind = if self.take("invariant") {
@@ -576,7 +620,7 @@ impl Parser {
         }
         Ok(formulas)
     }
-    fn action(&mut self) -> Result<Action, Error> {
+    fn action(&mut self, explicit: bool) -> Result<Action, Error> {
         let name = self.name()?;
         let mut params = Vec::new();
         self.expect("(")?;
@@ -598,20 +642,39 @@ impl Parser {
             assignments: Vec::new(),
         };
         self.expect("{")?;
+        if explicit {
+            if self.take("guard") {
+                action.guards = self.block()?;
+            }
+            if self.take("update") {
+                self.expect("{")?;
+                while !self.take("}") {
+                    action.assignments.push(self.assignment(false)?);
+                }
+            }
+            self.expect("}")?;
+            return Ok(action);
+        }
         while !self.take("}") {
             if self.peek().is_empty() {
                 return Err(Error::syntax("unterminated action"));
             }
             if self.peek_at(1) == "'" {
-                let var = self.name()?;
-                self.expect("'")?;
-                self.expect("=")?;
-                action.assignments.push((var, self.expression(0)?));
+                action.assignments.push(self.assignment(true)?);
             } else {
                 action.guards.push(self.formula()?);
             }
         }
         Ok(action)
+    }
+
+    fn assignment(&mut self, primed: bool) -> Result<(String, Expr), Error> {
+        let var = self.name()?;
+        if primed {
+            self.expect("'")?;
+        }
+        self.expect("=")?;
+        Ok((var, self.expression(0)?))
     }
 
     /// implies (right) < or < and < not < atoms.
@@ -1396,6 +1459,16 @@ fn check_in(model: &Model, target: &mut Model) -> Result<(), Error> {
         }
     }
     let sigs: BTreeSet<&str> = model.sigs.iter().map(String::as_str).collect();
+    for (name, definition) in &model.entity_definitions {
+        if !sigs.contains(name.as_str()) {
+            return Err(Error::kind(format!("definition for unknown entity {name}")));
+        }
+        if definition.trim().is_empty() || !definition.chars().all(definition_character) {
+            return Err(Error::kind(format!(
+                "{name}: expected a nonempty one-line definition"
+            )));
+        }
+    }
     for sig in &model.sigs {
         if !model.scope.sizes.contains_key(sig) {
             return Err(Error::kind(format!("no scope for {sig}")));

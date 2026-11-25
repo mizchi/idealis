@@ -1,0 +1,26 @@
+{
+  "config": {},
+  "initial": { "balance": { "Account0": 0, "Account1": 0 } },
+  "steps": [
+    {
+      "command": { "kind": "deposit", "a": "Account0", "n": 3 },
+      "accepted": true,
+      "state": { "balance": { "Account0": 3, "Account1": 0 } }
+    },
+    {
+      "command": { "kind": "withdraw", "a": "Account0", "n": 4 },
+      "accepted": false,
+      "state": { "balance": { "Account0": 3, "Account1": 0 } }
+    },
+    {
+      "command": { "kind": "deposit", "a": "Account1", "n": 2 },
+      "accepted": true,
+      "state": { "balance": { "Account0": 3, "Account1": 2 } }
+    },
+    {
+      "command": { "kind": "withdraw", "a": "Account0", "n": 1 },
+      "accepted": true,
+      "state": { "balance": { "Account0": 2, "Account1": 2 } }
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+// One aggregate per (user, document) pair. The caller must supply a consistent
+// projection for each pair: granted roles of that user, roles that can read that
+// document, its secrecy and the user's clearance. Koine does not quantify over
+// aggregate instances or enumerate the legal configurations and reachable states.
+context Permissions {
+  entity User identified by UserId as natural(String) {}
+  entity Role identified by RoleId as natural(String) {}
+  entity Document identified by DocumentId as natural(String) {}
+
+  aggregate DocumentAccess root Access {
+    entity Access identified by AccessId {
+      user: UserId
+      document: DocumentId
+      grants: List<RoleId>
+      reads: List<RoleId>
+      secret: Bool
+      cleared: Bool
+      open: Bool = false
+
+      invariant grants.distinctBy(role => role)
+      invariant reads.distinctBy(role => role)
+      invariant !secret || cleared || !grants.any(g => reads.any(r => g == r))
+      invariant !open || !secret || cleared
+      invariant !open || grants.any(g => reads.any(r => g == r))
+
+      command read {
+        requires grants.any(g => reads.any(r => g == r))
+        open -> true
+      }
+
+      command close {
+        requires open
+        open -> false
+      }
+
+      create start(user: UserId, document: DocumentId, grants: List<RoleId>, reads: List<RoleId>, secret: Bool, cleared: Bool) {}
+    }
+  }
+}

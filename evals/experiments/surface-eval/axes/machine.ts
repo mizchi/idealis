@@ -30,7 +30,7 @@ export const machine: Axis = {
       metrics,
       score,
       notes: [
-        "tree: rubric from 0107 (1 an analysable tree, 0.5 analysable only inside the host, 0 host functions)",
+        "tree: rubric (1 an analysable tree, 0.5 analysable only inside the host, 0 host functions)",
         "toolchain: the candidate's check commands, run in this run",
       ],
     };

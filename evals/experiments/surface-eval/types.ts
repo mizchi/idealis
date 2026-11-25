@@ -15,6 +15,7 @@ export interface Candidate {
   shared: string[];
   comments: { line?: string; block?: [string, string] };
   check: Check[];
+  checkInputs?: string[];
   adapter: string | null;
   tree: number;
   verification: string[];
@@ -39,6 +40,8 @@ export interface Plan {
   candidates: string[];
   tasks: string[];
   axes: string[];
+  /** The tasks and human-axis questions (default `tasks.json`). */
+  tasksFile?: string;
   human: { readers: number; model: string; batch: string };
   weights: Record<string, number> | null;
 }

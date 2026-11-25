@@ -1,0 +1,40 @@
+// One reviewed revision. The sources of the evidence are outside this model.
+model RmodelCalibration
+enum Decision = Trial | Adopted
+enum SemanticEvidence = Unchecked | Equivalent | Diverges | EmptyCheck | Incomplete | MissingComparison
+enum GoalEvidence = Unmeasured | Improved | NoGain | Regressed
+
+var decision: one Decision
+var semantics: one SemanticEvidence
+var goal: one GoalEvidence
+init { decision = Trial semantics = Unchecked goal = Unmeasured }
+
+behavior recordSemantics(evidence: SemanticEvidence) {
+  guard { decision = Trial semantics = Unchecked evidence != Unchecked }
+  update { semantics = evidence }
+}
+
+behavior recordGoal(evidence: GoalEvidence) {
+  guard { decision = Trial goal = Unmeasured evidence != Unmeasured }
+  update { goal = evidence }
+}
+
+behavior adopt() {
+  guard { decision = Trial semantics = Equivalent goal = Improved }
+  update { decision = Adopted }
+}
+
+behavior revise() {
+  guard { decision = Adopted or semantics != Unchecked or goal != Unmeasured }
+  update { decision = Trial semantics = Unchecked goal = Unmeasured }
+}
+
+invariant AdoptionNeedsEquivalence { decision = Adopted implies semantics = Equivalent }
+invariant AdoptionNeedsImprovement { decision = Adopted implies goal = Improved }
+reachable EquivalentButUnmeasured { decision = Trial and semantics = Equivalent and goal = Unmeasured }
+reachable ImprovedButDiverges { decision = Trial and semantics = Diverges and goal = Improved }
+reachable ImprovedButEmpty { decision = Trial and semantics = EmptyCheck and goal = Improved }
+reachable ImprovedButIncomplete { decision = Trial and semantics = Incomplete and goal = Improved }
+reachable ImprovedButMissingComparison { decision = Trial and semantics = MissingComparison and goal = Improved }
+reachable SupportedAdoption { decision = Adopted }
+scope steps = 5
