@@ -203,3 +203,32 @@ run は追記のみ。`evals/runs/0119-*` に、source / binary / 入力・drive
 | 文書（上の 6 ファイル）                                                                            | 上限と thread の要件                                                                                                              |          約 15 |
 
 product code は約 25 行、テストは約 600 行、実験は約 600 行で、fixture と run は生成物。iteration と README の索引は評価の後に書く。
+
+## 実装の段で追記した条件
+
+評価を流す前に、実装とテストを書く中で分かった条件の変更を追記する。上の記述は変えない。
+
+- before の基準: before は、この plan を記録した時点の origin/main（42b88c5a9）の source / binary とする。5674480c5 の後に Apalache の `MkSeq`（#121）が `crates/rtla-compiler/src` に入っているので、観測の節の値は 5674480c5 のもので、before はこの 1 点だけ異なる。変わらないことを sha256 で確かめる対象は、before と after の間で同じ集合のまま（`crates/rtla/src`、`crates/rtla-compiler/src`、`crates/rtlc/src/ir.rs`、`packages/idealis/src`、`crates/idealis-core/src`、`adapters/go`）。
+- 観測用の複製が記録する値: `descend` が上限と比べる値（下降を試みる直前の深さ）の最大を記録する。葉の検査（深さ 128 以上で `descend` を呼ぶ）も含める。上限 L は、この値が L 以上の入力を拒否する。葉で終わる入力（hop、call、operator など）は観測の節の 5 + 3N と同じ値になる。branch の step の訪問で終わる 4 種類（ENABLED の step、binder の locals、temporal の call、action の step）は、構造上の深さが 512 でも最後の下降は深さ 511 からなので受理され、513 で拒否される。観測の節の値と複製の記録の違いは、深さ 128 未満の hop（N = 40 は構造上 125、記録は 124）だけ。
+- 13 種類の大きさ: 観測用の複製（上の値）で決めた、受理される最大の大きさと次の大きさは、operator 493 / 494、value 246 / 247、call 511 / 512、membership 491 / 492、binding 463 / 464、enabled 479 / 480、bind-run 463 / 464、lazy 246 / 247、temporal 511 / 512、forward 255 / 256、update 491 / 492、function 125 / 126、action 511 / 512。最初に置いたテストは構造上の深さで決めた値（enabled 478、bind-run 462、temporal 510、action 510）で、実装の後の最初の実行で、受理側が 1 つ多いと分かった。複製の記録を上の定義に変え、4 つの大きさを直し、before で Red を取り直した。
+- 4 種類の形: `forward` は 1 定義 1 段の呼び出し（引数は呼び出し側の `Parameter`）、`update` は `EXCEPT` の target の入れ子（定義ごと 30 段）、`function` は `[k \in {1} |-> inner][1]` の入れ子（束縛の slot は外側から 0、1、…、定義ごと 15 段）、`action` は 1 つの branch に 256 を超える step を置けない（`Safety branch exceeds 256 steps`）ので、30 step ごとの action 定義を `Step::Call` でつないだもの。temporal は 1 定義 1 段の temporal の call（`[]` は重ねない）。
+- TS frontend の綴り: TS frontend は `%` を持たないので、上の wrapper の綴り（`step == counter' = hopN(counter) % 5`）は TS の 2 経路が compile で拒否する。TS の経路にも同じ深さの入力を流すため、`step == counter' = IF counter < 4 THEN counter + 1 ELSE 0` と `inv == hopN(counter) >= 0` の綴り（`hop-invariant-N`、N ∈ {40, 41, 76, 84, 85, 168, 169}）を足す。観測用の複製の深さは 6 + 3N で、N = 168 が 510（受理）、N = 169 が 513（拒否）になる。意味の対照のうち、除算以外の入力（評価されない枝 2 つと `hop168` の違反）も `%` を使わない綴りに変えた。
+- 期待値の derive: `cases-0119.json` の各入力は、深さの宣言（`depth`）を持つ。before が再帰しない経路の `Safety evaluation nesting exceeds 128` で拒否した v2 のセルは、`depth` が 512 以上なら `Safety evaluation nesting exceeds 512`、それ以外は観測用の複製の出力とする。それ以外のセルと v1 は before の出力。`depth` の宣言（hop は 5 + 3N、hop-invariant は 6 + 3N）は、観測用の複製の記録と一致することを `0119-oracle` に残す。
+- 並列の Red: `parallel_stack` の Red は、上限だけを 512 にして pool の `stack_size` を入れていない段（debug）で、rayon の worker の `has overflowed its stack`（SIGABRT）として記録した。before の Red は 128 での拒否。
+- ENABLED の subscript のテスト: 128 を超える段を作るので、debug の test の thread（既定 2 MiB）では足りない。段の数を上げた拒否の側は 8 MiB の thread で動かす。
+- Wasm の探索範囲: hop は N 1〜1,400、13 種類は大きさ 1〜4,000 で、受理される最大の大きさを探索する。観測用の複製の上限（4,096）が先に来る種類（forward、function）は、複製の上限の拒否で止まるので、その host の上端は深さ 4,094 以上として扱う。上端の深さは、観測用の複製が同じ入力に対して記録した値。
+- harness のモード: `stack-harness` に TLA+ のファイルを読む `source` モードを足した（`chain_N50.tla` と hop-invariant の深さの記録用）。観測用の複製だけが cargo の feature `oracle-peak` で深さを出力する。
+
+## 上限の値を 256 に変えた条件
+
+観測用の複製の Wasm の上端を測ったところ、plan が結果を見る前に決めた代わりの値の規則に当たった。評価の残り（TLC、4 経路、corpus、kernel）を流す前に、値を 512 から 256 に変える。
+
+- 測定: 観測用の複製（上限 4,096）を、Node v24.22.3 の既定・`--liftoff-only`・`--no-liftoff`、Chromium の main thread と dedicated Worker で、13 種類と hop について、要求ごとに新しい instance で動かし、受理される最大の大きさを探索した。受理される最大の大きさでの評価の深さ（複製の記録）の最小は、Node の既定と `--no-liftoff` で update の 1,237、`--liftoff-only` で update の 1,654、Chromium の main thread で update の 1,559。Chromium の dedicated Worker では、update が 806（大きさ 777 まで受理され、778 で `RangeError: Maximum call stack size exceeded`）で、1,024 未満になった。同じ Worker の value は 1,452、hop は 2,156 で、update が最も浅い。Chromium は 2 回流して同じ値になった。
+- 規則の適用: plan の「ある host の Wasm の上端が深さ 1,024 未満」に当たるので、512 を採らない。256 は、Wasm の上端が 512 以上（最小が Worker の update の 806）、深さ 255 の最小の stack が release で 1,024 KiB 以下・debug で 6,144 KiB 以下（深さ約 250 の測定で release 最大 276 KiB、debug 最大 2,116 KiB）を満たすので、256 を採る。実モデルの深さ 232 との差は 10.3% で、余裕が小さいことを iteration に記録する。
+- 値を除いて変えないもの: 再帰の経路の 128、`evaluation_depth` の u16（256 は u8 に入らない）、rayon の pool の 8 MiB、release 2 MiB・debug 8 MiB の thread の要件、IR・wire・frontend・v1・要求の `bounds`、`contracts.ts`、Wasm の build の設定、ほかの上限。
+- 値に連動して変えるもの: 拒否の文言は `Safety evaluation nesting exceeds 256`。hop は、深さ 5 + 3N なので N = 83（254）が受理される最大、N = 84（257）が最初の拒否。入力は N ∈ {40, 41, 76, 83, 84, 85, 168, 169} とし、N = 83 までが complete、N = 84 以上が `Safety evaluation nesting exceeds 256` になる（N = 76 は深さ 233 で実モデルの深さ 232 に近い）。hop-invariant も同じ N（深さ 6 + 3N で、N = 83 が 255）。13 種類の 255 / 256 の大きさは観測用の複製で決め直す（深さの定義は上の追記のとおり）。意味の対照のうち除算は N = 70（深さ 215）、違反は N = 76（深さ 233）、再帰する定義を呼ぶ入力は hop の深さ約 155（N = 50）から呼ぶものに変える。評価されない枝の入力（N = 300）は変えない。
+- 並列の Red: 上限が 256 なので hop の最深の入力（debug で約 1.1 MiB）は rayon の worker の 2 MiB に収まり、abort しない。`parallel_stack` は、debug で最も stack を使う種類の membership（深さ約 250 で 2,116 KiB）を 32 個の初期状態の Next の guard に置いたモデルに変える（受理は 242 段の入れ子、拒否は 243 段）。この深さは 2 MiB の worker の限界にほぼ一致し、abort するかどうかが 1 段（debug で約 8 KiB）で変わるので、pool の stack の Red には使わない。pool の stack の Red は、`safety_parallel.rs` の unit test（pool の worker の thread で、32 KiB の frame を 192 段積む）で取る。stack の指定がないと debug・release とも abort し、8 MiB を指定すると通る。
+- Wasm の測定: 観測用の複製の記録（上の測定）は 512 の評価の途中で取ったもので、上限の値に依存しない（複製の上限は 4,096）ので、そのまま使う。after の Wasm は、深さ 255 を受理し 256 を型付きで拒否することを、Node の 3 モード・Chromium の 2 host で確かめる。512 の実装で取った stack の測定は、superseded として audit に残す。
+- 値の変更の経緯: Red のテストと、512 の実装での Green（evaluation_stack・parallel_stack・call_depth、rtlc と rtla-compiler の全テストを debug と release）は、値を変える前に流した。これも audit に残す。
+- 再帰する定義を呼ぶ入力: `Sum(2)` のように引数が定数の呼び出しは、評価の前に畳まれて動的評価の深さを積まない（深さ約 155 から呼んでも complete になる）。深さ約 155（N = 50）の hop の最も内側で `x + Sum(x)`（引数が状態に依存する）を呼ぶ入力に変えた。before は 128 の protocol の拒否、after は `bounded / evaluation`。
+- `UNCHANGED Vn`: 観測用の複製の深さは n = 7 が 128、n = 8 が 256 なので、256 では n = 7 が受理され、n = 8 は `Safety evaluation nesting exceeds 256` で拒否される。n = 8 を受理する予測は 512 の値のもので、256 では成り立たない。v1 は変わらず n = 8 まで受理し、n = 9 以上は v1・v2 とも frontend の leaf 256 の上限で拒否する。
