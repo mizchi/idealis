@@ -1243,6 +1243,121 @@ pub(crate) fn parse(source: &str) -> Result<Model, Error> {
     Ok(model)
 }
 
+/// Type-checks a syntax tree built without the parser, such as one read
+/// from the JSON IR (plan 0108), with the parser's limits on its size.
+/// Bool is added when the tree mentions it, as the parser does.
+pub(crate) fn validate(mut model: Model) -> Result<Model, Error> {
+    fn expr(
+        e: &Expr,
+        nodes: &mut usize,
+        depth: usize,
+        names: &mut BTreeSet<String>,
+    ) -> Result<(), Error> {
+        *nodes += 1;
+        if *nodes > MAX_NODES * 16 || depth > MAX_DEPTH {
+            return Err(Error::syntax("the IR exceeds the parser's size limits"));
+        }
+        match e {
+            Expr::Name(name) => {
+                names.insert(name.clone());
+            }
+            Expr::None | Expr::Literal(_) => {}
+            Expr::Count(inner) => expr(inner, nodes, depth + 1, names)?,
+            Expr::Binary(_, l, r) | Expr::Arith(_, l, r) => {
+                expr(l, nodes, depth + 1, names)?;
+                expr(r, nodes, depth + 1, names)?;
+            }
+            Expr::Record(name, values) => {
+                names.insert(name.clone());
+                for v in values {
+                    expr(v, nodes, depth + 1, names)?;
+                }
+            }
+        }
+        Ok(())
+    }
+    fn formula(
+        f: &Formula,
+        nodes: &mut usize,
+        depth: usize,
+        names: &mut BTreeSet<String>,
+    ) -> Result<(), Error> {
+        *nodes += 1;
+        if *nodes > MAX_NODES * 16 || depth > MAX_DEPTH {
+            return Err(Error::syntax("the IR exceeds the parser's size limits"));
+        }
+        let int = |i: &Int, nodes: &mut usize, names: &mut BTreeSet<String>| match i {
+            Int::Count(e) | Int::Value(e) => expr(e, nodes, depth + 1, names),
+            Int::Literal(_) => Ok(()),
+        };
+        match f {
+            Formula::Compare(_, l, r) => {
+                expr(l, nodes, depth + 1, names)?;
+                expr(r, nodes, depth + 1, names)?;
+            }
+            Formula::Ints(_, l, r) => {
+                int(l, nodes, names)?;
+                int(r, nodes, names)?;
+            }
+            Formula::Mult(_, e) | Formula::Empty(e) => expr(e, nodes, depth + 1, names)?,
+            Formula::Not(inner) => formula(inner, nodes, depth + 1, names)?,
+            Formula::And(parts) => {
+                for p in parts {
+                    formula(p, nodes, depth + 1, names)?;
+                }
+            }
+            Formula::Or(l, r) | Formula::Implies(l, r) => {
+                formula(l, nodes, depth + 1, names)?;
+                formula(r, nodes, depth + 1, names)?;
+            }
+            Formula::Quantified(_, _, sort, body) => {
+                names.insert(sort.clone());
+                formula(body, nodes, depth + 1, names)?;
+            }
+        }
+        Ok(())
+    }
+    let mut names = BTreeSet::new();
+    let mut nodes = 0usize;
+    for relation in &model.relations {
+        match &relation.shape {
+            Shape::Unary { sig, .. } => names.insert(sig.clone()),
+            Shape::Binary { from, to, .. } => names.insert(from.clone()) | names.insert(to.clone()),
+        };
+    }
+    for record in &model.records {
+        names.extend(record.fields.iter().map(|(_, sort)| sort.clone()));
+    }
+    for f in model
+        .facts
+        .iter()
+        .chain(&model.init)
+        .chain(model.checks.iter().map(|c| &c.formula))
+    {
+        formula(f, &mut nodes, 0, &mut names)?;
+    }
+    for action in &model.actions {
+        names.extend(action.params.iter().map(|(_, sort)| sort.clone()));
+        for g in &action.guards {
+            formula(g, &mut nodes, 0, &mut names)?;
+        }
+        for (_, value) in &action.assignments {
+            expr(value, &mut nodes, 0, &mut names)?;
+        }
+    }
+    let boolean = [BOOL, "true", "false"].iter().any(|n| names.contains(*n));
+    if boolean && !model.enums.iter().any(|(name, _)| name == BOOL) {
+        model
+            .enums
+            .push((BOOL.to_owned(), vec!["false".into(), "true".into()]));
+    }
+    if model.scope.steps == 0 {
+        return Err(Error::syntax("the model needs a scope with steps"));
+    }
+    check(&mut model)?;
+    Ok(model)
+}
+
 fn check(model: &mut Model) -> Result<(), Error> {
     // The checker reads a snapshot and rewrites arithmetic in the model.
     let snapshot = model.clone();

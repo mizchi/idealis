@@ -253,4 +253,5 @@ pub fn disagree(a: &Answer, b: &Answer, steps: usize) -> bool {
 
 pub mod checkers;
 pub mod conform;
+pub mod ir;
 pub mod schema;

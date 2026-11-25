@@ -322,6 +322,12 @@ rcheck-moonbit:
   cd tests/rcheck/moonbit && moon build --target js
   cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test moonbit -- --ignored
 
+# Adapters write the kernel IR; roracle compares their verdicts with the
+# rmodel source's (plan 0108). Needs pkl on PATH.
+rcheck-adapters:
+  scripts/rcheck-adapters-fresh.sh
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test adapters --test ir
+
 rmodel-oracle output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" alloy=".artifacts/alloy-subset/org.alloytools.alloy.dist.jar" tlc=".artifacts/0068-tlc-1.8.0.jar":
   evals/experiments/rmodel/oracle.sh {{quote(absolute_path(java))}} {{quote(absolute_path(alloy))}} {{quote(absolute_path(tlc))}} {{quote(absolute_path(output))}}
 

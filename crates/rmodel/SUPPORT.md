@@ -21,6 +21,8 @@
 
 - [x] 実装のためのbindings（`bindings`、0102）: JSONの形（atomは名前、Boolはboolean、recordはobject、二項関係は定義域のatomを鍵にしたobject）、JSON Schema（draft 2020-12）、Rustのtraitと型、TypeScriptの型とJSON Linesのdriver、Goのinterfaceと厳密なdecoder・`Serve`（0104、出力はgofmtの書式）、MoonBitのtraitと厳密なdecoder・`Server::handle`（0105、targetに依存しない）。参照評価器を1歩ずつ進める`reference::Machine`。
 
+- [x] `validate`（0108）: parserを通らない構文木（核のIRのJSONなど）を、parserと同じ型検査と大きさの上限で検査する。Boolは名前が現れたときに足す。
+
 ## 照合
 
 - [x] corpusの5モデル・20 checkで、ralloyのSAT・rtlc・Alloy 6.2.0・TLC 1.8.0の判定が、結果の前に書いた期待とすべて一致する。明示状態の深さはstepsの内側（0091）。

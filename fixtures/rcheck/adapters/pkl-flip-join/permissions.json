@@ -1,0 +1,563 @@
+{
+  "version": 1,
+  "name": "Permissions",
+  "sigs": [
+    "User",
+    "Role",
+    "Doc"
+  ],
+  "enums": [],
+  "relations": [
+    {
+      "name": "grants",
+      "var": false,
+      "shape": {
+        "kind": "binary",
+        "from": "User",
+        "to": "Role",
+        "mult": "set"
+      }
+    },
+    {
+      "name": "reads",
+      "var": false,
+      "shape": {
+        "kind": "binary",
+        "from": "Role",
+        "to": "Doc",
+        "mult": "set"
+      }
+    },
+    {
+      "name": "secret",
+      "var": false,
+      "shape": {
+        "kind": "unary",
+        "sort": "Doc",
+        "mult": "set"
+      }
+    },
+    {
+      "name": "cleared",
+      "var": false,
+      "shape": {
+        "kind": "unary",
+        "sort": "User",
+        "mult": "set"
+      }
+    },
+    {
+      "name": "open",
+      "var": true,
+      "shape": {
+        "kind": "binary",
+        "from": "User",
+        "to": "Doc",
+        "mult": "set"
+      }
+    }
+  ],
+  "facts": [
+    {
+      "op": "all",
+      "var": "r",
+      "sort": "Role",
+      "body": {
+        "op": "all",
+        "var": "d",
+        "sort": "Doc",
+        "body": {
+          "op": "all",
+          "var": "u",
+          "sort": "User",
+          "body": {
+            "op": "implies",
+            "left": {
+              "op": "and",
+              "args": [
+                {
+                  "op": "in",
+                  "left": {
+                    "op": "name",
+                    "name": "d"
+                  },
+                  "right": {
+                    "op": "join",
+                    "left": {
+                      "op": "name",
+                      "name": "reads"
+                    },
+                    "right": {
+                      "op": "name",
+                      "name": "r"
+                    }
+                  }
+                },
+                {
+                  "op": "in",
+                  "left": {
+                    "op": "name",
+                    "name": "d"
+                  },
+                  "right": {
+                    "op": "name",
+                    "name": "secret"
+                  }
+                },
+                {
+                  "op": "in",
+                  "left": {
+                    "op": "name",
+                    "name": "r"
+                  },
+                  "right": {
+                    "op": "join",
+                    "left": {
+                      "op": "name",
+                      "name": "grants"
+                    },
+                    "right": {
+                      "op": "name",
+                      "name": "u"
+                    }
+                  }
+                }
+              ]
+            },
+            "right": {
+              "op": "in",
+              "left": {
+                "op": "name",
+                "name": "u"
+              },
+              "right": {
+                "op": "name",
+                "name": "cleared"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "init": [
+    {
+      "op": "no",
+      "of": {
+        "op": "name",
+        "name": "open"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "name": "read",
+      "params": [
+        {
+          "name": "u",
+          "sort": "User"
+        },
+        {
+          "name": "d",
+          "sort": "Doc"
+        }
+      ],
+      "guards": [
+        {
+          "op": "exists",
+          "var": "r",
+          "sort": "Role",
+          "body": {
+            "op": "and",
+            "args": [
+              {
+                "op": "in",
+                "left": {
+                  "op": "name",
+                  "name": "r"
+                },
+                "right": {
+                  "op": "join",
+                  "left": {
+                    "op": "name",
+                    "name": "grants"
+                  },
+                  "right": {
+                    "op": "name",
+                    "name": "u"
+                  }
+                }
+              },
+              {
+                "op": "in",
+                "left": {
+                  "op": "name",
+                  "name": "d"
+                },
+                "right": {
+                  "op": "join",
+                  "left": {
+                    "op": "name",
+                    "name": "reads"
+                  },
+                  "right": {
+                    "op": "name",
+                    "name": "r"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "assignments": [
+        {
+          "var": "open",
+          "value": {
+            "op": "union",
+            "left": {
+              "op": "name",
+              "name": "open"
+            },
+            "right": {
+              "op": "product",
+              "left": {
+                "op": "name",
+                "name": "u"
+              },
+              "right": {
+                "op": "name",
+                "name": "d"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "close",
+      "params": [
+        {
+          "name": "u",
+          "sort": "User"
+        },
+        {
+          "name": "d",
+          "sort": "Doc"
+        }
+      ],
+      "guards": [
+        {
+          "op": "in",
+          "left": {
+            "op": "name",
+            "name": "d"
+          },
+          "right": {
+            "op": "join",
+            "left": {
+              "op": "name",
+              "name": "open"
+            },
+            "right": {
+              "op": "name",
+              "name": "u"
+            }
+          }
+        }
+      ],
+      "assignments": [
+        {
+          "var": "open",
+          "value": {
+            "op": "difference",
+            "left": {
+              "op": "name",
+              "name": "open"
+            },
+            "right": {
+              "op": "product",
+              "left": {
+                "op": "name",
+                "name": "u"
+              },
+              "right": {
+                "op": "name",
+                "name": "d"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "name": "NoLeak",
+      "kind": "invariant",
+      "formula": {
+        "op": "all",
+        "var": "u",
+        "sort": "User",
+        "body": {
+          "op": "implies",
+          "left": {
+            "op": "exists",
+            "var": "d",
+            "sort": "Doc",
+            "body": {
+              "op": "and",
+              "args": [
+                {
+                  "op": "in",
+                  "left": {
+                    "op": "name",
+                    "name": "d"
+                  },
+                  "right": {
+                    "op": "join",
+                    "left": {
+                      "op": "name",
+                      "name": "open"
+                    },
+                    "right": {
+                      "op": "name",
+                      "name": "u"
+                    }
+                  }
+                },
+                {
+                  "op": "in",
+                  "left": {
+                    "op": "name",
+                    "name": "d"
+                  },
+                  "right": {
+                    "op": "name",
+                    "name": "secret"
+                  }
+                }
+              ]
+            }
+          },
+          "right": {
+            "op": "in",
+            "left": {
+              "op": "name",
+              "name": "u"
+            },
+            "right": {
+              "op": "name",
+              "name": "cleared"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "OnlyGranted",
+      "kind": "invariant",
+      "formula": {
+        "op": "all",
+        "var": "u",
+        "sort": "User",
+        "body": {
+          "op": "all",
+          "var": "d",
+          "sort": "Doc",
+          "body": {
+            "op": "implies",
+            "left": {
+              "op": "in",
+              "left": {
+                "op": "name",
+                "name": "d"
+              },
+              "right": {
+                "op": "join",
+                "left": {
+                  "op": "name",
+                  "name": "open"
+                },
+                "right": {
+                  "op": "name",
+                  "name": "u"
+                }
+              }
+            },
+            "right": {
+              "op": "exists",
+              "var": "r",
+              "sort": "Role",
+              "body": {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "in",
+                    "left": {
+                      "op": "name",
+                      "name": "r"
+                    },
+                    "right": {
+                      "op": "join",
+                      "left": {
+                        "op": "name",
+                        "name": "grants"
+                      },
+                      "right": {
+                        "op": "name",
+                        "name": "u"
+                      }
+                    }
+                  },
+                  {
+                    "op": "in",
+                    "left": {
+                      "op": "name",
+                      "name": "d"
+                    },
+                    "right": {
+                      "op": "join",
+                      "left": {
+                        "op": "name",
+                        "name": "reads"
+                      },
+                      "right": {
+                        "op": "name",
+                        "name": "r"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "SecretRead",
+      "kind": "reachable",
+      "formula": {
+        "op": "exists",
+        "var": "u",
+        "sort": "User",
+        "body": {
+          "op": "exists",
+          "var": "d",
+          "sort": "Doc",
+          "body": {
+            "op": "and",
+            "args": [
+              {
+                "op": "in",
+                "left": {
+                  "op": "name",
+                  "name": "d"
+                },
+                "right": {
+                  "op": "join",
+                  "left": {
+                    "op": "name",
+                    "name": "open"
+                  },
+                  "right": {
+                    "op": "name",
+                    "name": "u"
+                  }
+                }
+              },
+              {
+                "op": "in",
+                "left": {
+                  "op": "name",
+                  "name": "d"
+                },
+                "right": {
+                  "op": "name",
+                  "name": "secret"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "UnclearedSecret",
+      "kind": "reachable",
+      "formula": {
+        "op": "exists",
+        "var": "u",
+        "sort": "User",
+        "body": {
+          "op": "and",
+          "args": [
+            {
+              "op": "not",
+              "arg": {
+                "op": "in",
+                "left": {
+                  "op": "name",
+                  "name": "u"
+                },
+                "right": {
+                  "op": "name",
+                  "name": "cleared"
+                }
+              }
+            },
+            {
+              "op": "exists",
+              "var": "d",
+              "sort": "Doc",
+              "body": {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "in",
+                    "left": {
+                      "op": "name",
+                      "name": "d"
+                    },
+                    "right": {
+                      "op": "join",
+                      "left": {
+                        "op": "name",
+                        "name": "open"
+                      },
+                      "right": {
+                        "op": "name",
+                        "name": "u"
+                      }
+                    }
+                  },
+                  {
+                    "op": "in",
+                    "left": {
+                      "op": "name",
+                      "name": "d"
+                    },
+                    "right": {
+                      "op": "name",
+                      "name": "secret"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "scope": {
+    "sizes": {
+      "User": 2,
+      "Role": 2,
+      "Doc": 2
+    },
+    "steps": 6
+  },
+  "omitted": []
+}

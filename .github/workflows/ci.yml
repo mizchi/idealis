@@ -83,6 +83,7 @@ jobs:
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
       - run: just rspec-test
       - run: just spec-check
+      - run: just rcheck-adapters
       - run: cargo fmt --manifest-path crates/rusmt/Cargo.toml -- --check
       - run: cargo clippy --all-targets --locked --manifest-path crates/rusmt/Cargo.toml -- -D warnings
       - run: cargo test --all-targets --locked --manifest-path crates/rusmt/Cargo.toml

@@ -1,5 +1,5 @@
 //! rcheck <model> [--checker auto|reference|explicit|sat|all] [--question NAME]
-//! rcheck generate <model> rust|typescript|go|moonbit|schema|states
+//! rcheck generate <model> rust|typescript|go|moonbit|ir|schema|states
 //! Answers every question of an rmodel model, or one, and prints JSON. Exits
 //! 1 when two definite answers disagree, 2 on a usage or model error.
 use rcheck::Selection;
@@ -17,6 +17,11 @@ fn main() {
             "typescript" => rmodel::bindings::typescript(&model),
             "go" => rmodel::bindings::go(&model, &model.name.to_lowercase()),
             "moonbit" => rmodel::bindings::moonbit(&model),
+            // The kernel IR as JSON (plan 0108).
+            "ir" => {
+                let ir = rcheck::ir::to_ir(&model).unwrap_or_else(|error| fail(&error));
+                format!("{}\n", serde_json::to_string_pretty(&ir).expect("JSON"))
+            }
             "schema" => {
                 let schema: serde_json::Value =
                     serde_json::from_str(&rmodel::bindings::json_schema(&model)).expect("JSON");
@@ -53,7 +58,16 @@ fn main() {
     }
     let path = path.unwrap_or_else(|| usage());
     let source = std::fs::read_to_string(&path).unwrap_or_else(|error| fail(&error.to_string()));
-    let model = rmodel::parse(&source).unwrap_or_else(|error| fail(&error.to_string()));
+    // A `.json` input is the kernel IR an adapter wrote (plan 0108).
+    let model = if path.ends_with(".json") {
+        let (model, omitted) = rcheck::ir::parse(&source).unwrap_or_else(|error| fail(&error));
+        for part in omitted {
+            eprintln!("omitted by the adapter: {} ({})", part.name, part.reason);
+        }
+        model
+    } else {
+        rmodel::parse(&source).unwrap_or_else(|error| fail(&error.to_string()))
+    };
     let names: Vec<String> = match only {
         Some(name) => vec![name],
         None => rcheck::questions(&model)
@@ -76,7 +90,7 @@ fn main() {
 
 fn usage() -> ! {
     fail(
-        "usage: rcheck <model> [--checker auto|reference|explicit|sat|all] [--question NAME] | rcheck generate <model> rust|typescript|go|moonbit|schema|states",
+        "usage: rcheck <model> [--checker auto|reference|explicit|sat|all] [--question NAME] | rcheck generate <model> rust|typescript|go|moonbit|ir|schema|states",
     )
 }
 

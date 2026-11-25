@@ -16,6 +16,9 @@
 - [x] 実装の照合（`conform`、0102）: 参照評価器を正本に、設定ごとに実装の初期状態がモデルの初期状態であること、到達する各状態で各action instanceの受け付けと次の状態が一致することを、幅優先で確かめる。答えは一致・bounded（設定の上限）・不一致（最短のcommandの列、期待と実測）・invalid（JSON Schemaに合わない答え）・空・未確定（呼び出しの予算）・エラー。driverは同じプロセス（生成したRustのtrait）か、JSON Linesの外部プロセス（生成したTypeScriptの`serve`）。
 - [x] `generate`: モデルからRustのtrait、TypeScriptの型とdriver、Goのinterfaceとdecoder（0104）、MoonBitのtraitとdecoder・`Server::handle`（0105）、JSON Schema、到達できる状態を生成する（0102）。JSON Schemaの検査は、生成するキーワードだけを扱う`schema::validate`で、知らないキーワードはエラーにする。
 
+- [x] 核のIRのJSON（version 1、`ir`、0108）: rmodelの型検査前の構文木。式・論理式は`op`で区別する木、知らないtag・欠けたfield・知らないfieldは拒む。`rcheck generate <model> ir`で書き、`.json`の入力は`rmodel::validate`で型検査してから検査器に渡す。adapterが写せなかった部分は`omitted`。
+- [x] adapterの差分テスト（0108）: roracleで、rmodelの文の判定を基準に、adapterのIRの判定を照らす。unsupported・omittedはunknown、拒まれたIRはerrorで、一致に数えない。
+
 ## 照合
 
 - [x] corpus（`fixtures/rmodel`・`spec/models`）の32 claimで、`auto`の答えがclaimと一致し、`all`の3つの答えが食い違わない（0101）。

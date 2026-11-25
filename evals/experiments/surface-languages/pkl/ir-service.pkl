@@ -1,0 +1,3 @@
+import "ToIR.pkl"
+import "service.pkl" as model
+output { value = ToIR.convert(model); renderer = new JsonRenderer {} }

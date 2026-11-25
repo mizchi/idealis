@@ -1,0 +1,196 @@
+/// An adapter (plan 0108): writes a model of Model.pkl as the idealis
+/// kernel IR, version 1 (crates/rcheck/src/ir.rs). Expressions become the
+/// IR's relational trees: `Image`/`App` a join, `Insert`/`Remove` a union
+/// or difference, `Assign`/`SetLone` a replacement at one key. The kernel
+/// has no algebraic data types with fields, `match`, step or temporal
+/// properties: a model that needs the first two is reported unsupported;
+/// a property of the last two is omitted with its reason.
+module ToIR
+
+import "Model.pkl"
+
+/// `ADAPTER_FAULT` in the environment selects an artificial fault for the
+/// differential test (plan 0108): "swap-insert-remove" or "flip-join".
+local fault: String = read?("env:ADAPTER_FAULT") ?? ""
+
+local function name(n: String): Dynamic = new { op = "name"; name = n }
+local function bin(o: String, l: Dynamic, r: Dynamic): Dynamic = new { op = o; left = l; right = r }
+
+/// The kernel's name for a type.
+local function typeName(t: Model.Type): String =
+  if (t is Model.SortT) t.name
+  else if (t is Model.DataT) t.name
+  else if (t is Model.IntT) "Int"
+  else "Bool"
+
+local function rel(m, n: String): Model.Rel = m.rels.find((r) -> r.name == n)
+
+local function data(m, n: String): Model.Data = m.data.find((d) -> d.name == n)
+
+/// The reason an expression is outside the kernel, or null.
+function unsupported(m, e: Model.Expr): String? =
+  if (e is Model.Match) "match on an algebraic data type"
+  else if (e is Model.Next || e is Model.Always || e is Model.Eventually) "a step or temporal operator"
+  else if (e is Model.Ctor && !e.args.isEmpty) "a constructor with fields"
+  else if ((e is Model.App || e is Model.Image) && e.args.length > 1) "a relation over two or more sorts"
+  else
+    let (children =
+      if (e is Model.In) List(e.elem, e.set)
+      else if (e is Model.Count) List(e.set)
+      else if (e is Model.Not) List(e.arg)
+      else if (e is Model.And || e is Model.Or) e.args
+      else if (e is Model.Implies || e is Model.Cmp || e is Model.Arith) List(e.lhs, e.rhs)
+      else if (e is Model.All || e is Model.Exists) List(e.body)
+      else if (e is Model.App || e is Model.Image) e.args
+      else List())
+      children.map((c) -> unsupported(m, c)).filterNonNull().firstOrNull
+
+/// Whether an expression denotes one integer.
+local function isInt(m, ctx: Map<String, String>, e: Model.Expr): Boolean =
+  e is Model.IntLit || e is Model.Count || e is Model.Arith
+    || (e is Model.Var && ctx.getOrNull(e.name) == "Int")
+    || ((e is Model.App || e is Model.Image) && rel(m, e.rel).cod is Model.IntT)
+
+/// A set or relation expression.
+function expr(m, ctx: Map<String, String>, e: Model.Expr): Dynamic =
+  if (e is Model.Var) name(e.name)
+  else if (e is Model.IntLit) new { op = "literal"; value = e.value }
+  else if (e is Model.BoolLit) name(e.value.toString())
+  else if (e is Model.Ctor) name(e.variant)
+  else if (e is Model.Universe) name(e.sort)
+  else if (e is Model.Count) new { op = "count"; of = expr(m, ctx, e.set) }
+  else if (e is Model.Arith) bin(if (e.fn == "+") "add" else "sub", expr(m, ctx, e.lhs), expr(m, ctx, e.rhs))
+  else if (e is Model.App || e is Model.Image)
+    if (e.args.isEmpty) name(e.rel)
+    else if (fault == "flip-join") bin("join", name(e.rel), expr(m, ctx, e.args.first))
+    else bin("join", expr(m, ctx, e.args.first), name(e.rel))
+  else throw("not a set expression: \(e.op)")
+
+local function int(m, ctx: Map<String, String>, e: Model.Expr): Dynamic =
+  if (e is Model.Count) new { kind = "count"; of = expr(m, ctx, e.set) }
+  else if (e is Model.IntLit) new { kind = "literal"; value = e.value }
+  else new { kind = "value"; of = expr(m, ctx, e) }
+
+local function orOf(m, ctx: Map<String, String>, args: List<Model.Expr>): Dynamic =
+  if (args.length == 1) formula(m, ctx, args.first)
+  else bin("or", formula(m, ctx, args.first), orOf(m, ctx, args.drop(1)))
+
+local cmpOps = Map("<", "lt", "<=", "le", ">", "gt", ">=", "ge", "=", "int_eq", "!=", "int_ne")
+
+/// A formula.
+function formula(m, ctx: Map<String, String>, e: Model.Expr): Dynamic =
+  if (e is Model.In) bin("in", expr(m, ctx, e.elem), expr(m, ctx, e.set))
+  else if (e is Model.Not) new { op = "not"; arg = formula(m, ctx, e.arg) }
+  else if (e is Model.And) new { op = "and"; args = e.args.map((a) -> formula(m, ctx, a)) }
+  else if (e is Model.Or) orOf(m, ctx, e.args)
+  else if (e is Model.Implies) bin("implies", formula(m, ctx, e.lhs), formula(m, ctx, e.rhs))
+  else if (e is Model.All || e is Model.Exists)
+    let (inner = ctx.put(e.var, e.sort))
+      new {
+        op = if (e is Model.All) "all" else "exists"
+        var = e.var
+        sort = e.sort
+        body = formula(m, inner, e.body)
+      }
+  else if (e is Model.Cmp)
+    if (isInt(m, ctx, e.lhs) || isInt(m, ctx, e.rhs) || !List("=", "!=").contains(e.rel))
+      new { op = cmpOps[e.rel]; left = int(m, ctx, e.lhs); right = int(m, ctx, e.rhs) }
+    else bin(if (e.rel == "=") "eq" else "ne", expr(m, ctx, e.lhs), expr(m, ctx, e.rhs))
+  else throw("not a formula: \(e.op)")
+
+/// The tuple `args -> elem` as an expression.
+local function tuple(m, ctx: Map<String, String>, args: List<Model.Expr>, elem: Dynamic): Dynamic =
+  if (args.isEmpty) elem else bin("product", expr(m, ctx, args.first), elem)
+
+/// The relation at the key `args`, as a set of tuples.
+local function at(m, ctx: Map<String, String>, r: String, args: List<Model.Expr>): Dynamic =
+  tuple(m, ctx, args, bin("join", expr(m, ctx, args.first), name(r)))
+
+/// Applies one update to the relation's current value.
+local function update(m, ctx: Map<String, String>, current: Dynamic, u: Model.Update): Dynamic =
+  let (insert = if (fault == "swap-insert-remove") "difference" else "union")
+  let (remove = if (fault == "swap-insert-remove") "union" else "difference")
+  if (u is Model.Insert) bin(insert, current, tuple(m, ctx, u.args, expr(m, ctx, u.elem)))
+  else if (u is Model.Remove) bin(remove, current, tuple(m, ctx, u.args, expr(m, ctx, u.elem)))
+  else if (u is Model.Assign)
+    if (u.args.isEmpty) expr(m, ctx, u.value)
+    else bin("union", bin("difference", current, at(m, ctx, u.rel, u.args)), tuple(m, ctx, u.args, expr(m, ctx, u.value)))
+  else if (u is Model.SetLone)
+    let (cleared = if (u.args.isEmpty) new Dynamic { op = "none" } else bin("difference", current, at(m, ctx, u.rel, u.args)))
+      if (u.value == null) cleared
+      else if (u.args.isEmpty) expr(m, ctx, u.value)
+      else bin("union", cleared, tuple(m, ctx, u.args, expr(m, ctx, u.value)))
+  else throw("not an update: \(u.tag)")
+
+local function shape(r: Model.Rel): Dynamic =
+  if (r.dom.isEmpty) new { kind = "unary"; sort = typeName(r.cod); mult = r.mult }
+  else new { kind = "binary"; from = typeName(r.dom.first); to = typeName(r.cod); mult = r.mult }
+
+local function initOf(m, r: Model.Rel): Dynamic =
+  if (r.initial is Model.Empty) new { op = "no"; of = name(r.name) }
+  else if (r.dom.isEmpty)
+    if (r.cod is Model.IntT) new { op = "int_eq"; left = new Dynamic { kind = "value"; of = name(r.name) }; right = int(m, Map(), r.initial.value) }
+    else bin("eq", name(r.name), expr(m, Map(), r.initial.value))
+  else
+    let (key = "k_" + r.name)
+    let (value = bin("join", name(key), name(r.name)))
+      new {
+        op = "all"
+        var = key
+        sort = typeName(r.dom.first)
+        body =
+          if (r.cod is Model.IntT) new Dynamic { op = "int_eq"; left = new Dynamic { kind = "value"; of = value }; right = int(m, Map(), r.initial.value) }
+          else bin("eq", value, expr(m, Map(), r.initial.value))
+      }
+
+/// Reasons the whole model is outside the kernel.
+function blockers(m): List<String> =
+  m.data.filter((d) -> d.variants.any((v) -> !v.fields.isEmpty)).map((d) -> "data \(d.name) has variants with fields")
+  + m.rels.filter((r) -> r.dom.length > 1).map((r) -> "relation \(r.name) over two or more sorts")
+  + m.facts.map((f) -> unsupported(m, f)).filterNonNull()
+  + m.actions.flatMap((a) -> (a.guard.map((g) -> unsupported(m, g))
+      + a.updates.flatMap((u) -> u.args + (if (u is Model.Assign) List(u.value) else if (u is Model.SetLone && u.value != null) List(u.value) else if (u is Model.Insert || u is Model.Remove) List(u.elem) else List())).map((x) -> unsupported(m, x)))
+      .filterNonNull().map((reason) -> "action \(a.name): \(reason)"))
+
+local function propReason(m, p: Model.Prop): String? =
+  if (!List("invariant", "reachable").contains(p.kind)) "a \(p.kind) property" else unsupported(m, p.formula)
+
+local function usesInt(m): Boolean =
+  m.rels.any((r) -> r.cod is Model.IntT || r.dom.any((t) -> t is Model.IntT))
+    || m.actions.any((a) -> a.params.any((p) -> p.type is Model.IntT))
+
+/// The IR, or `{ unsupported }` when the model is outside the kernel.
+function convert(m): Dynamic =
+  let (blocked = blockers(m))
+    if (!blocked.isEmpty) new { unsupported = blocked.join("; ") }
+    else
+      new {
+        version = 1
+        name = m.name
+        sigs = m.sorts
+        enums = m.data.map((d) -> new Dynamic { name = d.name; members = d.variants.map((v) -> v.name) })
+        relations = m.rels.map((r) -> new Dynamic { name = r.name; var = r.mutable; shape = shape(r) })
+        facts = m.facts.map((f) -> formula(m, Map(), f))
+        init = m.rels.filter((r) -> r.mutable).map((r) -> initOf(m, r))
+        actions = m.actions.map((a) ->
+          let (ctx = a.params.toMap((p) -> p.name, (p) -> typeName(p.type)))
+            new Dynamic {
+              name = a.name
+              params = a.params.map((p) -> new Dynamic { name = p.name; sort = typeName(p.type) })
+              guards = a.guard.map((g) -> formula(m, ctx, g))
+              assignments = a.updates.map((u) -> u.rel).distinct.map((r) ->
+                new Dynamic {
+                  var = r
+                  value = a.updates.filter((u) -> u.rel == r).fold(name(r), (current, u) -> update(m, ctx, current, u))
+                })
+            })
+        checks = m.props.filter((p) -> propReason(m, p) == null).map((p) ->
+          new Dynamic { name = p.name; kind = p.kind; formula = formula(m, Map(), p.formula) })
+        scope = new Dynamic {
+          sizes = m.check.sizes
+          when (usesInt(m)) { ints = List(m.check.intMin, m.check.intMax) }
+          steps = m.check.steps
+        }
+        omitted = m.props.filter((p) -> propReason(m, p) != null).map((p) ->
+          new Dynamic { name = p.name; reason = propReason(m, p) })
+      }

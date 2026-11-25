@@ -1,0 +1,350 @@
+{
+  "version": 1,
+  "name": "Bank",
+  "sigs": [
+    "Account"
+  ],
+  "enums": [],
+  "relations": [
+    {
+      "name": "balance",
+      "var": true,
+      "shape": {
+        "kind": "binary",
+        "from": "Account",
+        "to": "Int",
+        "mult": "one"
+      }
+    }
+  ],
+  "facts": [],
+  "init": [
+    {
+      "op": "all",
+      "var": "k_balance",
+      "sort": "Account",
+      "body": {
+        "op": "int_eq",
+        "left": {
+          "kind": "value",
+          "of": {
+            "op": "join",
+            "left": {
+              "op": "name",
+              "name": "k_balance"
+            },
+            "right": {
+              "op": "name",
+              "name": "balance"
+            }
+          }
+        },
+        "right": {
+          "kind": "literal",
+          "value": 0
+        }
+      }
+    }
+  ],
+  "actions": [
+    {
+      "name": "deposit",
+      "params": [
+        {
+          "name": "a",
+          "sort": "Account"
+        },
+        {
+          "name": "n",
+          "sort": "Int"
+        }
+      ],
+      "guards": [
+        {
+          "op": "gt",
+          "left": {
+            "kind": "value",
+            "of": {
+              "op": "name",
+              "name": "n"
+            }
+          },
+          "right": {
+            "kind": "literal",
+            "value": 0
+          }
+        },
+        {
+          "op": "le",
+          "left": {
+            "kind": "value",
+            "of": {
+              "op": "add",
+              "left": {
+                "op": "join",
+                "left": {
+                  "op": "name",
+                  "name": "balance"
+                },
+                "right": {
+                  "op": "name",
+                  "name": "a"
+                }
+              },
+              "right": {
+                "op": "name",
+                "name": "n"
+              }
+            }
+          },
+          "right": {
+            "kind": "literal",
+            "value": 4
+          }
+        }
+      ],
+      "assignments": [
+        {
+          "var": "balance",
+          "value": {
+            "op": "union",
+            "left": {
+              "op": "difference",
+              "left": {
+                "op": "name",
+                "name": "balance"
+              },
+              "right": {
+                "op": "product",
+                "left": {
+                  "op": "name",
+                  "name": "a"
+                },
+                "right": {
+                  "op": "join",
+                  "left": {
+                    "op": "name",
+                    "name": "a"
+                  },
+                  "right": {
+                    "op": "name",
+                    "name": "balance"
+                  }
+                }
+              }
+            },
+            "right": {
+              "op": "product",
+              "left": {
+                "op": "name",
+                "name": "a"
+              },
+              "right": {
+                "op": "add",
+                "left": {
+                  "op": "join",
+                  "left": {
+                    "op": "name",
+                    "name": "balance"
+                  },
+                  "right": {
+                    "op": "name",
+                    "name": "a"
+                  }
+                },
+                "right": {
+                  "op": "name",
+                  "name": "n"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "withdraw",
+      "params": [
+        {
+          "name": "a",
+          "sort": "Account"
+        },
+        {
+          "name": "n",
+          "sort": "Int"
+        }
+      ],
+      "guards": [
+        {
+          "op": "gt",
+          "left": {
+            "kind": "value",
+            "of": {
+              "op": "name",
+              "name": "n"
+            }
+          },
+          "right": {
+            "kind": "literal",
+            "value": 0
+          }
+        },
+        {
+          "op": "ge",
+          "left": {
+            "kind": "value",
+            "of": {
+              "op": "join",
+              "left": {
+                "op": "name",
+                "name": "balance"
+              },
+              "right": {
+                "op": "name",
+                "name": "a"
+              }
+            }
+          },
+          "right": {
+            "kind": "value",
+            "of": {
+              "op": "name",
+              "name": "n"
+            }
+          }
+        }
+      ],
+      "assignments": [
+        {
+          "var": "balance",
+          "value": {
+            "op": "union",
+            "left": {
+              "op": "difference",
+              "left": {
+                "op": "name",
+                "name": "balance"
+              },
+              "right": {
+                "op": "product",
+                "left": {
+                  "op": "name",
+                  "name": "a"
+                },
+                "right": {
+                  "op": "join",
+                  "left": {
+                    "op": "name",
+                    "name": "a"
+                  },
+                  "right": {
+                    "op": "name",
+                    "name": "balance"
+                  }
+                }
+              }
+            },
+            "right": {
+              "op": "product",
+              "left": {
+                "op": "name",
+                "name": "a"
+              },
+              "right": {
+                "op": "sub",
+                "left": {
+                  "op": "join",
+                  "left": {
+                    "op": "name",
+                    "name": "balance"
+                  },
+                  "right": {
+                    "op": "name",
+                    "name": "a"
+                  }
+                },
+                "right": {
+                  "op": "name",
+                  "name": "n"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "name": "NonNegative",
+      "kind": "invariant",
+      "formula": {
+        "op": "all",
+        "var": "a",
+        "sort": "Account",
+        "body": {
+          "op": "ge",
+          "left": {
+            "kind": "value",
+            "of": {
+              "op": "join",
+              "left": {
+                "op": "name",
+                "name": "balance"
+              },
+              "right": {
+                "op": "name",
+                "name": "a"
+              }
+            }
+          },
+          "right": {
+            "kind": "literal",
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "Rich",
+      "kind": "reachable",
+      "formula": {
+        "op": "exists",
+        "var": "a",
+        "sort": "Account",
+        "body": {
+          "op": "ge",
+          "left": {
+            "kind": "value",
+            "of": {
+              "op": "join",
+              "left": {
+                "op": "name",
+                "name": "balance"
+              },
+              "right": {
+                "op": "name",
+                "name": "a"
+              }
+            }
+          },
+          "right": {
+            "kind": "literal",
+            "value": 3
+          }
+        }
+      }
+    }
+  ],
+  "scope": {
+    "sizes": {
+      "Account": 2
+    },
+    "ints": [
+      -4,
+      4
+    ],
+    "steps": 4
+  },
+  "omitted": []
+}

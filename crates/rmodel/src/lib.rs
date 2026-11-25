@@ -53,3 +53,10 @@ impl std::error::Error for Error {}
 pub fn parse(source: &str) -> Result<Model, Error> {
     syntax::parse(source)
 }
+
+/// Type-checks a syntax tree that did not come from the parser, such as
+/// one read from the JSON IR (plan 0108), and returns it ready for the
+/// checkers (arithmetic rewritten, Bool added when mentioned).
+pub fn validate(model: Model) -> Result<Model, Error> {
+    syntax::validate(model)
+}
