@@ -2,6 +2,10 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0106: 帰納法の検査器の試作（proto）](iterations/0106-induction-proto.md)は、核のIRからVCを作りz3で帰納的な不変条件を検査する試作で、CTIを参照評価器で検査し直す。直した後のcorpusと生成したモデルで食い違いは0件、断片は狭い（生成したモデルの4%）。
+
+[0105: MoonBitのtraitとdecodeの生成](iterations/0105-moonbit-bindings.md)は、同じJSONの契約でMoonBitのtrait・厳密なdecoder・`Server::handle`を生成し、MoonBitの2実装の照合と、3件の人工故障の検出を確かめた。
+
 [0104: Goのinterfaceとdecodeの生成](iterations/0104-go-bindings.md)は、同じJSONの契約でGoのinterface・厳密なdecoder・driverを生成し、Goの2実装の照合と、3件の人工故障の検出を確かめた。
 
 [0102: ドメインのモデルから型を生成し、実装を照合する](iterations/0102-domain-bindings.md)は、モデルからRustのtrait・TypeScriptの型・JSON Schemaを生成し、参照評価器を正本に実装を照合した。Rustの3実装・TypeScriptの2実装が一致し、3件の人工故障を両言語で最短の列で検出した。
