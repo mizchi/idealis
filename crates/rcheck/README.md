@@ -30,6 +30,10 @@ violation or a reachable state, the shortest depth. A bounded `holds` is not
 a proof, `empty` is not a pass, and `unknown` is never read as either. The
 command exits 1 when two definite answers disagree.
 
+IR files from adapters must describe a complete model to be checked by this
+CLI. If an adapter lists missing source parts in `omitted`, rcheck reports
+them and exits before running any checker.
+
 ## Dead behavior
 
 ```sh
@@ -118,12 +122,138 @@ within the finite scope. TypeScript generation requires the model’s integer
 scope to fit JavaScript’s safe integers.
 
 `pbt-typescript` embeds the same cases in a Node.js module with a fast-check
-property. For each example, the property calls the supplied factory with
-the model configuration. The factory returns `apply`, which accepts the
-generated command JSON and returns a boolean, and `observe`, which returns
-the implementation's state as JSON. The property samples and shrinks lists
+property. Pass `{ decodeConfig, create }` to `boundaryProperty`. The property
+passes the decoded configuration to `create`. The factory returns `apply`,
+which accepts the generated command JSON and returns a boolean, and
+`observe`, which returns the implementation's state as JSON. The property samples and shrinks lists
 of pairs, verifies that prefix commands are accepted, and compares both the
 final acceptance and snapshot. The test can force every pair to be exercised
 by passing `examples: [[boundaryCases.pairs]]` to fast-check. See the
 [withdrawal test](../../tests/rcheck/withdrawal.pbt.test.ts) for an adapter
 using the generated bindings and a replay with a stored seed and path.
+
+### Generated Go interface and fuzz test
+
+Generate both files in the same Go package. For the withdrawal example the
+package is `withdrawal`.
+
+```sh
+rcheck generate "$model" go > bindings.go
+rcheck generate "$model" pbt-go > boundary_generated_test.go
+```
+
+Implement the interface in `bindings.go` and register a factory in your
+test. The generated helper calls the factory with a typed `Config`.
+
+```go
+func FuzzWithdrawalBoundaries(f *testing.F) {
+    CheckBoundaryCases(f, func(config Config) Withdrawal {
+        return newAccount(config)
+    })
+}
+```
+
+`go test` replays every pair as a fuzz seed. In fuzz mode the input selects
+a pair from the same corpus. Each example uses an independent instance and
+checks the acceptance and snapshot of the final command. Run
+`just rcheck-go` to run the [withdrawal implementation and fault control](../../tests/rcheck/go/withdrawal/withdrawal_test.go).
+
+## Validate before running a command
+
+Use a checked model to create a Rust `Validator`. Start a session with
+the supplied configuration and initial state. The session checks the wire
+types, finite scope, facts, initial predicates and invariants.
+
+```rust
+let validator = rcheck::conform::Validator::new(&model)?;
+let mut session = validator.start(&config, &initial_state)?;
+let predicted = session.validate(&command)?;
+let observed = session.dispatch(&command, |input| domain.apply(input))?;
+assert_eq!(observed, predicted);
+```
+
+`validate` returns the expected next snapshot and has no domain effects.
+`dispatch` calls the domain only if the guard holds and the predicted
+state satisfies the model. It checks the actual acceptance and state
+returned by the domain. A failure or divergent response leaves that
+session unusable. The model check cannot undo effects from a domain that
+has already started.
+
+Go, TypeScript and other processes can use the pure JSON interface.
+Each request supplies a configuration, an initial snapshot and an
+optional prefix of accepted commands. Supply the prefix for the actual
+domain instance you intend to call.
+
+```sh
+rcheck validate fixtures/rcheck/nat-account.model - <<'JSON'
+{
+  "config": {"limit": 3},
+  "initial": {"balance": {"units": 3}},
+  "prefix": [{"kind": "withdraw", "amount": {"units": 2}}],
+  "command": {"kind": "withdraw", "amount": {"units": 1}}
+}
+JSON
+```
+
+This returns `{"state":{"balance":{"units":0}}}`. Invalid inputs, disabled
+commands and model violations exit 2 with a diagnostic. The Rust API
+distinguishes these cases in `ValidationError`.
+
+## Structured values and progress checks
+
+```text
+sequence Journal = Entry, max = 2
+variant Outcome = Pending | Paid(Amount) | Rejected(Reason)
+```
+
+Use `Journal[A, B]`, `append(log, entry)`, `len(log)` and `at(log, index)`.
+Indices start at zero. An out-of-range read returns the empty set. Appending
+past the declared maximum leaves the scope when the result is stored.
+The wire shape `{"$sequence":["A","B"]}` preserves order and duplicates.
+
+Construct a variant with `Paid(amount)` or `Pending()`. Test the tag with
+`is(result, Paid)` and read its payload with `payload(result, Paid)`.
+A different tag yields an empty set. The wire shape is
+`{"tag":"Paid","value":{"units":2}}` or `{"tag":"Pending"}`.
+Rust, Go, TypeScript and MoonBit generate typed values and codecs.
+
+```text
+fairness weak serve
+eventually FirstService { some served }
+leads_to EachRequest(c: Client) { c in waiting } { c in served }
+leads_to WithoutFairness(c: Client) with {} { c in waiting } { c in served }
+```
+
+Fairness over a parameterized action ranges over the action as a whole.
+`with { weak serve }` or `with {}` overrides the defaults for one question.
+`eventually` requires a predicate to become true. `leads_to` requires a
+response each time its trigger holds. The explicit checker answers temporal
+questions, with `lasso` and `loopStart` on a temporal counterexample. Safety
+and reachability use the underlying transition system.
+
+Run `just rcheck-structured` for model checks, `just rcheck-adapters` for Pkl,
+and `just rmodel-structured-tlc .artifacts/structured-replay` for TLC.
+
+## Checking adjacent states
+
+```text
+transition ShippedStays {
+  is(before(status), Shipped) implies {
+    is(after(status), Shipped)
+    payload(before(status), Shipped) = payload(after(status), Shipped)
+  }
+}
+```
+
+A `transition` property checks both snapshots of each enabled model
+operation with valid states. This includes explicitly enabled no-ops.
+Implicit waiting is outside the operation relation. An initial state with
+no enabled operations has no step to violate the property. The unqualified
+expression and `before(expr)` read the previous snapshot. `after(expr)`
+and the experimental postfix prime read the resulting snapshot.
+The same property is checked by the runtime validator before dispatch.
+
+`just rcheck-transition` runs the regression tests.
+`just rmodel-transition-tlc .artifacts/transition-replay` checks the
+lowered models with TLC. The reference and explicit checkers support
+these properties. The SAT backend reports them as unsupported.

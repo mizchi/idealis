@@ -1,0 +1,13 @@
+model NatAccount
+record Amount { units: Nat }
+rel limit: one Nat
+var balance: one Amount
+fact { limit = 3 }
+init { balance = Amount { units: 3 } }
+behavior withdraw(amount: Amount) {
+  guard { amount.units > 0 amount.units <= balance.units }
+  update { balance = Amount { units: balance.units - amount.units } }
+}
+invariant WithinLimit { balance.units <= limit }
+reachable EmptyBalance { balance.units = 0 }
+scope Int = -1..5, steps = 4

@@ -1,0 +1,11 @@
+model RetryDelivery
+enum Status = Offline | Online | Delivered
+var status: one Status
+init { status = Offline }
+behavior reconnect() { guard { status = Offline } update { status = Online } }
+behavior loseConnection() { guard { status = Online } update { status = Offline } }
+behavior deliver() { guard { status = Online } update { status = Delivered } }
+fairness weak reconnect
+fairness strong deliver
+eventually Delivers { status = Delivered }
+scope steps = 4

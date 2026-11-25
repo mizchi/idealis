@@ -292,12 +292,12 @@ rmodel-design-drift *args:
   cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check -- --rmodel-design >&2
   pnpm exec jev-lint docs --document-manifest spec/rmodel-design-documents.json --ledger .jev-lint/judgments/rmodel-design "$@"
 
-rmodel-readability-eval output:
+rmodel-readability-eval output study="behavior":
   cargo build --release --locked --manifest-path crates/rcheck/Cargo.toml
-  node evals/experiments/rmodel-readability/run.mjs run {{quote(output)}}
+  node evals/experiments/rmodel-readability/run.mjs run {{quote(output)}} {{quote(study)}}
 
-rmodel-readability-replay output:
-  node evals/experiments/rmodel-readability/run.mjs replay {{quote(output)}}
+rmodel-readability-replay output study="behavior":
+  node evals/experiments/rmodel-readability/run.mjs replay {{quote(output)}} {{quote(study)}}
 
 # Advisory semantic drift between the glossary, crate documents, rules and
 # models (plan 0092). Appends to the ledger; never a CI gate.
@@ -325,6 +325,44 @@ rcheck-lean-oracle:
 rcheck-boundaries: build
   cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test linked_projects --test withdrawal
   node --test dist/tests/rcheck/withdrawal.pbt.test.js
+
+rcheck-transition:
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test transition
+
+# Shipment requirement, generated bindings and model-derived ITF.
+shipment-build:
+  cargo build --locked --manifest-path crates/rcheck/Cargo.toml --bin rcheck
+
+shipment-write: shipment-build
+  python3 evals/experiments/shipment/trace.py --write
+
+shipment-test: shipment-build build
+  cargo test --locked --manifest-path crates/rspec/Cargo.toml --test links
+  cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check -- --rmodel-design
+  python3 evals/experiments/shipment/trace.py
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test shipment
+  node --test dist/tests/rcheck/shipment.pbt.test.js
+  cd tests/rcheck/go && CGO_ENABLED=0 go test -count=1 -v ./shipment
+
+shipment-drift output:
+  cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check -- --rmodel-design
+  python3 evals/experiments/shipment/drift.py {{quote(output)}}
+
+rmodel-transition-tlc output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" tlc=".artifacts/0068-tlc-1.8.0.jar":
+  cargo build --locked --manifest-path crates/rmodel/Cargo.toml --example emit
+  python3 evals/experiments/rmodel/structured-tlc.py {{quote(absolute_path(java))}} {{quote(absolute_path(tlc))}} {{quote(absolute_path(output))}} --transition
+
+rcheck-structured:
+  cargo test --locked --manifest-path crates/rmodel/Cargo.toml --test structured_temporal
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test structured_temporal
+
+rmodel-structured-tlc output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" tlc=".artifacts/0068-tlc-1.8.0.jar":
+  cargo build --locked --manifest-path crates/rmodel/Cargo.toml --example emit
+  python3 evals/experiments/rmodel/structured-tlc.py {{quote(absolute_path(java))}} {{quote(absolute_path(tlc))}} {{quote(absolute_path(output))}}
+
+rcheck-validation:
+  cargo test --locked --manifest-path crates/rmodel/Cargo.toml --test values
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test validation
 
 # TypeScript implementations against the generated bindings and ajv on the
 # generated JSON Schema (plan 0102).
@@ -370,6 +408,12 @@ surface-eval-score plan run: build
 
 rmodel-oracle output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" alloy=".artifacts/alloy-subset/org.alloytools.alloy.dist.jar" tlc=".artifacts/0068-tlc-1.8.0.jar":
   evals/experiments/rmodel/oracle.sh {{quote(absolute_path(java))}} {{quote(absolute_path(alloy))}} {{quote(absolute_path(tlc))}} {{quote(absolute_path(output))}}
+
+# Plan 0114: source/IR, registered checkers and independent JVM tools.
+rmodel-portability output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" alloy=".artifacts/alloy-subset/org.alloytools.alloy.dist.jar" tlc=".artifacts/0068-tlc-1.8.0.jar":
+  cargo build --locked --manifest-path crates/rmodel/Cargo.toml --example emit
+  cargo build --locked --manifest-path crates/rcheck/Cargo.toml
+  python3 evals/experiments/rmodel/portability.py {{quote(absolute_path(java))}} {{quote(absolute_path(tlc))}} {{quote(absolute_path(alloy))}} {{quote(absolute_path(output))}}
 
 rquint-tlc output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" jar=".artifacts/0068-tlc-1.8.0.jar":
   evals/experiments/quint-ir/tlc.sh {{quote(absolute_path(java))}} {{quote(absolute_path(jar))}} {{quote(absolute_path(output))}}

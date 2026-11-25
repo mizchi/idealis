@@ -1,0 +1,17 @@
+model Service
+entity Client
+var waiting: set Client
+var served: set Client
+init { no waiting no served }
+behavior request(c: Client) {
+  guard { c not in waiting c not in served }
+  update { waiting = waiting + c }
+}
+behavior serve(c: Client) {
+  guard { c in waiting }
+  update { waiting = waiting - c served = served + c }
+}
+invariant Disjoint { no waiting & served }
+leads_to EventuallyServed(c: Client) with { weak serve } { c in waiting } { c in served }
+leads_to EventuallyServedUnfair(c: Client) with {} { c in waiting } { c in served }
+scope Client = 2, steps = 4

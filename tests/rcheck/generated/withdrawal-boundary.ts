@@ -19,19 +19,30 @@ function canonical(value: unknown): unknown {
     return Object.fromEntries(
       Object.entries(value)
         .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
-        .map(([key, field]) => [key, canonical(field)]),
+        .map(([key, field]) => [
+          key,
+          key === "$sequence" && Array.isArray(field)
+            ? field.map(canonical)
+            : canonical(field),
+        ]),
     );
   }
   return value;
 }
 
-export function boundaryProperty(create: (config: unknown) => BoundaryAdapter) {
+export function boundaryProperty<Config>({
+  decodeConfig,
+  create,
+}: {
+  decodeConfig(value: unknown): Config;
+  create(config: Config): BoundaryAdapter;
+}) {
   return property(
     array(constantFrom(...boundaryCases.pairs), { minLength: 1 }),
     (pairs) => {
       for (const { action, config, examples, kind } of pairs) {
         for (const { prefix, command, accepted, state } of examples) {
-          const adapter = create(structuredClone(config));
+          const adapter = create(decodeConfig(structuredClone(config)));
           const label = `${kind} boundary for ${action}: ${JSON.stringify({ prefix, command })}`;
           for (const earlier of prefix) {
             assert.equal(adapter.apply(structuredClone(earlier)), true, label);

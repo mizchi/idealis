@@ -23,6 +23,17 @@ fn increments(value: &Value) -> Vec<Value> {
     if let Some(number) = value.as_i64() {
         return number.checked_add(1).map(Value::from).into_iter().collect();
     }
+    if let Some(items) = value.as_array() {
+        let mut neighbors = Vec::new();
+        for (index, item) in items.iter().enumerate() {
+            for increment in increments(item) {
+                let mut changed = items.clone();
+                changed[index] = increment;
+                neighbors.push(Value::Array(changed));
+            }
+        }
+        return neighbors;
+    }
     let Some(fields) = value.as_object() else {
         return Vec::new();
     };
@@ -208,4 +219,16 @@ pub fn boundary_typescript(model: &rmodel::Model, max_states: usize) -> Result<S
         "{source}\nexport const boundaryCases = {};\n",
         serde_json::to_string_pretty(&cases).expect("JSON")
     ))
+}
+
+/// Emit a Go test companion to the model's generated bindings.
+pub fn boundary_go(model: &rmodel::Model, max_states: usize) -> Result<String, String> {
+    let cases = boundary_cases(model, max_states)?;
+    let source = include_str!("boundary_property.go.in")
+        .replace("@PACKAGE@", &model.name.to_lowercase())
+        .replace("@MODEL@", &model.name);
+    let cases = serde_json::to_string_pretty(&cases)
+        .expect("JSON")
+        .replace('`', "\\u0060");
+    Ok(format!("{source}\nconst boundaryCorpus = `{cases}`\n"))
 }

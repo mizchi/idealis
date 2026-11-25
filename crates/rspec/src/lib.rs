@@ -193,6 +193,10 @@ pub fn links(spec: &Spec, root: &Path) -> Vec<Problem> {
                     .checks
                     .iter()
                     .any(|check| check.name == reference.name)
+                && !model
+                    .transitions
+                    .iter()
+                    .any(|check| check.name == reference.name)
             {
                 problems.push(problem(
                     "D2",
@@ -268,11 +272,16 @@ pub fn links(spec: &Spec, root: &Path) -> Vec<Problem> {
                 problems.push(problem("D3", format!("{path}: {name} is bound to no term")));
             }
         }
-        for check in &model.checks {
-            if !claimed.contains(&(path.to_string(), check.name.clone())) {
+        let checks = model
+            .checks
+            .iter()
+            .map(|check| &check.name)
+            .chain(model.transitions.iter().map(|check| &check.name));
+        for name in checks {
+            if !claimed.contains(&(path.to_string(), name.clone())) {
                 problems.push(problem(
                     "D3",
-                    format!("{path}: check {} is claimed by no rule", check.name),
+                    format!("{path}: check {name} is claimed by no rule"),
                 ));
             }
         }
@@ -296,27 +305,41 @@ pub fn links(spec: &Spec, root: &Path) -> Vec<Problem> {
             let Some(Some(model)) = models.get(claim.model.as_str()) else {
                 continue;
             };
-            let Some(check) = model.checks.iter().find(|check| check.name == claim.check) else {
-                problems.push(problem(
-                    "D4",
-                    format!("{}: {} has no check {}", rule.id, claim.model, claim.check),
-                ));
-                continue;
-            };
-            let fits = match check.kind {
-                rmodel::CheckKind::Invariant => {
-                    matches!(claim.expect.as_str(), "holds" | "violated")
+            let (kind, fits) = match model.checks.iter().find(|check| check.name == claim.check) {
+                Some(check) => match check.kind {
+                    rmodel::CheckKind::Invariant => (
+                        "Invariant",
+                        matches!(claim.expect.as_str(), "holds" | "violated"),
+                    ),
+                    rmodel::CheckKind::Reachable => (
+                        "Reachable",
+                        matches!(claim.expect.as_str(), "reachable" | "unreachable"),
+                    ),
+                },
+                None if model
+                    .transitions
+                    .iter()
+                    .any(|check| check.name == claim.check) =>
+                {
+                    (
+                        "Transition",
+                        matches!(claim.expect.as_str(), "holds" | "violated"),
+                    )
                 }
-                rmodel::CheckKind::Reachable => {
-                    matches!(claim.expect.as_str(), "reachable" | "unreachable")
+                None => {
+                    problems.push(problem(
+                        "D4",
+                        format!("{}: {} has no check {}", rule.id, claim.model, claim.check),
+                    ));
+                    continue;
                 }
             };
             if !fits {
                 problems.push(problem(
                     "D4",
                     format!(
-                        "{}: {} expects {} of a {:?} check",
-                        rule.id, claim.check, claim.expect, check.kind
+                        "{}: {} expects {} of a {kind} check",
+                        rule.id, claim.check, claim.expect
                     ),
                 ));
             }

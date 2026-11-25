@@ -1,0 +1,23 @@
+model Retry
+enum Status = Queued | Sent | Confirmed
+var status: one Status
+var attempt: one Nat
+init { status = Queued attempt = 0 }
+behavior send() {
+  guard { status = Queued }
+  update { status = Sent attempt = 1 }
+}
+behavior retry() {
+  guard { status = Sent attempt < 2 }
+  update { attempt = attempt + 1 }
+}
+behavior confirm() {
+  guard { status = Sent }
+  update { status = Confirmed attempt = 0 }
+}
+transition AttemptsNeverFallWhileSent {
+  (before(status) = Sent and after(status) = Sent) implies
+    after(attempt) >= before(attempt)
+}
+reachable WasRetried { attempt = 2 }
+scope Int = 0..2, steps = 4

@@ -6,16 +6,20 @@
 //! specification links its rules to (plan 0092).
 pub mod bindings;
 mod emit;
+mod numeric;
 mod print;
 pub mod reference;
+mod structured;
 mod syntax;
+pub use structured::{Case, Sequence, Variant};
 
-pub use emit::{DECLARATIONS, SCOPE, alloy_label, alloy_supports, to_alloy, to_tla};
+pub use emit::{DECLARATIONS, SCOPE, alloy_label, alloy_supports, tla_supports, to_alloy, to_tla};
 pub use print::quint_like;
 use std::fmt;
 pub use syntax::{
-    Action, Arith, BOOL, Check, CheckKind, Compare, Expr, Formula, INT, Int, IntCompare, Model,
-    Mult, Quantifier, Record, Relation, Scope, SetOp, Shape,
+    Action, Arith, BOOL, Check, CheckKind, Compare, Expr, Fairness, FairnessKind, Formula, INT,
+    Int, IntCompare, Model, Mult, NAT, Phase, Quantifier, Record, Relation, Scope, SetOp, Shape,
+    TemporalCheck, TransitionCheck,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

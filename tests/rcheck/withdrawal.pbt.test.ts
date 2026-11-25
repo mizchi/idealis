@@ -11,9 +11,9 @@ import {
   configFromJson,
   stateToJson,
 } from "./generated/withdrawal.js";
-import type { Domain, State } from "./generated/withdrawal.js";
+import type { Config, Domain, State } from "./generated/withdrawal.js";
 
-function account(corruptRejection: boolean): Domain {
+function account(_config: Config, corruptRejection: boolean): Domain {
   let state: State = {
     balance: { units: 2 },
     beforeBalance: { units: 2 },
@@ -57,9 +57,8 @@ function account(corruptRejection: boolean): Domain {
   };
 }
 
-function create(config: unknown, faulty: boolean): BoundaryAdapter {
-  configFromJson(config);
-  const domain = account(faulty);
+function create(config: Config, faulty: boolean): BoundaryAdapter {
+  const domain = account(config, faulty);
   return {
     apply: (command) => domain.apply(commandFromJson(command)),
     observe: () => stateToJson(domain.state),
@@ -67,7 +66,10 @@ function create(config: unknown, faulty: boolean): BoundaryAdapter {
 }
 
 test("the generated property runs all withdrawal boundary pairs on the independent implementation", () => {
-  const property = boundaryProperty((config) => create(config, false));
+  const property = boundaryProperty({
+    decodeConfig: configFromJson,
+    create: (config) => create(config, false),
+  });
   const runs = check(property, {
     seed: 113,
     numRuns: 50,
@@ -82,7 +84,10 @@ test("the generated property runs all withdrawal boundary pairs on the independe
 
 test("the generated property shrinks a corrupt rejection to a single reproducible boundary pair", () => {
   const seeded = { seed: 113, numRuns: 50 };
-  const property = boundaryProperty((config) => create(config, true));
+  const property = boundaryProperty({
+    decodeConfig: configFromJson,
+    create: (config) => create(config, true),
+  });
   const runs = check(property, seeded);
   assert.equal(runs.failed, true);
   assert.match(String(runs.errorInstance), /boundary for rejectWithdrawal/);
@@ -96,4 +101,24 @@ test("the generated property shrinks a corrupt rejection to a single reproducibl
     endOnFailure: true,
   });
   assert.deepEqual(replay.counterexample, runs.counterexample);
+});
+
+test("the decoded configuration reaches the implementation factory", () => {
+  const typedConfig = Symbol("typed config");
+  const property = boundaryProperty({
+    decodeConfig(value) {
+      assert.deepEqual(value, {});
+      return { token: typedConfig };
+    },
+    create({ token }) {
+      assert.equal(token, typedConfig);
+      return create({}, false);
+    },
+  });
+  const runs = check(property, { seed: 113, numRuns: 1 });
+  assert.equal(
+    runs.failed,
+    false,
+    runs.failed ? String(runs.errorInstance) : undefined,
+  );
 });

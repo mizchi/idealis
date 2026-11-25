@@ -172,3 +172,49 @@ fn raw_boundary_cases_preserve_large_integers_but_typescript_refuses_rounding() 
             .contains("safe integers")
     );
 }
+
+#[test]
+fn go_boundary_generation_uses_the_linked_model_and_config_type() {
+    let path = project("withdrawal");
+    let output = Command::new(env!("CARGO_BIN_EXE_rcheck"))
+        .args(["generate", path.to_str().unwrap(), "pbt-go"])
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let text = String::from_utf8(output.stdout).unwrap();
+    assert_eq!(
+        text,
+        include_str!("../../../tests/rcheck/go/withdrawal/boundary_generated_test.go")
+    );
+    let source = rcheck::project::load_source(path.to_str().unwrap()).unwrap();
+    let model = rmodel::parse(&source).unwrap();
+    assert_eq!(
+        rmodel::bindings::go(&model, "withdrawal"),
+        include_str!("../../../tests/rcheck/go/withdrawal/bindings.go")
+    );
+    let mut literal = text.split('`');
+    let embedded: Value = serde_json::from_str(literal.nth(1).unwrap()).unwrap();
+    assert_eq!(
+        embedded,
+        invoke(&["generate", path.to_str().unwrap(), "pbt-cases"])
+    );
+    assert!(text.contains("CheckBoundaryCases(f *testing.F, create func(Config) Withdrawal)"));
+}
+
+#[test]
+fn explicit_checker_finishes_negative_checks_for_values_within_scope() {
+    let withdrawal = project("withdrawal");
+    let row = invoke(&[
+        withdrawal.to_str().unwrap(),
+        "--checker",
+        "explicit",
+        "--question",
+        "RejectionPreservesBalance",
+    ]);
+    assert_eq!(row[0]["answers"][0]["verdict"], "holds");
+    assert_eq!(row[0]["answers"][0]["coverage"]["kind"], "complete");
+}

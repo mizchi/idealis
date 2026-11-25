@@ -7,7 +7,9 @@
 //! `rmodel::bindings`; each answer is first checked against the model's
 //! JSON Schema.
 mod boundaries;
-pub use boundaries::{boundary_cases, boundary_typescript};
+mod validation;
+pub use boundaries::{boundary_cases, boundary_go, boundary_typescript};
+pub use validation::{Session, ValidationError, Validator};
 
 use rmodel::reference::{Data, Machine, Next, Snapshot};
 use serde::Serialize;
@@ -89,6 +91,13 @@ fn element(data: &Data) -> Value {
         Data::Atom(name) if name == "false" => Value::Bool(false),
         Data::Atom(name) => Value::String(name.clone()),
         Data::Int(value) => Value::from(*value),
+        Data::Sequence(items) => {
+            serde_json::json!({"$sequence": items.iter().map(element).collect::<Vec<_>>()})
+        }
+        Data::Variant(tag, value) => match value {
+            Some(value) => serde_json::json!({"tag": tag, "value": element(value)}),
+            None => serde_json::json!({"tag": tag}),
+        },
         Data::Record(_, fields) => Value::Object(
             fields
                 .iter()
@@ -119,29 +128,35 @@ fn held(mult: rmodel::Mult, elements: Vec<Value>) -> Value {
 
 /// Relations' tuples in the JSON form of the bindings.
 fn relations(model: &rmodel::Model, data: Vec<(String, Vec<Vec<Data>>)>) -> Value {
-    let mut object = Map::new();
-    for (name, tuples) in data {
-        let relation = model.relation(&name).expect("a relation of the model");
-        let value = match &relation.shape {
-            rmodel::Shape::Unary { mult, .. } => {
-                held(*mult, tuples.iter().map(|t| element(&t[0])).collect())
+    Value::Object(
+        data.into_iter()
+            .map(|(name, tuples)| {
+                let value = relation_value(model, &name, &tuples);
+                (name, value)
+            })
+            .collect(),
+    )
+}
+
+fn relation_value(model: &rmodel::Model, name: &str, tuples: &[Vec<Data>]) -> Value {
+    let relation = model.relation(name).expect("a relation of the model");
+    match &relation.shape {
+        rmodel::Shape::Unary { mult, .. } => {
+            held(*mult, tuples.iter().map(|t| element(&t[0])).collect())
+        }
+        rmodel::Shape::Binary { from, mult, .. } => {
+            let mut map = Map::new();
+            for atom in rmodel::bindings::keys(model, from) {
+                let elements = tuples
+                    .iter()
+                    .filter(|t| key(&t[0]) == atom)
+                    .map(|t| element(&t[1]))
+                    .collect();
+                map.insert(atom, held(*mult, elements));
             }
-            rmodel::Shape::Binary { from, mult, .. } => {
-                let mut map = Map::new();
-                for atom in rmodel::bindings::keys(model, from) {
-                    let elements = tuples
-                        .iter()
-                        .filter(|t| key(&t[0]) == atom)
-                        .map(|t| element(&t[1]))
-                        .collect();
-                    map.insert(atom, held(*mult, elements));
-                }
-                Value::Object(map)
-            }
-        };
-        object.insert(name, value);
+            Value::Object(map)
+        }
     }
-    Value::Object(object)
 }
 
 /// Arrays are sets in the JSON form: sorted for comparison.
@@ -155,7 +170,15 @@ fn canonical(value: &Value) -> Value {
         Value::Object(object) => Value::Object(
             object
                 .iter()
-                .map(|(name, value)| (name.clone(), canonical(value)))
+                .map(|(name, value)| {
+                    let value = match (name.as_str(), value) {
+                        ("$sequence", Value::Array(items)) => {
+                            Value::Array(items.iter().map(canonical).collect())
+                        }
+                        _ => canonical(value),
+                    };
+                    (name.clone(), value)
+                })
                 .collect(),
         ),
         other => other.clone(),

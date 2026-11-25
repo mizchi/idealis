@@ -35,9 +35,41 @@
         "source": "spec-rmodel-design-md"
       },
       "topic": "rule RMODEL-SWAP の文と、モデル spec/models/rmodel-behavior.model の宣言・action・checkの意味"
+    },
+    {
+      "id": "rule-rmodel-nat-fixtures-rcheck-nat-account-model",
+      "mode": "semantic",
+      "reference": {
+        "source": "fixtures-rcheck-nat-account-model"
+      },
+      "target": {
+        "heading": "RMODEL-NAT",
+        "source": "spec-rmodel-design-md"
+      },
+      "topic": "rule RMODEL-NAT の文と、モデル fixtures/rcheck/nat-account.model の宣言・action・checkの意味"
+    },
+    {
+      "id": "rule-shipment-tracking-fixtures-rcheck-structured-shipped-transition-model",
+      "mode": "semantic",
+      "reference": {
+        "source": "fixtures-rcheck-structured-shipped-transition-model"
+      },
+      "target": {
+        "heading": "SHIPMENT-TRACKING",
+        "source": "spec-rmodel-design-md"
+      },
+      "topic": "rule SHIPMENT-TRACKING の文と、モデル fixtures/rcheck/structured/shipped-transition.model の宣言・action・checkの意味"
     }
   ],
   "files": {
+    "fixtures-rcheck-nat-account-model": {
+      "path": "fixtures/rcheck/nat-account.model",
+      "role": "reference"
+    },
+    "fixtures-rcheck-structured-shipped-transition-model": {
+      "path": "fixtures/rcheck/structured/shipped-transition.model",
+      "role": "reference"
+    },
     "spec-models-rmodel-behavior-model": {
       "path": "spec/models/rmodel-behavior.model",
       "role": "reference"
@@ -52,6 +84,8 @@
     }
   },
   "roots": [
+    "fixtures/rcheck/nat-account.model",
+    "fixtures/rcheck/structured/shipped-transition.model",
     "spec/models/rmodel-behavior.model",
     "spec/models/rmodel-calibration.model",
     "spec/rmodel-design.md"

@@ -10,6 +10,118 @@
     ],
     "terms": [
       {
+        "id": "shipment-carrier",
+        "kind": "entity",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "追跡方法",
+          "en": "tracking method"
+        },
+        "definition": {
+          "ja": "発送時に選んだ Post または Courier。",
+          "en": "Post or Courier, selected at shipment."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rcheck/structured/shipped-transition.model",
+            "name": "Carrier"
+          },
+          {
+            "path": "fixtures/rcheck/structured/shipped-transition.model",
+            "name": "Post"
+          },
+          {
+            "path": "fixtures/rcheck/structured/shipped-transition.model",
+            "name": "Courier"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "shipment-status",
+        "kind": "state",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "発送状態",
+          "en": "shipment status"
+        },
+        "definition": {
+          "ja": "未発送または、追跡方法を持つ発送済み。",
+          "en": "Ready, or Shipped with a tracking method."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rcheck/structured/shipped-transition.model",
+            "name": "status"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "ship-order",
+        "kind": "action",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "発送する",
+          "en": "ship the order"
+        },
+        "definition": {
+          "ja": "未発送の注文を、指定した追跡方法で発送済みにする。",
+          "en": "Moves a ready order to shipped with the specified tracking method."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rcheck/structured/shipped-transition.model",
+            "name": "ship"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "acknowledge-shipment",
+        "kind": "action",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "発送を確認する",
+          "en": "acknowledge shipment"
+        },
+        "definition": {
+          "ja": "注文の発送を確認済みにする。",
+          "en": "Records that shipment has been acknowledged."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rcheck/structured/shipped-transition.model",
+            "name": "acknowledge"
+          },
+          {
+            "path": "fixtures/rcheck/structured/shipped-transition.model",
+            "name": "acknowledged"
+          },
+          {
+            "path": "fixtures/rcheck/structured/shipped-transition.model",
+            "name": "Bool"
+          },
+          {
+            "path": "fixtures/rcheck/structured/shipped-transition.model",
+            "name": "true"
+          },
+          {
+            "path": "fixtures/rcheck/structured/shipped-transition.model",
+            "name": "false"
+          }
+        ],
+        "code": []
+      },
+      {
         "id": "adoption",
         "kind": "state",
         "group": "文法変更と遷移",
@@ -414,6 +526,204 @@
             "symbol": "boundary_cases"
           }
         ]
+      },
+      {
+        "id": "nat-balance",
+        "kind": "state",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "残高",
+          "en": "balance"
+        },
+        "definition": {
+          "ja": "出金例の現在の残高。",
+          "en": "The current balance of the withdrawal example."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rcheck/nat-account.model",
+            "name": "balance"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "nat-limit",
+        "kind": "concept",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "残高の上限",
+          "en": "balance limit"
+        },
+        "definition": {
+          "ja": "出金例の設定で決まる残高の上限。",
+          "en": "The configured balance limit in the withdrawal example."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rcheck/nat-account.model",
+            "name": "limit"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "nat-withdraw",
+        "kind": "action",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "出金",
+          "en": "withdraw"
+        },
+        "definition": {
+          "ja": "正の額が残高以下なら残高から引く。",
+          "en": "Debit a positive amount that fits within the balance."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "fixtures/rcheck/nat-account.model",
+            "name": "withdraw"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "natural-value",
+        "kind": "concept",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "自然数",
+          "en": "natural number"
+        },
+        "definition": {
+          "ja": "整数スコープのうち0以上で、Nat の設定、操作引数や状態に使える値。",
+          "en": "A nonnegative value of the integer scope, usable as a Nat in configuration, command arguments and state."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rmodel/src/syntax.rs",
+            "symbol": "NAT"
+          }
+        ]
+      },
+      {
+        "id": "command-validation",
+        "kind": "action",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "処理前の検証",
+          "en": "command validation"
+        },
+        "definition": {
+          "ja": "実装の処理に渡す前に、入力の型、現在のガード、予測した状態の宣言と不変条件を検査する。",
+          "en": "Check input types, the current guard, declarations and invariants of the predicted state before handing the command to an implementation."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rcheck/src/conform/validation.rs",
+            "symbol": "dispatch"
+          }
+        ]
+      },
+      {
+        "id": "bounded-sequence",
+        "kind": "concept",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "有限列",
+          "en": "bounded sequence"
+        },
+        "definition": {
+          "ja": "長さに上限があり、順序と重複を保持する。",
+          "en": "Preserves order and duplicates up to a length bound."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rmodel/src/structured.rs",
+            "symbol": "Sequence"
+          }
+        ]
+      },
+      {
+        "id": "payload-variant",
+        "kind": "concept",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "値付き variant",
+          "en": "payload variant"
+        },
+        "definition": {
+          "ja": "タグが値の型を決め、値のないタグも持てる。",
+          "en": "The tag determines the payload type or the absence of a payload."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rmodel/src/structured.rs",
+            "symbol": "Variant"
+          }
+        ]
+      },
+      {
+        "id": "progress-obligation",
+        "kind": "concept",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "進行性の問い",
+          "en": "progress obligation"
+        },
+        "definition": {
+          "ja": "指定した公平性を満たす実行について、いつか応答が起きることを求める。",
+          "en": "Requires an eventual response in executions that satisfy the fairness assumptions."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rmodel/src/syntax.rs",
+            "symbol": "TemporalCheck"
+          }
+        ]
+      },
+      {
+        "id": "transition-property",
+        "kind": "concept",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "遷移の性質",
+          "en": "transition property"
+        },
+        "definition": {
+          "ja": "実行可能な一操作の直前と直後を比較する条件。",
+          "en": "A condition over the snapshots immediately before and after an enabled operation."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rmodel/src/syntax.rs",
+            "symbol": "TransitionCheck"
+          }
+        ]
       }
     ],
     "rules": [
@@ -595,6 +905,107 @@
         ],
         "claims": [],
         "unformalized": "境界の選出と探索未完了の扱いは linked_projects.rs、仕様と独立実装の差は withdrawal.pbt.test.ts で検査する。"
+      },
+      {
+        "id": "RMODEL-NAT",
+        "text": {
+          "ja": "出金例は Nat の金額を使い、残高を上限以下に保つ。残高をちょうど0にすることができる。",
+          "en": "The withdrawal example uses Nat amounts, keeps the balance within its limit, and can reach a zero balance."
+        },
+        "terms": [
+          "natural-value",
+          "nat-balance",
+          "nat-limit",
+          "nat-withdraw"
+        ],
+        "claims": [
+          {
+            "model": "fixtures/rcheck/nat-account.model",
+            "check": "WithinLimit",
+            "expect": "holds"
+          },
+          {
+            "model": "fixtures/rcheck/nat-account.model",
+            "check": "EmptyBalance",
+            "expect": "reachable"
+          }
+        ]
+      },
+      {
+        "id": "RMODEL-VALIDATE",
+        "text": {
+          "ja": "入力・設定・状態がモデルに適合し、ガードが成立し、遷移先が範囲と不変条件を満たすときに実装の処理を呼ぶ。実装の応答がモデルと異なったセッションでは後続処理を呼ばない。",
+          "en": "Call the implementation after validating inputs, configuration and state, a true guard, and the scope and invariants of the predicted state. Withhold later calls if an implementation response diverges from the model."
+        },
+        "terms": [
+          "command-validation",
+          "natural-value"
+        ],
+        "claims": [],
+        "unformalized": "validation.rs のテストで実装の呼び出しを計測する。"
+      },
+      {
+        "id": "RMODEL-STRUCTURED",
+        "text": {
+          "ja": "生成した値と観測は列の順序・重複と variant のタグ・値の型を保つ。",
+          "en": "Generated values and observations preserve sequence order and duplicates, and variant tags and payload types."
+        },
+        "terms": [
+          "bounded-sequence",
+          "payload-variant"
+        ],
+        "claims": [],
+        "unformalized": "structured_temporal.rs で順序を入れ替えた観測を検出し、列の上限と値付きタグの型を検査する。"
+      },
+      {
+        "id": "RMODEL-PROGRESS",
+        "text": {
+          "ja": "同じ配信モデルでも、問いが指定する公平性によって進行性の判定が変わる。空や探索の打ち切りを成立としない。",
+          "en": "Progress over the same delivery model can depend on the fairness of the obligation. Empty or incomplete exploration does not satisfy it."
+        },
+        "terms": [
+          "progress-obligation"
+        ],
+        "claims": [],
+        "unformalized": "rcheck の structured_temporal.rs と TLC の 0116 評価で公平性ありとなしを照合する。"
+      },
+      {
+        "id": "SHIPMENT-TRACKING",
+        "text": {
+          "ja": "注文が発送済みなら、実行可能な操作の直後も発送済みであり、追跡方法は操作直前と同じでなければならない。",
+          "en": "Once an order is shipped, every enabled operation must leave it shipped with the same tracking method it had immediately before the operation."
+        },
+        "terms": [
+          "shipment-carrier",
+          "shipment-status",
+          "ship-order",
+          "acknowledge-shipment"
+        ],
+        "claims": [
+          {
+            "model": "fixtures/rcheck/structured/shipped-transition.model",
+            "check": "ShippedStays",
+            "expect": "holds"
+          },
+          {
+            "model": "fixtures/rcheck/structured/shipped-transition.model",
+            "check": "WasShipped",
+            "expect": "reachable"
+          }
+        ]
+      },
+      {
+        "id": "RMODEL-TRANSITION",
+        "text": {
+          "ja": "遷移の性質を破る操作は実装を呼ぶ前に検出する。",
+          "en": "An operation that violates a transition property is detected before calling the implementation."
+        },
+        "terms": [
+          "transition-property",
+          "command-validation"
+        ],
+        "claims": [],
+        "unformalized": "transition.rs で正常版と追跡方法を書き換える故障を参照評価器と rtlc で比べる。TLC は評価 0117 で照合する。"
       }
     ],
     "groundings": [

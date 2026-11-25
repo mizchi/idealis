@@ -15,6 +15,7 @@ fn answer(
         coverage,
         depth: None,
         detail: None,
+        lasso: None,
     }
 }
 
@@ -26,7 +27,10 @@ impl Checker for Reference {
     fn name(&self) -> &'static str {
         "reference"
     }
-    fn supports(&self, model: &rmodel::Model, _: &Question) -> Support {
+    fn supports(&self, model: &rmodel::Model, question: &Question) -> Support {
+        if question.kind == Kind::Temporal {
+            return Support::No("the reference checker only checks state properties".into());
+        }
         match rmodel::reference::enumerable(model) {
             Ok(()) => Support::Yes(Coverage::Complete),
             Err(reason) => Support::No(reason),
@@ -67,14 +71,44 @@ impl Checker for Explicit {
     fn name(&self) -> &'static str {
         "explicit"
     }
-    fn supports(&self, _: &rmodel::Model, _: &Question) -> Support {
-        Support::Yes(Coverage::Complete)
+    fn supports(&self, model: &rmodel::Model, _: &Question) -> Support {
+        match rmodel::tla_supports(model) {
+            Ok(()) => Support::Yes(Coverage::Complete),
+            Err(reason) => Support::No(reason),
+        }
     }
     fn answer(&self, model: &rmodel::Model, question: &Question, budget: Budget) -> Answer {
         let failed = |detail: String| Answer {
             detail: Some(detail),
             ..answer(self.name(), question, Coverage::Complete, Verdict::Error)
         };
+        if question.kind == Kind::Temporal {
+            for check in [rmodel::DECLARATIONS, rmodel::SCOPE] {
+                let verdict = self.answer(
+                    model,
+                    &Question {
+                        name: check.into(),
+                        kind: Kind::Invariant,
+                    },
+                    budget,
+                );
+                if verdict.verdict != Verdict::Holds {
+                    return Answer {
+                        detail: Some(format!("{check}: {:?}", verdict.verdict)),
+                        ..answer(
+                            self.name(),
+                            question,
+                            Coverage::Complete,
+                            if verdict.verdict == Verdict::Empty {
+                                Verdict::Empty
+                            } else {
+                                Verdict::Unknown
+                            },
+                        )
+                    };
+                }
+            }
+        }
         let (source, config) = match rmodel::to_tla(model, &question.name) {
             Ok(lowered) => lowered,
             Err(error) => return failed(error.to_string()),
@@ -93,24 +127,28 @@ impl Checker for Explicit {
             max_depth: 1_000,
             max_states: u32::try_from(budget.states).unwrap_or(u32::MAX),
             max_work: u32::try_from(budget.work).unwrap_or(u32::MAX),
-            max_temporal_nodes: None,
+            max_temporal_nodes: (question.kind == Kind::Temporal)
+                .then_some(u32::try_from(budget.states).unwrap_or(u32::MAX)),
         }) {
             Ok(result) => result,
             Err(error) => return failed(error.message),
         };
         let found = result.violation.is_some();
         let mut verdict = match (result.status.as_str(), found, question.kind) {
-            (_, true, Kind::Invariant) => Verdict::Violated,
+            (_, true, Kind::Invariant | Kind::Temporal | Kind::Transition) => Verdict::Violated,
             (_, true, Kind::Reachable) => Verdict::Reachable,
             ("empty", _, _) => Verdict::Empty,
-            ("complete", _, Kind::Invariant) => Verdict::Holds,
+            ("complete", _, Kind::Invariant | Kind::Temporal | Kind::Transition) => Verdict::Holds,
             ("complete", _, Kind::Reachable) => Verdict::Unreachable,
             _ => Verdict::Unknown,
         };
         let mut detail = (verdict == Verdict::Unknown).then(|| result.status.clone());
         // A negative answer covers only the states within the integer scope:
         // when a state leaves it, the search is not complete (plan 0103).
-        if model.has_values() && matches!(verdict, Verdict::Holds | Verdict::Unreachable) {
+        if model.has_values()
+            && question.name != rmodel::SCOPE
+            && matches!(verdict, Verdict::Holds | Verdict::Unreachable)
+        {
             let scope = Question {
                 name: rmodel::SCOPE.to_owned(),
                 kind: Kind::Invariant,
@@ -124,8 +162,13 @@ impl Checker for Explicit {
                 });
             }
         }
+        let lasso = result
+            .violation
+            .filter(|trace| question.kind == Kind::Temporal && trace.loop_start.is_some())
+            .map(|trace| serde_json::to_value(trace).expect("serializable trace"));
         Answer {
-            depth: found.then_some(result.depth as usize),
+            lasso,
+            depth: (found && question.kind != Kind::Temporal).then_some(result.depth as usize),
             detail,
             ..answer(self.name(), question, Coverage::Complete, verdict)
         }
@@ -139,7 +182,12 @@ impl Checker for Sat {
     fn name(&self) -> &'static str {
         "sat"
     }
-    fn supports(&self, model: &rmodel::Model, _: &Question) -> Support {
+    fn supports(&self, model: &rmodel::Model, question: &Question) -> Support {
+        if matches!(question.kind, Kind::Temporal | Kind::Transition) {
+            return Support::No(
+                "the SAT lowering does not compile temporal or transition properties".into(),
+            );
+        }
         match rmodel::alloy_supports(model) {
             Ok(()) => Support::Yes(Coverage::Bounded {
                 steps: model.scope.steps,

@@ -4,6 +4,40 @@
 
 ## 文法変更と遷移
 
+### 追跡方法（tracking method）
+
+発送時に選んだ Post または Courier。
+
+- id: `shipment-carrier`
+- モデル: `fixtures/rcheck/structured/shipped-transition.model` の `Carrier`
+- モデル: `fixtures/rcheck/structured/shipped-transition.model` の `Post`
+- モデル: `fixtures/rcheck/structured/shipped-transition.model` の `Courier`
+
+### 発送状態（shipment status）
+
+未発送または、追跡方法を持つ発送済み。
+
+- id: `shipment-status`
+- モデル: `fixtures/rcheck/structured/shipped-transition.model` の `status`
+
+### 発送する（ship the order）
+
+未発送の注文を、指定した追跡方法で発送済みにする。
+
+- id: `ship-order`
+- モデル: `fixtures/rcheck/structured/shipped-transition.model` の `ship`
+
+### 発送を確認する（acknowledge shipment）
+
+注文の発送を確認済みにする。
+
+- id: `acknowledge-shipment`
+- モデル: `fixtures/rcheck/structured/shipped-transition.model` の `acknowledge`
+- モデル: `fixtures/rcheck/structured/shipped-transition.model` の `acknowledged`
+- モデル: `fixtures/rcheck/structured/shipped-transition.model` の `Bool`
+- モデル: `fixtures/rcheck/structured/shipped-transition.model` の `true`
+- モデル: `fixtures/rcheck/structured/shipped-transition.model` の `false`
+
 ### 採用判断（adoption decision）
 
 変更を評価中にするか採用するかの状態。
@@ -128,6 +162,69 @@
 - id: `guard-boundary`
 - コード: `crates/rcheck/src/conform/boundaries.rs` の `boundary_cases`
 
+### 残高（balance）
+
+出金例の現在の残高。
+
+- id: `nat-balance`
+- モデル: `fixtures/rcheck/nat-account.model` の `balance`
+
+### 残高の上限（balance limit）
+
+出金例の設定で決まる残高の上限。
+
+- id: `nat-limit`
+- モデル: `fixtures/rcheck/nat-account.model` の `limit`
+
+### 出金（withdraw）
+
+正の額が残高以下なら残高から引く。
+
+- id: `nat-withdraw`
+- モデル: `fixtures/rcheck/nat-account.model` の `withdraw`
+
+### 自然数（natural number）
+
+整数スコープのうち0以上で、Nat の設定、操作引数や状態に使える値。
+
+- id: `natural-value`
+- コード: `crates/rmodel/src/syntax.rs` の `NAT`
+
+### 処理前の検証（command validation）
+
+実装の処理に渡す前に、入力の型、現在のガード、予測した状態の宣言と不変条件を検査する。
+
+- id: `command-validation`
+- コード: `crates/rcheck/src/conform/validation.rs` の `dispatch`
+
+### 有限列（bounded sequence）
+
+長さに上限があり、順序と重複を保持する。
+
+- id: `bounded-sequence`
+- コード: `crates/rmodel/src/structured.rs` の `Sequence`
+
+### 値付き variant（payload variant）
+
+タグが値の型を決め、値のないタグも持てる。
+
+- id: `payload-variant`
+- コード: `crates/rmodel/src/structured.rs` の `Variant`
+
+### 進行性の問い（progress obligation）
+
+指定した公平性を満たす実行について、いつか応答が起きることを求める。
+
+- id: `progress-obligation`
+- コード: `crates/rmodel/src/syntax.rs` の `TemporalCheck`
+
+### 遷移の性質（transition property）
+
+実行可能な一操作の直前と直後を比較する条件。
+
+- id: `transition-property`
+- コード: `crates/rmodel/src/syntax.rs` の `TransitionCheck`
+
 ## 実装の照合
 
 - `crates/rmodel/src/syntax.rs` の `action` を、`crates/rmodel/tests/behavior.rs` の `behavior_has_the_same_guard_parallel_updates_and_frame_as_action` がモデル `spec/models/rmodel-behavior.model` と照合する
@@ -197,3 +294,41 @@
 ガードの境界は宣言した有限の範囲を完全探索した後で選び、先行操作、受付結果、直後の状態を生成テストに渡す。
 
 - 形式化しない理由: 境界の選出と探索未完了の扱いは linked_projects.rs、仕様と独立実装の差は withdrawal.pbt.test.ts で検査する。
+
+### RMODEL-NAT
+
+出金例は Nat の金額を使い、残高を上限以下に保つ。残高をちょうど0にすることができる。
+
+- `fixtures/rcheck/nat-account.model` の `WithinLimit` は holds
+- `fixtures/rcheck/nat-account.model` の `EmptyBalance` は reachable
+
+### RMODEL-VALIDATE
+
+入力・設定・状態がモデルに適合し、ガードが成立し、遷移先が範囲と不変条件を満たすときに実装の処理を呼ぶ。実装の応答がモデルと異なったセッションでは後続処理を呼ばない。
+
+- 形式化しない理由: validation.rs のテストで実装の呼び出しを計測する。
+
+### RMODEL-STRUCTURED
+
+生成した値と観測は列の順序・重複と variant のタグ・値の型を保つ。
+
+- 形式化しない理由: structured_temporal.rs で順序を入れ替えた観測を検出し、列の上限と値付きタグの型を検査する。
+
+### RMODEL-PROGRESS
+
+同じ配信モデルでも、問いが指定する公平性によって進行性の判定が変わる。空や探索の打ち切りを成立としない。
+
+- 形式化しない理由: rcheck の structured_temporal.rs と TLC の 0116 評価で公平性ありとなしを照合する。
+
+### SHIPMENT-TRACKING
+
+注文が発送済みなら、実行可能な操作の直後も発送済みであり、追跡方法は操作直前と同じでなければならない。
+
+- `fixtures/rcheck/structured/shipped-transition.model` の `ShippedStays` は holds
+- `fixtures/rcheck/structured/shipped-transition.model` の `WasShipped` は reachable
+
+### RMODEL-TRANSITION
+
+遷移の性質を破る操作は実装を呼ぶ前に検出する。
+
+- 形式化しない理由: transition.rs で正常版と追跡方法を書き換える故障を参照評価器と rtlc で比べる。TLC は評価 0117 で照合する。

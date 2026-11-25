@@ -1,7 +1,7 @@
 //! A validator for the JSON Schema keywords `rmodel::bindings::json_schema`
 //! writes (plan 0102): `$ref` into `$defs`, `enum`, `const`, `type`,
 //! `properties`, `required`, `additionalProperties: false`, `items`,
-//! `uniqueItems`, `minItems`, `anyOf` and `oneOf`. Any other keyword is an
+//! `uniqueItems`, `minItems`, `maxItems`, `minimum`, `maximum`, `anyOf` and `oneOf`. Any other keyword is an
 //! error rather than ignored. The tests compare it with ajv.
 use serde_json::Value;
 
@@ -56,6 +56,22 @@ fn check(root: &Value, schema: &Value, value: &Value, path: &str) -> Result<(), 
                     return Err(format!("{path}: {value} is not of type {argument}"));
                 }
             }
+            "minimum" | "maximum" => {
+                let integer = |number: &Value| {
+                    number
+                        .as_i64()
+                        .map(i128::from)
+                        .or_else(|| number.as_u64().map(i128::from))
+                };
+                let limit =
+                    integer(argument).ok_or_else(|| format!("{path}: malformed {keyword}"))?;
+                if let Some(number) = integer(value)
+                    && (keyword == "minimum" && number < limit
+                        || keyword == "maximum" && number > limit)
+                {
+                    return Err(format!("{path}: {value} exceeds {keyword} {limit}"));
+                }
+            }
             "properties" => {
                 if let (Some(properties), Some(object)) = (argument.as_object(), value.as_object())
                 {
@@ -101,6 +117,12 @@ fn check(root: &Value, schema: &Value, value: &Value, path: &str) -> Result<(), 
                             return Err(format!("{path}: {item} appears twice"));
                         }
                     }
+                }
+            }
+            "maxItems" => {
+                let maximum = argument.as_u64().unwrap_or_default() as usize;
+                if value.as_array().is_some_and(|items| items.len() > maximum) {
+                    return Err(format!("{path}: more than {maximum} items"));
                 }
             }
             "minItems" => {

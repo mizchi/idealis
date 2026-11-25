@@ -192,20 +192,82 @@
       }
     }
   ],
+  "temporal": [
+    {
+      "name": "EventuallyServed",
+      "formula": {
+        "op": "in",
+        "left": {
+          "op": "name",
+          "name": "c"
+        },
+        "right": {
+          "op": "name",
+          "name": "served"
+        }
+      },
+      "params": [
+        {
+          "name": "c",
+          "sort": "Client"
+        }
+      ],
+      "trigger": {
+        "op": "in",
+        "left": {
+          "op": "name",
+          "name": "c"
+        },
+        "right": {
+          "op": "name",
+          "name": "waiting"
+        }
+      },
+      "fairness": [
+        {
+          "kind": "weak",
+          "action": "serve"
+        }
+      ]
+    },
+    {
+      "name": "EventuallyServedUnfair",
+      "formula": {
+        "op": "in",
+        "left": {
+          "op": "name",
+          "name": "c"
+        },
+        "right": {
+          "op": "name",
+          "name": "served"
+        }
+      },
+      "params": [
+        {
+          "name": "c",
+          "sort": "Client"
+        }
+      ],
+      "trigger": {
+        "op": "in",
+        "left": {
+          "op": "name",
+          "name": "c"
+        },
+        "right": {
+          "op": "name",
+          "name": "waiting"
+        }
+      },
+      "fairness": []
+    }
+  ],
   "scope": {
     "sizes": {
       "Client": 2
     },
     "steps": 4
   },
-  "omitted": [
-    {
-      "name": "EventuallyServed",
-      "reason": "a temporal property"
-    },
-    {
-      "name": "EventuallyServedUnfair",
-      "reason": "a temporal property"
-    }
-  ]
+  "omitted": []
 }

@@ -244,3 +244,112 @@ scope A = 1, Int = 0..2, steps = 2",
     );
     assert!(model.is_ok(), "{:?}", model.err());
 }
+
+#[test]
+fn naturals_use_the_nonnegative_part_of_the_integer_scope() {
+    let model = rmodel::parse(
+        "model NaturalCounter
+         var n: one Nat
+         init { n = 0 }
+         behavior take(x: Nat) { guard { x = n + 1 } update { n = x } }
+         invariant NonNegative { n >= 0 }
+         reachable Two { n = 2 }
+         scope Int = -2..2, steps = 3",
+    )
+    .unwrap();
+    let report = rmodel::reference::analyze(&model, 1_000);
+    assert_eq!(report.scope, rmodel::reference::Outcome::Holds);
+    assert_eq!(
+        report.verdicts[1].outcome,
+        rmodel::reference::Outcome::Reachable { depth: 2 }
+    );
+}
+
+#[test]
+fn arithmetic_overflow_is_rejected_before_a_checker_can_report_holds() {
+    let source = "model MaxInt
+        var n: one Int
+        init { n = 9223372036854775807 }
+        behavior increment() { update { n = n + 1 } }
+        invariant AtMax { n = 9223372036854775807 }
+        scope Int = 9223372036854775806..9223372036854775807, steps = 2";
+    assert!(
+        rmodel::parse(source)
+            .unwrap_err()
+            .message
+            .contains("arithmetic")
+    );
+}
+
+#[test]
+fn a_wide_exact_model_can_be_checked_by_the_reference_without_promising_tlc_support() {
+    let model = rmodel::parse(
+        "model Wide
+         var n: one Int
+         init { n = 2147483647 }
+         behavior increment() { update { n = n + 1 } }
+         invariant InRange { n <= 2147483647 }
+         scope Int = 2147483646..2147483647, steps = 2",
+    )
+    .unwrap();
+    let report = rmodel::reference::analyze(&model, 100);
+    assert_eq!(
+        report.scope,
+        rmodel::reference::Outcome::Violated { depth: 1 }
+    );
+    let error = rmodel::to_tla(&model, "InRange").unwrap_err();
+    assert!(error.message.contains("arithmetic"), "{error}");
+}
+
+#[test]
+fn an_overflow_through_a_record_literal_projection_is_rejected() {
+    let error = rmodel::parse(
+        "model Project
+         record Amount { units: Int }
+         var n: one Int
+         init { n = 0 }
+         behavior explode() { update { n = (Amount {units: 9223372036854775807}).units + 1 } }
+         scope Int = 0..1, steps = 2",
+    )
+    .unwrap_err();
+    assert!(error.message.contains("arithmetic"), "{error}");
+}
+
+#[test]
+fn the_reference_accepts_the_lowest_signed_literal_without_wrap() {
+    let model = rmodel::parse(
+        "model Low
+         var n: one Int
+         init { n = -9223372036854775808 }
+         invariant AtMin { n = -9223372036854775808 }
+         scope Int = -9223372036854775808..-9223372036854775807, steps = 2",
+    )
+    .unwrap();
+    let result = rmodel::reference::evaluate(&model, 100);
+    assert_eq!(result[0].outcome, rmodel::reference::Outcome::Holds);
+    assert!(rmodel::tla_supports(&model).is_err());
+}
+
+#[test]
+fn arithmetic_in_updates_accounts_for_large_count_domains() {
+    // This model has no integer comparisons, so the Alloy-specific limit
+    // on the universe size does not apply to the update.
+    let members = (0..401)
+        .map(|i| format!("Member{i}"))
+        .collect::<Vec<_>>()
+        .join(" | ");
+    let source = format!(
+        "model Many
+         enum Members = {members}
+         var n: one Int
+         init {{ n = 0 }}
+         behavior count() {{ update {{ n = #Members + 9223372036854775407 }} }}
+         scope Int = 0..0, steps = 2"
+    );
+    assert!(
+        rmodel::parse(&source)
+            .unwrap_err()
+            .message
+            .contains("arithmetic")
+    );
+}

@@ -53,6 +53,8 @@ enum Atom {
     Int(i64),
     /// The record's position among the model's records, and its fields.
     Record(u16, Box<[Atom]>),
+    Sequence(Vec<Atom>),
+    Variant(String, Option<Box<Atom>>),
 }
 type Tuple = Vec<Atom>;
 type Value = BTreeSet<Tuple>;
@@ -66,8 +68,6 @@ struct Universe<'a> {
     sorts: BTreeMap<&'a str, Vec<Atom>>,
     /// The atom of each enum member.
     members: BTreeMap<&'a str, Atom>,
-    /// The scope's integers, `lo..=hi`.
-    ints: Option<(i64, i64)>,
     model: &'a Model,
 }
 
@@ -102,32 +102,54 @@ impl<'a> Universe<'a> {
         // combination of their fields (plan 0103).
         if let Some((low, high)) = model.scope.ints {
             sorts.insert(crate::syntax::INT, (low..=high).map(Atom::Int).collect());
-        }
-        for (position, record) in model.records.iter().enumerate() {
-            let mut all: Vec<Vec<Atom>> = vec![Vec::new()];
-            for (_, sort) in &record.fields {
-                all = all
-                    .into_iter()
-                    .flat_map(|prefix| {
-                        sorts[sort.as_str()].iter().map(move |atom: &Atom| {
-                            let mut next = prefix.clone();
-                            next.push(atom.clone());
-                            next
-                        })
-                    })
-                    .collect();
-            }
             sorts.insert(
-                record.name.as_str(),
-                all.into_iter()
-                    .map(|fields| Atom::Record(position as u16, fields.into()))
-                    .collect(),
+                crate::syntax::NAT,
+                (low.max(0)..=high).map(Atom::Int).collect(),
             );
+        }
+        use crate::structured::ValueType;
+        for ty in model.value_order().expect("checked value types") {
+            let atoms = match ty {
+                ValueType::Record(record) => {
+                    let position = model
+                        .records
+                        .iter()
+                        .position(|r| r.name == record.name)
+                        .unwrap();
+                    let fields: Vec<_> = record
+                        .fields
+                        .iter()
+                        .map(|(_, sort)| sorts[sort.as_str()].clone())
+                        .collect();
+                    product(&fields)
+                        .map(|v| Atom::Record(position as u16, v.into()))
+                        .collect()
+                }
+                ValueType::Sequence(seq) => (0..=seq.max)
+                    .flat_map(|length| {
+                        let choices = vec![sorts[seq.element.as_str()].clone(); length];
+                        product(&choices).map(Atom::Sequence).collect::<Vec<_>>()
+                    })
+                    .collect(),
+                ValueType::Variant(variant) => variant
+                    .cases
+                    .iter()
+                    .flat_map(|case| match &case.payload {
+                        None => vec![Atom::Variant(case.tag.clone(), None)],
+                        Some(sort) => sorts[sort.as_str()]
+                            .iter()
+                            .map(|atom| {
+                                Atom::Variant(case.tag.clone(), Some(Box::new(atom.clone())))
+                            })
+                            .collect(),
+                    })
+                    .collect(),
+            };
+            sorts.insert(ty.name(), atoms);
         }
         Self {
             sorts,
             members,
-            ints: model.scope.ints,
             model,
         }
     }
@@ -164,17 +186,15 @@ impl<'a> Universe<'a> {
     /// Every value of a relation that meets its type and multiplicity, or
     /// `None` when the domain is too large to enumerate.
     /// Whether every integer in a value lies in the scope (plan 0103).
-    fn in_scope(&self, value: &Value) -> bool {
-        fn inside(ints: Option<(i64, i64)>, atom: &Atom) -> bool {
-            match atom {
-                Atom::Id(_) => true,
-                Atom::Int(value) => ints.is_some_and(|(low, high)| (low..=high).contains(value)),
-                Atom::Record(_, fields) => fields.iter().all(|field| inside(ints, field)),
-            }
-        }
-        value
-            .iter()
-            .all(|tuple| tuple.iter().all(|a| inside(self.ints, a)))
+    fn in_scope(&self, shape: &Shape, value: &Value) -> bool {
+        let target = match shape {
+            Shape::Unary { sig, .. } => sig,
+            Shape::Binary { to, .. } => to,
+        };
+        !self.model.is_value(target)
+            || value
+                .iter()
+                .all(|tuple| self.sorts[target.as_str()].contains(tuple.last().expect("a target")))
     }
     /// The only integer of a set the checker proved singular.
     fn int(&self, value: &Value) -> i64 {
@@ -184,6 +204,18 @@ impl<'a> Universe<'a> {
         }
     }
     fn candidates(&self, shape: &Shape) -> Option<Vec<Value>> {
+        if let Shape::Unary {
+            sig,
+            mult: mult @ (Mult::One | Mult::Lone),
+        } = shape
+        {
+            let mut values = Vec::new();
+            if *mult == Mult::Lone {
+                values.push(Value::new());
+            }
+            values.extend(self.sorts[sig.as_str()].iter().cloned().map(singleton));
+            return Some(values);
+        }
         let domain = self.domain(shape);
         if domain.len() > MAX_DOMAIN {
             return None;
@@ -207,6 +239,7 @@ impl<'a> Universe<'a> {
 /// The relations' values and the atoms bound by quantifiers and parameters.
 struct Scene<'s> {
     relations: &'s BTreeMap<&'s str, Value>,
+    after: Option<&'s BTreeMap<&'s str, Value>>,
     bound: &'s BTreeMap<String, Atom>,
 }
 
@@ -215,8 +248,32 @@ fn singleton(atom: Atom) -> Value {
 }
 
 impl Universe<'_> {
+    fn scalar(&self, expr: &Expr, scene: &Scene<'_>) -> Atom {
+        self.expression(expr, scene)
+            .into_iter()
+            .next()
+            .expect("one value by the checker")
+            .into_iter()
+            .next()
+            .expect("a unary value")
+    }
+
     fn expression(&self, expression: &Expr, scene: &Scene<'_>) -> Value {
         match expression {
+            Expr::At(phase, expr) => {
+                let relations = match phase {
+                    crate::Phase::Before => scene.relations,
+                    crate::Phase::After => scene.after.expect("a checked transition property"),
+                };
+                self.expression(
+                    expr,
+                    &Scene {
+                        relations,
+                        after: None,
+                        bound: scene.bound,
+                    },
+                )
+            }
             Expr::None => Value::new(),
             Expr::Name(name) => {
                 if let Some(atom) = scene.bound.get(name) {
@@ -242,13 +299,55 @@ impl Universe<'_> {
                     self.int(&self.expression(left, scene)),
                     self.int(&self.expression(right, scene)),
                 );
-                // Mathematical integers: an i64 overflow is far outside any
-                // scope, so it saturates and leaves the scope.
+                // The checked model bounds every intermediate operation.
                 singleton(Atom::Int(match operator {
-                    Arith::Add => left.saturating_add(right),
-                    Arith::Sub => left.saturating_sub(right),
-                    Arith::Mul => left.saturating_mul(right),
+                    Arith::Add => left + right,
+                    Arith::Sub => left - right,
+                    Arith::Mul => left * right,
                 }))
+            }
+            Expr::Sequence(_, items) => singleton(Atom::Sequence(
+                items.iter().map(|item| self.scalar(item, scene)).collect(),
+            )),
+            Expr::Append(seq, item) => {
+                let Atom::Sequence(mut elements) = self.scalar(seq, scene) else {
+                    unreachable!("typed sequence")
+                };
+                elements.push(self.scalar(item, scene));
+                singleton(Atom::Sequence(elements))
+            }
+            Expr::Length(seq) => {
+                let Atom::Sequence(elements) = self.scalar(seq, scene) else {
+                    unreachable!("typed sequence")
+                };
+                singleton(Atom::Int(elements.len() as i64))
+            }
+            Expr::Index(seq, index) => {
+                let Atom::Sequence(elements) = self.scalar(seq, scene) else {
+                    unreachable!("typed sequence")
+                };
+                let index = self.int(&self.expression(index, scene));
+                usize::try_from(index)
+                    .ok()
+                    .and_then(|i| elements.get(i))
+                    .cloned()
+                    .map_or_else(Value::new, singleton)
+            }
+            Expr::Variant(tag, value) => singleton(Atom::Variant(
+                tag.clone(),
+                value.as_ref().map(|v| Box::new(self.scalar(v, scene))),
+            )),
+            Expr::Payload(expr, tag) => {
+                let Atom::Variant(actual, value) = self.scalar(expr, scene) else {
+                    unreachable!("typed variant")
+                };
+                if &actual == tag
+                    && let Some(value) = value
+                {
+                    singleton(*value)
+                } else {
+                    Value::new()
+                }
             }
             Expr::Record(name, values) => {
                 let position = self
@@ -344,6 +443,9 @@ impl Universe<'_> {
                     Mult::Set => true,
                 }
             }
+            Formula::HasTag(expr, tag) => {
+                matches!(self.scalar(expr, scene), Atom::Variant(actual, _) if &actual == tag)
+            }
             Formula::Empty(counted) => self.expression(counted, scene).is_empty(),
             Formula::Not(inner) => !self.formula(inner, scene),
             Formula::And(parts) => parts.iter().all(|part| self.formula(part, scene)),
@@ -359,6 +461,7 @@ impl Universe<'_> {
                         body,
                         &Scene {
                             relations: scene.relations,
+                            after: scene.after,
                             bound: &bound,
                         },
                     )
@@ -376,7 +479,7 @@ impl Universe<'_> {
 /// Every combination of one value per relation, produced one at a time:
 /// materializing them exhausted memory before the budget applied (seed
 /// 5141, plan 0101).
-fn product(choices: &[Vec<Value>]) -> impl Iterator<Item = Vec<Value>> + '_ {
+fn product<T: Clone>(choices: &[Vec<T>]) -> impl Iterator<Item = Vec<T>> + '_ {
     let mut indices = vec![0usize; choices.len()];
     let mut done = choices.iter().any(Vec::is_empty);
     std::iter::from_fn(move || {
@@ -448,7 +551,8 @@ pub fn enumerable(model: &Model) -> Result<(), String> {
     let universe = Universe::new(model);
     for relation in &model.relations {
         let size = universe.domain(&relation.shape).len();
-        if size > MAX_DOMAIN {
+        let direct = matches!(&relation.shape, Shape::Unary { mult: Mult::One | Mult::Lone, sig } if model.is_value(sig));
+        if size > MAX_DOMAIN && !direct {
             return Err(format!(
                 "{} has {size} possible tuples, more than {MAX_DOMAIN}",
                 relation.name
@@ -463,6 +567,7 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
     let statics: Vec<_> = model.relations.iter().filter(|r| !r.var).collect();
     let vars: Vec<_> = model.relations.iter().filter(|r| r.var).collect();
     let mut found: Vec<Option<usize>> = vec![None; model.checks.len()];
+    let mut transition_found = vec![None; model.transitions.len()];
     let mut enabled = vec![false; model.actions.len()];
     let mut broken: Option<usize> = None;
     let mut escaped: Option<usize> = None;
@@ -470,8 +575,10 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
         model
             .checks
             .iter()
-            .map(|check| Verdict {
-                check: check.name.clone(),
+            .map(|check| &check.name)
+            .chain(model.transitions.iter().map(|check| &check.name))
+            .map(|name| Verdict {
+                check: name.clone(),
                 outcome: Outcome::Unknown,
             })
             .collect::<Vec<_>>()
@@ -519,6 +626,7 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
                 fact,
                 &Scene {
                     relations: &relations,
+                    after: None,
                     bound: &none,
                 },
             )
@@ -538,6 +646,7 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
             }
             let scene = Scene {
                 relations: &relations,
+                after: None,
                 bound: &none,
             };
             if model.init.iter().all(|f| universe.formula(f, &scene)) && seen.insert(state.clone())
@@ -557,6 +666,7 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
             }
             let scene = Scene {
                 relations: &relations,
+                after: None,
                 bound: &none,
             };
             for (index, check) in model.checks.iter().enumerate() {
@@ -573,6 +683,7 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
                 for bound in bindings(&universe, &action.params) {
                     let scene = Scene {
                         relations: &relations,
+                        after: None,
                         bound: &bound,
                     };
                     if !action.guards.iter().all(|g| universe.formula(g, &scene)) {
@@ -591,7 +702,7 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
                             .position(|r| &r.name == var)
                             .expect("checked var");
                         let value = universe.expression(value, &scene);
-                        if !universe.in_scope(&value) {
+                        if !universe.in_scope(&vars[position].shape, &value) {
                             inside = false;
                         }
                         if !universe.admits(&vars[position].shape, &value) {
@@ -613,6 +724,24 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
                             broken = Some(depth + 1);
                         }
                         continue;
+                    }
+                    if !model.transitions.is_empty() {
+                        let mut after = relations.clone();
+                        for (var, val) in vars.iter().zip(&next) {
+                            after.insert(var.name.as_str(), val.clone());
+                        }
+                        let step = Scene {
+                            relations: &relations,
+                            after: Some(&after),
+                            bound: &none,
+                        };
+                        for (check, found) in model.transitions.iter().zip(&mut transition_found) {
+                            if found.is_none_or(|known| depth + 1 < known)
+                                && !universe.formula(&check.formula, &step)
+                            {
+                                *found = Some(depth + 1);
+                            }
+                        }
                     }
                     if seen.insert(next.clone()) {
                         queue.push_back((next, depth + 1));
@@ -643,6 +772,21 @@ pub fn analyze(model: &Model, max_states: usize) -> Report {
                 (CheckKind::Reachable, None, true) => Outcome::Unreachable,
             },
         })
+        .chain(
+            model
+                .transitions
+                .iter()
+                .zip(transition_found)
+                .map(|(check, found)| Verdict {
+                    check: check.name.clone(),
+                    outcome: match (found, complete) {
+                        (Some(depth), _) => Outcome::Violated { depth },
+                        (None, false) => Outcome::Unknown,
+                        (None, true) if !initial => Outcome::Empty,
+                        (None, true) => Outcome::Holds,
+                    },
+                }),
+        )
         .collect();
     Report {
         verdicts,
@@ -675,6 +819,8 @@ pub enum Data {
     Atom(String),
     Int(i64),
     Record(String, Vec<(String, Data)>),
+    Sequence(Vec<Data>),
+    Variant(String, Option<Box<Data>>),
 }
 
 /// The relations' values of a configuration or a state, opaque outside.
@@ -758,6 +904,7 @@ impl<'a> Machine<'a> {
             let relations = self.relations(&configuration, &[]);
             let scene = Scene {
                 relations: &relations,
+                after: None,
                 bound: &none,
             };
             self.model
@@ -775,6 +922,7 @@ impl<'a> Machine<'a> {
                 let relations = self.relations(&configuration.0, state);
                 let scene = Scene {
                     relations: &relations,
+                    after: None,
                     bound: &none,
                 };
                 self.model
@@ -785,6 +933,112 @@ impl<'a> Machine<'a> {
             .map(Snapshot)
             .collect()
     }
+    /// Select one configuration by its relation values and verify its facts.
+    /// This does not traverse the product of all possible configurations.
+    pub fn match_configuration(
+        &self,
+        matches: impl FnMut(&str, Vec<Vec<Data>>) -> bool,
+    ) -> Option<Snapshot> {
+        let configuration = self.match_snapshot(&self.statics, &self.static_choices, matches)?;
+        let relations = self.relations(&configuration.0, &[]);
+        let scene = Scene {
+            relations: &relations,
+            after: None,
+            bound: &BTreeMap::new(),
+        };
+        self.model
+            .facts
+            .iter()
+            .all(|f| self.universe.formula(f, &scene))
+            .then_some(configuration)
+    }
+
+    /// Select one supplied initial state and check its initial predicates.
+    pub fn match_initial(
+        &self,
+        configuration: &Snapshot,
+        matches: impl FnMut(&str, Vec<Vec<Data>>) -> bool,
+    ) -> Option<Snapshot> {
+        let state = self.match_snapshot(&self.vars, &self.var_choices, matches)?;
+        let relations = self.relations(&configuration.0, &state.0);
+        let scene = Scene {
+            relations: &relations,
+            after: None,
+            bound: &BTreeMap::new(),
+        };
+        self.model
+            .init
+            .iter()
+            .all(|f| self.universe.formula(f, &scene))
+            .then_some(state)
+    }
+
+    fn match_snapshot(
+        &self,
+        relations: &[&crate::Relation],
+        choices: &[Vec<Value>],
+        mut matches: impl FnMut(&str, Vec<Vec<Data>>) -> bool,
+    ) -> Option<Snapshot> {
+        relations
+            .iter()
+            .zip(choices)
+            .map(|(relation, candidates)| {
+                candidates
+                    .iter()
+                    .find(|value| {
+                        let tuples = value
+                            .iter()
+                            .map(|tuple| tuple.iter().map(|atom| self.data(atom)).collect())
+                            .collect();
+                        matches(&relation.name, tuples)
+                    })
+                    .cloned()
+            })
+            .collect::<Option<Vec<_>>>()
+            .map(Snapshot)
+    }
+
+    /// The first false invariant of a given valid state.
+    pub fn violated_invariant(&self, configuration: &Snapshot, state: &Snapshot) -> Option<&str> {
+        let relations = self.relations(&configuration.0, &state.0);
+        let scene = Scene {
+            relations: &relations,
+            after: None,
+            bound: &BTreeMap::new(),
+        };
+        self.model
+            .checks
+            .iter()
+            .find(|check| {
+                check.kind == CheckKind::Invariant && !self.universe.formula(&check.formula, &scene)
+            })
+            .map(|check| check.name.as_str())
+    }
+
+    /// The first false transition property of an accepted, well-formed step.
+    pub fn violated_transition(
+        &self,
+        configuration: &Snapshot,
+        before: &Snapshot,
+        after: &Snapshot,
+    ) -> Option<&str> {
+        if self.model.transitions.is_empty() {
+            return None;
+        }
+        let old = self.relations(&configuration.0, &before.0);
+        let new = self.relations(&configuration.0, &after.0);
+        let scene = Scene {
+            relations: &old,
+            after: Some(&new),
+            bound: &BTreeMap::new(),
+        };
+        self.model
+            .transitions
+            .iter()
+            .find(|check| !self.universe.formula(&check.formula, &scene))
+            .map(|check| check.name.as_str())
+    }
+
     /// Every action instance from a state, in declaration and argument
     /// order.
     pub fn steps(&self, configuration: &Snapshot, state: &Snapshot) -> Vec<Step> {
@@ -794,6 +1048,7 @@ impl<'a> Machine<'a> {
             for bound in bindings(&self.universe, &action.params) {
                 let scene = Scene {
                     relations: &relations,
+                    after: None,
                     bound: &bound,
                 };
                 let args = action
@@ -801,30 +1056,7 @@ impl<'a> Machine<'a> {
                     .iter()
                     .map(|(param, _)| (param.clone(), self.data(&bound[param])))
                     .collect();
-                let next = action
-                    .guards
-                    .iter()
-                    .all(|guard| self.universe.formula(guard, &scene))
-                    .then(|| {
-                        let mut next = state.0.clone();
-                        let (mut valid, mut inside) = (true, true);
-                        for (var, value) in &action.assignments {
-                            let position = self
-                                .vars
-                                .iter()
-                                .position(|r| &r.name == var)
-                                .expect("checked var");
-                            let value = self.universe.expression(value, &scene);
-                            inside &= self.universe.in_scope(&value);
-                            valid &= self.universe.admits(&self.vars[position].shape, &value);
-                            next[position] = value;
-                        }
-                        match (inside, valid) {
-                            (false, _) => Next::Outside(Snapshot(next)),
-                            (true, false) => Next::Broken(Snapshot(next)),
-                            (true, true) => Next::State(Snapshot(next)),
-                        }
-                    });
+                let next = self.next(action, &scene, state);
                 steps.push(Step {
                     action: action.name.clone(),
                     args,
@@ -834,6 +1066,65 @@ impl<'a> Machine<'a> {
         }
         steps
     }
+    /// Resolve just the supplied action and arguments. Unlike `steps`,
+    /// this does not enumerate the product of action bindings. The outer
+    /// option matches the request; the inner option indicates guard acceptance.
+    pub fn match_step(
+        &self,
+        configuration: &Snapshot,
+        state: &Snapshot,
+        name: &str,
+        mut matches: impl FnMut(&str, Data) -> bool,
+    ) -> Option<Option<Next>> {
+        let action = self
+            .model
+            .actions
+            .iter()
+            .find(|action| action.name == name)?;
+        let mut bound = BTreeMap::new();
+        for (param, sort) in &action.params {
+            let atom = self.universe.sorts[sort.as_str()]
+                .iter()
+                .find(|atom| matches(param, self.data(atom)))?;
+            bound.insert(param.clone(), atom.clone());
+        }
+        let relations = self.relations(&configuration.0, &state.0);
+        let scene = Scene {
+            relations: &relations,
+            after: None,
+            bound: &bound,
+        };
+        Some(self.next(action, &scene, state))
+    }
+
+    fn next(&self, action: &crate::Action, scene: &Scene<'_>, state: &Snapshot) -> Option<Next> {
+        if !action
+            .guards
+            .iter()
+            .all(|guard| self.universe.formula(guard, scene))
+        {
+            return None;
+        }
+        let mut next = state.0.clone();
+        let (mut valid, mut inside) = (true, true);
+        for (var, value) in &action.assignments {
+            let position = self
+                .vars
+                .iter()
+                .position(|r| &r.name == var)
+                .expect("checked var");
+            let value = self.universe.expression(value, scene);
+            inside &= self.universe.in_scope(&self.vars[position].shape, &value);
+            valid &= self.universe.admits(&self.vars[position].shape, &value);
+            next[position] = value;
+        }
+        Some(match (inside, valid) {
+            (false, _) => Next::Outside(Snapshot(next)),
+            (true, false) => Next::Broken(Snapshot(next)),
+            (true, true) => Next::State(Snapshot(next)),
+        })
+    }
+
     /// The static relations' values, by name, as sets of tuples.
     pub fn configuration_data(&self, configuration: &Snapshot) -> Vec<(String, Vec<Vec<Data>>)> {
         self.describe(&self.statics, &configuration.0)
@@ -863,6 +1154,12 @@ impl<'a> Machine<'a> {
         match atom {
             Atom::Id(id) => Data::Atom(self.names[id].clone()),
             Atom::Int(value) => Data::Int(*value),
+            Atom::Sequence(items) => {
+                Data::Sequence(items.iter().map(|item| self.data(item)).collect())
+            }
+            Atom::Variant(tag, value) => {
+                Data::Variant(tag.clone(), value.as_ref().map(|v| Box::new(self.data(v))))
+            }
             Atom::Record(position, fields) => {
                 let record = &self.model.records[*position as usize];
                 Data::Record(

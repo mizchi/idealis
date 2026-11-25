@@ -110,8 +110,55 @@ fn malformed_ir_is_rejected() {
     let mut ill_typed = good.clone();
     ill_typed["relations"][0]["shape"]["to"] = "Nowhere".into();
     cases.push(("unknown sort", ill_typed, "unknown sig"));
+    let mut steps = good.clone();
+    steps["scope"]["steps"] = 33.into();
+    cases.push(("trace scope", steps, "steps"));
+    let mut sort_size = good.clone();
+    sort_size["scope"]["sizes"]["User"] = 8.into();
+    cases.push(("sort scope", sort_size, "outside"));
+    let mut ints = good;
+    ints["scope"]["ints"] = serde_json::json!([i64::MIN, i64::MAX]);
+    cases.push(("integer scope", ints, "at most 20"));
     for (label, json, needle) in cases {
         let error = rcheck::ir::parse(&json.to_string()).unwrap_err();
         assert!(error.contains(needle), "{label}: {error}");
     }
+}
+
+#[test]
+fn linked_models_round_trip() {
+    for name in ["withdrawal", "raft"] {
+        let path = root().join(format!("fixtures/rcheck/linked/{name}/project.rmodel.json"));
+        let source = rcheck::project::load_source(path.to_str().unwrap()).unwrap();
+        round_trip(name, &rmodel::parse(&source).unwrap());
+    }
+}
+
+#[test]
+fn cli_withholds_verdicts_when_an_adapter_omits_a_transition() {
+    let source = "model Gate
+        enum Flag = Off | On
+        var x: one Flag
+        init { x = Off }
+        behavior open() { update { x = On } }
+        invariant Closed { x = Off }
+        scope steps = 3";
+    let mut ir = rcheck::ir::to_ir(&rmodel::parse(source).unwrap()).unwrap();
+    ir.actions.clear();
+    ir.omitted.push(rcheck::ir::Omitted {
+        name: "open".into(),
+        reason: "unsupported transition".into(),
+    });
+    let path = std::env::temp_dir().join(format!("rcheck-partial-{}.json", std::process::id()));
+    std::fs::write(&path, serde_json::to_vec(&ir).unwrap()).unwrap();
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_rcheck"))
+        .arg(&path)
+        .args(["--question", "Closed"])
+        .output();
+    std::fs::remove_file(path).unwrap();
+
+    let output = output.unwrap();
+    assert_eq!(output.status.code(), Some(2));
+    assert!(output.stdout.is_empty());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("open (unsupported transition)"));
 }

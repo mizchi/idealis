@@ -17,6 +17,8 @@ pub struct Question {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Kind {
+    Temporal,
+    Transition,
     Invariant,
     Reachable,
 }
@@ -64,6 +66,9 @@ pub struct Answer {
     pub depth: Option<usize>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub detail: Option<String>,
+    /// The explicit engine's temporal counterexample, if it found a cycle.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub lasso: Option<serde_json::Value>,
 }
 
 impl Answer {
@@ -116,6 +121,14 @@ pub fn questions(model: &rmodel::Model) -> Vec<Question> {
                 rmodel::CheckKind::Reachable => Kind::Reachable,
             },
         })
+        .chain(model.temporal.iter().map(|check| Question {
+            name: check.name.clone(),
+            kind: Kind::Temporal,
+        }))
+        .chain(model.transitions.iter().map(|check| Question {
+            name: check.name.clone(),
+            kind: Kind::Transition,
+        }))
         .chain(std::iter::once(Question {
             name: rmodel::DECLARATIONS.to_owned(),
             kind: Kind::Invariant,

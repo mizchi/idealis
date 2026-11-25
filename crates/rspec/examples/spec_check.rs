@@ -136,9 +136,13 @@ fn main() {
                 }
             }
         }
-        for problem in rspec::links(&spec, root) {
-            eprintln!("{} {pkl}: {}", problem.check, problem.message);
-            failures += 1;
+        let problems = rspec::links(&spec, root);
+        if !problems.is_empty() {
+            for problem in &problems {
+                eprintln!("{} {pkl}: {}", problem.check, problem.message);
+            }
+            failures += problems.len();
+            continue;
         }
         for rule in &spec.rules {
             for claim in &rule.claims {
@@ -196,9 +200,13 @@ fn design_drift_manifest(root: &Path) -> serde_json::Value {
 }
 
 fn reference(root: &Path, path: &str, name: &str) -> &'static str {
-    use rmodel::reference::Outcome;
     let model = rmodel::parse(&std::fs::read_to_string(root.join(path)).unwrap()).unwrap();
-    let verdict = rmodel::reference::evaluate(&model, 2_000_000)
+    reference_verdict(&model, path, name)
+}
+
+fn reference_verdict(model: &rmodel::Model, path: &str, name: &str) -> &'static str {
+    use rmodel::reference::Outcome;
+    let verdict = rmodel::reference::evaluate(model, 2_000_000)
         .into_iter()
         .find(|verdict| verdict.check == name)
         .unwrap_or_else(|| panic!("{path}: no check {name}"));
@@ -214,6 +222,9 @@ fn reference(root: &Path, path: &str, name: &str) -> &'static str {
 
 fn engines(root: &Path, path: &str, name: &str) -> Vec<(&'static str, String)> {
     let model = rmodel::parse(&std::fs::read_to_string(root.join(path)).unwrap()).unwrap();
+    if model.transitions.iter().any(|check| check.name == name) {
+        return vec![("rmodel", reference_verdict(&model, path, name).to_owned())];
+    }
     let check = model
         .checks
         .iter()

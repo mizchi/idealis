@@ -12,8 +12,8 @@
 //! Every relation is typed and has its multiplicity in every state.
 use crate::Error;
 use crate::syntax::{
-    Arith, Check, CheckKind, Compare, Expr, Formula, INT, Int, IntCompare, Model, Mult, Quantifier,
-    SetOp, Shape,
+    Arith, Check, CheckKind, Compare, Expr, FairnessKind, Formula, INT, Int, IntCompare, Model,
+    Mult, NAT, Quantifier, SetOp, Shape, TemporalCheck, TransitionCheck,
 };
 use std::collections::BTreeMap;
 
@@ -276,6 +276,9 @@ pub fn alloy_supports(model: &Model) -> Result<(), String> {
     if model.scope.ints.is_some() {
         return Err("integer values: Alloy integers wrap at their bit width".into());
     }
+    if model.has_structures() {
+        return Err("sequences and payload variants have no Alloy lowering".into());
+    }
     if !model.records.is_empty() {
         return Err("records: no Alloy lowering of value semantics".into());
     }
@@ -288,6 +291,7 @@ const VALUES: &str = "alloy_supports rejects models with values";
 fn is_pair(model: &Model, expression: &Expr, scope: &Scope) -> bool {
     match expression {
         Expr::None => false,
+        Expr::At(_, expr) => is_pair(model, expr, scope),
         Expr::Name(name) => {
             !scope.contains_key(name)
                 && matches!(
@@ -300,7 +304,16 @@ fn is_pair(model: &Model, expression: &Expr, scope: &Scope) -> bool {
             is_pair(model, left, scope) && is_pair(model, right, scope)
         }
         Expr::Binary(_, left, right) => is_pair(model, left, scope) || is_pair(model, right, scope),
-        Expr::Literal(_) | Expr::Count(_) | Expr::Arith(..) | Expr::Record(..) => false,
+        Expr::Literal(_)
+        | Expr::Count(_)
+        | Expr::Arith(..)
+        | Expr::Record(..)
+        | Expr::Sequence(..)
+        | Expr::Append(..)
+        | Expr::Length(_)
+        | Expr::Index(..)
+        | Expr::Variant(..)
+        | Expr::Payload(..) => false,
     }
 }
 
@@ -333,6 +346,7 @@ fn alloy_as(model: &Model, expression: &Expr, scope: &Scope, pair: bool) -> Stri
 
 fn alloy_expression(model: &Model, expression: &Expr, scope: &Scope) -> String {
     match expression {
+        Expr::At(..) => unreachable!("Alloy lowering only emits state properties"),
         Expr::None => "none".into(),
         Expr::Name(name) => {
             if let Some(bound) = scope.get(name) {
@@ -364,7 +378,16 @@ fn alloy_expression(model: &Model, expression: &Expr, scope: &Scope) -> String {
                 alloy_as(model, right, scope, pair)
             )
         }
-        Expr::Literal(_) | Expr::Count(_) | Expr::Arith(..) | Expr::Record(..) => {
+        Expr::Literal(_)
+        | Expr::Count(_)
+        | Expr::Arith(..)
+        | Expr::Record(..)
+        | Expr::Sequence(..)
+        | Expr::Append(..)
+        | Expr::Length(_)
+        | Expr::Index(..)
+        | Expr::Variant(..)
+        | Expr::Payload(..) => {
             unreachable!("{VALUES}")
         }
     }
@@ -404,6 +427,7 @@ fn alloy_formula(model: &Model, formula: &Formula, scope: &Scope) -> String {
         }
         Formula::Mult(mult, counted) => format!("({} {})", alloy_mult(*mult), expression(counted)),
         Formula::Empty(counted) => format!("(no {})", expression(counted)),
+        Formula::HasTag(..) => unreachable!("{VALUES}"),
         Formula::Not(inner) => format!("(not {})", alloy_formula(model, inner, scope)),
         Formula::And(parts) if parts.is_empty() => "(no none)".into(),
         Formula::And(parts) => format!(
@@ -439,12 +463,23 @@ fn alloy_formula(model: &Model, formula: &Formula, scope: &Scope) -> String {
     }
 }
 
+/// TLC's integer literals and arithmetic must fit the portable signed range.
+pub fn tla_supports(model: &Model) -> Result<(), String> {
+    let limit = i64::from(i32::MAX);
+    crate::numeric::validate(model, -limit..=limit).map_err(|error| error.message)
+}
+
 /// A TLA+ module and TLC configuration checking one check of the model.
 pub fn to_tla(model: &Model, check: &str) -> Result<(String, String), Error> {
+    tla_supports(model).map_err(Error::kind)?;
     let target = if check == DECLARATIONS {
         Target::Declarations
     } else if check == SCOPE {
         Target::Scope
+    } else if let Some(property) = model.transitions.iter().find(|p| p.name == check) {
+        Target::Transition(property)
+    } else if let Some(obligation) = model.temporal.iter().find(|p| p.name == check) {
+        Target::Temporal(obligation)
     } else {
         Target::Check(
             model
@@ -454,22 +489,31 @@ pub fn to_tla(model: &Model, check: &str) -> Result<(String, String), Error> {
                 .ok_or_else(|| Error::kind(format!("no check {check}")))?,
         )
     };
-    let mut emitter = Tla { model, fresh: 0 };
-    Ok((
-        emitter.module(target),
-        format!("INIT Init\nNEXT Next\nINVARIANT {}\n", alloy_label(check)),
-    ))
+    let config = if matches!(target, Target::Temporal(_) | Target::Transition(_)) {
+        format!("SPECIFICATION Spec\nPROPERTY {}\n", alloy_label(check))
+    } else {
+        format!("INIT Init\nNEXT Next\nINVARIANT {}\n", alloy_label(check))
+    };
+    let mut emitter = Tla {
+        model,
+        fresh: 0,
+        after: false,
+    };
+    Ok((emitter.module(target), config))
 }
 
 enum Target<'a> {
     Declarations,
     Scope,
     Check(&'a Check),
+    Temporal(&'a TemporalCheck),
+    Transition(&'a TransitionCheck),
 }
 
 struct Tla<'a> {
     model: &'a Model,
     fresh: usize,
+    after: bool,
 }
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Arity {
@@ -481,14 +525,23 @@ impl Tla<'_> {
     fn module(&mut self, check: Target<'_>) -> String {
         let model = self.model;
         let mut out = format!(
-            "---- MODULE {} ----\nEXTENDS Integers, FiniteSets\n",
-            model.name
+            "---- MODULE {} ----\nEXTENDS Integers, FiniteSets{}\n",
+            model.name,
+            if model.sequences.is_empty() {
+                ""
+            } else {
+                ", Sequences"
+            }
         );
-        let variables: Vec<String> = model
+        let mut variables: Vec<String> = model
             .relations
             .iter()
             .map(|relation| format!("r_{}", relation.name))
             .collect();
+        let observes_step = matches!(check, Target::Transition(_));
+        if observes_step {
+            variables.push("rmodel_tick".into());
+        }
         out.push_str(&format!("VARIABLES {}\n", variables.join(", ")));
         for sig in &model.sigs {
             let atoms: Vec<String> = (0..model.scope.sizes[sig])
@@ -514,14 +567,42 @@ impl Tla<'_> {
         // them, which InScope detects.
         if let Some((low, high)) = model.scope.ints {
             out.push_str(&format!("s_{INT} == {low}..{high}\n"));
+            if model.uses_nat() {
+                out.push_str(&format!("s_{NAT} == {}..{high}\n", low.max(0)));
+            }
         }
-        for record in &model.records {
-            let fields: Vec<String> = record
-                .fields
-                .iter()
-                .map(|(field, sort)| format!("f_{field} : s_{sort}"))
-                .collect();
-            out.push_str(&format!("s_{} == [{}]\n", record.name, fields.join(", ")));
+        use crate::structured::ValueType;
+        for ty in model.value_order().expect("checked value types") {
+            let domain = match ty {
+                ValueType::Record(record) => {
+                    let fields = record
+                        .fields
+                        .iter()
+                        .map(|(field, sort)| format!("f_{field} : s_{sort}"))
+                        .collect::<Vec<_>>()
+                        .join(", ");
+                    format!("[{fields}]")
+                }
+                ValueType::Sequence(seq) => (0..=seq.max)
+                    .map(|len| {
+                        let domains = vec![format!("s_{}", seq.element); len];
+                        self.tuples(&domains)
+                    })
+                    .collect::<Vec<_>>()
+                    .join(" \\cup "),
+                ValueType::Variant(variant) => variant
+                    .cases
+                    .iter()
+                    .map(|case| {
+                        self.tagged(
+                            &case.tag,
+                            case.payload.as_ref().map(|sort| format!("s_{sort}")),
+                        )
+                    })
+                    .collect::<Vec<_>>()
+                    .join(" \\cup "),
+            };
+            out.push_str(&format!("s_{} == {domain}\n", ty.name()));
         }
         for relation in &model.relations {
             let (domain, shape) = match &relation.shape {
@@ -569,8 +650,37 @@ impl Tla<'_> {
         let mut init: Vec<String> = model
             .relations
             .iter()
-            .map(|relation| format!("r_{0} \\in SUBSET D_{0}", relation.name))
+            .map(|relation| {
+                if let Shape::Unary {
+                    sig,
+                    mult: Mult::One | Mult::Lone,
+                } = &relation.shape
+                    && model.has_structures()
+                    && model.is_value(sig)
+                {
+                    let empty = if matches!(
+                        relation.shape,
+                        Shape::Unary {
+                            mult: Mult::Lone,
+                            ..
+                        }
+                    ) {
+                        " \\cup {{}}"
+                    } else {
+                        ""
+                    };
+                    format!(
+                        "r_{0} \\in ({{{{v}} : v \\in D_{0}}}{empty})",
+                        relation.name
+                    )
+                } else {
+                    format!("r_{0} \\in SUBSET D_{0}", relation.name)
+                }
+            })
             .collect();
+        if observes_step {
+            init.push("rmodel_tick = FALSE".into());
+        }
         init.extend(
             model
                 .relations
@@ -589,6 +699,10 @@ impl Tla<'_> {
                 .map(|(param, _)| (param.clone(), format!("{{p_{param}}}")))
                 .collect();
             let mut body = Vec::new();
+            // Make an explicitly enabled no-op distinguishable from an implicit wait.
+            if observes_step {
+                body.push("rmodel_tick' = ~rmodel_tick".into());
+            }
             for (var, value) in &action.assignments {
                 body.push(format!("r_{var}' = {}", self.expression(value, &scope).0));
             }
@@ -672,6 +786,44 @@ impl Tla<'_> {
             steps.join(" \\/ "),
             variables.join(", ")
         ));
+        if let Target::Temporal(obligation) = &check {
+            let state = format!("<<{}>>", variables.join(", "));
+            // Keep Init opaque to the compiler's SPECIFICATION splitter.
+            let mut spec = format!("(Init \\/ FALSE) /\\ [][Next]_{state}");
+            for fairness in obligation.fairness.as_ref().unwrap_or(&model.fairness) {
+                let action = model
+                    .actions
+                    .iter()
+                    .find(|a| a.name == fairness.action)
+                    .expect("checked action");
+                let args = action
+                    .params
+                    .iter()
+                    .map(|(param, _)| format!("p_{param}"))
+                    .collect::<Vec<_>>();
+                let mut choice = if args.is_empty() {
+                    format!("a_{}", action.name)
+                } else {
+                    format!("a_{}({})", action.name, args.join(", "))
+                };
+                for (param, sort) in action.params.iter().rev() {
+                    choice = format!("(\\E p_{param} \\in s_{sort} : {choice})");
+                }
+                let fair = match fairness.kind {
+                    FairnessKind::Weak => "WF",
+                    FairnessKind::Strong => "SF",
+                };
+                out.push_str(&format!("Fair_{} == {valid} /\\ {choice}\n", action.name));
+                spec.push_str(&format!(" /\\ {fair}_{state}(Fair_{})", action.name));
+            }
+            out.push_str(&format!("Spec == {spec}\n"));
+        }
+        if observes_step {
+            out.push_str(&format!(
+                "Spec == (Init \\/ FALSE) /\\ [][Next]_<<{}>>\n",
+                variables.join(", ")
+            ));
+        }
         let (name, body) = match check {
             Target::Declarations if model.has_values() => {
                 (DECLARATIONS, "(InScope => TypeOK)".to_owned())
@@ -679,6 +831,30 @@ impl Tla<'_> {
             Target::Declarations => (DECLARATIONS, "TypeOK".to_owned()),
             Target::Scope if model.has_values() => (SCOPE, "InScope".to_owned()),
             Target::Scope => (SCOPE, "TRUE".to_owned()),
+            Target::Transition(check) => {
+                let state = variables.join(", ");
+                let formula = self.formula(&check.formula, &empty);
+                (
+                    check.name.as_str(),
+                    format!("[] [(({valid}) /\\ ({valid})' => {formula})]_<<{state}>>"),
+                )
+            }
+            Target::Temporal(check) => {
+                let scope = check
+                    .params
+                    .iter()
+                    .map(|(param, _)| (param.clone(), format!("{{p_{param}}}")))
+                    .collect();
+                let mut body = format!("<>({})", self.formula(&check.formula, &scope));
+                if let Some(trigger) = &check.trigger {
+                    let condition = self.formula(trigger, &scope);
+                    body = format!("[](({condition}) => {body})");
+                }
+                for (param, sort) in check.params.iter().rev() {
+                    body = format!("(\\A p_{param} \\in s_{sort} : {body})");
+                }
+                (check.name.as_str(), body)
+            }
             Target::Check(check) => {
                 let formula = self.formula(&check.formula, &empty);
                 let body = match check.kind {
@@ -695,12 +871,43 @@ impl Tla<'_> {
         self.fresh += 1;
         self.fresh
     }
+    fn tuples(&mut self, domains: &[String]) -> String {
+        if domains.is_empty() {
+            return "{<<>>}".into();
+        }
+        let id = self.next();
+        let items: Vec<_> = (0..domains.len()).map(|i| format!("q{id}_{i}")).collect();
+        let binds = items
+            .iter()
+            .zip(domains)
+            .map(|(name, domain)| format!("{name} \\in {domain}"))
+            .collect::<Vec<_>>()
+            .join(", ");
+        format!("{{<<{}>> : {binds}}}", items.join(", "))
+    }
+
+    fn tagged(&mut self, tag: &str, payload: Option<String>) -> String {
+        match payload {
+            Some(set) => {
+                let id = self.next();
+                format!("{{[tag |-> \"{tag}\", value |-> v{id}] : v{id} \\in {set}}}")
+            }
+            None => format!("{{[tag |-> \"{tag}\", value |-> \"\"]}}"),
+        }
+    }
+
     fn expression(
         &mut self,
         expression: &Expr,
         scope: &BTreeMap<String, String>,
     ) -> (String, Arity) {
         match expression {
+            Expr::At(phase, expr) => {
+                let after = std::mem::replace(&mut self.after, *phase == crate::Phase::After);
+                let lowered = self.expression(expr, scope);
+                self.after = after;
+                lowered
+            }
             Expr::None => ("{}".into(), Arity::Any),
             Expr::Name(name) => {
                 if let Some(bound) = scope.get(name) {
@@ -710,7 +917,8 @@ impl Tla<'_> {
                         Shape::Unary { .. } => Arity::Set,
                         Shape::Binary { .. } => Arity::Pair,
                     };
-                    (format!("r_{name}"), arity)
+                    let phase = if self.after && relation.var { "'" } else { "" };
+                    (format!("r_{name}{phase}"), arity)
                 } else if let Some(enumeration) = self.model.member(name) {
                     (format!("{{\"{enumeration}.{name}\"}}"), Arity::Set)
                 } else {
@@ -734,6 +942,52 @@ impl Tla<'_> {
                 };
                 (
                     pairwise(&format!("x{id} {symbol} y{id}"), &left, &right, id),
+                    Arity::Set,
+                )
+            }
+            Expr::Sequence(_, items) => {
+                let domains = items
+                    .iter()
+                    .map(|v| self.expression(v, scope).0)
+                    .collect::<Vec<_>>();
+                (self.tuples(&domains), Arity::Set)
+            }
+            Expr::Append(seq, item) => {
+                let id = self.next();
+                let seq = self.expression(seq, scope).0;
+                let item = self.expression(item, scope).0;
+                (
+                    pairwise(&format!("Append(x{id}, y{id})"), &seq, &item, id),
+                    Arity::Set,
+                )
+            }
+            Expr::Length(seq) => {
+                let id = self.next();
+                let set = self.expression(seq, scope).0;
+                (format!("{{Len(v{id}) : v{id} \\in {set}}}"), Arity::Set)
+            }
+            Expr::Index(seq, index) => {
+                let id = self.next();
+                let seq = self.expression(seq, scope).0;
+                let index = self.expression(index, scope).0;
+                (
+                    format!(
+                        "UNION {{UNION {{IF 0 <= i{id} /\\ i{id} < Len(v{id}) THEN {{v{id}[i{id} + 1]}} ELSE {{}} : i{id} \\in {index}}} : v{id} \\in {seq}}}"
+                    ),
+                    Arity::Set,
+                )
+            }
+            Expr::Variant(tag, payload) => {
+                let set = payload.as_ref().map(|expr| self.expression(expr, scope).0);
+                (self.tagged(tag, set), Arity::Set)
+            }
+            Expr::Payload(expr, tag) => {
+                let id = self.next();
+                let set = self.expression(expr, scope).0;
+                (
+                    format!(
+                        "{{v{id}.value : v{id} \\in {{w{id} \\in {set} : w{id}.tag = \"{tag}\"}}}}"
+                    ),
                     Arity::Set,
                 )
             }
@@ -860,6 +1114,11 @@ impl Tla<'_> {
                     Mult::Lone => format!("(Cardinality({set}) =< 1)"),
                     Mult::Set => "TRUE".into(),
                 }
+            }
+            Formula::HasTag(expr, tag) => {
+                let id = self.next();
+                let set = self.expression(expr, scope).0;
+                format!("(\\E v{id} \\in {set} : v{id}.tag = \"{tag}\")")
             }
             Formula::Empty(counted) => format!("({} = {{}})", self.expression(counted, scope).0),
             Formula::Not(inner) => format!("(~{})", self.formula(inner, scope)),

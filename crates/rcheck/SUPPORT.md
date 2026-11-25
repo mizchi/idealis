@@ -23,6 +23,12 @@
 - [x] adapterの差分テスト（0108）: roracleで、rmodelの文の判定を基準に、adapterのIRの判定を照らす。unsupported・omittedはunknown、拒まれたIRはerrorで、一致に数えない。
 - [x] `*.rmodel.json` のファイル一覧を一つの rmodel として型検査し、チェッカーと生成器で共有する。出金と単一任期の Raft 選挙で確認する。
 - [x] `generate <model> pbt-cases|pbt-typescript` は完全探索できる有限範囲から、隣接整数、一遷移、隣接入力後の一操作で受付が変わる組を導出する。再生用 JSON と fast-check のプロパティを生成する。探索未完了・不正・境界例なしはエラー。[CLI のテスト](tests/linked_projects.rs) · [TypeScript の正常・故障対照](../../tests/rcheck/withdrawal.pbt.test.ts)
+- [x] `generate <model> pbt-go` は `generate <model> go` の interface を実装する関数を受け取り、同じ境界例を Go の fuzz seed として再生する。[Go の出金実装と故障対照](../../tests/rcheck/go/withdrawal/withdrawal_test.go)
+- [x] CLI は `omitted` を含む IR の検査を拒否する。どの遷移や前提を落としたかの情報は診断に出す。[欠落した遷移の回帰テスト](tests/ir.rs)。
+- [x] `Validator` と `rcheck validate` は入力値、設定、初期状態、現在のガード、遷移の範囲と不変条件を実行前に確認する。Rust の `dispatch` は実装の応答も照合し、不一致でそのセッションを無効にする。[処理前の検査](tests/validation.rs)。
+- [x] 有限列と値付き variant を IR、状態 JSON、生成型へ渡す。検証と PBT は列の順序を維持する。[回帰テスト](tests/structured_temporal.rs)。
+- [x] rtlc で `eventually` と `leads_to` を検査する。時相の反例は周期の開始点を持ち、空や予算切れは合格にしない。参照評価器と SAT は時相の問いに対応しない。[回帰テスト](tests/structured_temporal.rs)。
+- [x] 参照評価器と rtlc は `transition` を検査し、処理前の validator も同じ性質を照合する。SAT は対象外を返す。[遷移の回帰テスト](tests/transition.rs)。
 
 ## 照合
 

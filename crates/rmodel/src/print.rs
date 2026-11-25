@@ -151,7 +151,17 @@ impl QuintLike<'_> {
             Expr::Binary(SetOp::Product, _, _) => true,
             Expr::Binary(SetOp::Join, left, right) => self.is_pair(left) && self.is_pair(right),
             Expr::Binary(_, left, right) => self.is_pair(left) || self.is_pair(right),
-            Expr::Literal(_) | Expr::Count(_) | Expr::Arith(..) | Expr::Record(..) => false,
+            Expr::At(_, expr) => self.is_pair(expr),
+            Expr::Literal(_)
+            | Expr::Count(_)
+            | Expr::Arith(..)
+            | Expr::Record(..)
+            | Expr::Sequence(..)
+            | Expr::Append(..)
+            | Expr::Length(_)
+            | Expr::Index(..)
+            | Expr::Variant(..)
+            | Expr::Payload(..) => false,
         }
     }
     /// A set-valued expression; a single atom is written `Set(x)`.
@@ -166,6 +176,14 @@ impl QuintLike<'_> {
             Expr::None => "Set()".into(),
             Expr::Name(name) => name.clone(),
             // Values (plan 0103), written as in Quint.
+            Expr::At(phase, expr) => {
+                let method = if *phase == crate::Phase::After {
+                    "after"
+                } else {
+                    "before"
+                };
+                format!("{method}({})", self.expression(expr))
+            }
             Expr::Literal(value) => value.to_string(),
             Expr::Count(counted) => format!("{}.size()", self.set(counted)),
             Expr::Arith(operator, left, right) => {
@@ -180,6 +198,30 @@ impl QuintLike<'_> {
                     self.expression(right)
                 )
             }
+            Expr::Sequence(_, values) => format!(
+                "List({})",
+                values
+                    .iter()
+                    .map(|v| self.expression(v))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
+            Expr::Append(seq, value) => format!(
+                "{}.append({})",
+                self.expression(seq),
+                self.expression(value)
+            ),
+            Expr::Length(seq) => format!("{}.length()", self.expression(seq)),
+            Expr::Index(seq, index) => {
+                format!("at({}, {})", self.expression(seq), self.expression(index))
+            }
+            Expr::Variant(tag, payload) => format!(
+                "{tag}({})",
+                payload
+                    .as_ref()
+                    .map_or(String::new(), |v| self.expression(v))
+            ),
+            Expr::Payload(value, tag) => format!("payload({}, {tag})", self.expression(value)),
             Expr::Record(name, values) => {
                 let record = self.model.record(name).expect("a declared record");
                 let fields: Vec<String> = record
@@ -254,6 +296,7 @@ impl QuintLike<'_> {
                     Mult::Set => "true".into(),
                 }
             }
+            Formula::HasTag(value, tag) => format!("is({}, {tag})", self.expression(value)),
             Formula::Empty(counted) => format!("{}.isEmpty()", self.set(counted)),
             Formula::Not(inner) => format!("not({})", self.formula(inner)),
             Formula::And(parts) if parts.is_empty() => "true".into(),

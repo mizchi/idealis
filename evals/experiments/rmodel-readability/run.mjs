@@ -4,17 +4,24 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { Jev, JevError } from "jev-lint/client";
 
-const fixture = "fixtures/rmodel-readability/cases.json";
+const [command, dir, study = "behavior"] = process.argv.slice(2);
+assert.ok(
+  dir &&
+    ["run", "replay"].includes(command) &&
+    ["behavior", "transition"].includes(study),
+  "usage: run.mjs run|replay <directory> [behavior|transition]",
+);
+
+const transition = study === "transition";
+const fixture = transition
+  ? "fixtures/rmodel-readability/transition-cases.json"
+  : "fixtures/rmodel-readability/cases.json";
 const rcheck = "crates/rcheck/target/release/rcheck";
 const model = "jev-1.14.0";
 const repetitions = 3;
-const variants = ["action", "behavior"];
+const variants = transition ? ["prime", "explicit"] : ["action", "behavior"];
+const [control, trialVariant] = variants;
 const letters = ["A", "B", "C", "D"];
-const [command, dir] = process.argv.slice(2);
-assert.ok(
-  dir && ["run", "replay"].includes(command),
-  "usage: run.mjs run|replay <directory>",
-);
 
 function candidate(source) {
   const updated = source.replace(
@@ -43,6 +50,17 @@ function candidate(source) {
   assert.notEqual(source, updated);
   assert.doesNotMatch(updated, /^action /m);
   return updated;
+}
+
+function prime(source) {
+  const explicit = source.replace(/^transition [\s\S]+$/m, (property) =>
+    property
+      .replace(/\bbefore\((\w+)\)/g, "$1")
+      .replace(/\bafter\((\w+)\)/g, "$1'"),
+  );
+  assert.notEqual(source, explicit);
+  assert.doesNotMatch(explicit, /\b(?:before|after)\(/);
+  return explicit;
 }
 
 function check(...args) {
@@ -76,8 +94,8 @@ function questionOptions(question, trial) {
 function score(cases, runs) {
   const results = cases.map((entry) => ({
     id: entry.id,
-    action: 0,
-    behavior: 0,
+    [control]: 0,
+    [trialVariant]: 0,
   }));
   const order = schedule(cases);
   assert.deepEqual(
@@ -105,14 +123,14 @@ function score(cases, runs) {
   }
   const total = results.reduce(
     (sum, row) => ({
-      action: sum.action + row.action,
-      behavior: sum.behavior + row.behavior,
+      [control]: sum[control] + row[control],
+      [trialVariant]: sum[trialVariant] + row[trialVariant],
     }),
-    { action: 0, behavior: 0 },
+    { [control]: 0, [trialVariant]: 0 },
   );
   const improved =
-    total.behavior > total.action &&
-    results.every((row) => row.behavior >= row.action);
+    total[trialVariant] > total[control] &&
+    results.every((row) => row[trialVariant] >= row[control]);
   return {
     status: "measured",
     perVariant: (runs.length / 2) * 3,
@@ -141,16 +159,21 @@ if (command === "replay") {
       assert.equal(new Set(question.options).size, letters.length);
       assert.ok(question.options[question.correct] !== undefined, entry.id);
     }
-    const action = readFileSync(entry.baseline, "utf8");
-    const behavior = candidate(action);
-    sources.set(entry.id, { action, behavior });
-    const newPath = join(dir, `${entry.id}.behavior.model`);
-    writeFileSync(newPath, behavior, { flag: "wx" });
+    const source = readFileSync(entry.baseline, "utf8");
+    const baseline = transition ? prime(source) : source;
+    const changed = transition ? source : candidate(source);
+    sources.set(entry.id, { [control]: baseline, [trialVariant]: changed });
+    const baselinePath = transition
+      ? join(dir, `${entry.id}.${control}.model`)
+      : entry.baseline;
+    if (transition) writeFileSync(baselinePath, baseline, { flag: "wx" });
+    const newPath = join(dir, `${entry.id}.${trialVariant}.model`);
+    writeFileSync(newPath, changed, { flag: "wx" });
     assert.deepEqual(
       check("generate", newPath, "ir"),
-      check("generate", entry.baseline, "ir"),
+      check("generate", baselinePath, "ir"),
     );
-    const expected = check(entry.baseline, "--checker", "reference");
+    const expected = check(baselinePath, "--checker", "reference");
     assert.ok(
       expected.length &&
         expected.every(
@@ -166,15 +189,27 @@ if (command === "replay") {
     semantics.push({ id: entry.id, checks: expected.length, irMatches: true });
   }
   write("semantics.json", semantics);
-  const client = new Jev({
-    model,
-    retries: 0,
-    rateLimitRetries: 0,
-    timeoutMs: 30_000,
-    budget: { maxRequests: 18, maxUsd: 0.05 },
-  });
+  const apiKey =
+    process.env.TYPESAFE_API_KEY ??
+    process.env.TYPESAFEAI_API_KEY ??
+    process.env.TYPESAFE_API_KEy;
+  const client =
+    transition && !apiKey
+      ? null
+      : new Jev({
+          model,
+          ...(transition ? { apiKey } : {}),
+          retries: 0,
+          rateLimitRetries: 0,
+          timeoutMs: 30_000,
+          budget: { maxRequests: 18, maxUsd: 0.05 },
+        });
   const responses = [];
   for (const task of schedule(cases)) {
+    if (!client) {
+      responses.push({ ...task, error: "missing-typesafe-api-key" });
+      continue;
+    }
     const entry = cases.find((c) => c.id === task.id);
     const source = sources
       .get(task.id)

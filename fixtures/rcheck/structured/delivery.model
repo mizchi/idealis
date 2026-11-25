@@ -1,0 +1,12 @@
+model Delivery
+enum Status = Waiting | Delivered
+var status: one Status
+init { status = Waiting }
+behavior deliver() {
+  guard { status = Waiting }
+  update { status = Delivered }
+}
+reachable CanDeliver { status = Delivered }
+fairness weak deliver
+eventually Delivers { status = Delivered }
+scope steps = 3

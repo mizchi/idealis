@@ -15,7 +15,9 @@
 //!   multiplicity would;
 //! - the configuration and the state are objects of their relations, and a
 //!   command is `{"kind": action, param: element, ...}`.
-use crate::syntax::{BOOL, INT, Model, Mult, Record, Shape};
+mod structured;
+
+use crate::syntax::{BOOL, INT, Model, Mult, NAT, Record, Shape};
 
 /// What a sort is, for the bindings.
 enum Kind<'a> {
@@ -23,16 +25,28 @@ enum Kind<'a> {
     Enum(&'a [String]),
     Bool,
     Int,
+    Nat,
     Sum(&'a [String]),
     Record(&'a Record),
+    Sequence(&'a crate::Sequence),
+    Variant(&'a crate::Variant),
 }
 
 fn kind<'a>(model: &'a Model, sort: &str) -> Kind<'a> {
     if sort == INT {
         return Kind::Int;
     }
+    if sort == NAT {
+        return Kind::Nat;
+    }
     if sort == BOOL {
         return Kind::Bool;
+    }
+    if let Some(seq) = model.sequence(sort) {
+        return Kind::Sequence(seq);
+    }
+    if let Some(variant) = model.variant(sort) {
+        return Kind::Variant(variant);
     }
     if let Some(record) = model.record(sort) {
         return Kind::Record(record);
@@ -56,7 +70,9 @@ pub fn keys(model: &Model, sort: &str) -> Vec<String> {
             .iter()
             .flat_map(|child| keys(model, child))
             .collect(),
-        Kind::Int | Kind::Record(_) => unreachable!("values are not keys"),
+        Kind::Int | Kind::Nat | Kind::Record(_) | Kind::Sequence(_) | Kind::Variant(_) => {
+            unreachable!("values are not keys")
+        }
     }
 }
 
@@ -112,12 +128,20 @@ pub fn json_schema(model: &Model) -> String {
     sorts.extend(model.enums.iter().map(|(name, _)| name.as_str()));
     sorts.extend(model.sums.iter().map(|(name, _)| name.as_str()));
     sorts.extend(model.records.iter().map(|record| record.name.as_str()));
+    sorts.extend(model.sequences.iter().map(|seq| seq.name.as_str()));
+    sorts.extend(model.variants.iter().map(|v| v.name.as_str()));
     if model.scope.ints.is_some() {
         sorts.push(INT);
+    }
+    if model.uses_nat() {
+        sorts.push(NAT);
     }
     for sort in sorts {
         let schema = match kind(model, sort) {
             Kind::Int => "{\"type\":\"integer\"}".to_owned(),
+            Kind::Nat => {
+                r#"{"type":"integer","minimum":0,"maximum":9223372036854775807}"#.to_owned()
+            }
             Kind::Bool => "{\"type\":\"boolean\"}".to_owned(),
             Kind::Sig(_) | Kind::Enum(_) => {
                 let names: Vec<String> = keys(model, sort).iter().map(|key| quote(key)).collect();
@@ -126,6 +150,30 @@ pub fn json_schema(model: &Model) -> String {
             Kind::Sum(children) => {
                 let options: Vec<String> = children.iter().map(|child| element(child)).collect();
                 format!("{{\"anyOf\":[{}]}}", options.join(","))
+            }
+            Kind::Sequence(seq) => object(vec![(
+                "$sequence".into(),
+                format!(
+                    "{{\"type\":\"array\",\"items\":{},\"maxItems\":{}}}",
+                    element(&seq.element),
+                    seq.max
+                ),
+            )]),
+            Kind::Variant(v) => {
+                let cases = v
+                    .cases
+                    .iter()
+                    .map(|case| {
+                        let mut fields =
+                            vec![("tag".into(), format!("{{\"const\":{}}}", quote(&case.tag)))];
+                        if let Some(sort) = &case.payload {
+                            fields.push(("value".into(), element(sort)));
+                        }
+                        object(fields)
+                    })
+                    .collect::<Vec<_>>()
+                    .join(",");
+                format!("{{\"oneOf\":[{cases}]}}")
             }
             Kind::Record(record) => object(
                 record
@@ -192,6 +240,7 @@ fn indent(text: &str, width: usize) -> String {
 fn rust_type(sort: &str) -> String {
     match sort {
         INT => "i64".into(),
+        NAT => "u64".into(),
         BOOL => "bool".into(),
         other => other.into(),
     }
@@ -239,6 +288,7 @@ pub fn rust(model: &Model, source: &str) -> String {
         format!("r####\"{source}\"####")
     };
     out.push_str(&format!("pub const MODEL: &str = {literal};\n\n"));
+    let definitions_start = out.len();
     let derive = "#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]";
     out.push_str(
         "fn to_Int(x: &i64) -> Value {\n    Value::from(*x)\n}\n\
@@ -247,6 +297,12 @@ pub fn rust(model: &Model, source: &str) -> String {
          fn from_Bool(v: &Value) -> Result<bool, String> {\n    v.as_bool().ok_or_else(|| format!(\"not a boolean: {v}\"))\n}\n\
          fn key_Bool(k: &str) -> Result<bool, String> {\n    match k {\n        \"true\" => Ok(true),\n        \"false\" => Ok(false),\n        _ => Err(format!(\"not a Bool key: {k}\")),\n    }\n}\n\n",
     );
+    if model.uses_nat() {
+        out.push_str(
+            "fn to_Nat(x: &u64) -> Value { Value::from(*x) }\n\
+             fn from_Nat(v: &Value) -> Result<u64, String> {\n    v.as_i64().and_then(|x| u64::try_from(x).ok()).ok_or_else(|| format!(\"not a Nat: {v}\"))\n}\n\n",
+        );
+    }
     for sig in &model.sigs {
         if let Some(definition) = model.entity_definitions.get(sig) {
             out.push_str(&format!("/// {definition}\n"));
@@ -318,7 +374,13 @@ pub fn rust(model: &Model, source: &str) -> String {
             from.join("\n")
         ));
     }
+    structured::rust(model, &mut out);
     for record in &model.records {
+        let derive = if model.has_structures() {
+            "#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]"
+        } else {
+            derive
+        };
         let fields: Vec<String> = record
             .fields
             .iter()
@@ -523,6 +585,12 @@ pub fn rust(model: &Model, source: &str) -> String {
         methods.join("\n"),
         calls.join("\n")
     ));
+    // A domain result type can be named Result. Qualify the generated
+    // return types in that case, leaving the embedded source intact.
+    if model.variant("Result").is_some() {
+        let qualified = out[definitions_start..].replace(" -> Result<", " -> std::result::Result<");
+        out.replace_range(definitions_start.., &qualified);
+    }
     out
 }
 
@@ -594,6 +662,12 @@ pub fn typescript(model: &Model) -> String {
         "function from_Bool(v: unknown): boolean {\n  if (typeof v !== \"boolean\") throw new Error(`not a boolean: ${JSON.stringify(v)}`);\n  return v;\n}\nconst to_Bool = (x: boolean): unknown => x;\nconst key_Bool = (k: string): boolean => {\n  if (k !== \"true\" && k !== \"false\") throw new Error(`not a Bool key: ${k}`);\n  return k === \"true\";\n};\n\
          function from_Int(v: unknown): number {\n  if (typeof v !== \"number\" || !Number.isInteger(v)) throw new Error(`not an integer: ${JSON.stringify(v)}`);\n  return v;\n}\nconst to_Int = (x: number): unknown => x;\n",
     );
+    if model.uses_nat() {
+        out.push_str("export type Nat = number & { readonly __sort: \"Nat\" };\n");
+        converters.push_str(
+            "export function decodeNat(value: unknown): Nat {\n  if (typeof value !== \"number\" || !Number.isSafeInteger(value) || value < 0) throw new Error(`not a Nat: ${JSON.stringify(value)}`);\n  return value as Nat;\n}\nconst from_Nat = decodeNat;\nconst to_Nat = (value: Nat): unknown => value;\n",
+        );
+    }
     for (name, children) in &model.sums {
         out.push_str(&format!(
             "export type {name} = {};\nexport const {name}s: readonly {name}[] = [{}];\n",
@@ -608,6 +682,7 @@ pub fn typescript(model: &Model) -> String {
             "function from_{name}(v: unknown): {name} {{\n  if (!({name}s as readonly unknown[]).includes(v)) throw new Error(`not a {name}: ${{JSON.stringify(v)}}`);\n  return v as {name};\n}}\nconst to_{name} = (x: {name}): unknown => x;\n"
         ));
     }
+    structured::typescript(model, &mut out, &mut converters);
     for record in &model.records {
         let fields: Vec<String> = record
             .fields
@@ -782,6 +857,7 @@ fn capital(name: &str) -> String {
 fn go_type(sort: &str) -> String {
     match sort {
         INT => "int64".into(),
+        NAT => "uint64".into(),
         BOOL => "bool".into(),
         other => other.into(),
     }
@@ -974,6 +1050,12 @@ fn go_text(model: &Model, package: &str) -> String {
          func allBool() []bool {{ return []bool{{false, true}} }}\n\n",
         model.name
     );
+    if model.uses_nat() {
+        out.push_str(
+            "func encodeNat(x uint64) any { return x }\n\n\
+             func decodeNat(raw json.RawMessage) (uint64, error) {\n\tvar x int64\n\tif isNull(raw) || json.Unmarshal(raw, &x) != nil || x < 0 {\n\t\treturn 0, fmt.Errorf(\"not a Nat: %s\", raw)\n\t}\n\treturn uint64(x), nil\n}\n\n",
+        );
+    }
     // Atom sorts share key, decodeKey, encode, decode and all.
     let atom_codec = |name: &str| {
         format!(
@@ -1006,7 +1088,7 @@ fn go_text(model: &Model, package: &str) -> String {
             "// {name} is an enum.\ntype {name} string\n\nconst (\n{}\n)\n\n\
              func key{name}(x {name}) string {{ return string(x) }}\n\n\
              func decode{name}Key(s string) ({name}, error) {{\n\tfor _, x := range all{name}() {{\n\t\tif string(x) == s {{\n\t\t\treturn x, nil\n\t\t}}\n\t}}\n\treturn \"\", fmt.Errorf(\"not a {name}: %q\", s)\n}}\n\n\
-             func all{name}() []{name} {{ return []{name}{{{}}} }}\n\n{}",
+             func all{name}() []{name} {{\n\treturn []{name}{{{}}}\n}}\n\n{}",
             constants.join("\n"),
             all.join(", "),
             atom_codec(name)
@@ -1043,6 +1125,7 @@ fn go_text(model: &Model, package: &str) -> String {
             atom_codec(name)
         ));
     }
+    structured::go(model, &mut out);
     for record in &model.records {
         let name = &record.name;
         let fields: Vec<String> = record
@@ -1275,7 +1358,7 @@ fn go_text(model: &Model, package: &str) -> String {
 /// The MoonBit type of an element of a sort.
 fn mbt_type(sort: &str) -> String {
     match sort {
-        INT => "Int64".into(),
+        INT | NAT => "Int64".into(),
         BOOL => "Bool".into(),
         other => other.into(),
     }
@@ -1329,6 +1412,14 @@ pub fn moonbit(model: &Model) -> String {
     out.push_str(&block(
         "fn decode_int(v : Json) -> Int64 raise DecodeError {\n  guard v is Number(n, ..) && n == n.floor() else {\n    raise DecodeError(\"not an integer: \\{v.stringify()}\")\n  }\n  n.to_int64()\n}".into(),
     ));
+    if model.uses_nat() {
+        out.push_str(&block(
+            "fn encode_nat(x : Int64) -> Json {\n  encode_int(x)\n}".into(),
+        ));
+        out.push_str(&block(
+            "fn decode_nat(v : Json) -> Int64 raise DecodeError {\n  guard v is Number(n, ..) && n >= 0.0 && n <= 9007199254740991.0 else {\n    raise DecodeError(\"not a Nat: \\{v.stringify()}\")\n  }\n  decode_int(v)\n}".into(),
+        ));
+    }
     out.push_str(&block(
         "fn encode_bool(x : Bool) -> Json {\n  Json::boolean(x)\n}".into(),
     ));
@@ -1438,7 +1529,9 @@ pub fn moonbit(model: &Model) -> String {
         )));
         out.push_str(&atom_codec(name));
     }
+    structured::moonbit(model, &mut out);
     for record in &model.records {
+        let derive = if model.has_structures() { "" } else { derive };
         let name = &record.name;
         let c = mbt_codec(name);
         let fields: Vec<String> = record

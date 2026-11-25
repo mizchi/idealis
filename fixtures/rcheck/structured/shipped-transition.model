@@ -1,0 +1,22 @@
+model Shipment
+enum Carrier = Post | Courier
+variant Status = Ready | Shipped(Carrier)
+var status: one Status
+var acknowledged: one Bool
+init { status = Ready() acknowledged = false }
+behavior ship(method: Carrier) {
+  guard { is(status, Ready) }
+  update { status = Shipped(method) }
+}
+behavior acknowledge() {
+  guard { is(status, Shipped) }
+  update { acknowledged = true }
+}
+transition ShippedStays {
+  is(before(status), Shipped) implies {
+    is(after(status), Shipped)
+    payload(before(status), Shipped) = payload(after(status), Shipped)
+  }
+}
+reachable WasShipped { is(status, Shipped) }
+scope steps = 4

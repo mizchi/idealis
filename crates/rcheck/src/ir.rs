@@ -26,6 +26,10 @@ pub struct Ir {
     pub sums: Vec<Named>,
     #[serde(default)]
     pub records: Vec<RecordIr>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub sequences: Vec<SequenceIr>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub variants: Vec<VariantIr>,
     #[serde(default)]
     pub relations: Vec<RelationIr>,
     #[serde(default)]
@@ -36,6 +40,12 @@ pub struct Ir {
     pub actions: Vec<ActionIr>,
     #[serde(default)]
     pub checks: Vec<CheckIr>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub temporal: Vec<TemporalIr>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub transitions: Vec<TransitionIr>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub fairness: Vec<FairnessIr>,
     pub scope: ScopeIr,
     /// Parts of the source the adapter could not write in the IR.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -61,6 +71,29 @@ pub struct Field {
 pub struct RecordIr {
     pub name: String,
     pub fields: Vec<Field>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SequenceIr {
+    pub name: String,
+    pub element: String,
+    pub max: usize,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct VariantIr {
+    pub name: String,
+    pub cases: Vec<CaseIr>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CaseIr {
+    pub tag: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub payload: Option<String>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
@@ -130,6 +163,33 @@ pub struct CheckIr {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
+pub struct TransitionIr {
+    pub name: String,
+    pub formula: F,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct TemporalIr {
+    pub name: String,
+    pub formula: F,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub params: Vec<Field>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub trigger: Option<F>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fairness: Option<Vec<FairnessIr>>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(tag = "kind", rename_all = "lowercase", deny_unknown_fields)]
+pub enum FairnessIr {
+    Weak { action: String },
+    Strong { action: String },
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct ScopeIr {
     #[serde(default)]
     pub sizes: BTreeMap<String, usize>,
@@ -149,19 +209,81 @@ pub struct Omitted {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "op", rename_all = "snake_case", deny_unknown_fields)]
 pub enum E {
-    Name { name: String },
+    Name {
+        name: String,
+    },
     None,
-    Union { left: Box<E>, right: Box<E> },
-    Difference { left: Box<E>, right: Box<E> },
-    Intersection { left: Box<E>, right: Box<E> },
-    Product { left: Box<E>, right: Box<E> },
-    Join { left: Box<E>, right: Box<E> },
-    Literal { value: i64 },
-    Count { of: Box<E> },
-    Add { left: Box<E>, right: Box<E> },
-    Sub { left: Box<E>, right: Box<E> },
-    Mul { left: Box<E>, right: Box<E> },
-    Record { name: String, fields: Vec<E> },
+    Union {
+        left: Box<E>,
+        right: Box<E>,
+    },
+    Difference {
+        left: Box<E>,
+        right: Box<E>,
+    },
+    Intersection {
+        left: Box<E>,
+        right: Box<E>,
+    },
+    Product {
+        left: Box<E>,
+        right: Box<E>,
+    },
+    Join {
+        left: Box<E>,
+        right: Box<E>,
+    },
+    Literal {
+        value: i64,
+    },
+    Count {
+        of: Box<E>,
+    },
+    Add {
+        left: Box<E>,
+        right: Box<E>,
+    },
+    Sub {
+        left: Box<E>,
+        right: Box<E>,
+    },
+    Mul {
+        left: Box<E>,
+        right: Box<E>,
+    },
+    Sequence {
+        name: String,
+        items: Vec<E>,
+    },
+    Append {
+        seq: Box<E>,
+        item: Box<E>,
+    },
+    Length {
+        of: Box<E>,
+    },
+    Index {
+        seq: Box<E>,
+        index: Box<E>,
+    },
+    Variant {
+        tag: String,
+        payload: Option<Box<E>>,
+    },
+    Before {
+        of: Box<E>,
+    },
+    After {
+        of: Box<E>,
+    },
+    Payload {
+        of: Box<E>,
+        tag: String,
+    },
+    Record {
+        name: String,
+        fields: Vec<E>,
+    },
 }
 
 /// An integer in a comparison: `#e`, a literal, or one integer value.
@@ -215,6 +337,10 @@ pub enum F {
     IntNe {
         left: I,
         right: I,
+    },
+    HasTag {
+        of: E,
+        tag: String,
     },
     Some {
         of: E,
@@ -300,6 +426,36 @@ fn expr(e: &Expr) -> E {
                 Arith::Mul => E::Mul { left, right },
             }
         }
+        Expr::Sequence(name, items) => E::Sequence {
+            name: name.clone(),
+            items: items.iter().map(expr).collect(),
+        },
+        Expr::Append(seq, item) => E::Append {
+            seq: Box::new(expr(seq)),
+            item: Box::new(expr(item)),
+        },
+        Expr::Length(seq) => E::Length {
+            of: Box::new(expr(seq)),
+        },
+        Expr::Index(seq, index) => E::Index {
+            seq: Box::new(expr(seq)),
+            index: Box::new(expr(index)),
+        },
+        Expr::Variant(tag, payload) => E::Variant {
+            tag: tag.clone(),
+            payload: payload.as_ref().map(|v| Box::new(expr(v))),
+        },
+        Expr::Payload(of, tag) => E::Payload {
+            of: Box::new(expr(of)),
+            tag: tag.clone(),
+        },
+        Expr::At(phase, value) => {
+            let of = Box::new(expr(value));
+            match phase {
+                rmodel::Phase::Before => E::Before { of },
+                rmodel::Phase::After => E::After { of },
+            }
+        }
         Expr::Record(name, fields) => E::Record {
             name: name.clone(),
             fields: fields.iter().map(expr).collect(),
@@ -347,6 +503,23 @@ fn expr_back(e: &E) -> Expr {
             let (l, r) = pair(left, right);
             Expr::Arith(Arith::Mul, l, r)
         }
+        E::Sequence { name, items } => {
+            Expr::Sequence(name.clone(), items.iter().map(expr_back).collect())
+        }
+        E::Append { seq, item } => {
+            Expr::Append(Box::new(expr_back(seq)), Box::new(expr_back(item)))
+        }
+        E::Length { of } => Expr::Length(Box::new(expr_back(of))),
+        E::Index { seq, index } => {
+            Expr::Index(Box::new(expr_back(seq)), Box::new(expr_back(index)))
+        }
+        E::Variant { tag, payload } => Expr::Variant(
+            tag.clone(),
+            payload.as_ref().map(|v| Box::new(expr_back(v))),
+        ),
+        E::Payload { of, tag } => Expr::Payload(Box::new(expr_back(of)), tag.clone()),
+        E::Before { of } => Expr::At(rmodel::Phase::Before, Box::new(expr_back(of))),
+        E::After { of } => Expr::At(rmodel::Phase::After, Box::new(expr_back(of))),
         E::Record { name, fields } => {
             Expr::Record(name.clone(), fields.iter().map(expr_back).collect())
         }
@@ -400,6 +573,10 @@ fn formula(f: &Formula) -> Result<F, String> {
                 Mult::Set => return Err("a `set` multiplicity formula".into()),
             }
         }
+        Formula::HasTag(of, tag) => F::HasTag {
+            of: expr(of),
+            tag: tag.clone(),
+        },
         Formula::Empty(e) => F::No { of: expr(e) },
         Formula::Not(inner) => F::Not {
             arg: Box::new(formula(inner)?),
@@ -430,6 +607,7 @@ fn formula_back(f: &F) -> Formula {
     let ints = |op, l: &I, r: &I| Formula::Ints(op, int_back(l), int_back(r));
     match f {
         F::In { left, right } => cmp(Compare::In, left, right),
+        F::HasTag { of, tag } => Formula::HasTag(expr_back(of), tag.clone()),
         F::NotIn { left, right } => cmp(Compare::NotIn, left, right),
         F::Eq { left, right } => cmp(Compare::Equal, left, right),
         F::Ne { left, right } => cmp(Compare::NotEqual, left, right),
@@ -467,6 +645,28 @@ fn formula_back(f: &F) -> Formula {
 }
 
 /// The IR of a checked model. Bool, which the checker adds, is left out.
+fn fairness(rule: &rmodel::Fairness) -> FairnessIr {
+    match rule.kind {
+        rmodel::FairnessKind::Weak => FairnessIr::Weak {
+            action: rule.action.clone(),
+        },
+        rmodel::FairnessKind::Strong => FairnessIr::Strong {
+            action: rule.action.clone(),
+        },
+    }
+}
+
+fn fairness_back(rule: &FairnessIr) -> rmodel::Fairness {
+    let (kind, action) = match rule {
+        FairnessIr::Weak { action } => (rmodel::FairnessKind::Weak, action),
+        FairnessIr::Strong { action } => (rmodel::FairnessKind::Strong, action),
+    };
+    rmodel::Fairness {
+        kind,
+        action: action.clone(),
+    }
+}
+
 pub fn to_ir(model: &Model) -> Result<Ir, String> {
     let named = |items: &[(String, Vec<String>)]| -> Vec<Named> {
         items
@@ -496,6 +696,30 @@ pub fn to_ir(model: &Model) -> Result<Ir, String> {
                     .map(|(name, sort)| Field {
                         name: name.clone(),
                         sort: sort.clone(),
+                    })
+                    .collect(),
+            })
+            .collect(),
+        sequences: model
+            .sequences
+            .iter()
+            .map(|s| SequenceIr {
+                name: s.name.clone(),
+                element: s.element.clone(),
+                max: s.max,
+            })
+            .collect(),
+        variants: model
+            .variants
+            .iter()
+            .map(|v| VariantIr {
+                name: v.name.clone(),
+                cases: v
+                    .cases
+                    .iter()
+                    .map(|c| CaseIr {
+                        tag: c.tag.clone(),
+                        payload: c.payload.clone(),
                     })
                     .collect(),
             })
@@ -565,6 +789,40 @@ pub fn to_ir(model: &Model) -> Result<Ir, String> {
                 })
             })
             .collect::<Result<_, String>>()?,
+        temporal: model
+            .temporal
+            .iter()
+            .map(|check| {
+                Ok(TemporalIr {
+                    name: check.name.clone(),
+                    formula: formula(&check.formula)?,
+                    params: check
+                        .params
+                        .iter()
+                        .map(|(name, sort)| Field {
+                            name: name.clone(),
+                            sort: sort.clone(),
+                        })
+                        .collect(),
+                    trigger: check.trigger.as_ref().map(formula).transpose()?,
+                    fairness: check
+                        .fairness
+                        .as_ref()
+                        .map(|rules| rules.iter().map(fairness).collect()),
+                })
+            })
+            .collect::<Result<_, String>>()?,
+        transitions: model
+            .transitions
+            .iter()
+            .map(|check| {
+                Ok(TransitionIr {
+                    name: check.name.clone(),
+                    formula: formula(&check.formula)?,
+                })
+            })
+            .collect::<Result<_, String>>()?,
+        fairness: model.fairness.iter().map(fairness).collect(),
         scope: ScopeIr {
             sizes: model.scope.sizes.clone(),
             ints: model.scope.ints,
@@ -602,6 +860,30 @@ pub fn from_ir(ir: &Ir) -> Result<Model, String> {
                     .fields
                     .iter()
                     .map(|f| (f.name.clone(), f.sort.clone()))
+                    .collect(),
+            })
+            .collect(),
+        sequences: ir
+            .sequences
+            .iter()
+            .map(|s| rmodel::Sequence {
+                name: s.name.clone(),
+                element: s.element.clone(),
+                max: s.max,
+            })
+            .collect(),
+        variants: ir
+            .variants
+            .iter()
+            .map(|v| rmodel::Variant {
+                name: v.name.clone(),
+                cases: v
+                    .cases
+                    .iter()
+                    .map(|c| rmodel::Case {
+                        tag: c.tag.clone(),
+                        payload: c.payload.clone(),
+                    })
                     .collect(),
             })
             .collect(),
@@ -656,6 +938,33 @@ pub fn from_ir(ir: &Ir) -> Result<Model, String> {
                 formula: formula_back(&c.formula),
             })
             .collect(),
+        temporal: ir
+            .temporal
+            .iter()
+            .map(|check| rmodel::TemporalCheck {
+                name: check.name.clone(),
+                formula: formula_back(&check.formula),
+                params: check
+                    .params
+                    .iter()
+                    .map(|p| (p.name.clone(), p.sort.clone()))
+                    .collect(),
+                trigger: check.trigger.as_ref().map(formula_back),
+                fairness: check
+                    .fairness
+                    .as_ref()
+                    .map(|rules| rules.iter().map(fairness_back).collect()),
+            })
+            .collect(),
+        transitions: ir
+            .transitions
+            .iter()
+            .map(|check| rmodel::TransitionCheck {
+                name: check.name.clone(),
+                formula: formula_back(&check.formula),
+            })
+            .collect(),
+        fairness: ir.fairness.iter().map(fairness_back).collect(),
         scope: rmodel::Scope {
             sizes: ir.scope.sizes.clone(),
             ints: ir.scope.ints,

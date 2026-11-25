@@ -1,5 +1,5 @@
 //! rcheck <model> [--checker auto|reference|explicit|sat|all] [--question NAME]
-//! rcheck generate <model> rust|typescript|go|moonbit|ir|schema|states|glossary|pbt-cases|pbt-typescript
+//! rcheck generate <model> rust|typescript|go|moonbit|ir|schema|states|glossary|pbt-cases|pbt-typescript|pbt-go
 //! rcheck dead-code <model> [--max-states N]
 //! rcheck lean-oracle <model> <file.lean> [--max-states N]
 //! Answers every question of an rmodel model, or one, and prints JSON. Exits
@@ -19,6 +19,12 @@ fn main() {
         && command == "lean-oracle"
     {
         lean_oracle::run(args);
+        return;
+    }
+    if let [command, model, request] = arguments.as_slice()
+        && command == "validate"
+    {
+        validate_request(model, request);
         return;
     }
     // rcheck generate <model> rust|typescript|schema (plan 0102).
@@ -57,6 +63,8 @@ fn main() {
                 rcheck::conform::boundary_typescript(&model, rcheck::Budget::default().states)
                     .unwrap_or_else(|error| fail(&error))
             }
+            "pbt-go" => rcheck::conform::boundary_go(&model, rcheck::Budget::default().states)
+                .unwrap_or_else(|error| fail(&error)),
             "glossary" => format!(
                 "{}\n",
                 serde_json::to_string_pretty(&model.entity_definitions).expect("JSON")
@@ -87,8 +95,11 @@ fn main() {
     }
     let path = path.unwrap_or_else(|| usage());
     let (model, omitted) = load_model(&path);
-    for part in omitted {
-        eprintln!("omitted by the adapter: {} ({})", part.name, part.reason);
+    if !omitted.is_empty() {
+        for part in omitted {
+            eprintln!("omitted by the adapter: {} ({})", part.name, part.reason);
+        }
+        fail("checking requires a complete model; the IR has adapter omissions");
     }
     let names: Vec<String> = match only {
         Some(name) => vec![name],
@@ -118,6 +129,46 @@ fn load_model(path: &str) -> (rmodel::Model, Vec<rcheck::ir::Omitted>) {
         let model = rmodel::parse(&source).unwrap_or_else(|error| fail(&error.to_string()));
         (model, Vec::new())
     }
+}
+
+fn validate_request(model: &str, path: &str) {
+    use serde::Deserialize;
+    use serde_json::Value;
+
+    #[derive(Deserialize)]
+    #[serde(deny_unknown_fields)]
+    struct Request {
+        config: Value,
+        initial: Value,
+        #[serde(default)]
+        prefix: Vec<Value>,
+        command: Value,
+    }
+
+    let (model, omitted) = load_model(model);
+    if !omitted.is_empty() {
+        fail("validate requires a complete model; the IR has adapter omissions");
+    }
+    let read = if path == "-" {
+        serde_json::from_reader(std::io::stdin().lock())
+    } else {
+        let file = std::fs::File::open(path).unwrap_or_else(|error| fail(&error.to_string()));
+        serde_json::from_reader(std::io::BufReader::new(file))
+    };
+    let request: Request = read.unwrap_or_else(|error| fail(&error.to_string()));
+    let validator = rcheck::conform::Validator::new(&model).unwrap_or_else(|error| fail(&error));
+    let mut session = validator
+        .start(&request.config, &request.initial)
+        .unwrap_or_else(|error| fail(&error.to_string()));
+    for command in &request.prefix {
+        session
+            .replay(command)
+            .unwrap_or_else(|error| fail(&error.to_string()));
+    }
+    let state = session
+        .validate(&request.command)
+        .unwrap_or_else(|error| fail(&error.to_string()));
+    println!("{}", serde_json::json!({ "state": state }));
 }
 
 fn dead_code(args: &[String]) {
@@ -171,7 +222,7 @@ fn dead_code(args: &[String]) {
 
 fn usage() -> ! {
     fail(
-        "usage: rcheck <model> [--checker auto|reference|explicit|sat|all] [--question NAME] | rcheck generate <model> rust|typescript|go|moonbit|ir|schema|states|glossary|pbt-cases|pbt-typescript | rcheck dead-code <model> [--max-states N] | rcheck lean-oracle <model> <file.lean> [--max-states N]",
+        "usage: rcheck <model> [--checker auto|reference|explicit|sat|all] [--question NAME] | rcheck generate <model> rust|typescript|go|moonbit|ir|schema|states|glossary|pbt-cases|pbt-typescript|pbt-go | rcheck dead-code <model> [--max-states N] | rcheck lean-oracle <model> <file.lean> [--max-states N] | rcheck validate <model> <request.json|->",
     )
 }
 

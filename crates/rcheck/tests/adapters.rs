@@ -17,7 +17,7 @@ const CASES: &[(&str, &[&str])] = &[
         &["NoLeak", "OnlyGranted", "SecretRead", "UnclearedSecret"],
     ),
     ("bank", &["NonNegative", "Rich"]),
-    ("order", &["FraudCancelled"]),
+    ("order", &["FraudCancelled", "ShippedCancelled"]),
     (
         "sessions",
         &[
@@ -124,13 +124,7 @@ fn the_pkl_adapter_agrees_where_it_can_write_the_model() {
     let report = check("pkl");
     let statuses = statuses(&report);
     for (case, status) in &statuses {
-        // order needs data with fields: unsupported, never a match.
-        let expected = if case == "order" {
-            Status::Unknown
-        } else {
-            Status::Matched
-        };
-        assert_eq!(*status, expected, "{case}: {report:#?}");
+        assert_eq!(*status, Status::Matched, "{case}: {report:#?}");
     }
 }
 
@@ -147,4 +141,46 @@ fn adapter_faults_are_found() {
         assert!(!caught.is_empty(), "{fault}: {:?}", statuses(&report));
         println!("{fault}: caught in {caught:?}");
     }
+}
+
+#[test]
+fn pkl_service_carries_a_property_specific_fairness_assumption() {
+    use rcheck::{Budget, Selection, Verdict};
+
+    let source = include_str!("../../../fixtures/rcheck/adapters/pkl/service.json");
+    let (model, omitted) = rcheck::ir::parse(source).unwrap();
+    assert!(omitted.is_empty(), "{omitted:?}");
+    let direct = rmodel::parse(include_str!(
+        "../../../fixtures/rcheck/structured/service.model"
+    ))
+    .unwrap();
+    for (name, expected) in [
+        ("EventuallyServed", Verdict::Holds),
+        ("EventuallyServedUnfair", Verdict::Violated),
+    ] {
+        for source in [&model, &direct] {
+            let all = rcheck::check(source, name, &Selection::All, Budget::default()).unwrap();
+            assert_eq!(all.answers.len(), 1, "{all:?}");
+            assert_eq!(all.answers[0].verdict, expected, "{all:?}");
+        }
+    }
+}
+
+#[test]
+fn pkl_order_preserves_the_shipped_tracking_transition_property() {
+    use rcheck::{Budget, Selection, Verdict};
+
+    let source = include_str!("../../../fixtures/rcheck/adapters/pkl/order.json");
+    let (model, omitted) = rcheck::ir::parse(source).unwrap();
+    assert_eq!(model.variants[0].name, "Status");
+    assert!(omitted.is_empty(), "{omitted:?}");
+    let report = rcheck::check(&model, "ShippedStays", &Selection::All, Budget::default()).unwrap();
+    assert_eq!(report.answers.len(), 2);
+    assert!(
+        report
+            .answers
+            .iter()
+            .all(|answer| answer.verdict == Verdict::Holds),
+        "{report:?}"
+    );
 }
