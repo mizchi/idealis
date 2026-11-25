@@ -309,6 +309,20 @@ jobs:
           if-no-files-found: warn
       - run: just rcheck-go
 
+  moonbit:
+    name: MoonBit bindings
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      # The installer is not pinned; moon fmt and the freshness check
+      # follow the installed toolchain (plan 0105).
+      - name: Install MoonBit
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+      - run: just rcheck-moonbit
+
   cache-proof:
     runs-on: ubuntu-latest
     steps:

@@ -1,5 +1,5 @@
 //! rcheck <model> [--checker auto|reference|explicit|sat|all] [--question NAME]
-//! rcheck generate <model> rust|typescript|go|schema|states
+//! rcheck generate <model> rust|typescript|go|moonbit|schema|states
 //! Answers every question of an rmodel model, or one, and prints JSON. Exits
 //! 1 when two definite answers disagree, 2 on a usage or model error.
 use rcheck::Selection;
@@ -16,6 +16,7 @@ fn main() {
             "rust" => rmodel::bindings::rust(&model, &source),
             "typescript" => rmodel::bindings::typescript(&model),
             "go" => rmodel::bindings::go(&model, &model.name.to_lowercase()),
+            "moonbit" => rmodel::bindings::moonbit(&model),
             "schema" => {
                 let schema: serde_json::Value =
                     serde_json::from_str(&rmodel::bindings::json_schema(&model)).expect("JSON");
@@ -75,7 +76,7 @@ fn main() {
 
 fn usage() -> ! {
     fail(
-        "usage: rcheck <model> [--checker auto|reference|explicit|sat|all] [--question NAME] | rcheck generate <model> rust|typescript|go|schema|states",
+        "usage: rcheck <model> [--checker auto|reference|explicit|sat|all] [--question NAME] | rcheck generate <model> rust|typescript|go|moonbit|schema|states",
     )
 }
 
