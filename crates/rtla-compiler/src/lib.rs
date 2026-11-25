@@ -14,6 +14,7 @@ mod functions;
 mod labels;
 mod levels;
 mod link;
+mod mk_seq;
 mod old;
 mod product;
 mod rewrite;
@@ -2713,6 +2714,9 @@ impl Compiler<'_> {
                 "consequent":self.expression(&expansion.function,child)?,
                 "alternative":{"op":"assert","condition":boolean(false),"message":string(set_as_fun::DUPLICATE_KEY)}
             }));
+        }
+        if self.extends("Apalache") && operator == "MkSeq" {
+            return self.expression(&mk_seq::expand(args)?, child);
         }
         if self.extends("Variants") {
             match operator {

@@ -155,7 +155,7 @@ impl Rewriter {
             }
             "Cardinality" => self.imports.contains("FiniteSets"),
             "SortSeq" | "Assert" => self.imports.contains("TLC"),
-            "ApaFoldSet" | "ApaFoldSeqLeft" | "SetAsFun" | ":=" => {
+            "ApaFoldSet" | "ApaFoldSeqLeft" | "SetAsFun" | "MkSeq" | ":=" => {
                 self.imports.contains("Apalache")
             }
             "Variant" | "VariantTag" | "VariantGetUnsafe" => self.imports.contains("Variants"),
@@ -383,6 +383,7 @@ impl Rewriter {
                         "ApaFoldSet",
                         "ApaFoldSeqLeft",
                         "SetAsFun",
+                        "MkSeq",
                         "Variant",
                         "VariantTag",
                         "VariantGetUnsafe",
