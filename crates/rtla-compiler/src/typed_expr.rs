@@ -749,6 +749,20 @@ impl Compiler<'_> {
             }
             return self.fold_ir(operator == "ApaFoldSeqLeft", args, context, child);
         }
+        if self.extends("Apalache") && operator == "SetAsFun" {
+            let [set] = args else {
+                return unsupported("operator arity SetAsFun");
+            };
+            let expansion = crate::set_as_fun::expand(set, set.location);
+            return Ok(I::If {
+                condition: Box::new(self.expression_ir(&expansion.single_valued, child)?),
+                consequent: Box::new(self.expression_ir(&expansion.function, child)?),
+                alternative: Box::new(I::Assert {
+                    condition: Box::new(boolean(false)),
+                    message: Box::new(string(crate::set_as_fun::DUPLICATE_KEY)),
+                }),
+            });
+        }
         if self.extends("Variants") {
             match operator {
                 "Variant" if args.len() == 2 => {
