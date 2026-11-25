@@ -1223,6 +1223,7 @@ impl Expression {
                                         u16::try_from(branch.steps.len() + 1).unwrap_or(u16::MAX),
                                     ),
                                     old,
+                                    recursive: ctx.recursive,
                                     ..EvalContext::new(&current, next)
                                 };
                                 let before = subscript.eval(context, arena)?;
