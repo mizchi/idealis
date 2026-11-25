@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "source": "evals/experiments/surface-languages (plan 0107); evidence values are 0107's table: direct 1, workaround 0.5, not expressible 0",
+  "candidates": [
+    {
+      "id": "rmodel",
+      "dir": "evals/experiments/surface-languages/rmodel",
+      "files": { "permissions": "permissions.model", "bank": "bank.model", "order": "order.model", "sessions": "sessions.model", "service": "service.model" },
+      "shared": [],
+      "comments": { "line": "//" },
+      "check": [{ "cwd": ".", "run": ["crates/rcheck/target/release/rcheck", "{dir}/{file}"], "each": true }],
+      "adapter": "fixtures/rcheck/adapters/rmodel",
+      "tree": 1,
+      "verification": ["complete-search", "bounded", "inductive"],
+      "evidence": { "identity": 1, "config": 1, "join": 1, "ints": 1, "adt": 0.5, "typeExclusion": 0, "step": 0, "count": 1, "lone": 1, "liveness": 0 }
+    },
+    {
+      "id": "quint",
+      "dir": "evals/experiments/surface-languages/quint",
+      "files": { "permissions": "permissions.qnt", "bank": "bank.qnt", "order": "order.qnt", "sessions": "sessions.qnt", "service": "service.qnt" },
+      "shared": [],
+      "comments": { "line": "//" },
+      "check": [{ "cwd": "{dir}", "run": ["pnpm", "dlx", "@informalsystems/quint@0.33.1", "typecheck", "{file}"], "each": true }],
+      "adapter": null,
+      "tree": 1,
+      "verification": ["bounded", "complete-search"],
+      "evidence": { "identity": 0.5, "config": 0.5, "join": 1, "ints": 1, "adt": 1, "typeExclusion": 1, "step": 0.5, "count": 1, "lone": 1, "liveness": 1 }
+    },
+    {
+      "id": "ocaml",
+      "dir": "evals/experiments/surface-languages/ocaml",
+      "files": { "permissions": "permissions.ml", "bank": "bank.ml", "order": "order.ml", "sessions": "sessions.ml", "service": "service.ml" },
+      "shared": ["model.ml"],
+      "comments": { "block": ["(*", "*)"] },
+      "check": [{ "cwd": "{dir}", "run": ["./run.sh"], "each": false }],
+      "adapter": null,
+      "tree": 0,
+      "verification": ["complete-search"],
+      "evidence": { "identity": 1, "config": 1, "join": 0.5, "ints": 0.5, "adt": 1, "typeExclusion": 1, "step": 1, "count": 1, "lone": 1, "liveness": 0.5 }
+    },
+    {
+      "id": "isabelle",
+      "dir": "evals/experiments/surface-languages/isabelle",
+      "files": { "permissions": "Permissions.thy", "bank": "Bank.thy", "order": "Order.thy", "sessions": "Sessions.thy", "service": "Service.thy" },
+      "shared": ["Model.thy"],
+      "comments": { "block": ["(*", "*)"] },
+      "check": [{ "cwd": ".", "run": ["{env:ISABELLE}", "build", "-c", "-D", "{dir}"], "each": false }],
+      "adapter": null,
+      "tree": 0.5,
+      "verification": ["proof"],
+      "evidence": { "identity": 1, "config": 1, "join": 1, "ints": 1, "adt": 1, "typeExclusion": 0.5, "step": 1, "count": 0.5, "lone": 1, "liveness": 1 }
+    },
+    {
+      "id": "idris",
+      "dir": "evals/experiments/surface-languages/idris",
+      "files": { "permissions": "Permissions.idr", "bank": "Bank.idr", "order": "Order.idr", "sessions": "Sessions.idr", "service": "Service.idr" },
+      "shared": ["TS.idr"],
+      "comments": { "line": "--", "block": ["{-", "-}"] },
+      "check": [{ "cwd": "{dir}", "run": ["idris2", "--check", "{file}"], "each": true, "env": ["IDRIS2_PREFIX"] }],
+      "adapter": null,
+      "tree": 0,
+      "verification": ["complete-search"],
+      "evidence": { "identity": 1, "config": 1, "join": 0.5, "ints": 0.5, "adt": 1, "typeExclusion": 1, "step": 1, "count": 1, "lone": 1, "liveness": 0.5 }
+    },
+    {
+      "id": "pkl",
+      "dir": "evals/experiments/surface-languages/pkl",
+      "files": { "permissions": "permissions.pkl", "bank": "bank.pkl", "order": "order.pkl", "sessions": "sessions.pkl", "service": "service.pkl" },
+      "shared": ["Model.pkl"],
+      "comments": { "line": "//" },
+      "check": [{ "cwd": "{dir}", "run": ["pkl", "eval", "{file}"], "each": true }],
+      "adapter": "fixtures/rcheck/adapters/pkl",
+      "tree": 1,
+      "verification": ["complete-search"],
+      "evidence": { "identity": 1, "config": 1, "join": 0.5, "ints": 1, "adt": 1, "typeExclusion": 0, "step": 1, "count": 1, "lone": 1, "liveness": 0.5 }
+    },
+    {
+      "id": "veil",
+      "dir": "evals/experiments/surface-languages/veil",
+      "files": { "permissions": "Permissions.lean", "bank": "Bank.lean", "order": "Order.lean", "sessions": "Sessions.lean", "service": "Service.lean" },
+      "shared": [],
+      "comments": { "line": "--", "block": ["/-", "-/"] },
+      "check": [{ "cwd": "{env:VEIL_HOME}", "run": ["lake", "lean", "{abs}"], "each": true, "env": ["VEIL_HOME"] }],
+      "adapter": null,
+      "tree": 0.5,
+      "verification": ["complete-search", "bounded", "inductive"],
+      "evidence": { "identity": 1, "config": 1, "join": 1, "ints": 0.5, "adt": 0.5, "typeExclusion": 1, "step": 1, "count": 0.5, "lone": 0.5, "liveness": 0.5 }
+    }
+  ]
+}
