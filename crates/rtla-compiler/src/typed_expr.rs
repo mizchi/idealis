@@ -203,6 +203,9 @@ impl Compiler<'_> {
                     _ => I::Function { bounds, body },
                 }
             }
+            E::Product { factors } if factors.len() >= 2 => {
+                self.expression_ir(&crate::product::expand(factors, value.location), context)?
+            }
             E::SetMap { bounds, expression } => {
                 let (bounds, bound) = self.bind_ir(bounds, &child)?;
                 I::MapSet {

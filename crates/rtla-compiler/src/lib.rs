@@ -15,6 +15,7 @@ mod labels;
 mod levels;
 mod link;
 mod old;
+mod product;
 mod rewrite;
 mod select;
 mod set_as_fun;
@@ -2496,6 +2497,9 @@ impl Compiler<'_> {
                     _ => "function",
                 };
                 Ok(json!({"op":op,"bounds":bindings,"body":self.expression(body,&bound)?}))
+            }
+            E::Product { factors } if factors.len() >= 2 => {
+                self.expression(&product::expand(factors, value.location), context)
             }
             E::SetMap { bounds, expression } => {
                 let (bindings, bound) = self.bind(bounds, &child)?;
