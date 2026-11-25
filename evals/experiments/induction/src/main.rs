@@ -125,6 +125,40 @@ fn compare(label: &str, model: &rmodel::Model) -> Vec<String> {
 
 fn main() {
     let arguments: Vec<String> = std::env::args().skip(1).collect();
+    // --show <model> <check> <step>: one VC, z3's answer, and for sat the
+    // concrete counterexample rewritten for the reference evaluator.
+    if let [flag, path, check, step] = arguments.as_slice()
+        && flag == "--show"
+    {
+        let model = rmodel::parse(&std::fs::read_to_string(path).unwrap()).unwrap();
+        let obligation = vc::obligations(&model)
+            .into_iter()
+            .find(|o| &o.check == check && &o.step == step)
+            .expect("an obligation");
+        println!("{}", obligation.smt);
+        let (answer, _) = smt::run(&obligation.smt, 20);
+        println!(";; z3: {answer:?}");
+        if answer == smt::Answer::Sat {
+            let params = model
+                .actions
+                .iter()
+                .find(|a| &a.name == step)
+                .map(|a| a.params.clone())
+                .unwrap_or_default();
+            let cti = smt::concrete(&model, &obligation.smt, &params, 3).expect("a CTI");
+            println!(";; CTI: {cti:?}\n");
+            println!("{}", recheck::source(&model, &cti, check, step));
+            println!(
+                ";; reference: {:?}",
+                recheck::confirms(&model, &cti, check, step).map_err(|e| e
+                    .lines()
+                    .next()
+                    .unwrap_or("")
+                    .to_owned())
+            );
+        }
+        return;
+    }
     if let [flag, seed] = arguments.as_slice()
         && flag == "--source"
     {

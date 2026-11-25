@@ -6,6 +6,8 @@ rmodelのモデルの`invariant`と`Declarations`が、すべての大きさで�
 cargo build --release --manifest-path evals/experiments/induction/Cargo.toml
 evals/experiments/induction/target/release/idealis-induction-proto fixtures/rmodel/*.model
 evals/experiments/induction/target/release/idealis-induction-proto --generated 9400 9699
+# one VC, z3's answer, and the counterexample rewritten for the reference evaluator
+evals/experiments/induction/target/release/idealis-induction-proto --show fixtures/rmodel/permissions-open.model NoLeak read
 ```
 
 - `src/vc.rs`: VC。sigは解釈しないsort、enumはdatatype、関係はBoolの関数、式は「tupleが式に属する」一階の式。
