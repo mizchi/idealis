@@ -336,6 +336,368 @@
         "code": []
       },
       {
+        "id": "candidate-revision",
+        "kind": "state",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "候補の版",
+          "en": "candidate revision"
+        },
+        "definition": {
+          "ja": "改版前後の候補を区別する。",
+          "en": "Distinguishes the candidate before and after revision."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/evidence-adoption.model",
+            "name": "Revision"
+          },
+          {
+            "path": "spec/models/evidence-adoption.model",
+            "name": "First"
+          },
+          {
+            "path": "spec/models/evidence-adoption.model",
+            "name": "Second"
+          },
+          {
+            "path": "spec/models/evidence-adoption.model",
+            "name": "current"
+          },
+          {
+            "path": "spec/models/evidence-adoption.model",
+            "name": "revise"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "reviewed-revision",
+        "kind": "state",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "レビューを終えた版",
+          "en": "reviewed revision"
+        },
+        "definition": {
+          "ja": "要件の節と式のレビューが済み、各節の検査が期待値と一致した版。",
+          "en": "A revision with reviewed clauses and the expected model verdicts."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/evidence-adoption.model",
+            "name": "reviewed"
+          },
+          {
+            "path": "spec/models/evidence-adoption.model",
+            "name": "recordReview"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "compared-revision",
+        "kind": "state",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "意味比較が一致した版",
+          "en": "compared revision"
+        },
+        "definition": {
+          "ja": "遅れて届いた結果にも、検査した時点の版を保持する。",
+          "en": "Even a late comparison retains the revision it evaluated."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/evidence-adoption.model",
+            "name": "equivalent"
+          },
+          {
+            "path": "spec/models/evidence-adoption.model",
+            "name": "lateSemantic"
+          },
+          {
+            "path": "spec/models/evidence-adoption.model",
+            "name": "recordSemantics"
+          },
+          {
+            "path": "spec/models/evidence-adoption.model",
+            "name": "receiveLateSemantics"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "improved-revision",
+        "kind": "state",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "ゴールが改善した版",
+          "en": "improved revision"
+        },
+        "definition": {
+          "ja": "測定した時点の版でゴールが改善した。",
+          "en": "Improvement belongs to the revision measured."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/evidence-adoption.model",
+            "name": "improved"
+          },
+          {
+            "path": "spec/models/evidence-adoption.model",
+            "name": "recordGoal"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "adopted-revision",
+        "kind": "state",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "採用した版",
+          "en": "adopted revision"
+        },
+        "definition": {
+          "ja": "現行の候補に必要な証拠がそろった状態。",
+          "en": "The current candidate with all required evidence."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/evidence-adoption.model",
+            "name": "adopted"
+          },
+          {
+            "path": "spec/models/evidence-adoption.model",
+            "name": "adopt"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "comparison-origin",
+        "kind": "state",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "比較結果の版",
+          "en": "comparison revision"
+        },
+        "definition": {
+          "ja": "受け取った結果は実行時の版を維持する。",
+          "en": "A result retains the revision it evaluated."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/checker-comparison.model",
+            "name": "Revision"
+          },
+          {
+            "path": "spec/models/checker-comparison.model",
+            "name": "First"
+          },
+          {
+            "path": "spec/models/checker-comparison.model",
+            "name": "Second"
+          },
+          {
+            "path": "spec/models/checker-comparison.model",
+            "name": "current"
+          },
+          {
+            "path": "spec/models/checker-comparison.model",
+            "name": "revise"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "required-checkers",
+        "kind": "entity",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "比較する検査器",
+          "en": "required checkers"
+        },
+        "definition": {
+          "ja": "参照評価器と rprob の二つ。",
+          "en": "The reference evaluator and rprob."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/checker-comparison.model",
+            "name": "Checker"
+          },
+          {
+            "path": "spec/models/checker-comparison.model",
+            "name": "Reference"
+          },
+          {
+            "path": "spec/models/checker-comparison.model",
+            "name": "Fast"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "checker-receipt",
+        "kind": "state",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "検査器の結果",
+          "en": "checker result"
+        },
+        "definition": {
+          "ja": "到着・完了を区別し、二種類の結果を抽象化して比較する。",
+          "en": "Separate received and complete results, and compare two abstract result values."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/checker-comparison.model",
+            "name": "received"
+          },
+          {
+            "path": "spec/models/checker-comparison.model",
+            "name": "completed"
+          },
+          {
+            "path": "spec/models/checker-comparison.model",
+            "name": "valueA"
+          },
+          {
+            "path": "spec/models/checker-comparison.model",
+            "name": "receiveA"
+          },
+          {
+            "path": "spec/models/checker-comparison.model",
+            "name": "receiveB"
+          },
+          {
+            "path": "spec/models/checker-comparison.model",
+            "name": "receiveIncomplete"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "comparison-publication",
+        "kind": "action",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "比較結果の発行",
+          "en": "publish comparison"
+        },
+        "definition": {
+          "ja": "現行の対象を二つの検査器が完了まで調べ、結果が一致したときに発行する。",
+          "en": "Publish once both checkers have completed the current comparison and their results agree."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/checker-comparison.model",
+            "name": "published"
+          },
+          {
+            "path": "spec/models/checker-comparison.model",
+            "name": "publish"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "measurement-prerequisite",
+        "kind": "state",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "改善の判定条件",
+          "en": "improvement prerequisites"
+        },
+        "definition": {
+          "ja": "測定が同じ計画に属し、有効で安定した標本があり、事前に決めた改善幅に達する。",
+          "en": "The observation belongs to the pinned plan, has stable valid samples, and meets the predeclared improvement margin."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/measurement-gate.model",
+            "name": "Prerequisite"
+          },
+          {
+            "path": "spec/models/measurement-gate.model",
+            "name": "PinnedRun"
+          },
+          {
+            "path": "spec/models/measurement-gate.model",
+            "name": "StableSamples"
+          },
+          {
+            "path": "spec/models/measurement-gate.model",
+            "name": "ThresholdMet"
+          },
+          {
+            "path": "spec/models/measurement-gate.model",
+            "name": "confirmed"
+          },
+          {
+            "path": "spec/models/measurement-gate.model",
+            "name": "confirm"
+          }
+        ],
+        "code": []
+      },
+      {
+        "id": "published-measurement",
+        "kind": "state",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "測定から発行した改善",
+          "en": "published improvement"
+        },
+        "definition": {
+          "ja": "条件を満たしたときにだけ発行できるゴール改善の証拠。",
+          "en": "Goal improvement evidence issued once the prerequisites hold."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [
+          {
+            "path": "spec/models/measurement-gate.model",
+            "name": "GoalDecision"
+          },
+          {
+            "path": "spec/models/measurement-gate.model",
+            "name": "Improvement"
+          },
+          {
+            "path": "spec/models/measurement-gate.model",
+            "name": "published"
+          },
+          {
+            "path": "spec/models/measurement-gate.model",
+            "name": "publishImprovement"
+          }
+        ],
+        "code": []
+      },
+      {
         "id": "toggle-value",
         "kind": "concept",
         "group": "文法変更と遷移",
@@ -813,6 +1175,153 @@
         "unformalized": "遷移の前後を比較する条件は、calibration.rs の the_next_revision_must_collect_new_evidence が参照評価器で検査する。"
       },
       {
+        "id": "RMODEL-EVIDENCE-PROVENANCE",
+        "text": {
+          "ja": "節レビュー・意味の一致・ゴール改善を、評価した候補の版に結び付けて採用を判断する。",
+          "en": "Tie clause review, semantic agreement, and goal improvement to the candidate revision they evaluated before adopting it."
+        },
+        "terms": [
+          "candidate-revision",
+          "reviewed-revision",
+          "compared-revision",
+          "improved-revision",
+          "adopted-revision"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/evidence-adoption.model",
+            "check": "AdoptedIsCurrent",
+            "expect": "holds"
+          },
+          {
+            "model": "spec/models/evidence-adoption.model",
+            "check": "OldAgreementArrives",
+            "expect": "reachable"
+          },
+          {
+            "model": "spec/models/evidence-adoption.model",
+            "check": "CurrentEvidenceCanAdopt",
+            "expect": "reachable"
+          }
+        ],
+        "clauses": [
+          {
+            "id": "review",
+            "text": {
+              "ja": "採用した版には、対応レビューと期待通りのモデル検査が必要。",
+              "en": "The adopted revision must have reviewed correspondence and the expected model verdicts."
+            },
+            "claim": {
+              "model": "spec/models/evidence-adoption.model",
+              "check": "AdoptionNeedsCurrentReview",
+              "expect": "holds"
+            }
+          },
+          {
+            "id": "agreement",
+            "text": {
+              "ja": "採用した版の意味比較が一致していなければならない。旧版の結果はその版に留める。",
+              "en": "Agreement is required for the adopted revision. Results from an earlier revision remain tied to that revision."
+            },
+            "claim": {
+              "model": "spec/models/evidence-adoption.model",
+              "check": "AdoptionNeedsCurrentAgreement",
+              "expect": "holds"
+            }
+          },
+          {
+            "id": "goal",
+            "text": {
+              "ja": "採用した版でゴールが改善していなければならない。",
+              "en": "The goal must improve on the adopted revision."
+            },
+            "claim": {
+              "model": "spec/models/evidence-adoption.model",
+              "check": "AdoptionNeedsCurrentImprovement",
+              "expect": "holds"
+            }
+          }
+        ]
+      },
+      {
+        "id": "RMODEL-EXPECTED-CHECKERS",
+        "text": {
+          "ja": "比較対象の版で、予定した二つの検査器が完了し、判定が一致して初めて意味の一致を発行できる。",
+          "en": "Publish agreement only when both scheduled checkers have finished the expected revision and their verdicts agree."
+        },
+        "terms": [
+          "comparison-origin",
+          "required-checkers",
+          "checker-receipt",
+          "comparison-publication"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/checker-comparison.model",
+            "check": "PublishedNeedsCurrentResults",
+            "expect": "holds"
+          },
+          {
+            "model": "spec/models/checker-comparison.model",
+            "check": "PublishedNeedsAgreement",
+            "expect": "holds"
+          },
+          {
+            "model": "spec/models/checker-comparison.model",
+            "check": "OneCompleteResult",
+            "expect": "reachable"
+          },
+          {
+            "model": "spec/models/checker-comparison.model",
+            "check": "OldResultsOnly",
+            "expect": "reachable"
+          },
+          {
+            "model": "spec/models/checker-comparison.model",
+            "check": "CurrentAgreementPublished",
+            "expect": "reachable"
+          }
+        ]
+      },
+      {
+        "id": "RMODEL-MEASURED-IMPROVEMENT",
+        "text": {
+          "ja": "測定前に固定した計画に属し、標本が有効で安定し、改善幅を満たすときにゴール改善を発行する。",
+          "en": "Publish goal improvement when the observations match the pinned plan, the samples are valid and stable, and the gain meets the threshold."
+        },
+        "terms": [
+          "measurement-prerequisite",
+          "published-measurement"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/measurement-gate.model",
+            "check": "ImprovementNeedsPinnedRun",
+            "expect": "holds"
+          },
+          {
+            "model": "spec/models/measurement-gate.model",
+            "check": "ImprovementNeedsStableSamples",
+            "expect": "holds"
+          },
+          {
+            "model": "spec/models/measurement-gate.model",
+            "check": "ImprovementNeedsThreshold",
+            "expect": "holds"
+          },
+          {
+            "model": "spec/models/measurement-gate.model",
+            "check": "UnsettledMeasurement",
+            "expect": "reachable"
+          },
+          {
+            "model": "spec/models/measurement-gate.model",
+            "check": "ImprovementPublished",
+            "expect": "reachable"
+          }
+        ]
+      },
+      {
         "id": "RMODEL-SWAP",
         "text": {
           "ja": "入れ替え例では左と右を遷移前の値から同時に更新する。二つの値は異なり続け、入れ替え後の状態に到達でき、両方が On の状態には到達しない。代入しない変数 update は Off のままにする。",
@@ -992,6 +1501,56 @@
             "check": "WasShipped",
             "expect": "reachable"
           }
+        ],
+        "clauses": [
+          {
+            "id": "status",
+            "text": {
+              "ja": "発送済みの注文は、実行可能な操作の直後も発送済みのままとする。",
+              "en": "An enabled operation leaves a shipped order in the shipped state."
+            },
+            "claim": {
+              "model": "fixtures/rcheck/structured/shipped-transition.model",
+              "check": "StaysShipped",
+              "expect": "holds"
+            }
+          },
+          {
+            "id": "tracking",
+            "text": {
+              "ja": "操作の前後とも発送済みなら、追跡方法は等しい。",
+              "en": "If the order is shipped on both sides of an operation, the tracking method is unchanged."
+            },
+            "claim": {
+              "model": "fixtures/rcheck/structured/shipped-transition.model",
+              "check": "KeepsTracking",
+              "expect": "holds"
+            }
+          },
+          {
+            "id": "confirm-courier",
+            "text": {
+              "ja": "Courier で発送し、追跡方法を維持したまま確認済みになる経路がある。",
+              "en": "There is an execution that ships with Courier and reaches an acknowledged state retaining Courier."
+            },
+            "claim": {
+              "model": "fixtures/rcheck/structured/shipped-transition.model",
+              "check": "ConfirmCourier",
+              "expect": "reachable"
+            }
+          },
+          {
+            "id": "confirm-post",
+            "text": {
+              "ja": "Post で発送し、追跡方法を維持したまま確認済みになる経路がある。",
+              "en": "There is an execution that ships with Post and reaches an acknowledged state retaining Post."
+            },
+            "claim": {
+              "model": "fixtures/rcheck/structured/shipped-transition.model",
+              "check": "ConfirmPost",
+              "expect": "reachable"
+            }
+          }
         ]
       },
       {
@@ -1009,6 +1568,39 @@
       }
     ],
     "groundings": [
+      {
+        "model": "spec/models/measurement-gate.model",
+        "implementation": {
+          "path": "evals/experiments/rprob/goal.py",
+          "symbol": "score"
+        },
+        "test": {
+          "path": "evals/experiments/rprob/test_goal.py",
+          "symbol": "test_measurement_is_bound_to_pinned_inputs"
+        }
+      },
+      {
+        "model": "spec/models/checker-comparison.model",
+        "implementation": {
+          "path": "crates/rspec/src/comparison.rs",
+          "symbol": "compare_receipts"
+        },
+        "test": {
+          "path": "crates/rspec/tests/comparison.rs",
+          "symbol": "real_checker_results_feed_adoption"
+        }
+      },
+      {
+        "model": "spec/models/evidence-adoption.model",
+        "implementation": {
+          "path": "crates/rspec/src/adoption.rs",
+          "symbol": "assess_adoption"
+        },
+        "test": {
+          "path": "crates/rspec/tests/adoption.rs",
+          "symbol": "a_late_result_cannot_authorize_the_current_candidate"
+        }
+      },
       {
         "model": "spec/models/rmodel-behavior.model",
         "implementation": {

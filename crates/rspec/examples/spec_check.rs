@@ -145,7 +145,7 @@ fn main() {
             continue;
         }
         for rule in &spec.rules {
-            for claim in &rule.claims {
+            for claim in rule.all_claims() {
                 let verdicts = match checker {
                     Checker::Backends => engines(root, &claim.model, &claim.check),
                     Checker::Reference => vec![(

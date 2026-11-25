@@ -468,6 +468,17 @@ const scopes: readonly CrateScope[] = [
     ],
   },
   {
+    name: "rprob",
+    evidence: [
+      {
+        path: "src/lib.rs",
+        topic:
+          "ビット集合・二項関係による幅優先探索、適用範囲と探索予算、最短深さ",
+        context: ["src/compile.rs", "src/bits.rs", "tests/reference.rs"],
+      },
+    ],
+  },
+  {
     name: "rquint",
     evidence: [
       {

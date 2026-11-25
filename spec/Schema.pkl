@@ -48,13 +48,25 @@ class Claim {
   expect: Expectation
 }
 
-class Rule {
+class Clause {
+  id: Id
+  text: Text
+  claim: Claim? = null
+  /// Revision recorded by a reviewer after checking the sentence against the claim.
+  reviewed: String? = null
+}
+
+open class Rule {
   id: RuleId
   text: Text
   terms: Listing<Id>(!isEmpty)
   claims: Listing<Claim> = new {}
   /// Why a rule has no claim; a rule needs claims or this reason.
   unformalized: String? = null
+}
+
+class ClauseRule extends Rule {
+  clauses: Listing<Clause>(!isEmpty)
 }
 
 /// An implementation checked against a model: the test that feeds the

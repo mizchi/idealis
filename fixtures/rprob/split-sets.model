@@ -1,0 +1,16 @@
+model SplitSets
+sig Item
+var left: set Item
+var right: set Item
+init { no left no right }
+behavior addLeft(i: Item) {
+  guard { i not in left }
+  update { left = left + i }
+}
+behavior addRight(i: Item) {
+  guard { i not in right }
+  update { right = right + i }
+}
+invariant NoMissing { left + right in Item }
+reachable Full { left = Item and right = Item }
+scope Item = 7, steps = 15

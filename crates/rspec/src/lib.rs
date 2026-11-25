@@ -6,16 +6,30 @@
 //! references, a closed vocabulary over the referenced models, claimed
 //! checks and expectations that fit their checks. Semantic drift between
 //! the rendered glossary and prose is left to `jev-lint docs`.
-use serde::Deserialize;
+mod adoption;
+mod clauses;
+mod comparison;
+pub use adoption::{
+    AdoptionBlocker, EvaluationRevision, Evidence, GoalMeasurement, SemanticComparison,
+    assess_adoption,
+};
+pub use clauses::{
+    ClauseEvidence, ClauseReport, LinkStatus, ModelCheck, ReviewStatus, clause_report,
+};
+pub use comparison::{
+    Checker, CheckerReceipt, ComparisonPlan, ComparisonResult, compare_receipts, run_checker,
+};
+
+use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Text {
     pub ja: String,
     pub en: String,
 }
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct ModelRef {
     pub path: String,
     pub name: String,
@@ -43,13 +57,34 @@ pub struct Claim {
     pub check: String,
     pub expect: String,
 }
+/// A sentence within a rule with its own model claim and correspondence review.
+#[derive(Clone, Debug, Deserialize)]
+pub struct Clause {
+    pub id: String,
+    pub text: Text,
+    pub claim: Option<Claim>,
+    pub reviewed: Option<String>,
+}
+
 #[derive(Clone, Debug, Deserialize)]
 pub struct Rule {
     pub id: String,
     pub text: Text,
     pub terms: Vec<String>,
     pub claims: Vec<Claim>,
+    #[serde(default)]
+    pub clauses: Vec<Clause>,
     pub unformalized: Option<String>,
+}
+
+impl Rule {
+    pub fn all_claims(&self) -> impl Iterator<Item = &Claim> {
+        self.claims.iter().chain(
+            self.clauses
+                .iter()
+                .filter_map(|clause| clause.claim.as_ref()),
+        )
+    }
 }
 /// An implementation checked against a model by a named test (plan 0093).
 #[derive(Clone, Debug, Deserialize)]
@@ -126,6 +161,15 @@ pub fn links(spec: &Spec, root: &Path) -> Vec<Problem> {
         if !rule_ids.insert(rule.id.as_str()) {
             problems.push(problem("D1", format!("duplicate rule {}", rule.id)));
         }
+        let mut clause_ids = BTreeSet::new();
+        for clause in &rule.clauses {
+            if clause.id.is_empty() || !clause_ids.insert(clause.id.as_str()) {
+                problems.push(problem(
+                    "D1",
+                    format!("{}: empty or duplicate clause id {:?}", rule.id, clause.id),
+                ));
+            }
+        }
         for term in &rule.terms {
             if !ids.contains(term.as_str()) {
                 problems.push(problem("D1", format!("{}: unknown term {term}", rule.id)));
@@ -141,7 +185,7 @@ pub fn links(spec: &Spec, root: &Path) -> Vec<Problem> {
         .chain(
             spec.rules
                 .iter()
-                .flat_map(|rule| rule.claims.iter().map(|claim| claim.model.as_str())),
+                .flat_map(|rule| rule.all_claims().map(|claim| claim.model.as_str())),
         )
         .chain(
             spec.groundings
@@ -260,8 +304,7 @@ pub fn links(spec: &Spec, root: &Path) -> Vec<Problem> {
         .rules
         .iter()
         .flat_map(|rule| {
-            rule.claims
-                .iter()
+            rule.all_claims()
                 .map(|claim| (claim.model.clone(), claim.check.clone()))
         })
         .collect();
@@ -289,13 +332,15 @@ pub fn links(spec: &Spec, root: &Path) -> Vec<Problem> {
     // D4: claims fit their checks; rules are grounded or say why not.
     let mut seen = BTreeSet::new();
     for rule in &spec.rules {
-        if rule.claims.is_empty() && rule.unformalized.as_deref().is_none_or(str::is_empty) {
+        if rule.all_claims().next().is_none()
+            && rule.unformalized.as_deref().is_none_or(str::is_empty)
+        {
             problems.push(problem(
                 "D4",
                 format!("{} has no claim and no reason", rule.id),
             ));
         }
-        for claim in &rule.claims {
+        for claim in rule.all_claims() {
             if !seen.insert((claim.model.as_str(), claim.check.as_str())) {
                 problems.push(problem(
                     "D4",
@@ -305,36 +350,15 @@ pub fn links(spec: &Spec, root: &Path) -> Vec<Problem> {
             let Some(Some(model)) = models.get(claim.model.as_str()) else {
                 continue;
             };
-            let (kind, fits) = match model.checks.iter().find(|check| check.name == claim.check) {
-                Some(check) => match check.kind {
-                    rmodel::CheckKind::Invariant => (
-                        "Invariant",
-                        matches!(claim.expect.as_str(), "holds" | "violated"),
-                    ),
-                    rmodel::CheckKind::Reachable => (
-                        "Reachable",
-                        matches!(claim.expect.as_str(), "reachable" | "unreachable"),
-                    ),
-                },
-                None if model
-                    .transitions
-                    .iter()
-                    .any(|check| check.name == claim.check) =>
-                {
-                    (
-                        "Transition",
-                        matches!(claim.expect.as_str(), "holds" | "violated"),
-                    )
-                }
-                None => {
-                    problems.push(problem(
-                        "D4",
-                        format!("{}: {} has no check {}", rule.id, claim.model, claim.check),
-                    ));
-                    continue;
-                }
+            let Some((kind, _)) = clauses::lookup_check(model, &claim.check) else {
+                problems.push(problem(
+                    "D4",
+                    format!("{}: {} has no check {}", rule.id, claim.model, claim.check),
+                ));
+                continue;
             };
-            if !fits {
+            if !kind.accepts(&claim.expect) {
+                let kind = kind.name();
                 problems.push(problem(
                     "D4",
                     format!(
@@ -409,6 +433,15 @@ pub fn render(spec: &Spec, source: &str) -> String {
                     claim.model, claim.check, claim.expect
                 ));
             }
+            for clause in &rule.clauses {
+                out.push_str(&format!("- `{}`　{}\n", clause.id, clause.text.ja));
+                if let Some(claim) = &clause.claim {
+                    out.push_str(&format!(
+                        "  - `{}` の `{}` は {}\n",
+                        claim.model, claim.check, claim.expect
+                    ));
+                }
+            }
             if let Some(reason) = &rule.unformalized {
                 out.push_str(&format!("- 形式化しない理由: {reason}\n"));
             }
@@ -482,8 +515,7 @@ pub fn documents_manifest(drift: &Drift<'_>) -> Result<serde_json::Value, String
         register(rendered, "document");
         for rule in &spec.rules {
             let models: BTreeSet<&str> = rule
-                .claims
-                .iter()
+                .all_claims()
                 .map(|claim| claim.model.as_str())
                 .collect();
             for model in models {

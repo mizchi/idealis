@@ -1,0 +1,3 @@
+scope Holds, declarations Holds
+verdicts [Verdict { check: "NoLeak", outcome: Holds }, Verdict { check: "OnlyGranted", outcome: Holds }, Verdict { check: "SecretRead", outcome: Reachable { depth: 1 } }, Verdict { check: "UnclearedSecret", outcome: Unreachable }]
+actions [("read", Some(true)), ("close", Some(true))]

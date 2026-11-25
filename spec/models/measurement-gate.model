@@ -1,0 +1,22 @@
+model MeasurementGate
+enum Prerequisite = PinnedRun | StableSamples | ThresholdMet
+enum GoalDecision = Improvement
+var confirmed: set Prerequisite
+var published: lone GoalDecision
+
+init { no confirmed no published }
+behavior confirm(p: Prerequisite) {
+  guard { p not in confirmed }
+  update { confirmed = confirmed + p }
+}
+behavior publishImprovement() {
+  guard { no published confirmed = Prerequisite }
+  update { published = Improvement }
+}
+
+invariant ImprovementNeedsPinnedRun { some published implies PinnedRun in confirmed }
+invariant ImprovementNeedsStableSamples { some published implies StableSamples in confirmed }
+invariant ImprovementNeedsThreshold { some published implies ThresholdMet in confirmed }
+reachable UnsettledMeasurement { PinnedRun in confirmed StableSamples not in confirmed no published }
+reachable ImprovementPublished { some published }
+scope steps = 5

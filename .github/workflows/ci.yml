@@ -73,6 +73,7 @@ jobs:
       - run: cargo test --all-targets --locked --manifest-path crates/ralloy/Cargo.toml
       - run: just rquint-test
       - run: just rmodel-test
+      - run: just rprob-test
       - run: just rcheck-test
       - run: just rcheck-typescript
       - name: Install Pkl 0.31.1

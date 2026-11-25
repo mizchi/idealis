@@ -1,0 +1,45 @@
+model EvidenceAdoption
+enum Revision = First | Second
+var current: one Revision
+var adopted: lone Revision
+var reviewed: set Revision
+var equivalent: set Revision
+var improved: set Revision
+var lateSemantic: lone Revision
+
+init {
+  current = First
+  no adopted no reviewed no equivalent no improved no lateSemantic
+}
+behavior recordReview(r: Revision) {
+  guard { (r = current or r = First) and r not in reviewed }
+  update { reviewed = reviewed + r }
+}
+behavior recordSemantics(r: Revision) {
+  guard { r = current r not in equivalent }
+  update { equivalent = equivalent + r }
+}
+behavior receiveLateSemantics(r: Revision) {
+  guard { current = Second r = First r not in equivalent }
+  update { equivalent = equivalent + r lateSemantic = r }
+}
+behavior recordGoal(r: Revision) {
+  guard { (r = current or r = First) and r not in improved }
+  update { improved = improved + r }
+}
+behavior revise() {
+  guard { current = First }
+  update { current = Second adopted = none }
+}
+behavior adopt() {
+  guard { no adopted current in reviewed current in equivalent current in improved }
+  update { adopted = current }
+}
+
+invariant AdoptedIsCurrent { adopted in current }
+invariant AdoptionNeedsCurrentReview { adopted in reviewed }
+invariant AdoptionNeedsCurrentAgreement { adopted in equivalent }
+invariant AdoptionNeedsCurrentImprovement { adopted in improved }
+reachable OldAgreementArrives { current = Second lateSemantic = First no adopted Second not in equivalent }
+reachable CurrentEvidenceCanAdopt { adopted = Second }
+scope steps = 8

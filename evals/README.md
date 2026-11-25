@@ -2,6 +2,24 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0127: rprob の初期候補と遷移ディスパッチ](iterations/0127-rprob-budget-and-dispatch.md)は、予算切れを含む7負荷で候補処理とビット更新を比較した。
+
+[0126: rprob の探索コスト](iterations/0126-rprob-hot-paths.md)は、状態保存・式評価・候補走査・ガード評価を段階ごとに比較した。
+
+[0125: rprob の候補列挙](iterations/0125-rprob-candidates.md)は、試作の準備時間、ピーク RSS、準備済み探索、対応範囲を同じカーネルの変更前後で検査した。
+
+[0124: 実測から採用のゴール証拠を作る](iterations/0124-measured-goal.md)は、固定したモデルで rprob を測定し、改善と測定未確定を採用判定に渡した。
+
+[0123: 検査結果から採用の意味比較を作る](iterations/0123-checker-receipts.md)は、参照評価器と rprob の結果を同じ計画に結び、片方の欠落・旧版の混入・不一致の対照を調べた。
+
+[0122: 自己仕様の採用判断と証拠の版](iterations/0122-evidence-provenance.md)は、節レビュー・意味比較・ゴールの測定を版で照合し、改版後に旧い成功が届く例を検査する。
+
+[0121: 有限集合モデルの探索カーネル](iterations/0121-rprob-kernel.md)は、rprob のビット集合による探索を参照評価器と照合し、時間とメモリを比較した。
+
+[0120: 要件の節を名前付きの検査へ結ぶ](iterations/0120-reviewed-clauses.md)は、rspec の節とレビュー版を発送のモデルに接続し、CLI で検査と対応の変更を報告する。
+
+[0119: 自然文と遷移の対応を追う](iterations/0119-requirement-links.md)は、Event-B の事例から三つのリンク構造を試し、代理読み手の評価と動作を消す修正の対照を行った。
+
 [0118: 発送の仕様と3言語の再生](iterations/0118-shipment-drift-and-replay.md)は、自然言語の要件を遷移の性質に結び、二つの ITF を Rust・TypeScript・Go で再生した。
 
 [0117: 遷移前後の検査と読み取り](iterations/0117-transition-readability.md)は、出荷の二状態の条件を直接記述し、参照評価器・rtlc・TLCの対照と二人の代理読み手で確認した。
