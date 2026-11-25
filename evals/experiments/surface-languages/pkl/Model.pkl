@@ -1,0 +1,354 @@
+/// A model as typed data (plan 0107, the Pkl column).
+///
+/// A model file amends this module. Formulas are a typed expression AST
+/// built from Pkl classes, not strings: every node carries a fixed `op`
+/// (and every type a fixed `tag`), so the JSON output is a tree a tool can
+/// read without a parser. Binders are written with Pkl lambdas
+/// (`all("u", "User", (u) -> ...)`) and stored first-order: the lambda is
+/// applied to a `Var` once, so the output holds names, not functions.
+///
+/// Pkl does not evaluate the formulas; it checks them. `diagnostics` is a
+/// small type checker over the AST (scope, arity, types, exhaustive
+/// `match`, which relations an action may assign) and a model with any
+/// diagnostic fails to evaluate. Checking reachability is out of reach
+/// here; see Interp.pkl for how far an evaluator in Pkl gets.
+module Model
+
+typealias Name = String(matches(Regex(#"^[A-Za-z][A-Za-z0-9_]*$"#)))
+typealias Mult = "one" | "lone" | "set"
+typealias Kind = "invariant" | "reachable" | "step" | "temporal"
+typealias Expect = "holds" | "violated" | "reachable" | "unreachable"
+
+// ---- types ---------------------------------------------------------------
+
+abstract class Type { fixed tag: String }
+class SortT extends Type { fixed tag = "sort"; name: Name }
+class DataT extends Type { fixed tag = "data"; name: Name }
+class IntT extends Type { fixed tag = "int" }
+class BoolT extends Type { fixed tag = "bool" }
+
+class Field { name: Name; type: Type }
+class Variant { name: Name; fields: List<Field> = List() }
+/// An algebraic data type; an enum is one whose variants have no fields.
+class Data {
+  name: Name
+  variants: List<Variant>(!isEmpty, map((it) -> it.name).isDistinct)
+}
+
+/// A relation `dom -> mult cod`. `mutable = false` is configuration (an
+/// arbitrary value constrained by `facts`); `mutable = true` is state and
+/// needs an initial value.
+class Rel {
+  name: Name
+  mutable: Boolean
+  dom: List<Type> = List()
+  cod: Type
+  mult: Mult
+  initial: Init?(mutable == (this != null))
+}
+abstract class Init { fixed tag: String }
+/// Every point is empty (set / lone).
+class Empty extends Init { fixed tag = "empty" }
+/// Every point holds `value` (one); the value must be closed.
+class Const extends Init { fixed tag = "const"; value: Expr }
+
+// ---- expressions -----------------------------------------------------------
+
+abstract class Expr { fixed op: String }
+class Var extends Expr { fixed op = "var"; name: Name }
+class IntLit extends Expr { fixed op = "int"; value: Int }
+class BoolLit extends Expr { fixed op = "bool"; value: Boolean }
+class Ctor extends Expr { fixed op = "ctor"; data: Name; variant: Name; args: List<Expr> = List() }
+/// The value of a `one` relation at `args`.
+class App extends Expr { fixed op = "app"; rel: Name; args: List<Expr> = List() }
+/// The set of values of a `set` / `lone` relation at `args`.
+class Image extends Expr { fixed op = "image"; rel: Name; args: List<Expr> = List() }
+class Universe extends Expr { fixed op = "universe"; sort: Name }
+class In extends Expr { fixed op = "in"; elem: Expr; set: Expr }
+class Count extends Expr { fixed op = "count"; set: Expr }
+class Not extends Expr { fixed op = "not"; arg: Expr }
+class And extends Expr { fixed op = "and"; args: List<Expr> }
+class Or extends Expr { fixed op = "or"; args: List<Expr> }
+class Implies extends Expr { fixed op = "implies"; lhs: Expr; rhs: Expr }
+class Cmp extends Expr { fixed op = "cmp"; rel: "=" | "!=" | "<" | "<=" | ">" | ">="; lhs: Expr; rhs: Expr }
+class Arith extends Expr { fixed op = "arith"; fn: "+" | "-"; lhs: Expr; rhs: Expr }
+class All extends Expr { fixed op = "all"; var: Name; sort: Name; body: Expr }
+class Exists extends Expr { fixed op = "exists"; var: Name; sort: Name; body: Expr }
+class Case { variant: Name; binds: List<Name> = List(); body: Expr }
+/// Total by construction: `diagnostics` requires one case per variant.
+class Match extends Expr { fixed op = "match"; scrutinee: Expr; cases: List<Case> }
+/// The value of `arg` in the next state (step and temporal properties).
+class Next extends Expr { fixed op = "next"; arg: Expr }
+class Always extends Expr { fixed op = "always"; arg: Expr }
+class Eventually extends Expr { fixed op = "eventually"; arg: Expr }
+
+// ---- actions and properties --------------------------------------------------
+
+class Param { name: Name; type: Type }
+abstract class Update { fixed tag: String; rel: Name }
+/// `rel(args) := value` for a `one` relation.
+class Assign extends Update { fixed tag = "assign"; args: List<Expr> = List(); value: Expr }
+/// `rel(args) := {value}` or empty (value = null) for a `lone` relation.
+class SetLone extends Update { fixed tag = "setLone"; args: List<Expr> = List(); value: Expr? }
+/// Add / remove `elem` at `rel(args)` for a `set` relation.
+class Insert extends Update { fixed tag = "insert"; args: List<Expr> = List(); elem: Expr }
+class Remove extends Update { fixed tag = "remove"; args: List<Expr> = List(); elem: Expr }
+
+/// Guards are conjoined; updates are simultaneous and read the old state;
+/// a relation not updated keeps its value.
+class Action {
+  name: Name
+  params: List<Param> = List()
+  guard: List<Expr> = List()
+  updates: List<Update>
+}
+
+class Fairness { strength: "weak" | "strong"; action: Name }
+class Prop {
+  name: Name
+  kind: Kind
+  formula: Expr
+  fairness: List<Fairness>(isEmpty || kind == "temporal") = List()
+  expect: Expect
+  note: String? = null
+}
+
+// ---- the model ---------------------------------------------------------------
+
+name: Name
+sorts: List<Name>
+data: List<Data> = List()
+rels: List<Rel>
+facts: List<Expr> = List()
+actions: List<Action>
+props: List<Prop>
+/// Check arguments, not part of the model: sort sizes, the Int range and
+/// the depth bound the kernel's checks use.
+check: Check
+class Check {
+  sizes: Map<Name, Int>
+  intMin: Int = 0
+  intMax: Int = 0
+  steps: Int
+}
+
+/// Every problem the checker finds; a non-empty list fails evaluation.
+diagnostics: List<String>(isEmpty) = errors()
+
+// ---- authoring helpers -----------------------------------------------------------
+
+function sort(n: Name): Type = new SortT { name = n }
+function dataT(n: Name): Type = new DataT { name = n }
+function int(): Type = new IntT {}
+function bool(): Type = new BoolT {}
+function enumOf(n: Name, vs: List<Name>): Data = new { name = n; variants = vs.map((it) -> new Variant { name = it }) }
+function param(n: Name, t: Type): Param = new { name = n; type = t }
+function adt(n: Name, vs: List<Variant>): Data = new { name = n; variants = vs }
+function variant(n: Name, fs: List<Field>): Variant = new { name = n; fields = fs }
+function field(n: Name, t: Type): Field = new { name = n; type = t }
+
+function v(n: Name): Expr = new Var { name = n }
+function i(n: Int): Expr = new IntLit { value = n }
+function lit(b: Boolean): Expr = new BoolLit { value = b }
+function ctor(d: Name, vn: Name, xs: List<Expr>): Expr = new Ctor { data = d; variant = vn; args = xs }
+function at(r: Name, xs: List<Expr>): Expr = new App { rel = r; args = xs }
+function img(r: Name, xs: List<Expr>): Expr = new Image { rel = r; args = xs }
+function univ(s: Name): Expr = new Universe { sort = s }
+function mem(x: Expr, s: Expr): Expr = new In { elem = x; set = s }
+function count(s: Expr): Expr = new Count { set = s }
+function no(s: Expr): Expr = cmp("=", count(s), i(0))
+function not(x: Expr): Expr = new Not { arg = x }
+function and(xs: List<Expr>): Expr = new And { args = xs }
+function or(xs: List<Expr>): Expr = new Or { args = xs }
+function implies(a: Expr, b: Expr): Expr = new Implies { lhs = a; rhs = b }
+function cmp(r: String, a: Expr, b: Expr): Expr = new Cmp { rel = r; lhs = a; rhs = b }
+function eq(a: Expr, b: Expr): Expr = cmp("=", a, b)
+function plus(a: Expr, b: Expr): Expr = new Arith { fn = "+"; lhs = a; rhs = b }
+function minus(a: Expr, b: Expr): Expr = new Arith { fn = "-"; lhs = a; rhs = b }
+// A parameter named like the property it sets (`body = body`) would read
+// the property itself, hence `fn`.
+function all(x: Name, s: Name, fn: (Expr) -> Expr): Expr = new All { var = x; sort = s; body = fn.apply(v(x)) }
+function some(x: Name, s: Name, fn: (Expr) -> Expr): Expr = new Exists { var = x; sort = s; body = fn.apply(v(x)) }
+function match(e: Expr, cs: List<Case>): Expr = new Match { scrutinee = e; cases = cs }
+function alt(vn: Name, bs: List<Name>, b: Expr): Case = new { variant = vn; binds = bs; body = b }
+function next(e: Expr): Expr = new Next { arg = e }
+function always(e: Expr): Expr = new Always { arg = e }
+function eventually(e: Expr): Expr = new Eventually { arg = e }
+
+// Object bodies (`new Rel { ... }`) resolve names against the new object,
+// not against the amended module, so the helpers below are unreachable
+// inside them; the model files build everything through these functions.
+function config(n: Name, d: List<Type>, m: Mult, c: Type): Rel =
+  new { name = n; mutable = false; dom = d; mult = m; cod = c; initial = null }
+function state(n: Name, d: List<Type>, m: Mult, c: Type, ini: Init): Rel =
+  new { name = n; mutable = true; dom = d; mult = m; cod = c; initial = ini }
+function empty(): Init = new Empty {}
+function constInit(e: Expr): Init = new Const { value = e }
+function action(n: Name, ps: List<Param>, g: List<Expr>, us: List<Update>): Action =
+  new { name = n; params = ps; guard = g; updates = us }
+function assign(r: Name, xs: List<Expr>, e: Expr): Update = new Assign { rel = r; args = xs; value = e }
+function setLone(r: Name, xs: List<Expr>, e: Expr?): Update = new SetLone { rel = r; args = xs; value = e }
+function insert(r: Name, xs: List<Expr>, e: Expr): Update = new Insert { rel = r; args = xs; elem = e }
+function remove(r: Name, xs: List<Expr>, e: Expr): Update = new Remove { rel = r; args = xs; elem = e }
+function prop(n: Name, k: Kind, x: Expect, f: Expr): Prop = new { name = n; kind = k; expect = x; formula = f }
+function fairProp(n: Name, x: Expect, fs: List<Fairness>, f: Expr): Prop =
+  new { name = n; kind = "temporal"; expect = x; fairness = fs; formula = f }
+function weak(a: Name): Fairness = new { strength = "weak"; action = a }
+function scope(m: Map<Name, Int>, lo: Int, hi: Int, k: Int): Check = new { sizes = m; intMin = lo; intMax = hi; steps = k }
+
+// ---- the checker ---------------------------------------------------------------
+
+/// Type names: a sort or data name, "Int", "Bool", "{T}" for a set, "?" when
+/// ill-typed (the error is reported where it arises).
+function tname(t: Type): String =
+  if (t is SortT) t.name else if (t is DataT) t.name else if (t is IntT) "Int" else "Bool"
+
+function relOf(n: String): Rel? = rels.findOrNull((r) -> r.name == n)
+function dataOf(n: String): Data? = data.findOrNull((d) -> d.name == n)
+function domainOk(n: String): Boolean = sorts.contains(n) || dataOf(n) != null
+
+function typeOf(e: Expr, env: Map<String, String>): String =
+  if (e is Var) env.getOrNull(e.name) ?? "?"
+  else if (e is IntLit || e is Count || e is Arith) "Int"
+  else if (e is Ctor) e.data
+  else if (e is App) let (r = relOf(e.rel)) if (r == null) "?" else tname(r.cod)
+  else if (e is Image) let (r = relOf(e.rel)) if (r == null) "?" else "{" + tname(r.cod) + "}"
+  else if (e is Universe) "{" + e.sort + "}"
+  else if (e is Next) typeOf(e.arg, env)
+  else if (e is Match)
+    let (d = dataOf(typeOf(e.scrutinee, env)))
+      if (d == null || e.cases.isEmpty) "?"
+      else typeOf(e.cases.first.body, caseEnv(d, e.cases.first, env))
+  else "Bool"
+
+function caseEnv(d: Data, c: Case, env: Map<String, String>): Map<String, String> =
+  let (vr = d.variants.findOrNull((it) -> it.name == c.variant))
+    if (vr == null || vr.fields.length != c.binds.length) env
+    else c.binds.zip(vr.fields).fold(env, (acc, p) -> acc.put(p.first, tname(p.second.type)))
+
+function expect(e: Expr, t: String, env: Map<String, String>, mode: String, where: String): List<String> =
+  let (es = check(e, env, mode, where))
+    if (!es.isEmpty) es
+    else let (got = typeOf(e, env)) if (got == t) List() else List("\(where): expected \(t), got \(got)")
+
+function args(r: Rel, xs: List<Expr>, env: Map<String, String>, mode: String, where: String): List<String> =
+  if (r.dom.length != xs.length) List("\(where): \(r.name) takes \(r.dom.length) arguments, got \(xs.length)")
+  else xs.zip(r.dom).flatMap((p) -> expect(p.first, tname(p.second), env, mode, where))
+
+function relUse(n: String, mode: String, where: String): List<String> =
+  let (r = relOf(n))
+    if (r == null) List("\(where): undeclared relation \(n)")
+    else if (mode == "fact" && r.mutable) List("\(where): a fact may only use configuration, not \(n)")
+    else List()
+
+function check(e: Expr, env: Map<String, String>, mode: String, where: String): List<String> =
+  if (e is Var) (if (env.containsKey(e.name)) List() else List("\(where): unbound variable \(e.name)"))
+  else if (e is IntLit || e is BoolLit) List()
+  else if (e is Universe) (if (domainOk(e.sort)) List() else List("\(where): undeclared sort \(e.sort)"))
+  else if (e is Ctor)
+    let (d = dataOf(e.data))
+    let (vr = d?.variants?.findOrNull((it) -> it.name == e.variant))
+      if (d == null) List("\(where): undeclared data type \(e.data)")
+      else if (vr == null) List("\(where): \(e.data) has no variant \(e.variant)")
+      else if (vr.fields.length != e.args.length) List("\(where): \(e.variant) takes \(vr.fields.length) fields")
+      else e.args.zip(vr.fields).flatMap((p) -> expect(p.first, tname(p.second.type), env, mode, where))
+  else if (e is App || e is Image)
+    let (u = relUse(e.rel, mode, where))
+      if (!u.isEmpty) u
+      else let (r = relOf(e.rel)!!)
+        if (e is App && r.mult != "one") List("\(where): \(r.name) is \(r.mult); use its image")
+        else if (e is Image && r.mult == "one") List("\(where): \(r.name) is one; use its value")
+        else args(r, e.args, env, mode, where)
+  else if (e is In)
+    let (es = check(e.elem, env, mode, where) + check(e.set, env, mode, where))
+      if (!es.isEmpty) es
+      else let (te = typeOf(e.elem, env)) let (ts = typeOf(e.set, env))
+        if (ts == "{" + te + "}") List() else List("\(where): \(te) is not an element of \(ts)")
+  else if (e is Count)
+    let (es = check(e.set, env, mode, where))
+      if (!es.isEmpty) es else if (typeOf(e.set, env).startsWith("{")) List() else List("\(where): # of a non-set")
+  else if (e is Not) expect(e.arg, "Bool", env, mode, where)
+  else if (e is And) e.args.flatMap((x) -> expect(x, "Bool", env, mode, where))
+  else if (e is Or) e.args.flatMap((x) -> expect(x, "Bool", env, mode, where))
+  else if (e is Implies) expect(e.lhs, "Bool", env, mode, where) + expect(e.rhs, "Bool", env, mode, where)
+  else if (e is Arith) expect(e.lhs, "Int", env, mode, where) + expect(e.rhs, "Int", env, mode, where)
+  else if (e is Cmp)
+    if (e.rel == "=" || e.rel == "!=")
+      let (es = check(e.lhs, env, mode, where) + check(e.rhs, env, mode, where))
+        if (!es.isEmpty) es
+        else let (a = typeOf(e.lhs, env)) let (b = typeOf(e.rhs, env))
+          if (a == b) List() else List("\(where): comparing \(a) with \(b)")
+    else expect(e.lhs, "Int", env, mode, where) + expect(e.rhs, "Int", env, mode, where)
+  else if (e is All || e is Exists)
+    if (!domainOk(e.sort)) List("\(where): undeclared sort \(e.sort)")
+    else expect(e.body, "Bool", env.put(e.var, e.sort), mode, where)
+  else if (e is Match)
+    let (es = check(e.scrutinee, env, mode, where))
+      if (!es.isEmpty) es
+      else let (d = dataOf(typeOf(e.scrutinee, env)))
+        if (d == null) List("\(where): match on a value of \(typeOf(e.scrutinee, env)), not a data type")
+        else let (names = e.cases.map((c) -> c.variant))
+          let (missing = d.variants.map((it) -> it.name).filter((n) -> !names.contains(n)))
+          if (!names.isDistinct) List("\(where): duplicate case in match on \(d.name)")
+          else if (!missing.isEmpty) List("\(where): match on \(d.name) misses \(missing.join(", "))")
+          else let (t = typeOf(e, env))
+            e.cases.flatMap((c) ->
+              let (vr = d.variants.find((it) -> it.name == c.variant))
+                if (vr.fields.length != c.binds.length) List("\(where): \(c.variant) binds \(vr.fields.length) fields")
+                else expect(c.body, t, caseEnv(d, c, env), mode, where))
+  else if (e is Next)
+    if (mode == "step" || mode == "temporal") check(e.arg, env, "state", where)
+    else List("\(where): next-state values only in step or temporal properties")
+  else if (e is Always || e is Eventually)
+    if (mode == "temporal") expect(e.arg, "Bool", env, mode, where)
+    else List("\(where): temporal operators only in temporal properties")
+  else List("\(where): unknown node")
+
+function typeErrors(t: Type, where: String): List<String> =
+  if (t is SortT && !sorts.contains(t.name)) List("\(where): undeclared sort \(t.name)")
+  else if (t is DataT && dataOf(t.name) == null) List("\(where): undeclared data type \(t.name)")
+  else List()
+
+function updateErrors(a: Action, u: Update, env: Map<String, String>): List<String> =
+  let (where = "action \(a.name), update \(u.rel)")
+  let (r = relOf(u.rel))
+    if (r == null) List("\(where): undeclared relation")
+    else if (!r.mutable) List("\(where): \(u.rel) is configuration and cannot change")
+    else if (u is Assign && r.mult != "one") List("\(where): assign needs a one relation")
+    else if (u is SetLone && r.mult != "lone") List("\(where): setLone needs a lone relation")
+    else if ((u is Insert || u is Remove) && r.mult != "set") List("\(where): insert/remove needs a set relation")
+    else args(r, u.args, env, "state", where) +
+      (if (u is Assign) expect(u.value, tname(r.cod), env, "state", where)
+       else if (u is SetLone) (if (u.value == null) List() else expect(u.value!!, tname(r.cod), env, "state", where))
+       else if (u is Insert) expect(u.elem, tname(r.cod), env, "state", where)
+       else if (u is Remove) expect(u.elem, tname(r.cod), env, "state", where)
+       else List())
+
+function errors(): List<String> =
+  (if (sorts.isDistinct) List() else List("sorts are not distinct")) +
+  (if ((sorts + data.map((d) -> d.name)).isDistinct) List() else List("a data type shares a sort's name")) +
+  (if (rels.map((r) -> r.name).isDistinct) List() else List("relations are not distinct")) +
+  data.flatMap((d) -> d.variants.flatMap((vr) -> vr.fields.flatMap((f) -> typeErrors(f.type, "data \(d.name)")))) +
+  rels.flatMap((r) ->
+    r.dom.flatMap((t) -> typeErrors(t, "relation \(r.name)")) + typeErrors(r.cod, "relation \(r.name)") +
+    (if (r.initial is Const && r.mult != "one") List("relation \(r.name): const initial needs a one relation")
+     else if (r.initial is Empty && r.mult == "one") List("relation \(r.name): a one relation cannot start empty")
+     else if (r.initial is Const) expect((r.initial as Const).value, tname(r.cod), Map(), "state", "relation \(r.name)")
+     else List())) +
+  facts.flatMap((f) -> expect(f, "Bool", Map(), "fact", "fact")) +
+  actions.flatMap((a) ->
+    let (env = a.params.fold(Map(), (acc, p) -> acc.put(p.name, tname(p.type))))
+      a.params.flatMap((p) -> typeErrors(p.type, "action \(a.name)")) +
+      a.guard.flatMap((g) -> expect(g, "Bool", env, "state", "action \(a.name)")) +
+      a.updates.flatMap((u) -> updateErrors(a, u, env))) +
+  props.flatMap((p) ->
+    let (mode = if (p.kind == "step") "step" else if (p.kind == "temporal") "temporal" else "state")
+      expect(p.formula, "Bool", Map(), mode, "property \(p.name)") +
+      p.fairness.flatMap((f) -> if (actions.any((a) -> a.name == f.action)) List() else List("property \(p.name): fairness on undeclared action \(f.action)")) +
+      (if ((p.kind == "invariant" || p.kind == "step" || p.kind == "temporal") && !(p.expect == "holds" || p.expect == "violated"))
+         List("property \(p.name): \(p.kind) expects holds or violated")
+       else if (p.kind == "reachable" && !(p.expect == "reachable" || p.expect == "unreachable"))
+         List("property \(p.name): reachable expects reachable or unreachable")
+       else List())) +
+  check.sizes.keys.toList().flatMap((s) -> if (sorts.contains(s)) List() else List("check: size for undeclared sort \(s)")) +
+  sorts.flatMap((s) -> if (check.sizes.containsKey(s)) List() else List("check: no size for sort \(s)"))

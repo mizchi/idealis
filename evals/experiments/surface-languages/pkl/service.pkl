@@ -1,0 +1,27 @@
+// service (SPEC 5): liveness under weak fairness.
+amends "Model.pkl"
+
+name = "Service"
+sorts = List("Client")
+rels = List(
+  state("waiting", List(), "set", sort("Client"), empty()),
+  state("served", List(), "set", sort("Client"), empty()),
+)
+local waiting = img("waiting", List())
+local served = img("served", List())
+local client = List(param("c", sort("Client")))
+actions = List(
+  action("request", client, List(not(mem(v("c"), waiting)), not(mem(v("c"), served))),
+    List(insert("waiting", List(), v("c")))),
+  action("serve", client, List(mem(v("c"), waiting)),
+    List(remove("waiting", List(), v("c")), insert("served", List(), v("c")))),
+)
+local eventuallyServed = all("c", "Client", (c) -> always(implies(mem(c, waiting), eventually(mem(c, served)))))
+props = List(
+  // Weak fairness is on the action serve as a whole (some c), as WF_vars(serve).
+  fairProp("EventuallyServed", "holds", List(weak("serve")), eventuallyServed),
+  // The same formula without fairness: stuttering forever, or only requests.
+  fairProp("EventuallyServedUnfair", "violated", List(), eventuallyServed),
+  prop("Disjoint", "invariant", "holds", all("c", "Client", (c) -> not(and(List(mem(c, waiting), mem(c, served)))))),
+)
+check = scope(Map("Client", 2), 0, 0, 4)

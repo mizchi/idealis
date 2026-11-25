@@ -1,0 +1,42 @@
+model Order
+// Workaround: no algebraic data types. The constructor is an enum, and
+// each payload is a separate lone relation kept consistent by hand.
+sig Order
+enum Status = Draft | Placed | Shipped | Cancelled
+enum Carrier = Post | Courier
+enum Reason = Customer | Fraud
+var status: Order -> one Status
+var tracking: Order -> lone Carrier
+var reason: Order -> lone Reason
+init { all o: Order | o.status = Draft }
+init { no tracking and no reason }
+action place(o: Order) {
+  o.status = Draft
+  status' = status - o -> Draft + o -> Placed
+}
+action ship(o: Order, c: Carrier) {
+  o.status = Placed
+  status' = status - o -> Placed + o -> Shipped
+  tracking' = tracking + o -> c
+}
+action cancel(o: Order, r: Reason) {
+  o.status in Draft + Placed
+  status' = status - o -> o.status + o -> Cancelled
+  reason' = reason + o -> r
+}
+// Not expressible: ShippedStays is a property of steps (a shipped order
+// stays shipped with the same tracking), and checks are state predicates.
+// The closest state invariant is the consistency of the payloads:
+// Workaround: no `iff`; both directions with `implies`.
+invariant PayloadsMatch {
+  all o: Order | {
+    o.status = Shipped implies some o.tracking
+    some o.tracking implies o.status = Shipped
+    o.status = Cancelled implies some o.reason
+    some o.reason implies o.status = Cancelled
+  }
+}
+reachable FraudCancelled { some o: Order | o.status = Cancelled and o.reason = Fraud }
+// The types of an algebraic status rule this out; here it is a check.
+reachable ShippedCancelled { some o: Order | o.status = Shipped and o.status = Cancelled }
+scope Order = 2, steps = 4

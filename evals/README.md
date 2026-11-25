@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0107: モデルの書き方の比較](iterations/0107-surface-languages.md)は、5つの題材をrmodel・Quint・OCaml・Isabelle・Idris 2・Pkl・Veilで書いて検査した。すべてSPECと一致し、詰む場所は系統で分かれた。ホストの関数で書くと解析できず、SMTに渡す言語は断片で詰む。
+
 [0106: 帰納法の検査器の試作（proto）](iterations/0106-induction-proto.md)は、核のIRからVCを作りz3で帰納的な不変条件を検査する試作で、CTIを参照評価器で検査し直す。直した後のcorpusと生成したモデルで食い違いは0件、断片は狭い（生成したモデルの4%）。
 
 [0105: MoonBitのtraitとdecodeの生成](iterations/0105-moonbit-bindings.md)は、同じJSONの契約でMoonBitのtrait・厳密なdecoder・`Server::handle`を生成し、MoonBitの2実装の照合と、3件の人工故障の検出を確かめた。

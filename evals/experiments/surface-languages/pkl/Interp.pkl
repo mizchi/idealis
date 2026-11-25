@@ -1,0 +1,172 @@
+/// How far an evaluator written in Pkl gets (plan 0107).
+///
+/// Evaluates the AST of a Model over finite states: enumerates the
+/// configurations that satisfy the facts, explores breadth-first up to
+/// `check.steps`, and judges invariant, reachable and step properties.
+/// Temporal properties (fairness) are not evaluated: that needs cycle
+/// detection over the state graph, and they come out as `unsupported`.
+///
+/// Values: an atom is "Sort#i", a constructor value is List(variant, args...),
+/// a set or lone relation point is a Set. A state maps each relation name
+/// to a Map from argument tuples to the point's value.
+module Interp
+
+import "Model.pkl"
+
+function atoms(m: Model, s: String): List<Any> = IntSeq(0, m.check.sizes[s] - 1).toList().map((k) -> "\(s)#\(k)")
+
+function cartesian(ls: List<List<Any>>): List<List<Any>> =
+  ls.fold(List(List()), (acc, l) -> acc.flatMap((t) -> l.map((x) -> t + List(x))))
+
+function powerset(l: List<Any>): List<Set<Any>> =
+  l.fold(List(Set()), (acc, x) -> acc + acc.map((s) -> s + Set(x)))
+
+function domain(m: Model, t: String): List<Any> =
+  if (t == "Int") IntSeq(m.check.intMin, m.check.intMax).toList()
+  else if (t == "Bool") List(false, true)
+  else if (m.sorts.contains(t)) atoms(m, t)
+  else let (d = m.dataOf(t)!!)
+    d.variants.flatMap((vr) ->
+      cartesian(vr.fields.map((f) -> domain(m, m.tname(f.type)))).map((xs) -> List(vr.name) + xs))
+
+function points(m: Model, r: Model.Rel): List<List<Any>> = cartesian(r.dom.map((t) -> domain(m, m.tname(t))))
+
+function values(m: Model, r: Model.Rel): List<Any> =
+  let (cod = domain(m, m.tname(r.cod)))
+    if (r.mult == "one") cod
+    else if (r.mult == "lone") List(Set()) + cod.map((x) -> Set(x))
+    else powerset(cod)
+
+function eval(m: Model, e: Model.Expr, env: Map<String, Any>, s: Map<String, Map<List<Any>, Any>>, s2: Map<String, Map<List<Any>, Any>>?): Any =
+  if (e is Model.Var) env[e.name]
+  else if (e is Model.IntLit || e is Model.BoolLit) e.value
+  else if (e is Model.Ctor) List(e.variant) + e.args.map((x) -> eval(m, x, env, s, s2))
+  else if (e is Model.App || e is Model.Image) s[e.rel][e.args.map((x) -> eval(m, x, env, s, s2))]
+  else if (e is Model.Universe) domain(m, e.sort).toSet()
+  else if (e is Model.In) (eval(m, e.set, env, s, s2) as Set).contains(eval(m, e.elem, env, s, s2))
+  else if (e is Model.Count) (eval(m, e.set, env, s, s2) as Set).length
+  else if (e is Model.Not) !(eval(m, e.arg, env, s, s2) as Boolean)
+  else if (e is Model.And) e.args.every((x) -> eval(m, x, env, s, s2) as Boolean)
+  else if (e is Model.Or) e.args.any((x) -> eval(m, x, env, s, s2) as Boolean)
+  else if (e is Model.Implies) !(eval(m, e.lhs, env, s, s2) as Boolean) || eval(m, e.rhs, env, s, s2) as Boolean
+  else if (e is Model.Arith)
+    let (a = eval(m, e.lhs, env, s, s2) as Int) let (b = eval(m, e.rhs, env, s, s2) as Int)
+      if (e.fn == "+") a + b else a - b
+  else if (e is Model.Cmp)
+    let (a = eval(m, e.lhs, env, s, s2)) let (b = eval(m, e.rhs, env, s, s2))
+      if (e.rel == "=") a == b else if (e.rel == "!=") a != b
+      else if (e.rel == "<") (a as Int) < (b as Int) else if (e.rel == "<=") (a as Int) <= (b as Int)
+      else if (e.rel == ">") (a as Int) > (b as Int) else (a as Int) >= (b as Int)
+  else if (e is Model.All) domain(m, e.sort).every((x) -> eval(m, e.body, env.put(e.var, x), s, s2) as Boolean)
+  else if (e is Model.Exists) domain(m, e.sort).any((x) -> eval(m, e.body, env.put(e.var, x), s, s2) as Boolean)
+  else if (e is Model.Match)
+    let (cv = eval(m, e.scrutinee, env, s, s2) as List)
+    let (c = e.cases.find((it) -> it.variant == cv[0]))
+      eval(m, c.body, c.binds.zip(cv.drop(1)).fold(env, (acc, p) -> acc.put(p.first, p.second)), s, s2)
+  else if (e is Model.Next) eval(m, e.arg, env, s2!!, null)
+  else throw("temporal operator outside the evaluated fragment")
+
+function configs(m: Model): List<Map<String, Map<List<Any>, Any>>> =
+  let (cs = m.rels.filter((r) -> !r.mutable))
+  let (perRel = cs.map((r) ->
+    let (ps = points(m, r))
+      cartesian(ps.map((ignored) -> values(m, r))).map((vs) -> Map(r.name, ps.zip(vs).toMap((p) -> p.first, (p) -> p.second)))))
+    cartesian(perRel).map((ms) -> ms.fold(Map(), (acc, x) -> acc + x))
+      .filter((c) -> m.facts.every((f) -> eval(m, f, Map(), c, null) as Boolean))
+
+function initial(m: Model, c: Map<String, Map<List<Any>, Any>>): Map<String, Map<List<Any>, Any>> =
+  m.rels.filter((r) -> r.mutable).fold(c, (acc, r) ->
+    acc.put(r.name, points(m, r).toMap((p) -> p, (ignored) ->
+      if (r.initial is Model.Const) eval(m, (r.initial as Model.Const).value, Map(), c, null) else Set())))
+
+function successors(m: Model, s: Map<String, Map<List<Any>, Any>>): List<Map<String, Map<List<Any>, Any>>> =
+  m.actions.flatMap((a) -> stepsOf(m, a, s))
+
+function enabled(m: Model, a: Model.Action, s: Map<String, Map<List<Any>, Any>>): Boolean =
+  !stepsOf(m, a, s).isEmpty
+
+function stepsOf(m: Model, a: Model.Action, s: Map<String, Map<List<Any>, Any>>): List<Map<String, Map<List<Any>, Any>>> =
+  cartesian(a.params.map((p) -> domain(m, m.tname(p.type)))).flatMap((xs) ->
+      let (env = a.params.zip(xs).fold(Map(), (acc, p) -> acc.put(p.first.name, p.second)))
+        if (!a.guard.every((g) -> eval(m, g, env, s, null) as Boolean)) List()
+        else List(a.updates.fold(s, (acc, u) ->
+          let (args = u.args.map((x) -> eval(m, x, env, s, null)))
+          let (old = s[u.rel][args])
+          let (nv = if (u is Model.Assign) eval(m, u.value, env, s, null)
+            else if (u is Model.SetLone) (if (u.value == null) Set() else Set(eval(m, u.value!!, env, s, null)))
+            else if (u is Model.Insert) (old as Set) + Set(eval(m, u.elem, env, s, null))
+            else (old as Set).filter((y) -> y != eval(m, u.elem, env, s, null)))
+            acc.put(u.rel, acc[u.rel].put(args, nv)))))
+
+/// Breadth-first to `depth` more steps. Returns the layers (states first
+/// seen at each depth) and whether the frontier ran out (complete) or the
+/// bound stopped the search (bounded).
+function explore(m: Model, seen: Set<Any>, layers: List<List<Any>>, depth: Int): Pair<List<List<Any>>, Boolean> =
+  let (frontier = layers.last)
+    if (frontier.isEmpty) Pair(layers.dropLast(1), true)
+    else let (nexts = frontier.flatMap((s) -> successors(m, s)).toSet().filter((s) -> !seen.contains(s)))
+      if (depth == 0) Pair(layers, nexts.isEmpty)
+      else explore(m, seen + nexts, layers + List(nexts.toList()), depth - 1)
+
+function judge(m: Model, p: Model.Prop, runs: List<Pair<List<List<Any>>, Boolean>>): Dynamic =
+  let (states = runs.flatMap((r) -> r.first.flatten()))
+  let (complete = runs.every((r) -> r.second))
+  let (holdsAt = (s) -> eval(m, p.formula, Map(), s, null) as Boolean)
+  let (verdict =
+    if (p.kind == "temporal") leadsTo(m, p, runs)
+    else if (p.kind == "invariant") (if (states.every(holdsAt)) "holds" else "violated")
+    else if (p.kind == "reachable") (if (states.any(holdsAt)) "reachable" else "unreachable")
+    else (if (states.every((s) -> successors(m, s).every((t) -> eval(m, p.formula, Map(), s, t) as Boolean))) "holds" else "violated"))
+    new {
+      name = p.name
+      expect = p.expect
+      got = verdict
+      search = if (states.isEmpty) "empty" else if (complete) "complete" else "bounded"
+      // The least depth with a witness (reachable) or counterexample (invariant).
+      depth = if (verdict == "reachable" || (p.kind == "invariant" && verdict == "violated"))
+        runs.map((r) -> r.first.toList().findIndexOrNull((l) -> l.any((s) -> holdsAt.apply(s) == (p.kind == "reachable"))) ?? 1000).min
+        else null
+      // A pass needs a non-empty search; a bounded "holds" or "unreachable"
+      // only covers the explored depth.
+      result = if (verdict == "unsupported" || states.isEmpty) "invalid" else if (verdict == p.expect) "matched" else "mismatch"
+    }
+
+/// Temporal properties: only the leads-to shape `[all x: S |] always(P implies
+/// eventually Q)` under weak fairness, on a complete search. A behaviour
+/// violates it when, from a reachable state with P and not Q, it can stay
+/// among not-Q states forever in a fair way: in a strongly connected part
+/// of the not-Q graph (stuttering included) in which each weakly fair action
+/// is taken or is disabled somewhere. Any other shape is unsupported.
+function leadsTo(m: Model, p: Model.Prop, runs: List<Pair<List<List<Any>>, Boolean>>): String =
+  let (q = p.formula)
+  let (binder = if (q is Model.All) q else null)
+  let (body = if (binder != null) binder.body else q)
+  let (inner = if (body is Model.Always) body.arg else null)
+    if (inner == null || !(inner is Model.Implies) || !((inner as Model.Implies).rhs is Model.Eventually)) "unsupported"
+    else if (!runs.every((r) -> r.second)) "unsupported"
+    else let (pre = (inner as Model.Implies).lhs) let (goal = ((inner as Model.Implies).rhs as Model.Eventually).arg)
+      let (envs = if (binder == null) List(Map()) else domain(m, binder.sort).map((x) -> Map(binder.var, x)))
+      let (fair = p.fairness.map((f) -> m.actions.find((a) -> a.name == f.action)))
+        if (runs.any((r) -> let (states = r.first.flatten()) envs.any((env) ->
+          let (bad = states.filter((s) -> !(eval(m, goal, env, s, null) as Boolean)).toSet())
+          let (edges = (s) -> successors(m, s).filter((t) -> bad.contains(t)).toSet() + Set(s))
+          let (starts = bad.filter((s) -> eval(m, pre, env, s, null) as Boolean))
+            starts.any((s0) -> reach(edges, Set(s0), Set(s0)).any((u) ->
+              let (scc = reach(edges, Set(u), Set(u)).filter((w) -> reach(edges, Set(w), Set(w)).contains(u)))
+                fair.every((a) -> scc.any((w) -> !enabled(m, a, w)) ||
+                  scc.any((w) -> stepsOf(m, a, w).any((t) -> scc.contains(t)))))))))
+          "violated" else "holds"
+
+function reach(edges: (Any) -> Set<Any>, seen: Set<Any>, frontier: Set<Any>): Set<Any> =
+  let (nexts = frontier.flatMap((s) -> edges.apply(s)).filter((t) -> !seen.contains(t)))
+    if (nexts.isEmpty) seen else reach(edges, seen + nexts, nexts)
+
+function run(m: Model): Dynamic =
+  let (cs = configs(m))
+  let (runs = cs.map((c) -> let (s0 = initial(m, c)) explore(m, Set(s0), List(List(s0)), m.check.steps)))
+    new {
+      model = m.name
+      configurations = cs.length
+      states = runs.map((r) -> r.first.flatten().length).fold(0, (a, b) -> a + b)
+      verdicts = m.props.map((p) -> judge(m, p, runs))
+    }

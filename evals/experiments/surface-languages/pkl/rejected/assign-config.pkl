@@ -1,0 +1,7 @@
+// Rejected: an action changes the configuration `admins`, and a guard
+// uses a variable `w` that no parameter binds.
+amends "../sessions.pkl"
+actions = List(
+  action("promote", List(param("u", sort("User"))), List(mem(v("w"), img("active", List()))),
+    List(insert("admins", List(), v("u")))),
+)

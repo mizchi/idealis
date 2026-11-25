@@ -1,0 +1,19 @@
+model Service
+sig Client
+var waiting: set Client
+var served: set Client
+init { no waiting and no served }
+action request(c: Client) {
+  c not in waiting + served
+  waiting' = waiting + c
+}
+action serve(c: Client) {
+  c in waiting
+  waiting' = waiting - c
+  served' = served + c
+}
+invariant Disjoint { no waiting & served }
+// Not expressible: EventuallyServed is a temporal property with weak
+// fairness on serve; the kernel has invariant and reachable only.
+reachable AllServed { served = Client }
+scope Client = 2, steps = 4

@@ -1,0 +1,7 @@
+// Rejected: a relation names the sort `Group`, which is not declared.
+amends "../sessions.pkl"
+rels = List(
+  config("admins", List(), "set", sort("Group")),
+  state("active", List(), "set", sort("User"), empty()),
+  state("locked", List(), "lone", sort("User"), empty()),
+)

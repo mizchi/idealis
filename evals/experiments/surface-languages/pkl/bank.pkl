@@ -1,0 +1,25 @@
+// bank (SPEC 2). Source: fixtures/rcheck/bank.model.
+amends "Model.pkl"
+
+name = "Bank"
+sorts = List("Account")
+rels = List(state("balance", List(sort("Account")), "one", int(), constInit(i(0))))
+local function bal(a: Expr): Expr = at("balance", List(a))
+local accountAmount = List(param("a", sort("Account")), param("n", int()))
+actions = List(
+  action("deposit", accountAmount,
+    List(cmp(">", v("n"), i(0)), cmp("<=", plus(bal(v("a")), v("n")), i(4))),
+    List(assign("balance", List(v("a")), plus(bal(v("a")), v("n"))))),
+  action("withdraw", accountAmount,
+    List(cmp(">", v("n"), i(0)), cmp(">=", bal(v("a")), v("n"))),
+    List(assign("balance", List(v("a")), minus(bal(v("a")), v("n"))))),
+)
+props = List(
+  prop("NonNegative", "invariant", "holds", all("a", "Account", (a) -> cmp(">=", bal(a), i(0)))),
+  // "In one step" is not part of the formula; Interp.pkl reports the least
+  // depth of the witness.
+  prop("Rich", "reachable", "reachable", some("a", "Account", (a) -> cmp(">=", bal(a), i(3)))),
+)
+// Int is unbounded in the model; the action parameter n and the check
+// enumerate -4..4 (a check argument).
+check = scope(Map("Account", 2), -4, 4, 4)

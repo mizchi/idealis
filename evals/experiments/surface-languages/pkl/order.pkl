@@ -1,0 +1,60 @@
+// order (SPEC 3): an algebraic status type.
+amends "Model.pkl"
+
+name = "Order"
+sorts = List("Order")
+data = List(
+  enumOf("Carrier", List("Post", "Courier")),
+  enumOf("Reason", List("Customer", "Fraud")),
+  adt("Status", List(
+    variant("Draft", List()),
+    variant("Placed", List()),
+    variant("Shipped", List(field("tracking", dataT("Carrier")))),
+    variant("Cancelled", List(field("reason", dataT("Reason")))),
+  )),
+)
+local function st(o: Expr): Expr = at("status", List(o))
+local function status(vn: String, xs: List<Expr>): Expr = ctor("Status", vn, xs)
+rels = List(state("status", List(sort("Order")), "one", dataT("Status"), constInit(status("Draft", List()))))
+actions = List(
+  action("place", List(param("o", sort("Order"))),
+    List(eq(st(v("o")), status("Draft", List()))),
+    List(assign("status", List(v("o")), status("Placed", List())))),
+  action("ship", List(param("o", sort("Order")), param("c", dataT("Carrier"))),
+    List(eq(st(v("o")), status("Placed", List()))),
+    List(assign("status", List(v("o")), status("Shipped", List(v("c")))))),
+  // Workaround: no wildcard case; a total match lists every variant.
+  action("cancel", List(param("o", sort("Order")), param("r", dataT("Reason"))),
+    List(match(st(v("o")), List(
+      alt("Draft", List(), lit(true)),
+      alt("Placed", List(), lit(true)),
+      alt("Shipped", List("t"), lit(false)),
+      alt("Cancelled", List("x"), lit(false))))),
+    List(assign("status", List(v("o")), status("Cancelled", List(v("r")))))),
+)
+props = List(
+  // A step property: the next status, read with `next`, keeps the tracking
+  // bound by the match.
+  prop("ShippedStays", "step", "holds", all("o", "Order", (o) -> match(st(o), List(
+    alt("Draft", List(), lit(true)),
+    alt("Placed", List(), lit(true)),
+    alt("Shipped", List("t"), eq(next(st(o)), status("Shipped", List(v("t"))))),
+    alt("Cancelled", List("x"), lit(true)))))),
+  prop("FraudCancelled", "reachable", "reachable", some("o", "Order", (o) -> match(st(o), List(
+    alt("Draft", List(), lit(false)),
+    alt("Placed", List(), lit(false)),
+    alt("Shipped", List("t"), lit(false)),
+    alt("Cancelled", List("r"), eq(v("r"), ctor("Reason", "Fraud", List()))))))),
+  // Not expressible as a state: status is `one` and a Ctor names one
+  // variant, so no value is both Shipped and Cancelled. The proposition can
+  // still be written (two matches on the same value), and is trivially
+  // unreachable; it is kept to show that, not as a check of the model.
+  (prop("ShippedCancelled", "reachable", "unreachable", some("o", "Order", (o) -> and(List(
+    match(st(o), List(alt("Draft", List(), lit(false)), alt("Placed", List(), lit(false)),
+      alt("Shipped", List("t"), lit(true)), alt("Cancelled", List("r"), lit(false)))),
+    match(st(o), List(alt("Draft", List(), lit(false)), alt("Placed", List(), lit(false)),
+      alt("Shipped", List("t"), lit(false)), alt("Cancelled", List("r"), lit(true))))))))) {
+    note = "unrepresentable state: the type of status rules it out"
+  },
+)
+check = scope(Map("Order", 2), 0, 0, 4)
