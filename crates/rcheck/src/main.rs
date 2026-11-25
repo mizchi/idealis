@@ -1,5 +1,5 @@
 //! rcheck <model> [--checker auto|reference|explicit|sat|all] [--question NAME]
-//! rcheck generate <model> rust|typescript|go|moonbit|ir|schema|states|glossary
+//! rcheck generate <model> rust|typescript|go|moonbit|ir|schema|states|glossary|pbt-cases|pbt-typescript
 //! rcheck dead-code <model> [--max-states N]
 //! rcheck lean-oracle <model> <file.lean> [--max-states N]
 //! Answers every question of an rmodel model, or one, and prints JSON. Exits
@@ -25,7 +25,7 @@ fn main() {
     if let [command, path, target] = arguments.as_slice()
         && command == "generate"
     {
-        let source = std::fs::read_to_string(path).unwrap_or_else(|error| fail(&error.to_string()));
+        let source = rcheck::project::load_source(path).unwrap_or_else(|error| fail(&error));
         let model = rmodel::parse(&source).unwrap_or_else(|error| fail(&error.to_string()));
         let text = match target.as_str() {
             "rust" => rmodel::bindings::rust(&model, &source),
@@ -46,6 +46,16 @@ fn main() {
                 let states =
                     rcheck::conform::reachable_states(&model).unwrap_or_else(|error| fail(&error));
                 format!("{}\n", serde_json::to_string_pretty(&states).expect("JSON"))
+            }
+            "pbt-cases" => {
+                let cases =
+                    rcheck::conform::boundary_cases(&model, rcheck::Budget::default().states)
+                        .unwrap_or_else(|error| fail(&error));
+                format!("{}\n", serde_json::to_string_pretty(&cases).expect("JSON"))
+            }
+            "pbt-typescript" => {
+                rcheck::conform::boundary_typescript(&model, rcheck::Budget::default().states)
+                    .unwrap_or_else(|error| fail(&error))
             }
             "glossary" => format!(
                 "{}\n",
@@ -101,8 +111,8 @@ fn main() {
 }
 
 fn load_model(path: &str) -> (rmodel::Model, Vec<rcheck::ir::Omitted>) {
-    let source = std::fs::read_to_string(path).unwrap_or_else(|error| fail(&error.to_string()));
-    if path.ends_with(".json") {
+    let source = rcheck::project::load_source(path).unwrap_or_else(|error| fail(&error));
+    if path.ends_with(".json") && !rcheck::project::is_manifest(path) {
         rcheck::ir::parse(&source).unwrap_or_else(|error| fail(&error))
     } else {
         let model = rmodel::parse(&source).unwrap_or_else(|error| fail(&error.to_string()));
@@ -161,7 +171,7 @@ fn dead_code(args: &[String]) {
 
 fn usage() -> ! {
     fail(
-        "usage: rcheck <model> [--checker auto|reference|explicit|sat|all] [--question NAME] | rcheck generate <model> rust|typescript|go|moonbit|ir|schema|states|glossary | rcheck dead-code <model> [--max-states N] | rcheck lean-oracle <model> <file.lean> [--max-states N]",
+        "usage: rcheck <model> [--checker auto|reference|explicit|sat|all] [--question NAME] | rcheck generate <model> rust|typescript|go|moonbit|ir|schema|states|glossary|pbt-cases|pbt-typescript | rcheck dead-code <model> [--max-states N] | rcheck lean-oracle <model> <file.lean> [--max-states N]",
     )
 }
 

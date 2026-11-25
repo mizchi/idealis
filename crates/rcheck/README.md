@@ -79,3 +79,51 @@ with a JSON Lines driver, and JSON Schema of the configuration, the state and
 the commands. `rcheck::conform` replays the implementation along the
 reference semantics and reports the shortest command sequence where it
 differs.
+
+## Split sources and boundary properties
+
+A `*.rmodel.json` file lists ordered `fragments`, for example
+`{"fragments":["domain.model","withdrawal.model"]}`. Paths are relative
+to the manifest. The fragments are parsed together with one model name and
+one namespace. This is an input format for rcheck, with the usual rmodel
+syntax in each fragment. See the [withdrawal](../../fixtures/rcheck/linked/withdrawal/project.rmodel.json)
+and [Raft election](../../fixtures/rcheck/linked/raft/project.rmodel.json)
+projects. The withdrawal uses a record for money and an enum for outcomes.
+A request can be accepted and later complete with `InsufficientFunds`.
+
+```sh
+model=fixtures/rcheck/linked/withdrawal/project.rmodel.json
+rcheck "$model" --checker reference
+rcheck generate "$model" typescript > bindings.ts
+rcheck generate "$model" pbt-cases > cases.json
+rcheck generate "$model" pbt-typescript > boundary.ts
+just rcheck-boundaries
+```
+
+`pbt-cases` emits versioned JSON. The reference evaluator first checks that
+it can completely explore the finite model. For each configuration, rcheck
+selects one witness pair per action and boundary kind:
+
+- `integer` changes one integer argument or record field by one in the same state.
+- `transition` tests the same command on both sides of one reachable state transition.
+- `continuation` tests the same command after two accepted inputs that differ
+  by one integer. This exposes the exact-balance boundary in the withdrawal model.
+
+Each pair shows opposite acceptance results. Each example includes the
+commands leading to the boundary and the expected snapshot after the final
+command, including cases where it was rejected. Generation fails for
+incomplete or invalid exploration, ambiguous initial states, or an empty
+corpus. Extraction samples the earliest witness for each action and kind
+within the finite scope. TypeScript generation requires the model’s integer
+scope to fit JavaScript’s safe integers.
+
+`pbt-typescript` embeds the same cases in a Node.js module with a fast-check
+property. For each example, the property calls the supplied factory with
+the model configuration. The factory returns `apply`, which accepts the
+generated command JSON and returns a boolean, and `observe`, which returns
+the implementation's state as JSON. The property samples and shrinks lists
+of pairs, verifies that prefix commands are accepted, and compares both the
+final acceptance and snapshot. The test can force every pair to be exercised
+by passing `examples: [[boundaryCases.pairs]]` to fast-check. See the
+[withdrawal test](../../tests/rcheck/withdrawal.pbt.test.ts) for an adapter
+using the generated bindings and a replay with a stored seed and path.

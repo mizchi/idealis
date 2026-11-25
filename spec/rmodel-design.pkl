@@ -59,6 +59,22 @@ spec: s.Spec = new {
       definition = s.text("到達した設定と状態を入力に受け取り、別のファイルで定義した命題の真偽を返す。", "Receives a reachable configuration and state and decides a proposition defined in a separate file.")
       code { s.code("formal/rmodel/Bank.lean", "checkBank") }
     }
+    new {
+      id = "linked-model"
+      kind = "concept"
+      group = termGroup
+      name = s.text("分割モデル", "linked model")
+      definition = s.text("順序付きの宣言ファイルから構成し、型名と操作名を一つのモデルで解決する。", "Composes ordered source fragments and resolves types and actions within one model.")
+      code { s.code("crates/rcheck/src/project.rs", "load_source") }
+    }
+    new {
+      id = "guard-boundary"
+      kind = "concept"
+      group = termGroup
+      name = s.text("ガードの境界", "guard boundary")
+      definition = s.text("隣接する整数入力または一遷移の差で、同じ操作を受け付けるかどうかが変わる、到達可能な二例の組。", "Two reachable cases where an adjacent integer or one extra transition flips acceptance of the same action.")
+      code { s.code("crates/rcheck/src/conform/boundaries.rs", "boundary_cases") }
+    }
   }
   rules {
     new {
@@ -117,6 +133,18 @@ spec: s.Spec = new {
       text = s.text("完全探索した非空の範囲に限り、各設定・状態に Lean の命題を照合できる。偽ならその観測を返し、探索が未完了または Lean の出力が不正なら区別して扱う。", "A Lean proposition can be checked over each configuration and state after a complete nonempty search. A false result identifies the observation, separately from incomplete exploration or an invalid response.")
       terms { "snapshot-oracle" }
       unformalized = "別プロセスとの照合と失敗の区別を rcheck の lean_oracle.rs で検査する。"
+    }
+    new {
+      id = "RMODEL-LINKED"
+      text = s.text("分割した宣言を一つのモデルとして解決し、業務上の拒否と分散プロトコルの安全性を同じ型・操作・検査で記述できる。", "Declarations in linked fragments resolve as a single model. The same types, actions and checks can describe business rejections and protocol safety.")
+      terms { "linked-model" }
+      unformalized = "出金と Raft の選挙の例は、マニフェストを入力にする linked_projects.rs の CLI テストで検査する。"
+    }
+    new {
+      id = "RMODEL-BOUNDARY"
+      text = s.text("ガードの境界は宣言した有限の範囲を完全探索した後で選び、先行操作、受付結果、直後の状態を生成テストに渡す。", "Select guard boundary witnesses after complete exploration of the declared finite scope. Pass their prefixes, acceptance and resulting states to the generated property.")
+      terms { "guard-boundary" }
+      unformalized = "境界の選出と探索未完了の扱いは linked_projects.rs、仕様と独立実装の差は withdrawal.pbt.test.ts で検査する。"
     }
   }
   groundings {

@@ -114,6 +114,20 @@
 - id: `snapshot-oracle`
 - コード: `formal/rmodel/Bank.lean` の `checkBank`
 
+### 分割モデル（linked model）
+
+順序付きの宣言ファイルから構成し、型名と操作名を一つのモデルで解決する。
+
+- id: `linked-model`
+- コード: `crates/rcheck/src/project.rs` の `load_source`
+
+### ガードの境界（guard boundary）
+
+隣接する整数入力または一遷移の差で、同じ操作を受け付けるかどうかが変わる、到達可能な二例の組。
+
+- id: `guard-boundary`
+- コード: `crates/rcheck/src/conform/boundaries.rs` の `boundary_cases`
+
 ## 実装の照合
 
 - `crates/rmodel/src/syntax.rs` の `action` を、`crates/rmodel/tests/behavior.rs` の `behavior_has_the_same_guard_parallel_updates_and_frame_as_action` がモデル `spec/models/rmodel-behavior.model` と照合する
@@ -171,3 +185,15 @@
 完全探索した非空の範囲に限り、各設定・状態に Lean の命題を照合できる。偽ならその観測を返し、探索が未完了または Lean の出力が不正なら区別して扱う。
 
 - 形式化しない理由: 別プロセスとの照合と失敗の区別を rcheck の lean_oracle.rs で検査する。
+
+### RMODEL-LINKED
+
+分割した宣言を一つのモデルとして解決し、業務上の拒否と分散プロトコルの安全性を同じ型・操作・検査で記述できる。
+
+- 形式化しない理由: 出金と Raft の選挙の例は、マニフェストを入力にする linked_projects.rs の CLI テストで検査する。
+
+### RMODEL-BOUNDARY
+
+ガードの境界は宣言した有限の範囲を完全探索した後で選び、先行操作、受付結果、直後の状態を生成テストに渡す。
+
+- 形式化しない理由: 境界の選出と探索未完了の扱いは linked_projects.rs、仕様と独立実装の差は withdrawal.pbt.test.ts で検査する。

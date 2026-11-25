@@ -21,6 +21,8 @@
 - [x] `rcheck dead-code` は参照評価器で、到達する状態で成立するガードを操作ごとに調べる。未確定、空、IR の欠落をデッド扱いしない。[到達性の CLI テスト](tests/dead_code.rs)。
 - [x] `rcheck lean-oracle` は、参照評価器が完全探索できた非空のモデルから設定と状態を抽出し、別の Lean ファイルに JSON で渡す。偽の観測と実行エラーを区別する。[入出金の命題](../../formal/rmodel/Bank.lean) · [oracle の CLI テスト](tests/lean_oracle.rs)。
 - [x] adapterの差分テスト（0108）: roracleで、rmodelの文の判定を基準に、adapterのIRの判定を照らす。unsupported・omittedはunknown、拒まれたIRはerrorで、一致に数えない。
+- [x] `*.rmodel.json` のファイル一覧を一つの rmodel として型検査し、チェッカーと生成器で共有する。出金と単一任期の Raft 選挙で確認する。
+- [x] `generate <model> pbt-cases|pbt-typescript` は完全探索できる有限範囲から、隣接整数、一遷移、隣接入力後の一操作で受付が変わる組を導出する。再生用 JSON と fast-check のプロパティを生成する。探索未完了・不正・境界例なしはエラー。[CLI のテスト](tests/linked_projects.rs) · [TypeScript の正常・故障対照](../../tests/rcheck/withdrawal.pbt.test.ts)
 
 ## 照合
 

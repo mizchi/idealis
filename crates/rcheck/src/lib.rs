@@ -4,6 +4,8 @@
 //! complete answer.
 use serde::Serialize;
 
+pub mod project;
+
 /// A question a model asks: one of its checks, or the built-in multiplicity
 /// check `Declarations` (plan 0099).
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]

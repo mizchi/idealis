@@ -6,6 +6,9 @@
 //! implementation is reached through a `Driver` speaking the JSON form of
 //! `rmodel::bindings`; each answer is first checked against the model's
 //! JSON Schema.
+mod boundaries;
+pub use boundaries::{boundary_cases, boundary_typescript};
+
 use rmodel::reference::{Data, Machine, Next, Snapshot};
 use serde::Serialize;
 use serde_json::{Map, Value};

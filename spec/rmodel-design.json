@@ -370,6 +370,50 @@
             "symbol": "checkBank"
           }
         ]
+      },
+      {
+        "id": "linked-model",
+        "kind": "concept",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "分割モデル",
+          "en": "linked model"
+        },
+        "definition": {
+          "ja": "順序付きの宣言ファイルから構成し、型名と操作名を一つのモデルで解決する。",
+          "en": "Composes ordered source fragments and resolves types and actions within one model."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rcheck/src/project.rs",
+            "symbol": "load_source"
+          }
+        ]
+      },
+      {
+        "id": "guard-boundary",
+        "kind": "concept",
+        "group": "文法変更と遷移",
+        "name": {
+          "ja": "ガードの境界",
+          "en": "guard boundary"
+        },
+        "definition": {
+          "ja": "隣接する整数入力または一遷移の差で、同じ操作を受け付けるかどうかが変わる、到達可能な二例の組。",
+          "en": "Two reachable cases where an adjacent integer or one extra transition flips acceptance of the same action."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rcheck/src/conform/boundaries.rs",
+            "symbol": "boundary_cases"
+          }
+        ]
       }
     ],
     "rules": [
@@ -527,6 +571,30 @@
         ],
         "claims": [],
         "unformalized": "別プロセスとの照合と失敗の区別を rcheck の lean_oracle.rs で検査する。"
+      },
+      {
+        "id": "RMODEL-LINKED",
+        "text": {
+          "ja": "分割した宣言を一つのモデルとして解決し、業務上の拒否と分散プロトコルの安全性を同じ型・操作・検査で記述できる。",
+          "en": "Declarations in linked fragments resolve as a single model. The same types, actions and checks can describe business rejections and protocol safety."
+        },
+        "terms": [
+          "linked-model"
+        ],
+        "claims": [],
+        "unformalized": "出金と Raft の選挙の例は、マニフェストを入力にする linked_projects.rs の CLI テストで検査する。"
+      },
+      {
+        "id": "RMODEL-BOUNDARY",
+        "text": {
+          "ja": "ガードの境界は宣言した有限の範囲を完全探索した後で選び、先行操作、受付結果、直後の状態を生成テストに渡す。",
+          "en": "Select guard boundary witnesses after complete exploration of the declared finite scope. Pass their prefixes, acceptance and resulting states to the generated property."
+        },
+        "terms": [
+          "guard-boundary"
+        ],
+        "claims": [],
+        "unformalized": "境界の選出と探索未完了の扱いは linked_projects.rs、仕様と独立実装の差は withdrawal.pbt.test.ts で検査する。"
       }
     ],
     "groundings": [

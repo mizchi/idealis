@@ -321,10 +321,15 @@ rcheck-test:
 rcheck-lean-oracle:
   cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test lean_oracle -- --include-ignored
 
+# The generated fast-check property and its seeded fault control.
+rcheck-boundaries: build
+  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test linked_projects --test withdrawal
+  node --test dist/tests/rcheck/withdrawal.pbt.test.js
+
 # TypeScript implementations against the generated bindings and ajv on the
 # generated JSON Schema (plan 0102).
 rcheck-typescript: build
-  node --test dist/tests/rcheck/schema.test.js
+  node --test dist/tests/rcheck/schema.test.js dist/tests/rcheck/withdrawal.pbt.test.js
   cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test typescript -- --ignored
 
 # Go implementations against the generated interfaces (plan 0104).

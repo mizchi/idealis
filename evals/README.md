@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0113: 仕様から境界を導き PBT で再生](iterations/0113-linked-boundaries.md)は、分割した出金モデルと3ノードの選挙モデルから境界を選び、Rust と TypeScript の出金実装および故障対照で検査した。`just rcheck-boundaries` で再現できる。
+
 [0112: 条件と更新の読み取り](iterations/0112-rmodel-readability.md)は、同じ三題材の `action` と `behavior` を比較した。rmodel の意味は一致し、代理読み手の正答は26/27と27/27だった。
 
 [0111: 自然言語の仕様から文法の検査を回す](iterations/0111-rmodel-spec-drift.md)は、rmodel の規則と検査を rspec と Jev につなぎ、`behavior` で最初の一周を回した。
