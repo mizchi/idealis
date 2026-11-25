@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "note": "Plan 0110: multi-step questions. Configurations name atoms as in the models (u0 is the first user, and so on).",
+  "tasks": [
+    {
+      "id": "permissions",
+      "questions": [
+        {
+          "id": "premise",
+          "text": "Is this configuration allowed: user u0 is granted role r0, role r0 reads document d1, d1 is secret, and no user is cleared?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        },
+        {
+          "id": "sequence",
+          "text": "u0 is granted r0, r0 reads d0 and d1, nothing is secret. Starting from the initial state, apply read(u0, d0), read(u0, d1), close(u0, d0). Which documents does u0 have open at the end?",
+          "options": ["none", "d0", "d1", "d0 and d1"],
+          "answer": "d1"
+        },
+        {
+          "id": "stranger",
+          "text": "In the same configuration, u1 is granted no role. After read(u0, d0), can close(u1, d0) be applied?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        }
+      ]
+    },
+    {
+      "id": "bank",
+      "questions": [
+        {
+          "id": "rejected",
+          "text": "From the initial state, apply deposit(a0, 3), withdraw(a0, 2), then deposit(a0, 4). Is the last action applied?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        },
+        {
+          "id": "balance",
+          "text": "From the initial state, apply deposit(a0, 2), deposit(a1, 2), withdraw(a0, 2). What is a0's balance?",
+          "options": ["0", "1", "2", "4"],
+          "answer": "0"
+        },
+        {
+          "id": "total",
+          "text": "What is the largest total of the two balances in any reachable state?",
+          "options": ["4", "6", "8", "unbounded"],
+          "answer": "8"
+        }
+      ]
+    },
+    {
+      "id": "order",
+      "questions": [
+        {
+          "id": "late",
+          "text": "From the initial state, apply place(o0), ship(o0, Courier), then cancel(o0, Fraud) wherever it can apply. What is o0's status at the end?",
+          "options": [
+            "Draft",
+            "Placed",
+            "Shipped with Post",
+            "Shipped with Courier",
+            "Cancelled for Customer",
+            "Cancelled for Fraud"
+          ],
+          "answer": "Shipped with Courier"
+        },
+        {
+          "id": "fewest",
+          "text": "From the initial state, what is the fewest number of actions after which some order is cancelled for Fraud?",
+          "options": ["1", "2", "3", "never"],
+          "answer": "1"
+        },
+        {
+          "id": "twice",
+          "text": "After place(o0), can place(o0) be applied again?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        }
+      ]
+    },
+    {
+      "id": "sessions",
+      "questions": [
+        {
+          "id": "count",
+          "text": "The only admin is u0. From the initial state, apply login(u0), lock(u0), logout(u0), login(u1), login(u2). How many users are active at the end?",
+          "options": ["0", "1", "2", "3"],
+          "answer": "2"
+        },
+        {
+          "id": "unlock",
+          "text": "In that end state, can unlock(u1) be applied?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        },
+        {
+          "id": "admin",
+          "text": "With u0 the only admin, can u1 ever be the locked user?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        }
+      ]
+    },
+    {
+      "id": "service",
+      "questions": [
+        {
+          "id": "again",
+          "text": "From the initial state, apply request(c0), serve(c0), then request(c0). Is the last action applied?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        },
+        {
+          "id": "waiting",
+          "text": "From the initial state, apply request(c0), request(c1), serve(c1). Which clients are waiting?",
+          "options": ["none", "c0", "c1", "c0 and c1"],
+          "answer": "c0"
+        },
+        {
+          "id": "fair",
+          "text": "If serve is weakly fair, is there an infinite behavior in which c0 stays waiting forever?",
+          "options": ["yes", "no"],
+          "answer": "no"
+        }
+      ]
+    }
+  ]
+}
