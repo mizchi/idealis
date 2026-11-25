@@ -25,7 +25,7 @@
 - [x] IFとCASE。最初の真のarmを選び、OTHERがなく未一致なら評価時エラーにする。未評価の分岐ではエラーにしない。
 - [x] INIT/NEXTまたは対応形のSPECIFICATION、定数、INVARIANT/PROPERTY、CHECK_DEADLOCK、定数ASSUME。
 - [x] 対応するstate/action/temporal propertyとWF/SFをIRへ変換する。
-- [x] 定義元moduleのEXTENDS ApalacheでApaFoldSet / ApaFoldSeqLeft。可視の2引数operatorを使う。再帰callbackは明示v2に限る。
+- [x] 定義元moduleのEXTENDS ApalacheでApaFoldSet / ApaFoldSeqLeft。可視の2引数operatorを使う。callbackの本体が累積値に対する `\in` を含んでもよい。再帰callbackは明示v2に限る。
 - [x] EXTENDS ApalacheでSetAsFun。`SetAsFun(S)`は`DOMAIN`が`{p[1] : p \in S}`で各keyを`p[2]`へ写す関数で、`Map()`、`Map(k -> v, ...)`、`setToMap()`の生成物を受理する。同じkeyに異なる値の組があれば、CHOOSEの選択順を保証できないため評価時エラー`SetAsFun: a key has more than one value`で拒否する。
 - [x] 同じimport下の`:=`をApalache定義の等号として扱う。
 - [x] EXTENDS VariantsでApalache 0.63.0のVariant / VariantTag / VariantGetUnsafe。tag取得はsingletonの文字列domainに限定する。

@@ -1172,7 +1172,7 @@ impl Compiler<'_> {
                             if let Some(slot) = parameter {
                                 if let Some(actual) = args.get(slot) {
                                     expressions.push(actual.clone());
-                                } else {
+                                } else if !args.is_empty() {
                                     return unsupported(format!(
                                         "operator {}",
                                         entry.definition.name
