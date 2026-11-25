@@ -155,7 +155,9 @@ impl Rewriter {
             }
             "Cardinality" => self.imports.contains("FiniteSets"),
             "SortSeq" | "Assert" => self.imports.contains("TLC"),
-            "ApaFoldSet" | "ApaFoldSeqLeft" | ":=" => self.imports.contains("Apalache"),
+            "ApaFoldSet" | "ApaFoldSeqLeft" | "SetAsFun" | ":=" => {
+                self.imports.contains("Apalache")
+            }
             "Variant" | "VariantTag" | "VariantGetUnsafe" => self.imports.contains("Variants"),
             _ => true,
         };
@@ -299,6 +301,7 @@ impl Rewriter {
                             | "Tail"
                             | "Append"
                             | "Cardinality"
+                            | "SetAsFun"
                     )
                     && name.starts_with(char::is_alphabetic)
                 {
@@ -379,6 +382,7 @@ impl Rewriter {
                         "Seq",
                         "ApaFoldSet",
                         "ApaFoldSeqLeft",
+                        "SetAsFun",
                         "Variant",
                         "VariantTag",
                         "VariantGetUnsafe",

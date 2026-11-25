@@ -17,6 +17,7 @@ mod link;
 mod old;
 mod rewrite;
 mod select;
+mod set_as_fun;
 mod source;
 mod symbols;
 mod symmetry;
@@ -2696,6 +2697,18 @@ impl Compiler<'_> {
                 return unsupported("fold arity");
             }
             return self.fold(operator == "ApaFoldSeqLeft", args, context, child);
+        }
+        if self.extends("Apalache") && operator == "SetAsFun" {
+            let [set] = args else {
+                return unsupported("operator arity SetAsFun");
+            };
+            let expansion = set_as_fun::expand(set, set.location);
+            return Ok(json!({
+                "op":"if",
+                "condition":self.expression(&expansion.single_valued,child)?,
+                "consequent":self.expression(&expansion.function,child)?,
+                "alternative":{"op":"assert","condition":boolean(false),"message":string(set_as_fun::DUPLICATE_KEY)}
+            }));
         }
         if self.extends("Variants") {
             match operator {
