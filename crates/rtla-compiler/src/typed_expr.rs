@@ -766,6 +766,9 @@ impl Compiler<'_> {
                 }),
             });
         }
+        if self.extends("Apalache") && operator == "MkSeq" {
+            return self.expression_ir(&crate::mk_seq::expand(args)?, child);
+        }
         if self.extends("Variants") {
             match operator {
                 "Variant" if args.len() == 2 => {

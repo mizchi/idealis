@@ -27,6 +27,7 @@
 - [x] 対応するstate/action/temporal propertyとWF/SFをIRへ変換する。
 - [x] 定義元moduleのEXTENDS ApalacheでApaFoldSet / ApaFoldSeqLeft。可視の2引数operatorを使う。callbackの本体が累積値に対する `\in` を含んでもよい。再帰callbackは明示v2に限る。
 - [x] EXTENDS ApalacheでSetAsFun。`SetAsFun(S)`は`DOMAIN`が`{p[1] : p \in S}`で各keyを`p[2]`へ写す関数で、`Map()`、`Map(k -> v, ...)`、`setToMap()`の生成物を受理する。同じkeyに異なる値の組があれば、CHOOSEの選択順を保証できないため評価時エラー`SetAsFun: a key has more than one value`で拒否する。
+- [x] 定義元moduleのEXTENDS ApalacheでMkSeq。`MkSeq(n, F)`は`[i \in 1..n |-> F(i)]`と同じsequenceで、`n`が0以下なら空のsequenceになる。`F`は引数を1つ取る可視のoperator名またはLAMBDAで、Quintの`range(a, b)`が出すLET定義のoperatorを渡す形（`ApaFoldSeqLeft`の列として使う形を含む）を受理する。範囲`1..n`のために、呼び出し側moduleがNaturals・Integers・Sequences・FiniteSetsのいずれもEXTENDSしていなければ`range requires Naturals`で拒否する。
 - [x] 直積`A \X B \X ...`（Quintの`tuples()`の生成物）。TLCと同じく3項以上は入れ子の組ではなくn項tupleの集合になる。成分ごとの集合の単一束縛の`{<<a, b>> : ...}`をUNIONで束ねて展開し、集合・membership・量化・CHOOSEのdomainと`Cardinality`で使える。展開は先の成分ごとに後の成分の集合を再評価し、直積を実体化する。
 - [x] 同じimport下の`:=`をApalache定義の等号として扱う。
 - [x] EXTENDS VariantsでApalache 0.63.0のVariant / VariantTag / VariantGetUnsafe。tag取得はsingletonの文字列domainに限定する。
@@ -70,7 +71,7 @@
 - [x] labelのbound parameter、重複、EXCEPT境界、RECURSIVE宣言の位置・arityを未使用定義も含め検査する。
 - [ ] operatorをstateへ格納する一般の値、任意の式への変数置換、全SANYの意味・level検査。
 - [ ] 無限集合の列挙、stateに依存するdomainでの時間論理量化、temporal variable quantification（\AA / \EE）。
-- [ ] 無制限CHOOSE、他のApalache/Variants operator（ApaFoldSet / ApaFoldSeqLeft / SetAsFun / `:=`を除く）。
+- [ ] 無制限CHOOSE、他のApalache/Variants operator（ApaFoldSet / ApaFoldSeqLeft / SetAsFun / MkSeq / `:=`を除く）。
 - [ ] 全モジュールのSANY検査、未使用定義の一般的な名前・型検査とproofの正しさの判断。
 - [ ] 一般のTLA+からSMTへの変換、Quint言語の直接解釈、Quint Connect APIやITFのimport。
 

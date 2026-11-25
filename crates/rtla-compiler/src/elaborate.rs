@@ -138,7 +138,7 @@ impl Elaborator {
         }
         if let E::Apply { operator, args } = &mut value.node {
             let callback = match operator.as_str() {
-                "SelectSeq" | "SortSeq" => Some(1),
+                "SelectSeq" | "SortSeq" | "MkSeq" => Some(1),
                 "ApaFoldSet" | "ApaFoldSeqLeft" => Some(0),
                 _ => None,
             };
