@@ -2,11 +2,11 @@
 
 use rtlc::ir::{
     Binding, BodyKind, Branch, Definition, Domain, Expression, Predicate, Scalar, Step,
-    TemporalFormula, TemporalProperty,
+    TemporalFormula, TemporalProperty, Update,
 };
 use rtlc::{SafetyBounds, SafetyProgram};
 
-pub const KINDS: [&str; 9] = [
+pub const KINDS: [&str; 13] = [
     "operator",
     "value",
     "call",
@@ -16,6 +16,10 @@ pub const KINDS: [&str; 9] = [
     "bind-run",
     "lazy",
     "temporal",
+    "forward",
+    "update",
+    "function",
+    "action",
 ];
 
 const PER_DEFINITION: usize = 30;
@@ -54,10 +58,19 @@ fn singleton(value: Expression) -> Expression {
 }
 
 fn definition(id: usize, local_scope: usize, body: Expression) -> Definition {
+    parametrized(id, 0, local_scope, body)
+}
+
+fn parametrized(
+    id: usize,
+    parameter_count: usize,
+    local_scope: usize,
+    body: Expression,
+) -> Definition {
     Definition {
         recursive: false,
         id,
-        parameter_count: 0,
+        parameter_count,
         capture_count: 0,
         body_kind: BodyKind::Expression,
         local_scope,
@@ -68,6 +81,16 @@ fn definition(id: usize, local_scope: usize, body: Expression) -> Definition {
 fn layered(
     size: usize,
     per: usize,
+    leaf: Expression,
+    layer: impl Fn(usize, Expression) -> Expression,
+) -> (Expression, Vec<Definition>) {
+    scoped(size, per, 0, leaf, layer)
+}
+
+fn scoped(
+    size: usize,
+    per: usize,
+    local_scope: usize,
     leaf: Expression,
     layer: impl Fn(usize, Expression) -> Expression,
 ) -> (Expression, Vec<Definition>) {
@@ -86,12 +109,41 @@ fn layered(
             };
             definition(
                 id,
-                0,
-                (0..levels).fold(inner, |inner, level| layer(level, inner)),
+                local_scope,
+                (0..levels)
+                    .rev()
+                    .fold(inner, |inner, level| layer(level, inner)),
             )
         })
         .collect();
     (call(0), definitions)
+}
+
+fn forwarded(size: usize) -> (Expression, Vec<Definition>) {
+    let count = size.max(1);
+    let parameter = || Expression::Parameter { slot: 0 };
+    let definitions = (0..count)
+        .map(|id| {
+            let body = if id + 1 == count {
+                parameter()
+            } else {
+                Expression::Call {
+                    definition: id + 1,
+                    arguments: vec![parameter()],
+                    captures: vec![],
+                }
+            };
+            parametrized(id, 1, 0, body)
+        })
+        .collect();
+    (
+        Expression::Call {
+            definition: 0,
+            arguments: vec![truth()],
+            captures: vec![],
+        },
+        definitions,
+    )
 }
 
 fn bindings(count: usize, body: Expression) -> Expression {
@@ -227,33 +279,117 @@ fn invariant(size: usize, kind: &str) -> (Expression, Vec<Definition>) {
                 definitions,
             )
         }
+        "forward" => forwarded(size),
+        "update" => {
+            let (root, definitions) = layered(
+                size,
+                PER_DEFINITION,
+                Expression::Tuple {
+                    values: vec![int(0)],
+                },
+                |_, inner| Expression::Update {
+                    target: Box::new(inner),
+                    updates: vec![Update {
+                        path: vec![int(1)],
+                        value: int(1),
+                    }],
+                },
+            );
+            (
+                Expression::Eq {
+                    left: Box::new(Expression::At {
+                        target: Box::new(root),
+                        key: Box::new(int(1)),
+                    }),
+                    right: Box::new(int(1)),
+                },
+                definitions,
+            )
+        }
+        "function" => scoped(
+            size,
+            PER_DEFINITION / 2,
+            PER_DEFINITION / 2,
+            truth(),
+            |level, inner| Expression::At {
+                target: Box::new(Expression::Function {
+                    bounds: vec![Binding {
+                        tuple_size: None,
+                        slot: level,
+                        domain: Domain::Set {
+                            values: vec![int(1)],
+                        },
+                    }],
+                    body: Box::new(inner),
+                }),
+                key: Box::new(int(1)),
+            },
+        ),
         _ => panic!("kind {kind}"),
     }
 }
 
+fn steps(size: usize) -> (Vec<Step>, Vec<Definition>) {
+    let size = size.max(1);
+    let count = size.div_ceil(PER_DEFINITION);
+    let chunk = |index: usize| -> Vec<Step> {
+        let last = index + 1 == count;
+        let length = if last {
+            size - PER_DEFINITION * (count - 1)
+        } else {
+            PER_DEFINITION
+        };
+        let mut steps: Vec<Step> = (1..length)
+            .map(|_| Step::Guard {
+                expression: truth(),
+            })
+            .collect();
+        steps.push(if last {
+            Step::Assign {
+                slot: 0,
+                value: int(0),
+            }
+        } else {
+            Step::Call {
+                definition: index + 1,
+                arguments: vec![],
+                captures: vec![],
+            }
+        });
+        steps
+    };
+    let mut definitions = vec![definition(0, 0, truth())];
+    definitions.extend((1..count).map(|index| Definition {
+        recursive: false,
+        id: index,
+        parameter_count: 0,
+        capture_count: 0,
+        body_kind: BodyKind::Action,
+        local_scope: 0,
+        body: rtlc::ir::DefinitionBody::Action(vec![Branch {
+            name: "Step".into(),
+            steps: chunk(index),
+        }]),
+    }));
+    (chunk(0), definitions)
+}
+
 fn temporal(size: usize) -> (TemporalFormula, Vec<Definition>) {
-    let count = size.div_ceil(PER_DEFINITION).max(1);
+    let count = size.max(1);
+    let call = |definition: usize| TemporalFormula::Call {
+        definition,
+        arguments: vec![],
+        captures: vec![],
+    };
     let definitions = (0..count)
         .map(|id| {
-            let levels = if id + 1 == count {
-                size - PER_DEFINITION * (count - 1)
-            } else {
-                PER_DEFINITION
-            };
-            let inner = if id + 1 == count {
+            let body = if id + 1 == count {
                 TemporalFormula::Atom {
                     expression: truth(),
                 }
             } else {
-                TemporalFormula::Call {
-                    definition: id + 1,
-                    arguments: vec![],
-                    captures: vec![],
-                }
+                call(id + 1)
             };
-            let body = (0..levels).fold(inner, |inner, _| TemporalFormula::Always {
-                formula: Box::new(inner),
-            });
             Definition {
                 recursive: false,
                 id,
@@ -265,14 +401,7 @@ fn temporal(size: usize) -> (TemporalFormula, Vec<Definition>) {
             }
         })
         .collect();
-    (
-        TemporalFormula::Call {
-            definition: 0,
-            arguments: vec![],
-            captures: vec![],
-        },
-        definitions,
-    )
+    (call(0), definitions)
 }
 
 pub fn temporal_body(formula: TemporalFormula) -> rtlc::ir::DefinitionBody {
@@ -280,6 +409,10 @@ pub fn temporal_body(formula: TemporalFormula) -> rtlc::ir::DefinitionBody {
 }
 
 pub fn program(kind: &str, size: usize) -> SafetyProgram {
+    let mut next_steps = vec![Step::Assign {
+        slot: 0,
+        value: int(0),
+    }];
     let (invariants, properties, definitions) = if kind == "temporal" {
         let (formula, definitions) = temporal(size);
         (
@@ -290,6 +423,10 @@ pub fn program(kind: &str, size: usize) -> SafetyProgram {
             }],
             definitions,
         )
+    } else if kind == "action" {
+        let (steps, definitions) = steps(size);
+        next_steps = steps;
+        (vec![], vec![], definitions)
     } else {
         let (expression, definitions) = invariant(size, kind);
         (
@@ -315,10 +452,7 @@ pub fn program(kind: &str, size: usize) -> SafetyProgram {
         }],
         next: vec![Branch {
             name: "Next".into(),
-            steps: vec![Step::Assign {
-                slot: 0,
-                value: int(0),
-            }],
+            steps: next_steps,
         }],
         invariants,
         assumptions: vec![],

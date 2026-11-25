@@ -517,6 +517,64 @@ export const runFrontendCompletion = async (assetBase = "") => {
   };
 };
 
+const hopSource = (levels: number): string =>
+  [
+    "---- MODULE CallDepth ----",
+    "EXTENDS Integers",
+    "VARIABLE counter",
+    "hop0(x) == x + 1",
+    ...Array.from(
+      { length: levels },
+      (_, index) => `hop${index + 1}(x) == hop${index}(x) + 1`,
+    ),
+    "init == counter = 0",
+    "inv == counter >= 0",
+    `step == counter' = hop${levels}(counter) % 5`,
+    "q_init == init",
+    "q_step == step",
+    "q_inv == inv",
+    "====",
+    "",
+  ].join("\n");
+
+export const runCallDepth = async (assetBase = "") => {
+  const core = await createPortableWasm(
+    new Uint8Array(await (await fetch(`${assetBase}/core.wasm`)).arrayBuffer()),
+  );
+  const bounds = { maxDepth: 64, maxStates: 10000, maxWork: 1_000_000 };
+  const config =
+    "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n";
+  const check = (levels: number) =>
+    checkTlaSource(
+      core,
+      { source: hopSource(levels), config, irVersion: 2 },
+      bounds,
+    );
+  const summary = (result: SafetyResult) => ({
+    status: result.status,
+    states: result.states,
+    generated: result.generated,
+    work: result.work,
+  });
+  const accepted = summary(check(83));
+  let refusal: { code: string; message: string } | null = null;
+  try {
+    check(84);
+  } catch (error) {
+    if (!(error instanceof PortableCoreError)) throw error;
+    refusal = { code: error.code, message: error.message };
+  }
+  if (refusal === null)
+    throw new Error("Browser accepted layered calls past the limit");
+  const afterRefusal = summary(check(40));
+  return {
+    accepted,
+    refusal,
+    afterRefusal,
+    isolated: globalThis.crossOriginIsolated ?? false,
+  };
+};
+
 export const runRecursiveActions = async (assetBase = "") => {
   const core = await createPortableWasm(
     new Uint8Array(await (await fetch(`${assetBase}/core.wasm`)).arrayBuffer()),

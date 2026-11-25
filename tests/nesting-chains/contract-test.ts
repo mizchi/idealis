@@ -55,9 +55,18 @@ const baseline = (await readJson(`${directory}/baseline.json`)) as Baseline;
 const cases = (await readJson(
   `${directory}/cases.json`,
 )) as readonly ChainCase[];
-const cases0075 = (await readJson(
+const recorded0075 = (await readJson(
   `${directory}/cases-0075.json`,
 )) as readonly ChainCase[];
+const depthCases = (await readJson(
+  "fixtures/call-depth/cases-0119.json",
+)) as readonly ChainCase[];
+const cases0075: readonly ChainCase[] = recorded0075.map(
+  (entry) =>
+    (entry.group === "boundary-0075"
+      ? depthCases.find((replacement) => replacement.name === entry.name)
+      : undefined) ?? entry,
+);
 const records0075 = (await readJson(
   `${directory}/records-0075.json`,
 )) as Records0075;
@@ -250,7 +259,7 @@ const refusal = (stage: "compile" | "check", text: string): Outcome => ({
 
 test("nesting chains fixtures follow from the recorded baselines and the plan", async () => {
   assert.deepEqual(cases, updatedCases(chainCases(baseline), records0075));
-  assert.deepEqual(cases0075, addedCases(records0075));
+  assert.deepEqual(recorded0075, addedCases(records0075));
   assert.ok(cases.length >= 200);
   assert.ok(cases0075.length >= 80);
 });

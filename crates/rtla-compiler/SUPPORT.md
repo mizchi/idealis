@@ -64,7 +64,7 @@
 - [x] v2でもmodule連結、設定operator置換・定数表・定義上書きをlowerする。
 - [x] v2のfrontendは、同じ種類の連言・選言が直接の項になっている連鎖と、`ELSE`が直接`IF`である連鎖を、明示的なloopでたどり、連鎖全体を1段の入れ子として数える。式とmembershipの位置では連言・選言は左のspineだけ、action・SPECIFICATIONのparts・ENABLEDの位置では左右どちらの入れ子もたどる。右結合の入れ子（式の位置）、`IF`のTHEN側、Label・LET・演算子の呼び出しをまたぐ入れ子、時間論理の連言・選言は段ごとに数えたままにする。出力IRは同じ意味の綴り（平たい連言・選言、OTHER付きCASE）と同じで、v1の数え方とIRは変えない。
 - [ ] checker（rtlc）も連鎖を1段と数えるが、IRの深さは連鎖の長さに比例する。最上位のinvariantでは平たい連言・選言128項、CASE127枝までを受理し、超える入力はfrontendの出力検査128で拒否する。JSONの要求とTSのdecoderを通る経路では、decoderの128でより短い長さで拒否されうる。Rustのparserは最も外側まで括弧で囲んだ62段以上の連鎖を`TLA parsing: Expression nesting exceeds 64`で拒否し、TS frontendはparseする。
-- [ ] v2は、tuple別名の連鎖`V0 == x`、`Vn == <<V(n-1), V(n-1)>>`に対する`UNCHANGED Vn`を、n=7（展開後のleafが128個）以上で検査時に`Safety evaluation nesting exceeds 128`で拒否する。v1はn=8（leafが256個）まで受理する。測定した現在の限界で、原因は調べていない。
+- [ ] v2は、tuple別名の連鎖`V0 == x`、`Vn == <<V(n-1), V(n-1)>>`に対する`UNCHANGED Vn`を、n=7（展開後のleafが128個）まで受理し、n=8（leafが256個）を検査時に`Safety evaluation nesting exceeds 256`で拒否する。v1はn=8まで受理する。n=9以上は、v1・v2とも`Safety branch exceeds 256 steps`で拒否する。測定した現在の限界で、原因は調べていない。
 
 - [x] 引数付きINSTANCE、LET内INSTANCE、nested moduleの宣言時scope、名前・LAMBDAによるWITH operator置換。
 - [x] 高階operatorをarityと字句scopeに従って静的に特殊化する。LAMBDAと一般selectorを解決する。
@@ -78,7 +78,7 @@
 ## 制約と根拠
 
 - [x] v2のUNCHANGED・ENABLED・SPECIFICATION subscriptのtuple別名展開は、v1と同じ入れ子の数え方で40を超える入力を`expression or operator nesting exceeds 40`で拒否し、node上限内の固定したtuple chainでv1の受理境界と照合し、「非対応・対象外」に記したUNCHANGEDの差を保持する。UNCHANGED・ENABLEDの展開はleafが後段の枝の上限と同じ256個を超える入力を`Safety branch exceeds 256 steps`で拒否する。
-- [x] frontendの式nesting / bound variable 40、checkerの定義内式48 / 値64、TS decoder128とv2の動的な評価入れ子128を緩めない。call経路長と定義内式のnestingを区別する。
+- [x] frontendの式nesting / bound variable 40、checkerの定義内式48 / 値64、TS decoder128とv2の動的な評価入れ子（再帰しない経路は256、再帰する定義に入った経路は128）を緩めない。call経路長と定義内式のnestingを区別する。
 - [x] 集合foldの値種と順序の制約を守る。文字列・recordや一部の関数を拒否する範囲と、順序に依存しないため受理する範囲は[README](README.md)に従う。
 - [x] 未対応・型エラー・予算切れを検査成功へ読み替えない。探索予算と結果はrtlcの契約。
 - [x] source bundleの追加moduleは256、importの深さは40、展開後のsymbolは4096まで。欠落・循環・衝突を拒否し、ファイルシステムやネットワークを読まない。

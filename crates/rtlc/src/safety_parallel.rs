@@ -59,6 +59,8 @@ impl Buffer {
     }
 }
 
+const WORKER_STACK_BYTES: usize = 8 * 1024 * 1024;
+
 pub(super) struct Workers {
     pool: rayon::ThreadPool,
     buffers: Vec<Buffer>,
@@ -70,6 +72,7 @@ impl Workers {
         Ok(Self {
             pool: rayon::ThreadPoolBuilder::new()
                 .num_threads(workers)
+                .stack_size(WORKER_STACK_BYTES)
                 .build()
                 .map_err(|error| CoreError::protocol(&format!("Safety worker pool: {error}")))?,
             buffers: (0..workers).map(|_| Buffer::new(width)).collect(),
@@ -276,6 +279,24 @@ mod tests {
         buffer.push(5, 2, &values);
         assert_eq!(buffer.values, values);
         assert_eq!(buffer.events.len(), 1);
+    }
+
+    #[inline(never)]
+    fn occupy(levels: usize) -> usize {
+        let mut frame = [0_u8; 32 * 1024];
+        std::hint::black_box(&mut frame);
+        if levels == 0 {
+            0
+        } else {
+            occupy(levels - 1) + 1 + usize::from(frame[0])
+        }
+    }
+
+    #[test]
+    fn workers_run_on_a_stack_larger_than_the_default() {
+        let workers = Workers::new(2, 1).unwrap();
+        let levels = 6 * 1024 / 32;
+        assert_eq!(workers.pool.install(|| occupy(levels)), levels);
     }
 }
 

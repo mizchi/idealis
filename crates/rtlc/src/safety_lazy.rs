@@ -11,7 +11,7 @@ struct Snapshot {
     old: Option<Scalar>,
     prime: bool,
     frame: Option<Arc<CallFrame>>,
-    evaluation_depth: u8,
+    evaluation_depth: u16,
     recursive: bool,
 }
 

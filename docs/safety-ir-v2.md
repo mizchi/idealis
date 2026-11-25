@@ -50,6 +50,8 @@ captureは自由なlexical bindingの集合を、束縛の宣言順へ並べる�
 
 callはactualの式とcallerのimmutableなlexical frame（locals、parameter / captureのthunk、EXCEPTのold）を持つ新しいframeを作る。parameter / captureは読むたびに式を評価し、値cacheを持たない。current / next / primeはlexical frameへ固定せず、読んだ時点の動的contextを使う。定義本体の外側oldは直接読めず、明示captureが必要。ENABLEDのfresh next列挙と短絡順は従来どおり。
 
+動的評価の入れ子は、再帰しない経路で256段までを受理し、深さ256に達する入力を検査時の`Safety evaluation nesting exceeds 256`（protocolエラー）で拒否する。再帰する定義に入った経路は128段で`bounded / evaluation`になり、この上限は変えない。256段の評価に必要なnativeのstackは、releaseで2 MiB、debugで8 MiBのthreadが要件で、並列検査のworkerのthreadは8 MiBを明示して確保する。Wasmは線形メモリのstackが尽きる前に型付きの拒否を返す。
+
 v2のmembership descriptorでは、単一のrange bindingとそのslotだけを返す`map-set`を整数区間として検査する。`tupleSize`を持たないidentity形だけを対象とし、区間を列挙せず両端を評価する。空区間、model value、整数以外の診断は従来のrange所属と同じ順に処理する。v2のIF/CASEで選ばれたmembership結果へも用途を保ち、条件と選択枝を毎回評価する。未選択枝を評価せず、通常の値としての`map-set`とv1の評価は列挙を維持する。
 
 call entryと引数・captureの要求時にそれぞれ`Arena::consume(1)`へ課金する。直接評価`Id(Id(TRUE))`は4 workで、maxWork 3 / 4 / 5は枯渇 / 成功 / 成功となる。探索の既存費用は別に加算する。枯渇はbounded / reason:workで、上限を超えない。membership descriptorもcallを毎回通し、cacheでこの課金を省略しない。
@@ -64,7 +66,7 @@ v2のfrontendは、同じ種類の`And`（または`Or`）が直接の項にな�
 
 rtlc unit testsは不正IR、frame-local slot、直接評価のwork境界を検査する。operator-sharing cohortではTS/Rustが生成するv2を保存済みTLCログと照合し、chain、binder、lexical capture、未使用 / 使用引数、prime、ENABLEDを検査する。両frontendの正規化後構造、native / Wasmの完全応答、定義数・call edge数・serialized bytesの線形増加も検査する。両枝を評価するchainは小さいwork予算でbounded / workになることを要求し、指数的な評価仕事の除去とは数えない。
 
-UNCHANGED・ENABLED・SPECIFICATION subscriptのtuple別名展開は、v1と同じ入れ子の数え方で40を超える入力を拒否し、受理する集合を、次に述べるUNCHANGEDの限界を除いてv1に一致させる。UNCHANGED・ENABLEDの展開はleafが後段の枝の上限と同じ256個を超える入力も拒否する。v2はtuple別名の連鎖`Vn == <<V(n-1), V(n-1)>>`に対する`UNCHANGED Vn`を、n=7（展開後のleafが128個）以上で検査時に`Safety evaluation nesting exceeds 128`で拒否し、v1はn=8（leafが256個）まで受理する。これは測定した現在のv2の限界で、原因は調べていない。
+UNCHANGED・ENABLED・SPECIFICATION subscriptのtuple別名展開は、v1と同じ入れ子の数え方で40を超える入力を拒否し、受理する集合を、次に述べるUNCHANGEDの限界を除いてv1に一致させる。UNCHANGED・ENABLEDの展開はleafが後段の枝の上限と同じ256個を超える入力も拒否する。v2はtuple別名の連鎖`Vn == <<V(n-1), V(n-1)>>`に対する`UNCHANGED Vn`を、n=7（展開後のleafが128個）まで受理し、n=8（leafが256個）を検査時に`Safety evaluation nesting exceeds 256`で拒否する。v1はn=8まで受理し、n=9以上はv1・v2とも`Safety branch exceeds 256 steps`で拒否する。これは測定した現在のv2の限界で、原因は調べていない。
 
 v1の深いinlineとbinder混線は型付き拒否として別に保持し、既存239入力は省略・明示v1のserialize digestで確認する。0070では追加のCHOOSE対照8件と生成actionの旧対照について、別のEXCEPTへ渡す自由な`@`をv2要求の拒否へ変更する。既存239入力のdigestは保持する。手書きv2 IRの対照はfrontend生成の照合と区別する。これらは固定した有限fragmentと入力での証拠であり、全TLA+互換、全モデルの受理、一般的な速度改善を意味しない。
 
@@ -119,7 +121,7 @@ Definitionのoptionalな`recursive: true`は自己・相互再帰を明示する
 
 ## temporal共有と関数観測
 
-temporal callのactual/captureはcaller scopeで検証し、bodyは独立したparameter/capture領域で検証する。temporal定義のphaseはNextに限り、`recursive: true`でもtemporalの循環を拒否する。式の共有呼出しと同じ128段の動的評価上限を使う。共有化は評価結果のcacheではなく、同じbodyをIRに重複して格納しない変更である。
+temporal callのactual/captureはcaller scopeで検証し、bodyは独立したparameter/capture領域で検証する。temporal定義のphaseはNextに限り、`recursive: true`でもtemporalの循環を拒否する。式の共有呼出しと同じ動的評価上限（再帰しない経路は256段、再帰する定義に入った経路は128段）を使う。共有化は評価結果のcacheではなく、同じbodyをIRに重複して格納しない変更である。
 
 v2の関数選択とDOMAINは内部の遅延関数を扱う。wireの値tagや公開Scalarは追加しない。宣言時snapshotとcaller thunkは異なる境界で、関数が所有するstate/locals/old/primeからbodyを評価する。共有化前後ではworkを維持する。別の変更である関数選択の遅延化は、一時的な全関数の構築を省くためworkが減る場合がある。[対応する観測位置](frontend-semantics.md)を参照。
 
