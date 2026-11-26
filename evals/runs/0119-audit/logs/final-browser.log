@@ -1,0 +1,21 @@
+cargo build --release --locked --manifest-path crates/roracle/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/roracle/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --locked --manifest-path crates/idealis-core/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/idealis-core/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+pnpm exec playwright test --project=core
+
+Running 7 tests using 3 workers
+
+  ✓  3 [core] › tests/scheduling-browser.spec.ts:85:1 › reuses two Wasm workers without cross-origin isolation (82ms)
+  ✓  2 [core] › tests/check-cache-browser.spec.ts:60:1 › two fresh browser clients reuse genuine Quint checks through HTTP (184ms)
+  ✓  4 [core] › tests/check-cache-browser.spec.ts:98:1 › fresh Wasm instances reuse state expansions and recheck changed Quint properties (107ms)
+  ✓  1 [core] › tests/browser.spec.ts:81:3 › checks unchanged Quint output vdefault in Chromium (171ms)
+  ✓  5 [core] › tests/browser.spec.ts:81:3 › checks unchanged Quint output v1 in Chromium (138ms)
+  ✓  6 [core] › tests/browser.spec.ts:81:3 › checks unchanged Quint output v2 in Chromium (138ms)
+  ✓  7 [core] › tests/browser.spec.ts:120:1 › runs core, shrinking, TLA+ and Z3 Wasm in a real browser (227ms)
+
+  7 passed (1.4s)

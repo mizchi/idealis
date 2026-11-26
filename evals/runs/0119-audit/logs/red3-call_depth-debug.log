@@ -1,0 +1,101 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling serde_core v1.0.229
+   Compiling version_check v0.9.5
+   Compiling zmij v1.0.23
+   Compiling serde v1.0.229
+   Compiling crossbeam-utils v0.8.23
+   Compiling libc v0.2.191
+   Compiling typenum v1.20.1
+   Compiling crossbeam-epoch v0.9.21
+   Compiling serde_json v1.0.154
+   Compiling cfg-if v1.0.5
+   Compiling either v1.19.0
+   Compiling crossbeam-deque v0.8.8
+   Compiling memchr v2.8.3
+   Compiling zerocopy v0.8.63
+   Compiling itoa v1.0.19
+   Compiling generic-array v0.14.7
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.15
+   Compiling rayon-core v1.13.0
+   Compiling autocfg v1.5.1
+   Compiling cc v1.11.2
+   Compiling clap_lex v1.1.1
+   Compiling anstyle v1.0.14
+   Compiling regex-syntax v0.8.11
+   Compiling num-traits v0.2.19
+   Compiling ciborium-io v0.2.2
+   Compiling clap_builder v4.6.7
+   Compiling itertools v0.13.0
+   Compiling same-file v1.0.6
+   Compiling cast v0.3.0
+   Compiling walkdir v2.5.0
+   Compiling oorandom v11.1.5
+   Compiling anes v0.1.6
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling digest v0.10.7
+   Compiling cpufeatures v0.2.17
+   Compiling page_size v0.6.0
+   Compiling regex-automata v0.4.18
+   Compiling sha2 v0.10.9
+   Compiling alloca v0.4.0
+   Compiling criterion-plot v0.8.2
+   Compiling syn v3.0.10
+   Compiling syn v2.0.119
+   Compiling clap v4.6.7
+   Compiling rayon v1.12.0
+   Compiling regex v1.13.1
+   Compiling serde_derive v1.0.229
+   Compiling zerocopy-derive v0.8.63
+   Compiling rtlc v0.1.0-alpha.0 (<before>/crates/rtlc)
+   Compiling tinytemplate v1.2.1
+   Compiling rtla v0.1.0-alpha.0 (<before>/crates/rtla)
+   Compiling half v2.7.1
+   Compiling ciborium-ll v0.2.2
+   Compiling ciborium v0.2.2
+   Compiling criterion v0.8.2
+   Compiling rtla-compiler v0.1.0-alpha.0 (<before>/crates/rtla-compiler)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.54s
+     Running tests/call_depth.rs (crates/rtla-compiler/target/debug/build/rtla-compiler/53fa77ff8a3adbff/out/call_depth-53fa77ff8a3adbff)
+
+running 3 tests
+test generated_layered_calls_complete ... FAILED
+test layered_calls_past_the_nesting_limit_are_refused ... FAILED
+test layered_calls_complete_up_to_the_nesting_limit ... FAILED
+
+failures:
+
+---- generated_layered_calls_complete stdout ----
+
+thread 'generated_layered_calls_complete' (147156131) panicked at tests/call_depth.rs:102:5:
+assertion `left == right` failed
+  left: "error protocol: Safety evaluation nesting exceeds 128"
+ right: "complete 5 6 532"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- layered_calls_past_the_nesting_limit_are_refused stdout ----
+
+thread 'layered_calls_past_the_nesting_limit_are_refused' (147156133) panicked at tests/call_depth.rs:91:9:
+assertion `left == right` failed: hop 84
+  left: "error protocol: Safety evaluation nesting exceeds 128"
+ right: "error protocol: Safety evaluation nesting exceeds 256"
+
+---- layered_calls_complete_up_to_the_nesting_limit stdout ----
+
+thread 'layered_calls_complete_up_to_the_nesting_limit' (147156132) panicked at tests/call_depth.rs:84:9:
+assertion `left == right` failed: hop 41
+  left: "error protocol: Safety evaluation nesting exceeds 128"
+ right: "complete 5 6 442"
+
+
+failures:
+    generated_layered_calls_complete
+    layered_calls_complete_up_to_the_nesting_limit
+    layered_calls_past_the_nesting_limit_are_refused
+
+test result: FAILED. 0 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `--test call_depth`

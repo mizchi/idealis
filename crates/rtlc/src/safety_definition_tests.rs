@@ -404,37 +404,89 @@ fn v2_except_old_requires_explicit_capture_and_keeps_its_lexical_value() {
     refused(valid);
 }
 
-#[test]
-fn v2_dynamic_call_depth_is_checked_before_exhausting_the_native_stack() {
-    use crate::ir::{Definition, Expression, Scalar};
+const REQUIRED_STACK: usize = 8 * 1024 * 1024;
+
+fn call_chain(
+    count: usize,
+    recursive: bool,
+) -> (Vec<crate::ir::Definition>, crate::ir::Expression) {
+    let definitions = (0..count)
+        .map(|id| {
+            let body = if id + 1 == count {
+                literal(true)
+            } else {
+                call(id + 1, vec![], vec![])
+            };
+            let mut input = definition(id, body);
+            input["parameterCount"] = json!(0);
+            if recursive {
+                input["recursive"] = json!(true);
+            }
+            serde_json::from_value(input).unwrap()
+        })
+        .collect();
+    (
+        definitions,
+        serde_json::from_value(call(0, vec![], vec![])).unwrap(),
+    )
+}
+
+fn evaluate_chain(
+    count: usize,
+    recursive: bool,
+) -> (Result<crate::ir::Scalar, crate::CoreError>, u32) {
     use crate::safety_expressions::EvalContext;
     use crate::safety_values::Arena;
 
-    for count in [127, 128, 129] {
-        let definitions: Vec<Definition> = (0..count)
-            .map(|id| {
-                let body = if id + 1 == count {
-                    literal(true)
-                } else {
-                    call(id + 1, vec![], vec![])
-                };
-                let mut input = definition(id, body);
-                input["parameterCount"] = json!(0);
-                serde_json::from_value(input).unwrap()
-            })
-            .collect();
-        let expression: Expression = serde_json::from_value(call(0, vec![], vec![])).unwrap();
-        let mut arena = Arena::new(1000);
-        arena.definitions = &definitions;
-        let result = expression.eval(EvalContext::new(&[], &[]), &mut arena);
-        if count == 127 {
+    std::thread::Builder::new()
+        .stack_size(REQUIRED_STACK)
+        .spawn(move || {
+            let (definitions, expression) = call_chain(count, recursive);
+            let mut arena = Arena::new(2000);
+            arena.definitions = &definitions;
+            let result = expression.eval(EvalContext::new(&[], &[]), &mut arena);
+            (result, arena.work)
+        })
+        .unwrap()
+        .join()
+        .unwrap()
+}
+
+#[test]
+fn v2_dynamic_call_depth_is_checked_before_exhausting_the_native_stack() {
+    use crate::ir::Scalar;
+
+    for count in [255, 256, 257] {
+        let (result, work) = evaluate_chain(count, false);
+        if count == 255 {
             assert_eq!(result.unwrap(), Scalar::Bool(true));
-            assert_eq!(arena.work, 127);
+            assert_eq!(work, 255);
         } else {
             let error = result.unwrap_err();
             assert_eq!(error.code, "protocol");
-            assert_eq!(error.message, "Safety evaluation nesting exceeds 128");
-            assert_eq!(arena.work, 128);
+            assert_eq!(error.message, "Safety evaluation nesting exceeds 256");
+            assert_eq!(work, 256);
+        }
+    }
+}
+
+#[test]
+fn v2_recursive_call_depth_keeps_the_former_limit() {
+    use crate::ir::Scalar;
+
+    for count in [127, 128, 129] {
+        let (result, work) = evaluate_chain(count, true);
+        if count == 127 {
+            assert_eq!(result.unwrap(), Scalar::Bool(true));
+            assert_eq!(work, 127);
+        } else {
+            let error = result.unwrap_err();
+            assert_eq!(error.code, "evaluation-budget");
+            assert_eq!(
+                error.message,
+                "Recursive safety evaluation nesting exceeds 128"
+            );
+            assert_eq!(work, 128);
         }
     }
 }
@@ -474,9 +526,57 @@ fn v2_enabled_subscripts_keep_the_depth_of_live_branch_steps() {
     assert_eq!(control.status, "complete");
     assert_eq!(control.states, 1);
     assert_eq!(control.generated, 2);
-    let error = build(60).check(bounds).unwrap_err();
+    let error = std::thread::Builder::new()
+        .stack_size(REQUIRED_STACK)
+        .spawn(move || build(100).check(bounds).unwrap_err())
+        .unwrap()
+        .join()
+        .unwrap();
     assert_eq!(error.code, "protocol");
-    assert_eq!(error.message, "Safety evaluation nesting exceeds 128");
+    assert_eq!(error.message, "Safety evaluation nesting exceeds 256");
+}
+
+#[test]
+fn v2_enabled_subscripts_keep_the_recursive_limit() {
+    let build = |steps: usize, recursive: bool| {
+        let mut list =
+            vec![json!({"kind":"assign","slot":0,"value":{"op":"read","slot":0,"next":false}})];
+        for _ in 1..steps {
+            list.push(json!({"kind":"guard","expression":literal(true)}));
+        }
+        let body = json!({"op":"enabled","branches":[{"name":"Nested","steps":list}],"subscript":literal(false)});
+        let mut entry = definition(0, body);
+        entry["parameterCount"] = json!(0);
+        entry["recursive"] = json!(recursive);
+        let mut input = program();
+        input["definitions"] = json!([entry]);
+        input["invariants"][0]["expression"] = json!({"op":"not","argument":call(0,vec![],vec![])});
+        serde_json::from_value::<SafetyProgram>(input).unwrap()
+    };
+    let bounds = SafetyBounds {
+        max_depth: 0,
+        max_states: 1,
+        max_work: 50000,
+        max_temporal_nodes: None,
+    };
+    let run = |steps, recursive| {
+        let program = build(steps, recursive);
+        std::thread::Builder::new()
+            .stack_size(REQUIRED_STACK)
+            .spawn(move || program.check(bounds).unwrap())
+            .unwrap()
+            .join()
+            .unwrap()
+    };
+    for (steps, recursive, status, reason) in [
+        (123, true, "complete", None),
+        (124, true, "bounded", Some("evaluation")),
+        (124, false, "complete", None),
+    ] {
+        let result = run(steps, recursive);
+        assert_eq!(result.status, status, "{steps} {recursive}");
+        assert_eq!(result.reason.as_deref(), reason, "{steps} {recursive}");
+    }
 }
 
 fn integer(value: i32) -> Value {
@@ -1740,4 +1840,63 @@ fn bind_run_planning_checks_a_long_child_list_one_element_at_a_time() {
         let (input, started) = pairs_before_the_branch_limit(tail);
         refused_within(&input, started, std::time::Duration::from_millis(850));
     }
+}
+
+fn applied_function_program(passes: usize, body_calls: usize) -> SafetyProgram {
+    let function = json!({"op":"function","bounds":[{"slot":0,"domain":{"kind":"set","values":[integer(1)]}}],"body":call(passes + 1, vec![], vec![])});
+    let mut definitions = vec![{
+        let mut root = definition(0, call(1, vec![function], vec![]));
+        root["parameterCount"] = json!(0);
+        root["localScope"] = json!(1);
+        root
+    }];
+    for id in 1..=passes {
+        let body = if id == passes {
+            json!({"op":"at","target":{"op":"parameter","slot":0},"key":integer(1)})
+        } else {
+            call(id + 1, vec![json!({"op":"parameter","slot":0})], vec![])
+        };
+        definitions.push(definition(id, body));
+    }
+    for index in 0..body_calls {
+        let id = passes + 1 + index;
+        let body = if index + 1 == body_calls {
+            literal(true)
+        } else {
+            call(id + 1, vec![], vec![])
+        };
+        let mut entry = definition(id, body);
+        entry["parameterCount"] = json!(0);
+        definitions.push(entry);
+    }
+    let mut input = program();
+    input["definitions"] = json!(definitions);
+    input["invariants"][0]["expression"] = call(0, vec![], vec![]);
+    serde_json::from_value(input).unwrap()
+}
+
+#[test]
+fn v2_applied_lazy_function_body_counts_the_depth_of_its_application() {
+    let bounds = SafetyBounds {
+        max_depth: 0,
+        max_states: 1,
+        max_work: 50000,
+        max_temporal_nodes: None,
+    };
+    let run = |passes, body_calls| {
+        let program = applied_function_program(passes, body_calls);
+        std::thread::Builder::new()
+            .stack_size(REQUIRED_STACK)
+            .spawn(move || program.check(bounds))
+            .unwrap()
+            .join()
+            .unwrap()
+    };
+    for (passes, body_calls) in [(1, 130), (70, 10)] {
+        let result = run(passes, body_calls).unwrap();
+        assert_eq!(result.status, "complete", "{passes} {body_calls}");
+    }
+    let error = run(70, 130).unwrap_err();
+    assert_eq!(error.code, "protocol");
+    assert_eq!(error.message, "Safety evaluation nesting exceeds 256");
 }

@@ -82,9 +82,9 @@
 
 - [x] complete / bounded / empty / 各違反 / 評価エラーを区別する。boundedやemptyを安全の証明にしない。
 - [x] v2の型所属はidentity range map-setを列挙せず判定する。通常値のmap-setとv1の評価は列挙を維持する。
-- [x] v2の動的評価の入れ子は128までで、再帰経路の超過はbounded/evaluation、通常の不正な深さはprotocolエラー。定義内expression深さ48や既存v1の制限とは別に扱う。
-- [x] v2は、`and`の`left`が直接`and`である連鎖（`or`も同じ）と`if`の`alternative`が直接`if`である連鎖を、評価・遅延関数・membershipのIF・構造の検証・metadataの解析で明示的なloopでたどり、連鎖全体を定義内expression深さ48と動的評価128の1段と数える。評価順・短絡・最初のエラー・workは変えない。v1の数え方は変えない。v2は式の木の根からのIRの深さ128を超える入力を`Safety IR expression nesting exceeds 128`で拒否する。
-- [x] 評価の再帰で積まれるframeを小さくするため、`eval_operator`と`eval_scalar_operator`の腕を別の関数に分けている。debugの既定2 MiBのthreadで、式の演算子・値の演算子・call・membership・量化の束縛・ENABLEDのstep・binderのlocals・遅延関数・時間論理の入れ子が、動的評価128の直前で受理され直後で型付きに拒否されることを`tests/evaluation_stack.rs`がdebugとreleaseで検査する。
+- [x] v2の動的評価の入れ子は、再帰しない経路で256まで、再帰する定義に入った経路で128まで。再帰経路の超過は`bounded / evaluation`、再帰しない経路の超過は`Safety evaluation nesting exceeds 256`のprotocolエラー。定義内expression深さ48や既存v1の制限とは別に扱う。
+- [x] v2は、`and`の`left`が直接`and`である連鎖（`or`も同じ）と`if`の`alternative`が直接`if`である連鎖を、評価・遅延関数・membershipのIF・構造の検証・metadataの解析で明示的なloopでたどり、連鎖全体を定義内expression深さ48と動的評価（再帰しない経路は256、再帰する定義に入った経路は128）の1段と数える。評価順・短絡・最初のエラー・workは変えない。v1の数え方は変えない。v2は式の木の根からのIRの深さ128を超える入力を`Safety IR expression nesting exceeds 128`で拒否する。
+- [x] 評価の再帰で積まれるframeを小さくするため、`eval_operator`と`eval_scalar_operator`の腕を別の関数に分けている。式の演算子・値の演算子・call・membership・量化の束縛・ENABLEDのstep・binderのlocals・遅延関数・時間論理・引数の転送・EXCEPTの入れ子・関数適用・actionのstepの13種類が、動的評価256の直前で受理され直後で型付きに拒否されることを`tests/evaluation_stack.rs`が検査する。要件はreleaseが2 MiB、debugが8 MiBのthreadで、debugの2 MiBのthreadは約240段を超えると中断しうる。並列探索のworkerのthreadは8 MiBのstackを明示し、`safety_parallel.rs`のunit testと`tests/parallel_stack.rs`が検査する。
 - [x] workはwall timeや厳密なメモリ上限ではない。並列探索のworkと予算境界の部分結果は逐次と同じとは限らない。
 - [x] 集合foldの文字列・record、関数key幅等の制限を維持する。ただし要素が1個以下、body が要素を読まない、body が累積値に`\union`で集合を足す（足す集合とIFの条件が累積値を読まない）fold は、文字列・recordを含んでも受理し、固定TLCのログと照合する。要素が1個以下の集合でも、その要素の中の入れ子の集合・関数のdomain・recordが比較可能であることを先に確かめ、比べられない組があれば従来の拒否を返す。累積値は、足す`\union`の直接の被演算子でなければならない（`acc \union ({elem} \union {"x"})`は受理し、`(acc \union {elem}) \union {"x"}`は受理しない）。要素が2個以上で文字列・recordを含む集合に比べられない組（fieldの種類の食い違いなど）がある場合は、受理する前に従来の拒否を返す。累積値に足すfoldのbodyが評価エラーの場合と、結果の要素に比較できない組（整数と型付きmodel valueなど）がある場合は、従来の拒否を返す。置き換えない例外は、要素が1個の集合（bodyのエラーをそのまま返す）、`Unsupported TLA input`で始まる別の拒否、予算切れ（`budget`・`evaluation-budget`）。要素が2個以上でmodel valueを含む集合foldは未対応。汎用Valueのvariantの存在だけで対応とは数えない。
 

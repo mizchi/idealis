@@ -1,0 +1,42 @@
+
+thread 'main' (147020565) panicked at src/main.rs:93:69:
+called `Result::unwrap()` on an `Err` value: ParseIntError { kind: InvalidDigit }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+node:internal/errors:986
+  const err = new Error(message);
+              ^
+
+Error: Command failed: <scratch>/stack/target-oracle/release/call-depth-stack-harness emit-kind operator NaN
+
+thread 'main' (147020565) panicked at src/main.rs:93:69:
+called `Result::unwrap()` on an `Err` value: ParseIntError { kind: InvalidDigit }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+    at genericNodeError (node:internal/errors:986:15)
+    at wrappedFn (node:internal/errors:540:14)
+    at checkExecSyncError (node:child_process:943:11)
+    at execFileSync (node:child_process:979:15)
+    at programOf (file://<after>/dist/evals/experiments/call-depth/wasm-ceiling.js:53:62)
+    at file://<after>/dist/evals/experiments/call-depth/wasm-ceiling.js:72:22
+    at outcome (file://<after>/dist/evals/experiments/call-depth/wasm-ceiling.js:83:29)
+    at search (file://<after>/dist/evals/experiments/call-depth/wasm-ceiling.js:97:24)
+    at async file://<after>/dist/evals/experiments/call-depth/wasm-ceiling.js:132:23 {
+  status: null,
+  signal: 'SIGABRT',
+  output: [
+    null,
+    '',
+    '\n' +
+      "thread 'main' (147020565) panicked at src/main.rs:93:69:\n" +
+      'called `Result::unwrap()` on an `Err` value: ParseIntError { kind: InvalidDigit }\n' +
+      'note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n'
+  ],
+  pid: 77434,
+  stdout: '',
+  stderr: '\n' +
+    "thread 'main' (147020565) panicked at src/main.rs:93:69:\n" +
+    'called `Result::unwrap()` on an `Err` value: ParseIntError { kind: InvalidDigit }\n' +
+    'note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n'
+}
+
+Node.js v24.22.3

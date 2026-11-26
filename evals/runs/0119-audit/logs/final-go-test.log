@@ -1,0 +1,28 @@
+cargo build --release --locked --manifest-path crates/roracle/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/roracle/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --locked --manifest-path crates/idealis-core/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/idealis-core/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.01s
+pnpm exec tsc -p packages/idealis/tsconfig.json
+pnpm exec tsc -p tsconfig.json
+node dist/evals/experiments/go/prepare.js
+Prepared 9 TS histories, one host tape and 17 shrink cases for Go
+test -z "$(gofmt -l adapters/go)"
+cd adapters/go && go vet ./...
+cd adapters/go && CGO_ENABLED=0 go test -count=1 ./...
+ok  	github.com/mizchi/idealis/adapters/go	8.830s
+?   	github.com/mizchi/idealis/adapters/go/cmd/counter-replay	[no test files]
+?   	github.com/mizchi/idealis/adapters/go/cmd/finite-bench	[no test files]
+?   	github.com/mizchi/idealis/adapters/go/cmd/history-check	[no test files]
+?   	github.com/mizchi/idealis/adapters/go/internal/counter	[no test files]
+cd adapters/go && go test -race -count=1 ./...
+ok  	github.com/mizchi/idealis/adapters/go	115.900s
+?   	github.com/mizchi/idealis/adapters/go/cmd/counter-replay	[no test files]
+?   	github.com/mizchi/idealis/adapters/go/cmd/finite-bench	[no test files]
+?   	github.com/mizchi/idealis/adapters/go/cmd/history-check	[no test files]
+?   	github.com/mizchi/idealis/adapters/go/internal/counter	[no test files]
+node dist/scripts/go-consumer.js
+{"status":"complete","consumer":"/var/folders/t_/xt7d7qm90013w3rq7687xg2h0000gn/T/idealis-go-consumer-80ToEV","cgo":false,"sdk":"copied standalone module","output":"ok  \tidealis-consumer\t1.016s","exampleOutput":"matched","wasmSha256":"7f2149a89698ed7ec8bb2613383a4d76a2e0c553bcc370ef573e2f638f2be36a"}
