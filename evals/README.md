@@ -2,6 +2,8 @@
 
 実験の実装・計測・再生は [experiments/](experiments/)、回帰テストは [tests/](../tests/)、固定入力・期待値は [fixtures/](../fixtures/) に置く。実行時にケースを生成するコードは実験に含める。保存済みの計画・実行結果・考察は記録時のパスを保持する。
 
+[0128: rprob の計測順](iterations/0128-rprob-benchmark-order.md)は、密な辺探索を変更前・候補の順序を交互にして再計測した。
+
 [0127: rprob の初期候補と遷移ディスパッチ](iterations/0127-rprob-budget-and-dispatch.md)は、予算切れを含む7負荷で候補処理とビット更新を比較した。
 
 [0126: rprob の探索コスト](iterations/0126-rprob-hot-paths.md)は、状態保存・式評価・候補走査・ガード評価を段階ごとに比較した。

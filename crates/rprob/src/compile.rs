@@ -8,6 +8,7 @@ use rmodel::{
 use std::{cell::Cell, collections::BTreeMap};
 
 const MAX_TUPLES: usize = 20;
+const MAX_ACTION_PARAMETERS: usize = 128;
 const MAX_LOWERED_NODES: usize = 1_000_000;
 
 #[derive(Clone, Copy)]
@@ -423,6 +424,9 @@ impl<'m> Compiler<'m> {
                     SetOp::Difference => (set_width()?, |a, b| a & !b),
                     SetOp::Intersection => (set_width()?, |a, b| a & b),
                     SetOp::Product => {
+                        if matches!(left_width, Empty) || matches!(right_width, Empty) {
+                            return Ok((Empty, Term::Const(0)));
+                        }
                         if matches!(left_width, Binary) || matches!(right_width, Binary) {
                             return Err(Unsupported::new("a product would exceed arity two"));
                         }
@@ -468,10 +472,20 @@ impl<'m> Compiler<'m> {
         match int {
             Int::Literal(value) => Ok(Number::Literal(*value)),
             Int::Count(expr) => Ok(Number::Count(self.term(expr, bound, false)?.1)),
-            Int::Value(Expr::Count(expr)) => Ok(Number::Count(self.term(expr, bound, false)?.1)),
-            _ => Err(Unsupported::new(
-                "only cardinalities and integer literals are supported in numeric comparisons",
-            )),
+            Int::Value(expr) => {
+                let mut expr = expr;
+                let mut after = false;
+                while let Expr::At(phase, child) = expr {
+                    after = *phase == Phase::After;
+                    expr = child;
+                }
+                if let Expr::Count(set) = expr {
+                    return Ok(Number::Count(self.term(set, bound, after)?.1));
+                }
+                Err(Unsupported::new(
+                    "only cardinalities and integer literals are supported in numeric comparisons",
+                ))
+            }
         }
     }
 
@@ -636,6 +650,11 @@ pub(crate) fn lower(model: &Model) -> Result<Compiled, Unsupported> {
     let mut scope = Bindings::new();
     let mut actions = Vec::new();
     for action in &model.actions {
+        if action.params.len() > MAX_ACTION_PARAMETERS {
+            return Err(Unsupported::new(format!(
+                "an action may have at most {MAX_ACTION_PARAMETERS} parameters"
+            )));
+        }
         let mut instances = Vec::new();
         compiler.instances(action, &action.params, &mut scope, &mut instances)?;
         if let [domain] = state.as_slice()

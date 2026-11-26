@@ -78,15 +78,15 @@ def card(fixture, rows, design, case, index):
 
 
 def main():
-    rows = json.loads(Path(sys.argv[1]).read_text())
+    rows = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
     output = Path(sys.argv[2])
     output.mkdir()
-    fixture = json.loads(Path("fixtures/rcheck/requirement-links/cases.json").read_text())
+    fixture = json.loads(Path("fixtures/rcheck/requirement-links/cases.json").read_text(encoding="utf-8"))
     for reader, cases in enumerate(SCHEDULE, 1):
         packet = "# 発送の仕様レビュー\n\n各画面は独立した変更例です。"
         for index, (design, case) in enumerate(cases, 1):
             packet += card(fixture, rows, design, case, index)
-        (output / f"{reader}.md").write_text(packet + "\n最後に、最も調査しやすかった画面番号とその理由を一つ答える。\n")
+        (output / f"{reader}.md").write_text(packet + "\n最後に、最も調査しやすかった画面番号とその理由を一つ答える。\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

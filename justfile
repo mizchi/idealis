@@ -335,6 +335,10 @@ rprob-stress-bench output baseline:
   cargo build --release --locked --manifest-path evals/experiments/rprob/Cargo.toml
   python3 -B evals/experiments/rprob/hot_paths.py --stress {{quote(output)}} {{quote(baseline)}}
 
+rprob-order-bench output baseline:
+  cargo build --release --locked --manifest-path evals/experiments/rprob/Cargo.toml
+  python3 -B evals/experiments/rprob/alternating.py {{quote(output)}} {{quote(baseline)}}
+
 rprob-goal-pin:
   cargo build --release --locked --manifest-path evals/experiments/rprob/Cargo.toml
   just adoption-evidence --pin "$(python3 -B evals/experiments/rprob/goal.py identify)"

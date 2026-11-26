@@ -448,3 +448,54 @@ fn grouped_bit_updates_keep_the_original_action_order() {
         assert_eq!(outcome(&report, "KeepsX"), Violated { depth: 2 });
     }
 }
+
+#[test]
+fn an_empty_product_can_be_used_at_either_arity() {
+    let report = agree(
+        "model EmptyProduct
+         sig A
+         invariant Kept { A in ((none -> A) + A) }
+         invariant RightEmpty { A in ((A -> none) + A) }
+         scope A = 1, steps = 2",
+        &[3],
+    );
+    assert_eq!(outcome(&report, "Kept"), Holds);
+    assert_eq!(outcome(&report, "RightEmpty"), Holds);
+}
+
+#[test]
+fn cardinality_can_select_the_before_and_after_phase() {
+    let report = agree(
+        "model PhaseCounts
+         sig Item
+         var selected: set Item
+         init { no selected }
+         behavior choose() { guard { no selected } update { selected = Item } }
+         transition Growth { after(#selected) > before(#selected) }
+         transition GrowthOfSet { #after(selected) > #before(selected) }
+         scope Item = 1, steps = 3",
+        &[5, 6],
+    );
+    assert_eq!(outcome(&report, "Growth"), Holds);
+    assert_eq!(outcome(&report, "GrowthOfSet"), Holds);
+}
+
+#[test]
+fn action_parameter_depth_has_a_checked_limit() {
+    let source = |count| {
+        let args = (0..count)
+            .map(|index| format!("p{index}: Item"))
+            .collect::<Vec<_>>();
+        format!(
+            "model ManyParameters\n sig Item\n action pick({}) {{ true }}\n scope Item = 1, steps = 2",
+            args.join(", ")
+        )
+    };
+    let accepted = rmodel::parse(&source(128)).unwrap();
+    assert!(rprob::Compiled::new(&accepted).is_ok());
+    let oversized = rmodel::parse(&source(129)).unwrap();
+    let Err(error) = rprob::Compiled::new(&oversized) else {
+        panic!("expected an unsupported parameter list");
+    };
+    assert!(error.to_string().contains("128 parameters"));
+}

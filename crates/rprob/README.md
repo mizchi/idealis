@@ -11,6 +11,8 @@ just rprob-test
 just rprob-bench .artifacts/rprob-new
 ```
 
+Benchmarks were tested with Hyperfine 2.0.0, including its `--metrics` flag. Use a fresh output directory for each run.
+
 Sets use a bit per atom, and binary relations use a fixed bit matrix.
 Candidate domains store small tables and generate larger choices on demand.
 Functions and partial functions select legal values per row.
@@ -28,3 +30,4 @@ The [candidate enumeration experiment](../../evals/iterations/0125-rprob-candida
 records the workload, measured cost, and remaining limits.
 The [exploration profile and measurements](../../evals/iterations/0126-rprob-hot-paths.md) track the effects of each change.
 The [stress benchmark](../../evals/iterations/0127-rprob-budget-and-dispatch.md) measures bulk budget accounting and specialized bit transitions.
+Use `just rprob-order-bench <output> <baseline>` for the [alternating-order dense workload](../../evals/iterations/0128-rprob-benchmark-order.md).

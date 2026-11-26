@@ -16,6 +16,6 @@ Apple M5、macOS 26.6.2、Hyperfine 2.0.0。両エンジンを同じ release バ
 | 二項関係3×4、準備再利用       | 478.82 ± 6.21 ms   | 9.72 ± 0.10 ms  | 49.3倍 |
 | 二項関係4×4、準備再利用       | 3166.15 ± 39.14 ms | 45.99 ± 0.61 ms | 68.8倍 |
 
-4×4は16本の辺が独立に変わる65,536状態のモデル。ピーク RSS の平均は123.85 MiB → 9.40 MiB、命令数の平均は85.36×10⁹ → 0.99×10⁹。準備再利用の参照側はパース済み AST を渡す現行 API、rprob 側は一度変換した `Compiled` を使う。計測は準備の差も含む。比較相手は rmodel の参照評価器。 [権限の生データ](../runs/0121-rprob-kernel/permissions.json) · [3×4](../runs/0121-rprob-kernel/edges-3x4.json) · [4×4](../runs/0121-rprob-kernel/edges-4x4.json)
+4×4は16本の辺が独立に変わる65,536状態のモデル。ピーク RSS の平均は123.85 MiB → 9.40 MiB、命令数の平均は85.36×10⁹ → 0.99×10⁹。準備再利用の参照側はパース済み AST を渡す現行 API、rprob 側は一度変換した `Compiled` を使う。計測は準備の差も含む。比較相手は rmodel の参照評価器。 [権限の集計](../runs/0121-rprob-kernel/permissions.json) · [3×4](../runs/0121-rprob-kernel/edges-3x4.json) · [4×4](../runs/0121-rprob-kernel/edges-4x4.json)
 
 `just rprob-test` で差分テスト、`just rprob-bench .artifacts/rprob-new` で再計測できる。対応範囲は有限 atom の集合・二項関係で、構造化された値と時相の問いは変換時に対応外を返す。 [対応範囲](../../crates/rprob/SUPPORT.md)
