@@ -72,7 +72,27 @@ fn temporal_calls_reach_the_nesting_limit_within_the_required_stack() {
 
 #[test]
 fn forwarded_parameters_reach_the_nesting_limit_within_the_required_stack() {
-    assert_boundary("forward", 127, 512);
+    assert_boundary("forward", 254, 1020);
+}
+
+#[test]
+fn forwarded_captures_reach_the_nesting_limit_within_the_required_stack() {
+    assert_boundary("capture", 254, 1020);
+}
+
+#[test]
+fn alternating_forwards_reach_the_nesting_limit_within_the_required_stack() {
+    assert_boundary("mixed", 254, 1020);
+}
+
+#[test]
+fn forwarded_membership_sets_reach_the_nesting_limit_within_the_required_stack() {
+    assert_boundary("forward-set", 250, 1007);
+}
+
+#[test]
+fn forwarded_function_applications_reach_the_nesting_limit_within_the_required_stack() {
+    assert_boundary("forward-function", 249, 503);
 }
 
 #[test]

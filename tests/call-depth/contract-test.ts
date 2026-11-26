@@ -2,14 +2,17 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { after, test } from "node:test";
 import {
-  type DepthCase,
-  depthCases,
-  type Records0119,
-} from "../../evals/experiments/call-depth/expectations-0119.js";
+  type DepthCase0120,
+  depthCases0120,
+  type Records0120,
+} from "../../evals/experiments/call-depth/expectations-0120.js";
 import {
-  depthLimit,
-  hopLevels,
-} from "../../evals/experiments/call-depth/sources.js";
+  acceptedHops,
+  acceptedInvariantHops,
+  families,
+  forwardedHopLevels,
+} from "../../evals/experiments/call-depth/sources-0120.js";
+import { depthLimit } from "../../evals/experiments/call-depth/sources.js";
 import {
   type Check,
   type Compile,
@@ -34,11 +37,11 @@ const directory = "fixtures/call-depth";
 const readJson = async (path: string): Promise<unknown> =>
   JSON.parse(await readFile(path, "utf8"));
 const records = (await readJson(
-  `${directory}/records-0119.json`,
-)) as Records0119;
+  `${directory}/records-0120.json`,
+)) as Records0120;
 const cases = (await readJson(
-  `${directory}/cases-0119.json`,
-)) as readonly DepthCase[];
+  `${directory}/cases-0120.json`,
+)) as readonly DepthCase0120[];
 
 const core = await createPortableWasm(await readFile(wasmPath));
 const native = startNative(nativePath);
@@ -109,8 +112,8 @@ const paths: readonly Path[] = [
 ];
 
 test("call depth fixtures follow from the recorded baselines and the plan", () => {
-  assert.deepEqual(cases, depthCases(records));
-  assert.equal(cases.length, 31);
+  assert.deepEqual(cases, depthCases0120(records));
+  assert.equal(cases.length, 63);
 });
 
 for (const entry of cases)
@@ -146,7 +149,7 @@ for (const entry of cases)
     }
   });
 
-const find = (name: string): DepthCase => {
+const find = (name: string): DepthCase0120 => {
   const found = cases.find((entry) => entry.name === name);
   assert.ok(found, name);
   return found;
@@ -159,14 +162,21 @@ const refusedAtTheLimit = (outcome: Outcome): boolean =>
 
 test("call depth layered calls complete up to depth 255 and refuse depth 256 on every path", () => {
   for (const frontend of ["ts", "rust"] as const)
-    for (const prefix of ["hop", "hop-invariant"]) {
+    for (const [prefix, accepted] of [
+      ["hop", acceptedHops],
+      ["hop-invariant", acceptedInvariantHops],
+    ] as const) {
       if (prefix === "hop" && frontend === "ts") continue;
-      for (const levels of hopLevels.filter((count) => count < 84))
+      for (const levels of forwardedHopLevels.filter(
+        (count) => count <= accepted,
+      ))
         assert.ok(
           completes(find(`${prefix}-${levels}`).expect[frontend].v2),
           `${frontend} ${prefix}-${levels}`,
         );
-      for (const levels of hopLevels.filter((count) => count >= 84))
+      for (const levels of forwardedHopLevels.filter(
+        (count) => count > accepted,
+      ))
         assert.ok(
           refusedAtTheLimit(find(`${prefix}-${levels}`).expect[frontend].v2),
           `${frontend} ${prefix}-${levels}`,
@@ -174,11 +184,31 @@ test("call depth layered calls complete up to depth 255 and refuse depth 256 on 
     }
 });
 
+test("call depth forwarding families complete up to their accepted size and refuse the next on both frontends", () => {
+  for (const family of families) {
+    const [, former, accepted, refused] = family.levels;
+    for (const frontend of ["ts", "rust"] as const) {
+      for (const levels of [family.levels[0], former, accepted])
+        assert.ok(
+          completes(find(`${family.name}-${levels}`).expect[frontend].v2),
+          `${frontend} ${family.name}-${levels}`,
+        );
+      assert.ok(
+        refusedAtTheLimit(
+          find(`${family.name}-${refused}`).expect[frontend].v2,
+        ),
+        `${frontend} ${family.name}-${refused}`,
+      );
+    }
+  }
+});
+
 test("call depth keeps the recursive limit and the frontend limits", () => {
   for (const name of [
     "recursion-loop",
     "recursion-sum-200",
     "recursion-from-hop-50",
+    "recursion-from-hop-38",
   ]) {
     const expected = find(name).expect.rust.v2;
     assert.ok(
@@ -188,7 +218,7 @@ test("call depth keeps the recursive limit and the frontend limits", () => {
       name,
     );
   }
-  for (const levels of hopLevels)
+  for (const levels of forwardedHopLevels)
     assert.deepEqual(find(`hop-${levels}`).expect.rust.v1, {
       stage: "compile",
       message: "expression or operator nesting exceeds 40",
@@ -200,7 +230,7 @@ test("call depth keeps the recursive limit and the frontend limits", () => {
 });
 
 test("a typed refusal leaves the same Wasm instance able to check the next request", async () => {
-  const refused = find("hop-invariant-84");
+  const refused = find("hop-invariant-125");
   const input: Input = {
     source: refused.source,
     config: refused.config,

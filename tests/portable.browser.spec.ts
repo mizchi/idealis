@@ -271,7 +271,7 @@ test("refuses layered calls past the nesting limit and keeps the instance usable
     return api.runCallDepth();
   });
   expect(result).toEqual({
-    accepted: { status: "complete", states: 5, generated: 6, work: 862 },
+    accepted: { status: "complete", states: 5, generated: 6, work: 1282 },
     refusal: {
       code: "protocol",
       message: "Safety evaluation nesting exceeds 256",

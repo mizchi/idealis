@@ -6,7 +6,7 @@ use rtlc::ir::{
 };
 use rtlc::{SafetyBounds, SafetyProgram};
 
-pub const KINDS: [&str; 13] = [
+pub const KINDS: [&str; 17] = [
     "operator",
     "value",
     "call",
@@ -17,6 +17,10 @@ pub const KINDS: [&str; 13] = [
     "lazy",
     "temporal",
     "forward",
+    "capture",
+    "mixed",
+    "forward-set",
+    "forward-function",
     "update",
     "function",
     "action",
@@ -119,30 +123,109 @@ fn scoped(
     (call(0), definitions)
 }
 
-fn forwarded(size: usize) -> (Expression, Vec<Definition>) {
+#[derive(Clone, Copy)]
+enum Passing {
+    Argument,
+    Capture,
+}
+
+fn reference(passing: Passing) -> Expression {
+    match passing {
+        Passing::Argument => Expression::Parameter { slot: 0 },
+        Passing::Capture => Expression::Capture { slot: 0 },
+    }
+}
+
+fn received(kind: &str, id: usize) -> Passing {
+    match kind {
+        "capture" => Passing::Capture,
+        "mixed" if id % 2 == 1 => Passing::Capture,
+        _ => Passing::Argument,
+    }
+}
+
+fn forwarding_call(kind: &str, definition: usize, actual: Expression) -> Expression {
+    let (arguments, captures) = match received(kind, definition) {
+        Passing::Argument => (vec![actual], vec![]),
+        Passing::Capture => (vec![], vec![actual]),
+    };
+    Expression::Call {
+        definition,
+        arguments,
+        captures,
+    }
+}
+
+fn forwarding_chain(kind: &str, size: usize) -> Vec<Definition> {
     let count = size.max(1);
-    let parameter = || Expression::Parameter { slot: 0 };
-    let definitions = (0..count)
+    (0..count)
         .map(|id| {
+            let own = reference(received(kind, id));
             let body = if id + 1 == count {
-                parameter()
+                own
             } else {
-                Expression::Call {
-                    definition: id + 1,
-                    arguments: vec![parameter()],
-                    captures: vec![],
-                }
+                forwarding_call(kind, id + 1, own)
             };
-            parametrized(id, 1, 0, body)
+            let (parameter_count, capture_count) = match received(kind, id) {
+                Passing::Argument => (1, 0),
+                Passing::Capture => (0, 1),
+            };
+            Definition {
+                recursive: false,
+                id,
+                parameter_count,
+                capture_count,
+                body_kind: BodyKind::Expression,
+                local_scope: 0,
+                body: body.into(),
+            }
         })
-        .collect();
+        .collect()
+}
+
+fn forwarded(kind: &str, size: usize) -> (Expression, Vec<Definition>) {
     (
-        Expression::Call {
-            definition: 0,
-            arguments: vec![truth()],
-            captures: vec![],
+        forwarding_call(kind, 0, truth()),
+        forwarding_chain(kind, size),
+    )
+}
+
+fn forwarded_set(size: usize) -> (Expression, Vec<Definition>) {
+    (
+        Expression::SequenceIn {
+            left: Box::new(Expression::Tuple { values: vec![] }),
+            right: Box::new(forwarding_call(
+                "forward",
+                0,
+                Expression::SequenceSet {
+                    argument: Box::new(singleton(truth())),
+                },
+            )),
         },
-        definitions,
+        forwarding_chain("forward", size),
+    )
+}
+
+fn forwarded_function(size: usize) -> (Expression, Vec<Definition>) {
+    let function = Expression::Function {
+        bounds: vec![Binding {
+            tuple_size: None,
+            slot: 0,
+            domain: Domain::Set {
+                values: vec![int(1)],
+            },
+        }],
+        body: Box::new(x()),
+    };
+    (
+        Expression::Ge {
+            left: Box::new(Expression::At {
+                target: Box::new(forwarding_call("forward", 0, function)),
+                key: Box::new(int(1)),
+            }),
+            right: Box::new(int(0)),
+        },
+        forwarding_chain("forward", size),
     )
 }
 
@@ -279,7 +362,9 @@ fn invariant(size: usize, kind: &str) -> (Expression, Vec<Definition>) {
                 definitions,
             )
         }
-        "forward" => forwarded(size),
+        "forward" | "capture" | "mixed" => forwarded(kind, size),
+        "forward-set" => forwarded_set(size),
+        "forward-function" => forwarded_function(size),
         "update" => {
             let (root, definitions) = layered(
                 size,

@@ -1892,11 +1892,950 @@ fn v2_applied_lazy_function_body_counts_the_depth_of_its_application() {
             .join()
             .unwrap()
     };
-    for (passes, body_calls) in [(1, 130), (70, 10)] {
-        let result = run(passes, body_calls).unwrap();
-        assert_eq!(result.status, "complete", "{passes} {body_calls}");
+    let mut observed = vec![];
+    for (passes, body_calls, completes) in [
+        (1, 130, true),
+        (70, 10, true),
+        (70, 130, true),
+        (130, 10, true),
+        (122, 127, true),
+        (122, 128, false),
+        (130, 120, false),
+    ] {
+        let outcome = run(passes, body_calls);
+        let matches = match (&outcome, completes) {
+            (Ok(result), true) => result.status == "complete",
+            (Err(error), false) => {
+                error.code == "protocol" && error.message == "Safety evaluation nesting exceeds 256"
+            }
+            _ => false,
+        };
+        if !matches {
+            observed.push(format!(
+                "{passes} {body_calls}: expected {}, observed {}",
+                if completes {
+                    "complete"
+                } else {
+                    "a depth refusal"
+                },
+                match outcome {
+                    Ok(result) => result.status,
+                    Err(error) => format!("{}: {}", error.code, error.message),
+                }
+            ));
+        }
     }
-    let error = run(70, 130).unwrap_err();
-    assert_eq!(error.code, "protocol");
-    assert_eq!(error.message, "Safety evaluation nesting exceeds 256");
+    assert!(observed.is_empty(), "\n{}", observed.join("\n"));
+}
+
+fn applied_recursive_function_program(passes: usize, body_calls: usize) -> SafetyProgram {
+    let function = json!({"op":"function","bounds":[{"slot":0,"domain":{"kind":"set","values":[integer(1)]}}],"body":call(passes + 1, vec![], vec![])});
+    let mut definitions = vec![{
+        let mut root = definition(0, call(1, vec![function], vec![]));
+        root["parameterCount"] = json!(0);
+        root["localScope"] = json!(1);
+        root
+    }];
+    for id in 1..=passes {
+        let body = if id == passes {
+            json!({"op":"at","target":{"op":"parameter","slot":0},"key":integer(1)})
+        } else {
+            call(id + 1, vec![json!({"op":"parameter","slot":0})], vec![])
+        };
+        definitions.push(definition(id, body));
+    }
+    for mut entry in zero_argument_chain(passes + 1, body_calls) {
+        entry["recursive"] = json!(true);
+        definitions.push(entry);
+    }
+    let mut input = program();
+    input["definitions"] = json!(definitions);
+    input["invariants"][0]["expression"] = call(0, vec![], vec![]);
+    serde_json::from_value(input).unwrap()
+}
+
+#[test]
+fn v2_applied_lazy_function_keeps_the_forwarded_depth_of_its_snapshot() {
+    let bounds = SafetyBounds {
+        max_depth: 0,
+        max_states: 1,
+        max_work: 50000,
+        max_temporal_nodes: None,
+    };
+    let run = |passes, body_calls| {
+        let program = applied_recursive_function_program(passes, body_calls);
+        std::thread::Builder::new()
+            .stack_size(REQUIRED_STACK)
+            .spawn(move || program.check(bounds))
+            .unwrap()
+            .join()
+            .unwrap()
+            .unwrap()
+    };
+    let mut observed = vec![];
+    for (passes, expected_work) in [
+        (70, 143),
+        (63, 129),
+        (62, 127),
+        (61, 125),
+        (60, 125),
+        (57, 125),
+    ] {
+        let result = run(passes, 10);
+        if (
+            result.status.as_str(),
+            result.reason.as_deref(),
+            result.work,
+        ) != ("bounded", Some("evaluation"), expected_work)
+        {
+            observed.push(format!(
+                "{passes}: expected bounded/evaluation work={expected_work}, observed {}/{:?} work={}",
+                result.status, result.reason, result.work
+            ));
+        }
+    }
+    let result = run(56, 10);
+    if (result.status.as_str(), result.reason.as_deref()) != ("complete", None) {
+        observed.push(format!(
+            "56: expected complete/None, observed {}/{:?} work={}",
+            result.status, result.reason, result.work
+        ));
+    }
+    assert!(observed.is_empty(), "\n{}", observed.join("\n"));
+}
+
+const DEPTH_REFUSAL: &str = "error protocol: Safety evaluation nesting exceeds 256";
+const RECURSIVE_REFUSAL: &str =
+    "error evaluation-budget: Recursive safety evaluation nesting exceeds 128";
+
+#[derive(Clone, Copy, PartialEq)]
+enum Shape {
+    Parameters,
+    Captures,
+    Alternating,
+    Frames,
+}
+
+fn receives_capture(shape: Shape, index: usize) -> bool {
+    match shape {
+        Shape::Captures => true,
+        Shape::Alternating => index % 2 == 1,
+        Shape::Parameters | Shape::Frames => false,
+    }
+}
+
+fn lexical(capture: bool) -> Value {
+    json!({"op":if capture { "capture" } else { "parameter" },"slot":0})
+}
+
+fn hand_over(shape: Shape, index: usize, definition: usize, actual: Value) -> Value {
+    if receives_capture(shape, index) {
+        call(definition, vec![], vec![actual])
+    } else {
+        call(definition, vec![actual], vec![])
+    }
+}
+
+fn forwarding_chain(shape: Shape, first: usize, size: usize) -> Vec<Value> {
+    (0..size)
+        .map(|index| {
+            let own = lexical(receives_capture(shape, index));
+            let body = if index + 1 == size {
+                own
+            } else if shape == Shape::Frames {
+                let next = hand_over(shape, index + 1, first + index + 1, lexical(false));
+                frame(vec![own], vec![], next)
+            } else {
+                hand_over(shape, index + 1, first + index + 1, own)
+            };
+            let mut entry = definition(first + index, body);
+            if receives_capture(shape, index) {
+                entry["parameterCount"] = json!(0);
+                entry["captureCount"] = json!(1);
+            }
+            entry
+        })
+        .collect()
+}
+
+fn forwarded_root(shape: Shape, first: usize, actual: Value) -> Value {
+    hand_over(shape, 0, first, actual)
+}
+
+fn evaluated(
+    definitions: Vec<Value>,
+    expression: Value,
+    maximum: u32,
+) -> (Result<crate::ir::Scalar, crate::CoreError>, u32) {
+    use crate::safety_expressions::EvalContext;
+    use crate::safety_values::Arena;
+
+    std::thread::Builder::new()
+        .stack_size(REQUIRED_STACK)
+        .spawn(move || {
+            let definitions: Vec<crate::ir::Definition> =
+                serde_json::from_value(Value::Array(definitions)).unwrap();
+            let expression: crate::ir::Expression = serde_json::from_value(expression).unwrap();
+            let mut arena = Arena::new(maximum);
+            arena.definitions = &definitions;
+            let result = expression.eval(
+                EvalContext::new(&[crate::ir::Scalar::Int(0)], &[]),
+                &mut arena,
+            );
+            (result, arena.work)
+        })
+        .unwrap()
+        .join()
+        .unwrap()
+}
+
+fn summarized(outcome: (Result<crate::ir::Scalar, crate::CoreError>, u32)) -> String {
+    let (result, work) = outcome;
+    match result {
+        Ok(crate::ir::Scalar::Bool(value)) => format!("{value} work={work}"),
+        Ok(_) => format!("non-boolean work={work}"),
+        Err(error) => format!("error {}: {} work={work}", error.code, error.message),
+    }
+}
+
+fn disagreements(rows: Vec<(String, String, String)>) -> Vec<String> {
+    rows.into_iter()
+        .filter(|(_, expected, actual)| expected != actual)
+        .map(|(label, expected, actual)| {
+            format!("{label}: expected `{expected}`, observed `{actual}`")
+        })
+        .collect()
+}
+
+fn assert_agreement(rows: Vec<(String, String, String)>) {
+    let found = disagreements(rows);
+    assert!(found.is_empty(), "\n{}", found.join("\n"));
+}
+
+fn without_work(text: String) -> String {
+    match text.rsplit_once(" work=") {
+        Some((head, _)) => head.to_string(),
+        None => text,
+    }
+}
+
+fn zero_argument_chain(first: usize, count: usize) -> Vec<Value> {
+    (0..count)
+        .map(|index| {
+            let body = if index + 1 == count {
+                literal(true)
+            } else {
+                call(first + index + 1, vec![], vec![])
+            };
+            let mut entry = definition(first + index, body);
+            entry["parameterCount"] = json!(0);
+            entry
+        })
+        .collect()
+}
+
+fn recursive_true(id: usize) -> Value {
+    let mut entry = definition(id, literal(true));
+    entry["parameterCount"] = json!(0);
+    entry["recursive"] = json!(true);
+    entry
+}
+
+fn forwarded_row(
+    label: &str,
+    shape: Shape,
+    size: usize,
+    expected: String,
+) -> (String, String, String) {
+    let actual = summarized(evaluated(
+        forwarding_chain(shape, 0, size),
+        forwarded_root(shape, 0, literal(true)),
+        2000,
+    ));
+    (format!("{label} {size}"), expected, actual)
+}
+
+#[test]
+fn v2_forwarded_arguments_do_not_add_evaluation_depth() {
+    let refused = format!("{DEPTH_REFUSAL} work=256");
+    let mut rows = vec![];
+    for (label, shape) in [
+        ("parameters", Shape::Parameters),
+        ("captures", Shape::Captures),
+        ("alternating", Shape::Alternating),
+    ] {
+        for (size, expected) in [
+            (127, "true work=254".to_string()),
+            (254, "true work=508".to_string()),
+            (255, refused.clone()),
+            (256, refused.clone()),
+        ] {
+            rows.push(forwarded_row(label, shape, size, expected));
+        }
+    }
+    for (size, expected) in [
+        (64, "true work=254".to_string()),
+        (127, "true work=506".to_string()),
+        (128, refused.clone()),
+        (129, refused.clone()),
+    ] {
+        rows.push(forwarded_row("frames", Shape::Frames, size, expected));
+    }
+    assert_agreement(rows);
+}
+
+fn set_root(size: usize) -> (Vec<Value>, Value) {
+    let set = json!({"op":"sequence-set","argument":{"op":"set","values":[literal(true)]}});
+    (
+        forwarding_chain(Shape::Parameters, 0, size),
+        json!({"op":"sequence-in","left":{"op":"tuple","values":[]},"right":call(0, vec![set], vec![])}),
+    )
+}
+
+fn function_root(size: usize) -> (Vec<Value>, Value) {
+    let function = json!({"op":"function","bounds":[{"slot":0,"domain":{"kind":"set","values":[integer(1)]}}],"body":literal(true)});
+    (
+        forwarding_chain(Shape::Parameters, 0, size),
+        json!({"op":"at","target":call(0, vec![function], vec![]),"key":integer(1)}),
+    )
+}
+
+#[test]
+fn v2_forwarded_sets_and_functions_do_not_add_evaluation_depth() {
+    let mut rows = vec![];
+    for (label, build, extra) in [
+        ("set", set_root as fn(usize) -> (Vec<Value>, Value), 3),
+        ("function", function_root, 2),
+    ] {
+        for size in [125, 250] {
+            let (definitions, root) = build(size);
+            rows.push((
+                format!("{label} {size}"),
+                format!("true work={}", 2 * size + extra),
+                summarized(evaluated(definitions, root, 5000)),
+            ));
+        }
+        let (definitions, root) = build(251);
+        rows.push((
+            format!("{label} 251"),
+            DEPTH_REFUSAL.to_string(),
+            without_work(summarized(evaluated(definitions, root, 5000))),
+        ));
+    }
+    assert_agreement(rows);
+}
+
+#[test]
+fn v2_refusal_moves_to_the_deepest_point_after_forwarding() {
+    let both = |forwards: usize, calls: usize| {
+        let mut definitions = forwarding_chain(Shape::Parameters, 0, forwards);
+        definitions.extend(zero_argument_chain(forwards, calls));
+        let root = json!({"op":"and","left":forwarded_root(Shape::Parameters, 0, literal(true)),"right":call(forwards, vec![], vec![])});
+        summarized(evaluated(definitions, root, 5000))
+    };
+    assert_agreement(vec![
+        (
+            "forward 100 and call 198".into(),
+            "true work=398".into(),
+            both(100, 198),
+        ),
+        (
+            "forward 200 and call 300".into(),
+            format!("{DEPTH_REFUSAL} work=655"),
+            both(200, 300),
+        ),
+    ]);
+}
+
+#[test]
+fn v2_refusal_continuation_enters_recursion_after_forwarding() {
+    let enter = |forwards: usize| {
+        let mut definitions = forwarding_chain(Shape::Parameters, 0, forwards);
+        definitions.push(recursive_true(forwards));
+        let root = forwarded_root(Shape::Parameters, 0, call(forwards, vec![], vec![]));
+        summarized(evaluated(definitions, root, 5000))
+    };
+    assert_agreement(vec![
+        (
+            "forward 254 into a recursive call".into(),
+            format!("{RECURSIVE_REFUSAL} work=509"),
+            enter(254),
+        ),
+        (
+            "forward 128 into a recursive call".into(),
+            format!("{RECURSIVE_REFUSAL} work=257"),
+            enter(128),
+        ),
+    ]);
+}
+
+#[test]
+fn v2_forwarding_hops_charge_one_unit_of_work_each() {
+    let chain = |maximum: u32| {
+        summarized(evaluated(
+            forwarding_chain(Shape::Parameters, 0, 6),
+            forwarded_root(Shape::Parameters, 0, literal(true)),
+            maximum,
+        ))
+    };
+    let rows = (0..=13)
+        .map(|maximum| {
+            let expected = if maximum < 12 {
+                format!("error budget: Safety work budget exhausted work={maximum}")
+            } else {
+                "true work=12".to_string()
+            };
+            (format!("budget {maximum}"), expected, chain(maximum))
+        })
+        .collect();
+    assert_agreement(rows);
+}
+
+#[test]
+fn v2_forwarding_charges_each_hop_before_the_next_reference() {
+    let broken = |maximum: u32| {
+        let mut definitions = forwarding_chain(Shape::Parameters, 0, 6);
+        definitions[3]["body"]["arguments"][0]["slot"] = json!(5);
+        summarized(evaluated(
+            definitions,
+            forwarded_root(Shape::Parameters, 0, literal(true)),
+            maximum,
+        ))
+    };
+    assert_agreement(vec![
+        (
+            "budget 7".into(),
+            "error budget: Safety work budget exhausted work=7".into(),
+            broken(7),
+        ),
+        (
+            "budget 2000".into(),
+            "error protocol: Invalid lexical reference work=8".into(),
+            broken(2000),
+        ),
+    ]);
+}
+
+#[test]
+fn v2_forwarding_refuses_before_the_next_reference() {
+    let chain = |second: Option<usize>, maximum: u32| {
+        let mut definitions = forwarding_chain(Shape::Parameters, 0, 255);
+        if let Some(slot) = second {
+            definitions[253]["body"]["arguments"][0]["slot"] = json!(slot);
+        }
+        summarized(evaluated(
+            definitions,
+            forwarded_root(Shape::Parameters, 0, literal(true)),
+            maximum,
+        ))
+    };
+    let refusal = format!("{DEPTH_REFUSAL} work=256");
+    assert_agreement(vec![
+        ("budget 256".into(), refusal.clone(), chain(None, 256)),
+        (
+            "unreadable second reference".into(),
+            refusal.clone(),
+            chain(Some(5), 2000),
+        ),
+        ("budget 2000".into(), refusal, chain(None, 2000)),
+    ]);
+}
+
+#[test]
+fn v2_recursive_forwarding_keeps_the_former_limit() {
+    let marked = |size: usize| {
+        let mut definitions = forwarding_chain(Shape::Parameters, 0, size);
+        for entry in &mut definitions {
+            entry["recursive"] = json!(true);
+        }
+        summarized(evaluated(
+            definitions,
+            forwarded_root(Shape::Parameters, 0, literal(true)),
+            2000,
+        ))
+    };
+    assert_agreement(vec![
+        ("recursive 63".into(), "true work=126".into(), marked(63)),
+        (
+            "recursive 64".into(),
+            format!("{RECURSIVE_REFUSAL} work=128"),
+            marked(64),
+        ),
+        (
+            "recursive 65".into(),
+            format!("{RECURSIVE_REFUSAL} work=128"),
+            marked(65),
+        ),
+    ]);
+}
+
+#[test]
+fn v2_recursion_entered_after_forwarding_keeps_the_former_limit() {
+    let mut definitions = forwarding_chain(Shape::Parameters, 0, 64);
+    definitions.push(recursive_true(64));
+    let root = forwarded_root(Shape::Parameters, 0, call(64, vec![], vec![]));
+    assert_agreement(vec![(
+        "forward 64 into a recursive call".into(),
+        format!("{RECURSIVE_REFUSAL} work=129"),
+        summarized(evaluated(definitions, root, 5000)),
+    )]);
+}
+
+fn enabled_body(steps: usize, subscript: Option<Value>) -> Value {
+    let mut list =
+        vec![json!({"kind":"assign","slot":0,"value":{"op":"read","slot":0,"next":false}})];
+    for _ in 1..steps {
+        list.push(json!({"kind":"guard","expression":literal(true)}));
+    }
+    let mut body = json!({"op":"enabled","branches":[{"name":"Step","steps":list}]});
+    if let Some(subscript) = subscript {
+        body["subscript"] = subscript;
+    }
+    body
+}
+
+fn forwarded_subscript(forwards: usize, steps: usize, recursive: bool) -> (Vec<Value>, Value) {
+    let mut definitions = forwarding_chain(Shape::Parameters, 0, forwards + 1);
+    definitions[forwards]["body"] = enabled_body(steps, Some(lexical(false)));
+    if recursive {
+        for entry in &mut definitions {
+            entry["recursive"] = json!(true);
+        }
+    }
+    (
+        definitions,
+        forwarded_root(
+            Shape::Parameters,
+            0,
+            json!({"op":"read","slot":0,"next":false}),
+        ),
+    )
+}
+
+fn recursive_definition(id: usize, body: Value) -> Value {
+    let mut entry = definition(id, body);
+    entry["parameterCount"] = json!(0);
+    entry["recursive"] = json!(true);
+    entry
+}
+
+#[test]
+fn v2_forwarded_depth_reaches_enabled_and_snapshots() {
+    let enters = |definition: Value, extra: Vec<Value>, actual: Value| {
+        let mut definitions = forwarding_chain(Shape::Parameters, 0, 60);
+        definitions.push(definition);
+        definitions.extend(extra);
+        summarized(evaluated(
+            definitions,
+            forwarded_root(Shape::Parameters, 0, actual),
+            50_000,
+        ))
+    };
+    let enabled = |steps, subscript| recursive_definition(60, enabled_body(steps, subscript));
+    let lazy_function = json!({"op":"function","bounds":[{"slot":0,"domain":{"kind":"set","values":[integer(1)]}}],"body":call(60, vec![], vec![])});
+    let lazy_chain = (0..10)
+        .map(|index| {
+            let body = if index == 9 {
+                literal(true)
+            } else {
+                call(61 + index + 1, vec![], vec![])
+            };
+            recursive_definition(61 + index, body)
+        })
+        .collect();
+    assert_agreement(vec![
+        (
+            "subscript".into(),
+            format!("{RECURSIVE_REFUSAL} work=127"),
+            enters(
+                enabled(5, Some(literal(false))),
+                vec![],
+                call(60, vec![], vec![]),
+            ),
+        ),
+        (
+            "step".into(),
+            format!("{RECURSIVE_REFUSAL} work=127"),
+            enters(enabled(10, None), vec![], call(60, vec![], vec![])),
+        ),
+        (
+            "snapshot".into(),
+            format!("{RECURSIVE_REFUSAL} work=125"),
+            enters(
+                recursive_definition(60, call(61, vec![], vec![])),
+                lazy_chain,
+                json!({"op":"at","target":lazy_function,"key":integer(1)}),
+            ),
+        ),
+    ]);
+}
+
+#[test]
+fn v2_enabled_subscripts_resolve_forwarded_parameters_without_depth() {
+    let observed = |forwards: usize, steps: usize| {
+        let (definitions, root) = forwarded_subscript(forwards, steps, false);
+        summarized(evaluated(definitions, root, 50_000))
+    };
+    let stuttering =
+        |forwards: usize, steps: usize| format!("false work={}", 3 * (forwards + 1) + steps + 1);
+    assert_agreement(vec![
+        (
+            "10 forwards, 60 steps".into(),
+            stuttering(10, 60),
+            observed(10, 60),
+        ),
+        (
+            "60 forwards, 131 steps".into(),
+            stuttering(60, 131),
+            observed(60, 131),
+        ),
+        (
+            "60 forwards, 132 steps".into(),
+            stuttering(60, 132),
+            observed(60, 132),
+        ),
+        (
+            "100 forwards, 60 steps".into(),
+            stuttering(100, 60),
+            observed(100, 60),
+        ),
+        (
+            "100 forwards, 151 steps".into(),
+            stuttering(100, 151),
+            observed(100, 151),
+        ),
+        (
+            "100 forwards, 152 steps".into(),
+            DEPTH_REFUSAL.into(),
+            without_work(observed(100, 152)),
+        ),
+    ]);
+}
+
+#[test]
+fn v2_enabled_subscripts_keep_the_recursive_limit_for_forwarded_parameters() {
+    let observed = |forwards: usize, steps: usize| {
+        let (definitions, root) = forwarded_subscript(forwards, steps, true);
+        without_work(summarized(evaluated(definitions, root, 50_000)))
+    };
+    assert_agreement(vec![
+        (
+            "40 forwards, 43 steps".into(),
+            "false".into(),
+            observed(40, 43),
+        ),
+        (
+            "40 forwards, 44 steps".into(),
+            RECURSIVE_REFUSAL.into(),
+            observed(40, 44),
+        ),
+        (
+            "45 forwards, 40 steps".into(),
+            RECURSIVE_REFUSAL.into(),
+            observed(45, 40),
+        ),
+    ]);
+}
+
+fn read_x() -> Value {
+    json!({"op":"read","slot":0,"next":false})
+}
+
+fn checked(definitions: Vec<Value>, invariant: Value) -> Result<SafetyResult, crate::CoreError> {
+    let mut input = program();
+    input["definitions"] = Value::Array(definitions);
+    input["invariants"][0]["expression"] = invariant;
+    check(input)
+}
+
+fn walk_program(guard: Value, definitions: Vec<Value>) -> Value {
+    let mut input = program();
+    input["next"][0]["steps"] = json!([
+        {"kind":"assign","slot":0,"value":{"op":"if",
+            "condition":{"op":"lt","left":read_x(),"right":integer(4)},
+            "consequent":{"op":"add","left":read_x(),"right":integer(1)},
+            "alternative":integer(0)}},
+        {"kind":"guard","expression":guard}
+    ]);
+    input["invariants"][0]["expression"] = literal(true);
+    input["definitions"] = Value::Array(definitions);
+    input
+}
+
+fn walked(result: Result<SafetyResult, crate::CoreError>) -> String {
+    match result {
+        Ok(result) => format!(
+            "{} states={} generated={}",
+            result.status, result.states, result.generated
+        ),
+        Err(error) => format!("error {}: {}", error.code, error.message),
+    }
+}
+
+#[test]
+fn v2_primed_forwarding_keeps_the_primed_values() {
+    let observed = |forwards: usize, right: Value| {
+        let guard = json!({"op":"eq",
+            "left":{"op":"prime","argument":forwarded_root(Shape::Parameters, 0, read_x())},
+            "right":right});
+        walked(check(walk_program(
+            guard,
+            forwarding_chain(Shape::Parameters, 0, forwards),
+        )))
+    };
+    let primed_terminal = || {
+        forwarded_root(
+            Shape::Parameters,
+            0,
+            json!({"op":"prime","argument":read_x()}),
+        )
+    };
+    assert_agreement(vec![
+        (
+            "10 forwards, unprimed right side".into(),
+            "complete states=1 generated=1".into(),
+            observed(10, forwarded_root(Shape::Parameters, 0, read_x())),
+        ),
+        (
+            "10 forwards".into(),
+            "complete states=5 generated=6".into(),
+            observed(10, primed_terminal()),
+        ),
+        (
+            "150 forwards".into(),
+            "complete states=5 generated=6".into(),
+            observed(150, primed_terminal()),
+        ),
+    ]);
+}
+
+const STRING_FOLD_DIAGNOSTIC: &str = "error protocol: Unsupported TLA input: set fold order for strings requires TLC intern IDs absent from the IR";
+const RECORD_FOLD_DIAGNOSTIC: &str = "error protocol: Unsupported TLA input: set fold order for records requires TLC field-name intern IDs absent from the IR";
+
+fn text(value: &str) -> Value {
+    json!({"op":"data","value":{"type":"string","value":value}})
+}
+
+fn element_record(value: i32) -> Value {
+    json!({"op":"record","fields":[["a", integer(value)]]})
+}
+
+fn union_fold(collection: Value, element: Value) -> Value {
+    json!({"op":"fold","accumulator":0,"order":"set-members",
+        "initial":{"op":"set","values":[]},"collection":collection,
+        "body":{"op":"cup","left":{"op":"bound","slot":0},"right":{"op":"set","values":[element]}}})
+}
+
+fn cardinality_at_least_zero(fold: Value) -> Value {
+    json!({"op":"ge","left":{"op":"cardinality","argument":fold},"right":integer(0)})
+}
+
+fn forwarded_element(first: usize, slot: usize) -> Value {
+    call(first, vec![json!({"op":"bound","slot":slot})], vec![])
+}
+
+#[test]
+fn v2_fold_bodies_resolve_forwarded_elements_without_depth() {
+    let observed = |forwards: usize| {
+        walked(checked(
+            forwarding_chain(Shape::Parameters, 0, forwards),
+            cardinality_at_least_zero(union_fold(
+                json!({"op":"set","values":[text("a"), text("b")]}),
+                forwarded_element(0, 1),
+            )),
+        ))
+    };
+    assert_agreement(vec![
+        (
+            "5 forwards".into(),
+            "complete states=1 generated=2".into(),
+            observed(5),
+        ),
+        (
+            "200 forwards".into(),
+            "complete states=1 generated=2".into(),
+            observed(200),
+        ),
+        (
+            "300 forwards".into(),
+            STRING_FOLD_DIAGNOSTIC.into(),
+            observed(300),
+        ),
+    ]);
+}
+
+#[test]
+fn v2_fold_rewrites_follow_the_first_refusal_after_forwarding() {
+    let observed = |first: usize, second: usize| {
+        let mut definitions = forwarding_chain(Shape::Parameters, 0, first);
+        definitions.extend(forwarding_chain(Shape::Parameters, first, second));
+        let strings = json!({"op":"set","values":[text("a"), text("b")]});
+        let records = json!({"op":"set","values":[element_record(1), element_record(2)]});
+        let invariant = json!({"op":"if",
+            "condition":{"op":"eq","left":read_x(),"right":integer(0)},
+            "consequent":cardinality_at_least_zero(union_fold(strings.clone(), forwarded_element(0, 1))),
+            "alternative":{"op":"if",
+                "condition":{"op":"eq","left":read_x(),"right":integer(1)},
+                "consequent":cardinality_at_least_zero(union_fold(records, forwarded_element(first, 1))),
+                "alternative":cardinality_at_least_zero(union_fold(strings, json!({"op":"div","left":integer(1),"right":{"op":"mul","left":integer(0),"right":{"op":"cardinality","argument":{"op":"set","values":[{"op":"bound","slot":1}]}}}})))}});
+        let mut input = program();
+        input["next"][0]["steps"] = json!([
+            {"kind":"assign","slot":0,"value":{"op":"if",
+                "condition":{"op":"lt","left":read_x(),"right":integer(2)},
+                "consequent":{"op":"add","left":read_x(),"right":integer(1)},
+                "alternative":integer(2)}}
+        ]);
+        input["definitions"] = Value::Array(definitions);
+        input["invariants"][0]["expression"] = invariant;
+        walked(check(input))
+    };
+    assert_agreement(vec![
+        (
+            "5 and 6 forwards: state 2 divides by zero".into(),
+            STRING_FOLD_DIAGNOSTIC.into(),
+            observed(5, 6),
+        ),
+        (
+            "5 and 300 forwards: state 1 reaches the limit".into(),
+            RECORD_FOLD_DIAGNOSTIC.into(),
+            observed(5, 300),
+        ),
+        (
+            "200 and 300 forwards: state 0 passes, state 1 reaches the limit".into(),
+            RECORD_FOLD_DIAGNOSTIC.into(),
+            observed(200, 300),
+        ),
+    ]);
+}
+
+#[test]
+fn v2_fold_rewrites_skip_folds_without_a_replacement() {
+    let observed = |forwards: usize| {
+        let inner = json!({"op":"fold","accumulator":2,"order":"sequence-left",
+            "initial":literal(true),
+            "collection":{"op":"tuple","values":[{"op":"bound","slot":1}]},
+            "body":forwarded_element(0, 3)});
+        let outer = json!({"op":"fold","accumulator":0,"order":"set-members",
+            "initial":{"op":"set","values":[]},
+            "collection":{"op":"set","values":[text("a"), text("b")]},
+            "body":{"op":"cup","left":{"op":"bound","slot":0},"right":{"op":"set","values":[inner]}}});
+        walked(checked(
+            forwarding_chain(Shape::Parameters, 0, forwards),
+            cardinality_at_least_zero(outer),
+        ))
+    };
+    assert_agreement(vec![
+        (
+            "5 forwards".into(),
+            "complete states=1 generated=2".into(),
+            observed(5),
+        ),
+        (
+            "200 forwards".into(),
+            "complete states=1 generated=2".into(),
+            observed(200),
+        ),
+        (
+            "300 forwards".into(),
+            STRING_FOLD_DIAGNOSTIC.into(),
+            observed(300),
+        ),
+    ]);
+}
+
+#[test]
+fn v2_forwarding_errors_keep_their_messages_and_work() {
+    let unreadable = {
+        let mut definitions = forwarding_chain(Shape::Parameters, 0, 40);
+        definitions[10]["body"]["arguments"][0]["slot"] = json!(5);
+        summarized(evaluated(
+            definitions,
+            forwarded_root(Shape::Parameters, 0, literal(true)),
+            2000,
+        ))
+    };
+    let outside_a_frame = summarized(evaluated(
+        forwarding_chain(Shape::Parameters, 0, 40),
+        forwarded_root(Shape::Parameters, 0, lexical(false)),
+        2000,
+    ));
+    assert_agreement(vec![
+        (
+            "unreadable slot 29 hops away".into(),
+            "error protocol: Invalid lexical reference work=69".into(),
+            unreadable,
+        ),
+        (
+            "forwarded argument outside any frame".into(),
+            "error protocol: Missing lexical call frame work=80".into(),
+            outside_a_frame,
+        ),
+    ]);
+}
+
+#[test]
+fn v2_forwarded_bound_and_old_keep_their_lexical_values() {
+    let quantified = checked(
+        forwarding_chain(Shape::Parameters, 0, 5),
+        json!({"op":"forall","bounds":[{"slot":0,"domain":{"kind":"set","values":[integer(1), integer(2)]}}],
+            "body":{"op":"ge","left":call(0, vec![json!({"op":"bound","slot":0})], vec![]),"right":integer(1)}}),
+    );
+    let excepted = checked(
+        forwarding_chain(Shape::Captures, 0, 5),
+        json!({"op":"eq",
+            "left":{"op":"update","target":{"op":"tuple","values":[integer(7)]},
+                "updates":[{"path":[integer(1)],"value":forwarded_root(Shape::Captures, 0, json!({"op":"old"}))}]},
+            "right":{"op":"tuple","values":[integer(7)]}}),
+    );
+    assert_agreement(vec![
+        (
+            "quantified variable".into(),
+            "complete states=1 generated=2".into(),
+            walked(quantified),
+        ),
+        (
+            "EXCEPT old value".into(),
+            "complete states=1 generated=2".into(),
+            walked(excepted),
+        ),
+    ]);
+}
+
+#[test]
+fn v1_enabled_subscripts_at_256_skip_the_depth_check() {
+    use crate::ir::{Branch, Expression, Scalar, Step};
+    use crate::safety_expressions::EvalContext;
+    use crate::safety_values::Arena;
+
+    let mut steps = vec![Step::Assign {
+        slot: 0,
+        value: Expression::Read {
+            slot: 0,
+            next: false,
+        },
+    }];
+    steps.extend((0..254).map(|_| Step::Guard {
+        expression: Expression::Literal {
+            value: Scalar::Bool(true),
+        },
+    }));
+    let expression = Expression::Enabled {
+        branches: vec![Branch {
+            name: "Longest".into(),
+            steps,
+        }],
+        subscript: Some(Box::new(Expression::Read {
+            slot: 0,
+            next: false,
+        })),
+    };
+    assert_eq!(
+        expression
+            .eval(
+                EvalContext::new(&[Scalar::Int(0)], &[]),
+                &mut Arena::new(10_000)
+            )
+            .unwrap(),
+        Scalar::Bool(false)
+    );
 }
