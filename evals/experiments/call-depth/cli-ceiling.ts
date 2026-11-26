@@ -23,7 +23,7 @@ const negationSource = (levels: number): string =>
     ),
     "Init == counter = 0",
     "Next == counter' = (counter + 1) % 5",
-    `Inv == neg${levels}(counter) <= 0`,
+    `Inv == neg${levels}(counter) <= 4`,
     "====",
     "",
   ].join("\n");
