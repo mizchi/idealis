@@ -1,0 +1,14 @@
+--- <scratch>/trees/fault-safety_expressions.rs.orig	2026-11-26 22:43:06
++++ <scratch>/trees/fault/crates/rtlc/src/safety_expressions.rs	2026-11-26 22:43:38
+@@ -104,9 +104,9 @@
+             .binding(reference)?;
+         arena.consume(1)?;
+         let inner = EvalContext {
+-            locals: &argument.locals,
++            locals: ctx.locals,
+             frame: argument.frame.as_deref(),
+-            old: argument.old,
++            old: ctx.old,
+             ..ctx
+         };
+         let Some(next) = argument.expression.reference() else {

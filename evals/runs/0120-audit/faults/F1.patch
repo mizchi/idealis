@@ -1,0 +1,11 @@
+--- <scratch>/trees/fault-safety_expressions.rs.orig	2026-11-26 22:43:06
++++ <scratch>/trees/fault/crates/rtlc/src/safety_expressions.rs	2026-11-26 22:54:37
+@@ -115,7 +115,7 @@
+         inner.check_nesting(arena)?;
+         reference = next;
+         ctx = EvalContext {
+-            forwarded: inner.forwarded.saturating_add(1),
++            forwarded: inner.forwarded,
+             ..inner
+         };
+     }

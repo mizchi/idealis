@@ -1,0 +1,28 @@
+{
+ "status": "complete",
+ "plan": "0120-forwarding-depth",
+ "comparisons": 264,
+ "byteComparisons": 492,
+ "byteDifferences": 0,
+ "checks": "Exact IR version, compiled program, result including work, and unsupported response equality for each version across before/after native/Wasm, including warmups.",
+ "byteChecks": "Raw response bytes (sha256 of the response text before parsing) of the compile-tla and check-safety requests, compared across before/after native/Wasm for each version.",
+ "resultSha256": "105b0552cd36470e8b2d19657e00610ff09cc67a0fdcd772b247b04bd57c64eb",
+ "models": 11,
+ "inputs": [
+  "Counter",
+  "SetFold",
+  "SequenceFold",
+  "Choice",
+  "Match",
+  "NestedFold",
+  "TCommit-8",
+  "sharing-10",
+  "sharing-20",
+  "sharing-30",
+  "sharing-60"
+ ],
+ "routes": 8,
+ "command": "just evaluator-corpus <snapshot before> <snapshot after> <java> <tla2tools.jar> <apalache-0.62.4.tgz> 0120-corpus-r3 0120-forwarding-depth; just evaluator-corpus-summary 0120-corpus-r3 0120-corpus-summary-r3 0120-forwarding-depth",
+ "note": "Rerun of the first 0120-corpus run with raw response-byte digests (compile-tla and check-safety responses, sha256 of the text before parsing). The jar and archive arguments are only hashed into the manifest; the references are the saved TLC oracle files. The Apalache archive here is 0.62.4 (0119 recorded 0.63.0). Timing fields of the summary are not kept; the run is under target/0120-audit-raw/corpus-r3. The first run (target/0120-audit-raw/corpus, ledger runs 0120-corpus and 0120-corpus-summary) had no byte digests and gave the same 264 comparisons.",
+ "exit": 0
+}

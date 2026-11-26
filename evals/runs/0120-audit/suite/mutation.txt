@@ -1,0 +1,11 @@
+just mutation (pnpm exec mutator), run under run.py as mutation-0120
+mutants: 242 (executed 109, reused 0)
+Killed 104 · Survived 5 · CompileError 133
+score: 95.4% [high]  (4.6s)
+not detected - tests run it, but none fails:
+  examples/durable-counter.ts:22:17  Survived   true -> false
+  examples/durable-counter.ts:30:12  Survived   running -> true
+  examples/durable-counter.ts:71:11  Survived   seen.clear(); -> ;
+  examples/durable-counter.ts:101:5  Survived   typeof value.amount === "number" -> true
+  examples/durable-counter.ts:114:3  Survived   typeof value.value === "number" -> true
+exit 0

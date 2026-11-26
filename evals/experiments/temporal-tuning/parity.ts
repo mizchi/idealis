@@ -11,6 +11,7 @@ import { createPortableWasm } from "../../../packages/idealis/src/portable-wasm.
 import { fingerprint } from "../rust-safety/provenance.js";
 import { startNative } from "../usable/native.js";
 import { digest } from "../usable/provenance.js";
+import { startWasmText } from "../usable/wasm-text.js";
 import { assertOracle } from "../workspace-oracle/node.js";
 
 interface Input extends TlaSourceInput {
@@ -40,14 +41,14 @@ const provenance = JSON.parse(
 );
 for (const binary of provenance.binaries)
   assert.equal(digest(await readFile(binary.path)), binary.sha256);
+const afterWasmPath =
+  "crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm";
 const before = await createPortableWasm(
   await readFile(join(baseline, "core.wasm")),
 );
-const after = await createPortableWasm(
-  await readFile(
-    "crates/idealis-core/target/wasm32-unknown-unknown/release/idealis_core.wasm",
-  ),
-);
+const after = await createPortableWasm(await readFile(afterWasmPath));
+const rawBefore = await startWasmText(join(baseline, "core.wasm"));
+const rawAfter = await startWasmText(afterWasmPath);
 const nativeBefore = startNative(join(baseline, "idealis-core"));
 const nativeAfter = startNative();
 const observe = (core: PortableCore, command: PortableCommand) => {
@@ -90,6 +91,8 @@ const limits = [
   { ...bounds, maxTemporalNodes: 1 },
 ];
 const records = [];
+const byteDifferences: string[] = [];
+let byteComparisons = 0;
 try {
   for (const input of inputs) {
     const request = {
@@ -118,6 +121,18 @@ try {
         expected,
         `${input.name}: after native/Wasm`,
       );
+      const reference = digest(rawBefore.requestText(command));
+      for (const [label, observed] of [
+        ["after Wasm", digest(rawAfter.requestText(command))],
+        ["before native", digest(await nativeBefore.requestText(command))],
+        ["after native", digest(await nativeAfter.requestText(command))],
+      ] as const) {
+        byteComparisons++;
+        if (observed !== reference)
+          byteDifferences.push(
+            `${input.name} ${command.request.kind} before Wasm vs ${label}`,
+          );
+      }
       responses.push({ command, response: expected });
     }
     records.push({ name: input.name, responses });
@@ -140,6 +155,8 @@ try {
         status: "complete",
         cases: inputs.length,
         commands: inputs.length * 10,
+        byteComparisons,
+        byteDifferences,
         records,
       },
       null,
@@ -148,8 +165,9 @@ try {
     { flag: "wx" },
   );
   console.log(
-    `${inputs.length} cases × 10 commands: exact before/after native/Wasm responses`,
+    `${inputs.length} cases × 10 commands: exact before/after native/Wasm responses; ${byteComparisons} raw response byte comparisons, ${byteDifferences.length} differ`,
   );
+  if (byteDifferences.length > 0) process.exitCode = 1;
 } finally {
   await nativeBefore.close();
   await nativeAfter.close();

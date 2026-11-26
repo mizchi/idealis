@@ -1,0 +1,45 @@
+Scratch test used only in a scratch copy of the after tree (not part of the frozen tests, not committed to the product).
+It reuses the shape of `applied_function_program` (a lazy function passed through 70 forwarding definitions and applied at the end)
+and marks the 10 definitions of the function body as recursive.
+Observed on the after tree:   bounded / evaluation  work=143
+Observed with fault F5c:      complete              work=308
+Observed with fault F1:       complete              work=308
+
+#[test]
+fn scratch_probe_applied_recursive() {
+    let bounds = SafetyBounds { max_depth: 0, max_states: 1, max_work: 50000, max_temporal_nodes: None };
+    let passes = 70;
+    let body_calls = 10;
+    let function = json!({"op":"function","bounds":[{"slot":0,"domain":{"kind":"set","values":[integer(1)]}}],"body":call(passes + 1, vec![], vec![])});
+    let mut definitions = vec![{
+        let mut root = definition(0, call(1, vec![function], vec![]));
+        root["parameterCount"] = json!(0);
+        root["localScope"] = json!(1);
+        root
+    }];
+    for id in 1..=passes {
+        let body = if id == passes {
+            json!({"op":"at","target":{"op":"parameter","slot":0},"key":integer(1)})
+        } else {
+            call(id + 1, vec![json!({"op":"parameter","slot":0})], vec![])
+        };
+        definitions.push(definition(id, body));
+    }
+    for index in 0..body_calls {
+        let id = passes + 1 + index;
+        let body = if index + 1 == body_calls { literal(true) } else { call(id + 1, vec![], vec![]) };
+        let mut entry = definition(id, body);
+        entry["parameterCount"] = json!(0);
+        entry["recursive"] = json!(true);
+        definitions.push(entry);
+    }
+    let mut input = program();
+    input["definitions"] = json!(definitions);
+    input["invariants"][0]["expression"] = call(0, vec![], vec![]);
+    let program: SafetyProgram = serde_json::from_value(input).unwrap();
+    let outcome = std::thread::Builder::new().stack_size(REQUIRED_STACK).spawn(move || program.check(bounds)).unwrap().join().unwrap();
+    match outcome {
+        Ok(result) => println!("SCRATCH {} {:?} work={}", result.status, result.reason, result.work),
+        Err(error) => println!("SCRATCH error {}: {}", error.code, error.message),
+    }
+}

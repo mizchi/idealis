@@ -75,7 +75,7 @@ fn checked_on(kibibytes: usize, program: SafetyProgram) -> String {
 
 #[cfg(feature = "oracle-peak")]
 fn peak() -> String {
-    format!(" peak={}", rtlc::probe_peak())
+    format!(" {}", rtlc::probe::line())
 }
 
 #[cfg(not(feature = "oracle-peak"))]

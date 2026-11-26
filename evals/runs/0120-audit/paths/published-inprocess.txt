@@ -1,0 +1,13 @@
+In-process check (cargo test of crates/idealis-core, release, no idealis-core process): Rust frontend, IR v2, check-safety on the 340 distinct inputs of the four case files that compile, bounds maxDepth 100, maxStates 1000, maxWork 1000000.
+oracle (observed copy of before) published256 against before's real response:
+cells 340, own-response cells 313, published256 cells 27: byte-identical to the real response 27, different 0
+oracle-after published256 against after's real response:
+cells 340, own-response cells 327, published256 cells 13: byte-identical to the real response 13, different 0
+hop-168, before's real response bytes: {"kind":"error","code":"protocol","message":"Safety evaluation nesting exceeds 256"}
+hop-168, oracle published256 member (key order kind, code, message as in the real response): {"kind":"error","code":"protocol","message":"Safety evaluation nesting exceeds 256"}
+
+Patch reproduction (each patch applied to its base reproduces the file contents of its tree for every file the patch names):
+checked oracle
+checked oracle-after
+31a57098d28733835c4f49b0d1c2b017f2aa4cb31023031067ba2ffae548bac8  oracle-0120.patch
+1ec9b658e46ded88e20c9cb8ef9c536b2e98b676f87c7afecb4f182d65cd7dcd  oracle-0120-after.patch

@@ -1,0 +1,15 @@
+--- <scratch>/trees/fault-safety_expressions.rs.orig	2026-11-26 22:43:06
++++ <scratch>/trees/fault/crates/rtlc/src/safety_expressions.rs	2026-11-26 22:47:09
+@@ -110,7 +110,11 @@
+             ..ctx
+         };
+         let Some(next) = argument.expression.reference() else {
+-            return evaluate(&argument.expression, inner, arena);
++            let terminal = match &*argument.expression {
++                Expression::Prime { argument } => &**argument,
++                other => other,
++            };
++            return evaluate(terminal, inner, arena);
+         };
+         inner.check_nesting(arena)?;
+         reference = next;

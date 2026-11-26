@@ -1,0 +1,10 @@
+--- <scratch>/trees/fault-safety_expressions.rs.orig	2026-11-26 22:43:06
++++ <scratch>/trees/fault/crates/rtlc/src/safety_expressions.rs	2026-11-26 22:43:35
+@@ -107,6 +107,7 @@
+             locals: &argument.locals,
+             frame: argument.frame.as_deref(),
+             old: argument.old,
++            prime: false,
+             ..ctx
+         };
+         let Some(next) = argument.expression.reference() else {

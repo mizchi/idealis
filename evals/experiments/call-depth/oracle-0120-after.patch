@@ -1,0 +1,427 @@
+diff -ruN a/crates/rtlc/src/lib.rs b/crates/rtlc/src/lib.rs
+--- a/crates/rtlc/src/lib.rs
++++ b/crates/rtlc/src/lib.rs
+@@ -5,6 +5,7 @@
+     ExpansionOptions, ExpansionStats, IncrementalSafetyResult, SafetyExpansionCache,
+ };
+ pub mod ir;
++pub mod probe;
+ mod safety;
+ mod safety_chains;
+ #[cfg(test)]
+diff -ruN a/crates/rtlc/src/probe.rs b/crates/rtlc/src/probe.rs
+--- a/crates/rtlc/src/probe.rs
++++ b/crates/rtlc/src/probe.rs
+@@ -0,0 +1,166 @@
++use crate::ir::SafetyResult;
++use crate::value::CoreError;
++use std::cell::{Cell, RefCell};
++use std::sync::Mutex;
++use std::sync::atomic::{AtomicBool, AtomicU16, AtomicU32, Ordering};
++
++pub const LIMIT: u16 = 4096;
++pub const RAW_MESSAGE: &str = "Safety evaluation nesting exceeds 256";
++
++static ACTIVE: AtomicBool = AtomicBool::new(true);
++static CUTTING: AtomicBool = AtomicBool::new(false);
++static PARALLEL: AtomicBool = AtomicBool::new(false);
++static PEAK_DEPTH: AtomicU16 = AtomicU16::new(0);
++static PEAK_TOTAL: AtomicU16 = AtomicU16::new(0);
++static HITS: AtomicU32 = AtomicU32::new(0);
++static PUBLISHED: Mutex<Published> = Mutex::new(Published::Own);
++
++#[derive(Clone, Debug)]
++pub enum Published {
++    Own,
++    Hit(String),
++    Cut(Result<SafetyResult, (String, String)>),
++}
++
++pub struct Summary {
++    pub peak_depth: u16,
++    pub peak_total: u16,
++    pub hits: u32,
++    pub published: Published,
++}
++
++thread_local! {
++    static FOLDS: RefCell<Vec<&'static str>> = const { RefCell::new(Vec::new()) };
++    static FIRST: RefCell<Option<String>> = const { RefCell::new(None) };
++    static CUT_LEN: Cell<Option<usize>> = const { Cell::new(None) };
++}
++
++pub fn begin() {
++    ACTIVE.store(true, Ordering::SeqCst);
++    CUTTING.store(false, Ordering::SeqCst);
++    PARALLEL.store(false, Ordering::SeqCst);
++    PEAK_DEPTH.store(0, Ordering::SeqCst);
++    PEAK_TOTAL.store(0, Ordering::SeqCst);
++    HITS.store(0, Ordering::SeqCst);
++    *PUBLISHED.lock().unwrap() = Published::Own;
++    reset_thread();
++}
++
++fn reset_thread() {
++    FOLDS.with_borrow_mut(Vec::clear);
++    FIRST.with_borrow_mut(|first| *first = None);
++    CUT_LEN.set(None);
++}
++
++pub fn summary() -> Summary {
++    Summary {
++        peak_depth: PEAK_DEPTH.load(Ordering::SeqCst),
++        peak_total: PEAK_TOTAL.load(Ordering::SeqCst),
++        hits: HITS.load(Ordering::SeqCst),
++        published: PUBLISHED.lock().unwrap().clone(),
++    }
++}
++
++pub fn line() -> String {
++    let summary = summary();
++    format!(
++        "peak={} total={} hits={} published={}",
++        summary.peak_depth,
++        summary.peak_total,
++        summary.hits,
++        match summary.published {
++            Published::Own => "own".to_string(),
++            Published::Hit(message) => format!("hit:{message}"),
++            Published::Cut(Ok(result)) => format!("cut:{} {} {}", result.status, result.states, result.generated),
++            Published::Cut(Err((code, message))) => format!("cut-error:{code}:{message}"),
++        }
++    )
++}
++
++#[inline]
++pub(crate) fn record(depth: u16, total: u16) {
++    if ACTIVE.load(Ordering::Relaxed) {
++        PEAK_DEPTH.fetch_max(depth, Ordering::Relaxed);
++        PEAK_TOTAL.fetch_max(total, Ordering::Relaxed);
++    }
++}
++
++pub(crate) fn hit() {
++    if ACTIVE.load(Ordering::Relaxed) {
++        HITS.fetch_add(1, Ordering::Relaxed);
++    }
++    let diagnostic = FOLDS.with_borrow(|folds| folds.last().copied());
++    FIRST.with_borrow_mut(|first| {
++        if first.is_none() {
++            *first = Some(diagnostic.unwrap_or(RAW_MESSAGE).to_string());
++        }
++    });
++}
++
++pub(crate) fn fold_enter(replacement: Option<&'static str>) -> bool {
++    match replacement {
++        Some(message) => {
++            FOLDS.with_borrow_mut(|folds| folds.push(message));
++            true
++        }
++        None => false,
++    }
++}
++
++pub(crate) fn fold_exit(entered: bool) {
++    if entered {
++        FOLDS.with_borrow_mut(|folds| {
++            folds.pop();
++        });
++    }
++}
++
++pub(crate) fn cutting() -> bool {
++    CUTTING.load(Ordering::Relaxed)
++}
++
++pub(crate) fn mark_parallel() {
++    if ACTIVE.load(Ordering::Relaxed) {
++        PARALLEL.store(true, Ordering::Relaxed);
++    }
++}
++
++pub(crate) fn worker_begin() {
++    reset_thread();
++}
++
++pub(crate) fn worker_note(length: usize) {
++    if FIRST.with_borrow(Option::is_some) && CUT_LEN.get().is_none() {
++        CUT_LEN.set(Some(length));
++    }
++}
++
++pub(crate) fn worker_end(length: usize) -> Option<(usize, String)> {
++    worker_note(length);
++    let message = FIRST.with_borrow(Clone::clone)?;
++    Some((CUT_LEN.get().unwrap_or(length), message))
++}
++
++pub(crate) fn observed(
++    mut run: impl FnMut() -> Result<SafetyResult, CoreError>,
++) -> Result<SafetyResult, CoreError> {
++    let own = run();
++    if HITS.load(Ordering::SeqCst) == 0 {
++        return own;
++    }
++    if !PARALLEL.load(Ordering::SeqCst) {
++        let message = FIRST.with_borrow(Clone::clone).unwrap_or_else(|| RAW_MESSAGE.to_string());
++        *PUBLISHED.lock().unwrap() = Published::Hit(message);
++        return own;
++    }
++    ACTIVE.store(false, Ordering::SeqCst);
++    CUTTING.store(true, Ordering::SeqCst);
++    let cut = run();
++    CUTTING.store(false, Ordering::SeqCst);
++    ACTIVE.store(true, Ordering::SeqCst);
++    *PUBLISHED.lock().unwrap() = Published::Cut(match &cut {
++        Ok(result) => Ok(result.clone()),
++        Err(error) => Err((error.code.to_string(), error.message.clone())),
++    });
++    own
++}
+diff -ruN a/crates/rtlc/src/safety.rs b/crates/rtlc/src/safety.rs
+--- a/crates/rtlc/src/safety.rs
++++ b/crates/rtlc/src/safety.rs
+@@ -209,7 +209,9 @@
+         options: SafetyOptions,
+     ) -> Result<SafetyResult, CoreError> {
+         self.validate_options(options)?;
+-        self.check_measured::<NoCoverage>(bounds, options, None, None, None)
++        crate::probe::observed(|| {
++            self.check_measured::<NoCoverage>(bounds, options, None, None, None)
++        })
+     }
+ 
+     fn validate_options(&self, options: SafetyOptions) -> Result<(), CoreError> {
+@@ -271,16 +273,16 @@
+         workers: usize,
+         cache: Option<&mut SafetyExpansionCache>,
+     ) -> Result<SafetyResult, CoreError> {
+-        self.check_measured::<NoCoverage>(
+-            bounds,
+-            SafetyOptions {
+-                workers,
+-                ..Default::default()
+-            },
+-            None,
+-            None,
+-            cache,
+-        )
++        let options = SafetyOptions {
++            workers,
++            ..Default::default()
++        };
++        if cache.is_some() {
++            return self.check_measured::<NoCoverage>(bounds, options, None, None, cache);
++        }
++        crate::probe::observed(|| {
++            self.check_measured::<NoCoverage>(bounds, options, None, None, None)
++        })
+     }
+     /// Export only after a complete, unreduced check of this program.
+     pub fn reachable_graph(&self, bounds: SafetyBounds) -> Result<SafetyGraph, CoreError> {
+diff -ruN a/crates/rtlc/src/safety_expressions.rs b/crates/rtlc/src/safety_expressions.rs
+--- a/crates/rtlc/src/safety_expressions.rs
++++ b/crates/rtlc/src/safety_expressions.rs
+@@ -180,6 +180,7 @@
+     }
+     #[inline]
+     fn refuse_excess_nesting(&self) -> Result<(), CoreError> {
++        crate::probe::record(self.evaluation_depth, self.nesting_depth());
+         if self.nesting_depth() >= RECURSIVE_DEPTH_LIMIT {
+             if self.recursive {
+                 return Err(CoreError {
+@@ -188,7 +189,10 @@
+                 });
+             }
+             if self.evaluation_depth >= DEPTH_LIMIT {
+-                return Err(CoreError::protocol("Safety evaluation nesting exceeds 256"));
++                crate::probe::hit();
++                if self.evaluation_depth >= crate::probe::LIMIT {
++                    return Err(CoreError::protocol("Safety evaluation nesting exceeds 256"));
++                }
+             }
+         }
+         Ok(())
+@@ -1631,14 +1635,16 @@
+                 arena.tick()?;
+                 locals.push(result);
+                 locals.push(element);
+-                result = body
+-                    .eval(
+-                        EvalContext {
+-                            locals: &locals,
+-                            ..ctx
+-                        },
+-                        arena,
+-                    )
++                let entered = crate::probe::fold_enter(replacement);
++                let evaluated = body.eval(
++                    EvalContext {
++                        locals: &locals,
++                        ..ctx
++                    },
++                    arena,
++                );
++                crate::probe::fold_exit(entered);
++                result = evaluated
+                     .map_err(|error| match replacement {
+                         Some(message)
+                             if error.code != "budget"
+diff -ruN a/crates/rtlc/src/safety_parallel.rs b/crates/rtlc/src/safety_parallel.rs
+--- a/crates/rtlc/src/safety_parallel.rs
++++ b/crates/rtlc/src/safety_parallel.rs
+@@ -32,6 +32,7 @@
+         self.values.clear();
+     }
+     fn push(&mut self, parent: usize, action: usize, values: &[Option<Scalar>]) {
++        crate::probe::worker_note(self.events.len());
+         self.events.push(Event::Candidate {
+             parent,
+             action,
+@@ -44,6 +45,7 @@
+ struct Buffer {
+     candidates: Candidates,
+     next: Vec<Option<Scalar>>,
++    cut: Option<(usize, String)>,
+ }
+ 
+ impl Buffer {
+@@ -51,11 +53,13 @@
+         Self {
+             candidates: Candidates::default(),
+             next: vec![None; width],
++            cut: None,
+         }
+     }
+     fn reset(&mut self) {
+         self.candidates.clear();
+         self.next.fill(None);
++        self.cut = None;
+     }
+ }
+ 
+@@ -135,6 +139,18 @@
+                     })
+                     .collect()
+             });
++            crate::probe::mark_parallel();
++            if crate::probe::cutting() {
++                for buffer in workers.buffers.iter_mut().take(expansions.len()) {
++                    if let Some((length, message)) = buffer.cut.take() {
++                        buffer.candidates.events.truncate(length);
++                        buffer
++                            .candidates
++                            .events
++                            .push(Event::Error(CoreError::protocol(&message)));
++                    }
++                }
++            }
+             arena.work += expansions.iter().map(|delta| delta.work).sum::<u32>();
+             let candidates = workers
+                 .buffers
+@@ -183,6 +199,20 @@
+         worker: usize,
+         buffer: &mut Buffer,
+     ) -> ValueDelta {
++        crate::probe::worker_begin();
++        let delta = self.expand_range_observed(range, base, budget, worker, buffer);
++        buffer.cut = crate::probe::worker_end(buffer.candidates.events.len());
++        delta
++    }
++
++    fn expand_range_observed(
++        &self,
++        range: Range<usize>,
++        base: &Arena,
++        budget: &WorkBudget,
++        worker: usize,
++        buffer: &mut Buffer,
++    ) -> ValueDelta {
+         buffer.reset();
+         let mut arena = base.fork(budget, worker);
+         for parent in range {
+@@ -229,12 +259,14 @@
+                     Ok(true) => return arena.into_delta(),
+                     Ok(false) => {}
+                     Err(error) => {
++                        crate::probe::worker_note(buffer.candidates.events.len());
+                         buffer.candidates.events.push(Event::Error(error));
+                         return arena.into_delta();
+                     }
+                 }
+             }
+             if !enabled && self.program.check_deadlock {
++                crate::probe::worker_note(buffer.candidates.events.len());
+                 buffer.candidates.events.push(Event::Deadlock(parent));
+                 break;
+             }
+diff -ruN a/crates/idealis-core/src/lib.rs b/crates/idealis-core/src/lib.rs
+--- a/crates/idealis-core/src/lib.rs
++++ b/crates/idealis-core/src/lib.rs
+@@ -592,6 +592,40 @@
+                 message: error.to_string(),
+             },
+         }
++    }
++    pub fn dispatch_observed(&mut self, bytes: &[u8]) -> Vec<u8> {
++        rtlc::probe::begin();
++        let message = self.dispatch(bytes);
++        let summary = rtlc::probe::summary();
++        let published = match summary.published {
++            rtlc::probe::Published::Own => None,
++            rtlc::probe::Published::Hit(message) => Some(Message::Error {
++                code: "protocol".into(),
++                message,
++            }),
++            rtlc::probe::Published::Cut(Ok(result)) => Some(Message::Safety { result }),
++            rtlc::probe::Published::Cut(Err((code, message))) => Some(Message::Error {
++                code: code.into(),
++                message,
++            }),
++        };
++        let published = match published {
++            Some(message) => serde_json::to_vec(&message).expect("serializable core message"),
++            None => b"null".to_vec(),
++        };
++        let mut probe = format!(
++            "{{\"hits256\":{},\"peakDepth\":{},\"peakTotal\":{},\"published256\":",
++            summary.hits, summary.peak_depth, summary.peak_total
++        )
++        .into_bytes();
++        probe.extend_from_slice(&published);
++        probe.push(b'}');
++        let mut output = serde_json::to_vec(&message).expect("serializable core message");
++        assert_eq!(output.pop(), Some(b'}'));
++        output.extend_from_slice(b",\"probe\":");
++        output.extend_from_slice(&probe);
++        output.push(b'}');
++        output
+     }
+     pub fn handle(&mut self, command: Command) -> Message {
+         match self.execute(command) {
+diff -ruN a/crates/idealis-core/src/main.rs b/crates/idealis-core/src/main.rs
+--- a/crates/idealis-core/src/main.rs
++++ b/crates/idealis-core/src/main.rs
+@@ -6,7 +6,7 @@
+     for line in io::stdin().lock().lines() {
+         println!(
+             "{}",
+-            serde_json::to_string(&engine.dispatch(line?.as_bytes()))?
++            String::from_utf8_lossy(&engine.dispatch_observed(line?.as_bytes()))
+         );
+     }
+     Ok(())
+diff -ruN a/crates/idealis-core/src/wasm.rs b/crates/idealis-core/src/wasm.rs
+--- a/crates/idealis-core/src/wasm.rs
++++ b/crates/idealis-core/src/wasm.rs
+@@ -22,8 +22,7 @@
+ #[unsafe(no_mangle)]
+ pub extern "C" fn modelt_dispatch() {
+     INSTANCE.with_borrow_mut(|instance| {
+-        let message = instance.engine.dispatch(&instance.input);
+-        instance.output = serde_json::to_vec(&message).expect("serializable core message");
++        instance.output = instance.engine.dispatch_observed(&instance.input);
+     });
+ }
+ #[unsafe(no_mangle)]

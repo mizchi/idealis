@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
+import type { PortableCommand } from "../../../packages/idealis/src/contracts.js";
 import { PortableCoreError } from "../../../packages/idealis/src/portable-value.js";
 import { createPortableWasm } from "../../../packages/idealis/src/portable-wasm.js";
 import { decodeSafetyProgram } from "../../../packages/idealis/src/safety-program.js";
@@ -13,6 +14,7 @@ import { config, names } from "../quint-generated/cases.js";
 import { bounds } from "../single-model/cases.js";
 import { startNative } from "../usable/native.js";
 import { digest } from "../usable/provenance.js";
+import { startWasmText } from "../usable/wasm-text.js";
 import { sharing } from "./inputs.js";
 
 const [before, after, java, jar, archive, directory] = process.argv.slice(2);
@@ -141,8 +143,23 @@ const routes = await Promise.all(
         : await createPortableWasm(
             await readFile(join(spec.root, "idealis_core.wasm")),
           ),
+    text:
+      spec.backend === "native"
+        ? undefined
+        : await startWasmText(join(spec.root, "idealis_core.wasm")),
   })),
 );
+const rawBytes = async (
+  route: (typeof routes)[number],
+  command: PortableCommand,
+): Promise<string> =>
+  digest(
+    route.text
+      ? route.text.requestText(command)
+      : await (route.core as ReturnType<typeof startNative>).requestText(
+          command,
+        ),
+  );
 const records = [];
 const cold = [];
 const observe = async (request: () => unknown) => {
@@ -192,6 +209,10 @@ try {
             status: "unsupported",
             compileMs,
             response: compiled,
+            compileBytesSha256: await rawBytes(route, {
+              version: 1,
+              request: { kind: "compile-tla", ...source },
+            }),
           };
           records.push(record);
           await save(`${input.name}-${iteration}-${route.name}.json`, record);
@@ -240,6 +261,14 @@ try {
             ? compiled.program.definitions.length
             : null,
           result,
+          compileBytesSha256: await rawBytes(route, {
+            version: 1,
+            request: { kind: "compile-tla", ...source },
+          }),
+          checkBytesSha256: await rawBytes(route, {
+            version: 1,
+            request: { kind: "check-safety", program, bounds },
+          }),
         };
         records.push(record);
         await save(`${input.name}-${iteration}-${route.name}.json`, {

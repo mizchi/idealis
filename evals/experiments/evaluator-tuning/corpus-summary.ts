@@ -19,6 +19,8 @@ interface Observation {
   readonly result?: SafetyResult;
   readonly response?: unknown;
   readonly program?: unknown;
+  readonly compileBytesSha256?: string;
+  readonly checkBytesSha256?: string;
 }
 interface Cold {
   readonly input: string;
@@ -54,6 +56,9 @@ assert.equal(manifest.specs.length, 8);
 assert.equal(result.records.length, manifest.inputs.length * 8 * 4);
 assert.equal(result.cold.length, (manifest.inputs.length - 4) * 4 * 4);
 let comparisons = 0;
+let byteComparisons = 0;
+let byteRecorded = 0;
+const byteDifferences: string[] = [];
 for (const model of manifest.inputs) {
   for (const version of [1, 2]) {
     for (const iteration of [0, 1, 2, 3]) {
@@ -81,12 +86,31 @@ for (const model of manifest.inputs) {
       );
       const expected = records[0];
       assert.ok(expected);
+      for (const record of records)
+        if (record.compileBytesSha256 !== undefined) byteRecorded++;
       for (const record of records.slice(1)) {
         assert.equal(record.status, expected.status);
         assert.deepEqual(record.program, expected.program);
         assert.deepEqual(record.result, expected.result);
         assert.deepEqual(record.response, expected.response);
         comparisons++;
+        if (
+          record.compileBytesSha256 !== undefined &&
+          expected.compileBytesSha256 !== undefined
+        ) {
+          for (const field of [
+            "compileBytesSha256",
+            "checkBytesSha256",
+          ] as const) {
+            if (record[field] === undefined && expected[field] === undefined)
+              continue;
+            byteComparisons++;
+            if (record[field] !== expected[field])
+              byteDifferences.push(
+                `${model.name} v${version} iteration ${iteration} ${expected.route} vs ${record.route} ${field}`,
+              );
+          }
+        }
       }
     }
   }
@@ -139,16 +163,20 @@ const models = manifest.inputs.map((model) => ({
 await mkdir(output);
 await writeFile(
   join(output, "result.json"),
-  `${JSON.stringify({ status: "complete", plan, input, resultSha256: digest(resultBytes), comparisons, checks: "Exact IR version, compiled program, result including work, and unsupported response equality for each version across before/after native/Wasm, including warmups.", models }, null, 2)}\n`,
+  `${JSON.stringify({ status: "complete", plan, input, resultSha256: digest(resultBytes), comparisons, ...(byteRecorded > 0 ? { byteComparisons, byteDifferences, byteChecks: "Raw response bytes (sha256 of the response text before parsing) of the compile-tla and check-safety requests, compared across before/after native/Wasm for each version." } : {}), checks: "Exact IR version, compiled program, result including work, and unsupported response equality for each version across before/after native/Wasm, including warmups.", models }, null, 2)}\n`,
   { flag: "wx" },
 );
 await appendFile(
   "evals/runs/ledger.jsonl",
   `${JSON.stringify({ runId: basename(output), plan, kind: "corpus-summary", status: "complete" })}\n`,
 );
+if (byteDifferences.length > 0) process.exitCode = 1;
 console.log(
   JSON.stringify({
     comparisons,
+    ...(byteRecorded > 0
+      ? { byteComparisons, byteDifferences: byteDifferences.length }
+      : {}),
     model: models.find((model) => model.name === "TCommit-8"),
   }),
 );

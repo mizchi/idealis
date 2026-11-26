@@ -1,0 +1,20 @@
+example C (plan: parallel, x in 0..15, Inv x < 16, Next: x = 0 -> forward200(x) + 16, other states -> forward300(x)) re-expressed as TLA+
+input ExampleC.tla sha256 8d74abbe2ae3b334306bf180277d053b301e9a41b22d54419d7969b3b7c17574, ExampleC.cfg sha256 04266cbe92a2a1002f227c5bda3c0ebbd2eeac9d43211aa9bb8f1d82f7c111ea (forwarding chains fa0..fa200 and fb0..fb300, each f(k)(a) == f(k-1)(a), f0(a) == a)
+command: java -Xmx256m -Xss8m -XX:+UseParallelGC -cp tla2tools.jar tlc2.TLC -workers 1 -nowarning -config ExampleC.cfg ExampleC.tla (jar sha256 936a262061c914694dfd669a543be24573c45d5aa0ff20a8b96b23d01e050e88)
+exit 12 (TLC's code for an invariant violation; commands.tsv marks it outcome=failed because the wrapper treats every nonzero exit as failed)
+TLC output (selected lines):
+  TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+  Finished computing initial states: 16 distinct states generated at 2026-11-27 01:59:47.
+  Error: Invariant Safe is violated.
+  Error: The behavior up to this point is:
+  State 1: <Initial predicate>
+  x = 0
+  State 2: <Next line 507, col 9 to line 507, col 59 of module ExampleC>
+  x = 16
+  17 states generated, 17 distinct states found, 15 states left on queue.
+  The depth of the complete state graph search is 2.
+  Finished in 00s at (2026-11-27 01:59:47)
+
+rtlc after (from parallel/summary.txt, example-c sequential and example-c parallel): invariant-violation, states=17, generated=17, trace [0] -> [16]; before: protocol error 'Safety evaluation nesting exceeds 256'
+comparison: status (violation), invariant name (Safe), states 17 / 17, generated 17 / 17, and every trace state (0 -> 16) are equal between TLC and rtlc after. Work is not compared.
+result: TLC 1.7.4-compatible build 2.19 rev 5a47802 agrees with after and with 0120-oracle-after published256; it disagrees with before (protocol refusal).

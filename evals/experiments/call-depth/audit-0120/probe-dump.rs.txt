@@ -1,0 +1,69 @@
+
+fn describe(result: &Result<rtlc::SafetyResult, rtlc::CoreError>) -> String {
+    match result {
+        Ok(result) => {
+            let trace = result
+                .violation
+                .as_ref()
+                .map(|violation| {
+                    violation
+                        .trace
+                        .iter()
+                        .map(|step| format!("{:?}", step.values))
+                        .collect::<Vec<_>>()
+                        .join("|")
+                })
+                .unwrap_or_default();
+            format!(
+                "ok status={} reason={:?} states={} generated={} work={} trace={}",
+                result.status, result.reason, result.states, result.generated, result.work, trace
+            )
+        }
+        Err(error) => format!("err code={} message={}", error.code, error.message),
+    }
+}
+
+#[test]
+fn probe_dump() {
+    let samples: usize = std::env::var("PROBE_SAMPLES")
+        .ok()
+        .and_then(|value| value.parse().ok())
+        .unwrap_or(20);
+    let cells: Vec<(&str, fn() -> SafetyProgram, SafetyBounds)> = vec![
+        ("sets-242", || model(ACCEPTED_SETS), bounds()),
+        ("sets-243", || model(ACCEPTED_SETS + 1), bounds()),
+        ("forwards-253", || forwarding_model(ACCEPTED_FORWARDS), bounds()),
+        ("forwards-254", || forwarding_model(ACCEPTED_FORWARDS + 1), bounds()),
+        ("example-b", || nonterminating_first_state(200), unbounded_work()),
+        ("example-c", || violating_first_state(200, 300), unbounded_work()),
+    ];
+    for (name, build, bound) in cells {
+        for run in 0..samples {
+            PROBE_BEGIN;
+            let result = build().check_parallel(bound, 2);
+            println!("PROBE {name} parallel run={run} {} {}", describe(&result), PROBE_LINE);
+        }
+        PROBE_BEGIN;
+        let sequential = on_required_stack(move || build().check(bound));
+        println!("PROBE {name} sequential {} {}", describe(&sequential), PROBE_LINE);
+    }
+}
+
+fn observed_line() -> String {
+    let summary = rtlc::probe::summary();
+    let published = match summary.published {
+        rtlc::probe::Published::Own => "own".to_string(),
+        rtlc::probe::Published::Hit(message) => format!("hit:{message}"),
+        rtlc::probe::Published::Cut(result) => format!(
+            "cut:{}",
+            describe(&result.map_err(|(code, message)| rtlc::CoreError {
+                code: Box::leak(code.into_boxed_str()),
+                message,
+            }))
+        ),
+    };
+    format!(
+        "peak={} total={} hits={} published={published}",
+        summary.peak_depth, summary.peak_total, summary.hits
+    )
+}

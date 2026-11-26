@@ -1,0 +1,20 @@
+--- <scratch>/trees/fault-safety_expressions.rs.orig	2026-11-26 22:43:06
++++ <scratch>/trees/fault/crates/rtlc/src/safety_expressions.rs	2026-11-26 22:43:31
+@@ -97,12 +97,16 @@
+     arena: &mut Arena,
+     evaluate: fn(&Expression, EvalContext<'_>, &mut Arena) -> Result<T, CoreError>,
+ ) -> Result<T, CoreError> {
++    let mut charged = false;
+     loop {
+         let argument = ctx
+             .frame
+             .ok_or_else(|| CoreError::protocol("Missing lexical call frame"))?
+             .binding(reference)?;
+-        arena.consume(1)?;
++        if !charged {
++            arena.consume(1)?;
++            charged = true;
++        }
+         let inner = EvalContext {
+             locals: &argument.locals,
+             frame: argument.frame.as_deref(),

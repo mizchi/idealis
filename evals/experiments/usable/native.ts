@@ -11,6 +11,7 @@ export const startNative = (
   const pending: {
     resolve: (value: unknown) => void;
     reject: (error: Error) => void;
+    text: boolean;
   }[] = [];
   let stderr = "";
   let stopped = false;
@@ -34,21 +35,25 @@ export const startNative = (
     const request = pending.shift();
     if (!request) return;
     try {
-      request.resolve(JSON.parse(line));
+      request.resolve(request.text ? line : JSON.parse(line));
     } catch (error) {
       request.reject(error instanceof Error ? error : new Error(String(error)));
     }
   });
+  const send = (command: PortableCommand, text: boolean): Promise<unknown> =>
+    new Promise((resolve, reject) => {
+      if (stopped) {
+        reject(new Error("Native process stopped"));
+        return;
+      }
+      pending.push({ resolve, reject, text });
+      child.stdin.write(`${JSON.stringify(command)}\n`);
+    });
   return {
     request: (command: PortableCommand): Promise<unknown> =>
-      new Promise((resolve, reject) => {
-        if (stopped) {
-          reject(new Error("Native process stopped"));
-          return;
-        }
-        pending.push({ resolve, reject });
-        child.stdin.write(`${JSON.stringify(command)}\n`);
-      }),
+      send(command, false),
+    requestText: async (command: PortableCommand): Promise<string> =>
+      String(await send(command, true)),
     close: async () => {
       child.stdin.end();
       const code = await completion;
