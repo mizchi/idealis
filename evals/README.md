@@ -22,6 +22,8 @@
 
 [0119: 自然文と遷移の対応を追う](iterations/0119-requirement-links.md)は、Event-B の事例から三つのリンク構造を試し、代理読み手の評価と動作を消す修正の対照を行った。
 
+[0119: 定義を層状に重ねた call の評価の深さ](iterations/0119-call-depth-limit.md)は、rtlc の v2 で再帰しない経路の動的評価の上限を128から256に上げ、並列検査の worker に 8 MiB の stack を指定した。plan の 512 は、Chromium の dedicated Worker の Wasm の上端が深さ 806 で、規則の 1,024 に届かず採らなかった。378 入力・3,024 セルで差は 128 で拒否していたセルだけで、IR・v1・再帰の経路は変わらない。実モデルの深さ 232 との差は 10.3% で、264 の側は 256 に収まらない。
+
 [0118: 発送の仕様と3言語の再生](iterations/0118-shipment-drift-and-replay.md)は、自然言語の要件を遷移の性質に結び、二つの ITF を Rust・TypeScript・Go で再生した。
 
 [0117: 遷移前後の検査と読み取り](iterations/0117-transition-readability.md)は、出荷の二状態の条件を直接記述し、参照評価器・rtlc・TLCの対照と二人の代理読み手で確認した。

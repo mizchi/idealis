@@ -1,0 +1,52 @@
+[before] cells: 3024; wasm vs native outcome differs: 5; exceptions: 0
+[after] cells: 3024; wasm vs native outcome differs: 5; exceptions: 0
+[oracle] cells: 3024; wasm vs native outcome differs: 5; exceptions: 0
+before vs after IR sha256 differs (all cells incl. refusals as null): 0
+TS vs Rust normalized IR where both compile: {('before', 'equal'): 355, ('after', 'equal'): 355}
+v1 before vs after outcome differs: 0
+v2 before vs after differing cells: 72
+  2 allowed: Safety evaluation nesting exceeds 128 -> check Integer division by zero
+  28 allowed: Safety evaluation nesting exceeds 128 -> check Safety evaluation nesting exceeds 256
+  2 allowed: Safety evaluation nesting exceeds 128 -> result bounded
+  36 allowed: Safety evaluation nesting exceeds 128 -> result complete
+  4 allowed: Safety evaluation nesting exceeds 128 -> result invariant-violation
+OTHER differences: 0
+changed cells where after differs from the oracle: 28
+  ('hop-84', 'rust-wasm', 'Safety evaluation nesting exceeds 256', 'complete', None, 176)
+  ('hop-84', 'rust-native', 'Safety evaluation nesting exceeds 256', 'complete', None, 176)
+  ('hop-85', 'rust-wasm', 'Safety evaluation nesting exceeds 256', 'complete', None, 882)
+  ('hop-85', 'rust-native', 'Safety evaluation nesting exceeds 256', 'complete', None, 882)
+  ('hop-168', 'rust-wasm', 'Safety evaluation nesting exceeds 256', 'complete', None, 1712)
+  ('hop-168', 'rust-native', 'Safety evaluation nesting exceeds 256', 'complete', None, 1712)
+  ('hop-169', 'rust-wasm', 'Safety evaluation nesting exceeds 256', 'complete', None, 346)
+  ('hop-169', 'rust-native', 'Safety evaluation nesting exceeds 256', 'complete', None, 346)
+  ('hop-invariant-84', 'ts-wasm', 'Safety evaluation nesting exceeds 256', 'complete', None, 872)
+  ('hop-invariant-84', 'ts-native', 'Safety evaluation nesting exceeds 256', 'complete', None, 872)
+  ('hop-invariant-84', 'rust-wasm', 'Safety evaluation nesting exceeds 256', 'complete', None, 872)
+  ('hop-invariant-84', 'rust-native', 'Safety evaluation nesting exceeds 256', 'complete', None, 872)
+  ('hop-invariant-85', 'ts-wasm', 'Safety evaluation nesting exceeds 256', 'complete', None, 882)
+  ('hop-invariant-85', 'ts-native', 'Safety evaluation nesting exceeds 256', 'complete', None, 882)
+  ('hop-invariant-85', 'rust-wasm', 'Safety evaluation nesting exceeds 256', 'complete', None, 882)
+  ('hop-invariant-85', 'rust-native', 'Safety evaluation nesting exceeds 256', 'complete', None, 882)
+  ('hop-invariant-168', 'ts-wasm', 'Safety evaluation nesting exceeds 256', 'complete', None, 1712)
+  ('hop-invariant-168', 'ts-native', 'Safety evaluation nesting exceeds 256', 'complete', None, 1712)
+  ('hop-invariant-168', 'rust-wasm', 'Safety evaluation nesting exceeds 256', 'complete', None, 1712)
+  ('hop-invariant-168', 'rust-native', 'Safety evaluation nesting exceeds 256', 'complete', None, 1712)
+  ('hop-invariant-169', 'ts-wasm', 'Safety evaluation nesting exceeds 256', 'complete', None, 1722)
+  ('hop-invariant-169', 'ts-native', 'Safety evaluation nesting exceeds 256', 'complete', None, 1722)
+  ('hop-invariant-169', 'rust-wasm', 'Safety evaluation nesting exceeds 256', 'complete', None, 1722)
+  ('hop-invariant-169', 'rust-native', 'Safety evaluation nesting exceeds 256', 'complete', None, 1722)
+  ('unchanged-8', 'ts-wasm', 'Safety evaluation nesting exceeds 256', 'complete', None, 260)
+  ('unchanged-8', 'ts-native', 'Safety evaluation nesting exceeds 256', 'complete', None, 260)
+  ('unchanged-8', 'rust-wasm', 'Safety evaluation nesting exceeds 256', 'complete', None, 260)
+  ('unchanged-8', 'rust-native', 'Safety evaluation nesting exceeds 256', 'complete', None, 260)
+after vs recorded expectations mismatches: 5
+  ('flat-and-128', 'v1', 'rust-wasm', {'stage': 'compile', 'message': 'Invalid compiled expression'}, {'stage': 'check', 'message': 'recursion limit exceeded at line 1 column 3032'})
+  ('flat-or-128', 'v1', 'rust-wasm', {'stage': 'compile', 'message': 'Invalid compiled expression'}, {'stage': 'check', 'message': 'recursion limit exceeded at line 1 column 2910'})
+  ('flat-and-129', 'v1', 'rust-wasm', {'stage': 'compile', 'message': 'Invalid compiled expression'}, {'stage': 'check', 'message': 'recursion limit exceeded at line 1 column 3032'})
+  ('flat-or-129', 'v1', 'rust-wasm', {'stage': 'compile', 'message': 'Invalid compiled expression'}, {'stage': 'check', 'message': 'recursion limit exceeded at line 1 column 2910'})
+  ('case-other-128', 'v1', 'rust-wasm', {'stage': 'compile', 'message': 'Invalid compiled expression'}, {'stage': 'check', 'message': 'recursion limit exceeded at line 1 column 27161'})
+quint:LongConjunction-broken: before {"stage": "result", "status": "invariant-violation", "trace": 5, "work": 15} | oracle {"stage": "result", "status": "invariant-violation", "trace": 5, "work": 15} | after {"stage": "result", "status": "invariant-violation", "trace": 5, "work": 15}
+quint:LongConjunction-safety: before {"stage": "result", "status": "complete", "states": 6, "generated": 7, "work": 20} | oracle {"stage": "result", "status": "complete", "states": 6, "generated": 7, "work": 20} | after {"stage": "result", "status": "complete", "states": 6, "generated": 7, "work": 20}
+quint:LongIfChain-broken: before {"stage": "result", "status": "invariant-violation", "trace": 54, "work": 216} | oracle {"stage": "result", "status": "invariant-violation", "trace": 54, "work": 216} | after {"stage": "result", "status": "invariant-violation", "trace": 54, "work": 216}
+quint:LongIfChain-safety: before {"stage": "result", "status": "complete", "states": 56, "generated": 57, "work": 226} | oracle {"stage": "result", "status": "complete", "states": 56, "generated": 57, "work": 226} | after {"stage": "result", "status": "complete", "states": 56, "generated": 57, "work": 226}

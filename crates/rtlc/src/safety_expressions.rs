@@ -14,6 +14,9 @@ use std::sync::Arc;
 #[path = "safety_lazy.rs"]
 mod lazy;
 
+const RECURSIVE_DEPTH_LIMIT: u16 = 128;
+const DEPTH_LIMIT: u16 = 256;
+
 #[derive(Clone, Copy)]
 pub(crate) struct EvalContext<'a> {
     pub current: &'a [Scalar],
@@ -22,7 +25,7 @@ pub(crate) struct EvalContext<'a> {
     pub old: Option<Scalar>,
     pub prime: bool,
     pub(crate) frame: Option<&'a CallFrame>,
-    pub(crate) evaluation_depth: u8,
+    pub(crate) evaluation_depth: u16,
     pub(crate) recursive: bool,
 }
 
@@ -115,14 +118,16 @@ impl<'a> EvalContext<'a> {
         if arena.metadata.is_none() && arena.definitions.is_empty() && self.frame.is_none() {
             return Ok(());
         }
-        if self.evaluation_depth >= 128 {
+        if self.evaluation_depth >= RECURSIVE_DEPTH_LIMIT {
             if self.recursive {
                 return Err(CoreError {
                     code: "evaluation-budget",
                     message: "Recursive safety evaluation nesting exceeds 128".into(),
                 });
             }
-            return Err(CoreError::protocol("Safety evaluation nesting exceeds 128"));
+            if self.evaluation_depth >= DEPTH_LIMIT {
+                return Err(CoreError::protocol("Safety evaluation nesting exceeds 256"));
+            }
         }
         self.evaluation_depth += 1;
         Ok(())
@@ -811,7 +816,7 @@ impl Expression {
         ctx: EvalContext<'_>,
         arena: &mut Arena,
     ) -> Result<Scalar, CoreError> {
-        if ctx.evaluation_depth >= 128 {
+        if ctx.evaluation_depth >= RECURSIVE_DEPTH_LIMIT {
             let mut checked = ctx;
             checked.descend(arena)?;
         }
@@ -1215,9 +1220,10 @@ impl Expression {
                                     locals: ctx.locals,
                                     frame: ctx.frame,
                                     evaluation_depth: ctx.evaluation_depth.saturating_add(
-                                        u8::try_from(branch.steps.len() + 1).unwrap_or(u8::MAX),
+                                        u16::try_from(branch.steps.len() + 1).unwrap_or(u16::MAX),
                                     ),
                                     old,
+                                    recursive: ctx.recursive,
                                     ..EvalContext::new(&current, next)
                                 };
                                 let before = subscript.eval(context, arena)?;

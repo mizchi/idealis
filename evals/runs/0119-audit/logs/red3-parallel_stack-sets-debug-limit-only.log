@@ -1,0 +1,19 @@
+   Compiling rtlc v0.1.0-alpha.0 (<after>/crates/rtlc)
+warning: constant `WORKER_STACK_BYTES` is never used
+  --> src/safety_parallel.rs:62:7
+   |
+62 | const WORKER_STACK_BYTES: usize = 8 * 1024 * 1024;
+   |       ^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `rtlc` (lib) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.74s
+     Running tests/parallel_stack.rs (crates/rtlc/target/debug/build/rtlc/273762d1a2648ddd/out/parallel_stack-273762d1a2648ddd)
+
+running 2 tests
+test a_worker_pool_refuses_nested_sets_past_the_nesting_limit ... ok
+test a_worker_pool_evaluates_nested_sets_up_to_the_nesting_limit ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

@@ -1,0 +1,9 @@
+pnpm exec tsc -p packages/idealis/tsconfig.json
+pnpm exec tsc -p tsconfig.json
+node dist/evals/experiments/harness/replay.js "$@"
+persistence: reproduced at step 7; fixed implementation passed
+deduplication: reproduced at step 4; fixed implementation passed
+late-retry: reproduced at step 7; fixed implementation passed
+fifo-only: reproduced at step 8; fixed implementation passed
+drop-ignored: reproduced at step 6; fixed implementation passed
+6 schedules replayed; fixed implementation passed

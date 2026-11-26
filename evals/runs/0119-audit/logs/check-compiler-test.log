@@ -1,0 +1,15 @@
+cargo fmt --manifest-path crates/rtla-compiler/Cargo.toml -- --check
+Diff in <after>/crates/rtla-compiler/tests/nesting_chains.rs:23:
+ }
+ 
+ fn cases_0075() -> Vec<Value> {
+[31m-    let replacements: Vec<Value> = serde_json::from_str(include_str!(
+(B[m[31m-        "../../../fixtures/call-depth/cases-0119.json"
+(B[m[31m-    ))
+(B[m[31m-    .unwrap();
+(B[m[32m+    let replacements: Vec<Value> =
+(B[m[32m+        serde_json::from_str(include_str!("../../../fixtures/call-depth/cases-0119.json")).unwrap();
+(B[m     let recorded: Vec<Value> = serde_json::from_str(include_str!(
+         "../../../fixtures/nesting-chains/cases-0075.json"
+     ))
+error: recipe `compiler-test` failed on line 857 with exit code 1

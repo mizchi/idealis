@@ -1,0 +1,1072 @@
+[
+  {
+    "name": "hop-40",
+    "group": "hop",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\ninit == counter = 0\ninv == counter >= 0\nstep == counter' = hop40(counter) % 5\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 125,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 5,
+          "generated": 6,
+          "work": 432
+        }
+      }
+    }
+  },
+  {
+    "name": "hop-41",
+    "group": "hop",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\ninit == counter = 0\ninv == counter >= 0\nstep == counter' = hop41(counter) % 5\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 128,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 5,
+          "generated": 6,
+          "work": 442
+        }
+      }
+    }
+  },
+  {
+    "name": "hop-76",
+    "group": "hop",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\nhop42(x) == hop41(x) + 1\nhop43(x) == hop42(x) + 1\nhop44(x) == hop43(x) + 1\nhop45(x) == hop44(x) + 1\nhop46(x) == hop45(x) + 1\nhop47(x) == hop46(x) + 1\nhop48(x) == hop47(x) + 1\nhop49(x) == hop48(x) + 1\nhop50(x) == hop49(x) + 1\nhop51(x) == hop50(x) + 1\nhop52(x) == hop51(x) + 1\nhop53(x) == hop52(x) + 1\nhop54(x) == hop53(x) + 1\nhop55(x) == hop54(x) + 1\nhop56(x) == hop55(x) + 1\nhop57(x) == hop56(x) + 1\nhop58(x) == hop57(x) + 1\nhop59(x) == hop58(x) + 1\nhop60(x) == hop59(x) + 1\nhop61(x) == hop60(x) + 1\nhop62(x) == hop61(x) + 1\nhop63(x) == hop62(x) + 1\nhop64(x) == hop63(x) + 1\nhop65(x) == hop64(x) + 1\nhop66(x) == hop65(x) + 1\nhop67(x) == hop66(x) + 1\nhop68(x) == hop67(x) + 1\nhop69(x) == hop68(x) + 1\nhop70(x) == hop69(x) + 1\nhop71(x) == hop70(x) + 1\nhop72(x) == hop71(x) + 1\nhop73(x) == hop72(x) + 1\nhop74(x) == hop73(x) + 1\nhop75(x) == hop74(x) + 1\nhop76(x) == hop75(x) + 1\ninit == counter = 0\ninv == counter >= 0\nstep == counter' = hop76(counter) % 5\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 233,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 5,
+          "generated": 6,
+          "work": 792
+        }
+      }
+    }
+  },
+  {
+    "name": "hop-83",
+    "group": "hop",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\nhop42(x) == hop41(x) + 1\nhop43(x) == hop42(x) + 1\nhop44(x) == hop43(x) + 1\nhop45(x) == hop44(x) + 1\nhop46(x) == hop45(x) + 1\nhop47(x) == hop46(x) + 1\nhop48(x) == hop47(x) + 1\nhop49(x) == hop48(x) + 1\nhop50(x) == hop49(x) + 1\nhop51(x) == hop50(x) + 1\nhop52(x) == hop51(x) + 1\nhop53(x) == hop52(x) + 1\nhop54(x) == hop53(x) + 1\nhop55(x) == hop54(x) + 1\nhop56(x) == hop55(x) + 1\nhop57(x) == hop56(x) + 1\nhop58(x) == hop57(x) + 1\nhop59(x) == hop58(x) + 1\nhop60(x) == hop59(x) + 1\nhop61(x) == hop60(x) + 1\nhop62(x) == hop61(x) + 1\nhop63(x) == hop62(x) + 1\nhop64(x) == hop63(x) + 1\nhop65(x) == hop64(x) + 1\nhop66(x) == hop65(x) + 1\nhop67(x) == hop66(x) + 1\nhop68(x) == hop67(x) + 1\nhop69(x) == hop68(x) + 1\nhop70(x) == hop69(x) + 1\nhop71(x) == hop70(x) + 1\nhop72(x) == hop71(x) + 1\nhop73(x) == hop72(x) + 1\nhop74(x) == hop73(x) + 1\nhop75(x) == hop74(x) + 1\nhop76(x) == hop75(x) + 1\nhop77(x) == hop76(x) + 1\nhop78(x) == hop77(x) + 1\nhop79(x) == hop78(x) + 1\nhop80(x) == hop79(x) + 1\nhop81(x) == hop80(x) + 1\nhop82(x) == hop81(x) + 1\nhop83(x) == hop82(x) + 1\ninit == counter = 0\ninv == counter >= 0\nstep == counter' = hop83(counter) % 5\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 254,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 5,
+          "generated": 6,
+          "work": 862
+        }
+      }
+    }
+  },
+  {
+    "name": "hop-84",
+    "group": "hop",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\nhop42(x) == hop41(x) + 1\nhop43(x) == hop42(x) + 1\nhop44(x) == hop43(x) + 1\nhop45(x) == hop44(x) + 1\nhop46(x) == hop45(x) + 1\nhop47(x) == hop46(x) + 1\nhop48(x) == hop47(x) + 1\nhop49(x) == hop48(x) + 1\nhop50(x) == hop49(x) + 1\nhop51(x) == hop50(x) + 1\nhop52(x) == hop51(x) + 1\nhop53(x) == hop52(x) + 1\nhop54(x) == hop53(x) + 1\nhop55(x) == hop54(x) + 1\nhop56(x) == hop55(x) + 1\nhop57(x) == hop56(x) + 1\nhop58(x) == hop57(x) + 1\nhop59(x) == hop58(x) + 1\nhop60(x) == hop59(x) + 1\nhop61(x) == hop60(x) + 1\nhop62(x) == hop61(x) + 1\nhop63(x) == hop62(x) + 1\nhop64(x) == hop63(x) + 1\nhop65(x) == hop64(x) + 1\nhop66(x) == hop65(x) + 1\nhop67(x) == hop66(x) + 1\nhop68(x) == hop67(x) + 1\nhop69(x) == hop68(x) + 1\nhop70(x) == hop69(x) + 1\nhop71(x) == hop70(x) + 1\nhop72(x) == hop71(x) + 1\nhop73(x) == hop72(x) + 1\nhop74(x) == hop73(x) + 1\nhop75(x) == hop74(x) + 1\nhop76(x) == hop75(x) + 1\nhop77(x) == hop76(x) + 1\nhop78(x) == hop77(x) + 1\nhop79(x) == hop78(x) + 1\nhop80(x) == hop79(x) + 1\nhop81(x) == hop80(x) + 1\nhop82(x) == hop81(x) + 1\nhop83(x) == hop82(x) + 1\nhop84(x) == hop83(x) + 1\ninit == counter = 0\ninv == counter >= 0\nstep == counter' = hop84(counter) % 5\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 257,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 256"
+        }
+      }
+    }
+  },
+  {
+    "name": "hop-85",
+    "group": "hop",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\nhop42(x) == hop41(x) + 1\nhop43(x) == hop42(x) + 1\nhop44(x) == hop43(x) + 1\nhop45(x) == hop44(x) + 1\nhop46(x) == hop45(x) + 1\nhop47(x) == hop46(x) + 1\nhop48(x) == hop47(x) + 1\nhop49(x) == hop48(x) + 1\nhop50(x) == hop49(x) + 1\nhop51(x) == hop50(x) + 1\nhop52(x) == hop51(x) + 1\nhop53(x) == hop52(x) + 1\nhop54(x) == hop53(x) + 1\nhop55(x) == hop54(x) + 1\nhop56(x) == hop55(x) + 1\nhop57(x) == hop56(x) + 1\nhop58(x) == hop57(x) + 1\nhop59(x) == hop58(x) + 1\nhop60(x) == hop59(x) + 1\nhop61(x) == hop60(x) + 1\nhop62(x) == hop61(x) + 1\nhop63(x) == hop62(x) + 1\nhop64(x) == hop63(x) + 1\nhop65(x) == hop64(x) + 1\nhop66(x) == hop65(x) + 1\nhop67(x) == hop66(x) + 1\nhop68(x) == hop67(x) + 1\nhop69(x) == hop68(x) + 1\nhop70(x) == hop69(x) + 1\nhop71(x) == hop70(x) + 1\nhop72(x) == hop71(x) + 1\nhop73(x) == hop72(x) + 1\nhop74(x) == hop73(x) + 1\nhop75(x) == hop74(x) + 1\nhop76(x) == hop75(x) + 1\nhop77(x) == hop76(x) + 1\nhop78(x) == hop77(x) + 1\nhop79(x) == hop78(x) + 1\nhop80(x) == hop79(x) + 1\nhop81(x) == hop80(x) + 1\nhop82(x) == hop81(x) + 1\nhop83(x) == hop82(x) + 1\nhop84(x) == hop83(x) + 1\nhop85(x) == hop84(x) + 1\ninit == counter = 0\ninv == counter >= 0\nstep == counter' = hop85(counter) % 5\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 260,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 256"
+        }
+      }
+    }
+  },
+  {
+    "name": "hop-168",
+    "group": "hop",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\nhop42(x) == hop41(x) + 1\nhop43(x) == hop42(x) + 1\nhop44(x) == hop43(x) + 1\nhop45(x) == hop44(x) + 1\nhop46(x) == hop45(x) + 1\nhop47(x) == hop46(x) + 1\nhop48(x) == hop47(x) + 1\nhop49(x) == hop48(x) + 1\nhop50(x) == hop49(x) + 1\nhop51(x) == hop50(x) + 1\nhop52(x) == hop51(x) + 1\nhop53(x) == hop52(x) + 1\nhop54(x) == hop53(x) + 1\nhop55(x) == hop54(x) + 1\nhop56(x) == hop55(x) + 1\nhop57(x) == hop56(x) + 1\nhop58(x) == hop57(x) + 1\nhop59(x) == hop58(x) + 1\nhop60(x) == hop59(x) + 1\nhop61(x) == hop60(x) + 1\nhop62(x) == hop61(x) + 1\nhop63(x) == hop62(x) + 1\nhop64(x) == hop63(x) + 1\nhop65(x) == hop64(x) + 1\nhop66(x) == hop65(x) + 1\nhop67(x) == hop66(x) + 1\nhop68(x) == hop67(x) + 1\nhop69(x) == hop68(x) + 1\nhop70(x) == hop69(x) + 1\nhop71(x) == hop70(x) + 1\nhop72(x) == hop71(x) + 1\nhop73(x) == hop72(x) + 1\nhop74(x) == hop73(x) + 1\nhop75(x) == hop74(x) + 1\nhop76(x) == hop75(x) + 1\nhop77(x) == hop76(x) + 1\nhop78(x) == hop77(x) + 1\nhop79(x) == hop78(x) + 1\nhop80(x) == hop79(x) + 1\nhop81(x) == hop80(x) + 1\nhop82(x) == hop81(x) + 1\nhop83(x) == hop82(x) + 1\nhop84(x) == hop83(x) + 1\nhop85(x) == hop84(x) + 1\nhop86(x) == hop85(x) + 1\nhop87(x) == hop86(x) + 1\nhop88(x) == hop87(x) + 1\nhop89(x) == hop88(x) + 1\nhop90(x) == hop89(x) + 1\nhop91(x) == hop90(x) + 1\nhop92(x) == hop91(x) + 1\nhop93(x) == hop92(x) + 1\nhop94(x) == hop93(x) + 1\nhop95(x) == hop94(x) + 1\nhop96(x) == hop95(x) + 1\nhop97(x) == hop96(x) + 1\nhop98(x) == hop97(x) + 1\nhop99(x) == hop98(x) + 1\nhop100(x) == hop99(x) + 1\nhop101(x) == hop100(x) + 1\nhop102(x) == hop101(x) + 1\nhop103(x) == hop102(x) + 1\nhop104(x) == hop103(x) + 1\nhop105(x) == hop104(x) + 1\nhop106(x) == hop105(x) + 1\nhop107(x) == hop106(x) + 1\nhop108(x) == hop107(x) + 1\nhop109(x) == hop108(x) + 1\nhop110(x) == hop109(x) + 1\nhop111(x) == hop110(x) + 1\nhop112(x) == hop111(x) + 1\nhop113(x) == hop112(x) + 1\nhop114(x) == hop113(x) + 1\nhop115(x) == hop114(x) + 1\nhop116(x) == hop115(x) + 1\nhop117(x) == hop116(x) + 1\nhop118(x) == hop117(x) + 1\nhop119(x) == hop118(x) + 1\nhop120(x) == hop119(x) + 1\nhop121(x) == hop120(x) + 1\nhop122(x) == hop121(x) + 1\nhop123(x) == hop122(x) + 1\nhop124(x) == hop123(x) + 1\nhop125(x) == hop124(x) + 1\nhop126(x) == hop125(x) + 1\nhop127(x) == hop126(x) + 1\nhop128(x) == hop127(x) + 1\nhop129(x) == hop128(x) + 1\nhop130(x) == hop129(x) + 1\nhop131(x) == hop130(x) + 1\nhop132(x) == hop131(x) + 1\nhop133(x) == hop132(x) + 1\nhop134(x) == hop133(x) + 1\nhop135(x) == hop134(x) + 1\nhop136(x) == hop135(x) + 1\nhop137(x) == hop136(x) + 1\nhop138(x) == hop137(x) + 1\nhop139(x) == hop138(x) + 1\nhop140(x) == hop139(x) + 1\nhop141(x) == hop140(x) + 1\nhop142(x) == hop141(x) + 1\nhop143(x) == hop142(x) + 1\nhop144(x) == hop143(x) + 1\nhop145(x) == hop144(x) + 1\nhop146(x) == hop145(x) + 1\nhop147(x) == hop146(x) + 1\nhop148(x) == hop147(x) + 1\nhop149(x) == hop148(x) + 1\nhop150(x) == hop149(x) + 1\nhop151(x) == hop150(x) + 1\nhop152(x) == hop151(x) + 1\nhop153(x) == hop152(x) + 1\nhop154(x) == hop153(x) + 1\nhop155(x) == hop154(x) + 1\nhop156(x) == hop155(x) + 1\nhop157(x) == hop156(x) + 1\nhop158(x) == hop157(x) + 1\nhop159(x) == hop158(x) + 1\nhop160(x) == hop159(x) + 1\nhop161(x) == hop160(x) + 1\nhop162(x) == hop161(x) + 1\nhop163(x) == hop162(x) + 1\nhop164(x) == hop163(x) + 1\nhop165(x) == hop164(x) + 1\nhop166(x) == hop165(x) + 1\nhop167(x) == hop166(x) + 1\nhop168(x) == hop167(x) + 1\ninit == counter = 0\ninv == counter >= 0\nstep == counter' = hop168(counter) % 5\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 509,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 256"
+        }
+      }
+    }
+  },
+  {
+    "name": "hop-169",
+    "group": "hop",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\nhop42(x) == hop41(x) + 1\nhop43(x) == hop42(x) + 1\nhop44(x) == hop43(x) + 1\nhop45(x) == hop44(x) + 1\nhop46(x) == hop45(x) + 1\nhop47(x) == hop46(x) + 1\nhop48(x) == hop47(x) + 1\nhop49(x) == hop48(x) + 1\nhop50(x) == hop49(x) + 1\nhop51(x) == hop50(x) + 1\nhop52(x) == hop51(x) + 1\nhop53(x) == hop52(x) + 1\nhop54(x) == hop53(x) + 1\nhop55(x) == hop54(x) + 1\nhop56(x) == hop55(x) + 1\nhop57(x) == hop56(x) + 1\nhop58(x) == hop57(x) + 1\nhop59(x) == hop58(x) + 1\nhop60(x) == hop59(x) + 1\nhop61(x) == hop60(x) + 1\nhop62(x) == hop61(x) + 1\nhop63(x) == hop62(x) + 1\nhop64(x) == hop63(x) + 1\nhop65(x) == hop64(x) + 1\nhop66(x) == hop65(x) + 1\nhop67(x) == hop66(x) + 1\nhop68(x) == hop67(x) + 1\nhop69(x) == hop68(x) + 1\nhop70(x) == hop69(x) + 1\nhop71(x) == hop70(x) + 1\nhop72(x) == hop71(x) + 1\nhop73(x) == hop72(x) + 1\nhop74(x) == hop73(x) + 1\nhop75(x) == hop74(x) + 1\nhop76(x) == hop75(x) + 1\nhop77(x) == hop76(x) + 1\nhop78(x) == hop77(x) + 1\nhop79(x) == hop78(x) + 1\nhop80(x) == hop79(x) + 1\nhop81(x) == hop80(x) + 1\nhop82(x) == hop81(x) + 1\nhop83(x) == hop82(x) + 1\nhop84(x) == hop83(x) + 1\nhop85(x) == hop84(x) + 1\nhop86(x) == hop85(x) + 1\nhop87(x) == hop86(x) + 1\nhop88(x) == hop87(x) + 1\nhop89(x) == hop88(x) + 1\nhop90(x) == hop89(x) + 1\nhop91(x) == hop90(x) + 1\nhop92(x) == hop91(x) + 1\nhop93(x) == hop92(x) + 1\nhop94(x) == hop93(x) + 1\nhop95(x) == hop94(x) + 1\nhop96(x) == hop95(x) + 1\nhop97(x) == hop96(x) + 1\nhop98(x) == hop97(x) + 1\nhop99(x) == hop98(x) + 1\nhop100(x) == hop99(x) + 1\nhop101(x) == hop100(x) + 1\nhop102(x) == hop101(x) + 1\nhop103(x) == hop102(x) + 1\nhop104(x) == hop103(x) + 1\nhop105(x) == hop104(x) + 1\nhop106(x) == hop105(x) + 1\nhop107(x) == hop106(x) + 1\nhop108(x) == hop107(x) + 1\nhop109(x) == hop108(x) + 1\nhop110(x) == hop109(x) + 1\nhop111(x) == hop110(x) + 1\nhop112(x) == hop111(x) + 1\nhop113(x) == hop112(x) + 1\nhop114(x) == hop113(x) + 1\nhop115(x) == hop114(x) + 1\nhop116(x) == hop115(x) + 1\nhop117(x) == hop116(x) + 1\nhop118(x) == hop117(x) + 1\nhop119(x) == hop118(x) + 1\nhop120(x) == hop119(x) + 1\nhop121(x) == hop120(x) + 1\nhop122(x) == hop121(x) + 1\nhop123(x) == hop122(x) + 1\nhop124(x) == hop123(x) + 1\nhop125(x) == hop124(x) + 1\nhop126(x) == hop125(x) + 1\nhop127(x) == hop126(x) + 1\nhop128(x) == hop127(x) + 1\nhop129(x) == hop128(x) + 1\nhop130(x) == hop129(x) + 1\nhop131(x) == hop130(x) + 1\nhop132(x) == hop131(x) + 1\nhop133(x) == hop132(x) + 1\nhop134(x) == hop133(x) + 1\nhop135(x) == hop134(x) + 1\nhop136(x) == hop135(x) + 1\nhop137(x) == hop136(x) + 1\nhop138(x) == hop137(x) + 1\nhop139(x) == hop138(x) + 1\nhop140(x) == hop139(x) + 1\nhop141(x) == hop140(x) + 1\nhop142(x) == hop141(x) + 1\nhop143(x) == hop142(x) + 1\nhop144(x) == hop143(x) + 1\nhop145(x) == hop144(x) + 1\nhop146(x) == hop145(x) + 1\nhop147(x) == hop146(x) + 1\nhop148(x) == hop147(x) + 1\nhop149(x) == hop148(x) + 1\nhop150(x) == hop149(x) + 1\nhop151(x) == hop150(x) + 1\nhop152(x) == hop151(x) + 1\nhop153(x) == hop152(x) + 1\nhop154(x) == hop153(x) + 1\nhop155(x) == hop154(x) + 1\nhop156(x) == hop155(x) + 1\nhop157(x) == hop156(x) + 1\nhop158(x) == hop157(x) + 1\nhop159(x) == hop158(x) + 1\nhop160(x) == hop159(x) + 1\nhop161(x) == hop160(x) + 1\nhop162(x) == hop161(x) + 1\nhop163(x) == hop162(x) + 1\nhop164(x) == hop163(x) + 1\nhop165(x) == hop164(x) + 1\nhop166(x) == hop165(x) + 1\nhop167(x) == hop166(x) + 1\nhop168(x) == hop167(x) + 1\nhop169(x) == hop168(x) + 1\ninit == counter = 0\ninv == counter >= 0\nstep == counter' = hop169(counter) % 5\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 512,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 256"
+        }
+      }
+    }
+  },
+  {
+    "name": "hop-invariant-40",
+    "group": "hop",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\ninit == counter = 0\ninv == hop40(counter) >= 0\nstep == counter' = IF counter < 4 THEN counter + 1 ELSE 0\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 126,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 5,
+          "generated": 6,
+          "work": 432
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 5,
+          "generated": 6,
+          "work": 432
+        }
+      }
+    }
+  },
+  {
+    "name": "hop-invariant-41",
+    "group": "hop",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\ninit == counter = 0\ninv == hop41(counter) >= 0\nstep == counter' = IF counter < 4 THEN counter + 1 ELSE 0\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 129,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 5,
+          "generated": 6,
+          "work": 442
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 5,
+          "generated": 6,
+          "work": 442
+        }
+      }
+    }
+  },
+  {
+    "name": "hop-invariant-76",
+    "group": "hop",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\nhop42(x) == hop41(x) + 1\nhop43(x) == hop42(x) + 1\nhop44(x) == hop43(x) + 1\nhop45(x) == hop44(x) + 1\nhop46(x) == hop45(x) + 1\nhop47(x) == hop46(x) + 1\nhop48(x) == hop47(x) + 1\nhop49(x) == hop48(x) + 1\nhop50(x) == hop49(x) + 1\nhop51(x) == hop50(x) + 1\nhop52(x) == hop51(x) + 1\nhop53(x) == hop52(x) + 1\nhop54(x) == hop53(x) + 1\nhop55(x) == hop54(x) + 1\nhop56(x) == hop55(x) + 1\nhop57(x) == hop56(x) + 1\nhop58(x) == hop57(x) + 1\nhop59(x) == hop58(x) + 1\nhop60(x) == hop59(x) + 1\nhop61(x) == hop60(x) + 1\nhop62(x) == hop61(x) + 1\nhop63(x) == hop62(x) + 1\nhop64(x) == hop63(x) + 1\nhop65(x) == hop64(x) + 1\nhop66(x) == hop65(x) + 1\nhop67(x) == hop66(x) + 1\nhop68(x) == hop67(x) + 1\nhop69(x) == hop68(x) + 1\nhop70(x) == hop69(x) + 1\nhop71(x) == hop70(x) + 1\nhop72(x) == hop71(x) + 1\nhop73(x) == hop72(x) + 1\nhop74(x) == hop73(x) + 1\nhop75(x) == hop74(x) + 1\nhop76(x) == hop75(x) + 1\ninit == counter = 0\ninv == hop76(counter) >= 0\nstep == counter' = IF counter < 4 THEN counter + 1 ELSE 0\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 234,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 5,
+          "generated": 6,
+          "work": 792
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 5,
+          "generated": 6,
+          "work": 792
+        }
+      }
+    }
+  },
+  {
+    "name": "hop-invariant-83",
+    "group": "hop",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\nhop42(x) == hop41(x) + 1\nhop43(x) == hop42(x) + 1\nhop44(x) == hop43(x) + 1\nhop45(x) == hop44(x) + 1\nhop46(x) == hop45(x) + 1\nhop47(x) == hop46(x) + 1\nhop48(x) == hop47(x) + 1\nhop49(x) == hop48(x) + 1\nhop50(x) == hop49(x) + 1\nhop51(x) == hop50(x) + 1\nhop52(x) == hop51(x) + 1\nhop53(x) == hop52(x) + 1\nhop54(x) == hop53(x) + 1\nhop55(x) == hop54(x) + 1\nhop56(x) == hop55(x) + 1\nhop57(x) == hop56(x) + 1\nhop58(x) == hop57(x) + 1\nhop59(x) == hop58(x) + 1\nhop60(x) == hop59(x) + 1\nhop61(x) == hop60(x) + 1\nhop62(x) == hop61(x) + 1\nhop63(x) == hop62(x) + 1\nhop64(x) == hop63(x) + 1\nhop65(x) == hop64(x) + 1\nhop66(x) == hop65(x) + 1\nhop67(x) == hop66(x) + 1\nhop68(x) == hop67(x) + 1\nhop69(x) == hop68(x) + 1\nhop70(x) == hop69(x) + 1\nhop71(x) == hop70(x) + 1\nhop72(x) == hop71(x) + 1\nhop73(x) == hop72(x) + 1\nhop74(x) == hop73(x) + 1\nhop75(x) == hop74(x) + 1\nhop76(x) == hop75(x) + 1\nhop77(x) == hop76(x) + 1\nhop78(x) == hop77(x) + 1\nhop79(x) == hop78(x) + 1\nhop80(x) == hop79(x) + 1\nhop81(x) == hop80(x) + 1\nhop82(x) == hop81(x) + 1\nhop83(x) == hop82(x) + 1\ninit == counter = 0\ninv == hop83(counter) >= 0\nstep == counter' = IF counter < 4 THEN counter + 1 ELSE 0\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 255,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 5,
+          "generated": 6,
+          "work": 862
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 5,
+          "generated": 6,
+          "work": 862
+        }
+      }
+    }
+  },
+  {
+    "name": "hop-invariant-84",
+    "group": "hop",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\nhop42(x) == hop41(x) + 1\nhop43(x) == hop42(x) + 1\nhop44(x) == hop43(x) + 1\nhop45(x) == hop44(x) + 1\nhop46(x) == hop45(x) + 1\nhop47(x) == hop46(x) + 1\nhop48(x) == hop47(x) + 1\nhop49(x) == hop48(x) + 1\nhop50(x) == hop49(x) + 1\nhop51(x) == hop50(x) + 1\nhop52(x) == hop51(x) + 1\nhop53(x) == hop52(x) + 1\nhop54(x) == hop53(x) + 1\nhop55(x) == hop54(x) + 1\nhop56(x) == hop55(x) + 1\nhop57(x) == hop56(x) + 1\nhop58(x) == hop57(x) + 1\nhop59(x) == hop58(x) + 1\nhop60(x) == hop59(x) + 1\nhop61(x) == hop60(x) + 1\nhop62(x) == hop61(x) + 1\nhop63(x) == hop62(x) + 1\nhop64(x) == hop63(x) + 1\nhop65(x) == hop64(x) + 1\nhop66(x) == hop65(x) + 1\nhop67(x) == hop66(x) + 1\nhop68(x) == hop67(x) + 1\nhop69(x) == hop68(x) + 1\nhop70(x) == hop69(x) + 1\nhop71(x) == hop70(x) + 1\nhop72(x) == hop71(x) + 1\nhop73(x) == hop72(x) + 1\nhop74(x) == hop73(x) + 1\nhop75(x) == hop74(x) + 1\nhop76(x) == hop75(x) + 1\nhop77(x) == hop76(x) + 1\nhop78(x) == hop77(x) + 1\nhop79(x) == hop78(x) + 1\nhop80(x) == hop79(x) + 1\nhop81(x) == hop80(x) + 1\nhop82(x) == hop81(x) + 1\nhop83(x) == hop82(x) + 1\nhop84(x) == hop83(x) + 1\ninit == counter = 0\ninv == hop84(counter) >= 0\nstep == counter' = IF counter < 4 THEN counter + 1 ELSE 0\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 258,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 256"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 256"
+        }
+      }
+    }
+  },
+  {
+    "name": "hop-invariant-85",
+    "group": "hop",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\nhop42(x) == hop41(x) + 1\nhop43(x) == hop42(x) + 1\nhop44(x) == hop43(x) + 1\nhop45(x) == hop44(x) + 1\nhop46(x) == hop45(x) + 1\nhop47(x) == hop46(x) + 1\nhop48(x) == hop47(x) + 1\nhop49(x) == hop48(x) + 1\nhop50(x) == hop49(x) + 1\nhop51(x) == hop50(x) + 1\nhop52(x) == hop51(x) + 1\nhop53(x) == hop52(x) + 1\nhop54(x) == hop53(x) + 1\nhop55(x) == hop54(x) + 1\nhop56(x) == hop55(x) + 1\nhop57(x) == hop56(x) + 1\nhop58(x) == hop57(x) + 1\nhop59(x) == hop58(x) + 1\nhop60(x) == hop59(x) + 1\nhop61(x) == hop60(x) + 1\nhop62(x) == hop61(x) + 1\nhop63(x) == hop62(x) + 1\nhop64(x) == hop63(x) + 1\nhop65(x) == hop64(x) + 1\nhop66(x) == hop65(x) + 1\nhop67(x) == hop66(x) + 1\nhop68(x) == hop67(x) + 1\nhop69(x) == hop68(x) + 1\nhop70(x) == hop69(x) + 1\nhop71(x) == hop70(x) + 1\nhop72(x) == hop71(x) + 1\nhop73(x) == hop72(x) + 1\nhop74(x) == hop73(x) + 1\nhop75(x) == hop74(x) + 1\nhop76(x) == hop75(x) + 1\nhop77(x) == hop76(x) + 1\nhop78(x) == hop77(x) + 1\nhop79(x) == hop78(x) + 1\nhop80(x) == hop79(x) + 1\nhop81(x) == hop80(x) + 1\nhop82(x) == hop81(x) + 1\nhop83(x) == hop82(x) + 1\nhop84(x) == hop83(x) + 1\nhop85(x) == hop84(x) + 1\ninit == counter = 0\ninv == hop85(counter) >= 0\nstep == counter' = IF counter < 4 THEN counter + 1 ELSE 0\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 261,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 256"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 256"
+        }
+      }
+    }
+  },
+  {
+    "name": "hop-invariant-168",
+    "group": "hop",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\nhop42(x) == hop41(x) + 1\nhop43(x) == hop42(x) + 1\nhop44(x) == hop43(x) + 1\nhop45(x) == hop44(x) + 1\nhop46(x) == hop45(x) + 1\nhop47(x) == hop46(x) + 1\nhop48(x) == hop47(x) + 1\nhop49(x) == hop48(x) + 1\nhop50(x) == hop49(x) + 1\nhop51(x) == hop50(x) + 1\nhop52(x) == hop51(x) + 1\nhop53(x) == hop52(x) + 1\nhop54(x) == hop53(x) + 1\nhop55(x) == hop54(x) + 1\nhop56(x) == hop55(x) + 1\nhop57(x) == hop56(x) + 1\nhop58(x) == hop57(x) + 1\nhop59(x) == hop58(x) + 1\nhop60(x) == hop59(x) + 1\nhop61(x) == hop60(x) + 1\nhop62(x) == hop61(x) + 1\nhop63(x) == hop62(x) + 1\nhop64(x) == hop63(x) + 1\nhop65(x) == hop64(x) + 1\nhop66(x) == hop65(x) + 1\nhop67(x) == hop66(x) + 1\nhop68(x) == hop67(x) + 1\nhop69(x) == hop68(x) + 1\nhop70(x) == hop69(x) + 1\nhop71(x) == hop70(x) + 1\nhop72(x) == hop71(x) + 1\nhop73(x) == hop72(x) + 1\nhop74(x) == hop73(x) + 1\nhop75(x) == hop74(x) + 1\nhop76(x) == hop75(x) + 1\nhop77(x) == hop76(x) + 1\nhop78(x) == hop77(x) + 1\nhop79(x) == hop78(x) + 1\nhop80(x) == hop79(x) + 1\nhop81(x) == hop80(x) + 1\nhop82(x) == hop81(x) + 1\nhop83(x) == hop82(x) + 1\nhop84(x) == hop83(x) + 1\nhop85(x) == hop84(x) + 1\nhop86(x) == hop85(x) + 1\nhop87(x) == hop86(x) + 1\nhop88(x) == hop87(x) + 1\nhop89(x) == hop88(x) + 1\nhop90(x) == hop89(x) + 1\nhop91(x) == hop90(x) + 1\nhop92(x) == hop91(x) + 1\nhop93(x) == hop92(x) + 1\nhop94(x) == hop93(x) + 1\nhop95(x) == hop94(x) + 1\nhop96(x) == hop95(x) + 1\nhop97(x) == hop96(x) + 1\nhop98(x) == hop97(x) + 1\nhop99(x) == hop98(x) + 1\nhop100(x) == hop99(x) + 1\nhop101(x) == hop100(x) + 1\nhop102(x) == hop101(x) + 1\nhop103(x) == hop102(x) + 1\nhop104(x) == hop103(x) + 1\nhop105(x) == hop104(x) + 1\nhop106(x) == hop105(x) + 1\nhop107(x) == hop106(x) + 1\nhop108(x) == hop107(x) + 1\nhop109(x) == hop108(x) + 1\nhop110(x) == hop109(x) + 1\nhop111(x) == hop110(x) + 1\nhop112(x) == hop111(x) + 1\nhop113(x) == hop112(x) + 1\nhop114(x) == hop113(x) + 1\nhop115(x) == hop114(x) + 1\nhop116(x) == hop115(x) + 1\nhop117(x) == hop116(x) + 1\nhop118(x) == hop117(x) + 1\nhop119(x) == hop118(x) + 1\nhop120(x) == hop119(x) + 1\nhop121(x) == hop120(x) + 1\nhop122(x) == hop121(x) + 1\nhop123(x) == hop122(x) + 1\nhop124(x) == hop123(x) + 1\nhop125(x) == hop124(x) + 1\nhop126(x) == hop125(x) + 1\nhop127(x) == hop126(x) + 1\nhop128(x) == hop127(x) + 1\nhop129(x) == hop128(x) + 1\nhop130(x) == hop129(x) + 1\nhop131(x) == hop130(x) + 1\nhop132(x) == hop131(x) + 1\nhop133(x) == hop132(x) + 1\nhop134(x) == hop133(x) + 1\nhop135(x) == hop134(x) + 1\nhop136(x) == hop135(x) + 1\nhop137(x) == hop136(x) + 1\nhop138(x) == hop137(x) + 1\nhop139(x) == hop138(x) + 1\nhop140(x) == hop139(x) + 1\nhop141(x) == hop140(x) + 1\nhop142(x) == hop141(x) + 1\nhop143(x) == hop142(x) + 1\nhop144(x) == hop143(x) + 1\nhop145(x) == hop144(x) + 1\nhop146(x) == hop145(x) + 1\nhop147(x) == hop146(x) + 1\nhop148(x) == hop147(x) + 1\nhop149(x) == hop148(x) + 1\nhop150(x) == hop149(x) + 1\nhop151(x) == hop150(x) + 1\nhop152(x) == hop151(x) + 1\nhop153(x) == hop152(x) + 1\nhop154(x) == hop153(x) + 1\nhop155(x) == hop154(x) + 1\nhop156(x) == hop155(x) + 1\nhop157(x) == hop156(x) + 1\nhop158(x) == hop157(x) + 1\nhop159(x) == hop158(x) + 1\nhop160(x) == hop159(x) + 1\nhop161(x) == hop160(x) + 1\nhop162(x) == hop161(x) + 1\nhop163(x) == hop162(x) + 1\nhop164(x) == hop163(x) + 1\nhop165(x) == hop164(x) + 1\nhop166(x) == hop165(x) + 1\nhop167(x) == hop166(x) + 1\nhop168(x) == hop167(x) + 1\ninit == counter = 0\ninv == hop168(counter) >= 0\nstep == counter' = IF counter < 4 THEN counter + 1 ELSE 0\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 510,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 256"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 256"
+        }
+      }
+    }
+  },
+  {
+    "name": "hop-invariant-169",
+    "group": "hop",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\nhop42(x) == hop41(x) + 1\nhop43(x) == hop42(x) + 1\nhop44(x) == hop43(x) + 1\nhop45(x) == hop44(x) + 1\nhop46(x) == hop45(x) + 1\nhop47(x) == hop46(x) + 1\nhop48(x) == hop47(x) + 1\nhop49(x) == hop48(x) + 1\nhop50(x) == hop49(x) + 1\nhop51(x) == hop50(x) + 1\nhop52(x) == hop51(x) + 1\nhop53(x) == hop52(x) + 1\nhop54(x) == hop53(x) + 1\nhop55(x) == hop54(x) + 1\nhop56(x) == hop55(x) + 1\nhop57(x) == hop56(x) + 1\nhop58(x) == hop57(x) + 1\nhop59(x) == hop58(x) + 1\nhop60(x) == hop59(x) + 1\nhop61(x) == hop60(x) + 1\nhop62(x) == hop61(x) + 1\nhop63(x) == hop62(x) + 1\nhop64(x) == hop63(x) + 1\nhop65(x) == hop64(x) + 1\nhop66(x) == hop65(x) + 1\nhop67(x) == hop66(x) + 1\nhop68(x) == hop67(x) + 1\nhop69(x) == hop68(x) + 1\nhop70(x) == hop69(x) + 1\nhop71(x) == hop70(x) + 1\nhop72(x) == hop71(x) + 1\nhop73(x) == hop72(x) + 1\nhop74(x) == hop73(x) + 1\nhop75(x) == hop74(x) + 1\nhop76(x) == hop75(x) + 1\nhop77(x) == hop76(x) + 1\nhop78(x) == hop77(x) + 1\nhop79(x) == hop78(x) + 1\nhop80(x) == hop79(x) + 1\nhop81(x) == hop80(x) + 1\nhop82(x) == hop81(x) + 1\nhop83(x) == hop82(x) + 1\nhop84(x) == hop83(x) + 1\nhop85(x) == hop84(x) + 1\nhop86(x) == hop85(x) + 1\nhop87(x) == hop86(x) + 1\nhop88(x) == hop87(x) + 1\nhop89(x) == hop88(x) + 1\nhop90(x) == hop89(x) + 1\nhop91(x) == hop90(x) + 1\nhop92(x) == hop91(x) + 1\nhop93(x) == hop92(x) + 1\nhop94(x) == hop93(x) + 1\nhop95(x) == hop94(x) + 1\nhop96(x) == hop95(x) + 1\nhop97(x) == hop96(x) + 1\nhop98(x) == hop97(x) + 1\nhop99(x) == hop98(x) + 1\nhop100(x) == hop99(x) + 1\nhop101(x) == hop100(x) + 1\nhop102(x) == hop101(x) + 1\nhop103(x) == hop102(x) + 1\nhop104(x) == hop103(x) + 1\nhop105(x) == hop104(x) + 1\nhop106(x) == hop105(x) + 1\nhop107(x) == hop106(x) + 1\nhop108(x) == hop107(x) + 1\nhop109(x) == hop108(x) + 1\nhop110(x) == hop109(x) + 1\nhop111(x) == hop110(x) + 1\nhop112(x) == hop111(x) + 1\nhop113(x) == hop112(x) + 1\nhop114(x) == hop113(x) + 1\nhop115(x) == hop114(x) + 1\nhop116(x) == hop115(x) + 1\nhop117(x) == hop116(x) + 1\nhop118(x) == hop117(x) + 1\nhop119(x) == hop118(x) + 1\nhop120(x) == hop119(x) + 1\nhop121(x) == hop120(x) + 1\nhop122(x) == hop121(x) + 1\nhop123(x) == hop122(x) + 1\nhop124(x) == hop123(x) + 1\nhop125(x) == hop124(x) + 1\nhop126(x) == hop125(x) + 1\nhop127(x) == hop126(x) + 1\nhop128(x) == hop127(x) + 1\nhop129(x) == hop128(x) + 1\nhop130(x) == hop129(x) + 1\nhop131(x) == hop130(x) + 1\nhop132(x) == hop131(x) + 1\nhop133(x) == hop132(x) + 1\nhop134(x) == hop133(x) + 1\nhop135(x) == hop134(x) + 1\nhop136(x) == hop135(x) + 1\nhop137(x) == hop136(x) + 1\nhop138(x) == hop137(x) + 1\nhop139(x) == hop138(x) + 1\nhop140(x) == hop139(x) + 1\nhop141(x) == hop140(x) + 1\nhop142(x) == hop141(x) + 1\nhop143(x) == hop142(x) + 1\nhop144(x) == hop143(x) + 1\nhop145(x) == hop144(x) + 1\nhop146(x) == hop145(x) + 1\nhop147(x) == hop146(x) + 1\nhop148(x) == hop147(x) + 1\nhop149(x) == hop148(x) + 1\nhop150(x) == hop149(x) + 1\nhop151(x) == hop150(x) + 1\nhop152(x) == hop151(x) + 1\nhop153(x) == hop152(x) + 1\nhop154(x) == hop153(x) + 1\nhop155(x) == hop154(x) + 1\nhop156(x) == hop155(x) + 1\nhop157(x) == hop156(x) + 1\nhop158(x) == hop157(x) + 1\nhop159(x) == hop158(x) + 1\nhop160(x) == hop159(x) + 1\nhop161(x) == hop160(x) + 1\nhop162(x) == hop161(x) + 1\nhop163(x) == hop162(x) + 1\nhop164(x) == hop163(x) + 1\nhop165(x) == hop164(x) + 1\nhop166(x) == hop165(x) + 1\nhop167(x) == hop166(x) + 1\nhop168(x) == hop167(x) + 1\nhop169(x) == hop168(x) + 1\ninit == counter = 0\ninv == hop169(counter) >= 0\nstep == counter' = IF counter < 4 THEN counter + 1 ELSE 0\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 513,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 256"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 256"
+        }
+      }
+    }
+  },
+  {
+    "name": "chain-N50",
+    "group": "hop",
+    "source": "--------------------------------- MODULE chain ---------------------------------\n\nEXTENDS Integers, Sequences, FiniteSets, TLC, Apalache, Variants\n\nVARIABLE\n  (*\n    @type: Int;\n  *)\n  counter\n\n(*\n  @type: ((Int) => Int);\n*)\nhop0(x_9) == x_9 + 1\n\n(*\n  @type: (() => Bool);\n*)\ninit == counter = 0\n\n(*\n  @type: (() => Bool);\n*)\ninv == counter >= 0\n\n(*\n  @type: ((Int) => Int);\n*)\nhop1(x_18) == hop0(x_18) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop2(x_27) == hop1(x_27) + 1\n\n(*\n  @type: (() => Bool);\n*)\nq_init == init\n\n(*\n  @type: (() => Bool);\n*)\nq_inv == inv\n\n(*\n  @type: ((Int) => Int);\n*)\nhop3(x_36) == hop2(x_36) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop4(x_45) == hop3(x_45) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop5(x_54) == hop4(x_54) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop6(x_63) == hop5(x_63) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop7(x_72) == hop6(x_72) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop8(x_81) == hop7(x_81) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop9(x_90) == hop8(x_90) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop10(x_99) == hop9(x_99) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop11(x_108) == hop10(x_108) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop12(x_117) == hop11(x_117) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop13(x_126) == hop12(x_126) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop14(x_135) == hop13(x_135) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop15(x_144) == hop14(x_144) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop16(x_153) == hop15(x_153) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop17(x_162) == hop16(x_162) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop18(x_171) == hop17(x_171) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop19(x_180) == hop18(x_180) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop20(x_189) == hop19(x_189) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop21(x_198) == hop20(x_198) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop22(x_207) == hop21(x_207) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop23(x_216) == hop22(x_216) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop24(x_225) == hop23(x_225) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop25(x_234) == hop24(x_234) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop26(x_243) == hop25(x_243) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop27(x_252) == hop26(x_252) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop28(x_261) == hop27(x_261) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop29(x_270) == hop28(x_270) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop30(x_279) == hop29(x_279) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop31(x_288) == hop30(x_288) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop32(x_297) == hop31(x_297) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop33(x_306) == hop32(x_306) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop34(x_315) == hop33(x_315) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop35(x_324) == hop34(x_324) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop36(x_333) == hop35(x_333) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop37(x_342) == hop36(x_342) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop38(x_351) == hop37(x_351) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop39(x_360) == hop38(x_360) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop40(x_369) == hop39(x_369) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop41(x_378) == hop40(x_378) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop42(x_387) == hop41(x_387) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop43(x_396) == hop42(x_396) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop44(x_405) == hop43(x_405) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop45(x_414) == hop44(x_414) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop46(x_423) == hop45(x_423) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop47(x_432) == hop46(x_432) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop48(x_441) == hop47(x_441) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop49(x_450) == hop48(x_450) + 1\n\n(*\n  @type: ((Int) => Int);\n*)\nhop50(x_459) == hop49(x_459) + 1\n\n(*\n  @type: (() => Bool);\n*)\nstep == counter' := hop50(counter) % 5\n\n(*\n  @type: (() => Bool);\n*)\nq_step == step\n\n================================================================================\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 155,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "modules or EXTENDS"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "modules or EXTENDS"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 5,
+          "generated": 6,
+          "work": 532
+        }
+      }
+    }
+  },
+  {
+    "name": "division-by-zero-70",
+    "group": "semantic",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x \\div 0\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\nhop42(x) == hop41(x) + 1\nhop43(x) == hop42(x) + 1\nhop44(x) == hop43(x) + 1\nhop45(x) == hop44(x) + 1\nhop46(x) == hop45(x) + 1\nhop47(x) == hop46(x) + 1\nhop48(x) == hop47(x) + 1\nhop49(x) == hop48(x) + 1\nhop50(x) == hop49(x) + 1\nhop51(x) == hop50(x) + 1\nhop52(x) == hop51(x) + 1\nhop53(x) == hop52(x) + 1\nhop54(x) == hop53(x) + 1\nhop55(x) == hop54(x) + 1\nhop56(x) == hop55(x) + 1\nhop57(x) == hop56(x) + 1\nhop58(x) == hop57(x) + 1\nhop59(x) == hop58(x) + 1\nhop60(x) == hop59(x) + 1\nhop61(x) == hop60(x) + 1\nhop62(x) == hop61(x) + 1\nhop63(x) == hop62(x) + 1\nhop64(x) == hop63(x) + 1\nhop65(x) == hop64(x) + 1\nhop66(x) == hop65(x) + 1\nhop67(x) == hop66(x) + 1\nhop68(x) == hop67(x) + 1\nhop69(x) == hop68(x) + 1\nhop70(x) == hop69(x) + 1\ninit == counter = 0\ninv == counter >= 0\nstep == counter' = hop70(counter) % 5\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 215,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Integer division by zero"
+        }
+      }
+    }
+  },
+  {
+    "name": "unevaluated-if-300",
+    "group": "semantic",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\nhop42(x) == hop41(x) + 1\nhop43(x) == hop42(x) + 1\nhop44(x) == hop43(x) + 1\nhop45(x) == hop44(x) + 1\nhop46(x) == hop45(x) + 1\nhop47(x) == hop46(x) + 1\nhop48(x) == hop47(x) + 1\nhop49(x) == hop48(x) + 1\nhop50(x) == hop49(x) + 1\nhop51(x) == hop50(x) + 1\nhop52(x) == hop51(x) + 1\nhop53(x) == hop52(x) + 1\nhop54(x) == hop53(x) + 1\nhop55(x) == hop54(x) + 1\nhop56(x) == hop55(x) + 1\nhop57(x) == hop56(x) + 1\nhop58(x) == hop57(x) + 1\nhop59(x) == hop58(x) + 1\nhop60(x) == hop59(x) + 1\nhop61(x) == hop60(x) + 1\nhop62(x) == hop61(x) + 1\nhop63(x) == hop62(x) + 1\nhop64(x) == hop63(x) + 1\nhop65(x) == hop64(x) + 1\nhop66(x) == hop65(x) + 1\nhop67(x) == hop66(x) + 1\nhop68(x) == hop67(x) + 1\nhop69(x) == hop68(x) + 1\nhop70(x) == hop69(x) + 1\nhop71(x) == hop70(x) + 1\nhop72(x) == hop71(x) + 1\nhop73(x) == hop72(x) + 1\nhop74(x) == hop73(x) + 1\nhop75(x) == hop74(x) + 1\nhop76(x) == hop75(x) + 1\nhop77(x) == hop76(x) + 1\nhop78(x) == hop77(x) + 1\nhop79(x) == hop78(x) + 1\nhop80(x) == hop79(x) + 1\nhop81(x) == hop80(x) + 1\nhop82(x) == hop81(x) + 1\nhop83(x) == hop82(x) + 1\nhop84(x) == hop83(x) + 1\nhop85(x) == hop84(x) + 1\nhop86(x) == hop85(x) + 1\nhop87(x) == hop86(x) + 1\nhop88(x) == hop87(x) + 1\nhop89(x) == hop88(x) + 1\nhop90(x) == hop89(x) + 1\nhop91(x) == hop90(x) + 1\nhop92(x) == hop91(x) + 1\nhop93(x) == hop92(x) + 1\nhop94(x) == hop93(x) + 1\nhop95(x) == hop94(x) + 1\nhop96(x) == hop95(x) + 1\nhop97(x) == hop96(x) + 1\nhop98(x) == hop97(x) + 1\nhop99(x) == hop98(x) + 1\nhop100(x) == hop99(x) + 1\nhop101(x) == hop100(x) + 1\nhop102(x) == hop101(x) + 1\nhop103(x) == hop102(x) + 1\nhop104(x) == hop103(x) + 1\nhop105(x) == hop104(x) + 1\nhop106(x) == hop105(x) + 1\nhop107(x) == hop106(x) + 1\nhop108(x) == hop107(x) + 1\nhop109(x) == hop108(x) + 1\nhop110(x) == hop109(x) + 1\nhop111(x) == hop110(x) + 1\nhop112(x) == hop111(x) + 1\nhop113(x) == hop112(x) + 1\nhop114(x) == hop113(x) + 1\nhop115(x) == hop114(x) + 1\nhop116(x) == hop115(x) + 1\nhop117(x) == hop116(x) + 1\nhop118(x) == hop117(x) + 1\nhop119(x) == hop118(x) + 1\nhop120(x) == hop119(x) + 1\nhop121(x) == hop120(x) + 1\nhop122(x) == hop121(x) + 1\nhop123(x) == hop122(x) + 1\nhop124(x) == hop123(x) + 1\nhop125(x) == hop124(x) + 1\nhop126(x) == hop125(x) + 1\nhop127(x) == hop126(x) + 1\nhop128(x) == hop127(x) + 1\nhop129(x) == hop128(x) + 1\nhop130(x) == hop129(x) + 1\nhop131(x) == hop130(x) + 1\nhop132(x) == hop131(x) + 1\nhop133(x) == hop132(x) + 1\nhop134(x) == hop133(x) + 1\nhop135(x) == hop134(x) + 1\nhop136(x) == hop135(x) + 1\nhop137(x) == hop136(x) + 1\nhop138(x) == hop137(x) + 1\nhop139(x) == hop138(x) + 1\nhop140(x) == hop139(x) + 1\nhop141(x) == hop140(x) + 1\nhop142(x) == hop141(x) + 1\nhop143(x) == hop142(x) + 1\nhop144(x) == hop143(x) + 1\nhop145(x) == hop144(x) + 1\nhop146(x) == hop145(x) + 1\nhop147(x) == hop146(x) + 1\nhop148(x) == hop147(x) + 1\nhop149(x) == hop148(x) + 1\nhop150(x) == hop149(x) + 1\nhop151(x) == hop150(x) + 1\nhop152(x) == hop151(x) + 1\nhop153(x) == hop152(x) + 1\nhop154(x) == hop153(x) + 1\nhop155(x) == hop154(x) + 1\nhop156(x) == hop155(x) + 1\nhop157(x) == hop156(x) + 1\nhop158(x) == hop157(x) + 1\nhop159(x) == hop158(x) + 1\nhop160(x) == hop159(x) + 1\nhop161(x) == hop160(x) + 1\nhop162(x) == hop161(x) + 1\nhop163(x) == hop162(x) + 1\nhop164(x) == hop163(x) + 1\nhop165(x) == hop164(x) + 1\nhop166(x) == hop165(x) + 1\nhop167(x) == hop166(x) + 1\nhop168(x) == hop167(x) + 1\nhop169(x) == hop168(x) + 1\nhop170(x) == hop169(x) + 1\nhop171(x) == hop170(x) + 1\nhop172(x) == hop171(x) + 1\nhop173(x) == hop172(x) + 1\nhop174(x) == hop173(x) + 1\nhop175(x) == hop174(x) + 1\nhop176(x) == hop175(x) + 1\nhop177(x) == hop176(x) + 1\nhop178(x) == hop177(x) + 1\nhop179(x) == hop178(x) + 1\nhop180(x) == hop179(x) + 1\nhop181(x) == hop180(x) + 1\nhop182(x) == hop181(x) + 1\nhop183(x) == hop182(x) + 1\nhop184(x) == hop183(x) + 1\nhop185(x) == hop184(x) + 1\nhop186(x) == hop185(x) + 1\nhop187(x) == hop186(x) + 1\nhop188(x) == hop187(x) + 1\nhop189(x) == hop188(x) + 1\nhop190(x) == hop189(x) + 1\nhop191(x) == hop190(x) + 1\nhop192(x) == hop191(x) + 1\nhop193(x) == hop192(x) + 1\nhop194(x) == hop193(x) + 1\nhop195(x) == hop194(x) + 1\nhop196(x) == hop195(x) + 1\nhop197(x) == hop196(x) + 1\nhop198(x) == hop197(x) + 1\nhop199(x) == hop198(x) + 1\nhop200(x) == hop199(x) + 1\nhop201(x) == hop200(x) + 1\nhop202(x) == hop201(x) + 1\nhop203(x) == hop202(x) + 1\nhop204(x) == hop203(x) + 1\nhop205(x) == hop204(x) + 1\nhop206(x) == hop205(x) + 1\nhop207(x) == hop206(x) + 1\nhop208(x) == hop207(x) + 1\nhop209(x) == hop208(x) + 1\nhop210(x) == hop209(x) + 1\nhop211(x) == hop210(x) + 1\nhop212(x) == hop211(x) + 1\nhop213(x) == hop212(x) + 1\nhop214(x) == hop213(x) + 1\nhop215(x) == hop214(x) + 1\nhop216(x) == hop215(x) + 1\nhop217(x) == hop216(x) + 1\nhop218(x) == hop217(x) + 1\nhop219(x) == hop218(x) + 1\nhop220(x) == hop219(x) + 1\nhop221(x) == hop220(x) + 1\nhop222(x) == hop221(x) + 1\nhop223(x) == hop222(x) + 1\nhop224(x) == hop223(x) + 1\nhop225(x) == hop224(x) + 1\nhop226(x) == hop225(x) + 1\nhop227(x) == hop226(x) + 1\nhop228(x) == hop227(x) + 1\nhop229(x) == hop228(x) + 1\nhop230(x) == hop229(x) + 1\nhop231(x) == hop230(x) + 1\nhop232(x) == hop231(x) + 1\nhop233(x) == hop232(x) + 1\nhop234(x) == hop233(x) + 1\nhop235(x) == hop234(x) + 1\nhop236(x) == hop235(x) + 1\nhop237(x) == hop236(x) + 1\nhop238(x) == hop237(x) + 1\nhop239(x) == hop238(x) + 1\nhop240(x) == hop239(x) + 1\nhop241(x) == hop240(x) + 1\nhop242(x) == hop241(x) + 1\nhop243(x) == hop242(x) + 1\nhop244(x) == hop243(x) + 1\nhop245(x) == hop244(x) + 1\nhop246(x) == hop245(x) + 1\nhop247(x) == hop246(x) + 1\nhop248(x) == hop247(x) + 1\nhop249(x) == hop248(x) + 1\nhop250(x) == hop249(x) + 1\nhop251(x) == hop250(x) + 1\nhop252(x) == hop251(x) + 1\nhop253(x) == hop252(x) + 1\nhop254(x) == hop253(x) + 1\nhop255(x) == hop254(x) + 1\nhop256(x) == hop255(x) + 1\nhop257(x) == hop256(x) + 1\nhop258(x) == hop257(x) + 1\nhop259(x) == hop258(x) + 1\nhop260(x) == hop259(x) + 1\nhop261(x) == hop260(x) + 1\nhop262(x) == hop261(x) + 1\nhop263(x) == hop262(x) + 1\nhop264(x) == hop263(x) + 1\nhop265(x) == hop264(x) + 1\nhop266(x) == hop265(x) + 1\nhop267(x) == hop266(x) + 1\nhop268(x) == hop267(x) + 1\nhop269(x) == hop268(x) + 1\nhop270(x) == hop269(x) + 1\nhop271(x) == hop270(x) + 1\nhop272(x) == hop271(x) + 1\nhop273(x) == hop272(x) + 1\nhop274(x) == hop273(x) + 1\nhop275(x) == hop274(x) + 1\nhop276(x) == hop275(x) + 1\nhop277(x) == hop276(x) + 1\nhop278(x) == hop277(x) + 1\nhop279(x) == hop278(x) + 1\nhop280(x) == hop279(x) + 1\nhop281(x) == hop280(x) + 1\nhop282(x) == hop281(x) + 1\nhop283(x) == hop282(x) + 1\nhop284(x) == hop283(x) + 1\nhop285(x) == hop284(x) + 1\nhop286(x) == hop285(x) + 1\nhop287(x) == hop286(x) + 1\nhop288(x) == hop287(x) + 1\nhop289(x) == hop288(x) + 1\nhop290(x) == hop289(x) + 1\nhop291(x) == hop290(x) + 1\nhop292(x) == hop291(x) + 1\nhop293(x) == hop292(x) + 1\nhop294(x) == hop293(x) + 1\nhop295(x) == hop294(x) + 1\nhop296(x) == hop295(x) + 1\nhop297(x) == hop296(x) + 1\nhop298(x) == hop297(x) + 1\nhop299(x) == hop298(x) + 1\nhop300(x) == hop299(x) + 1\ninit == counter = 0\ninv == counter >= 0\nstep == counter' = IF counter > 100 THEN hop300(counter) ELSE IF counter < 4 THEN counter + 1 ELSE 0\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 5,
+          "generated": 6,
+          "work": 22
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 5,
+          "generated": 6,
+          "work": 22
+        }
+      }
+    }
+  },
+  {
+    "name": "unevaluated-and-300",
+    "group": "semantic",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\nhop42(x) == hop41(x) + 1\nhop43(x) == hop42(x) + 1\nhop44(x) == hop43(x) + 1\nhop45(x) == hop44(x) + 1\nhop46(x) == hop45(x) + 1\nhop47(x) == hop46(x) + 1\nhop48(x) == hop47(x) + 1\nhop49(x) == hop48(x) + 1\nhop50(x) == hop49(x) + 1\nhop51(x) == hop50(x) + 1\nhop52(x) == hop51(x) + 1\nhop53(x) == hop52(x) + 1\nhop54(x) == hop53(x) + 1\nhop55(x) == hop54(x) + 1\nhop56(x) == hop55(x) + 1\nhop57(x) == hop56(x) + 1\nhop58(x) == hop57(x) + 1\nhop59(x) == hop58(x) + 1\nhop60(x) == hop59(x) + 1\nhop61(x) == hop60(x) + 1\nhop62(x) == hop61(x) + 1\nhop63(x) == hop62(x) + 1\nhop64(x) == hop63(x) + 1\nhop65(x) == hop64(x) + 1\nhop66(x) == hop65(x) + 1\nhop67(x) == hop66(x) + 1\nhop68(x) == hop67(x) + 1\nhop69(x) == hop68(x) + 1\nhop70(x) == hop69(x) + 1\nhop71(x) == hop70(x) + 1\nhop72(x) == hop71(x) + 1\nhop73(x) == hop72(x) + 1\nhop74(x) == hop73(x) + 1\nhop75(x) == hop74(x) + 1\nhop76(x) == hop75(x) + 1\nhop77(x) == hop76(x) + 1\nhop78(x) == hop77(x) + 1\nhop79(x) == hop78(x) + 1\nhop80(x) == hop79(x) + 1\nhop81(x) == hop80(x) + 1\nhop82(x) == hop81(x) + 1\nhop83(x) == hop82(x) + 1\nhop84(x) == hop83(x) + 1\nhop85(x) == hop84(x) + 1\nhop86(x) == hop85(x) + 1\nhop87(x) == hop86(x) + 1\nhop88(x) == hop87(x) + 1\nhop89(x) == hop88(x) + 1\nhop90(x) == hop89(x) + 1\nhop91(x) == hop90(x) + 1\nhop92(x) == hop91(x) + 1\nhop93(x) == hop92(x) + 1\nhop94(x) == hop93(x) + 1\nhop95(x) == hop94(x) + 1\nhop96(x) == hop95(x) + 1\nhop97(x) == hop96(x) + 1\nhop98(x) == hop97(x) + 1\nhop99(x) == hop98(x) + 1\nhop100(x) == hop99(x) + 1\nhop101(x) == hop100(x) + 1\nhop102(x) == hop101(x) + 1\nhop103(x) == hop102(x) + 1\nhop104(x) == hop103(x) + 1\nhop105(x) == hop104(x) + 1\nhop106(x) == hop105(x) + 1\nhop107(x) == hop106(x) + 1\nhop108(x) == hop107(x) + 1\nhop109(x) == hop108(x) + 1\nhop110(x) == hop109(x) + 1\nhop111(x) == hop110(x) + 1\nhop112(x) == hop111(x) + 1\nhop113(x) == hop112(x) + 1\nhop114(x) == hop113(x) + 1\nhop115(x) == hop114(x) + 1\nhop116(x) == hop115(x) + 1\nhop117(x) == hop116(x) + 1\nhop118(x) == hop117(x) + 1\nhop119(x) == hop118(x) + 1\nhop120(x) == hop119(x) + 1\nhop121(x) == hop120(x) + 1\nhop122(x) == hop121(x) + 1\nhop123(x) == hop122(x) + 1\nhop124(x) == hop123(x) + 1\nhop125(x) == hop124(x) + 1\nhop126(x) == hop125(x) + 1\nhop127(x) == hop126(x) + 1\nhop128(x) == hop127(x) + 1\nhop129(x) == hop128(x) + 1\nhop130(x) == hop129(x) + 1\nhop131(x) == hop130(x) + 1\nhop132(x) == hop131(x) + 1\nhop133(x) == hop132(x) + 1\nhop134(x) == hop133(x) + 1\nhop135(x) == hop134(x) + 1\nhop136(x) == hop135(x) + 1\nhop137(x) == hop136(x) + 1\nhop138(x) == hop137(x) + 1\nhop139(x) == hop138(x) + 1\nhop140(x) == hop139(x) + 1\nhop141(x) == hop140(x) + 1\nhop142(x) == hop141(x) + 1\nhop143(x) == hop142(x) + 1\nhop144(x) == hop143(x) + 1\nhop145(x) == hop144(x) + 1\nhop146(x) == hop145(x) + 1\nhop147(x) == hop146(x) + 1\nhop148(x) == hop147(x) + 1\nhop149(x) == hop148(x) + 1\nhop150(x) == hop149(x) + 1\nhop151(x) == hop150(x) + 1\nhop152(x) == hop151(x) + 1\nhop153(x) == hop152(x) + 1\nhop154(x) == hop153(x) + 1\nhop155(x) == hop154(x) + 1\nhop156(x) == hop155(x) + 1\nhop157(x) == hop156(x) + 1\nhop158(x) == hop157(x) + 1\nhop159(x) == hop158(x) + 1\nhop160(x) == hop159(x) + 1\nhop161(x) == hop160(x) + 1\nhop162(x) == hop161(x) + 1\nhop163(x) == hop162(x) + 1\nhop164(x) == hop163(x) + 1\nhop165(x) == hop164(x) + 1\nhop166(x) == hop165(x) + 1\nhop167(x) == hop166(x) + 1\nhop168(x) == hop167(x) + 1\nhop169(x) == hop168(x) + 1\nhop170(x) == hop169(x) + 1\nhop171(x) == hop170(x) + 1\nhop172(x) == hop171(x) + 1\nhop173(x) == hop172(x) + 1\nhop174(x) == hop173(x) + 1\nhop175(x) == hop174(x) + 1\nhop176(x) == hop175(x) + 1\nhop177(x) == hop176(x) + 1\nhop178(x) == hop177(x) + 1\nhop179(x) == hop178(x) + 1\nhop180(x) == hop179(x) + 1\nhop181(x) == hop180(x) + 1\nhop182(x) == hop181(x) + 1\nhop183(x) == hop182(x) + 1\nhop184(x) == hop183(x) + 1\nhop185(x) == hop184(x) + 1\nhop186(x) == hop185(x) + 1\nhop187(x) == hop186(x) + 1\nhop188(x) == hop187(x) + 1\nhop189(x) == hop188(x) + 1\nhop190(x) == hop189(x) + 1\nhop191(x) == hop190(x) + 1\nhop192(x) == hop191(x) + 1\nhop193(x) == hop192(x) + 1\nhop194(x) == hop193(x) + 1\nhop195(x) == hop194(x) + 1\nhop196(x) == hop195(x) + 1\nhop197(x) == hop196(x) + 1\nhop198(x) == hop197(x) + 1\nhop199(x) == hop198(x) + 1\nhop200(x) == hop199(x) + 1\nhop201(x) == hop200(x) + 1\nhop202(x) == hop201(x) + 1\nhop203(x) == hop202(x) + 1\nhop204(x) == hop203(x) + 1\nhop205(x) == hop204(x) + 1\nhop206(x) == hop205(x) + 1\nhop207(x) == hop206(x) + 1\nhop208(x) == hop207(x) + 1\nhop209(x) == hop208(x) + 1\nhop210(x) == hop209(x) + 1\nhop211(x) == hop210(x) + 1\nhop212(x) == hop211(x) + 1\nhop213(x) == hop212(x) + 1\nhop214(x) == hop213(x) + 1\nhop215(x) == hop214(x) + 1\nhop216(x) == hop215(x) + 1\nhop217(x) == hop216(x) + 1\nhop218(x) == hop217(x) + 1\nhop219(x) == hop218(x) + 1\nhop220(x) == hop219(x) + 1\nhop221(x) == hop220(x) + 1\nhop222(x) == hop221(x) + 1\nhop223(x) == hop222(x) + 1\nhop224(x) == hop223(x) + 1\nhop225(x) == hop224(x) + 1\nhop226(x) == hop225(x) + 1\nhop227(x) == hop226(x) + 1\nhop228(x) == hop227(x) + 1\nhop229(x) == hop228(x) + 1\nhop230(x) == hop229(x) + 1\nhop231(x) == hop230(x) + 1\nhop232(x) == hop231(x) + 1\nhop233(x) == hop232(x) + 1\nhop234(x) == hop233(x) + 1\nhop235(x) == hop234(x) + 1\nhop236(x) == hop235(x) + 1\nhop237(x) == hop236(x) + 1\nhop238(x) == hop237(x) + 1\nhop239(x) == hop238(x) + 1\nhop240(x) == hop239(x) + 1\nhop241(x) == hop240(x) + 1\nhop242(x) == hop241(x) + 1\nhop243(x) == hop242(x) + 1\nhop244(x) == hop243(x) + 1\nhop245(x) == hop244(x) + 1\nhop246(x) == hop245(x) + 1\nhop247(x) == hop246(x) + 1\nhop248(x) == hop247(x) + 1\nhop249(x) == hop248(x) + 1\nhop250(x) == hop249(x) + 1\nhop251(x) == hop250(x) + 1\nhop252(x) == hop251(x) + 1\nhop253(x) == hop252(x) + 1\nhop254(x) == hop253(x) + 1\nhop255(x) == hop254(x) + 1\nhop256(x) == hop255(x) + 1\nhop257(x) == hop256(x) + 1\nhop258(x) == hop257(x) + 1\nhop259(x) == hop258(x) + 1\nhop260(x) == hop259(x) + 1\nhop261(x) == hop260(x) + 1\nhop262(x) == hop261(x) + 1\nhop263(x) == hop262(x) + 1\nhop264(x) == hop263(x) + 1\nhop265(x) == hop264(x) + 1\nhop266(x) == hop265(x) + 1\nhop267(x) == hop266(x) + 1\nhop268(x) == hop267(x) + 1\nhop269(x) == hop268(x) + 1\nhop270(x) == hop269(x) + 1\nhop271(x) == hop270(x) + 1\nhop272(x) == hop271(x) + 1\nhop273(x) == hop272(x) + 1\nhop274(x) == hop273(x) + 1\nhop275(x) == hop274(x) + 1\nhop276(x) == hop275(x) + 1\nhop277(x) == hop276(x) + 1\nhop278(x) == hop277(x) + 1\nhop279(x) == hop278(x) + 1\nhop280(x) == hop279(x) + 1\nhop281(x) == hop280(x) + 1\nhop282(x) == hop281(x) + 1\nhop283(x) == hop282(x) + 1\nhop284(x) == hop283(x) + 1\nhop285(x) == hop284(x) + 1\nhop286(x) == hop285(x) + 1\nhop287(x) == hop286(x) + 1\nhop288(x) == hop287(x) + 1\nhop289(x) == hop288(x) + 1\nhop290(x) == hop289(x) + 1\nhop291(x) == hop290(x) + 1\nhop292(x) == hop291(x) + 1\nhop293(x) == hop292(x) + 1\nhop294(x) == hop293(x) + 1\nhop295(x) == hop294(x) + 1\nhop296(x) == hop295(x) + 1\nhop297(x) == hop296(x) + 1\nhop298(x) == hop297(x) + 1\nhop299(x) == hop298(x) + 1\nhop300(x) == hop299(x) + 1\ninit == counter = 0\ninv == ~(counter > 100 /\\ hop300(counter) > 0)\nstep == counter' = IF counter < 4 THEN counter + 1 ELSE 0\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 5,
+          "generated": 6,
+          "work": 22
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 5,
+          "generated": 6,
+          "work": 22
+        }
+      }
+    }
+  },
+  {
+    "name": "violation-76",
+    "group": "semantic",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nhop0(x) == x + 1\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\nhop42(x) == hop41(x) + 1\nhop43(x) == hop42(x) + 1\nhop44(x) == hop43(x) + 1\nhop45(x) == hop44(x) + 1\nhop46(x) == hop45(x) + 1\nhop47(x) == hop46(x) + 1\nhop48(x) == hop47(x) + 1\nhop49(x) == hop48(x) + 1\nhop50(x) == hop49(x) + 1\nhop51(x) == hop50(x) + 1\nhop52(x) == hop51(x) + 1\nhop53(x) == hop52(x) + 1\nhop54(x) == hop53(x) + 1\nhop55(x) == hop54(x) + 1\nhop56(x) == hop55(x) + 1\nhop57(x) == hop56(x) + 1\nhop58(x) == hop57(x) + 1\nhop59(x) == hop58(x) + 1\nhop60(x) == hop59(x) + 1\nhop61(x) == hop60(x) + 1\nhop62(x) == hop61(x) + 1\nhop63(x) == hop62(x) + 1\nhop64(x) == hop63(x) + 1\nhop65(x) == hop64(x) + 1\nhop66(x) == hop65(x) + 1\nhop67(x) == hop66(x) + 1\nhop68(x) == hop67(x) + 1\nhop69(x) == hop68(x) + 1\nhop70(x) == hop69(x) + 1\nhop71(x) == hop70(x) + 1\nhop72(x) == hop71(x) + 1\nhop73(x) == hop72(x) + 1\nhop74(x) == hop73(x) + 1\nhop75(x) == hop74(x) + 1\nhop76(x) == hop75(x) + 1\ninit == counter = 0\ninv == hop76(counter) < 80\nstep == counter' = IF counter < 4 THEN counter + 1 ELSE 0\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 233,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "invariant-violation",
+          "trace": 4,
+          "work": 632
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "invariant-violation",
+          "trace": 4,
+          "work": 632
+        }
+      }
+    }
+  },
+  {
+    "name": "unchanged-6",
+    "group": "limit",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE x\nV0 == x\nV1 == <<V0, V0>>\nV2 == <<V1, V1>>\nV3 == <<V2, V2>>\nV4 == <<V3, V3>>\nV5 == <<V4, V4>>\nV6 == <<V5, V5>>\nInit == x = 0\nNext == UNCHANGED V6\nInv == x = 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 64,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "result",
+          "status": "complete",
+          "states": 1,
+          "generated": 2,
+          "work": 67
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 1,
+          "generated": 2,
+          "work": 68
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "result",
+          "status": "complete",
+          "states": 1,
+          "generated": 2,
+          "work": 67
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 1,
+          "generated": 2,
+          "work": 68
+        }
+      }
+    }
+  },
+  {
+    "name": "unchanged-7",
+    "group": "limit",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE x\nV0 == x\nV1 == <<V0, V0>>\nV2 == <<V1, V1>>\nV3 == <<V2, V2>>\nV4 == <<V3, V3>>\nV5 == <<V4, V4>>\nV6 == <<V5, V5>>\nV7 == <<V6, V6>>\nInit == x = 0\nNext == UNCHANGED V7\nInv == x = 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 128,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "result",
+          "status": "complete",
+          "states": 1,
+          "generated": 2,
+          "work": 131
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 1,
+          "generated": 2,
+          "work": 132
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "result",
+          "status": "complete",
+          "states": 1,
+          "generated": 2,
+          "work": 131
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 1,
+          "generated": 2,
+          "work": 132
+        }
+      }
+    }
+  },
+  {
+    "name": "unchanged-8",
+    "group": "limit",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE x\nV0 == x\nV1 == <<V0, V0>>\nV2 == <<V1, V1>>\nV3 == <<V2, V2>>\nV4 == <<V3, V3>>\nV5 == <<V4, V4>>\nV6 == <<V5, V5>>\nV7 == <<V6, V6>>\nV8 == <<V7, V7>>\nInit == x = 0\nNext == UNCHANGED V8\nInv == x = 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": 256,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "result",
+          "status": "complete",
+          "states": 1,
+          "generated": 2,
+          "work": 259
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 256"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "result",
+          "status": "complete",
+          "states": 1,
+          "generated": 2,
+          "work": 259
+        },
+        "v2": {
+          "stage": "check",
+          "message": "Safety evaluation nesting exceeds 256"
+        }
+      }
+    }
+  },
+  {
+    "name": "unchanged-9",
+    "group": "limit",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE x\nV0 == x\nV1 == <<V0, V0>>\nV2 == <<V1, V1>>\nV3 == <<V2, V2>>\nV4 == <<V3, V3>>\nV5 == <<V4, V4>>\nV6 == <<V5, V5>>\nV7 == <<V6, V6>>\nV8 == <<V7, V7>>\nV9 == <<V8, V8>>\nInit == x = 0\nNext == UNCHANGED V9\nInv == x = 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety branch exceeds 256 steps"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "Safety branch exceeds 256 steps"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "check",
+          "message": "Safety branch exceeds 256 steps"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "Safety branch exceeds 256 steps"
+        }
+      }
+    }
+  },
+  {
+    "name": "recursion-loop",
+    "group": "recursion",
+    "source": "---- MODULE CallDepth ----\nVARIABLE x\nRECURSIVE Loop(_)\nLoop(value) == Loop(value)\nInit == x = Loop(0)\nNext == UNCHANGED x\n====\n",
+    "config": "INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator Loop"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "recursive operator definitions"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator $linked1"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "bounded",
+          "reason": "evaluation",
+          "work": 128
+        }
+      }
+    }
+  },
+  {
+    "name": "recursion-sum-200",
+    "group": "recursion",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE x\nRECURSIVE Sum(_)\nSum(n) == IF n = 0 THEN 0 ELSE n + Sum(n - 1)\nInit == x = 0\nNext == UNCHANGED x\nInv == Sum(200) >= 0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator Sum"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "recursive operator definitions"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "operator $linked1"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "bounded",
+          "reason": "evaluation",
+          "work": 702
+        }
+      }
+    }
+  },
+  {
+    "name": "recursion-from-hop-50",
+    "group": "recursion",
+    "source": "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE counter\nRECURSIVE Sum(_)\nSum(n) == IF n = 0 THEN 0 ELSE n + Sum(n - 1)\nhop0(x) == x + Sum(x)\nhop1(x) == hop0(x) + 1\nhop2(x) == hop1(x) + 1\nhop3(x) == hop2(x) + 1\nhop4(x) == hop3(x) + 1\nhop5(x) == hop4(x) + 1\nhop6(x) == hop5(x) + 1\nhop7(x) == hop6(x) + 1\nhop8(x) == hop7(x) + 1\nhop9(x) == hop8(x) + 1\nhop10(x) == hop9(x) + 1\nhop11(x) == hop10(x) + 1\nhop12(x) == hop11(x) + 1\nhop13(x) == hop12(x) + 1\nhop14(x) == hop13(x) + 1\nhop15(x) == hop14(x) + 1\nhop16(x) == hop15(x) + 1\nhop17(x) == hop16(x) + 1\nhop18(x) == hop17(x) + 1\nhop19(x) == hop18(x) + 1\nhop20(x) == hop19(x) + 1\nhop21(x) == hop20(x) + 1\nhop22(x) == hop21(x) + 1\nhop23(x) == hop22(x) + 1\nhop24(x) == hop23(x) + 1\nhop25(x) == hop24(x) + 1\nhop26(x) == hop25(x) + 1\nhop27(x) == hop26(x) + 1\nhop28(x) == hop27(x) + 1\nhop29(x) == hop28(x) + 1\nhop30(x) == hop29(x) + 1\nhop31(x) == hop30(x) + 1\nhop32(x) == hop31(x) + 1\nhop33(x) == hop32(x) + 1\nhop34(x) == hop33(x) + 1\nhop35(x) == hop34(x) + 1\nhop36(x) == hop35(x) + 1\nhop37(x) == hop36(x) + 1\nhop38(x) == hop37(x) + 1\nhop39(x) == hop38(x) + 1\nhop40(x) == hop39(x) + 1\nhop41(x) == hop40(x) + 1\nhop42(x) == hop41(x) + 1\nhop43(x) == hop42(x) + 1\nhop44(x) == hop43(x) + 1\nhop45(x) == hop44(x) + 1\nhop46(x) == hop45(x) + 1\nhop47(x) == hop46(x) + 1\nhop48(x) == hop47(x) + 1\nhop49(x) == hop48(x) + 1\nhop50(x) == hop49(x) + 1\ninit == counter = 0\ninv == counter >= 0\nstep == counter' = hop50(counter) % 5\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+    "config": "INIT q_init\nNEXT q_step\nINVARIANT q_inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression Apply %"
+        },
+        "v2": {
+          "stage": "compile",
+          "message": "recursive operator definitions"
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "bounded",
+          "reason": "evaluation",
+          "work": 130
+        }
+      }
+    }
+  },
+  {
+    "name": "calls-127",
+    "group": "boundary-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nC126 == x >= 0\nC125 == C126\nC124 == C125\nC123 == C124\nC122 == C123\nC121 == C122\nC120 == C121\nC119 == C120\nC118 == C119\nC117 == C118\nC116 == C117\nC115 == C116\nC114 == C115\nC113 == C114\nC112 == C113\nC111 == C112\nC110 == C111\nC109 == C110\nC108 == C109\nC107 == C108\nC106 == C107\nC105 == C106\nC104 == C105\nC103 == C104\nC102 == C103\nC101 == C102\nC100 == C101\nC99 == C100\nC98 == C99\nC97 == C98\nC96 == C97\nC95 == C96\nC94 == C95\nC93 == C94\nC92 == C93\nC91 == C92\nC90 == C91\nC89 == C90\nC88 == C89\nC87 == C88\nC86 == C87\nC85 == C86\nC84 == C85\nC83 == C84\nC82 == C83\nC81 == C82\nC80 == C81\nC79 == C80\nC78 == C79\nC77 == C78\nC76 == C77\nC75 == C76\nC74 == C75\nC73 == C74\nC72 == C73\nC71 == C72\nC70 == C71\nC69 == C70\nC68 == C69\nC67 == C68\nC66 == C67\nC65 == C66\nC64 == C65\nC63 == C64\nC62 == C63\nC61 == C62\nC60 == C61\nC59 == C60\nC58 == C59\nC57 == C58\nC56 == C57\nC55 == C56\nC54 == C55\nC53 == C54\nC52 == C53\nC51 == C52\nC50 == C51\nC49 == C50\nC48 == C49\nC47 == C48\nC46 == C47\nC45 == C46\nC44 == C45\nC43 == C44\nC42 == C43\nC41 == C42\nC40 == C41\nC39 == C40\nC38 == C39\nC37 == C38\nC36 == C37\nC35 == C36\nC34 == C35\nC33 == C34\nC32 == C33\nC31 == C32\nC30 == C31\nC29 == C30\nC28 == C29\nC27 == C28\nC26 == C27\nC25 == C26\nC24 == C25\nC23 == C24\nC22 == C23\nC21 == C22\nC20 == C21\nC19 == C20\nC18 == C19\nC17 == C18\nC16 == C17\nC15 == C16\nC14 == C15\nC13 == C14\nC12 == C13\nC11 == C12\nC10 == C11\nC9 == C10\nC8 == C9\nC7 == C8\nC6 == C7\nC5 == C6\nC4 == C5\nC3 == C4\nC2 == C3\nC1 == C2\nC0 == C1\nInv == C0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 782
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 782
+        }
+      }
+    }
+  },
+  {
+    "name": "calls-128",
+    "group": "boundary-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nC127 == x >= 0\nC126 == C127\nC125 == C126\nC124 == C125\nC123 == C124\nC122 == C123\nC121 == C122\nC120 == C121\nC119 == C120\nC118 == C119\nC117 == C118\nC116 == C117\nC115 == C116\nC114 == C115\nC113 == C114\nC112 == C113\nC111 == C112\nC110 == C111\nC109 == C110\nC108 == C109\nC107 == C108\nC106 == C107\nC105 == C106\nC104 == C105\nC103 == C104\nC102 == C103\nC101 == C102\nC100 == C101\nC99 == C100\nC98 == C99\nC97 == C98\nC96 == C97\nC95 == C96\nC94 == C95\nC93 == C94\nC92 == C93\nC91 == C92\nC90 == C91\nC89 == C90\nC88 == C89\nC87 == C88\nC86 == C87\nC85 == C86\nC84 == C85\nC83 == C84\nC82 == C83\nC81 == C82\nC80 == C81\nC79 == C80\nC78 == C79\nC77 == C78\nC76 == C77\nC75 == C76\nC74 == C75\nC73 == C74\nC72 == C73\nC71 == C72\nC70 == C71\nC69 == C70\nC68 == C69\nC67 == C68\nC66 == C67\nC65 == C66\nC64 == C65\nC63 == C64\nC62 == C63\nC61 == C62\nC60 == C61\nC59 == C60\nC58 == C59\nC57 == C58\nC56 == C57\nC55 == C56\nC54 == C55\nC53 == C54\nC52 == C53\nC51 == C52\nC50 == C51\nC49 == C50\nC48 == C49\nC47 == C48\nC46 == C47\nC45 == C46\nC44 == C45\nC43 == C44\nC42 == C43\nC41 == C42\nC40 == C41\nC39 == C40\nC38 == C39\nC37 == C38\nC36 == C37\nC35 == C36\nC34 == C35\nC33 == C34\nC32 == C33\nC31 == C32\nC30 == C31\nC29 == C30\nC28 == C29\nC27 == C28\nC26 == C27\nC25 == C26\nC24 == C25\nC23 == C24\nC22 == C23\nC21 == C22\nC20 == C21\nC19 == C20\nC18 == C19\nC17 == C18\nC16 == C17\nC15 == C16\nC14 == C15\nC13 == C14\nC12 == C13\nC11 == C12\nC10 == C11\nC9 == C10\nC8 == C9\nC7 == C8\nC6 == C7\nC5 == C6\nC4 == C5\nC3 == C4\nC2 == C3\nC1 == C2\nC0 == C1\nInv == C0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 788
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 788
+        }
+      }
+    }
+  },
+  {
+    "name": "calls-129",
+    "group": "boundary-0075",
+    "source": "---- MODULE NestingChains ----\nEXTENDS Integers\nVARIABLE x\nInit == x = 0\nNext == x' = IF x < 5 THEN x + 1 ELSE 0\nC128 == x >= 0\nC127 == C128\nC126 == C127\nC125 == C126\nC124 == C125\nC123 == C124\nC122 == C123\nC121 == C122\nC120 == C121\nC119 == C120\nC118 == C119\nC117 == C118\nC116 == C117\nC115 == C116\nC114 == C115\nC113 == C114\nC112 == C113\nC111 == C112\nC110 == C111\nC109 == C110\nC108 == C109\nC107 == C108\nC106 == C107\nC105 == C106\nC104 == C105\nC103 == C104\nC102 == C103\nC101 == C102\nC100 == C101\nC99 == C100\nC98 == C99\nC97 == C98\nC96 == C97\nC95 == C96\nC94 == C95\nC93 == C94\nC92 == C93\nC91 == C92\nC90 == C91\nC89 == C90\nC88 == C89\nC87 == C88\nC86 == C87\nC85 == C86\nC84 == C85\nC83 == C84\nC82 == C83\nC81 == C82\nC80 == C81\nC79 == C80\nC78 == C79\nC77 == C78\nC76 == C77\nC75 == C76\nC74 == C75\nC73 == C74\nC72 == C73\nC71 == C72\nC70 == C71\nC69 == C70\nC68 == C69\nC67 == C68\nC66 == C67\nC65 == C66\nC64 == C65\nC63 == C64\nC62 == C63\nC61 == C62\nC60 == C61\nC59 == C60\nC58 == C59\nC57 == C58\nC56 == C57\nC55 == C56\nC54 == C55\nC53 == C54\nC52 == C53\nC51 == C52\nC50 == C51\nC49 == C50\nC48 == C49\nC47 == C48\nC46 == C47\nC45 == C46\nC44 == C45\nC43 == C44\nC42 == C43\nC41 == C42\nC40 == C41\nC39 == C40\nC38 == C39\nC37 == C38\nC36 == C37\nC35 == C36\nC34 == C35\nC33 == C34\nC32 == C33\nC31 == C32\nC30 == C31\nC29 == C30\nC28 == C29\nC27 == C28\nC26 == C27\nC25 == C26\nC24 == C25\nC23 == C24\nC22 == C23\nC21 == C22\nC20 == C21\nC19 == C20\nC18 == C19\nC17 == C18\nC16 == C17\nC15 == C16\nC14 == C15\nC13 == C14\nC12 == C13\nC11 == C12\nC10 == C11\nC9 == C10\nC8 == C9\nC7 == C8\nC6 == C7\nC5 == C6\nC4 == C5\nC3 == C4\nC2 == C3\nC1 == C2\nC0 == C1\nInv == C0\n====\n",
+    "config": "INIT Init\nNEXT Next\nINVARIANT Inv\nCHECK_DEADLOCK FALSE\n",
+    "equivalent": null,
+    "semantic": null,
+    "depth": null,
+    "expect": {
+      "ts": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 794
+        }
+      },
+      "rust": {
+        "v1": {
+          "stage": "compile",
+          "message": "expression or operator nesting exceeds 40"
+        },
+        "v2": {
+          "stage": "result",
+          "status": "complete",
+          "states": 6,
+          "generated": 7,
+          "work": 794
+        }
+      }
+    }
+  }
+]

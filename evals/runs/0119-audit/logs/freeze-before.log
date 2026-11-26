@@ -1,0 +1,14 @@
+node:internal/fs/promises:1668
+  const result = await PromisePrototypeThen(
+                 ^
+
+Error: ENOENT: no such file or directory, scandir 'crates/rtlc/target/release/deps'
+    at async readdir (node:internal/fs/promises:1668:18)
+    at async file://<after>/dist/evals/experiments/compact-functions/freeze.js:24:17 {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'scandir',
+  path: 'crates/rtlc/target/release/deps'
+}
+
+Node.js v24.22.3

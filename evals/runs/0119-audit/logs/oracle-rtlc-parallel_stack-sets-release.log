@@ -1,0 +1,31 @@
+   Compiling rtlc v0.1.0-alpha.0 (<oracle>/crates/rtlc)
+    Finished `release` profile [optimized] target(s) in 18.03s
+     Running tests/parallel_stack.rs (crates/rtlc/target/release/build/rtlc/61cc4c4e2b7e6c66/out/parallel_stack-61cc4c4e2b7e6c66)
+
+running 2 tests
+test a_worker_pool_evaluates_nested_sets_up_to_the_nesting_limit ... FAILED
+test a_worker_pool_refuses_nested_sets_past_the_nesting_limit ... FAILED
+
+failures:
+
+---- a_worker_pool_evaluates_nested_sets_up_to_the_nesting_limit stdout ----
+
+thread 'a_worker_pool_evaluates_nested_sets_up_to_the_nesting_limit' (147143763) panicked at tests/parallel_stack.rs:71:5:
+assertion `left == right` failed
+  left: 423
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- a_worker_pool_refuses_nested_sets_past_the_nesting_limit stdout ----
+
+thread 'a_worker_pool_refuses_nested_sets_past_the_nesting_limit' (147143764) panicked at tests/parallel_stack.rs:78:10:
+called `Result::unwrap_err()` on an `Ok` value: SafetyResult { status: "complete", reason: None, states: 32, generated: 64, depth: 0, work: 423, violation: None }
+
+
+failures:
+    a_worker_pool_evaluates_nested_sets_up_to_the_nesting_limit
+    a_worker_pool_refuses_nested_sets_past_the_nesting_limit
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test parallel_stack`

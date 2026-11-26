@@ -1,0 +1,21 @@
+head 61468f8bcc413736da47c80e9eb88ba70d42e296
+git status --short:
+ M evals/experiments/call-depth/cli-ceiling.ts
+git diff -- evals/experiments/call-depth/cli-ceiling.ts:
+diff --git a/evals/experiments/call-depth/cli-ceiling.ts b/evals/experiments/call-depth/cli-ceiling.ts
+index 239dd426e..2e9bc730c 100644
+--- a/evals/experiments/call-depth/cli-ceiling.ts
++++ b/evals/experiments/call-depth/cli-ceiling.ts
+@@ -23,7 +23,7 @@ const negationSource = (levels: number): string =>
+     ),
+     "Init == counter = 0",
+     "Next == counter' = (counter + 1) % 5",
+-    `Inv == neg${levels}(counter) <= 0`,
++    `Inv == neg${levels}(counter) <= 4`,
+     "====",
+     "",
+   ].join("\n");
+sha256:
+61c9a444b327260b98a7533ec1b2beaa28693be89e8bd07cebf0381d7afa6056  evals/experiments/call-depth/cli-ceiling.ts
+ae20d88394e3d8ccabb793030ca24e2e0729191f3b06f193575011b36dc2650f  dist/evals/experiments/call-depth/cli-ceiling.js
+aef80356013fa7b4b57b05ab3493251859251ef3f5b5a96eb070a3a28163dc18  crates/idealis-cli/target/wasm32-wasip1/release/idealis.wasm

@@ -1,0 +1,67 @@
+pnpm exec tsc -p packages/idealis/tsconfig.json
+pnpm exec tsc -p tsconfig.json
+node dist/scripts/build-wasm-tests.js
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.00s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.00s
+    Finished `release` profile [optimized] target(s) in 0.00s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+    Finished `release` profile [optimized] target(s) in 0.01s
+node --test dist/tests/wasm-host/contract-test.js
+✔ Rust Wasm modules compile with no host imports (13.819916ms)
+✔ portable code and browser workers bundle without Node dependencies (76.577958ms)
+✔ portable Wasm run retains its verdicts (154.155917ms)
+✔ portable Wasm runSymmetry retains its verdicts (16.011292ms)
+✔ portable Wasm runSharedIr retains its verdicts (13.617291ms)
+✔ portable Wasm runFrontendCompletion retains its verdicts (51.191625ms)
+✔ portable Wasm runRecursiveActions retains its verdicts (28.812291ms)
+✔ portable Wasm runCallDepth retains its verdicts (13.978583ms)
+✔ portable Wasm runFrontendSemantics retains its verdicts (42.8725ms)
+✔ Quint generated models retain complete and counterexample outcomes (22.681ms)
+✔ core, shrinking, TLA and real Z3 Wasm run in Node (238.998333ms)
+✔ parser Wasm reuses memory after syntax and config errors (10.8465ms)
+✔ SMT Wasm distinguishes sat, unsat, unknown and errors (7.465208ms)
+✔ SMT expansion preserves scopes and recovers after an error (6.19ms)
+✔ SMT scripts preserve checks, budgets and reset behavior (4.970917ms)
+✔ Alloy Wasm keeps counterexamples, unknown and rejected inputs (7.059208ms)
+✔ Alloy instance replay preserves mismatch and invalid outcomes (4.047125ms)
+✔ PBT Wasm shrinks and replays an implementation counterexample (9.210458ms)
+✔ controlled actor schedules replay against the native SUT (212.74025ms)
+✔ SAT Wasm matches native results and its independent enumerator (208.792292ms)
+✔ structured fuzz replays actual native request and response records in Wasm (219.397084ms)
+✔ runtime Wasm matches the TS kernel and sharded results (6.407084ms)
+✔ roracle JSON ABI retains snapshots and signed-zero mismatch (5.749917ms)
+✔ typed oracle Wasm checks replay and host clock against native (276.254166ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1790.152166
+pnpm exec vp test run --project=wasm
+
+ RUN  v5.1.0 <after>
+
+
+ Test Files  1 passed (1)
+      Tests  24 passed (24)
+   Start at  08:06:42
+   Duration  1.09s (tests 88%, import 9%, transform 3%)
+

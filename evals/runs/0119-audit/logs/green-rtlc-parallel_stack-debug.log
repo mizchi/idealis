@@ -1,0 +1,25 @@
+   Compiling rtlc v0.1.0-alpha.0 (<after>/crates/rtlc)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.69s
+     Running tests/parallel_stack.rs (crates/rtlc/target/debug/build/rtlc/273762d1a2648ddd/out/parallel_stack-273762d1a2648ddd)
+
+running 2 tests
+test a_worker_pool_refuses_calls_past_the_nesting_limit ... ok
+test a_worker_pool_evaluates_calls_up_to_the_nesting_limit ... FAILED
+
+failures:
+
+---- a_worker_pool_evaluates_calls_up_to_the_nesting_limit stdout ----
+
+thread 'a_worker_pool_evaluates_calls_up_to_the_nesting_limit' (146778846) panicked at tests/parallel_stack.rs:63:5:
+assertion `left == right` failed
+  left: 10913
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_worker_pool_evaluates_calls_up_to_the_nesting_limit
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test parallel_stack`

@@ -254,3 +254,29 @@ test("checks levels, lazy functions and shared templates in Chromium", async ({
     isolated: false,
   });
 });
+
+test("refuses layered calls past the nesting limit and keeps the instance usable in Chromium", async ({
+  page,
+}) => {
+  await page.goto(origin);
+  const result = await page.evaluate(async () => {
+    const api: unknown = Reflect.get(globalThis, "portableBrowser");
+    if (
+      typeof api !== "object" ||
+      api === null ||
+      !("runCallDepth" in api) ||
+      typeof api.runCallDepth !== "function"
+    )
+      throw new Error("Missing call depth browser API");
+    return api.runCallDepth();
+  });
+  expect(result).toEqual({
+    accepted: { status: "complete", states: 5, generated: 6, work: 862 },
+    refusal: {
+      code: "protocol",
+      message: "Safety evaluation nesting exceeds 256",
+    },
+    afterRefusal: { status: "complete", states: 5, generated: 6, work: 432 },
+    isolated: false,
+  });
+});

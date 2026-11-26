@@ -1,0 +1,41 @@
+   Compiling rtlc v0.1.0-alpha.0 (<before>/crates/rtlc)
+   Compiling rtla-compiler v0.1.0-alpha.0 (<before>/crates/rtla-compiler)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.28s
+     Running tests/nesting_chains.rs (crates/rtla-compiler/target/debug/build/rtla-compiler/3e181ebbb1f102a3/out/nesting_chains-3e181ebbb1f102a3)
+
+running 14 tests
+test version_one_keeps_counting_every_level ... ok
+test a_chain_counts_as_one_level_up_to_the_parser_limit ... ok
+test quint_if_chain_of_54_branches_is_checked_like_tlc ... ok
+test quint_conjunction_of_44_terms_is_checked_like_the_flat_form ... ok
+test disjunction_nested_in_the_action_is_walked_from_either_side ... ok
+test chain_errors_are_reported_in_lowering_order ... ok
+test nesting_that_is_not_a_chain_keeps_the_checker_and_evaluation_limits ... FAILED
+test nesting_deeper_than_the_parser_accepts_is_walked_on_the_sides_the_position_allows ... ok
+test nesting_that_is_not_a_chain_keeps_its_limit ... ok
+test chain_positions_match_the_equivalent_spelling ... ok
+test chain_lengths_follow_the_expected_layer ... ok
+test chain_semantics_match_the_equivalent_spelling ... ok
+test chains_past_the_former_checker_limits_follow_the_expected_layer ... ok
+test branch_limit_is_reported_before_a_later_undefined_operator ... ok
+
+failures:
+
+---- nesting_that_is_not_a_chain_keeps_the_checker_and_evaluation_limits stdout ----
+
+thread '<unnamed>' (148425279) panicked at tests/nesting_chains.rs:201:5:
+"calls-127" v2: expected {"generated":7,"stage":"result","states":6,"status":"complete","work":782}, got {"message":"Safety evaluation nesting exceeds 128","stage":"check"}
+"calls-128" v2: expected {"generated":7,"stage":"result","states":6,"status":"complete","work":788}, got {"message":"Safety evaluation nesting exceeds 128","stage":"check"}
+"calls-129" v2: expected {"generated":7,"stage":"result","states":6,"status":"complete","work":794}, got {"message":"Safety evaluation nesting exceeds 128","stage":"check"}
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'nesting_that_is_not_a_chain_keeps_the_checker_and_evaluation_limits' (148425274) panicked at tests/nesting_chains.rs:18:10:
+called `Result::unwrap()` on an `Err` value: Any { .. }
+
+
+failures:
+    nesting_that_is_not_a_chain_keeps_the_checker_and_evaluation_limits
+
+test result: FAILED. 13 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.11s
+
+error: test failed, to rerun pass `--test nesting_chains`

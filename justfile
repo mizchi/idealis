@@ -674,7 +674,18 @@ portable-replay run: build
 safety-build: portable-build build
 
 safety-test: safety-build
-  node --test dist/tests/rust-safety/contract-test.js dist/tests/collections-temporal/contract-test.js dist/tests/tlc-differential/compare-test.js dist/tests/tlc-differential/regression-test.js dist/tests/nesting-chains/contract-test.js dist/tests/nesting-chains/abba-report-test.js dist/tests/nesting-chains/stack-cell-test.js
+  node --test dist/tests/rust-safety/contract-test.js dist/tests/collections-temporal/contract-test.js dist/tests/tlc-differential/compare-test.js dist/tests/tlc-differential/regression-test.js dist/tests/nesting-chains/contract-test.js dist/tests/nesting-chains/abba-report-test.js dist/tests/nesting-chains/stack-cell-test.js dist/tests/call-depth/contract-test.js
+
+call-depth-harness:
+  cargo fmt --manifest-path evals/experiments/call-depth/stack-harness/Cargo.toml -- --check
+  cargo clippy --all-targets --locked --manifest-path evals/experiments/call-depth/stack-harness/Cargo.toml -- -D warnings
+
+call-depth-stack binary output cells: build
+  node dist/evals/experiments/call-depth/stack.js {{quote(binary)}} {{quote(output)}} {{quote(cells)}}
+
+[positional-arguments]
+call-depth-wasm *args: build
+  node dist/evals/experiments/call-depth/wasm-ceiling.js "$@"
 
 safety-eval run plan="0014-value-hash": safety-build
   node dist/evals/experiments/rust-safety/evaluate.js {{quote(run)}} {{quote(plan)}}

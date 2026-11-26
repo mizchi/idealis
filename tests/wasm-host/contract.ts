@@ -102,6 +102,23 @@ export const registerWasmHostContract = (
       expected: { matched: 23, rejected: 1, bounded: 2, isolated: false },
     },
     {
+      method: "runCallDepth",
+      expected: {
+        accepted: { status: "complete", states: 5, generated: 6, work: 862 },
+        refusal: {
+          code: "protocol",
+          message: "Safety evaluation nesting exceeds 256",
+        },
+        afterRefusal: {
+          status: "complete",
+          states: 5,
+          generated: 6,
+          work: 432,
+        },
+        isolated: false,
+      },
+    },
+    {
       method: "runFrontendSemantics",
       expected: {
         matched: 64,

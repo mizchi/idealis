@@ -1,0 +1,31 @@
+   Compiling rtlc v0.1.0-alpha.0 (<before>/crates/rtlc)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.61s
+     Running tests/parallel_stack.rs (crates/rtlc/target/debug/build/rtlc/273762d1a2648ddd/out/parallel_stack-273762d1a2648ddd)
+
+running 2 tests
+test a_worker_pool_refuses_nested_sets_past_the_nesting_limit ... FAILED
+test a_worker_pool_evaluates_nested_sets_up_to_the_nesting_limit ... FAILED
+
+failures:
+
+---- a_worker_pool_refuses_nested_sets_past_the_nesting_limit stdout ----
+
+thread 'a_worker_pool_refuses_nested_sets_past_the_nesting_limit' (147151125) panicked at tests/parallel_stack.rs:80:5:
+assertion `left == right` failed
+  left: "Safety evaluation nesting exceeds 128"
+ right: "Safety evaluation nesting exceeds 256"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- a_worker_pool_evaluates_nested_sets_up_to_the_nesting_limit stdout ----
+
+thread 'a_worker_pool_evaluates_nested_sets_up_to_the_nesting_limit' (147151124) panicked at tests/parallel_stack.rs:67:67:
+called `Result::unwrap()` on an `Err` value: CoreError { code: "protocol", message: "Safety evaluation nesting exceeds 128" }
+
+
+failures:
+    a_worker_pool_evaluates_nested_sets_up_to_the_nesting_limit
+    a_worker_pool_refuses_nested_sets_past_the_nesting_limit
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test parallel_stack`

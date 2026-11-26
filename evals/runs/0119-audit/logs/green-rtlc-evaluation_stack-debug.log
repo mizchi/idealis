@@ -1,0 +1,60 @@
+   Compiling rtlc v0.1.0-alpha.0 (<after>/crates/rtlc)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.15s
+     Running tests/evaluation_stack.rs (crates/rtlc/target/debug/build/rtlc/a5a68c95a4a7bfcc/out/evaluation_stack-a5a68c95a4a7bfcc)
+
+running 13 tests
+test action_steps_reach_the_nesting_limit_within_the_required_stack ... FAILED
+test temporal_calls_reach_the_nesting_limit_within_the_required_stack ... FAILED
+test enabled_steps_reach_the_nesting_limit_within_the_required_stack ... FAILED
+test calls_reach_the_nesting_limit_within_the_required_stack ... ok
+test forwarded_parameters_reach_the_nesting_limit_within_the_required_stack ... ok
+test expression_operators_reach_the_nesting_limit_within_the_required_stack ... ok
+test unread_binder_locals_reach_the_nesting_limit_within_the_required_stack ... FAILED
+test value_operators_reach_the_nesting_limit_within_the_required_stack ... ok
+test quantifier_bindings_reach_the_nesting_limit_within_the_required_stack ... ok
+test lazy_functions_reach_the_nesting_limit_within_the_required_stack ... ok
+test function_applications_reach_the_nesting_limit_within_the_required_stack ... ok
+test membership_sets_reach_the_nesting_limit_within_the_required_stack ... ok
+test nested_updates_reach_the_nesting_limit_within_the_required_stack ... ok
+
+failures:
+
+---- action_steps_reach_the_nesting_limit_within_the_required_stack stdout ----
+
+thread 'action_steps_reach_the_nesting_limit_within_the_required_stack' (146795232) panicked at tests/evaluation_stack.rs:20:5:
+assertion `left == right` failed: action 511
+  left: "complete reason=- states=1 generated=2 work=548"
+ right: "error protocol: Safety evaluation nesting exceeds 512"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- temporal_calls_reach_the_nesting_limit_within_the_required_stack stdout ----
+
+thread 'temporal_calls_reach_the_nesting_limit_within_the_required_stack' (146795242) panicked at tests/evaluation_stack.rs:20:5:
+assertion `left == right` failed: temporal 511
+  left: "complete reason=- states=1 generated=2 work=1543"
+ right: "error protocol: Safety evaluation nesting exceeds 512"
+
+---- enabled_steps_reach_the_nesting_limit_within_the_required_stack stdout ----
+
+thread 'enabled_steps_reach_the_nesting_limit_within_the_required_stack' (146795234) panicked at tests/evaluation_stack.rs:20:5:
+assertion `left == right` failed: enabled 479
+  left: "complete reason=- states=1 generated=2 work=515"
+ right: "error protocol: Safety evaluation nesting exceeds 512"
+
+---- unread_binder_locals_reach_the_nesting_limit_within_the_required_stack stdout ----
+
+thread 'unread_binder_locals_reach_the_nesting_limit_within_the_required_stack' (146795243) panicked at tests/evaluation_stack.rs:20:5:
+assertion `left == right` failed: bind-run 463
+  left: "complete reason=- states=1 generated=2 work=515"
+ right: "error protocol: Safety evaluation nesting exceeds 512"
+
+
+failures:
+    action_steps_reach_the_nesting_limit_within_the_required_stack
+    enabled_steps_reach_the_nesting_limit_within_the_required_stack
+    temporal_calls_reach_the_nesting_limit_within_the_required_stack
+    unread_binder_locals_reach_the_nesting_limit_within_the_required_stack
+
+test result: FAILED. 9 passed; 4 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `--test evaluation_stack`
