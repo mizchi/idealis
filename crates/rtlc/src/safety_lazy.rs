@@ -12,6 +12,7 @@ struct Snapshot {
     prime: bool,
     frame: Option<Arc<CallFrame>>,
     evaluation_depth: u16,
+    forwarded: u16,
     recursive: bool,
 }
 
@@ -25,6 +26,7 @@ impl Snapshot {
             prime: context.prime,
             frame: context.frame.cloned().map(Arc::new),
             evaluation_depth: context.evaluation_depth,
+            forwarded: context.forwarded,
             recursive: context.recursive,
         }
     }
@@ -38,6 +40,7 @@ impl Snapshot {
             prime: self.prime,
             frame: self.frame.as_deref(),
             evaluation_depth: self.evaluation_depth,
+            forwarded: self.forwarded,
             recursive: self.recursive,
         }
     }
