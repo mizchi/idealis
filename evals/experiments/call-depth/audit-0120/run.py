@@ -81,6 +81,9 @@ def main():
     start = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     load = os.popen("uptime").read().split("load averages:")[-1].strip().replace(",", "")
     started = time.time()
+    def interrupt(signum, frame):
+        raise KeyboardInterrupt
+    signal.signal(signal.SIGTERM, interrupt)
     outcome, code, peak = "ok", None, 0
     if free_gib(env_dir) < floor:
         outcome, code = "disk-floor", 98
@@ -95,6 +98,15 @@ def main():
                     break
                 except subprocess.TimeoutExpired:
                     pass
+                except KeyboardInterrupt:
+                    outcome = "interrupted"
+                    try:
+                        os.killpg(child.pid, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+                    code = child.wait()
+                    sink.write("\n[run.py] killed: interrupted\n")
+                    break
                 rss = tree_rss(child.pid)
                 peak = max(peak, rss)
                 reason = None

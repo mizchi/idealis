@@ -16,7 +16,7 @@ step() {
   name=$1; shift
   idle $name || exit 3
   free=$(df -g / | tail -1 | awk '{print $4}'); echo "free ${free}G before $name"
-  $S/run $name $W "$@"
+  $S/run $name $W "$@" || exit $?
 }
 step s4-check "${U[@]}" just check
 step s4-wasm-test "${U[@]}" just wasm-test

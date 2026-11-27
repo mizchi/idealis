@@ -2,9 +2,13 @@ import sys,json
 def load(p):
     d={}
     for line in open(p):
-        n,t=line.rstrip("\n").split("\t",1); d[n]=t
+        n,t=line.rstrip("\n").split("\t",1)
+        if n in d: sys.exit(f"duplicate cell {n} in {p}")
+        d[n]=t
     return d
 real,obs=load(sys.argv[1]),load(sys.argv[2])
+if real.keys()!=obs.keys():
+    sys.exit(f"cell names differ: only real {sorted(real.keys()-obs.keys())[:10]}, only observation {sorted(obs.keys()-real.keys())[:10]}")
 m=b'"probe":{'
 eq=ne=own=0; bad=[]
 for n,t in obs.items():

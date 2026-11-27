@@ -87,6 +87,15 @@ const side = {
 };
 const expectations = await readExpectations(expectFiles.split(","));
 const names = Object.keys(side.after);
+for (const [label, cases] of Object.entries(side)) {
+  const keys = new Set(Object.keys(cases));
+  const missing = names.filter((name) => !keys.has(name));
+  const extra = [...keys].filter((name) => !names.includes(name));
+  assert.ok(
+    missing.length === 0 && extra.length === 0,
+    `${label} dump differs from after in case names: missing ${missing.join(",")} extra ${extra.join(",")}`,
+  );
+}
 const lines: string[] = [];
 const differences: string[] = [];
 const say = (text: string): void => {

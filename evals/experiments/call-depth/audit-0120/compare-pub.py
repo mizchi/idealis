@@ -14,7 +14,10 @@ def load(side):
         parts = line.rstrip("\n").split("\t")
         if len(parts) != 5 or parts[0] != "PUB":
             continue
-        rows[(parts[1], int(parts[2]))] = (parts[3], parts[4])
+        key = (parts[1], int(parts[2]))
+        if key in rows:
+            sys.exit(f"duplicate call {key} in pub-{side}.tsv")
+        rows[key] = (parts[3], parts[4])
     return rows
 
 lines = []
@@ -22,6 +25,10 @@ bad = 0
 for oracle, real_side in (("oracle", "before"), ("oracle-after", "after")):
     probes, real = load(oracle), load(real_side)
     common = [k for k in probes if k in real]
+    for key in probes:
+        if key not in real:
+            bad += 1
+            lines.append(f"UNMATCHED {oracle} call {key} has no {real_side} call")
     counts = collections.Counter()
     for key in common:
         probe, own = probes[key]

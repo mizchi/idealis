@@ -200,6 +200,7 @@ for (const rule of rules) {
   let firstHit: number | null = null;
   let firstFormerHit: number | null = null;
   const nonMonotone: string[] = [];
+  const unverified: string[] = [];
   for (let size = rule.range[0]; size <= rule.range[1]; size++) {
     const o = get(oracle, rule.cell(size));
     const a = get(oracleAfter, rule.cell(size));
@@ -219,13 +220,15 @@ for (const rule of rules) {
           `${rule.label} ${size} ${label}: declared ${structural} recorded ${peak}`,
         );
     }
-    if ((o.hits ?? 0) === 0) {
+    if (o.hits === null) unverified.push(`oracle ${size}`);
+    else if (o.hits === 0) {
       if (firstFormerHit !== null) nonMonotone.push(`oracle ${size}`);
-      else formerAccepted = size;
+      else if (unverified.length === 0) formerAccepted = size;
     } else firstFormerHit ??= size;
-    if ((a.hits ?? 0) === 0) {
+    if (a.hits === null) unverified.push(`oracle-after ${size}`);
+    else if (a.hits === 0) {
       if (firstHit !== null) nonMonotone.push(`oracle-after ${size}`);
-      else accepted = size;
+      else if (unverified.length === 0) accepted = size;
     } else firstHit ??= size;
   }
   const acceptedPoint = get(oracleAfter, rule.cell(accepted));
@@ -241,10 +244,15 @@ for (const rule of rules) {
     rejectedOutcome: rejectedPoint.outcome,
     rejectedPublished: rejectedPoint.published,
     nonMonotone,
+    unverified,
   };
   if (formerAccepted !== rule.acceptedBefore || accepted !== rule.accepted)
     boundaryMismatch.push(
       `${rule.label}: before ${formerAccepted} (predicted ${rule.acceptedBefore}), after ${accepted} (predicted ${rule.accepted})`,
+    );
+  if (unverified.length > 0)
+    boundaryMismatch.push(
+      `${rule.label}: hit count missing at ${unverified.join(", ")}`,
     );
   if (nonMonotone.length > 0)
     boundaryMismatch.push(

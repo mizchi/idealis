@@ -31,6 +31,7 @@ const rows: string[] = [];
 const mismatches: string[] = [];
 const counts: Record<string, Record<string, number>> = {};
 const unjudged: string[] = [];
+const missing: string[] = [];
 const tally = (side: string, label: string): void => {
   counts[side] ??= {};
   const row = counts[side];
@@ -41,7 +42,10 @@ for (const [name, expected] of Object.entries(tlc)) {
   for (const side of ["before", "after"] as const) {
     for (const path of ["rust-native", "ts-native"] as const) {
       const cell = sides[side]?.[name]?.v2?.[path];
-      if (!cell) continue;
+      if (!cell) {
+        missing.push(`${side} ${path} ${name}`);
+        continue;
+      }
       const outcome = cell.outcome;
       const hits = sides["oracle-after"]?.[name]?.v2?.[path]?.probe?.hits256;
       const { label, agrees } = judge(side, expected, cell, {
@@ -77,6 +81,8 @@ const lines: string[] = [
   ...mismatches.map((row) => `  ${row}`),
   `cases whose agreement is not judged (agrees is null; counted, never left out): ${unjudged.length}`,
   ...unjudged.map((row) => `  ${row}`),
+  `comparison cells missing from the path dumps: ${missing.length}`,
+  ...missing.map((row) => `  ${row}`),
   "",
 ];
 const judged = (side: string): number =>
@@ -104,3 +110,4 @@ writeFileSync(
   { flag: "wx" },
 );
 console.log(lines.join("\n"));
+assert.equal(missing.length, 0, "path dumps lack comparison cells");
