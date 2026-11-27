@@ -1600,7 +1600,7 @@ pub fn moonbit(model: &Model) -> String {
             };
             let decode_held = |value: &str| match mult {
                 Mult::Set | Mult::Some => format!(
-                    "{{\n    let set : Set[{t}] = Set([])\n    for item in items({value}) {{\n      set.add(decode_{c}(item))\n    }}\n    set\n  }}",
+                    "{{\n    let set : Set[{t}] = Set([])\n    for item in items({value}) {{\n      set.insert(decode_{c}(item))\n    }}\n    set\n  }}",
                     t = mbt_type(sort)
                 ),
                 Mult::Lone => format!(
@@ -1644,7 +1644,7 @@ pub fn moonbit(model: &Model) -> String {
                         ),
                         Mult::One => format!("{field}[k] = decode_{c}(raw)"),
                         _ => format!(
-                            "let set : Set[{t}] = Set([])\n    for item in items(raw) {{\n      set.add(decode_{c}(item))\n    }}\n    {field}[k] = set",
+                            "let set : Set[{t}] = Set([])\n    for item in items(raw) {{\n      set.insert(decode_{c}(item))\n    }}\n    {field}[k] = set",
                             t = mbt_type(sort)
                         ),
                     };

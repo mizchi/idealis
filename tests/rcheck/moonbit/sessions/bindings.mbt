@@ -139,7 +139,7 @@ pub fn decode_config(v : Json) -> Config raise DecodeError {
   let admins = {
     let set : Set[User] = Set([])
     for item in items(m["admins"]) {
-      set.add(decode_user(item))
+      set.insert(decode_user(item))
     }
     set
   }
@@ -172,7 +172,7 @@ pub fn decode_state(v : Json) -> State raise DecodeError {
   let active = {
     let set : Set[User] = Set([])
     for item in items(m["active"]) {
-      set.add(decode_user(item))
+      set.insert(decode_user(item))
     }
     set
   }
