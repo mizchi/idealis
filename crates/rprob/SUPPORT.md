@@ -22,7 +22,7 @@ ProB の集合・関係モデルに着想を得た試作。入力は rmodel の�
 - [x] 番号で表した構造値を操作の引数にできる。操作本体を一度だけ変換し、引数の組を宣言順で一件ずつ評価する。引数に依存しない先頭の条件が偽なら試行を省く。有限の経路探索は `--max-arguments` を受け付け、未確定と予算内に得た反例を区別する。時相の問い自体の束縛に使う番号付きの型は対象外。[参照との差分](tests/reference.rs) · [SQLite での補充](../../tests/model-patterns/refill-queue.test.ts)
 - [x] 番号で表した列にも `append`・`tail`・`take`・`removeAt`・`removeAll`・`at`・`len` を適用する。`elements` はビットと番号の両方で使える。最大長を超える一時値の比較と、保存時の `Scope` 違反を区別する。[列の回転と順序の照合](../../tests/model-patterns/rotate-queue.test.ts)
 - [x] 番号で表す値の一時集合では、`elements`、所属・包含・等値、和・差・積集合、多重度、要素数を扱う。`removeAll` に渡すと含まれる値をすべて除く。構造値の集合を状態スロットに直接置く宣言は rmodel の型検査の対象外。[バッチの適用記録](../../examples/model-patterns/crash-recovery/deduplicate-batch.model) · [差分試験](tests/reference.rs)
-- [x] 二項関係 `Key -> one/lone Value` の大きな構造値をキー順の混合基数でまとめる。全行が1ワードに収まる場合に、直積、上書き、`withoutKeys`、差・積集合、照合、単一キーの値と複数キーの一時集合を扱う。同じキーに異なる値を含みうる一般の和は対象外。[ワーカーのチェックポイント](../../examples/model-patterns/crash-recovery/worker-checkpoints.model) · [差分試験](tests/reference.rs)
+- [x] 二項関係 `Key -> one/lone Value` の大きな構造値をキー順の混合基数でまとめる。全行が1ワードに収まる場合に、直積、上書き、`withoutKeys`、差・積集合、照合、単一キーの値と複数キーの一時集合を扱う。同じキーに異なる値を含みうる一般の和は対象外。[ワーカーのチェックポイント](../../examples/model-patterns/crash-recovery/worker-checkpoints.ideal) · [差分試験](tests/reference.rs)
 - [x] `temporal_witness` は `eventually` と `leads_to` の公平な循環を検査する。引数付きの性質、モデル既定と個別指定の公平性、弱・強、操作全体と引数ごとの区別を扱う。空・成立・循環による違反・未確定を区別する。rcheck は得られた循環を参照評価器で再生し、通常の有限探索はグラフを保存しない。[有限グラフのテスト](tests/temporal.rs) · [rtlc との照合](../rcheck/tests/capabilities.rs)
 - [ ] 計算した整数や値の構築を含む一般の二項関係式、範囲外の要素を含む列の演算、最大長を超えうる列をさらに別の値に組み込む一般の式。
 - [x] `rprob::witness` は選んだ状態・遷移・宣言の問いの構成、初期状態、操作と引数、終状態を返す。完了前の経路と全探索での最短経路を区別する。通常の `Compiled::analyze` は親経路を保持しない。[固定・疎表現の再生試験](tests/witness.rs)

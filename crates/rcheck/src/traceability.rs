@@ -1,5 +1,5 @@
+use idealis_spec::{Claim, Rule};
 use rcheck::{Kind, conform, project, questions};
-use rspec::{Claim, Rule};
 use serde::Serialize;
 use serde_json::{Value, json};
 use std::path::Path;
@@ -88,7 +88,7 @@ fn report(
 ) -> Result<(Status, Value), String> {
     let read =
         |path: &str| std::fs::read_to_string(path).map_err(|error| format!("{path}: {error}"));
-    let spec = rspec::from_json(&read(spec_path)?)?;
+    let spec = idealis_spec::from_json(&read(spec_path)?)?;
     let rendered = document.map(read).transpose()?;
     let mut status = Status::Matched;
     let mut rules = Vec::new();

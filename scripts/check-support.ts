@@ -428,7 +428,7 @@ const scopes: readonly CrateScope[] = [
     ],
   },
   {
-    name: "rspec",
+    name: "idealis-spec",
     evidence: [
       {
         path: "src/lib.rs",
@@ -634,6 +634,9 @@ export const sourceView = (root: string, staged: boolean): SourceView => {
       },
     };
   }
+  const deleted = new Set(
+    git(root, ["ls-files", "--deleted", "-z"]).toString().split("\0"),
+  );
   return {
     paths: git(root, [
       "ls-files",
@@ -644,7 +647,7 @@ export const sourceView = (root: string, staged: boolean): SourceView => {
     ])
       .toString()
       .split("\0")
-      .filter(Boolean)
+      .filter((path) => path && !deleted.has(path))
       .sort(),
     read: async (path) => {
       assert.ok(!posix.isAbsolute(path) && !path.split("/").includes(".."));

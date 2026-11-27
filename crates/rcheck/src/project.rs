@@ -76,6 +76,13 @@ pub fn is_manifest(path: &str) -> bool {
     path.ends_with(".rmodel.json")
 }
 
+fn is_model_source(path: &Path) -> bool {
+    matches!(
+        path.extension().and_then(|extension| extension.to_str()),
+        Some("ideal" | "model")
+    )
+}
+
 pub fn load_source(path: &str) -> Result<String, String> {
     let source = read_source(path)?;
     if source
@@ -90,8 +97,13 @@ pub fn load_source(path: &str) -> Result<String, String> {
 
 /// Load source, preserving the original file and position when parsing fails.
 pub fn load_model_source(path: &str) -> Result<(rmodel::Model, String), String> {
+    load_checked_model_source(path).map(|(model, source)| (model.into_model(), source))
+}
+
+/// Load source, including project links, into the validated model boundary.
+pub fn load_checked_model_source(path: &str) -> Result<(rmodel::CheckedModel, String), String> {
     let source = read_source(path)?;
-    let model = source.model(path)?;
+    let model = source.located_model(path)?.model;
     Ok((model, source.text))
 }
 
@@ -107,7 +119,13 @@ pub fn load_public_binding_source(path: &str) -> Result<(rmodel::Model, BTreeSet
 
 pub(crate) fn load_update_branches(
     path: &str,
-) -> Result<(rmodel::LocatedModel, BTreeMap<usize, String>), String> {
+) -> Result<
+    (
+        rmodel::LocatedModel<rmodel::CheckedModel>,
+        BTreeMap<usize, String>,
+    ),
+    String,
+> {
     if path.ends_with(".json") && !is_manifest(path) {
         return Err("branches requires model source or a project manifest".into());
     }
@@ -240,11 +258,14 @@ impl Source {
     }
 
     fn model(&self, path: &str) -> Result<rmodel::Model, String> {
-        Ok(self.located_model(path)?.model)
+        Ok(self.located_model(path)?.model.into_model())
     }
 
-    fn located_model(&self, path: &str) -> Result<rmodel::LocatedModel, String> {
-        let located = rmodel::parse_located(&self.text).map_err(|diagnostic| {
+    fn located_model(
+        &self,
+        path: &str,
+    ) -> Result<rmodel::LocatedModel<rmodel::CheckedModel>, String> {
+        let located = rmodel::parse_located_checked(&self.text).map_err(|diagnostic| {
             let location = diagnostic
                 .offset
                 .map_or_else(|| path.to_owned(), |offset| self.position(offset));
@@ -270,7 +291,10 @@ impl Source {
         Ok(located)
     }
 
-    fn check_ownership(&self, located: &rmodel::LocatedModel) -> Result<(), String> {
+    fn check_ownership(
+        &self,
+        located: &rmodel::LocatedModel<rmodel::CheckedModel>,
+    ) -> Result<(), String> {
         let instances: BTreeMap<_, _> = self
             .fragments
             .iter()
@@ -479,9 +503,9 @@ fn read_source(path: &str) -> Result<Source, String> {
                 }
             }
         }
-        if file.extension().and_then(|extension| extension.to_str()) != Some("model") {
+        if !is_model_source(&file) {
             return Err(format!(
-                "{path}: expected a .model fragment: {}",
+                "{path}: expected an .ideal or .model fragment: {}",
                 file.display()
             ));
         }

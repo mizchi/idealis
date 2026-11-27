@@ -389,6 +389,6 @@ Z3 は `init()` の結果を `createSmtOracle(api)` に渡す。Node では利�
 - `composeModels` は独立操作の interleaving と明示した `both` 操作の直積を探索する。モデル間の境界不変条件を指定できる。assume-guarantee 推論は行わない。
 - TLA+ アダプターは成功時に witness を捏造しない。lasso の反例は有限オラクルへ変換せず、元の検査結果を残す。型や整数意味論を Z3 と自動で一致させる変換は含まない。
 
-[設計](docs/architecture.md)、[テスト手法の調査](docs/testing-research.md)、[検証記録](docs/validation.md) を参照。
+[Idealis 言語の設計](docs/language-architecture.md)、[実装照合の設計](docs/architecture.md)、[テスト手法の調査](docs/testing-research.md)、[検証記録](docs/validation.md) を参照。
 
 再帰actionの呼出しは引数ごとに複製していた親frameを共有する。初期実装とのCriterion比較では、複数引数の準備済みcheckが1,036.8 µsから808.6 µsへ短縮した（約1.28倍）。捕捉変数の2ケースは約17〜19%短縮し、単一引数と分岐の準備済みcheckはほぼ同等だった。[対応範囲](docs/recursive-actions.md)と[測定条件・全結果](evals/iterations/0071-recursive-actions.md)を参照。TLCに対する速度比ではない。

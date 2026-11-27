@@ -1,6 +1,6 @@
 #[test]
 fn the_self_spec_links_revision_provenance_to_adoption() {
-    let spec = rspec::from_json(include_str!("../../../spec/rmodel-design.json")).unwrap();
+    let spec = idealis_spec::from_json(include_str!("../../../spec/rmodel-design.json")).unwrap();
     let rule = spec
         .rules
         .iter()
@@ -11,7 +11,7 @@ fn the_self_spec_links_revision_provenance_to_adoption() {
     );
 }
 
-use rspec::{
+use idealis_spec::{
     AdoptionBlocker::*, EvaluationRevision, Evidence, GoalMeasurement, SemanticComparison,
 };
 use serde_json::{Value, json};
@@ -22,9 +22,9 @@ const ROOT: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
 const RULE: &str = "RMODEL-EVIDENCE-PROVENANCE";
 const MODEL: &str = "spec/models/evidence-adoption.model";
 
-fn report(spec: &Value, root: &Path, budget: usize) -> rspec::ClauseReport {
-    let spec = rspec::from_json(&spec.to_string()).unwrap();
-    rspec::clause_report(&spec, root, RULE, budget).unwrap()
+fn report(spec: &Value, root: &Path, budget: usize) -> idealis_spec::ClauseReport {
+    let spec = idealis_spec::from_json(&spec.to_string()).unwrap();
+    idealis_spec::clause_report(&spec, root, RULE, budget).unwrap()
 }
 
 fn evidence<T>(revision: &EvaluationRevision, outcome: T) -> Evidence<T> {
@@ -58,7 +58,7 @@ fn a_late_result_cannot_authorize_the_current_candidate() {
     let good_goal = evidence(&current, GoalMeasurement::Improved);
     let fresh_comparison = evidence(&current, SemanticComparison::Equivalent);
     assert_eq!(
-        rspec::assess_adoption(
+        idealis_spec::assess_adoption(
             &current,
             &evidence(&current, &unreviewed),
             &fresh_comparison,
@@ -86,7 +86,7 @@ fn a_late_result_cannot_authorize_the_current_candidate() {
     let review = evidence(&current, &approved);
     let stale_agreement = evidence(&old_candidate, SemanticComparison::Equivalent);
     assert_eq!(
-        rspec::assess_adoption(&current, &review, &stale_agreement, &good_goal),
+        idealis_spec::assess_adoption(&current, &review, &stale_agreement, &good_goal),
         Err(vec![ComparisonFromOtherRevision])
     );
     for status in [
@@ -96,12 +96,17 @@ fn a_late_result_cannot_authorize_the_current_candidate() {
         SemanticComparison::Missing,
     ] {
         assert_eq!(
-            rspec::assess_adoption(&current, &review, &evidence(&current, status), &good_goal),
+            idealis_spec::assess_adoption(
+                &current,
+                &review,
+                &evidence(&current, status),
+                &good_goal
+            ),
             Err(vec![ComparisonNotEquivalent])
         );
     }
     assert_eq!(
-        rspec::assess_adoption(
+        idealis_spec::assess_adoption(
             &current,
             &review,
             &fresh_comparison,
@@ -110,7 +115,7 @@ fn a_late_result_cannot_authorize_the_current_candidate() {
         Err(vec![GoalNotImproved])
     );
     assert_eq!(
-        rspec::assess_adoption(
+        idealis_spec::assess_adoption(
             &current,
             &evidence(&old_candidate, &approved),
             &fresh_comparison,
@@ -119,7 +124,7 @@ fn a_late_result_cannot_authorize_the_current_candidate() {
         Err(vec![ReviewFromOtherRevision, GoalFromOtherRevision])
     );
     assert_eq!(
-        rspec::assess_adoption(&current, &review, &fresh_comparison, &good_goal),
+        idealis_spec::assess_adoption(&current, &review, &fresh_comparison, &good_goal),
         Ok(())
     );
 
@@ -127,7 +132,7 @@ fn a_late_result_cannot_authorize_the_current_candidate() {
 
     let limited = report(&spec, &isolated.0, 0);
     assert_eq!(
-        rspec::assess_adoption(
+        idealis_spec::assess_adoption(
             &current,
             &evidence(&current, &limited),
             &fresh_comparison,
@@ -149,7 +154,7 @@ fn a_late_result_cannot_authorize_the_current_candidate() {
     let edited = EvaluationRevision::for_report("candidate-2", &edited_report);
     assert_ne!(edited, current);
     assert_eq!(
-        rspec::assess_adoption(&edited, &review, &fresh_comparison, &good_goal),
+        idealis_spec::assess_adoption(&edited, &review, &fresh_comparison, &good_goal),
         Err(vec![
             ReviewFromOtherRevision,
             ComparisonFromOtherRevision,
@@ -158,7 +163,7 @@ fn a_late_result_cannot_authorize_the_current_candidate() {
     );
     // Relabelling a clause report cannot make its source revision current.
     assert_eq!(
-        rspec::assess_adoption(
+        idealis_spec::assess_adoption(
             &edited,
             &evidence(&edited, &approved),
             &evidence(&edited, SemanticComparison::Equivalent),
@@ -170,8 +175,8 @@ fn a_late_result_cannot_authorize_the_current_candidate() {
 
 fn finite_model_agrees_with_the_gate(
     source: &str,
-    approved: &rspec::ClauseReport,
-    unreviewed: &rspec::ClauseReport,
+    approved: &idealis_spec::ClauseReport,
+    unreviewed: &idealis_spec::ClauseReport,
 ) {
     use rmodel::reference::{Data, Machine, Next, Snapshot};
 
@@ -251,7 +256,7 @@ fn finite_model_agrees_with_the_gate(
                             GoalMeasurement::Unmeasured
                         },
                     );
-                    let actual = rspec::assess_adoption(
+                    let actual = idealis_spec::assess_adoption(
                         &current_key,
                         &review_evidence,
                         &comparison_evidence,

@@ -1,6 +1,6 @@
 # rmodel の corpus の語彙と rule
 
-<!-- Generated from fixtures/rmodel/spec.pkl by rspec (plan 0092). Do not edit. -->
+<!-- Generated from fixtures/rmodel/spec.pkl by idealis-spec (plan 0092). Do not edit. -->
 
 ## もの
 

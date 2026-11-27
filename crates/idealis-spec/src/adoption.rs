@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 /// Pin this when scheduling a comparison or measurement. The candidate
 /// identifies the implementation artifact, independently of the model and
-/// requirement revision supplied by rspec.
+/// requirement revision supplied by idealis-spec.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct EvaluationRevision {
     pub candidate: String,

@@ -203,9 +203,9 @@ pub fn generate(path: &str) -> Result<BranchMap, String> {
 pub(super) fn load(
     path: &str,
     branch_map: Option<&str>,
-) -> Result<(Model, Option<Locations>), String> {
+) -> Result<(rmodel::CheckedModel, Option<Locations>), String> {
     if path.ends_with(".json") && !project::is_manifest(path) {
-        let (model, omitted) = ir::parse(&project::load_source(path)?)?;
+        let (model, omitted) = ir::parse_checked(&project::load_source(path)?)?;
         if !omitted.is_empty() {
             return Err(
                 "branch diagnostics require a complete model; the IR has adapter omissions".into(),

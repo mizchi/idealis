@@ -5,6 +5,7 @@ import {
   mkdtemp,
   readdir,
   readFile,
+  rename,
   rm,
   writeFile,
 } from "node:fs/promises";
@@ -94,6 +95,17 @@ test("a real index is authoritative over unstaged checklist edits", async () => 
       /supported checklist/,
     );
     await checkSupport(sourceView(root, false), ["demo"]);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("working-tree inventory follows an unstaged crate move", async () => {
+  const root = await fixture();
+  try {
+    await rename(join(root, "crates/demo"), join(root, "crates/renamed"));
+    await checkSupport(sourceView(root, true), ["demo"]);
+    await checkSupport(sourceView(root, false), ["renamed"]);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

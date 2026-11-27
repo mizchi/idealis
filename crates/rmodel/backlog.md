@@ -66,7 +66,7 @@ rprob で単項の整数集合と任意値も照合した。再訪では実ブ�
 | 2（確認済み） | 部品のインターフェースと単体型検査 | 宣言外の読み取りを拒否し、公開用の型を生成できる。部品を単体で型検査し、接続時に共有する型断片とポートの型・多重度を確認する。[東西の配信](../../examples/model-patterns/offline-merge/two-stores/README.md)                                                           |
 | 3（確認済み） | 配布パターンと ITF の照合          | 別プロジェクトで同梱モデルと環境別のアダプターを読み込み、観測を保存して最初の差分を再照合する。[接続例](../../examples/model-patterns/README.md#自分の環境につなぐ)                                                                                                   |
 | 4             | モデル全体の到達性と診断           | 分岐マップ付きの IR で同じ診断を再現できる。意図した到達不能は `expect unreachable` で理由を記録し、到達したら CI で検出する。[到達性レビュー](review.md#到達不能な分岐と使いにくい入口)                                                                               |
-| 5             | 自然言語の規則と反例をリンクする   | `rcheck traceability` で相互に引ける。規則本文と Markdown の差、モデルの判定違いを区別する。文章と命題の意味の対応は rspec のレビューで扱う。[規則を引く](../rcheck/README.md#follow-a-rule-to-its-checks-and-back)                                                    |
+| 5             | 自然言語の規則と反例をリンクする   | `rcheck traceability` で相互に引ける。規則本文と Markdown の差、モデルの判定違いを区別する。文章と命題の意味の対応は idealis-spec のレビューで扱う。[規則を引く](../rcheck/README.md#follow-a-rule-to-its-checks-and-back)                                             |
 | 6             | 部品の動作契約                     | 合成先と入力環境から仮定・保証・到達条件を調べられる。型が合う書き手の故障と入力の欠落を区別した。別の環境を含む一般的な保証の合成は今後評価する。[東西の配信](../../examples/model-patterns/offline-merge/two-stores/README.md)                                       |
 | 7             | IR の互換性と外部検査器            | 旧 IR と有限経路、時相反例の閉路・進行性・公平性を照合できる。元ソースの更新分岐は独立した分岐マップで扱う。[外部検査器](../rcheck/README.md#exchange-evidence-with-an-external-checker) · [分岐マップ](../rcheck/README.md#carry-branch-diagnostics-alongside-the-ir) |
 

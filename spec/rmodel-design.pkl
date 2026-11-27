@@ -362,13 +362,13 @@ spec: s.Spec = new {
     }
     new {
       model = checkerComparison
-      implementation = s.code("crates/rspec/src/comparison.rs", "compare_receipts")
-      test = s.code("crates/rspec/tests/comparison.rs", "real_checker_results_feed_adoption")
+      implementation = s.code("crates/idealis-spec/src/comparison.rs", "compare_receipts")
+      test = s.code("crates/idealis-spec/tests/comparison.rs", "real_checker_results_feed_adoption")
     }
     new {
       model = evidenceAdoption
-      implementation = s.code("crates/rspec/src/adoption.rs", "assess_adoption")
-      test = s.code("crates/rspec/tests/adoption.rs", "a_late_result_cannot_authorize_the_current_candidate")
+      implementation = s.code("crates/idealis-spec/src/adoption.rs", "assess_adoption")
+      test = s.code("crates/idealis-spec/tests/adoption.rs", "a_late_result_cannot_authorize_the_current_candidate")
     }
     new {
       model = behavior

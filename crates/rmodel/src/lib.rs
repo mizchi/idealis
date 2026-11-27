@@ -82,14 +82,32 @@ pub fn parse(source: &str) -> Result<Model, Error> {
     parse_diagnostic(source).map_err(|diagnostic| diagnostic.error)
 }
 
+/// A model whose declarations and expressions have passed type checking.
+#[derive(Clone, Debug)]
+pub struct CheckedModel(Model);
+
+impl CheckedModel {
+    pub fn into_model(self) -> Model {
+        self.0
+    }
+}
+
+impl std::ops::Deref for CheckedModel {
+    type Target = Model;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 /// Parses and checks a model, retaining the source location of an error when available.
 pub fn parse_diagnostic(source: &str) -> Result<Model, ParseDiagnostic> {
     syntax::parse(source, false).map(|located| located.model)
 }
 
 /// A checked model with source offsets in characters.
-pub struct LocatedModel {
-    pub model: Model,
+pub struct LocatedModel<M = Model> {
+    pub model: M,
     pub declarations: std::collections::BTreeMap<String, usize>,
     /// Mutable state read by each declaration, including expanded derived expressions.
     pub state_reads: std::collections::BTreeMap<usize, std::collections::BTreeSet<String>>,
@@ -167,6 +185,22 @@ pub fn parse_located(source: &str) -> Result<LocatedModel, ParseDiagnostic> {
     syntax::parse(source, true)
 }
 
+/// Retain locations and the type-checking boundary for a source model.
+pub fn parse_located_checked(source: &str) -> Result<LocatedModel<CheckedModel>, ParseDiagnostic> {
+    let LocatedModel {
+        model,
+        declarations,
+        state_reads,
+        update_branches,
+    } = parse_located(source)?;
+    Ok(LocatedModel {
+        model: CheckedModel(model),
+        declarations,
+        state_reads,
+        update_branches,
+    })
+}
+
 /// The byte spans of unquoted `@name` references in component source.
 pub fn component_slots(
     source: &str,
@@ -179,4 +213,9 @@ pub fn component_slots(
 /// checkers (arithmetic rewritten, Bool added when mentioned).
 pub fn validate(model: Model) -> Result<Model, Error> {
     syntax::validate(model)
+}
+
+/// Check a model constructed outside the source parser.
+pub fn validate_checked(model: Model) -> Result<CheckedModel, Error> {
+    validate(model).map(CheckedModel)
 }

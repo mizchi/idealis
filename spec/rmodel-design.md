@@ -1,6 +1,6 @@
 # rmodel の文法設計仕様
 
-<!-- Generated from spec/rmodel-design.pkl by rspec (plan 0092). Do not edit. -->
+<!-- Generated from spec/rmodel-design.pkl by idealis-spec (plan 0092). Do not edit. -->
 
 ## 文法変更と遷移
 
@@ -335,8 +335,8 @@
 ## 実装の照合
 
 - `evals/experiments/rprob/goal.py` の `score` を、`evals/experiments/rprob/test_goal.py` の `test_measurement_is_bound_to_pinned_inputs` がモデル `spec/models/measurement-gate.model` と照合する
-- `crates/rspec/src/comparison.rs` の `compare_receipts` を、`crates/rspec/tests/comparison.rs` の `real_checker_results_feed_adoption` がモデル `spec/models/checker-comparison.model` と照合する
-- `crates/rspec/src/adoption.rs` の `assess_adoption` を、`crates/rspec/tests/adoption.rs` の `a_late_result_cannot_authorize_the_current_candidate` がモデル `spec/models/evidence-adoption.model` と照合する
+- `crates/idealis-spec/src/comparison.rs` の `compare_receipts` を、`crates/idealis-spec/tests/comparison.rs` の `real_checker_results_feed_adoption` がモデル `spec/models/checker-comparison.model` と照合する
+- `crates/idealis-spec/src/adoption.rs` の `assess_adoption` を、`crates/idealis-spec/tests/adoption.rs` の `a_late_result_cannot_authorize_the_current_candidate` がモデル `spec/models/evidence-adoption.model` と照合する
 - `crates/rmodel/src/syntax.rs` の `action` を、`crates/rmodel/tests/behavior.rs` の `behavior_has_the_same_guard_parallel_updates_and_frame_as_action` がモデル `spec/models/rmodel-behavior.model` と照合する
 - `crates/rmodel/src/reference.rs` の `steps` を、`crates/rmodel/tests/calibration.rs` の `the_next_revision_must_collect_new_evidence` がモデル `spec/models/rmodel-calibration.model` と照合する
 

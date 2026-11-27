@@ -100,7 +100,7 @@ rcheck traceability spec/rmodel-design.json \
   --document spec/rmodel-design.md
 ```
 
-Pass an rspec JSON module with a `spec` property, as produced by
+Pass an idealis-spec JSON module with a `spec` property, as produced by
 `pkl eval -f json`. A handwritten module can omit lists whose Pkl default
 is empty. `--rule` runs the rule's claims and linked clauses. `--check`
 finds claims by their exact model path and check name in the specification.
@@ -114,7 +114,7 @@ Exit 0 indicates that every selected claim matched. Exit 1 means a definite
 mismatch. Exit 2 reports an invalid input or link. Exit 3 means the rule or check
 has no link, or a search was inconclusive. `--max-states` sets a budget per
 claim. The result tracks correspondence to named checks and the current model
-verdict. Use the rspec review workflow to assess whether a natural-language
+verdict. Use the idealis-spec review workflow to assess whether a natural-language
 sentence and its formal check express the same requirement.
 
 ## Check an expected verdict in CI
@@ -589,7 +589,8 @@ The [runtime model patterns](../../examples/model-patterns/README.md) show how t
 ## Split sources and boundary properties
 
 A `*.rmodel.json` file lists ordered `fragments`, for example
-`{"fragments":["domain.model","withdrawal.model"]}`. Paths are relative
+`{"fragments":["domain.ideal","withdrawal.ideal"]}`. Both `.ideal` and
+`.model` fragments are accepted. Paths are relative
 to the manifest. The fragments are parsed together with one model name and
 one namespace. This is an input format for rcheck, with the usual rmodel
 syntax in each fragment. See the [withdrawal](../../fixtures/rcheck/linked/withdrawal/project.rmodel.json)

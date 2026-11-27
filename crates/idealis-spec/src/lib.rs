@@ -383,7 +383,7 @@ pub fn links(spec: &Spec, root: &Path) -> Vec<Problem> {
 /// The Japanese glossary and rules as Markdown: what jev-lint reads.
 pub fn render(spec: &Spec, source: &str) -> String {
     let mut out = format!(
-        "# {}\n\n<!-- Generated from {source} by rspec (plan 0092). Do not edit. -->\n",
+        "# {}\n\n<!-- Generated from {source} by idealis-spec (plan 0092). Do not edit. -->\n",
         spec.name.ja
     );
     for group in &spec.groups {

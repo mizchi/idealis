@@ -85,13 +85,13 @@ variant はタグに対応する一つの値を持ち、複数項目は record �
 
 出荷と再試行を二人の代理読み手が読み、どちらの表記も6問中6問正解した。差が出なかったため、明示表記は試作のままとする。[評価 0117](../../evals/iterations/0117-transition-readability.md)
 
-発送の仕様から `ShippedStays` を参照するときは rspec の既存の要件 ID と claim を使う。同じ操作列を各言語で比べるため、期待状態は rmodel の参照評価器から ITF に取り出し、生成したインターフェースを実装した各言語の観測と照合する。要件 ID とトレース形式は既存の仕様とテストの層に置く。[評価 0118](../../evals/iterations/0118-shipment-drift-and-replay.md)
+発送の仕様から `ShippedStays` を参照するときは idealis-spec の既存の要件 ID と claim を使う。同じ操作列を各言語で比べるため、期待状態は rmodel の参照評価器から ITF に取り出し、生成したインターフェースを実装した各言語の観測と照合する。要件 ID とトレース形式は既存の仕様とテストの層に置く。[評価 0118](../../evals/iterations/0118-shipment-drift-and-replay.md)
 
 ## 自然文の節に遷移の検査とレビューを結ぶ
 
 要件全体の参照だけ、要件全体の版を持つ、節ごとに式と版を持つ、の三案を発送で比較した。式が成立しても追跡方法の節が式から消える例があり、節の参照があればどこが未検査かを表示できる。モデルの振る舞いが変わった場合は検査結果を失効させ、自然文と式の対応レビューは対象の組で判定する。確認操作のガードを強める修正は、追跡方法の維持を成立させても、配送方法ごとの確認済み状態への到達を失う場合があった。節ごとの形は試作として扱う。[評価 0119](../../evals/iterations/0119-requirement-links.md)
 
-0120 では節ごとの版を rspec 側に置いた。節は rmodel の名前付きの検査を参照し、CLI は現在のモデル判定と対応レビューの版を出す。発送の確認操作を残すために、状態を維持する性質と配送方法ごとの到達を別の検査にした。 [評価 0120](../../evals/iterations/0120-reviewed-clauses.md)
+0120 では節ごとの版を idealis-spec 側に置いた。節は rmodel の名前付きの検査を参照し、CLI は現在のモデル判定と対応レビューの版を出す。発送の確認操作を残すために、状態を維持する性質と配送方法ごとの到達を別の検査にした。 [評価 0120](../../evals/iterations/0120-reviewed-clauses.md)
 
 ## 同じ値が保たれることを `unchanged` で書く
 
@@ -1405,7 +1405,7 @@ idealis 自身の `spec/models` の7入力も同じ状態上限で全探索し�
 
 ## 規則 ID とモデルの検査を相互に引く
 
-Pkl の rspec が持つ規則と `claim` を使い、`rcheck traceability` で規則 ID からモデルの検査を、モデルパスと検査名から規則や節を引く。規則の本文を二重に持たず、レンダリング済み Markdown の位置が必要なら `--document` で現在の本文と照合する。モデル側の期待と実際の判定は既存の `witness` から取得する。文章と命題の意味の対応は rspec のレビューで扱う。
+Pkl の idealis-spec が持つ規則と `claim` を使い、`rcheck traceability` で規則 ID からモデルの検査を、モデルパスと検査名から規則や節を引く。規則の本文を二重に持たず、レンダリング済み Markdown の位置が必要なら `--document` で現在の本文と照合する。モデル側の期待と実際の判定は既存の `witness` から取得する。文章と命題の意味の対応は idealis-spec のレビューで扱う。
 
 受領済みの検査結果を上書きできるようにした人工故障では、2手で `ReceivedResultStays` が破れた。検査から `RMODEL-RECEIPT-IMMUTABILITY` に戻り、同じ経路を `validate` に渡すと最後の上書きを拒否した。本文だけ変えた Markdown、リンクなし、状態予算切れ、発送規則の節単位のリンクも確認した。[使い方](../rcheck/README.md#follow-a-rule-to-its-checks-and-back) · [回帰試験](../rcheck/tests/traceability.rs)
 
@@ -1969,6 +1969,6 @@ rmodel の構造値を保持する宣言は `one` と `lone` を使う。この�
 
 `Worker -> lone Checkpoint` に各ワーカーのキューと再試行回数を保存する。rprob はキーの宣言順に値番号を並べ、空の行を0として混合基数でまとめる。1ワードに収まる範囲で、`worker.saved` による参照、`++` による上書き、`withoutKeys(saved, worker)` による削除を扱う。複数キーを選ぶ場合は値の一時集合を得る。全行に値を要求する `one` で行を削除すると宣言違反になる。
 
-二人分を保存する最短経路は2手。削除対象を全ワーカーに広げると3手目で他方の行を失う。参照検査器と rprob の判定・経路を照合した。競合する行を持ちうる一般の和と、全行が1ワードに収まらない場合は、格納表現を広げる際の設計課題に残した。[モデル](../../examples/model-patterns/crash-recovery/worker-checkpoints.model) · [差分試験](../rprob/tests/reference.rs)
+二人分を保存する最短経路は2手。削除対象を全ワーカーに広げると3手目で他方の行を失う。参照検査器と rprob の判定・経路を照合した。競合する行を持ちうる一般の和と、全行が1ワードに収まらない場合は、格納表現を広げる際の設計課題に残した。[モデル](../../examples/model-patterns/crash-recovery/worker-checkpoints.ideal) · [差分試験](../rprob/tests/reference.rs)
 
 生成 IR からの rprob の経路は、ソースから得た参照の経路と JSON が一致した。SQLite の削除をキーで絞ると他方のチェックポイントは残り、削除条件を外すと3手目で差分が出た。保存した ITF からも再現した。[SQLite の実行試験](../../tests/model-patterns/worker-checkpoints.test.ts)

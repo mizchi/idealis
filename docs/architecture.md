@@ -2,6 +2,8 @@
 
 ここでは現在のModel/Driverと、TS参照モデルの境界を説明する。Z3/TLA+の相互運用、TS・Rust・Goの接続、埋め込みinvariantの計画は[目指す開発](vision.md)を参照。
 
+`.ideal` の言語、DDD の規則、バックエンドの責務と移行は [Idealis 言語の設計](language-architecture.md) を参照。
+
 モデルと実装を結ぶ共通境界は「操作」「観測」「トレース」。ソルバーがテストランナーを呼ぶ構造を避け、どの環境でも同じ比較処理を使う。
 
 ```mermaid

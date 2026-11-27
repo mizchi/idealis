@@ -18,7 +18,7 @@
 
 [0121: 有限集合モデルの探索カーネル](iterations/0121-rprob-kernel.md)は、rprob のビット集合による探索を参照評価器と照合し、時間とメモリを比較した。
 
-[0120: 要件の節を名前付きの検査へ結ぶ](iterations/0120-reviewed-clauses.md)は、rspec の節とレビュー版を発送のモデルに接続し、CLI で検査と対応の変更を報告する。
+[0120: 要件の節を名前付きの検査へ結ぶ](iterations/0120-reviewed-clauses.md)は、idealis-spec の節とレビュー版を発送のモデルに接続し、CLI で検査と対応の変更を報告する。
 
 [0119: 自然文と遷移の対応を追う](iterations/0119-requirement-links.md)は、Event-B の事例から三つのリンク構造を試し、代理読み手の評価と動作を消す修正の対照を行った。
 
@@ -38,7 +38,7 @@
 
 [0112: 条件と更新の読み取り](iterations/0112-rmodel-readability.md)は、同じ三題材の `action` と `behavior` を比較した。rmodel の意味は一致し、代理読み手の正答は26/27と27/27だった。
 
-[0111: 自然言語の仕様から文法の検査を回す](iterations/0111-rmodel-spec-drift.md)は、rmodel の規則と検査を rspec と Jev につなぎ、`behavior` で最初の一周を回した。
+[0111: 自然言語の仕様から文法の検査を回す](iterations/0111-rmodel-spec-drift.md)は、rmodel の規則と検査を idealis-spec と Jev につなぎ、`behavior` で最初の一周を回した。
 
 [0110: 候補の追加と絞り込み](iterations/0110-more-candidates.md)は、Souther・Koine・Context Mapper・FizzBee・P を加えて12候補を比較した。追加候補では Souther と FizzBee が次の比較に残った。読みやすさは Haiku の週次上限により未測定。
 

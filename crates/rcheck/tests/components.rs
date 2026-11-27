@@ -61,6 +61,45 @@ fn component_types_can_be_checked_without_a_host() {
 }
 
 #[test]
+fn ideal_sources_work_as_component_and_project_fragments() {
+    let directory = std::env::temp_dir().join(format!("rcheck-ideal-{}", std::process::id()));
+    std::fs::create_dir_all(&directory).unwrap();
+    for name in ["request-types", "receipt-interface", "delivery"] {
+        std::fs::copy(
+            example().join(format!("{name}.model")),
+            directory.join(format!("{name}.ideal")),
+        )
+        .unwrap();
+    }
+    let component = directory.join("delivery.component.json");
+    let input = std::fs::read_to_string(example().join("delivery.component.json")).unwrap();
+    std::fs::write(&component, input.replace(".model\"", ".ideal\"")).unwrap();
+    let typed = report(&["component", component.to_str().unwrap()]);
+    assert_eq!(typed["status"], "typed");
+
+    std::fs::write(
+        directory.join("host.ideal"),
+        "model Host\nvar inbox: Request -> lone Nat\nscope Int = 0..2, steps = 4",
+    )
+    .unwrap();
+    let project = directory.join("host.rmodel.json");
+    std::fs::write(
+        &project,
+        json!({"fragments": [
+            "host.ideal", "request-types.ideal",
+            {"component":"delivery.component.json", "namespace":"subscriber", "ports":{"receipt":"inbox"}}
+        ]})
+        .to_string(),
+    )
+    .unwrap();
+    assert_eq!(
+        report(&[project.to_str().unwrap()])[0]["answers"][0]["verdict"],
+        "holds"
+    );
+    std::fs::remove_dir_all(directory).unwrap();
+}
+
+#[test]
 fn project_link_checks_the_declared_port_shape_and_shared_types() {
     let directory = std::env::temp_dir().join(format!("rcheck-component-{}", std::process::id()));
     std::fs::create_dir_all(&directory).unwrap();

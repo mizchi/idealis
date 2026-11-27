@@ -431,13 +431,13 @@ fn enforce_expectation(report: &rcheck::Report, name: &str, expected: Verdict) {
     }
 }
 
-fn load_model(path: &str) -> (rmodel::Model, Vec<rcheck::ir::Omitted>) {
+fn load_model(path: &str) -> (rmodel::CheckedModel, Vec<rcheck::ir::Omitted>) {
     if path.ends_with(".json") && !rcheck::project::is_manifest(path) {
         let source = rcheck::project::load_source(path).unwrap_or_else(|error| fail(&error));
-        rcheck::ir::parse(&source).unwrap_or_else(|error| fail(&error))
+        rcheck::ir::parse_checked(&source).unwrap_or_else(|error| fail(&error))
     } else {
         let (model, _) =
-            rcheck::project::load_model_source(path).unwrap_or_else(|error| fail(&error));
+            rcheck::project::load_checked_model_source(path).unwrap_or_else(|error| fail(&error));
         (model, Vec::new())
     }
 }
@@ -689,7 +689,8 @@ const USAGE: &str = "Usage:
   rcheck traceability <spec.json> (--rule ID | --check MODEL CHECK)
          [--root DIR] [--document PATH] [--max-states N]
 
-Model inputs: .model source, .rmodel.json project, or JSON IR (except for generate).
+Model inputs: .ideal source (.model also accepted), .rmodel.json project,
+              or JSON IR (except for generate).
 Generation targets: rust, typescript, go, moonbit, ir, schema, states, glossary,
                     pbt-cases, pbt-typescript, pbt-go, branch-map";
 

@@ -32,21 +32,21 @@ fn shipment_names_its_four_clause_checks() {
             "ConfirmPost"
         ]
     );
-    let spec = rspec::from_json(SPEC).unwrap();
-    assert!(rspec::links(&spec, Path::new(ROOT)).is_empty());
+    let spec = idealis_spec::from_json(SPEC).unwrap();
+    assert!(idealis_spec::links(&spec, Path::new(ROOT)).is_empty());
 }
 
 const MODEL: &str = "fixtures/rcheck/structured/shipped-transition.model";
 const RULE: &str = "SHIPMENT-TRACKING";
 
-fn report(source: &Value, root: &Path, budget: usize) -> rspec::ClauseReport {
-    let spec = rspec::from_json(&source.to_string()).unwrap();
-    rspec::clause_report(&spec, root, RULE, budget).unwrap()
+fn report(source: &Value, root: &Path, budget: usize) -> idealis_spec::ClauseReport {
+    let spec = idealis_spec::from_json(&source.to_string()).unwrap();
+    idealis_spec::clause_report(&spec, root, RULE, budget).unwrap()
 }
 
 #[test]
 fn reviews_follow_the_clause_and_model_checks_follow_the_current_behavior() {
-    use rspec::{LinkStatus, ReviewStatus};
+    use idealis_spec::{LinkStatus, ReviewStatus};
     use serde_json::json;
 
     let root = Path::new(ROOT);

@@ -53,15 +53,15 @@ pub fn drift_manifest(root: &Path) -> serde_json::Value {
         .filter(|path| root.join(path).is_file())
         .collect();
     documents.sort();
-    let specs: Vec<(String, rspec::Spec)> = SPECS
+    let specs: Vec<(String, idealis_spec::Spec)> = SPECS
         .iter()
         .map(|(_, json, markdown, _)| {
-            let spec =
-                rspec::from_json(&std::fs::read_to_string(root.join(json)).unwrap()).unwrap();
+            let spec = idealis_spec::from_json(&std::fs::read_to_string(root.join(json)).unwrap())
+                .unwrap();
             (markdown.to_string(), spec)
         })
         .collect();
-    rspec::documents_manifest(&rspec::Drift {
+    idealis_spec::documents_manifest(&idealis_spec::Drift {
         glossary: "docs/glossary.md",
         documents,
         rules: specs
@@ -123,8 +123,8 @@ fn main() {
             String::from_utf8_lossy(&output.stderr)
         );
         let evaluated = String::from_utf8(output.stdout).unwrap();
-        let spec = rspec::from_json(&evaluated).unwrap();
-        let rendered = rspec::render(&spec, pkl);
+        let spec = idealis_spec::from_json(&evaluated).unwrap();
+        let rendered = idealis_spec::render(&spec, pkl);
         if write {
             std::fs::write(root.join(json), &evaluated).unwrap();
             std::fs::write(root.join(markdown), &rendered).unwrap();
@@ -136,7 +136,7 @@ fn main() {
                 }
             }
         }
-        let problems = rspec::links(&spec, root);
+        let problems = idealis_spec::links(&spec, root);
         if !problems.is_empty() {
             for problem in &problems {
                 eprintln!("{} {pkl}: {}", problem.check, problem.message);
@@ -189,8 +189,9 @@ fn main() {
 }
 
 fn design_drift_manifest(root: &Path) -> serde_json::Value {
-    let spec = rspec::from_json(&std::fs::read_to_string(root.join(DESIGN_JSON)).unwrap()).unwrap();
-    rspec::documents_manifest(&rspec::Drift {
+    let spec =
+        idealis_spec::from_json(&std::fs::read_to_string(root.join(DESIGN_JSON)).unwrap()).unwrap();
+    idealis_spec::documents_manifest(&idealis_spec::Drift {
         glossary: DESIGN_MARKDOWN,
         documents: vec![],
         rules: vec![(DESIGN_MARKDOWN, &spec)],

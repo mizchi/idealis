@@ -24,8 +24,8 @@ fn load(path: &str) -> Value {
     serde_json::from_str(&std::fs::read_to_string(root().join(path)).unwrap()).unwrap()
 }
 fn problems(value: &Value) -> Vec<(String, String)> {
-    let spec = rspec::from_json(&value.to_string()).unwrap();
-    rspec::links(&spec, root())
+    let spec = idealis_spec::from_json(&value.to_string()).unwrap();
+    idealis_spec::links(&spec, root())
         .into_iter()
         .map(|problem| (problem.check.to_owned(), problem.message))
         .collect()
@@ -36,9 +36,9 @@ fn committed_specifications_link_and_render() {
     for (pkl, json, markdown) in SPECS {
         let value = load(json);
         assert_eq!(problems(&value), vec![], "{json}");
-        let spec = rspec::from_json(&value.to_string()).unwrap();
+        let spec = idealis_spec::from_json(&value.to_string()).unwrap();
         assert_eq!(
-            rspec::render(&spec, pkl),
+            idealis_spec::render(&spec, pkl),
             std::fs::read_to_string(root().join(markdown)).unwrap(),
             "{markdown} is stale; run just spec-write"
         );
@@ -208,9 +208,9 @@ fn broken_groundings_are_reported() {
 fn stale_markdown_is_detected() {
     let mut value = load("fixtures/rmodel/spec.json");
     value["spec"]["rules"][0]["text"]["ja"] = json!("書き換えた文");
-    let spec = rspec::from_json(&value.to_string()).unwrap();
+    let spec = idealis_spec::from_json(&value.to_string()).unwrap();
     assert_ne!(
-        rspec::render(&spec, "fixtures/rmodel/spec.pkl"),
+        idealis_spec::render(&spec, "fixtures/rmodel/spec.pkl"),
         std::fs::read_to_string(root().join("fixtures/rmodel/spec.md")).unwrap()
     );
 }
@@ -229,18 +229,18 @@ fn terms_may_reference_checks() {
 /// control's reference file is registered.
 #[test]
 fn manifest_sources_are_distinct_and_registered() {
-    let spec = rspec::from_json(
+    let spec = idealis_spec::from_json(
         &std::fs::read_to_string(root().join("fixtures/rmodel/spec.json")).unwrap(),
     )
     .unwrap();
-    let clash = rspec::documents_manifest(&rspec::Drift {
+    let clash = idealis_spec::documents_manifest(&idealis_spec::Drift {
         glossary: "docs/glossary.md",
         documents: vec!["crates/a-b/README.md".into(), "crates/a_b/README.md".into()],
         rules: vec![],
         controls: vec![],
     });
     assert!(clash.is_err());
-    let manifest = rspec::documents_manifest(&rspec::Drift {
+    let manifest = idealis_spec::documents_manifest(&idealis_spec::Drift {
         glossary: "docs/glossary.md",
         documents: vec![],
         rules: vec![("fixtures/rmodel/spec.md", &spec)],

@@ -1030,6 +1030,10 @@ fn check_version(version: u32) -> Result<(), String> {
 
 /// A checked model from the IR, through rmodel's type checker.
 pub fn from_ir(ir: &Ir) -> Result<Model, String> {
+    from_ir_checked(ir).map(rmodel::CheckedModel::into_model)
+}
+
+fn from_ir_checked(ir: &Ir) -> Result<rmodel::CheckedModel, String> {
     check_version(ir.version)?;
     let model = Model {
         name: ir.name.clone(),
@@ -1171,11 +1175,16 @@ pub fn from_ir(ir: &Ir) -> Result<Model, String> {
             steps: ir.scope.steps,
         },
     };
-    rmodel::validate(model).map_err(|e| e.to_string())
+    rmodel::validate_checked(model).map_err(|e| e.to_string())
 }
 
 /// Reads IR JSON, rejecting unknown tags and fields, and checks the model.
 pub fn parse(json: &str) -> Result<(Model, Vec<Omitted>), String> {
+    parse_checked(json).map(|(model, omitted)| (model.into_model(), omitted))
+}
+
+/// Read versioned JSON into the same validated model boundary as source.
+pub fn parse_checked(json: &str) -> Result<(rmodel::CheckedModel, Vec<Omitted>), String> {
     #[derive(Deserialize)]
     struct Header {
         version: u32,
@@ -1183,5 +1192,5 @@ pub fn parse(json: &str) -> Result<(Model, Vec<Omitted>), String> {
     let header: Header = serde_json::from_str(json).map_err(|error| format!("IR: {error}"))?;
     check_version(header.version)?;
     let ir: Ir = serde_json::from_str(json).map_err(|e| format!("IR: {e}"))?;
-    Ok((from_ir(&ir)?, ir.omitted))
+    Ok((from_ir_checked(&ir)?, ir.omitted))
 }

@@ -42,7 +42,7 @@
 - [x] 更新の `let` が `if` で始まり、代入式の値として使われる場合は、複数の利用箇所を元の `if` の一行にまとめる。分岐マップ v3 は式へのパスを保存し、v1・v2 も読み込める。述語だけでの利用は対象外。[範囲応答と利用箇所の回帰試験](tests/branches.rs)
 - [x] レコードのフィールドなど、更新の値を組み立てる式の内側の `if` も集計する。直接書いた分岐へのパスは分岐マップ v4、`let` から展開したパスは v3 で表す。述語内の評価は対象外。[HTTP 304 と範囲応答の回帰試験](tests/branches.rs)
 - [x] 更新グループと代入の右辺で直接連なる `if` の `then`・`else` に `expect unreachable` を書ける。`rcheck coverage` は到達したときに経路付きで不一致を返し、予算切れは未確定にする。理由は分岐マップにも残る。[CLI の回帰試験](tests/coverage.rs)
-- [x] `rcheck traceability` は rspec の規則・節とモデルの検査を双方向に引き、期待判定と現在の証拠を返す。Markdown の本文、リンクなし、探索の未確定、モデルの違反を区別する。[自己モデルの回帰試験](tests/traceability.rs)
+- [x] `rcheck traceability` は idealis-spec の規則・節とモデルの検査を双方向に引き、期待判定と現在の証拠を返す。Markdown の本文、リンクなし、探索の未確定、モデルの違反を区別する。[自己モデルの回帰試験](tests/traceability.rs)
 - [x] `rcheck witness-step` は操作名・引数・前後状態の条件に合う遷移を探し、その操作を末尾に持つ経路を返す。到達不能、空、予算切れ、スコープ逸脱を区別する。[回帰試験](tests/witness.rs)
 - [x] `record-itf` と `replay-itf` は有限の状態観測を ITF で保存・再照合する。一致、最初の差分、記録不足や不正な操作を区別し、符号付き64ビット整数と列の順序を保持する。[CLI の回帰試験](tests/itf_replay.rs)
 - [x] 操作が0件の ITF では初期観測1件を照合する。観測がなければ入力エラーになる。[CLI の回帰試験](tests/itf_replay.rs)

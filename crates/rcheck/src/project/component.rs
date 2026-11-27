@@ -1,4 +1,4 @@
-use super::{Access, Instance, Port, Source};
+use super::{Access, Instance, Port, Source, is_model_source};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
@@ -246,9 +246,9 @@ impl Checked {
 }
 
 fn model_path(directory: &Path, file: &Path) -> Result<PathBuf, String> {
-    if file.extension().and_then(|extension| extension.to_str()) != Some("model") {
+    if !is_model_source(file) {
         return Err(format!(
-            "expected a .model file: {}",
+            "expected an .ideal or .model file: {}",
             directory.join(file).display()
         ));
     }

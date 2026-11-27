@@ -334,7 +334,7 @@ fn batch_journal_recognizes_sets_of_structured_values() {
 #[test]
 fn worker_checkpoints_preserve_other_large_rows() {
     let source =
-        include_str!("../../../examples/model-patterns/crash-recovery/worker-checkpoints.model");
+        include_str!("../../../examples/model-patterns/crash-recovery/worker-checkpoints.ideal");
     let model = rmodel::parse(source).unwrap();
     let actual = rprob::analyze_safety(&model, 100).unwrap().report;
     let expected = rmodel::reference::analyze_actions(&model, 100);

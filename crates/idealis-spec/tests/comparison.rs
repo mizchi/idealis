@@ -1,6 +1,6 @@
 #[test]
 fn comparison_policy_is_part_of_the_self_specification() {
-    let spec = rspec::from_json(include_str!("../../../spec/rmodel-design.json")).unwrap();
+    let spec = idealis_spec::from_json(include_str!("../../../spec/rmodel-design.json")).unwrap();
     assert!(
         spec.rules
             .iter()
@@ -8,7 +8,7 @@ fn comparison_policy_is_part_of_the_self_specification() {
     );
 }
 
-use rspec::{
+use idealis_spec::{
     AdoptionBlocker, Checker, ComparisonPlan, Evidence, GoalMeasurement, SemanticComparison,
     compare_receipts, run_checker,
 };
@@ -19,7 +19,7 @@ const MODEL: &str = include_str!("../../../spec/models/evidence-adoption.model")
 const ROOT: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
 const RULE: &str = "RMODEL-EVIDENCE-PROVENANCE";
 
-fn collect_plan(plan: &ComparisonPlan) -> [rspec::CheckerReceipt; 2] {
+fn collect_plan(plan: &ComparisonPlan) -> [idealis_spec::CheckerReceipt; 2] {
     let reference = run_checker(plan, Checker::Reference, MODEL, |model, budget| {
         Ok(rmodel::reference::analyze(model, budget))
     })
@@ -35,9 +35,9 @@ fn collect_plan(plan: &ComparisonPlan) -> [rspec::CheckerReceipt; 2] {
 fn real_checker_results_feed_adoption() {
     use SemanticComparison::*;
     let mut source: serde_json::Value = serde_json::from_str(SPEC).unwrap();
-    let spec = rspec::from_json(SPEC).unwrap();
+    let spec = idealis_spec::from_json(SPEC).unwrap();
     let root = Path::new(ROOT);
-    let before = rspec::clause_report(&spec, root, RULE, 100_000).unwrap();
+    let before = idealis_spec::clause_report(&spec, root, RULE, 100_000).unwrap();
     let clauses = source["spec"]["rules"]
         .as_array_mut()
         .unwrap()
@@ -49,8 +49,8 @@ fn real_checker_results_feed_adoption() {
     for (clause, evidence) in clauses.iter_mut().zip(&before.clauses) {
         clause["reviewed"] = serde_json::json!(evidence.revision);
     }
-    let spec = rspec::from_json(&source.to_string()).unwrap();
-    let approved = rspec::clause_report(&spec, root, RULE, 100_000).unwrap();
+    let spec = idealis_spec::from_json(&source.to_string()).unwrap();
+    let approved = idealis_spec::clause_report(&spec, root, RULE, 100_000).unwrap();
     let plan = ComparisonPlan::pin("new", &approved, 100_000).unwrap();
     let [reference, fast] = collect_plan(&plan);
 
@@ -64,7 +64,7 @@ fn real_checker_results_feed_adoption() {
         outcome: GoalMeasurement::Improved,
     };
     let assess = |receipts: &[_]| {
-        rspec::assess_adoption(
+        idealis_spec::assess_adoption(
             &plan.revision,
             &review,
             &compare_receipts(&plan, receipts).evidence,
@@ -118,19 +118,27 @@ fn real_checker_results_feed_adoption() {
 
 #[test]
 fn empty_and_unsupported_are_distinct_from_agreement() {
+    use sha2::{Digest, Sha256};
+
     let root = Path::new(ROOT);
-    let spec = rspec::from_json(SPEC).unwrap();
-    let shipment = rspec::clause_report(&spec, root, "SHIPMENT-TRACKING", 100_000).unwrap();
-    let plan = ComparisonPlan::pin("candidate", &shipment, 100_000).unwrap();
-    let source = std::fs::read_to_string(root.join(&plan.model)).unwrap();
+    let spec = idealis_spec::from_json(SPEC).unwrap();
+    let shipment = idealis_spec::clause_report(&spec, root, "SHIPMENT-TRACKING", 100_000).unwrap();
+    let mut plan = ComparisonPlan::pin("candidate", &shipment, 100_000).unwrap();
+    let mut source = std::fs::read_to_string(root.join(&plan.model)).unwrap();
+    // Keep the shipment checks and add an unused domain beyond the bitset limit.
+    let members = (0..65).map(|n| format!("Spill{n}")).collect::<Vec<_>>();
+    source.push_str(&format!("\nenum Unused = {}\n", members.join(" | ")));
+    plan.source_sha256 = format!("{:x}", Sha256::digest(&source));
     let reference = run_checker(&plan, Checker::Reference, &source, |model, budget| {
         Ok(rmodel::reference::analyze(model, budget))
     })
     .unwrap();
-    let fast = run_checker(&plan, Checker::Rprob, &source, |model, budget| {
-        rprob::Compiled::new(model)
-            .map(|compiled| compiled.analyze(budget))
-            .map_err(|error| error.to_string())
+    let fast = run_checker(&plan, Checker::Rprob, &source, |model, _| {
+        let error = rprob::Compiled::new(model)
+            .err()
+            .expect("oversized atom domain");
+        assert!(error.to_string().contains("64 atoms"));
+        Err(error.to_string())
     })
     .unwrap();
     assert_eq!(
@@ -138,12 +146,11 @@ fn empty_and_unsupported_are_distinct_from_agreement() {
         SemanticComparison::Incomplete
     );
 
-    use sha2::{Digest, Sha256};
     let source = MODEL.replace("current = First\n  no adopted", "false\n  no adopted");
     assert_ne!(source, MODEL);
     let mut plan = ComparisonPlan::pin(
         "empty-fixture",
-        &rspec::clause_report(&spec, root, RULE, 100_000).unwrap(),
+        &idealis_spec::clause_report(&spec, root, RULE, 100_000).unwrap(),
         100_000,
     )
     .unwrap();

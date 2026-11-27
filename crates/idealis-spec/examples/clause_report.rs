@@ -1,5 +1,7 @@
 //! Report the evidence for a rule in a Pkl specification.
-use rspec::{ComparisonPlan, EvaluationRevision, Evidence, GoalMeasurement, SemanticComparison};
+use idealis_spec::{
+    ComparisonPlan, EvaluationRevision, Evidence, GoalMeasurement, SemanticComparison,
+};
 use serde::de::DeserializeOwned;
 use serde_json::json;
 use std::{path::Path, process::Command};
@@ -22,8 +24,8 @@ fn run() -> Result<(), String> {
         return Err(String::from_utf8_lossy(&output.stderr).into_owned());
     }
     let data = String::from_utf8(output.stdout).map_err(|error| error.to_string())?;
-    let spec = rspec::from_json(&data)?;
-    let report = rspec::clause_report(&spec, Path::new("."), rule, 2_000_000)?;
+    let spec = idealis_spec::from_json(&data)?;
+    let report = idealis_spec::clause_report(&spec, Path::new("."), rule, 2_000_000)?;
     let output = match mode {
         [] => json!(report),
         [flag, candidate] if flag == "--pin" => {
@@ -41,7 +43,7 @@ fn run() -> Result<(), String> {
                 revision: current.clone(),
                 outcome: &report,
             };
-            let blockers = rspec::assess_adoption(&current, &review, &comparison, &goal)
+            let blockers = idealis_spec::assess_adoption(&current, &review, &comparison, &goal)
                 .err()
                 .unwrap_or_default();
             json!({"ready": blockers.is_empty(), "blockers": blockers, "revision": current, "report": report})

@@ -28,7 +28,9 @@ mod typed_expr;
 mod typed_lower;
 pub use analysis::analysis_roles;
 use analysis::{Node, NodeMut};
+pub use rtla::SyntaxVersion;
 use rtlc::ir;
+pub use source::compile_source_bundle;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct CompileError {

@@ -1,4 +1,4 @@
-use rspec::{Checker, CheckerReceipt, ComparisonPlan, compare_receipts, run_checker};
+use idealis_spec::{Checker, CheckerReceipt, ComparisonPlan, compare_receipts, run_checker};
 use serde::de::DeserializeOwned;
 use serde_json::json;
 use std::process::ExitCode;

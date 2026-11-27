@@ -4,6 +4,8 @@
 
 ## 対応済み
 
+- [x] `compile_source_bundle` は TLA+ ソース、TLC 設定、補助モジュールを `rtla` で解析し、型付き AST のコンパイルに渡す。補助モジュールの名前と束の上限を検査する。
+
 - [x] `analyze_modules` で実行用設定なしのモジュール束に既存 linker と任意の level 検査を適用する。単独解析で proof・nested module は拒否する。直接 EXTENDS Sequences の Len 等と同名のトップレベル宣言には、衝突元と定義位置を示す。
 
 - [x] 共有IRの統合でも既存v1のSYMMETRY設定を保持する。明示v2のSYMMETRYはlowering前に理由を示して拒否する。

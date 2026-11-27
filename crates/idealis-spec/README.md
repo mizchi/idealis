@@ -1,15 +1,15 @@
-# rspec
+# idealis-spec
 
-A specification written in Pkl: a ubiquitous language of terms, each bound
-to the model declarations and code symbols that denote it, and rules in
-prose grounded by claims about rmodel checks.
+Idealis specifications connect domain vocabulary and natural-language rules
+to formal properties and implementation symbols. The current document
+adapter reads specifications written in Pkl. See the [language architecture](../../docs/language-architecture.md).
 
-- `rspec::links` decides what is static: unique ids, references that
+- `idealis_spec::links` decides what is static: unique ids, references that
   resolve, a closed vocabulary over the referenced models (every
   declaration has a term, every check a claim), and expectations that fit
   their checks.
-- `rspec::render` writes the Japanese glossary and rules as Markdown.
-- `rspec::documents_manifest` derives the `jev-lint docs` manifest that
+- `idealis_spec::render` writes the Japanese glossary and rules as Markdown.
+- `idealis_spec::documents_manifest` derives the `jev-lint docs` manifest that
   compares the glossary with every crate document (terminology) and each
   rule with its models (semantic). Those answers are advisory.
 

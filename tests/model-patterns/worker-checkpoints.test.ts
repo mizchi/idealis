@@ -15,7 +15,7 @@ type Worker = "East" | "West";
 type Checkpoint = { pending: { $sequence: string[] }; retries: number };
 type Command = { kind: "checkpoint" | "expire"; worker: Worker };
 const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/crash-recovery/worker-checkpoints.model";
+const model = "examples/model-patterns/crash-recovery/worker-checkpoints.ideal";
 const project = (state: Readonly<Record<string, unknown>>) => state;
 
 const checkpoints: Record<Worker, Checkpoint> = {
