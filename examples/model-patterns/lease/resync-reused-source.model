@@ -1,0 +1,53 @@
+model ReusedSourceResync
+enum Host = Primary | Backup
+enum Body = Seed | OldData | NewData | BackupData
+record Stamp { endpoint: Host, instance: Nat }
+record Image { owner: Stamp, offset: Nat, contents: Body }
+
+var active: one Stamp
+var saved: one Image
+var buffered: lone Image
+var observed: lone Image
+
+init {
+  active = Stamp { endpoint: Primary, instance: 0 }
+  saved = Image { owner: Stamp { endpoint: Primary, instance: 0 }, offset: 0, contents: Seed }
+  no buffered no observed
+}
+behavior capture() {
+  guard { no buffered }
+  update {
+    buffered = Image { owner: active, offset: 1,
+      contents: if { active.endpoint = Backup } then BackupData
+        else if { active.instance = 0 } then OldData else NewData }
+  }
+}
+behavior moveToBackup() {
+  guard { active.endpoint = Primary active.instance = 0 }
+  update { active = Stamp { endpoint: Backup, instance: 0 } }
+}
+behavior returnToPrimary() {
+  guard { active.endpoint = Backup }
+  update { active = Stamp { endpoint: Primary, instance: 1 } }
+}
+behavior publish() {
+  guard { some buffered }
+  update {
+    if { buffered.owner = active } then { saved = buffered }
+    buffered = none
+  }
+}
+behavior read() {
+  update { observed = if { saved.owner = active } then saved else none }
+}
+transition OldIncarnationCannotReplaceReplica on publish {
+  before(buffered.owner) != before(active) implies unchanged(saved)
+}
+transition ReadChecksIncarnation on read {
+  before(saved.owner) != before(active) implies no after(observed)
+}
+reachable OldImageBufferedWhenPrimaryReturns {
+  active = Stamp { endpoint: Primary, instance: 1 }
+  buffered.owner = Stamp { endpoint: Primary, instance: 0 }
+}
+scope Int = 0..1, steps = 9

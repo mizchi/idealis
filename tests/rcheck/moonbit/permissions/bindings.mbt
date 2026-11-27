@@ -238,7 +238,7 @@ pub fn decode_config(v : Json) -> Config raise DecodeError {
     let raw = entries[key_user(k)]
     let set : Set[Role] = Set([])
     for item in items(raw) {
-      set.add(decode_role(item))
+      set.insert(decode_role(item))
     }
     grants[k] = set
   }
@@ -248,21 +248,21 @@ pub fn decode_config(v : Json) -> Config raise DecodeError {
     let raw = entries[key_role(k)]
     let set : Set[Doc] = Set([])
     for item in items(raw) {
-      set.add(decode_doc(item))
+      set.insert(decode_doc(item))
     }
     reads[k] = set
   }
   let secret = {
     let set : Set[Doc] = Set([])
     for item in items(m["secret"]) {
-      set.add(decode_doc(item))
+      set.insert(decode_doc(item))
     }
     set
   }
   let cleared = {
     let set : Set[User] = Set([])
     for item in items(m["cleared"]) {
-      set.add(decode_user(item))
+      set.insert(decode_user(item))
     }
     set
   }
@@ -300,7 +300,7 @@ pub fn decode_state(v : Json) -> State raise DecodeError {
     let raw = entries[key_user(k)]
     let set : Set[Doc] = Set([])
     for item in items(raw) {
-      set.add(decode_doc(item))
+      set.insert(decode_doc(item))
     }
     open[k] = set
   }

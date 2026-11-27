@@ -1,0 +1,15 @@
+model NodeNextTick
+enum Callback = IoNextTick | FirstMicrotask | SecondMicrotask | NestedNextTick
+enum Position = First | Second | Third | Fourth
+var callbackAt: Position -> lone Callback
+
+init { no callbackAt }
+behavior drainIoBatch() {
+  guard { no callbackAt }
+  update {
+    callbackAt = (First -> IoNextTick) + (Second -> FirstMicrotask)
+      + (Third -> SecondMicrotask) + (Fourth -> NestedNextTick)
+  }
+}
+reachable ObservedBatch { some callbackAt }
+scope steps = 2

@@ -1,0 +1,12 @@
+model NodeIoBatch
+enum Callback = Microtask | Immediate | Timer
+sequence Invocations = Callback, max = 3
+var calls: one Invocations
+
+init { calls = Invocations[] }
+behavior drainIoBatch() {
+  guard { calls = Invocations[] }
+  update { calls = Invocations[Microtask, Immediate, Timer] }
+}
+reachable ObservedBatch { calls = Invocations[Microtask, Immediate, Timer] }
+scope steps = 2

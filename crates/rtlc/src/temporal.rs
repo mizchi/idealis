@@ -65,11 +65,20 @@ enum Formula<'a> {
     Or(usize, usize),
     Until(usize, usize),
     Release(usize, usize),
+    Recurring(EdgePredicate),
 }
+
+/// A propositional condition on the current graph edge.
+#[derive(Clone, Copy)]
+enum EdgePredicate {
+    Atom(usize),
+    Either(usize, usize),
+}
+
 struct Pool<'a> {
     formulas: Vec<Formula<'a>>,
     definitions: &'a [crate::ir::Definition],
-    until: Vec<usize>,
+    acceptance: Vec<usize>,
     frame_sequence: usize,
     entries: Vec<Vec<usize>>,
     active_entries: Vec<usize>,
@@ -106,12 +115,23 @@ impl<'a> Pool<'a> {
         }
         let index = self.formulas.len();
         if matches!(formula, Formula::Until(..)) {
-            self.until.push(index);
+            self.acceptance.push(index);
         }
         self.formulas.push(formula);
         self.entries.push(self.active_entries.clone());
         index
     }
+    fn edge_predicate(&self, id: usize) -> Option<EdgePredicate> {
+        let is_atom = |id: usize| matches!(self.formulas[id], Formula::Atom(..));
+        match self.formulas[id] {
+            Formula::Atom(..) => Some(EdgePredicate::Atom(id)),
+            Formula::Or(left, right) if is_atom(left) && is_atom(right) => {
+                Some(EdgePredicate::Either(left, right))
+            }
+            _ => None,
+        }
+    }
+
     fn lower(
         &mut self,
         formula: &'a TemporalFormula,
@@ -216,6 +236,14 @@ impl<'a> Pool<'a> {
                 if matches!(formula, TemporalFormula::Eventually { .. }) != negative {
                     let truth = self.add(Formula::True);
                     self.add(Formula::Until(truth, child))
+                } else if let Formula::Until(truth, condition) = self.formulas[child]
+                    && matches!(self.formulas[truth], Formula::True)
+                    && let Some(predicate) = self.edge_predicate(condition)
+                {
+                    // The freshly lowered eventuality has an acceptance
+                    // entry. Reuse it for GF p, whose loop must visit p.
+                    self.formulas[child] = Formula::Recurring(predicate);
+                    child
                 } else {
                     let falsity = self.add(Formula::False);
                     self.add(Formula::Release(falsity, child))
@@ -254,6 +282,67 @@ impl<'a> Pool<'a> {
         })
     }
 }
+fn evaluate_atom(
+    expression: &Expression,
+    negative: bool,
+    lexical: &LexicalSnapshot,
+    ctx: EvalContext<'_>,
+    arena: &mut Arena,
+) -> Result<bool, CoreError> {
+    let value = expression
+        .eval(
+            EvalContext {
+                locals: &lexical.locals,
+                frame: lexical.frame.as_deref(),
+                old: lexical.old,
+                ..ctx
+            },
+            arena,
+        )?
+        .boolean()?;
+    Ok(value != negative)
+}
+
+impl EdgePredicate {
+    fn evaluate(
+        self,
+        pool: &Pool<'_>,
+        ctx: EvalContext<'_>,
+        entered: &mut HashSet<usize>,
+        arena: &mut Arena,
+    ) -> Result<bool, CoreError> {
+        let mut atom = |id: usize, arena: &mut Arena| {
+            arena.tick()?;
+            enter(&pool.entries[id], entered, arena)?;
+            let Formula::Atom(expression, negative, lexical) = &pool.formulas[id] else {
+                unreachable!("checked edge predicate");
+            };
+            evaluate_atom(expression, *negative, lexical, ctx, arena)
+        };
+        match self {
+            Self::Atom(id) => atom(id, arena),
+            Self::Either(left, right) => {
+                let left = atom(left, arena)?;
+                let right = atom(right, arena)?;
+                Ok(left || right)
+            }
+        }
+    }
+}
+
+fn enter(
+    entries: &[usize],
+    entered: &mut HashSet<usize>,
+    arena: &mut Arena,
+) -> Result<(), CoreError> {
+    for entry in entries {
+        if entered.insert(*entry) {
+            arena.consume(1)?;
+        }
+    }
+    Ok(())
+}
+
 #[derive(Clone)]
 enum Seen {
     Dense([u64; 4]),
@@ -318,28 +407,12 @@ fn expand(
             if !state.seen.insert(id) {
                 continue;
             }
-            for entry in &pool.entries[id] {
-                if state.entered.insert(*entry) {
-                    arena.consume(1)?;
-                }
-            }
+            enter(&pool.entries[id], &mut state.entered, arena)?;
             match &pool.formulas[id] {
                 Formula::True => {}
                 Formula::False => continue 'alternative,
                 Formula::Atom(expression, negative, lexical) => {
-                    if expression
-                        .eval(
-                            EvalContext {
-                                locals: &lexical.locals,
-                                frame: lexical.frame.as_deref(),
-                                old: lexical.old,
-                                ..ctx
-                            },
-                            arena,
-                        )?
-                        .boolean()?
-                        == *negative
-                    {
+                    if !evaluate_atom(expression, *negative, lexical, ctx, arena)? {
                         continue 'alternative;
                     }
                 }
@@ -361,6 +434,12 @@ fn expand(
                     stack.push(other);
                     state.todo.push(*right);
                 }
+                Formula::Recurring(predicate) => {
+                    state.next.push(id);
+                    if !predicate.evaluate(pool, ctx, &mut state.entered, arena)? {
+                        state.pending.push(id);
+                    }
+                }
                 Formula::Release(left, right) => {
                     let mut other = state.clone();
                     other.todo.push(*right);
@@ -375,6 +454,7 @@ fn expand(
         state.next.dedup();
         state.pending.retain(|id| match pool.formulas[*id] {
             Formula::Until(_, right) => !state.seen.contains(right),
+            Formula::Recurring(_) => true,
             _ => false,
         });
         state.pending.sort_unstable();
@@ -530,12 +610,12 @@ impl Product<'_> {
             }
             let mut selected = vec![];
             let mut accepting = true;
-            for until in &self.pool.until {
+            for obligation in &self.pool.acceptance {
                 let mut witness = None;
                 'find: for source in &component {
                     for (index, edge) in self.edges[*source].iter().enumerate() {
                         arena.tick()?;
-                        if members.contains(&edge.target) && !edge.pending.contains(until) {
+                        if members.contains(&edge.target) && !edge.pending.contains(obligation) {
                             witness = Some((*source, index));
                             break 'find;
                         }
@@ -591,7 +671,7 @@ pub(crate) fn check(
         let mut pool = Pool {
             definitions: program.definitions.as_deref().unwrap_or_default(),
             formulas: vec![],
-            until: vec![],
+            acceptance: vec![],
             frame_sequence: 0,
             entries: vec![],
             active_entries: vec![],

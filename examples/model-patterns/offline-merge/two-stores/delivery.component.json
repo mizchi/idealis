@@ -1,0 +1,11 @@
+{
+  "interface": "receipt-interface.model",
+  "types": ["request-types.model"],
+  "body": "delivery.model",
+  "ports": { "receipt": "read" },
+  "contract": {
+    "assumptions": ["StableInput"],
+    "guarantees": ["DeliveredFromReceipt"],
+    "exercises": ["CanDeliver"]
+  }
+}

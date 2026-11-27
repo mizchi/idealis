@@ -1,0 +1,12 @@
+model Override
+enum Tab = Left | Right
+enum Token = One | Two | Three
+var current: Tab -> set Token
+init { current = Left -> One + Right -> One }
+behavior patch() { update { current = current ++ (Left -> (Two + Three)) } }
+invariant OtherTabKept { Right.current = One }
+invariant EmptyPatch { current ++ none = current none ++ current = current }
+reachable LeftReplaced { Left.current = Two + Three }
+scope steps = 3
+
+invariant ParenthesizedOverride { (current) ++ none = current }

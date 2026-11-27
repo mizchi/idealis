@@ -1,6 +1,7 @@
 //! The model language (plan 0091): tokens, syntax tree, parser and the
 //! type and form checks every lowering relies on.
-use crate::{Case, Error, Sequence, Variant};
+use crate::{Case, Error, ParseDiagnostic, Sequence, Variant};
+use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -33,7 +34,11 @@ pub struct Relation {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SetOp {
     Union,
+    SetUnion,
+    Override,
+    WithoutKeys,
     Difference,
+    SetDifference,
     Intersection,
     Product,
     Join,
@@ -52,12 +57,15 @@ pub enum Phase {
     After,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Expr {
     /// A sig, a relation, or a bound atom variable.
     Name(String),
     None,
     Binary(SetOp, Box<Expr>, Box<Expr>),
+    If(Box<Formula>, Box<Expr>, Box<Expr>),
+    /// The atoms of a finite sort that satisfy a predicate.
+    Select(String, String, Box<Formula>),
     /// An integer literal, the set of one integer (plan 0103).
     Literal(i64),
     /// `#e`, the set of one integer.
@@ -69,13 +77,69 @@ pub enum Expr {
     /// `Money { amount: e, currency: c }`, the set of one record, fields in
     /// declaration order.
     Record(String, Vec<Expr>),
+    /// A record field resolved from the receiver type by the checker.
+    Field(Box<Expr>, String),
     Sequence(String, Vec<Expr>),
     Append(Box<Expr>, Box<Expr>),
+    Tail(Box<Expr>),
+    Take(Box<Expr>, Box<Expr>),
+    RemoveAt(Box<Expr>, Box<Expr>),
+    RemoveAll(Box<Expr>, Box<Expr>),
+    ReachableFrom(Box<Expr>, Box<Expr>),
+    /// The set of first components of a binary relation.
+    Keys(Box<Expr>),
+    /// Ordered pairs connected by paths of positive length.
+    Closure(Box<Expr>),
     Length(Box<Expr>),
+    Elements(Box<Expr>),
     Index(Box<Expr>, Box<Expr>),
     Variant(String, Option<Box<Expr>>),
     Payload(Box<Expr>, String),
     At(Phase, Box<Expr>),
+}
+
+impl Expr {
+    /// Value operands evaluated in the current binding scope. Conditions and
+    /// comprehension predicates have their own control flow.
+    pub(crate) fn coverage_child(&self, index: usize) -> Option<&Self> {
+        match (self, index) {
+            (Self::Record(_, values) | Self::Sequence(_, values), index) => values.get(index),
+            (
+                Self::Binary(_, left, _)
+                | Self::Arith(_, left, _)
+                | Self::If(_, left, _)
+                | Self::Append(left, _)
+                | Self::Take(left, _)
+                | Self::RemoveAt(left, _)
+                | Self::RemoveAll(left, _)
+                | Self::ReachableFrom(left, _)
+                | Self::Index(left, _)
+                | Self::Field(left, _)
+                | Self::Count(left)
+                | Self::Tail(left)
+                | Self::Keys(left)
+                | Self::Closure(left)
+                | Self::Length(left)
+                | Self::Elements(left)
+                | Self::Variant(_, Some(left))
+                | Self::Payload(left, _),
+                0,
+            ) => Some(left),
+            (
+                Self::Binary(_, _, right)
+                | Self::Arith(_, _, right)
+                | Self::If(_, _, right)
+                | Self::Append(_, right)
+                | Self::Take(_, right)
+                | Self::RemoveAt(_, right)
+                | Self::RemoveAll(_, right)
+                | Self::ReachableFrom(_, right)
+                | Self::Index(_, right),
+                1,
+            ) => Some(right),
+            _ => None,
+        }
+    }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Compare {
@@ -93,19 +157,22 @@ pub enum IntCompare {
     Equal,
     NotEqual,
 }
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Int {
     Count(Expr),
     Literal(i64),
     /// An expression of one integer (plan 0103).
     Value(Expr),
+    /// A parsed value operand with its source offset, removed by type checking.
+    #[doc(hidden)]
+    LocatedValue(Expr, usize),
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Quantifier {
     All,
     Some,
 }
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Formula {
     Compare(Compare, Expr, Expr),
     Ints(IntCompare, Int, Int),
@@ -119,6 +186,15 @@ pub enum Formula {
     Implies(Box<Formula>, Box<Formula>),
     Quantified(Quantifier, String, String, Box<Formula>),
 }
+impl Formula {
+    pub(crate) fn tests_presence(&self) -> bool {
+        match self {
+            Self::Mult(Mult::Some, _) => true,
+            Self::And(parts) => parts.iter().any(Self::tests_presence),
+            _ => false,
+        }
+    }
+}
 #[derive(Clone, Debug)]
 pub struct Action {
     pub name: String,
@@ -127,6 +203,39 @@ pub struct Action {
     pub guards: Vec<Formula>,
     /// Simultaneous updates, at most one per var.
     pub assignments: Vec<(String, Expr)>,
+}
+
+impl Action {
+    /// Keep the guard's evaluation order while separating the clauses that
+    /// can run before action arguments are bound.
+    pub fn guard_parts(&self) -> (Vec<&Formula>, Vec<&Formula>) {
+        if self.params.is_empty() {
+            return (Vec::new(), self.guards.iter().collect());
+        }
+
+        fn conjuncts<'a>(formula: &'a Formula, clauses: &mut Vec<&'a Formula>) {
+            match formula {
+                Formula::And(children) => {
+                    for child in children {
+                        conjuncts(child, clauses);
+                    }
+                }
+                _ => clauses.push(formula),
+            }
+        }
+
+        let arguments = self.params.iter().map(|(name, _)| name.as_str()).collect();
+        let mut clauses = Vec::new();
+        for guard in &self.guards {
+            conjuncts(guard, &mut clauses);
+        }
+        let prefix = clauses
+            .iter()
+            .take_while(|clause| !may_read_names(clause, &arguments))
+            .count();
+        let suffix = clauses.split_off(prefix);
+        (clauses, suffix)
+    }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CheckKind {
@@ -144,6 +253,7 @@ pub struct Check {
 #[derive(Clone, Debug)]
 pub struct TransitionCheck {
     pub name: String,
+    pub action: Option<String>,
     pub formula: Formula,
 }
 
@@ -168,6 +278,8 @@ pub enum FairnessKind {
 pub struct Fairness {
     pub kind: FairnessKind,
     pub action: String,
+    /// Require fairness for every argument tuple, rather than their union.
+    pub each: bool,
 }
 
 /// `record Money { amount: Int, currency: Currency }`: a value compared by
@@ -177,6 +289,12 @@ pub struct Record {
     pub name: String,
     /// Field names and their sorts.
     pub fields: Vec<(String, String)>,
+}
+
+impl Record {
+    pub(crate) fn field_index(&self, name: &str) -> Option<usize> {
+        self.fields.iter().position(|(field, _)| field == name)
+    }
 }
 #[derive(Clone, Debug)]
 pub struct Scope {
@@ -204,6 +322,8 @@ pub struct Model {
     pub sequences: Vec<Sequence>,
     pub variants: Vec<Variant>,
     pub relations: Vec<Relation>,
+    /// Named, single-state expressions. Uses inside the kernel are expanded.
+    pub derivations: Vec<(String, Expr)>,
     pub facts: Vec<Formula>,
     pub init: Vec<Formula>,
     pub actions: Vec<Action>,
@@ -251,15 +371,11 @@ impl Model {
     pub fn record(&self, name: &str) -> Option<&Record> {
         self.records.iter().find(|record| record.name == name)
     }
-    /// The record a field belongs to, and the field's position.
+    /// The first declared record with this field, and its position there.
     pub fn field(&self, name: &str) -> Option<(&Record, usize)> {
-        self.records.iter().find_map(|record| {
-            record
-                .fields
-                .iter()
-                .position(|(field, _)| field == name)
-                .map(|index| (record, index))
-        })
+        self.records
+            .iter()
+            .find_map(|record| record.field_index(name).map(|index| (record, index)))
     }
     /// Values are integers and records; atoms are everything else.
     pub fn is_value(&self, sort: &str) -> bool {
@@ -345,6 +461,7 @@ const KEYWORDS: &[&str] = &[
     "and",
     "or",
     "implies",
+    "iff",
     "in",
     "none",
 ];
@@ -385,8 +502,29 @@ fn definition_character(c: char) -> bool {
     !c.is_control() && !matches!(c, '\u{2028}' | '\u{2029}')
 }
 
-fn tokens(source: &str) -> Result<Vec<String>, Error> {
+fn tokens(source: &str) -> Result<(Vec<String>, Vec<usize>), ParseDiagnostic> {
+    lex(source, false)
+}
+
+pub(crate) fn component_slots(
+    source: &str,
+) -> Result<Vec<(std::ops::Range<usize>, String)>, ParseDiagnostic> {
+    let (tokens, offsets) = lex(source, true)?;
+    let bytes: Vec<_> = source.char_indices().map(|(byte, _)| byte).collect();
+    Ok(tokens
+        .into_iter()
+        .zip(offsets)
+        .filter_map(|(token, start)| {
+            let name = token.strip_prefix('@')?;
+            let byte = bytes[start];
+            Some((byte..byte + token.len(), name.to_owned()))
+        })
+        .collect())
+}
+
+fn lex(source: &str, component: bool) -> Result<(Vec<String>, Vec<usize>), ParseDiagnostic> {
     let mut tokens = Vec::new();
+    let mut offsets = Vec::new();
     let characters: Vec<char> = source.chars().collect();
     let mut position = 0;
     while position < characters.len() {
@@ -401,33 +539,150 @@ fn tokens(source: &str) -> Result<Vec<String>, Error> {
             }
             continue;
         }
+        let start = position;
+        offsets.push(start);
         if character == '"' {
-            tokens.push(definition_token(&characters, &mut position)?);
+            tokens.push(
+                definition_token(&characters, &mut position).map_err(|error| ParseDiagnostic {
+                    error,
+                    offset: Some(start),
+                })?,
+            );
             continue;
         }
-        let start = position;
-        if character.is_ascii_alphanumeric() || character == '_' {
+        let slot = component
+            && character == '@'
+            && characters
+                .get(position + 1)
+                .is_some_and(|c| c.is_ascii_alphabetic() || *c == '_');
+        if slot {
+            position += 1;
+        }
+        if slot || character.is_ascii_alphanumeric() || character == '_' {
             while position < characters.len()
                 && (characters[position].is_ascii_alphanumeric() || characters[position] == '_')
             {
                 position += 1;
             }
-        } else if let Some(operator) = ["->", "!=", "<=", ">="].into_iter().find(|operator| {
+        } else if let Some(operator) = ["->", "!=", "<=", ">=", "++"].into_iter().find(|operator| {
             characters[position..].starts_with(&operator.chars().collect::<Vec<_>>())
         }) {
             position += operator.len();
         } else if "{}[]():,.+-*&#=<>'|".contains(character) {
             position += 1;
         } else {
-            return Err(Error::syntax(format!("unexpected character {character:?}")));
+            return Err(ParseDiagnostic {
+                error: Error::syntax(format!("unexpected character {character:?}")),
+                offset: Some(start),
+            });
         }
         tokens.push(characters[start..position].iter().collect());
     }
-    Ok(tokens)
+    Ok((tokens, offsets))
+}
+
+#[derive(Default)]
+struct Locations {
+    named: BTreeMap<String, usize>,
+    facts: Vec<usize>,
+    init: Vec<usize>,
+    scope: Option<usize>,
+    bindings: BTreeMap<String, LocalDefinitions>,
+    update_branches: BTreeMap<String, Vec<crate::UpdateBranch>>,
+    binding_branches: BTreeMap<String, BTreeMap<String, Vec<BindingBranch>>>,
+    // The current source declaration, if checking a model read from text.
+    current: Cell<Option<usize>>,
+    operand_error: Cell<Option<usize>>,
+}
+
+struct LocalDefinitions {
+    definitions: Vec<(String, Expr)>,
+    remaining: usize,
+}
+
+struct BindingBranch {
+    branch: crate::UpdateBranch,
+    path: Vec<usize>,
+}
+
+fn record_binding_sites<'a>(
+    mut source: &'a Expr,
+    checked: &Expr,
+    definitions: &BTreeMap<&str, &'a Expr>,
+    bindings: &mut BTreeMap<String, Vec<BindingBranch>>,
+    assignment: &str,
+    path: &mut Vec<usize>,
+) {
+    // A source binding may be an alias of an earlier binding. Resolve
+    // aliases at the same position without recursing through the chain.
+    while let Expr::Name(name) = source {
+        let Some(value) = definitions.get(name.as_str()) else {
+            return;
+        };
+        if let Some(branches) = bindings.get_mut(name) {
+            for entry in branches {
+                let mut site = path.clone();
+                site.extend(&entry.path);
+                entry.branch.sites.push((assignment.to_owned(), site));
+            }
+        }
+        source = value;
+    }
+    for (index, (source, checked)) in (0..)
+        .map_while(|index| {
+            source
+                .coverage_child(index)
+                .zip(checked.coverage_child(index))
+        })
+        .enumerate()
+    {
+        path.push(index);
+        record_binding_sites(source, checked, definitions, bindings, assignment, path);
+        path.pop();
+    }
+}
+
+struct ValueBranches<'a> {
+    assignee: &'a str,
+    path: Vec<usize>,
+    embedded: bool,
+    branches: &'a mut Vec<crate::UpdateBranch>,
+    allow_expectations: bool,
+}
+
+impl ValueBranches<'_> {
+    fn wrap_left_operand(&mut self, first_branch: usize) -> Result<(), Error> {
+        for branch in &mut self.branches[first_branch..] {
+            if branch.unreachable_reasons().iter().any(Option::is_some) {
+                return Err(Error::syntax(
+                    "an unreachable expectation needs a direct conditional assignment",
+                ));
+            }
+            if branch.sites.is_empty() {
+                let path = std::mem::take(&mut branch.ancestors)
+                    .into_iter()
+                    .map(|yes| usize::from(!yes))
+                    .collect();
+                branch.sites.push((self.assignee.to_owned(), path));
+            }
+            branch.sites[0].1.insert(self.path.len(), 0);
+        }
+        Ok(())
+    }
+}
+
+impl Locations {
+    fn enter(&self, name: &str) {
+        self.current.set(self.named.get(name).copied());
+    }
 }
 
 struct Parser {
     tokens: Vec<String>,
+    offsets: Vec<usize>,
+    locations: Locations,
+    track_locations: bool,
+    uses_bool: bool,
     position: usize,
     /// Nesting of formulas and expressions being parsed (review of #102).
     depth: usize,
@@ -480,6 +735,15 @@ impl Parser {
         self.position += 1;
         Ok(token)
     }
+
+    fn declared_name(&mut self) -> Result<String, Error> {
+        let offset = self.offsets.get(self.position).copied();
+        let name = self.name()?;
+        self.locations
+            .named
+            .insert(name.clone(), offset.expect("name was read"));
+        Ok(name)
+    }
     fn number(&mut self) -> Result<i64, Error> {
         let value = self
             .peek()
@@ -514,6 +778,7 @@ impl Parser {
             sequences: Vec::new(),
             variants: Vec::new(),
             relations: Vec::new(),
+            derivations: Vec::new(),
             facts: Vec::new(),
             init: Vec::new(),
             actions: Vec::new(),
@@ -531,14 +796,22 @@ impl Parser {
         while !self.peek().is_empty() {
             // The node bound applies to each declaration (issue #106).
             self.nodes = 0;
+            let start = self.position;
             match self.peek() {
+                "derive" => {
+                    self.position += 1;
+                    let name = self.name()?;
+                    self.expect("=")?;
+                    let value = self.expression(0)?;
+                    model.derivations.push((name, value));
+                }
                 "enum" => {
                     self.position += 1;
                     let name = self.name()?;
                     self.expect("=")?;
-                    let mut members = vec![self.name()?];
+                    let mut members = vec![self.declared_name()?];
                     while self.take("|") {
-                        members.push(self.name()?);
+                        members.push(self.declared_name()?);
                     }
                     model.enums.push((name, members));
                 }
@@ -569,7 +842,7 @@ impl Parser {
                     self.expect("=")?;
                     let mut cases = Vec::new();
                     loop {
-                        let tag = self.name()?;
+                        let tag = self.declared_name()?;
                         let payload = if self.take("(") {
                             let t = self.name()?;
                             self.expect(")")?;
@@ -703,8 +976,20 @@ impl Parser {
                 "transition" => {
                     self.position += 1;
                     let name = self.name()?;
-                    let formula = Formula::And(self.block()?);
-                    model.transitions.push(TransitionCheck { name, formula });
+                    let action = if self.take("on") {
+                        Some(self.name()?)
+                    } else {
+                        None
+                    };
+                    self.expect("{")?;
+                    let definitions = self.local_definitions(None)?;
+                    let formula = Formula::And(self.block_body()?);
+                    self.save_bindings(&name, definitions);
+                    model.transitions.push(TransitionCheck {
+                        name,
+                        action,
+                        formula,
+                    });
                 }
                 "invariant" | "reachable" => {
                     let kind = if self.take("invariant") {
@@ -759,6 +1044,18 @@ impl Parser {
                 }
                 other => return Err(Error::syntax(format!("unexpected {other:?}"))),
             }
+            let offset = self.offsets[start];
+            match self.tokens[start].as_str() {
+                "fact" => self.locations.facts.resize(model.facts.len(), offset),
+                "init" => self.locations.init.resize(model.init.len(), offset),
+                "scope" => self.locations.scope = Some(offset),
+                "fairness" => {}
+                _ => {
+                    self.locations
+                        .named
+                        .insert(self.tokens[start + 1].clone(), offset);
+                }
+            }
         }
         if !scoped || model.scope.steps == 0 {
             return Err(Error::syntax("the model needs a scope with steps"));
@@ -785,14 +1082,81 @@ impl Parser {
     }
     fn block(&mut self) -> Result<Vec<Formula>, Error> {
         self.expect("{")?;
+        self.block_body()
+    }
+
+    fn block_body(&mut self) -> Result<Vec<Formula>, Error> {
         let mut formulas = Vec::new();
         while !self.take("}") {
             if self.peek().is_empty() {
                 return Err(Error::syntax("unterminated block"));
             }
             formulas.push(self.formula()?);
+            self.take(",");
         }
         Ok(formulas)
+    }
+
+    fn local_definitions(
+        &mut self,
+        mut binding_branches: Option<&mut BTreeMap<String, Vec<BindingBranch>>>,
+    ) -> Result<Vec<(String, Expr)>, Error> {
+        let mut definitions = Vec::new();
+        while self.peek() == "let" && self.peek_at(1) != "=" {
+            self.expect("let")?;
+            let name = self.name()?;
+            self.expect("=")?;
+            let value = if let Some(bindings) = &mut binding_branches
+                && self.track_locations
+            {
+                let mut branches = Vec::new();
+                let mut locations = ValueBranches {
+                    assignee: &name,
+                    path: Vec::new(),
+                    embedded: false,
+                    branches: &mut branches,
+                    allow_expectations: false,
+                };
+                let value = self.expression_located(0, Some(&mut locations))?;
+                if !branches.is_empty() {
+                    let branches = branches
+                        .into_iter()
+                        .map(|mut branch| {
+                            let path = branch.sites.pop().map_or_else(
+                                || {
+                                    branch
+                                        .ancestors
+                                        .iter()
+                                        .map(|&yes| usize::from(!yes))
+                                        .collect()
+                                },
+                                |(_, path)| path,
+                            );
+                            branch.binding = true;
+                            BindingBranch { branch, path }
+                        })
+                        .collect();
+                    bindings.insert(name.clone(), branches);
+                }
+                value
+            } else {
+                self.expression(0)?
+            };
+            definitions.push((name, value));
+        }
+        Ok(definitions)
+    }
+
+    fn save_bindings(&mut self, declaration: &str, definitions: Vec<(String, Expr)>) {
+        if !definitions.is_empty() {
+            self.locations.bindings.insert(
+                declaration.to_owned(),
+                LocalDefinitions {
+                    definitions,
+                    remaining: MAX_NODES - self.nodes,
+                },
+            );
+        }
     }
     fn fairness(&mut self) -> Result<Fairness, Error> {
         let kind = if self.take("weak") {
@@ -801,10 +1165,13 @@ impl Parser {
             self.expect("strong")?;
             FairnessKind::Strong
         };
-        Ok(Fairness {
-            kind,
-            action: self.name()?,
-        })
+        let action = self.name()?;
+        let each = self.take("(");
+        if each {
+            self.expect("*")?;
+            self.expect(")")?;
+        }
+        Ok(Fairness { kind, action, each })
     }
 
     fn params(&mut self) -> Result<Vec<(String, String)>, Error> {
@@ -840,43 +1207,187 @@ impl Parser {
             }
             if self.take("update") {
                 self.expect("{")?;
-                while !self.take("}") {
-                    action.assignments.push(self.assignment(false)?);
+                let mut binding_branches = BTreeMap::new();
+                let definitions = self.local_definitions(Some(&mut binding_branches))?;
+                if !binding_branches.is_empty() {
+                    self.locations
+                        .binding_branches
+                        .insert(action.name.clone(), binding_branches);
                 }
+                let mut branches = Vec::new();
+                action.assignments = self.update_assignments(&mut Vec::new(), &mut branches)?;
+                self.save_branches(&action.name, branches);
+                self.save_bindings(&action.name, definitions);
             }
             self.expect("}")?;
             return Ok(action);
         }
+        let mut branches = Vec::new();
         while !self.take("}") {
             if self.peek().is_empty() {
                 return Err(Error::syntax("unterminated action"));
             }
             if self.peek_at(1) == "'" {
-                action.assignments.push(self.assignment(true)?);
+                action
+                    .assignments
+                    .push(self.assignment(true, &[], &mut branches)?);
             } else {
                 action.guards.push(self.formula()?);
             }
         }
+        self.save_branches(&action.name, branches);
         Ok(action)
     }
 
-    fn assignment(&mut self, primed: bool) -> Result<(String, Expr), Error> {
+    fn save_branches(&mut self, action: &str, mut branches: Vec<crate::UpdateBranch>) {
+        if !branches.is_empty() {
+            branches.sort_by_key(|branch| branch.offset);
+            self.locations
+                .update_branches
+                .insert(action.to_owned(), branches);
+        }
+    }
+
+    fn update_assignments(
+        &mut self,
+        ancestors: &mut Vec<bool>,
+        branches: &mut Vec<crate::UpdateBranch>,
+    ) -> Result<Vec<(String, Expr)>, Error> {
+        let mut assignments = Vec::new();
+        while !self.take("}") {
+            if self.peek() == "if" && self.peek_at(1) == "{" {
+                self.enter()?;
+                let group = self.conditional_updates(ancestors, branches);
+                self.depth -= 1;
+                assignments.extend(group?);
+            } else {
+                assignments.push(self.assignment(false, ancestors, branches)?);
+            }
+        }
+        Ok(assignments)
+    }
+
+    fn conditional_updates(
+        &mut self,
+        ancestors: &mut Vec<bool>,
+        branches: &mut Vec<crate::UpdateBranch>,
+    ) -> Result<Vec<(String, Expr)>, Error> {
+        let offset = self.offsets[self.position];
+        self.expect("if")?;
+        let start = self.nodes;
+        let condition = Formula::And(self.block()?);
+        let condition_nodes = self.nodes - start;
+        self.expect("then")?;
+        let then_unreachable = self.arm_expectation()?;
+        self.expect("{")?;
+        ancestors.push(true);
+        let yes = self.update_assignments(ancestors, branches)?;
+        ancestors.pop();
+        let (no, else_unreachable) =
+            if self.peek() == "else" && matches!(self.peek_at(1), "{" | "expect") {
+                self.position += 1;
+                let expectation = self.arm_expectation()?;
+                self.expect("{")?;
+                ancestors.push(false);
+                let no = self.update_assignments(ancestors, branches)?;
+                ancestors.pop();
+                (no, expectation)
+            } else {
+                (Vec::new(), None)
+            };
+        let mut pairs = BTreeMap::<String, [Option<Expr>; 2]>::new();
+        for (index, branch) in [yes, no].into_iter().enumerate() {
+            for (target, value) in branch {
+                let field = &mut pairs.entry(target.clone()).or_default()[index];
+                if field.replace(value).is_some() {
+                    return Err(Error::kind(format!("duplicate update of {target}")));
+                }
+            }
+        }
+        let Some(assignee) = pairs.keys().next() else {
+            return Err(Error::syntax("conditional update needs an assignment"));
+        };
+        if self.track_locations {
+            branches.push(crate::UpdateBranch {
+                offset,
+                assignee: assignee.clone(),
+                ancestors: ancestors.clone(),
+                sites: Vec::new(),
+                binding: false,
+                value_conditional: false,
+                unreachable_reasons: [then_unreachable, else_unreachable],
+            });
+        }
+        // Every expanded assignment carries the condition, a conditional
+        // expression, and possibly a reference to its previous value.
+        self.charge_nodes((condition_nodes + 3).saturating_mul(pairs.len()))?;
+        Ok(pairs
+            .into_iter()
+            .map(|(target, [yes, no])| {
+                let prior = || Expr::Name(target.clone());
+                let value = Expr::If(
+                    Box::new(condition.clone()),
+                    Box::new(yes.unwrap_or_else(prior)),
+                    Box::new(no.unwrap_or_else(prior)),
+                );
+                (target, value)
+            })
+            .collect())
+    }
+
+    fn arm_expectation(&mut self) -> Result<Option<String>, Error> {
+        if !self.take("expect") {
+            return Ok(None);
+        }
+        self.expect("unreachable")?;
+        let Some(reason) = self
+            .peek()
+            .strip_prefix('"')
+            .filter(|reason| !reason.trim().is_empty())
+        else {
+            return Err(Error::syntax(
+                "expected a nonempty quoted reason for the unreachable arm",
+            ));
+        };
+        let reason = reason.to_owned();
+        self.position += 1;
+        Ok(Some(reason))
+    }
+
+    fn assignment(
+        &mut self,
+        primed: bool,
+        ancestors: &[bool],
+        branches: &mut Vec<crate::UpdateBranch>,
+    ) -> Result<(String, Expr), Error> {
         let var = self.name()?;
         if primed {
             self.expect("'")?;
         }
         self.expect("=")?;
-        Ok((var, self.expression(0)?))
+        let mut locations = ValueBranches {
+            assignee: &var,
+            path: ancestors.iter().map(|&yes| usize::from(!yes)).collect(),
+            embedded: false,
+            branches,
+            allow_expectations: true,
+        };
+        let value = self.expression_located(0, Some(&mut locations))?;
+        Ok((var, value))
     }
 
-    /// implies (right) < or < and < not < atoms.
-    fn enter(&mut self) -> Result<(), Error> {
-        self.nodes += 1;
+    fn charge_nodes(&mut self, count: usize) -> Result<(), Error> {
+        self.nodes += count;
         if self.nodes > MAX_NODES {
             return Err(Error::syntax(format!(
                 "a declaration with more than {MAX_NODES} nodes"
             )));
         }
+        Ok(())
+    }
+
+    fn enter(&mut self) -> Result<(), Error> {
+        self.charge_nodes(1)?;
         self.depth += 1;
         if self.depth > MAX_DEPTH {
             return Err(Error::syntax(format!("nesting deeper than {MAX_DEPTH}")));
@@ -891,16 +1402,38 @@ impl Parser {
         }
         Ok(())
     }
+    /// iff (non-associative) < implies (right) < or < and < not < atoms.
     fn formula(&mut self) -> Result<Formula, Error> {
         self.enter()?;
-        let formula = self.implication();
+        let formula = self.equivalence();
         self.depth -= 1;
         formula
+    }
+    fn equivalence(&mut self) -> Result<Formula, Error> {
+        let start = self.nodes;
+        let left = self.implication()?;
+        if !self.take("iff") {
+            return Ok(left);
+        }
+        let right = self.implication()?;
+        if self.peek() == "iff" {
+            return Err(Error::syntax(
+                "use parentheses to group multiple iff operators",
+            ));
+        }
+        self.charge_nodes(self.nodes - start + 3)?;
+        Ok(Formula::And(vec![
+            Formula::Implies(Box::new(left.clone()), Box::new(right.clone())),
+            Formula::Implies(Box::new(right), Box::new(left)),
+        ]))
     }
     fn implication(&mut self) -> Result<Formula, Error> {
         let left = self.disjunction()?;
         if self.take("implies") {
-            return Ok(Formula::Implies(Box::new(left), Box::new(self.formula()?)));
+            self.enter()?;
+            let right = self.implication();
+            self.depth -= 1;
+            return Ok(Formula::Implies(Box::new(left), Box::new(right?)));
         }
         Ok(left)
     }
@@ -995,8 +1528,9 @@ impl Parser {
             // (plan 0103, found by the generated models).
             let comparison_follows = matches!(
                 self.peek(),
-                "in" | "=" | "!=" | "." | "+" | "-" | "&" | "->" | "*" | "<" | "<=" | ">" | ">="
-            ) || self.peek() == "not" && self.peek_at(1) == "in";
+                "in" | "=" | "!=" | "<" | "<=" | ">" | ">=" | "'"
+            ) || Self::infix(self.peek()).is_some()
+                || self.peek() == "not" && self.peek_at(1) == "in";
             match formula {
                 Ok(formula) if !comparison_follows => return Ok(formula),
                 _ => (self.position, self.depth, self.nodes) = start,
@@ -1005,6 +1539,8 @@ impl Parser {
         let integer = self.peek() == "#"
             || self.peek() == "-"
             || self.peek().bytes().all(|byte| byte.is_ascii_digit());
+        let start_nodes = self.nodes;
+        let left_start = self.offsets.get(self.position).copied();
         let left = self.expression(0)?;
         let ordering = match self.peek() {
             "<" => Some(IntCompare::Less),
@@ -1017,10 +1553,15 @@ impl Parser {
         };
         if let Some(operator) = ordering {
             self.position += 1;
+            let right_start = self.offsets.get(self.position).copied();
             let right = self.expression(0)?;
-            return Ok(Formula::Ints(operator, Self::int(left), Self::int(right)));
+            return Ok(Formula::Ints(
+                operator,
+                Self::int(left, left_start),
+                Self::int(right, right_start),
+            ));
         }
-        if integer {
+        if integer && self.peek() != "in" && !(self.peek() == "not" && self.peek_at(1) == "in") {
             return Err(Error::syntax(format!(
                 "expected an integer comparison, got {:?}",
                 self.peek()
@@ -1034,9 +1575,23 @@ impl Parser {
                 self.position += 1;
                 Compare::NotIn
             }
+            // Only a standalone call is a preservation condition. In a
+            // comparison, the same spelling can still be a variant tag.
             // A Bool expression on its own holds when it is true (plan
             // 0103); the checker rejects any other expression here.
             _ => {
+                let left = match left {
+                    Expr::Variant(name, Some(value)) if name == "unchanged" => {
+                        // Reuse the phase checker and charge for both operands.
+                        self.charge_nodes(self.nodes - start_nodes)?;
+                        return Ok(Formula::Compare(
+                            Compare::Equal,
+                            Expr::At(Phase::Before, value.clone()),
+                            Expr::At(Phase::After, value),
+                        ));
+                    }
+                    other => other,
+                };
                 return Ok(Formula::Compare(
                     Compare::Equal,
                     left,
@@ -1048,7 +1603,12 @@ impl Parser {
         Ok(Formula::Compare(operator, left, self.expression(0)?))
     }
     /// A record literal: every declared field once, in any order.
-    fn record(&mut self, name: String, declared: &[String]) -> Result<Expr, Error> {
+    fn record(
+        &mut self,
+        name: String,
+        declared: &[String],
+        mut locations: Option<&mut ValueBranches<'_>>,
+    ) -> Result<Expr, Error> {
         self.expect("{")?;
         let mut given: BTreeMap<String, Expr> = BTreeMap::new();
         while !self.take("}") {
@@ -1057,8 +1617,12 @@ impl Parser {
             }
             let field = self.name()?;
             self.expect(":")?;
-            let value = self.expression(0)?;
-            if !declared.contains(&field) || given.insert(field.clone(), value).is_some() {
+            let index = declared.iter().position(|candidate| candidate == &field);
+            let value = match index {
+                Some(index) => self.value_operand(0, index, locations.as_deref_mut())?,
+                None => self.expression(0)?,
+            };
+            if index.is_none() || given.insert(field.clone(), value).is_some() {
                 return Err(Error::syntax(format!("{name}: unexpected field {field}")));
             }
         }
@@ -1074,24 +1638,171 @@ impl Parser {
     }
     /// `#e` and literals keep their own forms, which the Alloy lowering
     /// writes as Alloy integers.
-    fn int(expression: Expr) -> Int {
+    fn int(expression: Expr, offset: Option<usize>) -> Int {
         match expression {
             Expr::Count(counted) => Int::Count(*counted),
             Expr::Literal(value) => Int::Literal(value),
-            other => Int::Value(other),
+            other => match offset {
+                Some(offset) => Int::LocatedValue(other, offset),
+                None => Int::Value(other),
+            },
         }
     }
-    /// `+ -` (1) < `&` (2) < `->` (3) < `.` (4).
+    fn infix(token: &str) -> Option<(SetOp, u8)> {
+        Some(match token {
+            "+" => (SetOp::Union, 1),
+            "++" => (SetOp::Override, 1),
+            "-" => (SetOp::Difference, 1),
+            "&" => (SetOp::Intersection, 2),
+            "*" => (SetOp::Multiply, 2),
+            "->" => (SetOp::Product, 3),
+            "." => (SetOp::Join, 4),
+            _ => return None,
+        })
+    }
+
     fn expression(&mut self, minimum: u8) -> Result<Expr, Error> {
+        self.expression_located(minimum, None)
+    }
+
+    fn expression_located(
+        &mut self,
+        minimum: u8,
+        locations: Option<&mut ValueBranches<'_>>,
+    ) -> Result<Expr, Error> {
         self.enter()?;
-        let expression = self.operand_chain(minimum);
+        let expression = self.operand_chain(minimum, locations);
         self.depth -= 1;
         expression
     }
-    fn operand_chain(&mut self, minimum: u8) -> Result<Expr, Error> {
+
+    fn value_arm(
+        &mut self,
+        taken: bool,
+        locations: Option<&mut ValueBranches<'_>>,
+    ) -> Result<(Expr, Option<String>), Error> {
+        let expectation = if self.peek() == "expect" && self.peek_at(1) == "unreachable" {
+            if !locations
+                .as_ref()
+                .is_some_and(|locations| locations.allow_expectations && !locations.embedded)
+            {
+                return Err(Error::syntax(
+                    "an unreachable expectation needs a direct conditional assignment",
+                ));
+            }
+            self.arm_expectation()?
+        } else {
+            None
+        };
+        let Some(locations) = locations else {
+            return Ok((self.expression(0)?, expectation));
+        };
+        locations.path.push(usize::from(!taken));
+        let value = self.expression_located(0, Some(locations));
+        locations.path.pop();
+        value.map(|value| (value, expectation))
+    }
+
+    fn value_operand(
+        &mut self,
+        minimum: u8,
+        index: usize,
+        locations: Option<&mut ValueBranches<'_>>,
+    ) -> Result<Expr, Error> {
+        let Some(locations) = locations else {
+            return self.expression(minimum);
+        };
+        let embedded = std::mem::replace(&mut locations.embedded, true);
+        locations.path.push(index);
+        let value = self.expression_located(minimum, Some(locations));
+        locations.path.pop();
+        locations.embedded = embedded;
+        value
+    }
+    fn starts_conditional(&self) -> bool {
+        if self.peek() != "if" || self.peek_at(1) != "{" || self.records.contains_key("if") {
+            return false;
+        }
+        let mut braces = 0;
+        for (offset, token) in self.tokens[self.position + 1..].iter().enumerate() {
+            match token.as_str() {
+                "{" => braces += 1,
+                "}" => {
+                    braces -= 1;
+                    if braces == 0 {
+                        return self.peek_at(offset + 2) == "then";
+                    }
+                }
+                _ => {}
+            }
+        }
+        false
+    }
+
+    fn operand_chain(
+        &mut self,
+        minimum: u8,
+        mut locations: Option<&mut ValueBranches<'_>>,
+    ) -> Result<Expr, Error> {
+        let first_branch = locations.as_ref().map(|locations| locations.branches.len());
         let mut length = 1;
-        let mut left = if self.take("(") {
-            let inner = self.expression(0)?;
+        let mut left = if self.starts_conditional() {
+            let offset = self.offsets[self.position];
+            self.expect("if")?;
+            let condition = Formula::And(self.block()?);
+            self.expect("then")?;
+            let (yes, then_unreachable) = self.value_arm(true, locations.as_deref_mut())?;
+            self.expect("else")?;
+            let (no, else_unreachable) = self.value_arm(false, locations.as_deref_mut())?;
+            if let Some(locations) = &mut locations
+                && (self.track_locations
+                    || then_unreachable.is_some()
+                    || else_unreachable.is_some())
+            {
+                let ancestors = if locations.embedded {
+                    Vec::new()
+                } else {
+                    locations.path.iter().map(|&index| index == 0).collect()
+                };
+                let mut branch = crate::UpdateBranch::from_selector(
+                    offset,
+                    locations.assignee.to_owned(),
+                    ancestors,
+                )
+                .with_value_conditional(true)
+                .with_unreachable_reasons([then_unreachable, else_unreachable]);
+                if locations.embedded {
+                    branch
+                        .sites
+                        .push((locations.assignee.to_owned(), locations.path.clone()));
+                }
+                locations.branches.push(branch);
+            }
+            Expr::If(Box::new(condition), Box::new(yes), Box::new(no))
+        } else if self.peek() == "bool"
+            && self.peek_at(1) == "{"
+            && !self.records.contains_key("bool")
+        {
+            self.position += 1;
+            self.uses_bool = true;
+            let condition = Formula::And(self.block()?);
+            self.charge_nodes(2)?;
+            Expr::If(
+                Box::new(condition),
+                Box::new(Expr::Name("true".into())),
+                Box::new(Expr::Name("false".into())),
+            )
+        } else if self.peek() == "select" && self.peek_at(1) == "(" && self.peek_at(3) == ":" {
+            self.position += 2;
+            let variable = self.name()?;
+            self.expect(":")?;
+            let sort = self.name()?;
+            self.expect("|")?;
+            let predicate = self.formula()?;
+            self.expect(")")?;
+            Expr::Select(variable, sort, Box::new(predicate))
+        } else if self.take("(") {
+            let inner = self.expression_located(0, locations.as_deref_mut())?;
             self.expect(")")?;
             inner
         } else if self.take("none") {
@@ -1101,7 +1812,11 @@ impl Parser {
         } else if self.take("false") {
             Expr::Name("false".into())
         } else if self.take("#") {
-            Expr::Count(Box::new(self.expression(4)?))
+            Expr::Count(Box::new(self.value_operand(
+                4,
+                0,
+                locations.as_deref_mut(),
+            )?))
         } else if self.peek() == "-" || self.peek().bytes().all(|byte| byte.is_ascii_digit()) {
             Expr::Literal(self.signed()?)
         } else {
@@ -1111,7 +1826,7 @@ impl Parser {
                 if !self.take("]") {
                     loop {
                         Self::chain(items.len() + 1)?;
-                        items.push(self.expression(0)?);
+                        items.push(self.value_operand(0, items.len(), locations.as_deref_mut())?);
                         if self.take("]") {
                             break;
                         }
@@ -1123,7 +1838,11 @@ impl Parser {
                 let argument = if self.peek() == ")" {
                     None
                 } else {
-                    Some(Box::new(self.expression(0)?))
+                    Some(Box::new(self.value_operand(
+                        0,
+                        0,
+                        locations.as_deref_mut(),
+                    )?))
                 };
                 let required = |arg: Option<Box<Expr>>| {
                     arg.ok_or_else(|| Error::syntax("expected an argument"))
@@ -1135,12 +1854,38 @@ impl Parser {
                     "append" | "at" => {
                         let first = required(argument)?;
                         self.expect(",")?;
-                        let second = Box::new(self.expression(0)?);
+                        let second =
+                            Box::new(self.value_operand(0, 1, locations.as_deref_mut())?);
                         if name == "append" {
                             Expr::Append(first, second)
                         } else {
                             Expr::Index(first, second)
                         }
+                    }
+                    operation @ ("take" | "removeAt" | "removeAll") if self.take(",") => {
+                        let seq = required(argument)?;
+                        let value = Box::new(self.value_operand(0, 1, locations.as_deref_mut())?);
+                        match operation {
+                            "take" => Expr::Take(seq, value),
+                            "removeAt" => Expr::RemoveAt(seq, value),
+                            _ => Expr::RemoveAll(seq, value),
+                        }
+                    }
+                    "reachableFrom" if self.take(",") => Expr::ReachableFrom(
+                        required(argument)?,
+                        Box::new(self.value_operand(0, 1, locations.as_deref_mut())?),
+                    ),
+                    "union" | "difference" | "withoutKeys" if self.take(",") => {
+                        let operator = match name.as_str() {
+                            "union" => SetOp::SetUnion,
+                            "difference" => SetOp::SetDifference,
+                            _ => SetOp::WithoutKeys,
+                        };
+                        Expr::Binary(
+                            operator,
+                            required(argument)?,
+                            Box::new(self.value_operand(0, 1, locations.as_deref_mut())?),
+                        )
                     }
                     "payload" => {
                         let first = required(argument)?;
@@ -1153,7 +1898,9 @@ impl Parser {
                 call
             } else {
                 match self.records.get(&name).cloned() {
-                    Some(declared) if self.peek() == "{" => self.record(name, &declared)?,
+                    Some(declared) if self.peek() == "{" => {
+                        self.record(name, &declared, locations.as_deref_mut())?
+                    }
                     _ => Expr::Name(name),
                 }
             }
@@ -1161,23 +1908,18 @@ impl Parser {
         if self.take("'") {
             left = Expr::At(Phase::After, Box::new(left));
         }
-        loop {
-            let (operator, precedence) = match self.peek() {
-                "+" => (SetOp::Union, 1),
-                "-" => (SetOp::Difference, 1),
-                "&" => (SetOp::Intersection, 2),
-                "*" => (SetOp::Multiply, 2),
-                "->" => (SetOp::Product, 3),
-                "." => (SetOp::Join, 4),
-                _ => break,
-            };
+        while let Some((operator, precedence)) = Self::infix(self.peek()) {
             if precedence < minimum {
                 break;
             }
             self.position += 1;
             length += 1;
             Self::chain(length)?;
-            let right = self.expression(precedence + 1)?;
+            if let (Some(locations), Some(first_branch)) = (locations.as_deref_mut(), first_branch)
+            {
+                locations.wrap_left_operand(first_branch)?;
+            }
+            let right = self.value_operand(precedence + 1, 1, locations.as_deref_mut())?;
             left = Expr::Binary(operator, Box::new(left), Box::new(right));
         }
         Ok(left)
@@ -1214,12 +1956,110 @@ impl Type {
 /// Names bound by parameters and quantifiers, with their sorts.
 type Bound = BTreeMap<String, String>;
 
+type BindingScope<'a> = (&'a BTreeMap<String, BindingValue>, &'a Cell<usize>);
+
+#[derive(Clone, Copy)]
+enum BindingSite {
+    Update,
+    Transition,
+    Derivation,
+}
+
+impl BindingSite {
+    fn expansion_limit(self) -> &'static str {
+        match self {
+            Self::Update => "expanded update bindings exceed the declaration size limit",
+            Self::Transition => "expanded transition bindings exceed the declaration size limit",
+            Self::Derivation => "expanded derivations exceed the model size limit",
+        }
+    }
+}
+
+struct BindingValue {
+    expression: Expr,
+    nodes: usize,
+}
+
+type StateReads = RefCell<BTreeMap<usize, BTreeSet<String>>>;
+
+#[derive(Clone, Copy)]
+struct ReadLocation<'a> {
+    offset: &'a Cell<Option<usize>>,
+    reads: &'a StateReads,
+}
+
+impl ReadLocation<'_> {
+    fn record(self, name: &str) {
+        if let Some(offset) = self.offset.get() {
+            self.reads
+                .borrow_mut()
+                .entry(offset)
+                .or_default()
+                .insert(name.to_owned());
+        }
+    }
+}
+
+#[derive(Clone)]
 struct Checker<'a> {
     model: &'a Model,
     transition: bool,
-    sigs: BTreeSet<&'a str>,
+    source_calls: bool,
+    sigs: &'a BTreeSet<&'a str>,
+    singletons: Vec<Expr>,
+    local_bindings: Option<(BindingScope<'a>, BindingSite)>,
+    derived_bindings: Option<BindingScope<'a>>,
+    // Set only while checking an already resolved expression expanded at a use site.
+    expanded_binders: Option<BTreeMap<String, String>>,
+    read_location: Option<ReadLocation<'a>>,
+    operand_error: &'a Cell<Option<usize>>,
 }
 impl Checker<'_> {
+    fn binding(&self, name: &str) -> Option<(&BindingValue, &Cell<usize>, BindingSite)> {
+        [
+            self.local_bindings,
+            self.derived_bindings
+                .map(|scope| (scope, BindingSite::Derivation)),
+        ]
+        .into_iter()
+        .flatten()
+        .find_map(|((values, remaining), site)| Some((values.get(name)?, remaining, site)))
+    }
+
+    fn local_values(
+        &self,
+        definitions: Option<LocalDefinitions>,
+        bound: &Bound,
+        remaining: &Cell<usize>,
+        site: BindingSite,
+    ) -> Result<BTreeMap<String, BindingValue>, Error> {
+        let mut locals = BTreeMap::new();
+        if let Some(LocalDefinitions {
+            definitions,
+            remaining: budget,
+        }) = definitions
+        {
+            remaining.set(budget);
+            for (name, mut expression) in definitions {
+                let scoped = Checker {
+                    local_bindings: Some(((&locals, remaining), site)),
+                    ..self.clone()
+                };
+                scoped.fresh(&name, bound)?;
+                scoped.expression(&mut expression, bound, true)?;
+                let context = if matches!(site, BindingSite::Transition) {
+                    "transition expression"
+                } else {
+                    "update expression"
+                };
+                let nodes = binding_value_nodes(&expression, context)?;
+                crate::numeric::validate_binding(self.model, &expression)?;
+                locals.insert(name, BindingValue { expression, nodes });
+            }
+        }
+        Ok(locals)
+    }
+
     /// Sorts a join may connect: one is a subsort of the other.
     fn compatible(&self, a: &str, b: &str) -> bool {
         self.model.subsort(a, b) || self.model.subsort(b, a)
@@ -1254,40 +2094,64 @@ impl Checker<'_> {
     /// Both sides of a set operation or comparison have one type, up to
     /// the sum sorts both belong to (plan 0100).
     fn same(&self, left: Type, right: Type, what: &str) -> Result<Type, Error> {
-        let joined = |a: &str, b: &str| self.model.join_sorts(a, b);
-        match (left, right) {
-            (Type::Any, other) | (other, Type::Any) => Ok(other),
-            (left, right) if left == right => Ok(left),
-            (Type::Set(a), Type::Set(b)) if joined(&a, &b).is_some() => {
-                Ok(Type::Set(joined(&a, &b).expect("joined")))
+        Self::combine_types(left, right, what, |a, b| self.model.join_sorts(a, b))
+    }
+
+    fn intersection(&self, left: Type, right: Type) -> Result<Type, Error> {
+        Self::combine_types(left, right, "set operation", |a, b| {
+            if self.model.subsort(a, b) {
+                Some(a.to_owned())
+            } else if self.model.subsort(b, a) {
+                Some(b.to_owned())
+            } else {
+                self.model.join_sorts(a, b)
             }
-            (Type::Pair(a, b), Type::Pair(c, d))
-                if joined(&a, &c).is_some() && joined(&b, &d).is_some() =>
-            {
-                Ok(Type::Pair(
-                    joined(&a, &c).expect("joined"),
-                    joined(&b, &d).expect("joined"),
-                ))
-            }
-            (left, right) if left.arity() != right.arity() => {
-                Err(Error::kind(format!("{what} of different arities")))
-            }
-            (left, right) => Err(Error::kind(format!(
+        })
+    }
+
+    fn combine_types(
+        left: Type,
+        right: Type,
+        what: &str,
+        sort: impl Fn(&str, &str) -> Option<String>,
+    ) -> Result<Type, Error> {
+        let combined = match (&left, &right) {
+            (Type::Any, _) => return Ok(right),
+            (_, Type::Any) => return Ok(left),
+            (Type::Set(a), Type::Set(b)) => sort(a, b).map(Type::Set),
+            (Type::Pair(a, b), Type::Pair(c, d)) => sort(a, c)
+                .zip(sort(b, d))
+                .map(|(from, to)| Type::Pair(from, to)),
+            _ => return Err(Error::kind(format!("{what} of different arities"))),
+        };
+        combined.ok_or_else(|| {
+            Error::kind(format!(
                 "{what} of different sorts: {} and {}",
                 left.describe(),
                 right.describe()
-            ))),
-        }
+            ))
+        })
     }
-    /// Whether an expression has exactly one element in every state, so
-    /// arithmetic and integer comparisons on it are total (plan 0103).
+    /// Whether an expression has exactly one element under the checked guards.
     fn singular(&self, expression: &Expr, bound: &Bound) -> bool {
+        if self.singletons.contains(expression) {
+            return true;
+        }
         match expression {
             Expr::Literal(_) | Expr::Count(_) | Expr::Arith(..) => true,
-            Expr::At(_, expr) => self.singular(expr, bound),
+            Expr::At(phase, expr) => self.state_checker(*phase).singular(expr, bound),
+            Expr::If(condition, yes, no) => {
+                let mut branch = self.clone();
+                branch.assume(condition, bound);
+                branch.singular(yes, bound) && self.singular(no, bound)
+            }
             Expr::Sequence(_, items) => items.iter().all(|item| self.singular(item, bound)),
-            Expr::Append(left, right) => self.singular(left, bound) && self.singular(right, bound),
-            Expr::Length(value) => self.singular(value, bound),
+            Expr::Append(left, right) | Expr::Take(left, right) | Expr::RemoveAt(left, right) => {
+                self.singular(left, bound) && self.singular(right, bound)
+            }
+            Expr::Tail(value) | Expr::Length(value) | Expr::RemoveAll(value, _) => {
+                self.singular(value, bound)
+            }
             Expr::Variant(_, value) => value.as_ref().is_none_or(|v| self.singular(v, bound)),
             Expr::Name(name) => {
                 bound.contains_key(name)
@@ -1303,34 +2167,122 @@ impl Checker<'_> {
                     })
             }
             Expr::Record(_, values) => values.iter().all(|value| self.singular(value, bound)),
+            Expr::Field(receiver, _) => self.singular(receiver, bound),
             Expr::Binary(SetOp::Join, left, right) => {
                 self.singular(left, bound)
                     && match right.as_ref() {
-                        Expr::Name(name) => {
-                            self.model.field(name).is_some()
-                                || self.model.relation(name).is_some_and(|relation| {
-                                    matches!(
-                                        relation.shape,
-                                        Shape::Binary {
-                                            mult: Mult::One,
-                                            ..
-                                        }
-                                    )
-                                })
-                        }
+                        Expr::Name(name) => self.model.relation(name).is_some_and(|relation| {
+                            matches!(
+                                relation.shape,
+                                Shape::Binary {
+                                    mult: Mult::One,
+                                    ..
+                                }
+                            )
+                        }),
                         _ => false,
                     }
             }
             _ => false,
         }
     }
+    fn state_checker(&self, phase: Phase) -> Self {
+        let singletons = self
+            .singletons
+            .iter()
+            .filter_map(|value| match (phase, value) {
+                (Phase::After, Expr::At(Phase::After, inner)) => Some(inner.as_ref().clone()),
+                (Phase::Before, Expr::At(Phase::After, _)) | (Phase::After, _) => None,
+                (Phase::Before, value) => Some(value.clone()),
+            })
+            .collect();
+        Self {
+            transition: false,
+            singletons,
+            expanded_binders: self.expanded_binders.clone(),
+            ..*self
+        }
+    }
+
+    fn at_most_one(&self, expression: &Expr, bound: &Bound) -> bool {
+        match expression {
+            Expr::At(phase, expr) => self.state_checker(*phase).at_most_one(expr, bound),
+            Expr::Field(receiver, _) => {
+                self.at_most_one(receiver, bound) || self.singular(receiver, bound)
+            }
+            Expr::Name(name) => self.model.relation(name).is_some_and(|relation| {
+                matches!(
+                    relation.shape,
+                    Shape::Unary {
+                        mult: Mult::Lone,
+                        ..
+                    }
+                )
+            }),
+            Expr::Binary(SetOp::Join, key, relation) => {
+                self.singular(key, bound)
+                    && matches!(relation.as_ref(), Expr::Name(name)
+                    if self.model.relation(name).is_some_and(|relation| {
+                        matches!(relation.shape, Shape::Binary { mult: Mult::Lone, .. })
+                    }))
+            }
+            Expr::Index(..) => true,
+            _ => false,
+        }
+    }
+
+    fn assume(&mut self, formula: &Formula, bound: &Bound) {
+        match formula {
+            Formula::And(parts) => {
+                for part in parts {
+                    self.assume(part, bound);
+                }
+            }
+            Formula::Mult(Mult::Some, expression) if self.at_most_one(expression, bound) => {
+                self.singletons.push(expression.clone());
+            }
+            Formula::Mult(Mult::One, expression) => {
+                self.singletons.push(expression.clone());
+            }
+            _ => {}
+        }
+    }
+
+    fn guard(&mut self, formula: &mut Formula, bound: &Bound, vars: bool) -> Result<(), Error> {
+        if let Formula::And(parts) = formula {
+            for part in parts {
+                self.guard(part, bound, vars)?;
+            }
+        } else {
+            self.formula(formula, bound, vars)?;
+            self.assume(formula, bound);
+        }
+        Ok(())
+    }
+
     fn integer(&self, expression: &Expr, bound: &Bound, what: &str) -> Result<(), Error> {
         if !self.singular(expression, bound) {
+            let detail = if self.at_most_one(expression, bound) {
+                "This value may be empty. Check presence with `some` before using it"
+            } else {
+                "This value may be empty or contain several integers"
+            };
             return Err(Error::kind(format!(
-                "{what} needs exactly one integer on each side; this one may be empty or several"
+                "{what} needs exactly one integer on each side. {detail}"
             )));
         }
         Ok(())
+    }
+    fn comparison_operand(
+        &self,
+        expression: &mut Expr,
+        bound: &Bound,
+        vars: bool,
+    ) -> Result<(), Error> {
+        if !self.expression(expression, bound, vars)?.numeric() {
+            return Err(Error::kind("an integer comparison needs integers"));
+        }
+        self.integer(expression, bound, "an integer comparison")
     }
     fn sequence_type(
         &self,
@@ -1393,9 +2345,7 @@ impl Checker<'_> {
                 Type::Set(if *value >= 0 { NAT } else { INT }.to_owned())
             }
             Expr::Count(counted) => {
-                if matches!(self.expression(counted, bound, vars)?, Type::Pair(..)) {
-                    return Err(Error::kind("# counts only sets"));
-                }
+                self.expression(counted, bound, vars)?;
                 int()
             }
             Expr::Arith(_, left, right) => {
@@ -1407,23 +2357,25 @@ impl Checker<'_> {
                 }
                 int()
             }
+            Expr::If(condition, yes, no) => {
+                let mut branch = self.clone();
+                branch.guard(condition, bound, vars)?;
+                let yes = branch.expression(yes, bound, vars)?;
+                let no = self.expression(no, bound, vars)?;
+                self.same(yes, no, "conditional branches")?
+            }
+            Expr::Select(variable, sort, predicate) => {
+                self.check_atom_sort(sort)?;
+                self.bound_formula(variable, sort, predicate, bound, vars)?;
+                Type::Set(sort.clone())
+            }
             Expr::At(phase, inner) => {
                 if !self.transition {
                     return Err(Error::kind(
                         "expected a state expression; before, after and prime are only allowed in a transition property, without nesting",
                     ));
                 }
-                if matches!(inner.as_ref(), Expr::Name(name) if self.model.field(name).is_some() && !bound.contains_key(name))
-                {
-                    return Err(Error::kind(
-                        "wrap the whole record projection in before or after",
-                    ));
-                }
-                let state = Checker {
-                    transition: false,
-                    model: self.model,
-                    sigs: self.sigs.clone(),
-                };
+                let state = self.state_checker(*phase);
                 let ty = state.expression(inner, bound, vars)?;
                 if *phase == Phase::Before {
                     *expression = std::mem::replace(inner.as_mut(), Expr::None);
@@ -1451,6 +2403,85 @@ impl Checker<'_> {
                 self.value_of(item, &seq.element, bound, vars)?;
                 Type::Set(seq.name.clone())
             }
+            Expr::Tail(seq) => Type::Set(self.sequence_type(seq, bound, vars)?.name.clone()),
+            Expr::Take(seq, count) => {
+                let seq = self.sequence_type(seq, bound, vars)?;
+                if !self.expression(count, bound, vars)?.numeric() || !self.singular(count, bound) {
+                    return Err(Error::kind("take needs one integer count"));
+                }
+                Type::Set(seq.name.clone())
+            }
+            Expr::RemoveAt(seq, index) => {
+                let seq = self.sequence_type(seq, bound, vars)?;
+                if !self.expression(index, bound, vars)?.numeric() || !self.singular(index, bound) {
+                    return Err(Error::kind("removeAt needs one integer index"));
+                }
+                Type::Set(seq.name.clone())
+            }
+            Expr::RemoveAll(seq, excluded) => {
+                let seq = self.sequence_type(seq, bound, vars)?;
+                let excluded = self.expression(excluded, bound, vars)?;
+                self.same(Type::Set(seq.element.clone()), excluded, "removeAll")?;
+                Type::Set(seq.name.clone())
+            }
+            Expr::Keys(relation) => match self.expression(relation, bound, vars)? {
+                Type::Pair(from, _) => Type::Set(from),
+                _ => return Err(Error::kind("keys needs one binary relation")),
+            },
+            Expr::Closure(edges) => match self.expression(edges, bound, vars)? {
+                Type::Pair(from, to)
+                    if self.sigs.contains(from.as_str())
+                        && self.sigs.contains(to.as_str())
+                        && !self.model.is_value(&from)
+                        && !self.model.is_value(&to)
+                        && self.compatible(&from, &to) =>
+                {
+                    Type::Pair(from, to)
+                }
+                _ => {
+                    return Err(Error::kind(
+                        "closure needs a binary relation on comparable atom sorts",
+                    ));
+                }
+            },
+            Expr::ReachableFrom(roots, edges) => {
+                let roots = self.expression(roots, bound, vars)?;
+                let edges = self.expression(edges, bound, vars)?;
+                match edges {
+                    Type::Pair(from, to)
+                        if self.sigs.contains(from.as_str())
+                            && self.sigs.contains(to.as_str())
+                            && (from == to
+                                || (self.compatible(&from, &to)
+                                    && !self.model.is_value(&from)
+                                    && !self.model.is_value(&to))) =>
+                    {
+                        let carrier = if self.model.subsort(&from, &to) {
+                            &to
+                        } else {
+                            &from
+                        };
+                        if !self.fits(&roots, &Type::Set(carrier.clone())) {
+                            return Err(Error::kind(
+                                "reachableFrom roots must fit the graph's atom sort",
+                            ));
+                        }
+                        self.same(roots, Type::Set(to), "reachableFrom")?
+                    }
+                    Type::Any
+                        if matches!(&roots, Type::Any)
+                            || matches!(&roots, Type::Set(sort) if self.sigs.contains(sort.as_str())) =>
+                    {
+                        roots
+                    }
+                    _ => {
+                        return Err(Error::kind(
+                            "reachableFrom needs atom roots and a relation on comparable atom sorts",
+                        ));
+                    }
+                }
+            }
+            Expr::Elements(seq) => Type::Set(self.sequence_type(seq, bound, vars)?.element.clone()),
             Expr::Length(seq) => {
                 self.sequence_type(seq, bound, vars)?;
                 int()
@@ -1461,6 +2492,43 @@ impl Checker<'_> {
                     return Err(Error::kind("at needs one integer index"));
                 }
                 Type::Set(seq.element.clone())
+            }
+            // Resolve an ordinary call after seeing all variant declarations.
+            Expr::Variant(tag, payload)
+                if self.source_calls
+                    && matches!(tag.as_str(), "tail" | "elements")
+                    && self.model.case(tag).is_none() =>
+            {
+                let seq = payload
+                    .as_mut()
+                    .ok_or_else(|| Error::kind(format!("{tag} needs one sequence argument")))?;
+                let ty = self.sequence_type(seq, bound, vars)?;
+                let arg = payload.take().expect("checked argument");
+                let (lowered, sort) = if tag == "tail" {
+                    (Expr::Tail(arg), &ty.name)
+                } else {
+                    (Expr::Elements(arg), &ty.element)
+                };
+                *expression = lowered;
+                Type::Set(sort.clone())
+            }
+            Expr::Variant(tag, payload)
+                if self.source_calls && tag == "keys" && self.model.case(tag).is_none() =>
+            {
+                let relation = payload
+                    .take()
+                    .ok_or_else(|| Error::kind("keys needs one binary relation"))?;
+                *expression = Expr::Keys(relation);
+                return self.expression(expression, bound, vars);
+            }
+            Expr::Variant(tag, payload)
+                if self.source_calls && tag == "closure" && self.model.case(tag).is_none() =>
+            {
+                let edges = payload
+                    .take()
+                    .ok_or_else(|| Error::kind("closure needs one relation argument"))?;
+                *expression = Expr::Closure(edges);
+                return self.expression(expression, bound, vars);
             }
             Expr::Variant(tag, payload) => {
                 let (variant, case) = self
@@ -1510,8 +2578,38 @@ impl Checker<'_> {
                 }
                 Type::Set(name.clone())
             }
+            Expr::Field(receiver, field) => {
+                let ty = self.expression(receiver, bound, vars)?;
+                self.field_projection(&ty, field, bound)
+                    .ok_or_else(|| Error::kind(format!("{} has no field {field}", ty.describe())))?
+            }
             Expr::Name(name) => {
-                if let Some(sort) = bound.get(name) {
+                if let Some(renamed) = self.expanded_binders.as_ref().and_then(|map| map.get(name))
+                {
+                    name.clone_from(renamed);
+                }
+                if let Some((value, remaining, site)) = self.binding(name) {
+                    if matches!(site, BindingSite::Transition) && !self.transition {
+                        return Err(Error::kind(format!(
+                            "transition binding {name} must be used outside before/after"
+                        )));
+                    }
+                    remaining.set(
+                        remaining
+                            .get()
+                            .checked_sub(value.nodes)
+                            .ok_or_else(|| Error::syntax(site.expansion_limit()))?,
+                    );
+                    *expression = value.expression.clone();
+                    // Resolve the expanded expression in the same scope as the wire IR.
+                    return Checker {
+                        local_bindings: None,
+                        derived_bindings: None,
+                        expanded_binders: Some(BTreeMap::new()),
+                        ..self.clone()
+                    }
+                    .expression(expression, bound, vars);
+                } else if let Some(sort) = bound.get(name) {
                     Type::Set(sort.clone())
                 } else if self.model.is_value(name) {
                     return Err(Error::kind(format!(
@@ -1525,15 +2623,26 @@ impl Checker<'_> {
                     if relation.var && !vars {
                         return Err(Error::kind(format!("fact refers to the var {name}")));
                     }
+                    if relation.var
+                        && let Some(location) = self.read_location
+                    {
+                        location.record(name);
+                    }
                     Self::shape(&relation.shape)
-                } else if let Some((record, index)) = self.model.field(name) {
-                    Type::Pair(record.name.clone(), record.fields[index].1.clone())
                 } else {
                     return Err(Error::kind(format!("unknown name {name}")));
                 }
             }
             Expr::Binary(operator, left_expression, right_expression) => {
                 let left = self.expression(left_expression, bound, vars)?;
+                if *operator == SetOp::Join
+                    && let Expr::Name(field) = right_expression.as_ref()
+                    && let Some(projected) = self.field_projection(&left, field, bound)
+                {
+                    let receiver = std::mem::replace(left_expression.as_mut(), Expr::None);
+                    *expression = Expr::Field(Box::new(receiver), field.clone());
+                    return Ok(projected);
+                }
                 let right = self.expression(right_expression, bound, vars)?;
                 // `+`, `-` and `*` between integers are arithmetic (plan 0103).
                 let arith = match operator {
@@ -1559,6 +2668,26 @@ impl Checker<'_> {
                     return Err(Error::kind("* needs integers"));
                 }
                 match operator {
+                    SetOp::Intersection => self.intersection(left, right)?,
+                    SetOp::WithoutKeys => match left {
+                        Type::Pair(from, to) => {
+                            self.same(Type::Set(from.clone()), right, "withoutKeys")?;
+                            Type::Pair(from, to)
+                        }
+                        Type::Any if matches!(right, Type::Set(_) | Type::Any) => Type::Any,
+                        _ => {
+                            return Err(Error::kind(
+                                "withoutKeys needs a binary relation and a set of keys",
+                            ));
+                        }
+                    },
+                    SetOp::Override => {
+                        let relation = self.same(left, right, "override")?;
+                        if !matches!(relation, Type::Pair(..)) {
+                            return Err(Error::kind("override needs a binary relation"));
+                        }
+                        relation
+                    }
                     SetOp::Product => match (left, right) {
                         (Type::Pair(..), _) | (_, Type::Pair(..)) => {
                             return Err(Error::kind("product above arity two"));
@@ -1598,6 +2727,25 @@ impl Checker<'_> {
             }
         })
     }
+    fn field_projection(&self, receiver: &Type, field: &str, bound: &Bound) -> Option<Type> {
+        let field_sort = |sort| {
+            let record = self.model.record(sort)?;
+            let index = record.field_index(field)?;
+            Some(record.fields[index].1.clone())
+        };
+        match receiver {
+            Type::Set(sort) => Some(Type::Set(field_sort(sort)?)),
+            Type::Pair(key, sort) => Some(Type::Pair(key.clone(), field_sort(sort)?)),
+            Type::Any => (!bound.contains_key(field)
+                && self.binding(field).is_none()
+                && !self.sigs.contains(field)
+                && self.model.member(field).is_none()
+                && self.model.relation(field).is_none()
+                && self.model.field(field).is_some())
+            .then_some(Type::Any),
+        }
+    }
+
     fn formula(&self, formula: &mut Formula, bound: &Bound, vars: bool) -> Result<(), Error> {
         match formula {
             Formula::Compare(operator, left, right) => {
@@ -1618,9 +2766,7 @@ impl Checker<'_> {
                 for int in [left, right] {
                     match int {
                         Int::Count(expression) => {
-                            if matches!(self.expression(expression, bound, vars)?, Type::Pair(..)) {
-                                return Err(Error::kind("# counts only sets"));
-                            }
+                            self.expression(expression, bound, vars)?;
                         }
                         // Counts are Alloy integers of a few bits; integer
                         // values have their own scope (plan 0103).
@@ -1637,10 +2783,16 @@ impl Checker<'_> {
                             }
                         }
                         Int::Value(expression) => {
-                            if !self.expression(expression, bound, vars)?.numeric() {
-                                return Err(Error::kind("an integer comparison needs integers"));
+                            self.comparison_operand(expression, bound, vars)?
+                        }
+                        Int::LocatedValue(expression, offset) => {
+                            if let Err(error) = self.comparison_operand(expression, bound, vars) {
+                                if self.operand_error.get().is_none() {
+                                    self.operand_error.set(Some(*offset));
+                                }
+                                return Err(error);
                             }
-                            self.integer(expression, bound, "an integer comparison")?;
+                            *int = Int::Value(std::mem::replace(expression, Expr::None));
                         }
                     }
                 }
@@ -1650,38 +2802,90 @@ impl Checker<'_> {
                 self.expression(expression, bound, vars)?;
             }
             Formula::Not(inner) => self.formula(inner, bound, vars)?,
-            Formula::And(parts) => {
-                for part in parts {
-                    self.formula(part, bound, vars)?;
-                }
-            }
-            Formula::Or(left, right) | Formula::Implies(left, right) => {
+            Formula::And(_) => self.clone().guard(formula, bound, vars)?,
+            Formula::Or(left, right) => {
                 self.formula(left, bound, vars)?;
                 self.formula(right, bound, vars)?;
             }
+            Formula::Implies(left, right) => {
+                let mut branch = self.clone();
+                branch.guard(left, bound, vars)?;
+                branch.formula(right, bound, vars)?;
+            }
             Formula::Quantified(_, variable, sig, body) => {
-                if self.model.is_value(sig) {
-                    return Err(Error::kind(format!(
-                        "quantifying over {sig}: only atoms are quantified, values have no fixed set"
-                    )));
+                if numeric_sort(sig) {
+                    let (_, high) = self
+                        .model
+                        .scope
+                        .ints
+                        .ok_or_else(|| Error::kind("Int and Nat need a scope Int = lo..hi"))?;
+                    if sig == NAT && high < 0 {
+                        return Err(Error::kind(
+                            "the Int scope needs a nonnegative value for Nat",
+                        ));
+                    }
+                } else {
+                    self.check_atom_sort(sig)?;
                 }
-                if !self.sigs.contains(sig.as_str()) {
-                    return Err(Error::kind(format!("unknown sig {sig}")));
-                }
-                self.fresh(variable, bound)?;
-                let mut inner = bound.clone();
-                inner.insert(variable.clone(), sig.clone());
-                self.formula(body, &inner, vars)?;
+                self.bound_formula(variable, sig, body, bound, vars)?;
             }
         }
         Ok(())
     }
+    fn check_atom_sort(&self, sig: &str) -> Result<(), Error> {
+        if self.model.is_value(sig) {
+            return Err(Error::kind(format!(
+                "quantifying over {sig}: only atoms are quantified, values have no fixed set"
+            )));
+        }
+        if !self.sigs.contains(sig) {
+            return Err(Error::kind(format!("unknown sig {sig}")));
+        }
+        Ok(())
+    }
+    fn bound_formula(
+        &self,
+        variable: &mut String,
+        sort: &str,
+        body: &mut Formula,
+        bound: &Bound,
+        vars: bool,
+    ) -> Result<(), Error> {
+        let derived_name = |name: &str| {
+            self.model
+                .derivations
+                .iter()
+                .any(|(declared, _)| declared == name)
+        };
+        let mut scoped;
+        let checker = if self.expanded_binders.is_some()
+            && (bound.contains_key(variable) || derived_name(variable))
+        {
+            let name = (0..)
+                .map(|index| format!("_rmodel_bound_{index}"))
+                .find(|name| self.fresh(name, bound).is_ok() && !derived_name(name))
+                .expect("infinitely many possible binding names");
+            scoped = self.clone();
+            scoped
+                .expanded_binders
+                .as_mut()
+                .expect("checking an expansion")
+                .insert(std::mem::replace(variable, name.clone()), name);
+            &scoped
+        } else {
+            self.fresh(variable, bound)?;
+            self
+        };
+        let mut inner = bound.clone();
+        inner.insert(variable.clone(), sort.to_owned());
+        checker.formula(body, &inner, vars)
+    }
     fn fresh(&self, name: &str, bound: &Bound) -> Result<(), Error> {
         if bound.contains_key(name)
+            || self.binding(name).is_some()
             || self.sigs.contains(name)
             || self.model.member(name).is_some()
             || self.model.relation(name).is_some()
-            || self.model.field(name).is_some()
         {
             return Err(Error::kind(format!("{name} shadows another name")));
         }
@@ -1689,124 +2893,269 @@ impl Checker<'_> {
     }
 }
 
-pub(crate) fn parse(source: &str) -> Result<Model, Error> {
+pub(crate) fn parse(
+    source: &str,
+    track_locations: bool,
+) -> Result<crate::LocatedModel, ParseDiagnostic> {
     if source.len() > 1 << 20 {
-        return Err(Error::syntax("source exceeds 1 MiB"));
+        return Err(ParseDiagnostic {
+            error: Error::syntax("source exceeds 1 MiB"),
+            offset: None,
+        });
     }
-    let tokens = tokens(source)?;
+    let (tokens, offsets) = tokens(source)?;
     let boolean = tokens
         .iter()
         .any(|token| [BOOL, "true", "false"].contains(&token.as_str()));
     let mut parser = Parser {
         tokens,
+        offsets,
+        locations: Locations::default(),
+        track_locations,
+        uses_bool: boolean,
         position: 0,
         depth: 0,
         nodes: 0,
         records: BTreeMap::new(),
     };
-    let mut model = parser.model()?;
-    if boolean {
+    let mut model = parser.model().map_err(|error| ParseDiagnostic {
+        error,
+        offset: Some(
+            parser
+                .offsets
+                .get(parser.position)
+                .copied()
+                .unwrap_or_else(|| source.chars().count()),
+        ),
+    })?;
+    if parser.uses_bool {
         model
             .enums
             .push((BOOL.to_owned(), vec!["false".into(), "true".into()]));
     }
-    check(&mut model)?;
-    Ok(model)
+    let state_reads = StateReads::default();
+    check(
+        &mut model,
+        true,
+        &mut parser.locations,
+        track_locations.then_some(&state_reads),
+    )
+    .map_err(|error| ParseDiagnostic {
+        error,
+        offset: parser
+            .locations
+            .operand_error
+            .get()
+            .or(parser.locations.current.get()),
+    })?;
+    Ok(crate::LocatedModel {
+        model,
+        declarations: parser.locations.named,
+        state_reads: state_reads.into_inner(),
+        update_branches: parser.locations.update_branches,
+    })
 }
 
-/// Type-checks a syntax tree built without the parser, such as one read
-/// from the JSON IR (plan 0108), with the parser's limits on its size.
-/// Bool is added when the tree mentions it, as the parser does.
-pub(crate) fn validate(mut model: Model) -> Result<Model, Error> {
-    fn expr(
-        e: &Expr,
-        nodes: &mut usize,
-        depth: usize,
-        names: &mut BTreeSet<String>,
-    ) -> Result<(), Error> {
-        *nodes += 1;
-        if *nodes > MAX_NODES * 16 || depth > MAX_DEPTH {
-            return Err(Error::syntax("the IR exceeds the parser's size limits"));
-        }
-        match e {
-            Expr::Name(name) => {
-                names.insert(name.clone());
-            }
-            Expr::None | Expr::Literal(_) => {}
-            Expr::Length(inner) | Expr::Payload(inner, _) | Expr::At(_, inner) => {
-                expr(inner, nodes, depth + 1, names)?
-            }
-            Expr::Append(left, right) | Expr::Index(left, right) => {
-                expr(left, nodes, depth + 1, names)?;
-                expr(right, nodes, depth + 1, names)?;
-            }
-            Expr::Sequence(_, items) => {
-                for item in items {
-                    expr(item, nodes, depth + 1, names)?;
-                }
-            }
-            Expr::Variant(_, payload) => {
-                if let Some(value) = payload {
-                    expr(value, nodes, depth + 1, names)?;
-                }
-            }
-            Expr::Count(inner) => expr(inner, nodes, depth + 1, names)?,
-            Expr::Binary(_, l, r) | Expr::Arith(_, l, r) => {
-                expr(l, nodes, depth + 1, names)?;
-                expr(r, nodes, depth + 1, names)?;
-            }
-            Expr::Record(name, values) => {
-                names.insert(name.clone());
-                for v in values {
-                    expr(v, nodes, depth + 1, names)?;
-                }
-            }
-        }
-        Ok(())
+/// Parse an observation predicate in the same environment as an action-scoped transition.
+pub(crate) fn transition_predicate(
+    model: &Model,
+    action: &Action,
+    source: &str,
+) -> Result<Formula, Error> {
+    if source.len() > 1 << 20 {
+        return Err(Error::syntax("observation predicate exceeds 1 MiB"));
     }
-    fn formula(
-        f: &Formula,
-        nodes: &mut usize,
-        depth: usize,
-        names: &mut BTreeSet<String>,
-    ) -> Result<(), Error> {
-        *nodes += 1;
-        if *nodes > MAX_NODES * 16 || depth > MAX_DEPTH {
-            return Err(Error::syntax("the IR exceeds the parser's size limits"));
-        }
-        let int = |i: &Int, nodes: &mut usize, names: &mut BTreeSet<String>| match i {
-            Int::Count(e) | Int::Value(e) => expr(e, nodes, depth + 1, names),
-            Int::Literal(_) => Ok(()),
-        };
-        match f {
-            Formula::Compare(_, l, r) => {
-                expr(l, nodes, depth + 1, names)?;
-                expr(r, nodes, depth + 1, names)?;
-            }
-            Formula::Ints(_, l, r) => {
-                int(l, nodes, names)?;
-                int(r, nodes, names)?;
-            }
-            Formula::Mult(_, e) | Formula::Empty(e) | Formula::HasTag(e, _) => {
-                expr(e, nodes, depth + 1, names)?
-            }
-            Formula::Not(inner) => formula(inner, nodes, depth + 1, names)?,
-            Formula::And(parts) => {
-                for p in parts {
-                    formula(p, nodes, depth + 1, names)?;
-                }
-            }
-            Formula::Or(l, r) | Formula::Implies(l, r) => {
-                formula(l, nodes, depth + 1, names)?;
-                formula(r, nodes, depth + 1, names)?;
-            }
-            Formula::Quantified(_, _, sort, body) => {
-                names.insert(sort.clone());
-                formula(body, nodes, depth + 1, names)?;
-            }
-        }
-        Ok(())
+    let (tokens, offsets) = tokens(source).map_err(|diagnostic| diagnostic.error)?;
+    let mut parser = Parser {
+        tokens,
+        offsets,
+        locations: Locations::default(),
+        track_locations: false,
+        uses_bool: false,
+        position: 0,
+        depth: 0,
+        nodes: 0,
+        records: model
+            .records
+            .iter()
+            .map(|record| {
+                (
+                    record.name.clone(),
+                    record.fields.iter().map(|(name, _)| name.clone()).collect(),
+                )
+            })
+            .collect(),
+    };
+    let mut formula = parser.formula()?;
+    if parser.position != parser.tokens.len() {
+        return Err(Error::syntax(format!(
+            "unexpected token {:?} after observation predicate",
+            parser.peek()
+        )));
     }
+    let sigs = model
+        .sigs
+        .iter()
+        .map(String::as_str)
+        .chain(model.enums.iter().map(|(name, _)| name.as_str()))
+        .chain(model.sums.iter().map(|(name, _)| name.as_str()))
+        .chain(
+            model
+                .value_domains()?
+                .into_iter()
+                .map(|value| value.kind.name()),
+        )
+        .chain([INT, NAT])
+        .collect();
+    let remaining = Cell::new(MAX_NODES * 16);
+    let derived = model
+        .derivations
+        .iter()
+        .map(|(name, expression)| {
+            Ok((
+                name.clone(),
+                BindingValue {
+                    nodes: binding_value_nodes(expression, "derivation")?,
+                    expression: expression.clone(),
+                },
+            ))
+        })
+        .collect::<Result<BTreeMap<_, _>, Error>>()?;
+    let checker = Checker {
+        model,
+        sigs: &sigs,
+        transition: true,
+        source_calls: true,
+        singletons: Vec::new(),
+        local_bindings: None,
+        derived_bindings: Some((&derived, &remaining)),
+        expanded_binders: None,
+        read_location: None,
+        operand_error: &parser.locations.operand_error,
+    };
+    checker.formula(&mut formula, &action.params.iter().cloned().collect(), true)?;
+    inspect_formula(&formula, &mut 0, 0, &mut BTreeSet::new()).map_err(|_| {
+        Error::syntax("expanded observation predicate exceeds the parser's size limits")
+    })?;
+    crate::numeric::validate_predicate(model, &formula)?;
+    Ok(formula)
+}
+
+fn inspect_expression(
+    e: &Expr,
+    nodes: &mut usize,
+    depth: usize,
+    names: &mut BTreeSet<String>,
+) -> Result<(), Error> {
+    *nodes += 1;
+    if *nodes > MAX_NODES * 16 || depth > MAX_DEPTH {
+        return Err(Error::syntax("the IR exceeds the parser's size limits"));
+    }
+    match e {
+        Expr::Name(name) => {
+            names.insert(name.clone());
+        }
+        Expr::Field(receiver, field) => {
+            names.insert(field.clone());
+            inspect_expression(receiver, nodes, depth + 1, names)?;
+        }
+        Expr::None | Expr::Literal(_) => {}
+        Expr::Tail(inner)
+        | Expr::Keys(inner)
+        | Expr::Closure(inner)
+        | Expr::Length(inner)
+        | Expr::Elements(inner)
+        | Expr::Payload(inner, _)
+        | Expr::At(_, inner) => inspect_expression(inner, nodes, depth + 1, names)?,
+        Expr::Append(left, right)
+        | Expr::Take(left, right)
+        | Expr::RemoveAt(left, right)
+        | Expr::RemoveAll(left, right)
+        | Expr::ReachableFrom(left, right)
+        | Expr::Index(left, right) => {
+            inspect_expression(left, nodes, depth + 1, names)?;
+            inspect_expression(right, nodes, depth + 1, names)?;
+        }
+        Expr::Sequence(_, items) => {
+            for item in items {
+                inspect_expression(item, nodes, depth + 1, names)?;
+            }
+        }
+        Expr::Variant(_, payload) => {
+            if let Some(value) = payload {
+                inspect_expression(value, nodes, depth + 1, names)?;
+            }
+        }
+        Expr::If(condition, yes, no) => {
+            inspect_formula(condition, nodes, depth + 1, names)?;
+            inspect_expression(yes, nodes, depth + 1, names)?;
+            inspect_expression(no, nodes, depth + 1, names)?;
+        }
+        Expr::Select(_, sort, predicate) => {
+            names.insert(sort.clone());
+            inspect_formula(predicate, nodes, depth + 1, names)?;
+        }
+        Expr::Count(inner) => inspect_expression(inner, nodes, depth + 1, names)?,
+        Expr::Binary(_, l, r) | Expr::Arith(_, l, r) => {
+            inspect_expression(l, nodes, depth + 1, names)?;
+            inspect_expression(r, nodes, depth + 1, names)?;
+        }
+        Expr::Record(name, values) => {
+            names.insert(name.clone());
+            for v in values {
+                inspect_expression(v, nodes, depth + 1, names)?;
+            }
+        }
+    }
+    Ok(())
+}
+fn inspect_formula(
+    f: &Formula,
+    nodes: &mut usize,
+    depth: usize,
+    names: &mut BTreeSet<String>,
+) -> Result<(), Error> {
+    *nodes += 1;
+    if *nodes > MAX_NODES * 16 || depth > MAX_DEPTH {
+        return Err(Error::syntax("the IR exceeds the parser's size limits"));
+    }
+    let int = |i: &Int, nodes: &mut usize, names: &mut BTreeSet<String>| match i {
+        Int::Count(e) | Int::Value(e) | Int::LocatedValue(e, _) => {
+            inspect_expression(e, nodes, depth + 1, names)
+        }
+        Int::Literal(_) => Ok(()),
+    };
+    match f {
+        Formula::Compare(_, l, r) => {
+            inspect_expression(l, nodes, depth + 1, names)?;
+            inspect_expression(r, nodes, depth + 1, names)?;
+        }
+        Formula::Ints(_, l, r) => {
+            int(l, nodes, names)?;
+            int(r, nodes, names)?;
+        }
+        Formula::Mult(_, e) | Formula::Empty(e) | Formula::HasTag(e, _) => {
+            inspect_expression(e, nodes, depth + 1, names)?
+        }
+        Formula::Not(inner) => inspect_formula(inner, nodes, depth + 1, names)?,
+        Formula::And(parts) => {
+            for p in parts {
+                inspect_formula(p, nodes, depth + 1, names)?;
+            }
+        }
+        Formula::Or(l, r) | Formula::Implies(l, r) => {
+            inspect_formula(l, nodes, depth + 1, names)?;
+            inspect_formula(r, nodes, depth + 1, names)?;
+        }
+        Formula::Quantified(_, _, sort, body) => {
+            names.insert(sort.clone());
+            inspect_formula(body, nodes, depth + 1, names)?;
+        }
+    }
+    Ok(())
+}
+
+fn inspect_tree(model: &Model) -> Result<BTreeSet<String>, Error> {
     let mut names = BTreeSet::new();
     let mut nodes = 0usize;
     for relation in &model.relations {
@@ -1817,6 +3166,9 @@ pub(crate) fn validate(mut model: Model) -> Result<Model, Error> {
     }
     for record in &model.records {
         names.extend(record.fields.iter().map(|(_, sort)| sort.clone()));
+    }
+    for (_, expression) in &model.derivations {
+        inspect_expression(expression, &mut nodes, 0, &mut names)?;
     }
     for f in model
         .facts
@@ -1831,17 +3183,31 @@ pub(crate) fn validate(mut model: Model) -> Result<Model, Error> {
         )
         .chain(model.transitions.iter().map(|check| &check.formula))
     {
-        formula(f, &mut nodes, 0, &mut names)?;
+        inspect_formula(f, &mut nodes, 0, &mut names)?;
     }
     for action in &model.actions {
         names.extend(action.params.iter().map(|(_, sort)| sort.clone()));
         for g in &action.guards {
-            formula(g, &mut nodes, 0, &mut names)?;
+            inspect_formula(g, &mut nodes, 0, &mut names)?;
         }
         for (_, value) in &action.assignments {
-            expr(value, &mut nodes, 0, &mut names)?;
+            inspect_expression(value, &mut nodes, 0, &mut names)?;
         }
     }
+    Ok(names)
+}
+
+pub(crate) fn may_read_names(formula: &Formula, candidates: &BTreeSet<&str>) -> bool {
+    let mut names = BTreeSet::new();
+    inspect_formula(formula, &mut 0, 0, &mut names).is_err()
+        || names.iter().any(|name| candidates.contains(name.as_str()))
+}
+
+/// Type-checks a syntax tree built without the parser, such as one read
+/// from the JSON IR (plan 0108), with the parser's limits on its size.
+/// Bool is added when the tree mentions it, as the parser does.
+pub(crate) fn validate(mut model: Model) -> Result<Model, Error> {
+    let names = inspect_tree(&model)?;
     let boolean = [BOOL, "true", "false"].iter().any(|n| names.contains(*n));
     if boolean && !model.enums.iter().any(|(name, _)| name == BOOL) {
         model
@@ -1868,18 +3234,46 @@ pub(crate) fn validate(mut model: Model) -> Result<Model, Error> {
             "Int = {low}..{high}: at most 20 consecutive integers"
         )));
     }
-    check(&mut model)?;
+    check(&mut model, false, &mut Locations::default(), None)?;
     Ok(model)
 }
 
-fn check(model: &mut Model) -> Result<(), Error> {
+fn binding_value_nodes(expression: &Expr, context: &str) -> Result<usize, Error> {
+    let mut nodes = 0;
+    inspect_expression(expression, &mut nodes, 0, &mut BTreeSet::new()).map_err(|_| {
+        Error::syntax(format!(
+            "expanded {context} exceeds the parser's size limits"
+        ))
+    })?;
+    Ok(nodes)
+}
+
+fn check(
+    model: &mut Model,
+    source_calls: bool,
+    locations: &mut Locations,
+    state_reads: Option<&StateReads>,
+) -> Result<(), Error> {
     // The checker reads a snapshot and rewrites arithmetic in the model.
     let snapshot = model.clone();
-    check_in(&snapshot, model)?;
+    let has_derivations = !model.derivations.is_empty();
+    check_in(&snapshot, model, source_calls, locations, state_reads)?;
+    locations.current.set(None);
+    if has_derivations {
+        inspect_tree(model)
+            .map_err(|_| Error::syntax("expanded derivations exceed the parser's size limits"))?;
+    }
     crate::numeric::validate(model, i64::MIN..=i64::MAX)
 }
 
-fn check_in(model: &Model, target: &mut Model) -> Result<(), Error> {
+fn check_in(
+    model: &Model,
+    target: &mut Model,
+    source_calls: bool,
+    locations: &mut Locations,
+    state_reads: Option<&StateReads>,
+) -> Result<(), Error> {
+    let definitions = std::mem::take(&mut target.derivations);
     let mut names = BTreeSet::new();
     for name in model
         .sigs
@@ -1891,9 +3285,7 @@ fn check_in(model: &Model, target: &mut Model) -> Result<(), Error> {
                 .flat_map(|(name, members)| std::iter::once(name).chain(members)),
         )
         .chain(model.sums.iter().map(|(name, _)| name))
-        .chain(model.records.iter().flat_map(|record| {
-            std::iter::once(&record.name).chain(record.fields.iter().map(|(field, _)| field))
-        }))
+        .chain(model.records.iter().map(|record| &record.name))
         .chain(model.sequences.iter().map(|seq| &seq.name))
         .chain(
             model
@@ -1906,7 +3298,9 @@ fn check_in(model: &Model, target: &mut Model) -> Result<(), Error> {
         .chain(model.checks.iter().map(|check| &check.name))
         .chain(model.temporal.iter().map(|check| &check.name))
         .chain(model.transitions.iter().map(|check| &check.name))
+        .chain(definitions.iter().map(|(name, _)| name))
     {
+        locations.enter(name);
         if !names.insert(name.as_str()) {
             return Err(Error::kind(format!("duplicate name {name}")));
         }
@@ -1919,8 +3313,29 @@ fn check_in(model: &Model, target: &mut Model) -> Result<(), Error> {
             )));
         }
     }
+    for record in &model.records {
+        locations.enter(&record.name);
+        let mut fields = BTreeSet::new();
+        for (field, _) in &record.fields {
+            if !fields.insert(field) {
+                return Err(Error::kind(format!(
+                    "{}: duplicate field {field}",
+                    record.name
+                )));
+            }
+            if numeric_sort(field)
+                || matches!(field.as_str(), BOOL | crate::SCOPE | crate::DECLARATIONS)
+            {
+                return Err(Error::kind(format!(
+                    "{}: {field} is a built-in name",
+                    record.name
+                )));
+            }
+        }
+    }
     let sigs: BTreeSet<&str> = model.sigs.iter().map(String::as_str).collect();
     for (name, definition) in &model.entity_definitions {
+        locations.enter(name);
         if !sigs.contains(name.as_str()) {
             return Err(Error::kind(format!("definition for unknown entity {name}")));
         }
@@ -1931,11 +3346,13 @@ fn check_in(model: &Model, target: &mut Model) -> Result<(), Error> {
         }
     }
     for sig in &model.sigs {
+        locations.enter(sig);
         if !model.scope.sizes.contains_key(sig) {
             return Err(Error::kind(format!("no scope for {sig}")));
         }
     }
     for sig in model.scope.sizes.keys() {
+        locations.current.set(locations.scope);
         if !sigs.contains(sig.as_str()) {
             return Err(Error::kind(format!("scope for unknown sig {sig}")));
         }
@@ -1949,6 +3366,7 @@ fn check_in(model: &Model, target: &mut Model) -> Result<(), Error> {
     // (plan 0100).
     let mut owned = BTreeSet::new();
     for (sum, children) in &model.sums {
+        locations.enter(sum);
         for child in children {
             if !sigs.contains(child.as_str()) {
                 return Err(Error::kind(format!(
@@ -1966,6 +3384,7 @@ fn check_in(model: &Model, target: &mut Model) -> Result<(), Error> {
         .into_iter()
         .chain(model.sums.iter().map(|(name, _)| name.as_str()))
         .collect();
+    locations.current.set(locations.scope);
     if model.declared_sorts().any(numeric_sort) && model.scope.ints.is_none() {
         return Err(Error::kind("Int and Nat need a scope Int = lo..hi"));
     }
@@ -1975,10 +3394,12 @@ fn check_in(model: &Model, target: &mut Model) -> Result<(), Error> {
         ));
     }
     sigs.extend([INT, NAT]);
-    for value in model.value_order()? {
-        sigs.insert(value.name());
+    locations.current.set(None);
+    for value in model.value_domains()? {
+        sigs.insert(value.kind.name());
     }
     for relation in &model.relations {
+        locations.enter(&relation.name);
         let used = match &relation.shape {
             Shape::Unary { sig, .. } => vec![sig],
             Shape::Binary { from, to, .. } => vec![from, to],
@@ -1986,8 +3407,8 @@ fn check_in(model: &Model, target: &mut Model) -> Result<(), Error> {
         if let Some(sig) = used.iter().find(|sig| !sigs.contains(sig.as_str())) {
             return Err(Error::kind(format!("{}: unknown sig {sig}", relation.name)));
         }
-        // A relation holds at most one value of a value sort per atom: no
-        // sets of values in v1.
+        // Unary integer sets use the finite Int scope. Value-bearing rows
+        // and structured values retain their one/lone multiplicity.
         let (target, mult) = match &relation.shape {
             Shape::Unary { sig, mult } => (sig, *mult),
             Shape::Binary { from, to, mult } => {
@@ -2000,38 +3421,61 @@ fn check_in(model: &Model, target: &mut Model) -> Result<(), Error> {
                 (to, *mult)
             }
         };
-        if model.is_value(target) && !matches!(mult, Mult::One | Mult::Lone) {
+        let integer_set = matches!(&relation.shape, Shape::Unary { sig, .. } if numeric_sort(sig));
+        if model.is_value(target) && !integer_set && !matches!(mult, Mult::One | Mult::Lone) {
             return Err(Error::kind(format!(
                 "{}: a relation to {target} holds one or lone value, not a set",
                 relation.name
             )));
         }
     }
-    // Counts are integers in the Alloy lowering, at most 5 bits (-16..15);
-    // every count of a set is bounded by the atoms in scope (review of #102).
-    if uses_counts(model) && atoms(model) > 15 {
-        return Err(Error::kind(format!(
-            "counts over {} atoms exceed the 15 an Alloy integer holds",
-            atoms(model)
-        )));
-    }
-    let checker = Checker {
+    let remaining = Cell::new(MAX_NODES * 16);
+    let mut derived = BTreeMap::new();
+    let mut checker = Checker {
         model,
-        sigs,
+        sigs: &sigs,
         transition: false,
+        source_calls,
+        singletons: Vec::new(),
+        local_bindings: None,
+        derived_bindings: None,
+        expanded_binders: None,
+        read_location: state_reads.map(|reads| ReadLocation {
+            offset: &locations.current,
+            reads,
+        }),
+        operand_error: &locations.operand_error,
     };
     let none = Bound::new();
-    for fact in &mut target.facts {
+    for (name, mut expression) in definitions {
+        locations.enter(&name);
+        let scoped = Checker {
+            derived_bindings: Some((&derived, &remaining)),
+            ..checker.clone()
+        };
+        scoped.expression(&mut expression, &none, true)?;
+        let nodes = binding_value_nodes(&expression, "derivation")?;
+        crate::numeric::validate_binding(model, &expression)?;
+        target.derivations.push((name.clone(), expression.clone()));
+        derived.insert(name, BindingValue { expression, nodes });
+    }
+    if !derived.is_empty() {
+        checker.derived_bindings = Some((&derived, &remaining));
+    }
+    for (index, fact) in target.facts.iter_mut().enumerate() {
+        locations.current.set(locations.facts.get(index).copied());
         checker.formula(fact, &none, false)?;
     }
-    for formula in target
-        .init
-        .iter_mut()
-        .chain(target.checks.iter_mut().map(|check| &mut check.formula))
-    {
+    for (index, formula) in target.init.iter_mut().enumerate() {
+        locations.current.set(locations.init.get(index).copied());
         checker.formula(formula, &none, true)?;
     }
+    for check in &mut target.checks {
+        locations.enter(&check.name);
+        checker.formula(&mut check.formula, &none, true)?;
+    }
     for variant in &model.variants {
+        locations.enter(&variant.name);
         for case in &variant.cases {
             if matches!(
                 case.tag.as_str(),
@@ -2045,6 +3489,7 @@ fn check_in(model: &Model, target: &mut Model) -> Result<(), Error> {
         }
     }
     for check in &mut target.temporal {
+        locations.enter(&check.name);
         let mut bound = Bound::new();
         for (name, sort) in &check.params {
             if !checker.sigs.contains(sort.as_str()) || model.is_value(sort) {
@@ -2063,12 +3508,41 @@ fn check_in(model: &Model, target: &mut Model) -> Result<(), Error> {
     }
     let transition_checker = Checker {
         transition: true,
-        model,
-        sigs: checker.sigs.clone(),
+        ..checker.clone()
     };
     for check in &mut target.transitions {
-        transition_checker.formula(&mut check.formula, &none, true)?;
+        locations.enter(&check.name);
+        let bound = match &check.action {
+            Some(name) => model
+                .actions
+                .iter()
+                .find(|action| &action.name == name)
+                .ok_or_else(|| Error::kind(format!("{}: unknown action {name}", check.name)))?
+                .params
+                .iter()
+                .cloned()
+                .collect(),
+            None => Bound::new(),
+        };
+        let remaining = Cell::new(0);
+        let locals = transition_checker.local_values(
+            locations.bindings.remove(&check.name),
+            &bound,
+            &remaining,
+            BindingSite::Transition,
+        )?;
+        let scoped = Checker {
+            local_bindings: Some(((&locals, &remaining), BindingSite::Transition)),
+            ..transition_checker.clone()
+        };
+        scoped.formula(&mut check.formula, &bound, true)?;
+        if !locals.is_empty() {
+            inspect_formula(&check.formula, &mut 0, 0, &mut BTreeSet::new()).map_err(|_| {
+                Error::syntax("expanded transition formula exceeds the parser's size limits")
+            })?;
+        }
     }
+    locations.current.set(None);
     for rules in std::iter::once(&model.fairness).chain(
         model
             .temporal
@@ -2096,6 +3570,8 @@ fn check_in(model: &Model, target: &mut Model) -> Result<(), Error> {
         }
     }
     for (action, written) in model.actions.iter().zip(&mut target.actions) {
+        locations.enter(&action.name);
+        let mut checker = checker.clone();
         let mut bound = Bound::new();
         for (param, sig) in &action.params {
             if !checker.sigs.contains(sig.as_str()) {
@@ -2105,7 +3581,18 @@ fn check_in(model: &Model, target: &mut Model) -> Result<(), Error> {
             bound.insert(param.clone(), sig.clone());
         }
         for guard in &mut written.guards {
-            checker.formula(guard, &bound, true)?;
+            checker.guard(guard, &bound, true)?;
+        }
+        let remaining = Cell::new(0);
+        let definitions = locations.bindings.remove(&action.name);
+        let binding_branches = locations.binding_branches.remove(&action.name);
+        let source_definitions = binding_branches
+            .as_ref()
+            .and(definitions.as_ref())
+            .map(|definitions| definitions.definitions.clone());
+        let locals = checker.local_values(definitions, &bound, &remaining, BindingSite::Update)?;
+        if !locals.is_empty() {
+            checker.local_bindings = Some(((&locals, &remaining), BindingSite::Update));
         }
         let mut assigned = BTreeSet::new();
         for (var, value) in written.assignments.iter_mut() {
@@ -2138,6 +3625,41 @@ fn check_in(model: &Model, target: &mut Model) -> Result<(), Error> {
                 )));
             }
         }
+        if !locals.is_empty() {
+            for (_, value) in &written.assignments {
+                binding_value_nodes(value, "update expression")?;
+            }
+        }
+        if let (Some(definitions), Some(mut bindings)) = (source_definitions, binding_branches) {
+            let definitions = definitions
+                .iter()
+                .map(|(name, expression)| (name.as_str(), expression))
+                .collect();
+            for ((name, source), (_, checked)) in
+                action.assignments.iter().zip(&written.assignments)
+            {
+                record_binding_sites(
+                    source,
+                    checked,
+                    &definitions,
+                    &mut bindings,
+                    name,
+                    &mut Vec::new(),
+                );
+            }
+            let branches = locations
+                .update_branches
+                .entry(action.name.clone())
+                .or_default();
+            branches.extend(
+                bindings
+                    .into_values()
+                    .flatten()
+                    .map(|entry| entry.branch)
+                    .filter(|branch| !branch.sites.is_empty()),
+            );
+            branches.sort_by_key(|branch| branch.offset);
+        }
     }
     Ok(())
 }
@@ -2152,22 +3674,87 @@ pub(crate) fn atoms(model: &Model) -> usize {
             .sum::<usize>()
 }
 
-/// Whether any formula compares integers.
-pub(crate) fn uses_counts(model: &Model) -> bool {
-    fn ints(formula: &Formula) -> bool {
-        match formula {
-            Formula::Ints(..) => true,
-            Formula::Not(inner) | Formula::Quantified(_, _, _, inner) => ints(inner),
-            Formula::And(parts) => parts.iter().any(ints),
-            Formula::Or(left, right) | Formula::Implies(left, right) => ints(left) || ints(right),
-            _ => false,
+/// Operands of counts in the finite atom fragment used by the Alloy lowering.
+#[derive(Default)]
+pub(crate) struct CollectionFeatures<'a> {
+    pub counts: Vec<&'a Expr>,
+    pub selection: bool,
+}
+
+pub(crate) fn collection_features(model: &Model, transitions_only: bool) -> CollectionFeatures<'_> {
+    fn formula<'a>(value: &'a Formula, features: &mut CollectionFeatures<'a>) {
+        match value {
+            Formula::Ints(_, left, right) => {
+                for side in [left, right] {
+                    match side {
+                        Int::Count(counted) => {
+                            features.counts.push(counted);
+                            expression(counted, features);
+                        }
+                        Int::Value(value) | Int::LocatedValue(value, _) => {
+                            expression(value, features)
+                        }
+                        Int::Literal(_) => {}
+                    }
+                }
+            }
+            Formula::Compare(_, left, right) => {
+                expression(left, features);
+                expression(right, features);
+            }
+            Formula::Or(left, right) | Formula::Implies(left, right) => {
+                formula(left, features);
+                formula(right, features);
+            }
+            Formula::Mult(_, value) | Formula::Empty(value) => expression(value, features),
+            Formula::Not(inner) | Formula::Quantified(_, _, _, inner) => formula(inner, features),
+            Formula::And(parts) => parts.iter().for_each(|part| formula(part, features)),
+            Formula::HasTag(..) => {}
         }
     }
-    model
-        .facts
-        .iter()
-        .chain(&model.init)
-        .chain(model.checks.iter().map(|check| &check.formula))
-        .chain(model.actions.iter().flat_map(|action| &action.guards))
-        .any(ints)
+    fn expression<'a>(value: &'a Expr, features: &mut CollectionFeatures<'a>) {
+        match value {
+            Expr::Count(inner) => {
+                features.counts.push(inner);
+                expression(inner, features);
+            }
+            Expr::If(condition, yes, no) => {
+                formula(condition, features);
+                expression(yes, features);
+                expression(no, features);
+            }
+            Expr::Select(_, _, predicate) => {
+                features.selection = true;
+                formula(predicate, features);
+            }
+            Expr::At(_, inner) | Expr::Keys(inner) | Expr::Closure(inner) => {
+                expression(inner, features)
+            }
+            Expr::Binary(_, left, right) | Expr::ReachableFrom(left, right) => {
+                expression(left, features);
+                expression(right, features);
+            }
+            _ => {}
+        }
+    }
+    let mut features = CollectionFeatures::default();
+    if transitions_only {
+        for check in &model.transitions {
+            formula(&check.formula, &mut features);
+        }
+    } else {
+        for condition in model
+            .facts
+            .iter()
+            .chain(&model.init)
+            .chain(model.checks.iter().map(|check| &check.formula))
+            .chain(model.actions.iter().flat_map(|action| &action.guards))
+        {
+            formula(condition, &mut features);
+        }
+        for (_, value) in model.actions.iter().flat_map(|action| &action.assignments) {
+            expression(value, &mut features);
+        }
+    }
+    features
 }

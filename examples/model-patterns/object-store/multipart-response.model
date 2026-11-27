@@ -1,0 +1,47 @@
+model MultipartResponse
+enum Wire = SuccessXml | ErrorXml | LostBody
+enum Report = Committed | Rejected | Unknown
+
+var headers: one Bool
+var wire: lone Wire
+var result: lone Report
+var published: one Bool
+
+init { not headers no wire no result not published }
+
+behavior sendHeaders() {
+  guard { not headers }
+  update { headers = true }
+}
+
+behavior finish(outcome: Wire, committed: Bool) {
+  guard {
+    headers no wire,
+    (outcome = LostBody or (outcome = SuccessXml and committed) or (outcome = ErrorXml and not committed))
+  }
+  update {
+    wire = outcome
+    published = committed
+  }
+}
+
+behavior readBody() {
+  guard { some wire no result }
+  update {
+    result = if { wire = SuccessXml } then Committed
+             else if { wire = ErrorXml } then Rejected else Unknown
+  }
+}
+
+invariant SuccessRequiresSuccessBody { result = Committed implies wire = SuccessXml }
+invariant ErrorBodyIsRejection { wire = ErrorXml and some result implies result = Rejected }
+invariant LostBodyIsUnconfirmed { wire = LostBody and some result implies result = Unknown }
+transition HeadersDoNotSettle on sendHeaders { unchanged(result) and unchanged(published) }
+transition ServerFinishDoesNotSettleClient on finish { unchanged(result) }
+
+reachable SuccessObserved { result = Committed published }
+reachable ErrorObserved { result = Rejected not published }
+reachable CommittedButUnconfirmed { result = Unknown published }
+reachable NotCommittedAndUnconfirmed { result = Unknown not published }
+
+scope steps = 5

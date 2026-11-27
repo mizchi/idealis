@@ -1,0 +1,40 @@
+model WorkerCheckpoints
+enum Worker = East | West
+enum Work = First | Second | Third | Fourth
+sequence Pending = Work, max = 4
+record Checkpoint { pending: Pending, retries: Nat }
+
+var saved: Worker -> lone Checkpoint
+init { no saved }
+
+behavior checkpoint(worker: Worker) {
+  guard { no worker.saved }
+  update {
+    saved = saved ++ (worker -> Checkpoint {
+      pending: if { worker = East } then Pending[First, Second] else Pending[Fourth, Third],
+      retries: if { worker = East } then 1 else 2
+    })
+  }
+}
+
+behavior expire(worker: Worker) {
+  guard { some worker.saved }
+  update { saved = withoutKeys(saved, worker) }
+}
+
+transition CheckpointKeepsOtherWorker on checkpoint {
+  all other: Worker | other != worker implies unchanged(other.saved)
+}
+
+transition ExpireKeepsOtherWorker on expire {
+  all other: Worker | other != worker implies unchanged(other.saved)
+}
+
+reachable BothSaved {
+  keys(saved) = Worker,
+  #(Worker.saved) = 2,
+  East.saved.pending = Pending[First, Second],
+  West.saved.retries = 2
+}
+
+scope Int = 0..7, steps = 3

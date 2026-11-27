@@ -1,0 +1,104 @@
+model ReceiptFrontier
+enum Generation = Zero | G1 | G2 | G3
+enum Sequence = One | Two
+enum Reply = Applied | Duplicate | Expired
+
+rel next: Generation -> lone Generation
+fact { next = (Zero -> G1) + (G1 -> G2) + (G2 -> G3) }
+
+var frontier: one Generation
+var sealed: set Generation
+var earlyClosed: set Generation
+var receipts: Generation -> set Sequence
+var applied: Generation -> set Sequence
+var effects: one Nat
+var reply: lone Reply
+
+derive prefix = (Generation - Zero) - reachableFrom(frontier.next, next)
+derive expired = prefix + earlyClosed
+
+init {
+  frontier = Zero
+  no sealed no earlyClosed no receipts no applied effects = 0 no reply
+}
+
+behavior seal(generation: Generation) {
+  guard { generation != Zero generation not in (sealed + expired) }
+  update { sealed = sealed + generation }
+}
+
+behavior collect(generation: Generation) {
+  guard { generation in sealed generation not in expired }
+  update {
+    if { generation.receipts = Sequence } then {
+      earlyClosed = earlyClosed + generation
+      sealed = sealed - generation
+      receipts = withoutKeys(receipts, generation)
+    }
+  }
+}
+
+behavior compact() {
+  guard { some earlyClosed }
+  update {
+    let adjacent = frontier.next & earlyClosed
+    if { some adjacent } then {
+      frontier = adjacent
+      earlyClosed = earlyClosed - adjacent
+    }
+  }
+}
+
+behavior reopen() {}
+
+behavior submit(generation: Generation, sequence: Sequence) {
+  guard { generation != Zero }
+  update {
+    let key = generation -> sequence
+    if { generation in expired } then { reply = Expired }
+    else {
+      if { key in receipts } then { reply = Duplicate }
+      else {
+        receipts = receipts + key
+        applied = applied + key
+        effects = effects + 1
+        reply = Applied
+      }
+    }
+  }
+}
+
+invariant EffectsStayUnique { effects = #applied }
+
+invariant ExpirationsHaveProof {
+  all generation: Generation | generation in expired implies generation.applied = Sequence
+}
+
+invariant RemovedReceiptsAreFenced {
+  keys(applied - receipts) in expired
+  no (keys(receipts) & expired)
+}
+
+invariant SparseIsOutsidePrefix { no (prefix & earlyClosed) }
+invariant ClosedGenerationsHaveNoSeal { no (sealed & expired) }
+
+transition CollectionConsumesSeal on collect {
+  generation in after(expired) implies
+    (generation in before(sealed) and before(generation.receipts) = Sequence)
+}
+
+transition CompactionKeepsCoverage on compact {
+  unchanged(expired) unchanged(receipts) unchanged(effects)
+}
+
+transition StaleDeliveryIsFenced on submit {
+  generation in before(expired) implies
+    (after(reply) = Expired and unchanged(effects) and unchanged(receipts))
+}
+
+transition MissingDeliveryCanApply on submit {
+  sequence not in before(generation.applied) implies
+    (after(reply) = Applied and after(effects) = before(effects) + 1)
+}
+
+scope Int = 0..7, steps = 18

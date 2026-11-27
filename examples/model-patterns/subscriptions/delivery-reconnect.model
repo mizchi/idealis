@@ -1,0 +1,42 @@
+model DeliveryReconnect
+enum Delivery = First | Second
+enum Outcome = Pending | Delivered | Missing
+
+var connected: lone Delivery
+var outcome: Delivery -> one Outcome
+var interrupted: set Delivery
+
+init { no connected outcome = Delivery -> Pending no interrupted }
+
+behavior connect(delivery: Delivery) {
+  guard { no connected delivery.outcome = Pending }
+  update { connected = delivery }
+}
+behavior interrupt() {
+  guard { some connected }
+  update { interrupted = interrupted + connected connected = none }
+}
+behavior finish(marker: Delivery, hasNotice: Bool) {
+  guard { some connected }
+  update {
+    if { connected = marker } then {
+      outcome = outcome ++ marker -> (if { hasNotice } then Delivered else Missing)
+    }
+    connected = none
+  }
+}
+
+invariant OnlyPendingConnects { some connected implies connected.outcome = Pending }
+transition InterruptionKeepsOutcome on interrupt { unchanged(outcome) }
+transition ForeignEndKeepsOutcome on finish {
+  marker != before(connected) implies unchanged(outcome)
+}
+transition OtherDeliveriesKeepOutcome on finish {
+  all id: Delivery | id != before(connected) implies after(id.outcome) = before(id.outcome)
+}
+
+reachable Interrupted { no connected some interrupted }
+reachable RecoveredAfterInterruption {
+  some id: Delivery | id in interrupted and id.outcome = Delivered
+}
+scope steps = 9

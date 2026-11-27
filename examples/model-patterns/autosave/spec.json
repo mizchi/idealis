@@ -1,0 +1,42 @@
+{
+  "spec": {
+    "id": "autosave",
+    "name": { "ja": "自動保存", "en": "Autosave" },
+    "groups": ["自動保存"],
+    "terms": [
+      {
+        "id": "saved-revision",
+        "kind": "state",
+        "group": "自動保存",
+        "name": { "ja": "保存済みの版", "en": "saved revision" },
+        "definition": {
+          "ja": "現在の版に対する保存成功応答を最後に受理したときの版。",
+          "en": "The revision last marked saved by a successful response for the current revision."
+        },
+        "model": [
+          {
+            "path": "examples/model-patterns/autosave/autosave.model",
+            "name": "saved"
+          }
+        ]
+      }
+    ],
+    "rules": [
+      {
+        "id": "AUTOSAVE-STALE-RESPONSE",
+        "text": {
+          "ja": "送信時の版が編集中の版と異なる応答を受け取っても、保存済みの版は変わらない。",
+          "en": "Receiving a response sent for a different revision than the current editing revision leaves the saved revision unchanged."
+        },
+        "terms": ["saved-revision"],
+        "claims": [
+          {
+            "model": "examples/model-patterns/autosave/autosave.model",
+            "check": "StaleKeepsSaved",
+            "expect": "holds"
+          }
+        ]
+      }
+    ]
+  }
+}

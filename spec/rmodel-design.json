@@ -1244,6 +1244,30 @@
         ]
       },
       {
+        "id": "RMODEL-ADOPTION-LIFETIME",
+        "text": {
+          "ja": "版が変わらない間は、旧版の検査結果が遅れて届いても採用を保持する。版を変えたときに採用を解除する。",
+          "en": "Keep the adoption while the revision stays the same, including when results for an older revision arrive late. Clear the adoption when the revision changes."
+        },
+        "terms": [
+          "candidate-revision",
+          "compared-revision",
+          "adopted-revision"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/evidence-adoption.model",
+            "check": "AdoptionSurvivesSameRevision",
+            "expect": "holds"
+          },
+          {
+            "model": "spec/models/evidence-adoption.model",
+            "check": "RevisionClearsAdoption",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
         "id": "RMODEL-EXPECTED-CHECKERS",
         "text": {
           "ja": "比較対象の版で、予定した二つの検査器が完了し、判定が一致して初めて意味の一致を発行できる。",
@@ -1284,6 +1308,25 @@
         ]
       },
       {
+        "id": "RMODEL-RECEIPT-IMMUTABILITY",
+        "text": {
+          "ja": "一度受領した検査結果は、版と検査器の組ごとに受領記録・完了状態・判定を保持する。",
+          "en": "Keep the receipt, completion status, and verdict for every revision and checker pair once received."
+        },
+        "terms": [
+          "comparison-origin",
+          "required-checkers",
+          "checker-receipt"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/checker-comparison.model",
+            "check": "ReceivedResultStays",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
         "id": "RMODEL-MEASURED-IMPROVEMENT",
         "text": {
           "ja": "測定前に固定した計画に属し、標本が有効で安定し、改善幅を満たすときにゴール改善を発行する。",
@@ -1318,6 +1361,24 @@
             "model": "spec/models/measurement-gate.model",
             "check": "ImprovementPublished",
             "expect": "reachable"
+          }
+        ]
+      },
+      {
+        "id": "RMODEL-PREREQUISITE-AT-PUBLICATION",
+        "text": {
+          "ja": "ゴール改善を発行するとき、その操作は確認済みの条件を変更しない。",
+          "en": "Publishing a goal improvement preserves the prerequisites already confirmed."
+        },
+        "terms": [
+          "measurement-prerequisite",
+          "published-measurement"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/measurement-gate.model",
+            "check": "PublicationKeepsPrerequisites",
+            "expect": "holds"
           }
         ]
       },

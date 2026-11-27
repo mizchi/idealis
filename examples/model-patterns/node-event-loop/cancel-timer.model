@@ -1,0 +1,47 @@
+model CancelTimer
+enum Generation = First | Second
+
+var current: lone Generation
+var pending: lone Generation
+var used: set Generation
+var running: set Generation
+var published: lone Generation
+
+init { no current no pending no used no running no published }
+
+behavior arm(generation: Generation) {
+  guard { generation not in used }
+  update { current = generation pending = generation used = used + generation }
+}
+behavior cancel() {
+  update { current = none pending = none }
+}
+behavior elapse() {
+  update { running = running + pending pending = none }
+}
+behavior settle(generation: Generation) {
+  guard { generation in running }
+  update {
+    running = running - generation
+    if { generation = current } then { published = generation }
+  }
+}
+
+invariant PendingBelongsToCurrent { pending in current }
+invariant RunningWasArmed { running in used }
+transition NoStartWithoutPending on elapse {
+  no before(pending) implies unchanged(running)
+}
+transition StaleCompletionKeepsPublication on settle {
+  generation != before(current) implies unchanged(published)
+}
+transition CurrentCompletionPublishes on settle {
+  generation = before(current) implies after(published) = generation
+}
+
+reachable FirstPending { pending = First }
+reachable FirstRunning { First in running current = First }
+reachable NewPublishedWithOldRunning {
+  current = Second published = Second First in running
+}
+scope steps = 8

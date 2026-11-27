@@ -1,0 +1,118 @@
+model PartitionRepair
+enum Row = OrderRow | PaymentRow | ShipmentRow | AuditRow
+enum Decision = Waiting | Fetching | Retry | Expired | Ready | Published
+
+rel forward: Row -> set Row
+rel backedge: lone Row
+fact {
+  forward = (ShipmentRow -> PaymentRow) + (PaymentRow -> OrderRow)
+  backedge in ShipmentRow
+}
+
+var captured: set Row
+var pending: set Row
+var unavailable: set Row
+var expired: set Row
+var replica: set Row
+var decision: one Decision
+
+derive dependencies = forward + (OrderRow -> backedge)
+derive missing = captured.closure(dependencies) - captured
+
+init {
+  captured = ShipmentRow
+  no unavailable no expired no pending no replica
+  decision = Waiting
+}
+
+behavior plan() {
+  guard { decision = Waiting }
+  update {
+    pending = missing
+    decision = if { no missing } then Ready else
+               if { some missing & expired } then Expired else
+               if { missing in unavailable } then Retry else Fetching
+  }
+}
+
+behavior fetch(row: Row) {
+  guard { decision = Fetching row in pending - unavailable - expired }
+  update {
+    captured = captured + row
+    pending = none
+    decision = Waiting
+  }
+}
+
+behavior disconnect(row: Row) {
+  guard { decision not in Expired + Published row not in captured + unavailable + expired }
+  update {
+    unavailable = unavailable + row
+    pending = none
+    decision = Waiting
+  }
+}
+
+behavior reconnect(row: Row) {
+  guard { decision not in Expired + Published row in unavailable - expired }
+  update {
+    unavailable = unavailable - row
+    pending = none
+    decision = Waiting
+  }
+}
+
+behavior expire(row: Row) {
+  guard { decision not in Expired + Published row not in expired }
+  update {
+    expired = expired + row
+    pending = none
+    decision = Waiting
+  }
+}
+
+behavior publish() {
+  guard { decision = Ready }
+  update { replica = captured decision = Published }
+}
+
+invariant PublishedCutIncludesDependencies {
+  replica.dependencies in replica
+}
+invariant PlanContainsOnlyMissingPrerequisites {
+  pending in (reachableFrom(captured, dependencies) - captured)
+}
+invariant RetryCanWaitForReconnection {
+  decision = Retry implies (some pending and pending in unavailable and no pending & expired)
+}
+invariant ExpiryHasAMissingPrerequisite {
+  decision = Expired implies some pending & expired
+}
+transition PlanFindsEveryMissingPrerequisite on plan {
+  after(pending) = before(reachableFrom(captured, dependencies) - captured)
+}
+transition FetchAddsOnlyTheChosenRow on fetch {
+  after(captured) = before(captured) + row
+  unchanged(replica)
+}
+transition FetchReducesOutstandingDependencies on fetch {
+  after(missing) = before(missing) - row
+}
+
+reachable ChainNeedsBoth {
+  no backedge no unavailable no expired
+  captured = ShipmentRow decision = Fetching pending = OrderRow + PaymentRow
+}
+reachable CycleNeedsBoth {
+  some backedge no unavailable no expired
+  captured = ShipmentRow decision = Fetching pending = OrderRow + PaymentRow
+}
+reachable AwaitingOrder {
+  no backedge no expired unavailable = OrderRow
+  captured = ShipmentRow + PaymentRow decision = Retry pending = OrderRow
+}
+reachable ExpiredBeforePlan {
+  no backedge no unavailable expired = OrderRow
+  captured = ShipmentRow decision = Waiting
+}
+scope steps = 12

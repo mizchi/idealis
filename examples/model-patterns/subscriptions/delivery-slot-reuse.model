@@ -1,0 +1,76 @@
+model DeliverySlotReuse
+enum Slot = Primary | Hedge
+enum Ticket = First | Second | Third
+enum Epoch = Initial | AfterFirst | AfterSecond
+record Connection { slot: Slot, epoch: Epoch }
+
+var epoch: one Epoch
+var issued: set Ticket
+var pending: Ticket -> lone Connection
+var current: Slot -> lone Ticket
+var published: Slot -> lone Ticket
+
+init { epoch = Initial no issued no pending no current no published }
+
+behavior connect(slot: Slot, ticket: Ticket) {
+  guard { ticket not in issued no slot.current }
+  update {
+    issued = issued + ticket
+    pending = pending + ticket -> Connection { slot: slot, epoch: epoch }
+    current = current + slot -> ticket
+  }
+}
+behavior detach(slot: Slot) {
+  guard { some slot.current }
+  update { current = current - slot -> Ticket }
+}
+behavior restart() {
+  guard { epoch != AfterSecond }
+  update {
+    epoch = if { epoch = Initial } then AfterFirst else AfterSecond
+    current = none
+    published = none
+  }
+}
+behavior finish(ticket: Ticket) {
+  guard { some ticket.pending }
+  update {
+    let slot = ticket.pending.slot
+    pending = pending - ticket -> ticket.pending
+    if { slot.current = ticket } then {
+      current = current - slot -> Ticket
+      published = published ++ slot -> ticket
+    }
+  }
+}
+
+invariant CurrentTicketIsPendingInThisEpoch {
+  all slot: Slot | some slot.current implies
+    slot.current.pending = Connection { slot: slot, epoch: epoch }
+}
+invariant PendingAndPublishedTicketsWereIssued {
+  keys(pending) + Slot.published in issued
+}
+transition StaleConnectionCannotRemoveReplacement on finish {
+  before(ticket.pending.slot.current) != ticket implies unchanged(current)
+}
+transition StaleConnectionCannotPublish on finish {
+  before(ticket.pending.slot.current) != ticket implies unchanged(published)
+}
+transition FinishKeepsOtherConnections on finish {
+  no after(ticket.pending)
+  unchanged((Ticket - ticket).pending)
+}
+
+reachable SuccessiveRestarts {
+  epoch = AfterSecond no published
+  First.pending = Connection { slot: Primary, epoch: Initial }
+  Second.pending = Connection { slot: Primary, epoch: AfterFirst }
+  Primary.current = Third
+}
+reachable SameEpochReplacement {
+  epoch = Initial no published
+  First.pending = Connection { slot: Primary, epoch: Initial }
+  Primary.current = Second Hedge.current = Third
+}
+scope steps = 9

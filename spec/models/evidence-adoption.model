@@ -40,6 +40,12 @@ invariant AdoptedIsCurrent { adopted in current }
 invariant AdoptionNeedsCurrentReview { adopted in reviewed }
 invariant AdoptionNeedsCurrentAgreement { adopted in equivalent }
 invariant AdoptionNeedsCurrentImprovement { adopted in improved }
+transition AdoptionSurvivesSameRevision {
+  (unchanged(current) and some before(adopted)) implies unchanged(adopted)
+}
+transition RevisionClearsAdoption {
+  not unchanged(current) implies no after(adopted)
+}
 reachable OldAgreementArrives { current = Second lateSemantic = First no adopted Second not in equivalent }
 reachable CurrentEvidenceCanAdopt { adopted = Second }
 scope steps = 8

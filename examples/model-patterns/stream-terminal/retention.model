@@ -1,0 +1,74 @@
+model SubscriptionRetention
+enum Client = Fast | Slow
+enum Reply = Ready | Gap
+
+rel head: one Nat
+fact { head = 2 }
+var floor: one Nat
+var cursors: Client -> one Nat
+var protected: set Client
+var due: set Client
+var replies: Client -> lone Reply
+
+init {
+  floor = 0 cursors = Client -> 0 protected = Client
+  no due no replies
+}
+behavior acknowledge(client: Client) {
+  guard { client in protected client.cursors < head }
+  update { cursors = cursors ++ client -> (client.cursors + 1) }
+}
+behavior reachDeadline(client: Client) {
+  guard { client in protected client not in due }
+  update { due = due + client }
+}
+behavior expire(client: Client) {
+  guard { client in due }
+  update { protected = protected - client due = due - client }
+}
+behavior compact(through: Nat) {
+  guard { floor < through through <= head }
+  update {
+    if { all client: Client | client in protected implies client.cursors >= through } then {
+      floor = through
+    }
+  }
+}
+behavior reconnect(client: Client) {
+  update {
+    if { client.cursors < floor } then {
+      replies = replies ++ client -> Gap
+    } else {
+      protected = protected + client
+      due = due - client
+      replies = replies ++ client -> Ready
+    }
+  }
+}
+behavior resnapshot(client: Client) {
+  guard { client.replies = Gap }
+  update {
+    cursors = cursors ++ client -> head
+    protected = protected + client
+    due = due - client
+    replies = replies ++ client -> Ready
+  }
+}
+
+invariant ProtectedClientsKeepTheirPrefix {
+  all client: Client | client in protected implies client.cursors >= floor
+}
+transition GapRequiresSnapshot on reconnect {
+  before(client.cursors) < before(floor) implies
+    after(client.replies) = Gap and unchanged(client.cursors) and unchanged(protected)
+}
+transition ExactFloorCanResume on reconnect {
+  before(client.cursors) = before(floor) implies after(client.replies) = Ready
+}
+transition SnapshotRepinsAtHead on resnapshot {
+  after(client.cursors) = before(head) and client in after(protected)
+}
+reachable SlowStillProtectsTheLog {
+  floor = 0 Fast.cursors = head Slow.cursors = 0 protected = Client no due
+}
+scope Int = 0..2, steps = 10

@@ -1,0 +1,61 @@
+model SavepointShadow
+enum Value = Original | First | Second
+sequence Marks = Value, max = 2
+
+var active: one Bool
+var local: one Value
+var committed: one Value
+var marks: one Marks
+
+derive topMark = at(marks, len(marks) - 1)
+
+init { not active local = Original committed = Original marks = Marks[] }
+
+behavior begin() {
+  guard { not active }
+  update { active = true }
+}
+behavior write(value: Value) {
+  guard { active }
+  update { local = value }
+}
+behavior mark() {
+  guard { active len(marks) < 2 }
+  update { marks = append(marks, local) }
+}
+behavior rewind() {
+  guard { active some topMark }
+  update { local = topMark }
+}
+behavior release() {
+  guard { active len(marks) > 0 }
+  update { marks = take(marks, len(marks) - 1) }
+}
+behavior abort() {
+  guard { active }
+  update { active = false local = committed marks = Marks[] }
+}
+behavior commit() {
+  guard { active }
+  update { active = false committed = local marks = Marks[] }
+}
+
+invariant ClosedConnectionReadsCommitted {
+  not active implies local = committed and len(marks) = 0
+}
+transition ReleaseDoesNotPublish on release {
+  after(active) and unchanged(committed) and unchanged(local)
+}
+transition RewindKeepsSelectedMark on rewind {
+  after(active) and unchanged(marks) and unchanged(committed)
+}
+transition CommitPublishes on commit { after(committed) = before(local) }
+
+reachable ShadowedMarkWithNewValue {
+  marks = Marks[Original, First] local = Second committed = Original
+}
+reachable OnlyMarkWithStagedValue {
+  marks = Marks[Original] local = First committed = Original
+}
+
+scope Int = 0..2, steps = 9

@@ -1,0 +1,76 @@
+model SemaphoreCancellation
+enum Seed = Owner
+enum Waiter = First | Second
+type Client = Seed + Waiter
+sequence Waiters = Waiter, max = 2
+
+var waiting: one Waiters
+var reserved: lone Waiter
+var held: lone Client
+var callbacks: set Waiter
+var cancelled: set Waiter
+
+init { waiting = Waiters[], no reserved, held = Owner, no callbacks, no cancelled }
+
+behavior enqueue(client: Waiter) {
+  guard { client not in elements(waiting) + reserved + held + cancelled }
+  update { waiting = append(waiting, client) }
+}
+
+behavior release(client: Client) {
+  guard { held = client }
+  update { held = none }
+}
+
+behavior reserve() {
+  guard { no held, no reserved, some at(waiting, 0) }
+  update {
+    let next = at(waiting, 0)
+    waiting = tail(waiting)
+    reserved = next
+    callbacks = callbacks + next
+  }
+}
+
+behavior cancel(client: Waiter) {
+  guard { client in elements(waiting) + reserved }
+  update {
+    waiting = removeAll(waiting, client)
+    reserved = reserved - client
+    cancelled = cancelled + client
+  }
+}
+
+behavior deliver(client: Waiter) {
+  guard { client in callbacks }
+  update {
+    callbacks = callbacks - client
+    if { reserved = client } then {
+      reserved = none
+      held = client
+    }
+  }
+}
+
+invariant OnePermit { some held implies no reserved }
+invariant CancelledNeverHolds { no (cancelled & (reserved + held)) }
+invariant ReservationHasNotification { reserved in callbacks }
+
+transition ReserveFifo on reserve {
+  after(reserved) = before(at(waiting, 0))
+}
+transition CancelReturnsReservation on cancel {
+  before(reserved) = client implies no after(reserved)
+}
+transition StaleDeliveryKeepsPermit on deliver {
+  before(reserved) != client implies (unchanged(reserved) and unchanged(held))
+}
+reachable PermitReassignedWithStaleCallback {
+  some reserved
+  some (callbacks & cancelled)
+}
+leads_to WaiterSettles(client: Waiter) with { weak release(*) weak reserve weak deliver(*) }
+  { client in elements(waiting) or reserved = client }
+  { held = client or client in cancelled }
+
+scope Int = 0..2, steps = 9

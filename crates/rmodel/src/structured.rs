@@ -2,7 +2,24 @@ use crate::{Error, INT, Model, NAT, Record};
 use std::collections::BTreeMap;
 
 pub const MAX_SEQUENCE_LENGTH: usize = 4;
-const MAX_VALUES: usize = 64;
+// Keep backend materialization separate from the type's mathematical domain.
+const MAX_ENUMERATION_NODES: usize = 16_384;
+
+pub(crate) struct ValueDomain<'a> {
+    pub kind: ValueType<'a>,
+    pub size: usize,
+    nodes_per_value: usize,
+}
+
+impl ValueDomain<'_> {
+    pub fn indexable(&self) -> bool {
+        self.nodes_per_value <= MAX_ENUMERATION_NODES
+    }
+
+    pub fn enumerable(&self) -> bool {
+        self.size.saturating_mul(self.nodes_per_value) <= MAX_ENUMERATION_NODES
+    }
+}
 
 #[derive(Clone, Debug)]
 pub struct Sequence {
@@ -24,7 +41,8 @@ pub struct Case {
 }
 
 #[derive(Clone, Copy)]
-pub(crate) enum ValueType<'a> {
+/// A declared structured value type.
+pub enum ValueType<'a> {
     Record(&'a Record),
     Sequence(&'a Sequence),
     Variant(&'a Variant),
@@ -53,6 +71,15 @@ impl<'a> ValueType<'a> {
 }
 
 impl Model {
+    /// Structured type declarations, with each dependency before its users.
+    pub fn value_types_in_dependency_order(&self) -> Result<Vec<ValueType<'_>>, Error> {
+        Ok(self
+            .value_domains()?
+            .into_iter()
+            .map(|domain| domain.kind)
+            .collect())
+    }
+
     pub fn sequence(&self, name: &str) -> Option<&Sequence> {
         self.sequences.iter().find(|s| s.name == name)
     }
@@ -75,7 +102,7 @@ impl Model {
         !self.sequences.is_empty() || !self.variants.is_empty()
     }
 
-    pub(crate) fn value_order(&self) -> Result<Vec<ValueType<'_>>, Error> {
+    pub(crate) fn value_domains(&self) -> Result<Vec<ValueDomain<'_>>, Error> {
         let mut types: Vec<_> = self
             .records
             .iter()
@@ -102,6 +129,7 @@ impl Model {
         }
 
         let mut ordered = Vec::new();
+        let mut nodes = BTreeMap::new();
         while !types.is_empty() {
             let index = types
                 .iter()
@@ -140,14 +168,30 @@ impl Model {
                     })
                 }
             };
-            if self.has_structures() && size > MAX_VALUES {
-                return Err(Error::kind(format!(
-                    "{}: value domain exceeds {MAX_VALUES} values",
-                    ty.name()
-                )));
-            }
+            let child_nodes = |name: &str| nodes.get(name).copied().unwrap_or(1usize);
+            let payload_nodes = match ty {
+                ValueType::Record(record) => {
+                    record.fields.iter().fold(0usize, |total, (_, sort)| {
+                        total.saturating_add(child_nodes(sort))
+                    })
+                }
+                ValueType::Sequence(seq) => seq.max.saturating_mul(child_nodes(&seq.element)),
+                ValueType::Variant(v) => v
+                    .cases
+                    .iter()
+                    .filter_map(|case| case.payload.as_deref())
+                    .map(child_nodes)
+                    .max()
+                    .unwrap_or_default(),
+            };
+            let nodes_per_value = payload_nodes.saturating_add(1);
             sizes.insert(ty.name(), size);
-            ordered.push(ty);
+            nodes.insert(ty.name(), nodes_per_value);
+            ordered.push(ValueDomain {
+                kind: ty,
+                size,
+                nodes_per_value,
+            });
         }
         Ok(ordered)
     }

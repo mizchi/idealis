@@ -1,0 +1,15 @@
+model RefillQueue
+enum Work = First | Second | Third | Fourth
+sequence Batch = Work, max = 4
+sequence History = Batch, max = 2
+var pending: lone History
+init { no pending }
+
+behavior refill(history: History) {
+  guard { no pending history = History[Batch[Third], Batch[Fourth]] }
+  update { pending = history }
+}
+
+transition RefillKeepsOrder on refill { after(pending) = history }
+reachable Refilled { pending = History[Batch[Third], Batch[Fourth]] }
+scope steps = 2

@@ -1,0 +1,53 @@
+model RestoreAllocatorContention
+enum Worker = Left | Right
+
+var high: one Nat
+var proposed: Worker -> lone Nat
+var assigned: Worker -> lone Nat
+var published: Worker -> lone Nat
+var stale: set Worker
+
+init { high = 0 no proposed no assigned no published no stale }
+
+behavior reserve(worker: Worker) {
+  guard { high < 2 no worker.proposed no worker.assigned }
+  update { proposed = proposed ++ worker -> (high + 1) }
+}
+
+behavior commit(worker: Worker) {
+  guard { some worker.proposed }
+  update {
+    let id = worker.proposed
+    proposed = proposed - (worker -> id)
+    if { id = high + 1 } then {
+      high = id
+      assigned = assigned ++ worker -> id
+    } else { stale = stale + worker }
+  }
+}
+
+behavior publish(worker: Worker) {
+  guard { some worker.assigned no worker.published }
+  update { published = published ++ worker -> worker.assigned }
+}
+
+invariant UniqueAssignments {
+  all a: Worker | all b: Worker |
+    (some a.assigned and a.assigned = b.assigned) implies a = b
+}
+
+invariant PublicationUsesDurableAssignment {
+  all worker: Worker | some worker.published implies worker.published = worker.assigned
+}
+
+transition StaleCommitPreservesAllocation on commit {
+  (some before(worker.proposed) and before(worker.proposed) <= before(high)) implies {
+    unchanged(high) unchanged(assigned) worker in after(stale)
+  }
+}
+
+reachable ContendersPublish {
+  Right in stale Left.published = 1 Right.published = 2
+}
+
+scope Int = 0..2, steps = 9

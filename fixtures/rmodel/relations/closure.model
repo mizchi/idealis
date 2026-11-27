@@ -1,0 +1,22 @@
+model PositiveClosure
+enum Node = A | B | C | D
+var edges: Node -> set Node
+
+init { edges = (A -> B) + (B -> C) + (C -> D) }
+behavior closeCycle() {
+  guard { D -> B not in edges }
+  update { edges = edges + (D -> B) }
+}
+behavior clear() { update { edges = none } }
+
+invariant EveryRowAgrees {
+  all n: Node | reachableFrom(n, edges) = n + n.closure(edges)
+}
+invariant PositivePathsOnly {
+  closure(edges) in (A -> (B + C + D)) + ((B + C + D) -> (B + C + D))
+}
+invariant EmptyStaysEmpty { no edges implies no closure(edges) }
+reachable LongPath { A -> D in closure(edges) }
+reachable CycleReturnsToStart { B -> B in closure(edges) }
+reachable Cleared { no closure(edges) }
+scope steps = 4

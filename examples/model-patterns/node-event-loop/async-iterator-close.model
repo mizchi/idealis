@@ -1,0 +1,43 @@
+model AsyncIteratorCleanup
+enum Phase = Idle | Closing | Finished
+enum Leave = BreakLoop | ThrowBody
+enum Cleanup = Succeed | Reject | NonObject
+enum Result = Normal | BodyError | CleanupError | InvalidReturn
+
+var phase: one Phase
+var leaveReason: lone Leave
+var cleanup: lone Cleanup
+var outcome: lone Result
+
+init { phase = Idle no leaveReason no cleanup no outcome }
+
+behavior leave(reason: Leave) {
+  guard { phase = Idle }
+  update { phase = Closing leaveReason = reason }
+}
+
+behavior finishClose(result: Cleanup) {
+  guard { phase = Closing }
+  update {
+    phase = Finished
+    cleanup = result
+    outcome = if { leaveReason = ThrowBody } then BodyError
+      else if { result = Reject } then CleanupError
+      else if { result = NonObject } then InvalidReturn
+      else Normal
+  }
+}
+
+invariant ClosingHasNoPublishedResult { phase = Closing implies no outcome and no cleanup }
+transition BodyErrorWinsAfterCleanup on finishClose {
+  before(leaveReason) = ThrowBody implies after(outcome) = BodyError
+}
+transition BreakReportsRejectedCleanup on finishClose {
+  before(leaveReason) = BreakLoop and result = Reject implies after(outcome) = CleanupError
+}
+transition BreakChecksReturnObject on finishClose {
+  before(leaveReason) = BreakLoop and result = NonObject implies after(outcome) = InvalidReturn
+}
+reachable ClosingAfterBreak { phase = Closing leaveReason = BreakLoop }
+reachable ClosingAfterThrow { phase = Closing leaveReason = ThrowBody }
+scope steps = 3

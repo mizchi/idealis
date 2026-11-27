@@ -1,0 +1,54 @@
+model AuthHistory
+enum Route = Home | Public | Account
+enum Placeholder = SignIn
+type Screen = Route + Placeholder
+sequence History = Route, max = 3
+var history: one History
+var cursor: one Nat
+var current: one Route
+var signedIn: one Bool
+derive screen = if { current = Account and not signedIn } then SignIn else current
+
+init {
+  history = History[Home]
+  cursor = 0 current = Home signedIn = false
+}
+behavior signIn() {
+  update { signedIn = true }
+}
+behavior signOut() {
+  update { signedIn = false }
+}
+behavior push(destination: Route) {
+  guard { cursor + 1 < 3 }
+  update {
+    history = append(take(history, cursor + 1), destination)
+    cursor = cursor + 1
+    current = destination
+  }
+}
+behavior goBack() {
+  guard { cursor > 0 }
+  update {
+    cursor = cursor - 1
+    current = at(history, cursor - 1)
+  }
+}
+behavior goForward() {
+  guard { cursor + 1 < len(history) }
+  update {
+    cursor = cursor + 1
+    current = at(history, cursor + 1)
+  }
+}
+invariant CursorPointsAtCurrent { current = at(history, cursor) }
+invariant AccountRequiresSignIn { screen = Account implies signedIn }
+invariant SignedOutAccountShowsSignIn { current = Account and not signedIn implies screen = SignIn }
+transition ChangedHistoryKeepsPrefix {
+  not unchanged(history) implies {
+    after(cursor) = before(cursor) + 1
+    after(history) = append(before(take(history, cursor + 1)), after(current))
+  }
+}
+reachable SignedOutAccountInHistory { current = Account screen = SignIn len(history) = 3 }
+scope Int = 0..3, steps = 12

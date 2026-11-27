@@ -1,0 +1,23 @@
+rel start: one Route
+var current: one Route
+var nextRoute: lone Route
+var atNext: one Bool
+
+init { current = start no nextRoute atNext = false }
+behavior push(destination: Route) {
+  guard { not atNext }
+  update { nextRoute = destination current = destination atNext = true }
+}
+behavior goBack() {
+  guard { atNext }
+  update { current = start atNext = false }
+}
+behavior goForward() {
+  guard { not atNext some nextRoute }
+  update { current = nextRoute atNext = true }
+}
+
+invariant AtStart { not atNext implies current = start }
+invariant AtPushedRoute { atNext implies current = nextRoute }
+reachable CanGoBack { atNext }
+scope steps = 5

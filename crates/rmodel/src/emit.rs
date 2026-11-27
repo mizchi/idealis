@@ -7,14 +7,15 @@
 //! `check { always f }`, reachability is `run { eventually f }`.
 //!
 //! TLA+: atoms are strings, sets are sets and binary relations are sets of
-//! pairs. Static relations are variables chosen in Init from `SUBSET` and
-//! never changed, so the explicit search enumerates the configurations.
+//! pairs. Static relations are variables initialized from a fixed fact or
+//! a subset of their domain and stay unchanged thereafter.
 //! Every relation is typed and has its multiplicity in every state.
-use crate::Error;
+use crate::reference::{Data, Machine};
 use crate::syntax::{
-    Arith, Check, CheckKind, Compare, Expr, FairnessKind, Formula, INT, Int, IntCompare, Model,
-    Mult, NAT, Quantifier, SetOp, Shape, TemporalCheck, TransitionCheck,
+    Action, Arith, Check, CheckKind, Compare, Expr, FairnessKind, Formula, INT, Int, IntCompare,
+    Model, Mult, NAT, Phase, Quantifier, SetOp, Shape, TemporalCheck, TransitionCheck,
 };
+use crate::{Error, initial::fixed_initial_values};
 use std::collections::BTreeMap;
 
 /// The Alloy command label of a check.
@@ -22,11 +23,25 @@ pub fn alloy_label(check: &str) -> String {
     format!("c_{check}")
 }
 
-/// Bound names: model name to emitted name.
-type Scope = BTreeMap<String, String>;
+#[derive(Clone, Default)]
+struct AlloyScope {
+    names: BTreeMap<String, String>,
+    after: bool,
+}
 
 pub fn to_alloy(model: &Model) -> String {
     let mut out = String::new();
+    let emit_transitions = alloy_transition_supports(model).is_ok();
+    let mut count_bound = alloy_count_bound(
+        model,
+        crate::syntax::collection_features(model, false).counts,
+    );
+    if emit_transitions {
+        count_bound = count_bound.max(alloy_count_bound(
+            model,
+            crate::syntax::collection_features(model, true).counts,
+        ));
+    }
     // A sum sort is an abstract signature its children extend (plan 0100).
     let extends = |sort: &str| {
         model
@@ -65,7 +80,7 @@ pub fn to_alloy(model: &Model) -> String {
         })
         .collect();
     out.push_str(&format!("one sig World {{\n{}\n}}\n", fields.join(",\n")));
-    let empty = Scope::new();
+    let empty = AlloyScope::default();
     let declared = alloy_declarations(model);
     if let Some(declared) = &declared {
         out.push_str(&format!("fact {{ {declared} }}\n"));
@@ -85,11 +100,7 @@ pub fn to_alloy(model: &Model) -> String {
     };
     let mut steps = Vec::new();
     for action in &model.actions {
-        let scope: Scope = action
-            .params
-            .iter()
-            .map(|(param, _)| (param.clone(), format!("p_{param}")))
-            .collect();
+        let scope = alloy_action_scope(action);
         let mut body: Vec<String> = action
             .guards
             .iter()
@@ -100,10 +111,7 @@ pub fn to_alloy(model: &Model) -> String {
                 model.relation(var).map(|relation| &relation.shape),
                 Some(Shape::Binary { .. })
             );
-            body.push(format!(
-                "(World.r_{var})' = {}",
-                alloy_as(model, value, &scope, pair)
-            ));
+            body.push(alloy_assignment(model, var, value, &scope, pair));
         }
         let assigned: Vec<&str> = action
             .assignments
@@ -111,11 +119,7 @@ pub fn to_alloy(model: &Model) -> String {
             .map(|(var, _)| var.as_str())
             .collect();
         body.extend(frame(&assigned));
-        let declarations: Vec<String> = action
-            .params
-            .iter()
-            .map(|(param, sig)| format!("p_{param}: s_{sig}"))
-            .collect();
+        let declarations = alloy_parameters(action);
         if declarations.is_empty() {
             out.push_str(&format!(
                 "pred a_{} {{\n  {}\n}}\n",
@@ -130,16 +134,10 @@ pub fn to_alloy(model: &Model) -> String {
                 declarations.join(", "),
                 body.join("\n  ")
             ));
-            let arguments: Vec<String> = action
-                .params
-                .iter()
-                .map(|(param, _)| format!("p_{param}"))
-                .collect();
             steps.push(format!(
-                "(some {} | a_{}[{}])",
+                "(some {} | {})",
                 declarations.join(", "),
-                action.name,
-                arguments.join(", ")
+                alloy_call(action),
             ));
         }
     }
@@ -190,11 +188,7 @@ pub fn to_alloy(model: &Model) -> String {
                 "{} Int",
                 // Only a model that counts needs more than 4 bits; wider
                 // integers would crowd ralloy's 64-atom universe (issue #106).
-                if !crate::syntax::uses_counts(model) || crate::syntax::atoms(model) <= 7 {
-                    4
-                } else {
-                    5
-                }
+                if count_bound <= 7 { 4 } else { 5 }
             ),
             format!("{} steps", model.scope.steps),
         ])
@@ -216,6 +210,15 @@ pub fn to_alloy(model: &Model) -> String {
             scope.join(", ")
         ));
     }
+    let action_steps = &steps[..model.actions.len()];
+    for check in model.transitions.iter().filter(|_| emit_transitions) {
+        let formula = alloy_transition(model, check, declared.as_deref(), action_steps);
+        out.push_str(&format!(
+            "{}: check {{ always {{ {formula} }} }} for {}\n",
+            alloy_label(&check.name),
+            scope.join(", ")
+        ));
+    }
     out.push_str(&format!(
         "{}: check {{ always {{ {} }} }} for {}\n",
         alloy_label(DECLARATIONS),
@@ -223,6 +226,77 @@ pub fn to_alloy(model: &Model) -> String {
         scope.join(", ")
     ));
     out
+}
+
+fn alloy_action_scope(action: &Action) -> AlloyScope {
+    AlloyScope {
+        names: action
+            .params
+            .iter()
+            .map(|(param, _)| (param.clone(), format!("p_{param}")))
+            .collect(),
+        after: false,
+    }
+}
+
+fn alloy_parameters(action: &Action) -> Vec<String> {
+    action
+        .params
+        .iter()
+        .map(|(param, sig)| format!("p_{param}: s_{sig}"))
+        .collect()
+}
+
+fn alloy_call(action: &Action) -> String {
+    if action.params.is_empty() {
+        format!("a_{}", action.name)
+    } else {
+        let arguments: Vec<String> = action
+            .params
+            .iter()
+            .map(|(param, _)| format!("p_{param}"))
+            .collect();
+        format!("a_{}[{}]", action.name, arguments.join(", "))
+    }
+}
+
+fn alloy_transition(
+    model: &Model,
+    check: &TransitionCheck,
+    declared: Option<&str>,
+    action_steps: &[String],
+) -> String {
+    let implication = |step: String, scope: &AlloyScope| {
+        let valid_step = match declared {
+            Some(valid) => format!("({valid} and (after {{ {valid} }}) and {step})"),
+            None => step,
+        };
+        let property = alloy_formula(model, &check.formula, scope);
+        format!("({valid_step} implies {property})")
+    };
+    if let Some(name) = &check.action {
+        // A pair may be produced by several calls. Each matching call must satisfy the property.
+        let action = model
+            .actions
+            .iter()
+            .find(|action| &action.name == name)
+            .expect("checked action");
+        let body = implication(alloy_call(action), &alloy_action_scope(action));
+        let parameters = alloy_parameters(action);
+        if parameters.is_empty() {
+            body
+        } else {
+            format!("(all {} | {body})", parameters.join(", "))
+        }
+    } else if action_steps.is_empty() {
+        "(no none)".to_owned()
+    } else {
+        // Exclude synthetic waiting while keeping explicit no-op actions.
+        implication(
+            format!("({})", action_steps.join(" or ")),
+            &AlloyScope::default(),
+        )
+    }
 }
 
 /// The name of the built-in check that no transition breaks a var's
@@ -269,6 +343,78 @@ fn alloy_mult(mult: Mult) -> &'static str {
     }
 }
 
+fn alloy_sort_size(model: &Model, name: &str) -> usize {
+    if let Some(size) = model.scope.sizes.get(name) {
+        return *size;
+    }
+    if let Some((_, members)) = model.enums.iter().find(|(sort, _)| sort == name) {
+        return members.len();
+    }
+    if let Some((_, children)) = model.sums.iter().find(|(sort, _)| sort == name) {
+        return children
+            .iter()
+            .map(|child| alloy_sort_size(model, child))
+            .sum();
+    }
+    crate::syntax::atoms(model)
+}
+
+fn alloy_collection_bound(model: &Model, value: &Expr) -> usize {
+    let atoms = crate::syntax::atoms(model);
+    let bound = if is_pair(model, value, &AlloyScope::default()) {
+        atoms.saturating_mul(atoms)
+    } else {
+        atoms
+    };
+    let size = |inner| alloy_collection_bound(model, inner);
+    match value {
+        Expr::None => 0,
+        Expr::Name(name) => {
+            if let Some(relation) = model.relation(name) {
+                match &relation.shape {
+                    Shape::Binary { from, to, .. } => {
+                        alloy_sort_size(model, from).saturating_mul(alloy_sort_size(model, to))
+                    }
+                    Shape::Unary { sig, .. } => alloy_sort_size(model, sig),
+                }
+            } else if model.member(name).is_some() {
+                1
+            } else {
+                alloy_sort_size(model, name)
+            }
+        }
+        Expr::At(_, inner) => size(inner),
+        Expr::If(_, yes, no) => size(yes).max(size(no)),
+        Expr::Select(_, sort, _) => alloy_sort_size(model, sort),
+        Expr::Binary(SetOp::Union | SetOp::SetUnion | SetOp::Override, left, right) => {
+            size(left).saturating_add(size(right)).min(bound)
+        }
+        Expr::Binary(SetOp::Difference | SetOp::SetDifference | SetOp::WithoutKeys, left, _) => {
+            size(left)
+        }
+        Expr::Binary(SetOp::Intersection, left, right) => size(left).min(size(right)),
+        Expr::Binary(SetOp::Product | SetOp::Join, left, right) => {
+            size(left).saturating_mul(size(right)).min(bound)
+        }
+        _ => bound,
+    }
+}
+
+fn alloy_count_bound(model: &Model, counts: Vec<&Expr>) -> usize {
+    let scope = AlloyScope::default();
+    counts
+        .into_iter()
+        .map(|value| {
+            if is_pair(model, value, &scope) {
+                alloy_collection_bound(model, value)
+            } else {
+                crate::syntax::atoms(model)
+            }
+        })
+        .max()
+        .unwrap_or(0)
+}
+
 /// Whether the Alloy lowering can express the model: Alloy integers wrap
 /// at their bit width, and the value semantics of records has no lowering
 /// yet (plan 0103).
@@ -282,24 +428,70 @@ pub fn alloy_supports(model: &Model) -> Result<(), String> {
     if !model.records.is_empty() {
         return Err("records: no Alloy lowering of value semantics".into());
     }
+    let features = crate::syntax::collection_features(model, false);
+    if features.selection {
+        return Err("set selection requires Alloy comprehension, unsupported by ralloy".into());
+    }
+    let count = alloy_count_bound(model, features.counts);
+    if count > 15 {
+        return Err(format!(
+            "counts exceed Alloy's maximum of 15 atoms or tuples: capacity {count}"
+        ));
+    }
     Ok(())
+}
+
+/// Whether the Alloy lowering can also emit the model's transition checks.
+pub fn alloy_transition_supports(model: &Model) -> Result<(), String> {
+    alloy_supports(model)?;
+    let features = crate::syntax::collection_features(model, true);
+    if features.selection {
+        return Err(
+            "transition selection requires Alloy comprehension, unsupported by ralloy".into(),
+        );
+    }
+    let count = alloy_count_bound(model, features.counts);
+    if count > 15 {
+        return Err(format!(
+            "transition counts exceed Alloy's maximum of 15 atoms or tuples: capacity {count}"
+        ));
+    }
+    Ok(())
+}
+
+fn alloy_assignment(
+    model: &Model,
+    var: &str,
+    value: &Expr,
+    scope: &AlloyScope,
+    pair: bool,
+) -> String {
+    if let Expr::If(test, yes, no) = value {
+        let test = alloy_formula(model, test, scope);
+        let yes = alloy_assignment(model, var, yes, scope, pair);
+        let no = alloy_assignment(model, var, no, scope, pair);
+        format!("(({test} implies ({yes})) and ((not {test}) implies ({no})))")
+    } else {
+        format!("(World.r_{var})' = {}", alloy_as(model, value, scope, pair))
+    }
 }
 
 const VALUES: &str = "alloy_supports rejects models with values";
 
 /// Whether an expression denotes a binary relation.
-fn is_pair(model: &Model, expression: &Expr, scope: &Scope) -> bool {
+fn is_pair(model: &Model, expression: &Expr, scope: &AlloyScope) -> bool {
     match expression {
         Expr::None => false,
         Expr::At(_, expr) => is_pair(model, expr, scope),
+        Expr::If(_, yes, no) => is_pair(model, yes, scope) || is_pair(model, no, scope),
         Expr::Name(name) => {
-            !scope.contains_key(name)
+            !scope.names.contains_key(name)
                 && matches!(
                     model.relation(name).map(|relation| &relation.shape),
                     Some(Shape::Binary { .. })
                 )
         }
-        Expr::Binary(SetOp::Product, _, _) => true,
+        Expr::Binary(SetOp::Product | SetOp::WithoutKeys, _, _) | Expr::Closure(_) => true,
         Expr::Binary(SetOp::Join, left, right) => {
             is_pair(model, left, scope) && is_pair(model, right, scope)
         }
@@ -308,9 +500,18 @@ fn is_pair(model: &Model, expression: &Expr, scope: &Scope) -> bool {
         | Expr::Count(_)
         | Expr::Arith(..)
         | Expr::Record(..)
+        | Expr::Field(..)
         | Expr::Sequence(..)
         | Expr::Append(..)
+        | Expr::Tail(_)
+        | Expr::Take(..)
+        | Expr::RemoveAt(..)
+        | Expr::RemoveAll(..)
+        | Expr::ReachableFrom(..)
+        | Expr::Select(..)
+        | Expr::Keys(..)
         | Expr::Length(_)
+        | Expr::Elements(_)
         | Expr::Index(..)
         | Expr::Variant(..)
         | Expr::Payload(..) => false,
@@ -319,19 +520,45 @@ fn is_pair(model: &Model, expression: &Expr, scope: &Scope) -> bool {
 
 /// `none` as the empty relation of the arity it stands for: Alloy's `none`
 /// is unary (review of #102).
-fn alloy_as(model: &Model, expression: &Expr, scope: &Scope, pair: bool) -> String {
+fn alloy_as(model: &Model, expression: &Expr, scope: &AlloyScope, pair: bool) -> String {
     match expression {
+        Expr::At(phase, inner) => {
+            let mut scope = scope.clone();
+            scope.after = *phase == Phase::After;
+            alloy_as(model, inner, &scope, pair)
+        }
+        Expr::If(test, yes, no) => {
+            let pair = pair || is_pair(model, expression, scope);
+            let test = alloy_formula(model, test, scope);
+            let yes = alloy_as(model, yes, scope, pair);
+            let no = alloy_as(model, no, scope, pair);
+            format!("({test} implies {yes} else {no})")
+        }
         Expr::None if pair => "(none -> none)".into(),
+        Expr::Binary(SetOp::Override, left, right) => {
+            let left = alloy_as(model, left, scope, true);
+            let right = alloy_as(model, right, scope, true);
+            format!("(({left} - (({right}.univ) -> univ)) + {right})")
+        }
+        Expr::Binary(SetOp::WithoutKeys, relation, keys) => {
+            let relation = alloy_as(model, relation, scope, true);
+            let keys = alloy_as(model, keys, scope, false);
+            format!("({relation} - ({keys} -> univ))")
+        }
         // The binary context reaches the operands of a set operation, so
         // `none + none` is binary too (issue #106).
         Expr::Binary(
-            operator @ (SetOp::Union | SetOp::Difference | SetOp::Intersection),
+            operator @ (SetOp::Union
+            | SetOp::SetUnion
+            | SetOp::Difference
+            | SetOp::SetDifference
+            | SetOp::Intersection),
             left,
             right,
         ) if pair => {
             let symbol = match operator {
-                SetOp::Union => "+",
-                SetOp::Difference => "-",
+                SetOp::Union | SetOp::SetUnion => "+",
+                SetOp::Difference | SetOp::SetDifference => "-",
                 _ => "&",
             };
             format!(
@@ -344,33 +571,61 @@ fn alloy_as(model: &Model, expression: &Expr, scope: &Scope, pair: bool) -> Stri
     }
 }
 
-fn alloy_expression(model: &Model, expression: &Expr, scope: &Scope) -> String {
+fn alloy_expression(model: &Model, expression: &Expr, scope: &AlloyScope) -> String {
     match expression {
-        Expr::At(..) => unreachable!("Alloy lowering only emits state properties"),
+        Expr::Select(variable, sort, predicate) => {
+            let mut inner = scope.clone();
+            inner
+                .names
+                .insert(variable.clone(), format!("v_{variable}"));
+            format!(
+                "{{v_{variable}: s_{sort} | {}}}",
+                alloy_formula(model, predicate, &inner)
+            )
+        }
+        Expr::Closure(edges) => format!("^({})", alloy_as(model, edges, scope, true)),
+        Expr::Keys(relation) => format!("({}.univ)", alloy_as(model, relation, scope, true)),
+        Expr::ReachableFrom(roots, edges) => {
+            let roots = alloy_as(model, roots, scope, false);
+            let edges = alloy_as(model, edges, scope, true);
+            format!("({roots} + (({roots}).^({edges})))")
+        }
+        Expr::At(..) => alloy_as(model, expression, scope, is_pair(model, expression, scope)),
+        Expr::If(..) => alloy_as(model, expression, scope, false),
         Expr::None => "none".into(),
         Expr::Name(name) => {
-            if let Some(bound) = scope.get(name) {
+            if let Some(bound) = scope.names.get(name) {
                 bound.clone()
-            } else if model.relation(name).is_some() {
-                format!("(World.r_{name})")
+            } else if let Some(relation) = model.relation(name) {
+                let prime = if scope.after && relation.var { "'" } else { "" };
+                format!("(World.r_{name}){prime}")
             } else if model.member(name).is_some() {
                 format!("e_{name}")
             } else {
                 format!("s_{name}")
             }
         }
+        Expr::Binary(SetOp::Override | SetOp::WithoutKeys, ..) => {
+            alloy_as(model, expression, scope, true)
+        }
         Expr::Binary(operator, left, right) => {
             let symbol = match operator {
-                SetOp::Union => "+",
-                SetOp::Difference => "-",
+                SetOp::Union | SetOp::SetUnion => "+",
+                SetOp::Difference | SetOp::SetDifference => "-",
                 SetOp::Intersection => "&",
                 SetOp::Product => "->",
                 SetOp::Join => ".",
-                SetOp::Multiply => unreachable!("{VALUES}"),
+                SetOp::Override | SetOp::WithoutKeys | SetOp::Multiply => {
+                    unreachable!("handled separately")
+                }
             };
             let pair = matches!(
                 operator,
-                SetOp::Union | SetOp::Difference | SetOp::Intersection
+                SetOp::Union
+                    | SetOp::SetUnion
+                    | SetOp::Difference
+                    | SetOp::SetDifference
+                    | SetOp::Intersection
             ) && (is_pair(model, left, scope) || is_pair(model, right, scope));
             format!(
                 "({} {symbol} {})",
@@ -378,13 +633,19 @@ fn alloy_expression(model: &Model, expression: &Expr, scope: &Scope) -> String {
                 alloy_as(model, right, scope, pair)
             )
         }
+        Expr::Count(counted) => format!("(#{})", alloy_expression(model, counted, scope)),
         Expr::Literal(_)
-        | Expr::Count(_)
         | Expr::Arith(..)
         | Expr::Record(..)
+        | Expr::Field(..)
         | Expr::Sequence(..)
         | Expr::Append(..)
+        | Expr::Tail(_)
+        | Expr::Take(..)
+        | Expr::RemoveAt(..)
+        | Expr::RemoveAll(..)
         | Expr::Length(_)
+        | Expr::Elements(_)
         | Expr::Index(..)
         | Expr::Variant(..)
         | Expr::Payload(..) => {
@@ -393,7 +654,7 @@ fn alloy_expression(model: &Model, expression: &Expr, scope: &Scope) -> String {
     }
 }
 
-fn alloy_formula(model: &Model, formula: &Formula, scope: &Scope) -> String {
+fn alloy_formula(model: &Model, formula: &Formula, scope: &AlloyScope) -> String {
     let expression = |expression: &Expr| alloy_expression(model, expression, scope);
     match formula {
         Formula::Compare(operator, left, right) => {
@@ -413,7 +674,7 @@ fn alloy_formula(model: &Model, formula: &Formula, scope: &Scope) -> String {
             let int = |int: &Int| match int {
                 Int::Count(counted) => format!("#{}", expression(counted)),
                 Int::Literal(value) => value.to_string(),
-                Int::Value(_) => unreachable!("{VALUES}"),
+                Int::Value(_) | Int::LocatedValue(..) => unreachable!("{VALUES}"),
             };
             let symbol = match operator {
                 IntCompare::Less => "<",
@@ -450,7 +711,9 @@ fn alloy_formula(model: &Model, formula: &Formula, scope: &Scope) -> String {
         ),
         Formula::Quantified(quantifier, variable, sig, body) => {
             let mut inner = scope.clone();
-            inner.insert(variable.clone(), format!("v_{variable}"));
+            inner
+                .names
+                .insert(variable.clone(), format!("v_{variable}"));
             let word = match quantifier {
                 Quantifier::All => "all",
                 Quantifier::Some => "some",
@@ -463,14 +726,86 @@ fn alloy_formula(model: &Model, formula: &Formula, scope: &Scope) -> String {
     }
 }
 
-/// TLC's integer literals and arithmetic must fit the portable signed range.
+/// TLC needs portable integers and materializable structured domains.
 pub fn tla_supports(model: &Model) -> Result<(), String> {
     let limit = i64::from(i32::MAX);
-    crate::numeric::validate(model, -limit..=limit).map_err(|error| error.message)
+    crate::numeric::validate(model, -limit..=limit).map_err(|error| error.message)?;
+    if model.has_structures()
+        && let Some(domain) = model
+            .value_domains()
+            .map_err(|error| error.message)?
+            .into_iter()
+            .find(|domain| !domain.enumerable())
+    {
+        return Err(format!(
+            "{} exceeds the TLA+ value materialization limit",
+            domain.kind.name()
+        ));
+    }
+    Ok(())
 }
 
 /// A TLA+ module and TLC configuration checking one check of the model.
 pub fn to_tla(model: &Model, check: &str) -> Result<(String, String), Error> {
+    lower_tla(model, check, None)
+}
+
+/// One transition label and the exact source command it represents.
+pub struct GroundAction {
+    pub label: String,
+    pub action: String,
+    pub args: Vec<(String, Data)>,
+}
+
+/// A temporal lowering that retains the identities of concrete action instances.
+pub struct TemporalWitnessTla {
+    pub source: String,
+    pub config: String,
+    pub actions: Vec<GroundAction>,
+}
+
+pub fn to_tla_temporal_witness(model: &Model, check: &str) -> Result<TemporalWitnessTla, Error> {
+    tla_supports(model).map_err(Error::kind)?;
+    if !model.temporal.iter().any(|property| property.name == check) {
+        return Err(Error::kind(format!("no temporal property {check}")));
+    }
+    let machine = Machine::new(model).map_err(Error::kind)?;
+    let mut actions = Vec::new();
+    // The explicit compiler accepts 4096 branches. The generated Next has
+    // three additional branches for unchanged and invalid states.
+    const MAX_ACTIONS: usize = 4093;
+    for (index, action) in model.actions.iter().enumerate() {
+        let arguments = machine
+            .action_arguments(action, MAX_ACTIONS - actions.len())
+            .ok_or_else(|| {
+                Error::kind("temporal witness exceeds the explicit action branch limit")
+            })?;
+        for (instance, args) in arguments.into_iter().enumerate() {
+            let label = if args.is_empty() {
+                format!("a_{}", action.name)
+            } else {
+                format!("Witness_{index}_{instance}")
+            };
+            actions.push(GroundAction {
+                label,
+                action: action.name.clone(),
+                args,
+            });
+        }
+    }
+    let (source, config) = lower_tla(model, check, Some(&actions))?;
+    Ok(TemporalWitnessTla {
+        source,
+        config,
+        actions,
+    })
+}
+
+fn lower_tla(
+    model: &Model,
+    check: &str,
+    grounded: Option<&[GroundAction]>,
+) -> Result<(String, String), Error> {
     tla_supports(model).map_err(Error::kind)?;
     let target = if check == DECLARATIONS {
         Target::Declarations
@@ -499,7 +834,7 @@ pub fn to_tla(model: &Model, check: &str) -> Result<(String, String), Error> {
         fresh: 0,
         after: false,
     };
-    Ok((emitter.module(target), config))
+    Ok((emitter.module(target, grounded), config))
 }
 
 enum Target<'a> {
@@ -521,8 +856,9 @@ enum Arity {
     Set,
     Pair,
 }
+
 impl Tla<'_> {
-    fn module(&mut self, check: Target<'_>) -> String {
+    fn module(&mut self, check: Target<'_>, grounded: Option<&[GroundAction]>) -> String {
         let model = self.model;
         let mut out = format!(
             "---- MODULE {} ----\nEXTENDS Integers, FiniteSets{}\n",
@@ -541,6 +877,11 @@ impl Tla<'_> {
         let observes_step = matches!(check, Target::Transition(_));
         if observes_step {
             variables.push("rmodel_tick".into());
+        }
+        // Represent the sole state of a relation-free model in TLA+.
+        let unit_state = variables.is_empty();
+        if unit_state {
+            variables.push("rmodel_unit".into());
         }
         out.push_str(&format!("VARIABLES {}\n", variables.join(", ")));
         for sig in &model.sigs {
@@ -572,7 +913,8 @@ impl Tla<'_> {
             }
         }
         use crate::structured::ValueType;
-        for ty in model.value_order().expect("checked value types") {
+        for value in model.value_domains().expect("checked value types") {
+            let ty = value.kind;
             let domain = match ty {
                 ValueType::Record(record) => {
                     let fields = record
@@ -647,11 +989,17 @@ impl Tla<'_> {
             }
         }
         let empty = BTreeMap::new();
+        let fixed = fixed_initial_values(model);
         let mut init: Vec<String> = model
             .relations
             .iter()
             .map(|relation| {
-                if let Shape::Unary {
+                if let Some(value) = fixed.get(relation.name.as_str()) {
+                    let (value, _) = self.expression(value, &empty);
+                    // Keep the domain restriction even when T_r only checks multiplicity.
+                    let name = &relation.name;
+                    format!("r_{name} = {value} /\\ r_{name} \\subseteq D_{name}")
+                } else if let Shape::Unary {
                     sig,
                     mult: Mult::One | Mult::Lone,
                 } = &relation.shape
@@ -681,6 +1029,9 @@ impl Tla<'_> {
         if observes_step {
             init.push("rmodel_tick = FALSE".into());
         }
+        if unit_state {
+            init.push("rmodel_unit = FALSE".into());
+        }
         init.extend(
             model
                 .relations
@@ -698,32 +1049,7 @@ impl Tla<'_> {
                 .iter()
                 .map(|(param, _)| (param.clone(), format!("{{p_{param}}}")))
                 .collect();
-            let mut body = Vec::new();
-            // Make an explicitly enabled no-op distinguishable from an implicit wait.
-            if observes_step {
-                body.push("rmodel_tick' = ~rmodel_tick".into());
-            }
-            for (var, value) in &action.assignments {
-                body.push(format!("r_{var}' = {}", self.expression(value, &scope).0));
-            }
-            let unchanged: Vec<String> = model
-                .relations
-                .iter()
-                .filter(|relation| {
-                    !action
-                        .assignments
-                        .iter()
-                        .any(|(var, _)| *var == relation.name)
-                })
-                .map(|relation| format!("r_{}", relation.name))
-                .collect();
-            if !unchanged.is_empty() {
-                body.push(format!("UNCHANGED <<{}>>", unchanged.join(", ")));
-            }
-            for guard in &action.guards {
-                body.push(self.formula(guard, &scope));
-            }
-
+            let body = self.action_body(action, &scope, unit_state, observes_step);
             let params: Vec<String> = action
                 .params
                 .iter()
@@ -735,6 +1061,21 @@ impl Tla<'_> {
                 format!("a_{}({})", action.name, params.join(", "))
             };
             out.push_str(&format!("{head} == {}\n", body.join(" /\\ ")));
+            if let Some(choices) = grounded
+                && !params.is_empty()
+            {
+                for choice in choices.iter().filter(|choice| choice.action == action.name) {
+                    let scope = choice
+                        .args
+                        .iter()
+                        .map(|(name, value)| (name.clone(), format!("{{{}}}", self.literal(value))))
+                        .collect();
+                    let body = self.action_body(action, &scope, unit_state, observes_step);
+                    out.push_str(&format!("{} == {}\n", choice.label, body.join(" /\\ ")));
+                    steps.push(choice.label.clone());
+                }
+                continue;
+            }
             let mut step = head;
             for (param, sig) in action.params.iter().rev() {
                 step = format!("(\\E p_{param} \\in s_{sig} : {step})");
@@ -749,7 +1090,9 @@ impl Tla<'_> {
             .vars()
             .map(|relation| format!("T_{0}(r_{0})", relation.name))
             .collect();
-        let declared = if declared.is_empty() {
+        let declared = if unit_state {
+            "rmodel_unit = FALSE".to_owned()
+        } else if declared.is_empty() {
             "TRUE".to_owned()
         } else {
             declared.join(" /\\ ")
@@ -806,15 +1149,25 @@ impl Tla<'_> {
                 } else {
                     format!("a_{}({})", action.name, args.join(", "))
                 };
-                for (param, sort) in action.params.iter().rev() {
-                    choice = format!("(\\E p_{param} \\in s_{sort} : {choice})");
-                }
                 let fair = match fairness.kind {
                     FairnessKind::Weak => "WF",
                     FairnessKind::Strong => "SF",
                 };
-                out.push_str(&format!("Fair_{} == {valid} /\\ {choice}\n", action.name));
-                spec.push_str(&format!(" /\\ {fair}_{state}(Fair_{})", action.name));
+                if fairness.each && !args.is_empty() {
+                    let name = format!("Fair_{}({})", action.name, args.join(", "));
+                    out.push_str(&format!("{name} == {valid} /\\ {choice}\n"));
+                    let mut rule = format!("{fair}_{state}({name})");
+                    for (param, sort) in action.params.iter().rev() {
+                        rule = format!("(\\A p_{param} \\in s_{sort} : {rule})");
+                    }
+                    spec.push_str(&format!(" /\\ {rule}"));
+                } else {
+                    for (param, sort) in action.params.iter().rev() {
+                        choice = format!("(\\E p_{param} \\in s_{sort} : {choice})");
+                    }
+                    out.push_str(&format!("Fair_{} == {valid} /\\ {choice}\n", action.name));
+                    spec.push_str(&format!(" /\\ {fair}_{state}(Fair_{})", action.name));
+                }
             }
             out.push_str(&format!("Spec == {spec}\n"));
         }
@@ -833,11 +1186,46 @@ impl Tla<'_> {
             Target::Scope => (SCOPE, "TRUE".to_owned()),
             Target::Transition(check) => {
                 let state = variables.join(", ");
-                let formula = self.formula(&check.formula, &empty);
-                (
-                    check.name.as_str(),
-                    format!("[] [(({valid}) /\\ ({valid})' => {formula})]_<<{state}>>"),
-                )
+                let mut condition = format!("({valid}) /\\ ({valid})'");
+                let action = check.action.as_ref().map(|name| {
+                    model
+                        .actions
+                        .iter()
+                        .find(|action| &action.name == name)
+                        .expect("checked action")
+                });
+                let scope = if let Some(action) = action {
+                    let params: Vec<_> = action
+                        .params
+                        .iter()
+                        .map(|(param, _)| format!("p_{param}"))
+                        .collect();
+                    if params.is_empty() {
+                        condition.push_str(&format!(" /\\ a_{}", action.name));
+                    } else {
+                        condition.push_str(&format!(
+                            " /\\ a_{}({})",
+                            action.name,
+                            params.join(", ")
+                        ));
+                    }
+                    action
+                        .params
+                        .iter()
+                        .zip(params)
+                        .map(|((param, _), tla)| (param.clone(), format!("{{{tla}}}")))
+                        .collect()
+                } else {
+                    BTreeMap::new()
+                };
+                let formula = self.formula(&check.formula, &scope);
+                let mut assertion = format!("({condition} => {formula})");
+                if let Some(action) = action {
+                    for (param, sort) in action.params.iter().rev() {
+                        assertion = format!("(\\A p_{param} \\in s_{sort} : {assertion})");
+                    }
+                }
+                (check.name.as_str(), format!("[] [{assertion}]_<<{state}>>"))
             }
             Target::Temporal(check) => {
                 let scope = check
@@ -886,6 +1274,87 @@ impl Tla<'_> {
         format!("{{<<{}>> : {binds}}}", items.join(", "))
     }
 
+    fn action_body(
+        &mut self,
+        action: &Action,
+        scope: &BTreeMap<String, String>,
+        unit_state: bool,
+        observes_step: bool,
+    ) -> Vec<String> {
+        let mut body = Vec::new();
+        // A guard may establish that a value read by a later expression exists.
+        let guards_first = action.guards.iter().any(Formula::tests_presence);
+        if guards_first {
+            body.extend(action.guards.iter().map(|guard| self.formula(guard, scope)));
+        }
+        // Make an explicitly enabled no-op distinguishable from an implicit wait.
+        if observes_step {
+            body.push("rmodel_tick' = ~rmodel_tick".into());
+        }
+        if unit_state {
+            body.push("UNCHANGED rmodel_unit".into());
+        }
+        for (var, value) in &action.assignments {
+            body.push(format!("r_{var}' = {}", self.expression(value, scope).0));
+        }
+        let unchanged: Vec<String> = self
+            .model
+            .relations
+            .iter()
+            .filter(|relation| {
+                !action
+                    .assignments
+                    .iter()
+                    .any(|(var, _)| *var == relation.name)
+            })
+            .map(|relation| format!("r_{}", relation.name))
+            .collect();
+        if !unchanged.is_empty() {
+            body.push(format!("UNCHANGED <<{}>>", unchanged.join(", ")));
+        }
+        if !guards_first {
+            body.extend(action.guards.iter().map(|guard| self.formula(guard, scope)));
+        }
+        body
+    }
+
+    fn literal(&self, value: &Data) -> String {
+        match value {
+            Data::Atom(name) => {
+                let atom = self
+                    .model
+                    .enums
+                    .iter()
+                    .find(|(_, members)| members.contains(name))
+                    .map_or_else(|| name.clone(), |(sort, _)| format!("{sort}.{name}"));
+                format!("\"{atom}\"")
+            }
+            Data::Int(value) => value.to_string(),
+            Data::Sequence(items) => format!(
+                "<<{}>>",
+                items
+                    .iter()
+                    .map(|item| self.literal(item))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
+            Data::Record(_, fields) => format!(
+                "[{}]",
+                fields
+                    .iter()
+                    .map(|(name, value)| format!("f_{name} |-> {}", self.literal(value)))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
+            Data::Variant(tag, payload) => {
+                let value = payload
+                    .as_ref()
+                    .map_or_else(|| "\"\"".into(), |value| self.literal(value));
+                format!("[tag |-> \"{tag}\", value |-> {value}]")
+            }
+        }
+    }
+
     fn tagged(&mut self, tag: &str, payload: Option<String>) -> String {
         match payload {
             Some(set) => {
@@ -902,6 +1371,74 @@ impl Tla<'_> {
         scope: &BTreeMap<String, String>,
     ) -> (String, Arity) {
         match expression {
+            Expr::Closure(edges) => {
+                let (edges, _) = self.expression(edges, scope);
+                let id = self.next();
+                let mut definitions = format!("(LET rows{id}_0 == {edges}");
+                // A shortest positive path uses at most one edge per atom,
+                // including paths from an atom back to itself along a cycle.
+                let doublings = crate::syntax::atoms(self.model)
+                    .max(1)
+                    .next_power_of_two()
+                    .trailing_zeros();
+                for step in 1..=doublings {
+                    let previous = format!("rows{id}_{}", step - 1);
+                    let joined = compose(&previous, &previous, self.next());
+                    definitions.push_str(&format!(
+                        "\n  rows{id}_{step} == {previous} \\cup ({joined})"
+                    ));
+                }
+                (
+                    format!("{definitions}\n  IN rows{id}_{doublings})"),
+                    Arity::Pair,
+                )
+            }
+            Expr::Keys(relation) => {
+                let (relation, _) = self.expression(relation, scope);
+                let id = self.next();
+                (
+                    format!("{{row{id}[1] : row{id} \\in {relation}}}"),
+                    Arity::Set,
+                )
+            }
+            Expr::ReachableFrom(roots, edges) => {
+                let (roots, _) = self.expression(roots, scope);
+                let (edges, _) = self.expression(edges, scope);
+                let id = self.next();
+                let mut definitions =
+                    format!("(LET roots{id}_0 == {roots}\n  edges{id} == {edges}");
+                let bound = crate::syntax::atoms(self.model);
+                for step in 1..=bound {
+                    let prev = step - 1;
+                    definitions.push_str(&format!(
+                        "\n  roots{id}_{step} == roots{id}_{prev} \\cup {{edge{id}[2] : edge{id} \\in {{pair{id} \\in edges{id} : pair{id}[1] \\in roots{id}_{prev}}}}}"
+                    ));
+                }
+                (
+                    format!("{definitions}\n  IN roots{id}_{bound})"),
+                    Arity::Set,
+                )
+            }
+            Expr::If(condition, yes, no) => {
+                let test = self.formula(condition, scope);
+                let (yes, left) = self.expression(yes, scope);
+                let (no, right) = self.expression(no, scope);
+                (
+                    format!("(IF {test} THEN {yes} ELSE {no})"),
+                    pick(left, right),
+                )
+            }
+            Expr::Select(variable, sort, predicate) => {
+                let mut inner = scope.clone();
+                inner.insert(variable.clone(), format!("{{v_{variable}}}"));
+                (
+                    format!(
+                        "{{v_{variable} \\in s_{sort} : {}}}",
+                        self.formula(predicate, &inner)
+                    ),
+                    Arity::Set,
+                )
+            }
             Expr::At(phase, expr) => {
                 let after = std::mem::replace(&mut self.after, *phase == crate::Phase::After);
                 let lowered = self.expression(expr, scope);
@@ -961,6 +1498,68 @@ impl Tla<'_> {
                     Arity::Set,
                 )
             }
+            Expr::Tail(seq) => {
+                let id = self.next();
+                let set = self.expression(seq, scope).0;
+                (
+                    format!("{{IF Len(v{id}) = 0 THEN <<>> ELSE Tail(v{id}) : v{id} \\in {set}}}"),
+                    Arity::Set,
+                )
+            }
+            Expr::Take(seq, count) => {
+                let id = self.next();
+                let seq = self.expression(seq, scope).0;
+                let count = self.expression(count, scope).0;
+                (
+                    pairwise(
+                        &format!(
+                            "IF y{id} <= 0 THEN <<>> ELSE IF y{id} >= Len(x{id}) THEN x{id} ELSE SubSeq(x{id}, 1, y{id})"
+                        ),
+                        &seq,
+                        &count,
+                        id,
+                    ),
+                    Arity::Set,
+                )
+            }
+            Expr::RemoveAt(seq, index) => {
+                let id = self.next();
+                let seq = self.expression(seq, scope).0;
+                let index = self.expression(index, scope).0;
+                (
+                    pairwise(
+                        &format!(
+                            "IF y{id} < 0 \\/ Len(x{id}) <= y{id} THEN x{id} ELSE (SubSeq(x{id}, 1, y{id}) \\o SubSeq(x{id}, y{id} + 2, Len(x{id})))"
+                        ),
+                        &seq,
+                        &index,
+                        id,
+                    ),
+                    Arity::Set,
+                )
+            }
+            Expr::RemoveAll(seq, excluded) => {
+                let id = self.next();
+                let seq = self.expression(seq, scope).0;
+                let excluded = self.expression(excluded, scope).0;
+                (
+                    format!(
+                        "(LET Keep{id}(v{id}) == v{id} \\notin {excluded}
+                          IN {{SelectSeq(s{id}, Keep{id}) : s{id} \\in {seq}}})"
+                    ),
+                    Arity::Set,
+                )
+            }
+            Expr::Elements(seq) => {
+                let id = self.next();
+                let set = self.expression(seq, scope).0;
+                (
+                    format!(
+                        "UNION {{{{v{id}[i{id}] : i{id} \\in 1..Len(v{id})}} : v{id} \\in {set}}}"
+                    ),
+                    Arity::Set,
+                )
+            }
             Expr::Length(seq) => {
                 let id = self.next();
                 let set = self.expression(seq, scope).0;
@@ -1012,29 +1611,48 @@ impl Tla<'_> {
                 }
                 (set, Arity::Set)
             }
-            Expr::Binary(SetOp::Join, left, right)
-                if matches!(right.as_ref(), Expr::Name(name)
-                    if !scope.contains_key(name) && self.model.field(name).is_some()) =>
-            {
-                let Expr::Name(field) = right.as_ref() else {
-                    unreachable!()
-                };
+            Expr::Field(receiver, field) => {
                 let id = self.next();
-                let (left, _) = self.expression(left, scope);
-                (
-                    format!("{{t{id}.f_{field} : t{id} \\in {left}}}"),
-                    Arity::Set,
-                )
+                let (receiver, arity) = self.expression(receiver, scope);
+                let value = match arity {
+                    Arity::Pair => format!("<<t{id}[1], t{id}[2].f_{field}>>"),
+                    _ => format!("t{id}.f_{field}"),
+                };
+                (format!("{{{value} : t{id} \\in {receiver}}}"), arity)
             }
             Expr::Binary(operator, left, right) => {
                 let (left, left_arity) = self.expression(left, scope);
                 let (right, right_arity) = self.expression(right, scope);
                 match operator {
-                    SetOp::Union => (
-                        format!("({left} \\cup {right})"),
-                        pick(left_arity, right_arity),
-                    ),
-                    SetOp::Difference => (
+                    SetOp::WithoutKeys => {
+                        let id = self.next();
+                        (
+                            format!("{{row{id} \\in {left} : row{id}[1] \\notin ({right})}}"),
+                            Arity::Pair,
+                        )
+                    }
+                    SetOp::Override => {
+                        let id = self.next();
+                        (
+                            format!(
+                                "({{t{id} \\in {left} : \\A p{id} \\in {right} : p{id}[1] # t{id}[1]}} \\cup ({right}))"
+                            ),
+                            Arity::Pair,
+                        )
+                    }
+                    SetOp::Union | SetOp::SetUnion => {
+                        // SANY rejects an unparenthesized prefix UNION before \\cup.
+                        let left = if left.starts_with("UNION ") {
+                            format!("({left})")
+                        } else {
+                            left
+                        };
+                        (
+                            format!("({left} \\cup {right})"),
+                            pick(left_arity, right_arity),
+                        )
+                    }
+                    SetOp::Difference | SetOp::SetDifference => (
                         format!("({left} \\ {right})"),
                         pick(left_arity, right_arity),
                     ),
@@ -1048,12 +1666,7 @@ impl Tla<'_> {
                         let id = self.next();
                         let (t, u) = (format!("t{id}"), format!("u{id}"));
                         match (left_arity, right_arity) {
-                            (Arity::Pair, Arity::Pair) => (
-                                format!(
-                                    "UNION {{{{<<{t}[1], {u}[2]>> : {u} \\in {{w{id} \\in {right} : w{id}[1] = {t}[2]}}}} : {t} \\in {left}}}"
-                                ),
-                                Arity::Pair,
-                            ),
+                            (Arity::Pair, Arity::Pair) => (compose(&left, &right, id), Arity::Pair),
                             (Arity::Pair, _) => (
                                 format!(
                                     "{{{t}[1] : {t} \\in {{{u} \\in {left} : {u}[2] \\in {right}}}}}"
@@ -1091,7 +1704,7 @@ impl Tla<'_> {
                     }
                     Int::Literal(value) => value.to_string(),
                     // One integer, by the checker (plan 0103).
-                    Int::Value(value) => {
+                    Int::Value(value) | Int::LocatedValue(value, _) => {
                         format!("(CHOOSE x \\in {} : TRUE)", self.expression(value, scope).0)
                     }
                 };
@@ -1149,8 +1762,14 @@ impl Tla<'_> {
                     Quantifier::All => "\\A",
                     Quantifier::Some => "\\E",
                 };
+                let domain = if sig == NAT {
+                    let (low, high) = self.model.scope.ints.expect("validated Nat quantifier");
+                    format!("({}..{high})", low.max(0))
+                } else {
+                    format!("s_{sig}")
+                };
                 format!(
-                    "({symbol} v_{variable} \\in s_{sig} : {})",
+                    "({symbol} v_{variable} \\in {domain} : {})",
                     self.formula(body, &inner)
                 )
             }
@@ -1160,6 +1779,12 @@ impl Tla<'_> {
 
 fn pick(left: Arity, right: Arity) -> Arity {
     if left == Arity::Any { right } else { left }
+}
+
+fn compose(left: &str, right: &str, id: usize) -> String {
+    format!(
+        "UNION {{{{<<t{id}[1], u{id}[2]>> : u{id} \\in {{w{id} \\in {right} : w{id}[1] = t{id}[2]}}}} : t{id} \\in {left}}}"
+    )
 }
 
 /// `{<<x, y>> : x \in A, y \in B}`; rtlc has no `\X`.

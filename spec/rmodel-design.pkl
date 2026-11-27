@@ -204,6 +204,15 @@ spec: s.Spec = new {
       }
     }
     new {
+      id = "RMODEL-ADOPTION-LIFETIME"
+      text = s.text("版が変わらない間は、旧版の検査結果が遅れて届いても採用を保持する。版を変えたときに採用を解除する。", "Keep the adoption while the revision stays the same, including when results for an older revision arrive late. Clear the adoption when the revision changes.")
+      terms { "candidate-revision"; "compared-revision"; "adopted-revision" }
+      claims {
+        s.claim(evidenceAdoption, "AdoptionSurvivesSameRevision", "holds")
+        s.claim(evidenceAdoption, "RevisionClearsAdoption", "holds")
+      }
+    }
+    new {
       id = "RMODEL-EXPECTED-CHECKERS"
       text = s.text("比較対象の版で、予定した二つの検査器が完了し、判定が一致して初めて意味の一致を発行できる。", "Publish agreement only when both scheduled checkers have finished the expected revision and their verdicts agree.")
       terms { "comparison-origin"; "required-checkers"; "checker-receipt"; "comparison-publication" }
@@ -216,6 +225,12 @@ spec: s.Spec = new {
       }
     }
     new {
+      id = "RMODEL-RECEIPT-IMMUTABILITY"
+      text = s.text("一度受領した検査結果は、版と検査器の組ごとに受領記録・完了状態・判定を保持する。", "Keep the receipt, completion status, and verdict for every revision and checker pair once received.")
+      terms { "comparison-origin"; "required-checkers"; "checker-receipt" }
+      claims { s.claim(checkerComparison, "ReceivedResultStays", "holds") }
+    }
+    new {
       id = "RMODEL-MEASURED-IMPROVEMENT"
       text = s.text("測定前に固定した計画に属し、標本が有効で安定し、改善幅を満たすときにゴール改善を発行する。", "Publish goal improvement when the observations match the pinned plan, the samples are valid and stable, and the gain meets the threshold.")
       terms { "measurement-prerequisite"; "published-measurement" }
@@ -226,6 +241,12 @@ spec: s.Spec = new {
         s.claim(measurementGate, "UnsettledMeasurement", "reachable")
         s.claim(measurementGate, "ImprovementPublished", "reachable")
       }
+    }
+    new {
+      id = "RMODEL-PREREQUISITE-AT-PUBLICATION"
+      text = s.text("ゴール改善を発行するとき、その操作は確認済みの条件を変更しない。", "Publishing a goal improvement preserves the prerequisites already confirmed.")
+      terms { "measurement-prerequisite"; "published-measurement" }
+      claims { s.claim(measurementGate, "PublicationKeepsPrerequisites", "holds") }
     }
     new {
       id = "RMODEL-SWAP"

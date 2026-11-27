@@ -1,0 +1,14 @@
+model BrowserBootstrap
+enum Route = Home | Account
+enum Placeholder = SignIn
+type Screen = Route + Placeholder
+
+rel requested: one Route
+rel authenticated: one Bool
+var current: one Route
+
+init { current = requested }
+derive screen = if { current = Account and not authenticated } then SignIn else current
+
+reachable SignedOutAccountBoot { current = Account not authenticated screen = SignIn }
+scope steps = 1

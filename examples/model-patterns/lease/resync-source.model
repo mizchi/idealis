@@ -1,0 +1,63 @@
+model SourceGenerationResync
+enum Origin = Primary | Replacement
+enum Ticket = First | Second
+enum Image = OldData | NewData | LaterData
+record Snapshot { origin: Origin, offset: Nat, image: Image }
+
+var active: one Origin
+var saved: one Snapshot
+var latest: lone Ticket
+var pending: set Ticket
+var inbox: Ticket -> lone Snapshot
+
+init {
+  active = Primary
+  saved = Snapshot { origin: Primary, offset: 2, image: OldData }
+  no latest no pending no inbox
+}
+behavior switchSource() {
+  guard { active = Primary }
+  update { active = Replacement }
+}
+behavior request(ticket: Ticket) {
+  guard { (ticket = First and no latest) or (ticket = Second and latest = First) }
+  update { latest = ticket pending = pending + ticket }
+}
+behavior receive(ticket: Ticket, source: Origin) {
+  guard { ticket in pending no ticket.inbox }
+  update {
+    inbox = inbox ++ ticket -> (if { source = Primary }
+      then Snapshot { origin: Primary, offset: 2, image: OldData }
+      else Snapshot { origin: Replacement, offset: 1, image: NewData })
+  }
+}
+behavior publish(ticket: Ticket) {
+  guard { ticket in pending some ticket.inbox }
+  update {
+    pending = pending - ticket
+    inbox = inbox - (ticket -> ticket.inbox)
+    if { ticket = latest and ticket.inbox.origin = active and
+        (saved.origin != active or ticket.inbox.offset >= saved.offset) } then {
+      saved = ticket.inbox
+    }
+  }
+}
+behavior advance() {
+  guard { active = Replacement saved.origin = active saved.offset = 1 }
+  update { saved = Snapshot { origin: Replacement, offset: 2, image: LaterData } }
+}
+transition WrongSourceDoesNotChangeReplica on publish {
+  before(ticket.inbox.origin) != before(active) implies unchanged(saved)
+}
+transition CurrentSourceStartsItsOwnOffset on publish {
+  (ticket = before(latest) and before(ticket.inbox.origin) = before(active) and
+    before(saved.origin) != before(active)) implies after(saved) = before(ticket.inbox)
+}
+reachable ReplacementReadyToPublishEarlierOffset {
+  active = Replacement saved.origin = Primary latest = First First.inbox.origin = Replacement
+}
+reachable WrongOriginAtSameOffset {
+  active = Replacement saved = Snapshot { origin: Replacement, offset: 2, image: LaterData }
+  latest = Second Second.inbox.origin = Primary Second.inbox.offset = 2
+}
+scope Int = 0..2, steps = 10

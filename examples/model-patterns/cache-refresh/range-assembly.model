@@ -1,0 +1,62 @@
+model RangeAssembly
+enum Part = Head | Tail
+enum Tag = Old | New
+enum Mode = Plain | Resume
+enum Status = Partial | Full
+record Reply { tag: Tag, status: Status }
+
+var origin: one Tag
+var pending: Part -> lone Reply
+var cachedTag: lone Tag
+var stored: Part -> lone Tag
+
+init { origin = Old no pending no cachedTag no stored }
+
+behavior replace() {
+  guard { origin = Old }
+  update { origin = New }
+}
+behavior request(part: Part, mode: Mode) {
+  guard { no part.pending, mode = Resume implies some cachedTag }
+  update {
+    let status = if { mode = Resume and cachedTag != origin } then Full else Partial
+    pending = pending ++ part -> Reply { tag: origin, status: status }
+  }
+}
+behavior accept(part: Part) {
+  guard { some part.pending }
+  update {
+    let reply = part.pending
+    pending = withoutKeys(pending, part)
+    if { reply.status = Full } then {
+      cachedTag = reply.tag
+      stored = Part -> reply.tag
+    } else {
+      if { no cachedTag or cachedTag = reply.tag } then {
+        cachedTag = reply.tag
+        stored = stored ++ part -> reply.tag
+      }
+    }
+  }
+}
+
+invariant StoredPartsShareTag { Part.stored in cachedTag }
+transition MismatchedPartialPreservesCache on accept {
+  (some before(cachedTag) and before(part.pending.status) = Partial
+    and before(part.pending.tag) != before(cachedTag))
+    implies unchanged(stored) and unchanged(cachedTag)
+}
+transition FullReplacesBothParts on accept {
+  before(part.pending.status) = Full implies after(stored) = Part -> before(part.pending.tag)
+}
+reachable OldHeadStored { origin = Old Head.stored = Old no Tail.stored no pending }
+reachable NewPartialWaiting {
+  Head.stored = Old no Tail.stored Tail.pending = Reply { tag: New, status: Partial }
+}
+reachable NewFullAndOldPartialWaiting {
+  Head.stored = Old no Tail.stored
+  Head.pending = Reply { tag: Old, status: Partial }
+  Tail.pending = Reply { tag: New, status: Full }
+}
+
+scope steps = 9

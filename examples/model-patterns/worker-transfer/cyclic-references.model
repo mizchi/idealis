@@ -1,0 +1,43 @@
+model WorkerCyclicCopy
+enum Node = SourceA | SourceB | CopyA | CopyB
+enum Value = Original | Edited
+
+var edges: Node -> lone Node
+var values: Node -> one Value
+var target: lone Node
+
+init {
+  edges = (SourceA -> SourceB) + (SourceB -> SourceA)
+  values = Node -> Original
+  no target
+}
+
+behavior send() {
+  guard { no target }
+  update {
+    target = CopyA
+    edges = edges + (CopyA -> CopyB) + (CopyB -> CopyA)
+    values = values ++ ((CopyA -> SourceA.values) + (CopyB -> SourceB.values))
+  }
+}
+
+behavior editThroughCycle() {
+  guard { some target }
+  update { values = values ++ (target.edges.edges -> Edited) }
+}
+
+invariant OriginalCycleIsIntact { SourceA.edges.edges = SourceA }
+invariant CopyHasBackEdge { some target implies some target.edges.edges }
+invariant CopyCycleReturnsToItsRoot { some target implies target.edges.edges = target }
+invariant CopyDoesNotPointIntoSource {
+  no ((target + target.edges + target.edges.edges) & (SourceA + SourceB))
+}
+transition EditThroughCycleChangesCopiedRoot on editThroughCycle { after(target.values) = Edited }
+transition EditThroughCycleKeepsSourceValues on editThroughCycle {
+  unchanged(SourceA.values) and unchanged(SourceB.values)
+}
+
+reachable MessageCopied { some target }
+reachable CopiedRootEdited { target.values = Edited SourceA.values = Original }
+
+scope steps = 4

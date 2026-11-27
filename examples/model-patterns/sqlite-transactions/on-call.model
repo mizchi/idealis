@@ -1,0 +1,39 @@
+model OnCall
+enum Doctor = Ada | Ben
+enum Result = Committed | Conflict | Refused
+
+var onDuty: set Doctor
+var basis: Doctor -> set Doctor
+var outcome: Doctor -> lone Result
+
+init { onDuty = Doctor no basis no outcome }
+
+behavior inspect(doctor: Doctor) {
+  guard { doctor in onDuty no doctor.basis, (no doctor.outcome or doctor.outcome = Conflict) }
+  update { basis = basis + (doctor -> onDuty) }
+}
+
+behavior submit(doctor: Doctor) {
+  guard { some doctor.basis }
+  update {
+    basis = withoutKeys(basis, doctor)
+    if { some (doctor.basis - doctor) } then {
+      if { doctor.basis = onDuty } then {
+        onDuty = onDuty - doctor
+        outcome = outcome ++ (doctor -> Committed)
+      } else {
+        outcome = outcome ++ (doctor -> Conflict)
+      }
+    } else {
+      outcome = outcome ++ (doctor -> Refused)
+    }
+  }
+}
+
+invariant AtLeastOneDoctor { some onDuty }
+transition StaleSnapshotCannotChangeDuty on submit {
+  (some (before(doctor.basis) - doctor) and before(doctor.basis) != before(onDuty))
+    implies unchanged(onDuty) and doctor in after(outcome.Conflict)
+}
+reachable LastDoctorRefused { one onDuty and some outcome.Refused }
+scope steps = 7

@@ -1,0 +1,54 @@
+model MultiStreamResume
+enum Client = Fast | Slow
+
+var online: set Client
+var cursors: Client -> one Nat
+var sent: Client -> one Nat
+var inbox: Client -> lone Nat
+var applied: Client -> one Nat
+
+init { no online no inbox cursors = Client -> 0 sent = Client -> 0 applied = Client -> 0 }
+behavior connect(client: Client) {
+  guard { client not in online }
+  update { online = online + client sent = sent ++ client -> client.cursors }
+}
+behavior deliver(client: Client) {
+  guard { client in online no client.inbox client.sent < 3 }
+  update {
+    sent = sent ++ client -> (client.sent + 1)
+    inbox = inbox ++ client -> (client.sent + 1)
+  }
+}
+behavior commit(client: Client) {
+  guard { client in online some client.inbox }
+  update {
+    if { client.inbox = client.cursors + 1 } then {
+      cursors = cursors ++ client -> client.inbox
+      applied = applied ++ client -> (client.applied + 1)
+    } else expect unreachable "This scenario delivers one next offset per subscriber starting at its committed cursor" {}
+    inbox = inbox - (client -> client.inbox)
+  }
+}
+behavior disconnect(client: Client) {
+  guard { client in online }
+  update {
+    online = online - client
+    inbox = inbox - (client -> client.inbox)
+  }
+}
+transition ConnectionUsesItsOwnCursor on connect {
+  after(client.sent) = before(client.cursors)
+}
+transition ClientCommitsOnlyItsOwnPosition on commit {
+  all other: Client | other != client implies unchanged(other.cursors) and unchanged(other.applied)
+}
+transition NextDeliveryFollowsItsOwnCursor on deliver {
+  after(client.inbox) = before(client.cursors) + 1
+}
+invariant EveryClientHasItsOwnPrefix {
+  all client: Client | client.applied = client.cursors
+}
+reachable DifferentProgressBeforeReconnect {
+  no online Fast.cursors = 2 Slow.cursors = 1
+}
+scope Int = 0..3, steps = 16

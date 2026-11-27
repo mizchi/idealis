@@ -1,0 +1,55 @@
+model FencedLease
+enum Generation = Old | New
+rel newer: Generation -> set Generation
+fact { newer = Old -> New }
+
+var issued: set Generation
+var expired: set Generation
+var active: lone Generation
+var fence: lone Generation
+var written: lone Generation
+
+init { no issued no expired no active no fence no written }
+
+behavior acquire(generation: Generation) {
+  guard {
+    no active generation not in issued
+    no (generation.newer & issued)
+  }
+  update {
+    issued = issued + generation
+    active = generation
+    fence = generation
+  }
+}
+behavior expire() {
+  guard { some active }
+  update { expired = expired + active active = none }
+}
+behavior release(generation: Generation) {
+  guard { generation in issued }
+  update {
+    if { generation = active } then { active = none }
+  }
+}
+behavior write(generation: Generation) {
+  guard { generation in issued }
+  update {
+    if { some active and (no fence or generation in fence + fence.newer) } then {
+      fence = generation
+      written = generation
+    }
+  }
+}
+
+transition StaleReleaseKeepsLease on release {
+  generation != before(active) implies unchanged(active)
+}
+transition StaleWriteKeepsData on write {
+  generation != before(active) implies unchanged(written)
+}
+transition CurrentWritePublishes on write {
+  generation = before(active) implies after(written) = generation
+}
+reachable ReissuedBeforeFirstWrite { Old in expired active = New no written }
+scope steps = 6

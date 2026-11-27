@@ -1,0 +1,18 @@
+model CountPairs
+enum Registration = Old | New | Later
+enum Sequence = First | Second
+var seen: Registration -> set Sequence
+
+init { seen = (Old -> Sequence) + (New -> First) }
+
+behavior copyFirst() {
+  guard { First not in Later.seen }
+  update { seen = seen + (Later -> First) }
+}
+
+invariant NamedPairs { #seen >= 3 }
+invariant ProductCountsPairs { #(Registration -> Sequence) = 6 }
+invariant IntersectedPairs { #((Old -> Sequence) & seen) = 2 }
+reachable FourthPair { #seen = 4 }
+transition CopyAddsOne on copyFirst { #after(seen) > #before(seen) }
+scope steps = 3

@@ -1,0 +1,50 @@
+model AcknowledgedNotifications
+enum Notice = Primary | Other
+enum Generation = Old | New
+
+var pending: Notice -> lone Generation
+var published: Notice -> set Generation
+var delivered: Notice -> set Generation
+var settled: Notice -> set Generation
+
+init { no pending no published no delivered no settled }
+
+behavior publish(notice: Notice, generation: Generation) {
+  guard {
+    no notice.pending
+    notice -> generation not in published
+    generation = Old or Old in notice.settled
+  }
+  update {
+    pending = pending + notice -> generation
+    published = published + notice -> generation
+  }
+}
+behavior deliver(notice: Notice, generation: Generation) {
+  guard { notice -> generation in pending notice -> generation not in delivered }
+  update { delivered = delivered + notice -> generation }
+}
+behavior ack(notice: Notice, generation: Generation) {
+  guard { notice -> generation in delivered }
+  update {
+    if { notice -> generation in pending } then {
+      pending = pending - notice -> generation
+      settled = settled + notice -> generation
+    }
+  }
+}
+
+invariant PublishedIsTracked { published = pending + settled no (pending & settled) }
+invariant SettledWasDelivered { settled in delivered }
+transition StaleAckKeepsPending on ack {
+  notice -> generation not in before(pending) implies unchanged(pending)
+}
+transition AckKeepsOtherIds on ack { unchanged(pending & ((Notice - notice) -> Generation)) }
+
+reachable ReusedWithOldAck {
+  Primary.pending = New Old in Primary.settled New not in Primary.delivered
+}
+reachable TwoIdsPending {
+  pending = Notice -> Old delivered = Primary -> Old
+}
+scope steps = 12

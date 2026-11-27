@@ -2,7 +2,7 @@ use crate::syntax::{
     Binary, Declaration, Expr, Field, Module, Mult, Parent, Predicate, Quantifier, RawCommand,
     RawScope, Signature, Unary,
 };
-use crate::{Error, ErrorKind, Kind};
+use crate::{DeclarationCounts, Error, ErrorKind, Kind};
 use std::collections::BTreeSet;
 
 struct Parser {
@@ -163,6 +163,9 @@ fn resolve(expression: Expr, arities: &std::collections::BTreeMap<String, usize>
         Expr::Binary(operator, left, right) => {
             Expr::Binary(operator, Box::new(go(*left)), Box::new(go(*right)))
         }
+        Expr::Conditional(test, yes, no) => {
+            Expr::Conditional(Box::new(go(*test)), Box::new(go(*yes)), Box::new(go(*no)))
+        }
         Expr::Quantified(quantifier, declarations, body) => Expr::Quantified(
             quantifier,
             declarations
@@ -237,6 +240,11 @@ fn implicit_this(expression: Expr, fields: &BTreeSet<String>) -> Expr {
             operator,
             Box::new(implicit_this(*left, fields)),
             Box::new(implicit_this(*right, fields)),
+        ),
+        Expr::Conditional(test, yes, no) => Expr::Conditional(
+            Box::new(implicit_this(*test, fields)),
+            Box::new(implicit_this(*yes, fields)),
+            Box::new(implicit_this(*no, fields)),
         ),
         Expr::Quantified(quantifier, declarations, body) => {
             let mut inner = fields.clone();
@@ -610,13 +618,13 @@ impl Parser {
                     scope,
                 });
             }
-            if module.signatures.len() > 16
-                || module.fields.len() > 8
-                || module.predicates.len() + module.assertions.len() > 64
-                || module.commands.len() > 64
-            {
-                return Err(Error::new(ErrorKind::Resource, "declaration limit"));
+            DeclarationCounts {
+                signatures: module.signatures.len(),
+                fields: module.fields.len(),
+                predicates_and_assertions: module.predicates.len() + module.assertions.len(),
+                commands: module.commands.len(),
             }
+            .check_limits()?;
         }
         if module.commands.is_empty() {
             return Err(Error::new(
@@ -912,7 +920,15 @@ impl Parser {
             } else {
                 precedence + 1
             })?;
-            left = Expr::Binary(operator, Box::new(left), Box::new(right));
+            left = if matches!(operator, Binary::Implies) && self.take("else") {
+                Expr::Conditional(
+                    Box::new(left),
+                    Box::new(right),
+                    Box::new(self.expression(precedence)?),
+                )
+            } else {
+                Expr::Binary(operator, Box::new(left), Box::new(right))
+            };
         }
         self.depth -= 1;
         Ok(left)

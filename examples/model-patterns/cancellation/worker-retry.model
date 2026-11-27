@@ -1,0 +1,48 @@
+model WorkerRetry
+enum CrashPoint = BeforeCommit | AfterCommit
+enum Outcome = Pending | Unknown | Done | Failed
+enum Result = Posted
+
+var outcome: one Outcome
+var effects: one Nat
+var receipt: lone Result
+var reply: lone Result
+
+init { outcome = Pending effects = 0 no receipt no reply }
+
+behavior loseWorker(point: CrashPoint) {
+  guard { outcome = Pending }
+  update {
+    outcome = Unknown
+    if { point = AfterCommit } then {
+      effects = 1
+      receipt = Posted
+    }
+  }
+}
+
+behavior retry() {
+  guard { outcome = Unknown }
+  update {
+    if { no receipt } then {
+      effects = effects + 1
+      receipt = Posted
+    }
+    outcome = Done
+    reply = if { some receipt } then receipt else Posted
+  }
+}
+
+invariant EffectAndReceiptAreAtomic {
+  (no receipt and effects = 0) or (receipt = Posted and effects = 1)
+}
+invariant ReplyConfirmsReceipt { outcome = Done implies reply = Posted and reply = receipt }
+transition ExitLeavesOutcomeUnknown on loseWorker { after(outcome) = Unknown and no after(reply) }
+transition RetryPreservesCommittedWork on retry {
+  some before(receipt) implies unchanged(effects) and unchanged(receipt)
+}
+reachable LostBeforeCommit { outcome = Unknown effects = 0 no receipt no reply }
+reachable LostAfterCommit { outcome = Unknown effects = 1 receipt = Posted no reply }
+leads_to UnknownEventuallyReplies with { weak retry } { outcome = Unknown } { outcome = Done }
+
+scope Int = 0..2, steps = 3

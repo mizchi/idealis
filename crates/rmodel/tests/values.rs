@@ -190,12 +190,180 @@ scope Wallet = 1, Int = 0..3, steps = 4";
 }
 
 #[test]
+fn record_projection_uses_the_receiver_even_when_an_action_argument_has_the_field_name() {
+    expect(
+        "model Versions
+         sig Replica
+         record Snapshot { revision: Nat }
+         var copies: Replica -> one Snapshot
+         init { all r: Replica | r.copies = Snapshot { revision: 0 } }
+         behavior store(replica: Replica, revision: Nat) {
+           guard { revision > replica.copies.revision }
+           update { copies = copies ++ replica -> Snapshot { revision: revision } }
+         }
+         transition StoresNewerRevision on store {
+           before(replica.copies.revision) < revision
+           after(replica.copies.revision) = revision
+         }
+         invariant ProjectionPreservesKeys {
+           all r: Replica | r.(copies.revision) = r.copies.revision
+         }
+         reachable Stored { some r: Replica | r.copies.revision = 2 }
+         scope Replica = 1, Int = 0..2, steps = 3",
+        &[
+            ("StoresNewerRevision", "holds", None),
+            ("ProjectionPreservesKeys", "holds", None),
+            ("Stored", "reachable", Some(1)),
+        ],
+    );
+}
+
+#[test]
+fn presence_refines_optional_records_in_order_and_in_the_same_phase() {
+    let base = "
+model Presence
+record Snapshot { revision: Nat }
+var accepted: lone Snapshot
+init { no accepted }
+behavior publish() {
+  guard { no accepted }
+  update { accepted = Snapshot { revision: 1 } }
+}
+behavior clear() {
+  guard { some accepted }
+  update { accepted = none }
+}
+scope Int = 0..2, steps = 3
+";
+    let checks = "
+invariant RevisionFloor { some accepted implies accepted.revision >= 1 }
+invariant FieldFloor { some accepted.revision implies accepted.revision >= 1 }
+reachable Published { some accepted and accepted.revision >= 1 }
+transition PublishedRevision on publish {
+  some after(accepted) implies after(accepted.revision) >= 1
+}
+transition ClearedRevision on clear {
+  some before(accepted) implies before(accepted.revision) >= 1
+}
+";
+    expect(
+        &format!("{base}{checks}"),
+        &[
+            ("RevisionFloor", "holds", None),
+            ("FieldFloor", "holds", None),
+            ("Published", "reachable", Some(1)),
+            ("PublishedRevision", "holds", None),
+            ("ClearedRevision", "holds", None),
+        ],
+    );
+
+    for formula in [
+        "accepted.revision >= 1",
+        "accepted.revision >= 1 and some accepted",
+        "some accepted or accepted.revision >= 1",
+        "(some accepted implies true) and accepted.revision >= 1",
+        "some before(accepted) implies after(accepted.revision) >= 1",
+        "some after(accepted) implies before(accepted.revision) >= 1",
+    ] {
+        let source = format!("{base}\ntransition Unsafe {{ {formula} }}");
+        let error = rmodel::parse(&source).unwrap_err();
+        assert!(
+            error.message.contains("exactly one integer"),
+            "{formula}: {error}"
+        );
+    }
+}
+
+#[test]
+fn field_names_are_scoped_to_the_record_type() {
+    expect(
+        "model LocalFields
+         sig Order
+         enum Channel = Web | Store
+         record Amount { units: Nat }
+         record Receipt { via: Channel, units: Nat }
+         var units: Order -> one Amount
+         var posted: Order -> one Receipt
+         init {
+           units = Order -> Amount { units: 1 }
+           posted = Order -> Receipt { via: Web, units: 0 }
+         }
+         behavior capture(order: Order) {
+           guard { order.posted.units = 0 }
+           update { posted = posted ++ order -> Receipt { via: Store, units: order.units.units } }
+         }
+         transition CopiesAmount on capture {
+           after(order.posted.units) = before(order.units.units)
+         }
+         reachable Captured { some order: Order | order.posted.units = 1 }
+         scope Order = 1, Int = 0..1, steps = 2",
+        &[
+            ("CopiesAmount", "holds", None),
+            ("Captured", "reachable", Some(1)),
+        ],
+    );
+    let err = rmodel::parse(
+        "model Duplicate record Amount { units: Nat, units: Nat } scope Int = 0..1, steps = 2",
+    )
+    .unwrap_err();
+    assert!(err.message.contains("Amount") && err.message.contains("duplicate field units"));
+}
+
+#[test]
+fn update_bindings_share_values_in_the_prestate() {
+    let source = "
+model Local
+var level: one Nat
+var old: one Nat
+var receipt: one Nat
+init { level = 1 old = 0 receipt = 0 }
+behavior capture() {
+  guard { level = 1 }
+  update {
+    let previous = level
+    let next = previous + 1
+    level = next
+    old = previous
+    receipt = next
+  }
+}
+transition SameValue on capture { after(old) = before(level) after(level) = after(receipt) }
+reachable Captured { level = 2 old = 1 receipt = 2 }
+scope Int = 0..2, steps = 2
+";
+    expect(
+        source,
+        &[
+            ("SameValue", "holds", None),
+            ("Captured", "reachable", Some(1)),
+        ],
+    );
+    for invalid in [
+        source.replace("let previous = level", "let previous = next"),
+        source.replace("let previous = level", "let level = 1"),
+        source.replace("old = 1 receipt", "old = previous receipt"),
+    ] {
+        assert!(rmodel::parse(&invalid).is_err(), "{invalid}");
+    }
+    let expanded = (1..16)
+        .map(|index| format!("let local{index} = local{} + local{}", index - 1, index - 1))
+        .collect::<Vec<_>>()
+        .join("\n");
+    let oversized = source.replace(
+        "let previous = level",
+        &format!("let local0 = 0\n{expanded}\nlet previous = level"),
+    );
+    let error = rmodel::parse(&oversized).unwrap_err();
+    assert!(error.message.contains("expanded update"), "{error}");
+}
+
+#[test]
 fn ill_typed_values_are_rejected() {
     let base = "model M\nsig A\nenum C = X | Y\nrecord R { n: Int, c: C }\nvar b: A -> one Int\nvar l: A -> lone Int\n";
     let scope = "\nscope A = 2, Int = 0..3, steps = 2";
     for (body, needle) in [
         (
-            "var xs: set Int\ninvariant I { some xs }",
+            "var xs: A -> set Int\ninvariant I { some xs }",
             "one or lone value",
         ),
         ("invariant I { all a: A | a.l + 1 > 0 }", "may be empty"),
@@ -214,7 +382,7 @@ fn ill_typed_values_are_rejected() {
             "needs one value of Int",
         ),
         (
-            "invariant I { all n: Int | n >= 0 }",
+            "invariant I { all r: R | some r }",
             "only atoms are quantified",
         ),
         ("invariant I { some a: A | a.b }", "expression of Bool"),
@@ -352,4 +520,290 @@ fn arithmetic_in_updates_accounts_for_large_count_domains() {
             .message
             .contains("arithmetic")
     );
+}
+
+#[test]
+fn relation_keys_project_distinct_left_values_in_both_states() {
+    let model = rmodel::parse(
+        "model ConnectionKeys
+         enum Ticket = First | Second
+         enum Slot = Primary | Hedge
+         record Connection { slot: Slot }
+         var pending: Ticket -> lone Connection
+         init { no pending }
+         behavior connect() {
+           update { pending = First -> Connection { slot: Primary } }
+         }
+         behavior clear() { guard { some pending } update { pending = none } }
+         reachable Connected { keys(pending) = First #keys(pending + First -> Connection { slot: Hedge }) = 1 }
+         invariant MatchesExistence {
+           { all ticket: Ticket | ticket in keys(pending) implies some ticket.pending }
+           { all ticket: Ticket | some ticket.pending implies ticket in keys(pending) }
+         }
+         transition ClearsKeys on clear { some before(keys(pending)) no after(keys(pending)) }
+         scope steps = 3",
+    )
+    .unwrap();
+    for (name, expected) in [
+        ("Connected", "reachable"),
+        ("MatchesExistence", "holds"),
+        ("ClearsKeys", "holds"),
+    ] {
+        let verdicts = rmodel::reference::evaluate(&model, 20_000);
+        assert_eq!(
+            word(verdicts.iter().find(|v| v.check == name).unwrap().outcome).0,
+            expected
+        );
+        assert_eq!(explicit(&model, name).0, expected);
+    }
+}
+
+#[test]
+fn keys_requires_a_binary_relation_and_existing_variant_tags_keep_their_meaning() {
+    for expression in ["keys(Key)", "keys(none)", "keys()"] {
+        let error = rmodel::parse(&format!(
+            "model Invalid enum Key = A invariant Bad {{ no {expression} }} scope steps = 1"
+        ))
+        .unwrap_err();
+        assert!(
+            error.message.contains("keys needs one binary relation"),
+            "{error}"
+        );
+    }
+    let model = rmodel::parse(
+        "model Existing enum Key = A variant Event = keys(Key)
+         var value: one Event init { value = keys(A) }
+         invariant TagStays { is(value, keys) }
+         scope steps = 1",
+    )
+    .unwrap();
+    assert_eq!(
+        rmodel::reference::evaluate(&model, 100)[0].outcome,
+        Outcome::Holds
+    );
+}
+
+#[test]
+fn binary_cardinality_does_not_extend_the_numeric_storage_scope() {
+    let model = rmodel::parse(
+        "model CountScope enum From = A | B | C enum To = D
+         var stored: one Nat init { stored = 0 }
+         behavior save() { update { stored = #(From -> To) } }
+         scope Int = 0..2, steps = 2",
+    )
+    .unwrap();
+    let witness = rmodel::reference::witness(&model, rmodel::SCOPE, 100).unwrap();
+    assert_eq!(
+        witness.outcome,
+        rmodel::reference::Outcome::Violated { depth: 1 }
+    );
+}
+
+#[test]
+fn a_fixed_sequence_uses_the_state_budget_without_enumerating_the_value_domain() {
+    use rmodel::reference::{Outcome, StopReason, analyze, witness};
+
+    let source =
+        include_str!("../../../examples/model-patterns/node-event-loop/nested-io-batch.model");
+    let model = rmodel::parse(source).unwrap();
+    let answer = witness(&model, "ObservedBatch", 4).unwrap();
+    assert!(answer.complete);
+    assert_eq!(answer.outcome, Outcome::Reachable { depth: 1 });
+    assert_eq!(analyze(&model, 4).verdicts[0].outcome, answer.outcome);
+
+    let free = rmodel::parse(&source.replace("init { calls = Invocations[] }", "")).unwrap();
+    let partial = witness(&free, "ObservedBatch", 4).unwrap();
+    assert!(!partial.complete);
+    assert_eq!(partial.outcome, Outcome::Unknown);
+    assert_eq!(partial.stop, Some(StopReason::Budget));
+    let complete = witness(&free, "ObservedBatch", 700).unwrap();
+    assert!(complete.complete);
+    assert_eq!(complete.outcome, Outcome::Reachable { depth: 0 });
+
+    // Two batches have over a hundred thousand possible values. The only
+    // reachable values in this model are the ones constructed in the source.
+    let nested_source = "model NestedBatches
+         enum Callback = Microtask | NestedMicrotask | Immediate | Timer
+         sequence Batch = Callback, max = 4
+         sequence History = Batch, max = 2
+         var history: one History
+         init { history = History[] }
+         behavior store() {
+           guard { history = History[] }
+           update { history = History[Batch[Microtask], Batch[Timer]] }
+         }
+         reachable Stored { history = History[Batch[Microtask], Batch[Timer]] }
+         scope steps = 2";
+    let nested = rmodel::parse(nested_source).unwrap();
+    let answer = witness(&nested, "Stored", 4).unwrap();
+    assert!(answer.complete);
+    assert_eq!(answer.outcome, Outcome::Reachable { depth: 1 });
+    assert!(rmodel::reference::Machine::new(&nested).is_ok());
+    assert!(
+        rmodel::tla_supports(&nested)
+            .unwrap_err()
+            .contains("History")
+    );
+
+    let nested_free =
+        rmodel::parse(&nested_source.replace("init { history = History[] }", "")).unwrap();
+    let answer = witness(&nested_free, "Stored", 4).unwrap();
+    assert!(!answer.complete);
+    assert_eq!(answer.outcome, Outcome::Unknown);
+    assert_eq!(answer.stop, Some(StopReason::Budget));
+
+    assert!(rmodel::reference::enumerable(&nested_free).is_ok());
+
+    let argument =
+        rmodel::parse(&nested_source.replace("store()", "store(value: History)")).unwrap();
+    let budget = rmodel::reference::SearchBudget {
+        states: 4,
+        arguments: 1,
+    };
+    let answer = rmodel::reference::witness_with_budget(&argument, "Stored", budget).unwrap();
+    assert_eq!(answer.outcome, Outcome::Unknown);
+    assert_eq!(answer.stop, Some(StopReason::ArgumentBudget));
+}
+
+#[test]
+fn indexed_initial_values_check_and_encode_a_witness_beyond_the_materialization_limit() {
+    use rmodel::reference::{Outcome, StopReason, witness};
+
+    let source =
+        include_str!("../../../examples/model-patterns/crash-recovery/restored-queue.model");
+    let model = rmodel::parse(source).unwrap();
+    let small = witness(&model, "RestoresFullQueue", 4).unwrap();
+    assert_eq!(small.stop, Some(StopReason::Budget));
+    assert!(!small.complete);
+
+    let enough = witness(&model, "RestoresFullQueue", 9000).unwrap();
+    assert!(enough.complete);
+    assert_eq!(enough.outcome, Outcome::Reachable { depth: 1 });
+    let trace = enough.witness.unwrap();
+    assert_eq!(trace.commands[0].action, "restart");
+    assert_eq!(trace.initial[0].1, trace.final_state[1].1);
+
+    let fault = source.replace(
+        "restored = saved }",
+        "restored = Checkpoint { pending: Pending[], retries: saved.retries } }",
+    );
+    assert_ne!(source, fault);
+    let fault = rmodel::parse(&fault).unwrap();
+    let answer = witness(&fault, "RestoresCheckpoint", 9000).unwrap();
+    assert!(answer.complete);
+    assert_eq!(answer.outcome, Outcome::Violated { depth: 1 });
+}
+
+#[test]
+fn discovers_one_enabled_call_in_a_large_argument_domain() {
+    use rmodel::reference::{
+        Outcome, SearchBudget, StopReason, transition_witness_with_budget, witness_with_budget,
+    };
+    let model = rmodel::parse(include_str!(
+        "../../../examples/model-patterns/crash-recovery/refill-queue.model"
+    ))
+    .unwrap();
+    let budget = |arguments| SearchBudget {
+        states: 4,
+        arguments,
+    };
+    for (arguments, outcome) in [
+        (1369, Outcome::Unknown),
+        (1370, Outcome::Reachable { depth: 1 }),
+    ] {
+        let answer = transition_witness_with_budget(
+            &model,
+            "refill",
+            "some after(pending)",
+            budget(arguments),
+        )
+        .unwrap();
+        assert_eq!(answer.outcome, outcome);
+        assert_eq!(answer.witness.is_some(), arguments == 1370);
+        assert!(!answer.complete);
+        assert_eq!(answer.stop, Some(StopReason::ArgumentBudget));
+    }
+    let answer = witness_with_budget(&model, "Refilled", budget(116_623)).unwrap();
+    assert!(answer.complete);
+    assert_eq!(answer.outcome, Outcome::Reachable { depth: 1 });
+    let path = answer.witness.unwrap();
+    assert_eq!(path.commands[0].action, "refill");
+    assert_eq!(path.commands[0].args[0].0, "history");
+}
+
+#[test]
+fn guard_prefix_prunes_bindings_and_keeps_argument_dependent_presence_order() {
+    use rmodel::reference::{Outcome, SearchBudget, analyze_instances_with_budget, witness};
+    let source = "model GuardOrder
+        enum Choice = Run | Skip
+        record Amount { units: Nat }
+        var saved: lone Amount
+        var accepted: one Bool
+        init { no saved not accepted }
+        behavior run(choice: Choice) {
+          guard { some saved, (choice = Run and saved.units > 0) }
+          update { accepted = true }
+        }
+        reachable Accepted { accepted }
+        scope Int = 0..1, steps = 3";
+    let model = rmodel::parse(source).unwrap();
+    let (report, calls) = analyze_instances_with_budget(
+        &model,
+        "run",
+        SearchBudget {
+            states: 4,
+            arguments: 0,
+        },
+        2,
+    )
+    .unwrap();
+    assert_eq!(report.scope, Outcome::Holds);
+    assert_eq!(report.verdicts[0].outcome, Outcome::Unreachable);
+    assert_eq!(
+        calls.iter().map(|call| call.enabled).collect::<Vec<_>>(),
+        [Some(false), Some(false)]
+    );
+
+    let guarded = source
+        .replace("some saved, (choice = Run and saved.units > 0)", "(choice = Run and some saved) and saved.units > 0")
+        .replace("reachable Accepted", "behavior store() { guard { no saved } update { saved = Amount { units: 1 } } } reachable Accepted");
+    let guarded = rmodel::parse(&guarded).unwrap();
+    let witness = witness(&guarded, "Accepted", 100).unwrap();
+    assert!(witness.complete);
+    let commands = witness.witness.unwrap().commands;
+    assert_eq!(
+        commands
+            .iter()
+            .map(|command| command.action.as_str())
+            .collect::<Vec<_>>(),
+        ["store", "run"]
+    );
+}
+
+#[test]
+fn one_refines_a_derived_row_to_an_integer_index() {
+    let source =
+        include_str!("../../../examples/model-patterns/sqlite-transactions/savepoint-named.model");
+    let model = rmodel::parse(source).unwrap();
+    let report = rmodel::reference::analyze_actions(&model, 20_000);
+    assert_eq!(report.declarations, rmodel::reference::Outcome::Holds);
+    let name = "RewindKeepsTheMostRecentMatchingMark";
+    assert_eq!(
+        report
+            .verdicts
+            .iter()
+            .find(|verdict| verdict.check == name)
+            .unwrap()
+            .outcome,
+        rmodel::reference::Outcome::Holds
+    );
+    for guard in ["some label.latest", "not one label.latest"] {
+        let without_proof = source.replace("one label.latest", guard);
+        assert!(
+            rmodel::parse(&without_proof)
+                .unwrap_err()
+                .message
+                .contains("one integer index")
+        );
+    }
 }

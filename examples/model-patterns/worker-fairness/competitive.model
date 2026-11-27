@@ -1,0 +1,27 @@
+model CompetitiveWorkers
+enum Worker = Left | Right
+var waiting: set Worker
+var owner: lone Worker
+init { no owner no waiting }
+
+behavior request(worker: Worker) {
+  guard { worker not in waiting worker != owner }
+  update { waiting = waiting + worker }
+}
+behavior acquire(worker: Worker) {
+  guard { no owner worker in waiting }
+  update { waiting = waiting - worker owner = worker }
+}
+behavior release() {
+  guard { some owner }
+  update { owner = none }
+}
+
+reachable BothWait { waiting = Worker }
+leads_to GroupStrong(worker: Worker) with { strong acquire weak release }
+  { worker in waiting } { owner = worker }
+leads_to InstanceWeak(worker: Worker) with { weak acquire(*) weak release }
+  { worker in waiting } { owner = worker }
+leads_to InstanceStrong(worker: Worker) with { strong acquire(*) weak release }
+  { worker in waiting } { owner = worker }
+scope steps = 12

@@ -1,0 +1,65 @@
+model RingReuse
+enum Slot = Left | Right
+enum Ticket = First | Second | Third
+enum Reader = Current | Delayed
+
+rel location: Ticket -> one Slot
+fact { location = (First -> Left) + (Second -> Right) + (Third -> Left) }
+
+var cells: Slot -> lone Ticket
+var observed: Reader -> lone Ticket
+var published: set Ticket
+var claimed: Ticket -> set Reader
+
+init {
+  cells = (Left -> First) + (Right -> Second)
+  published = First + Second
+  no observed no claimed
+}
+
+behavior snapshot(reader: Reader, slot: Slot) {
+  guard { no reader.observed some slot.cells }
+  update { observed = observed + (reader -> slot.cells) }
+}
+
+behavior publishThird() {
+  guard { Third not in published no Third.location.cells }
+  update {
+    cells = cells + (Third.location -> Third)
+    published = published + Third
+  }
+}
+
+behavior claim(reader: Reader) {
+  guard { some reader.observed }
+  update {
+    observed = observed - (reader -> Ticket)
+    if { reader.observed = reader.observed.location.cells } then {
+      claimed = claimed + (reader.observed.location.cells -> reader)
+      cells = cells - (reader.observed.location -> Ticket)
+    }
+  }
+}
+
+invariant TicketStaysAtItsSlot { all slot: Slot | slot.cells.location in slot }
+invariant PublishedTicketIsQueuedOrClaimed {
+  published = Slot.cells + claimed.Reader and no (Slot.cells & claimed.Reader)
+}
+invariant OneClaimantPerTicket { all ticket: Ticket | lone ticket.claimed }
+transition StaleCandidateCannotConsumeReplacement on claim {
+  before(reader.observed) != before(reader.observed.location.cells) implies unchanged(cells) and unchanged(claimed)
+}
+transition FreshCandidateClaimsItsTicket on claim {
+  let candidate = before(reader.observed)
+  (some candidate and candidate = before(reader.observed.location.cells))
+    implies reader in candidate.after(claimed)
+}
+transition ClaimLeavesOtherSlotAlone on claim {
+  all slot: Slot | slot != before(reader.observed.location) implies unchanged(slot.cells)
+}
+
+reachable WrappedWithOldCandidate {
+  Delayed.observed = First Left.cells = Third Right.cells = Second First.claimed = Current no Current.observed
+}
+
+scope steps = 10

@@ -1,0 +1,58 @@
+model BoundedChannel
+enum Seed = First
+enum Write = Second | Third | Fourth
+type Item = Seed + Write
+enum Outcome = Waiting | Accepted | Cancelled
+sequence Waiters = Write, max = 3
+
+var buffer: lone Item
+var waiting: one Waiters
+var outcome: Write -> lone Outcome
+var delivered: set Item
+
+init { buffer = First waiting = Waiters[] no outcome no delivered }
+
+behavior write(item: Write) {
+  guard { no item.outcome len(waiting) < 3 }
+  update {
+    outcome = outcome ++ item -> (if { no buffer } then Accepted else Waiting)
+    waiting = if { no buffer } then waiting else append(waiting, item)
+    buffer = if { no buffer } then item else buffer
+  }
+}
+
+behavior cancel(item: Write) {
+  guard { some item.outcome }
+  update {
+    waiting = if { item.outcome = Waiting }
+      then removeAll(waiting, item) else waiting
+    outcome = if { item.outcome = Waiting } then outcome ++ item -> Cancelled else outcome
+  }
+}
+
+behavior take() {
+  guard { some buffer }
+  update {
+    delivered = delivered + buffer
+    buffer = at(waiting, 0)
+    waiting = tail(waiting)
+    outcome = outcome ++ at(waiting, 0) -> Accepted
+  }
+}
+
+invariant CancelledIsNotDelivered {
+  all item: Write | item.outcome = Cancelled implies item not in delivered
+}
+
+transition TerminalOutcomeStays on cancel {
+  before(item.outcome) = Accepted implies unchanged(outcome)
+}
+transition CancellationKeepsOtherMembers on cancel {
+  elements(after(waiting)) = elements(before(waiting)) - item
+}
+transition CancellationStays on take {
+  all item: Write | before(item.outcome) = Cancelled implies unchanged(item.outcome)
+}
+reachable FullWithThreeWaiting { some buffer len(waiting) = 3 }
+reachable ACancelledAndAnotherDelivered { Second.outcome = Cancelled Third in delivered }
+scope Int = 0..3, steps = 9

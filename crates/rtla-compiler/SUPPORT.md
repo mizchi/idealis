@@ -15,6 +15,7 @@
 - [x] v2の引数・captureをcaller lexical frame付きの遅延引数としてrtlcへ渡す。値のmemoizationは行わず、call entryと要求時の課金・予算判定はrtlcが担当する。
 
 - [x] 名前解決、定数・operatorとLETの展開、lexical scopeの保持。
+- [x] 複数の束縛を持つ内包式では、各束縛の範囲で外側の名前を参照し、範囲式内の束縛には先行する実行時スロットを避けて割り当てる。v1・v2 で照合した。[回帰試験](tests/binding_domains.rs)
 - [x] 既存語彙のcustom記号operatorを通常の定義として解決する。prefix `-.`、infix、postfix `^+`/`^*`/`^#`とnonfix呼出しをIR v1/v2で扱う。
 - [x] builtin・対応する標準moduleからimportした記号とのbinding衝突を拒否する。未使用定義とLET/formal宣言も検査し、SANY全体の意味解析とは区別する。
 - [x] 明示したModule集合のcompile_modulesで非再帰EXTENDSと引数なしnamed/unnamed INSTANCE、WITH、LOCALを解決する（IR v1/v2）。diamond import、定義元のscope、独立したinstanceを保持する。

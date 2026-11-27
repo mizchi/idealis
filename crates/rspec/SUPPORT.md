@@ -5,6 +5,7 @@
 ## 対応済み
 
 - [x] `spec/Schema.pkl`の用語（id・種類・日英の名前と定義・別名・避ける語・モデルとコードへの参照）、rule（日英の文・用語・claim・形式化しない理由）、claim（モデルのcheckと期待する判定）（0092）。
+- [x] 仕様 JSON は、Pkl で空の既定値を持つ一覧を省略できる。[自動保存の仕様と照合](../../examples/model-patterns/autosave/README.md)
 - [x] D1〜D4: idの一意性、参照の解決（モデルは宣言、コードは識別子として現れること）、参照するモデルの語彙が閉じていること、checkがすべてclaimされること、期待がcheckの種類と合うこと（0092）。
 - [x] D5: claimの期待を、ralloyのSATとrtlcの判定と照らす（`just spec-check`）。D6: Pklの評価結果・Markdown・jev-lintのmanifestが古くないこと（0092）。
 - [x] `transition` の名前と期待値を claim として検査する。発送仕様の `ShippedStays` は rmodel の参照評価器に照合する（0118）。

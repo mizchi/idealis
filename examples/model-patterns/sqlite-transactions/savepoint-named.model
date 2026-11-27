@@ -1,0 +1,70 @@
+model SavepointNamed
+enum Label = Outer | Inner
+enum Value = Original | Staged
+sequence Names = Label, max = 3
+sequence Snapshots = Value, max = 3
+
+var active: one Bool
+var local: one Value
+var committed: one Value
+var names: one Names
+var snapshots: one Snapshots
+
+derive latest = (at(names, 0) -> 0) ++ (at(names, 1) -> 1) ++ (at(names, 2) -> 2)
+
+init {
+  not active local = Original committed = Original
+  names = Names[] snapshots = Snapshots[]
+}
+
+behavior begin() {
+  guard { not active }
+  update { active = true }
+}
+behavior write(value: Value) {
+  guard { active }
+  update { local = value }
+}
+behavior mark(label: Label) {
+  guard { active len(names) < 3 }
+  update { names = append(names, label) snapshots = append(snapshots, local) }
+}
+behavior rewind(label: Label) {
+  guard { active one label.latest }
+  update {
+    let index = label.latest
+    local = at(snapshots, index)
+    names = take(names, index + 1)
+    snapshots = take(snapshots, index + 1)
+  }
+}
+behavior release(label: Label) {
+  guard { active one label.latest }
+  update {
+    let index = label.latest
+    names = take(names, index)
+    snapshots = take(snapshots, index)
+  }
+}
+behavior abort() {
+  guard { active }
+  update {
+    active = false local = committed names = Names[] snapshots = Snapshots[]
+  }
+}
+
+invariant MarksStayAligned { len(names) = len(snapshots) }
+transition RewindKeepsTheMostRecentMatchingMark on rewind {
+  before(names) = Names[Outer, Outer, Inner] and label = Outer implies
+    after(names) = Names[Outer, Outer] and after(local) = before(at(snapshots, 1))
+}
+transition ReleaseRemovesThroughTheMostRecentMatch on release {
+  before(names) = Names[Outer, Outer, Inner] and label = Outer implies
+    after(names) = Names[Outer] and unchanged(local) and unchanged(committed)
+}
+reachable ShadowedMarkUnderOtherName {
+  names = Names[Outer, Outer, Inner] snapshots = Snapshots[Original, Staged, Original]
+  local = Original committed = Original
+}
+
+scope Int = 0..3, steps = 9

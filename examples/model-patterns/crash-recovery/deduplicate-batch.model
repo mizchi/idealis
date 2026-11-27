@@ -1,0 +1,30 @@
+model DeduplicateBatch
+enum Work = First | Second | Third | Fourth
+sequence Batch = Work, max = 4
+sequence Journal = Batch, max = 2
+var applied: one Journal
+
+init { applied = Journal[Batch[First, Second]] }
+
+behavior receive(batch: Batch) {
+  guard { batch = Batch[First, Second] or batch = Batch[First, Third] }
+  update {
+    if { batch not in elements(applied) and len(applied) < 2 } then {
+      applied = append(applied, batch)
+    }
+  }
+}
+
+transition KnownBatchStaysOnce on receive {
+  batch in elements(before(applied)) implies unchanged(applied)
+}
+
+invariant NoDuplicateBatches {
+  #elements(applied) = len(applied)
+}
+
+reachable AppliedBoth {
+  elements(applied) = Batch[First, Second] + Batch[First, Third]
+}
+
+scope Int = 0..2, steps = 3

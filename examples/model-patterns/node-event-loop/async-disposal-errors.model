@@ -1,0 +1,45 @@
+model AsyncDisposalErrors
+enum Stage = Active | ClosingInner | ClosingOuter | Done
+enum BodyResult = Returned | Threw
+enum Disposal = Succeeded | Failed
+enum Cause = Body | Inner | Outer
+sequence Failures = Cause, max = 3
+
+var stage: one Stage
+var seen: one Failures
+var reported: one Failures
+
+init { stage = Active seen = Failures[] reported = Failures[] }
+
+behavior leave(result: BodyResult) {
+  guard { stage = Active }
+  update {
+    stage = ClosingInner
+    if { result = Threw } then { seen = Failures[Body] }
+  }
+}
+behavior finishInner(result: Disposal) {
+  guard { stage = ClosingInner }
+  update {
+    stage = ClosingOuter
+    if { result = Failed } then { seen = append(seen, Inner) }
+  }
+}
+behavior finishOuter(result: Disposal) {
+  guard { stage = ClosingOuter }
+  update {
+    let allErrors = if { result = Failed } then append(seen, Outer) else seen
+    stage = Done
+    seen = allErrors
+    reported = allErrors
+  }
+}
+
+invariant PublishesAfterBothDisposers { stage != Done implies reported = Failures[] }
+invariant ReportsEveryFailure { stage = Done implies reported = seen }
+transition InnerRejectionStillStartsOuter on finishInner { after(stage) = ClosingOuter }
+transition OuterRejectionPreservesPriorErrors on finishOuter {
+  result = Failed implies after(reported) = append(before(seen), Outer)
+}
+reachable StartingScope { stage = Active }
+scope steps = 4

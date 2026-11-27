@@ -1,0 +1,43 @@
+model CrashRecovery
+enum Phase = Idle | OpenTxn | Prepared | Committed | Offline
+enum Mark = Posted
+var phase: one Phase
+var ledger: lone Mark
+var receipt: lone Mark
+var reply: lone Mark
+
+init { phase = Idle no ledger no receipt no reply }
+
+behavior begin() {
+  guard { phase = Idle no receipt }
+  update { phase = OpenTxn }
+}
+behavior stage() {
+  guard { phase = OpenTxn }
+  update { phase = Prepared }
+}
+behavior commit() {
+  guard { phase = Prepared }
+  update { phase = Committed ledger = Posted receipt = Posted }
+}
+behavior crash() {
+  guard { phase = Prepared or phase = Committed }
+  update { phase = Offline reply = none }
+}
+behavior restart() {
+  guard { phase = Offline }
+  update { phase = Idle }
+}
+behavior respond() {
+  guard { phase = Committed or { phase = Idle some receipt } }
+  update { phase = Idle reply = receipt }
+}
+
+transition RestartIsAtomic on restart { after(ledger) = after(receipt) }
+transition ResponseUsesReceipt on respond { after(reply) = before(receipt) some after(reply) }
+reachable StoppedBeforeCommit { phase = Offline no receipt }
+reachable StoppedAfterCommit { phase = Offline some receipt no reply }
+reachable CanReply { phase = Idle some reply }
+leads_to RecoversWhenScheduled with { weak restart } { phase = Offline } { phase = Idle }
+leads_to RecoveryWithoutScheduling with {} { phase = Offline } { phase = Idle }
+scope steps = 8

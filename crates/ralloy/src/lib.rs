@@ -44,6 +44,40 @@ impl std::fmt::Display for Error {
 }
 impl std::error::Error for Error {}
 
+/// Declaration counts after expanding multi-name declarations.
+pub struct DeclarationCounts {
+    pub signatures: usize,
+    pub fields: usize,
+    pub predicates_and_assertions: usize,
+    pub commands: usize,
+}
+
+impl DeclarationCounts {
+    /// Check the same declaration limits used by the Alloy parser.
+    pub fn check_limits(&self) -> Result<(), Error> {
+        for (count, limit, declarations) in [
+            (self.signatures, 16, "signatures"),
+            (self.fields, 8, "fields"),
+            (
+                self.predicates_and_assertions,
+                64,
+                "predicates and assertions",
+            ),
+            (self.commands, 64, "commands"),
+        ] {
+            if count > limit {
+                return Err(Error::new(
+                    ErrorKind::Resource,
+                    format!(
+                        "Alloy declaration limit: {count} {declarations} exceed the limit of {limit}"
+                    ),
+                ));
+            }
+        }
+        Ok(())
+    }
+}
+
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum Kind {

@@ -380,6 +380,13 @@
 - `goal`　採用した版でゴールが改善していなければならない。
   - `spec/models/evidence-adoption.model` の `AdoptionNeedsCurrentImprovement` は holds
 
+### RMODEL-ADOPTION-LIFETIME
+
+版が変わらない間は、旧版の検査結果が遅れて届いても採用を保持する。版を変えたときに採用を解除する。
+
+- `spec/models/evidence-adoption.model` の `AdoptionSurvivesSameRevision` は holds
+- `spec/models/evidence-adoption.model` の `RevisionClearsAdoption` は holds
+
 ### RMODEL-EXPECTED-CHECKERS
 
 比較対象の版で、予定した二つの検査器が完了し、判定が一致して初めて意味の一致を発行できる。
@@ -390,6 +397,12 @@
 - `spec/models/checker-comparison.model` の `OldResultsOnly` は reachable
 - `spec/models/checker-comparison.model` の `CurrentAgreementPublished` は reachable
 
+### RMODEL-RECEIPT-IMMUTABILITY
+
+一度受領した検査結果は、版と検査器の組ごとに受領記録・完了状態・判定を保持する。
+
+- `spec/models/checker-comparison.model` の `ReceivedResultStays` は holds
+
 ### RMODEL-MEASURED-IMPROVEMENT
 
 測定前に固定した計画に属し、標本が有効で安定し、改善幅を満たすときにゴール改善を発行する。
@@ -399,6 +412,12 @@
 - `spec/models/measurement-gate.model` の `ImprovementNeedsThreshold` は holds
 - `spec/models/measurement-gate.model` の `UnsettledMeasurement` は reachable
 - `spec/models/measurement-gate.model` の `ImprovementPublished` は reachable
+
+### RMODEL-PREREQUISITE-AT-PUBLICATION
+
+ゴール改善を発行するとき、その操作は確認済みの条件を変更しない。
+
+- `spec/models/measurement-gate.model` の `PublicationKeepsPrerequisites` は holds
 
 ### RMODEL-SWAP
 

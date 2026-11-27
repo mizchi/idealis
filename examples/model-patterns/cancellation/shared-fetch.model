@@ -1,0 +1,52 @@
+model SharedFetch
+enum Caller = First | Second
+enum Transport = Idle | Running | Completed | Aborted
+enum Result = Done | Cancelled | Failed
+
+var phase: one Transport
+var waiting: set Caller
+var results: Caller -> lone Result
+
+init { phase = Idle no waiting no results }
+behavior join(caller: Caller) {
+  guard { phase in Idle + Running caller not in waiting no caller.results }
+  update { phase = Running waiting = waiting + caller }
+}
+behavior cancel(caller: Caller) {
+  guard { caller in waiting or some caller.results }
+  update {
+    if { caller in waiting } then {
+      results = results ++ caller -> Cancelled
+      waiting = waiting - caller
+      if { waiting = caller } then { phase = Aborted }
+    }
+  }
+}
+behavior complete() {
+  guard { phase != Idle }
+  update {
+    if { phase = Running } then {
+      results = results ++ (waiting -> Done)
+      waiting = none
+      phase = Completed
+    }
+  }
+}
+
+transition CancellingOneKeepsSharedWork on cancel {
+  (caller in before(waiting) and some (before(waiting) - caller)) implies
+    after(phase) = Running and after(waiting) = (before(waiting) - caller)
+}
+transition LastWaiterAbortsTransport on cancel {
+  before(waiting) = caller implies after(phase) = Aborted
+}
+transition TerminalCallerResultStays {
+  all caller: Caller | some before(caller.results) implies unchanged(caller.results)
+}
+transition CompletionSettlesTheWaiters on complete {
+  all caller: Caller | caller in before(waiting) implies after(caller.results) = Done
+}
+invariant RunningHasWaiters { phase = Running implies some waiting }
+reachable BothCallersAreWaiting { phase = Running waiting = Caller }
+
+scope steps = 6

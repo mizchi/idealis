@@ -1,0 +1,20 @@
+model WorkerCounter
+enum Worker = Left | Right
+var value: one Nat
+var loaded: Worker -> lone Nat
+var finished: set Worker
+init { value = 0 no loaded no finished }
+
+behavior load(worker: Worker) {
+  guard { no worker.loaded worker not in finished }
+  update { loaded = loaded + worker -> value }
+}
+behavior commit(worker: Worker) {
+  guard { some worker.loaded }
+  update { value = value + 1 loaded = loaded - worker -> (worker.loaded) finished = finished + worker }
+}
+
+invariant EachCommitCounts { value = #finished }
+reachable BothLoadedZero { loaded = Worker -> 0 }
+reachable BothFinished { finished = Worker }
+scope Int = 0..2, steps = 5

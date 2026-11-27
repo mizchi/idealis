@@ -1,0 +1,54 @@
+model CompactedChangeFeed
+
+var head: one Nat
+var floor: one Nat
+var sourceTotal: one Nat
+var cursor: one Nat
+var replicaTotal: one Nat
+var gap: one Bool
+var pending: one Bool
+var snapshotAt: one Nat
+var snapshotTotal: one Nat
+
+init {
+  head = 0 floor = 0 sourceTotal = 0
+  cursor = 0 replicaTotal = 0 gap = false
+  pending = false snapshotAt = 0 snapshotTotal = 0
+}
+
+behavior append() {
+  guard { head < 3 }
+  update { head = head + 1 sourceTotal = sourceTotal + 2 }
+}
+behavior compact() {
+  guard { floor < head }
+  update { floor = head }
+}
+behavior pull() {
+  guard { not pending }
+  update {
+    if { cursor < floor } then { gap = true } else {
+      gap = false
+      if { cursor < head } then { cursor = cursor + 1 replicaTotal = replicaTotal + 2 }
+    }
+  }
+}
+behavior capture() {
+  guard { gap not pending }
+  update { snapshotAt = head snapshotTotal = sourceTotal pending = true }
+}
+behavior install() {
+  guard { pending }
+  update { cursor = snapshotAt replicaTotal = snapshotTotal pending = false gap = false }
+}
+
+invariant ReplicaValueMatchesPrefix { cursor <= head and replicaTotal = cursor + cursor }
+transition ReportGapOnPull on pull {
+  before(cursor) < before(floor) implies after(gap) and unchanged(cursor) and unchanged(replicaTotal)
+}
+transition PullAtRetentionBoundary on pull {
+  (before(cursor) = before(floor) and before(cursor) < before(head)) implies
+    (after(cursor) = before(cursor) + 1 and not after(gap))
+}
+reachable NeedsInitialSnapshot { head = 1 floor = 1 cursor = 0 gap }
+scope Int = 0..6, steps = 12

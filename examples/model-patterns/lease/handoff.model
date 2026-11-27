@@ -1,0 +1,51 @@
+model TimedHandoff
+enum Client = Left | Right
+enum Stage = Waiting | Offered | Held | Cancelled | Returned
+
+var stage: Client -> one Stage
+var reserved: set Client
+
+init { stage = Client -> Waiting no reserved }
+
+behavior offer(client: Client) {
+  guard { client.stage = Waiting }
+  update {
+    if { no reserved } then {
+      stage = stage ++ client -> Offered
+      reserved = reserved + client
+    }
+  }
+}
+behavior timeout(client: Client) {
+  guard { client.stage in Waiting + Offered + Held }
+  update {
+    if { client.stage in Waiting + Offered } then {
+      stage = stage ++ client -> Cancelled
+      reserved = reserved - client
+    }
+  }
+}
+behavior accept(client: Client) {
+  guard { client.stage in Offered + Cancelled }
+  update {
+    if { client.stage = Offered } then {
+      stage = stage ++ client -> Held
+    }
+  }
+}
+behavior release(client: Client) {
+  guard { client.stage = Held }
+  update {
+    stage = stage ++ client -> Returned
+    reserved = reserved - client
+  }
+}
+
+invariant AtMostOneReservation { lone reserved }
+invariant OnlyOfferedOrHeldOccupies { reserved = stage.(Offered + Held) }
+transition TimeoutKeepsAcceptedLease on timeout {
+  before(client.stage) = Held implies unchanged(reserved) and unchanged(stage)
+}
+reachable LeftOffered { Left.stage = Offered Right.stage = Waiting }
+reachable LeftHeld { Left.stage = Held Right.stage = Waiting }
+scope steps = 8

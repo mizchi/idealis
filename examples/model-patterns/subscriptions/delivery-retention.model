@@ -1,0 +1,46 @@
+model DeliveryRetention
+enum Result = Waiting | Retry | Expired | Delivered | Missing
+
+rel head: one Nat
+fact { head = 2 }
+var floor: one Nat
+var pinned: one Nat
+var online: one Bool
+var result: one Result
+
+init { floor = 1 pinned = 1 online result = Waiting }
+
+behavior outage() { guard { online } update { online = false } }
+behavior restore() { guard { not online } update { online = true } }
+behavior compact() { guard { floor < head } update { floor = head } }
+behavior probe() {
+  guard { result = Waiting or result = Retry }
+  update {
+    if { pinned < floor } then { result = Expired }
+    else {
+      if { not online } then { result = Retry }
+      else { result = if { pinned = head } then Delivered else Missing }
+    }
+  }
+}
+behavior restart() {
+  guard { result = Expired }
+  update { pinned = head result = Waiting }
+}
+
+invariant PinDoesNotExceedHead { pinned <= head }
+invariant ExpiredMeansPruned { result = Expired implies pinned < floor }
+transition ProbeKeepsPin on probe { unchanged(pinned) }
+transition StalePinExpires on probe {
+  before(pinned) < before(floor) implies after(result) = Expired
+}
+transition OfflineRetainedPinCanRetry on probe {
+  before(pinned) >= before(floor) and not before(online) implies after(result) = Retry
+}
+transition RestartDiscardsTheOldRead on restart {
+  before(result) = Expired after(pinned) = before(head) after(result) = Waiting
+}
+reachable TemporaryFailure { result = Retry floor = 1 not online }
+reachable PrunedWhilePinned { result = Expired pinned = 1 floor = 2 }
+reachable RestartedWithNotice { pinned = 2 result = Delivered }
+scope Int = 1..2, steps = 8

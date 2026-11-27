@@ -107,6 +107,8 @@ TLA+はRust/Wasm frontendとtla-ts経路を持ち、`z3-solver`を任意のSMT a
 
 [SAT/CNF候補の評価](evals/iterations/0037-sat-foundation.md)では、Varisat 0.2.2のnative/Wasmを独立全列挙と照合し、実ブラウザの動作を確認した。実行バジェットを保証するbackendへの採用は保留中。`ralloy`や`rusmt`には組み込まず、非公開のeval crateとして分離している。
 
+`@mizchi/idealis/patterns` は、ブラウザ履歴・Node.js のコールバック順序・オブジェクトストアを、同梱の rmodel と照合する接続パターンを提供する。保存した観測は ITF にして再照合できる。[使い方](docs/rmodel-patterns.md)
+
 ## 実行
 
 観測付きの有限モデルを TS / Rust で共有する方法、反例の縮小、時計・通信・永続化の注入は [利用ガイド](docs/using-models.md) を参照。`just package` で solver を必須にしない npm/Cargo/Wasm archive と CLI を作り、別 consumer で検証できる。[公開手順と CI の分割](docs/releasing.md) は別途記載している。

@@ -1,0 +1,52 @@
+model WebLocksCancellation
+enum Seed = Owner
+enum Waiter = First | Second
+type Client = Seed + Waiter
+sequence Queue = Waiter, max = 2
+
+var holder: lone Client
+var waiting: one Queue
+var aborted: set Waiter
+var rejected: set Waiter
+var completed: set Client
+
+init { holder = Owner waiting = Queue[] no aborted no rejected no completed }
+
+behavior enqueue(client: Waiter) {
+  guard { some holder client not in (holder + elements(waiting) + rejected + completed) }
+  update { waiting = append(waiting, client) }
+}
+
+behavior cancel(client: Waiter) {
+  guard { client in (holder + elements(waiting)) client not in aborted }
+  update {
+    aborted = aborted + client
+    if { client in elements(waiting) } then {
+      waiting = removeAll(waiting, client)
+      rejected = rejected + client
+    }
+  }
+}
+
+behavior release(client: Client) {
+  guard { holder = client }
+  update {
+    holder = at(waiting, 0)
+    waiting = tail(waiting)
+    completed = completed + client
+  }
+}
+
+invariant RejectedNeverRuns { no (rejected & (holder + elements(waiting) + completed)) }
+transition CancelPendingRemovesRequest on cancel {
+  client in elements(before(waiting)) implies (
+    client not in elements(after(waiting)) and client in after(rejected) and unchanged(holder)
+  )
+}
+transition CancelGrantedKeepsLock on cancel {
+  before(holder) = client implies unchanged(holder) and unchanged(waiting) and unchanged(rejected)
+}
+transition ReleaseGrantsNextPending on release { after(holder) = at(before(waiting), 0) }
+reachable TwoPending { holder = Owner waiting = Queue[First, Second] }
+
+scope Int = 0..2, steps = 8

@@ -1,0 +1,25 @@
+model LatestRequest
+enum Request = Old | New
+var latest: lone Request
+var pending: set Request
+var shown: lone Request
+init { no latest no pending no shown }
+
+behavior start(request: Request) {
+  guard { request not in pending request not in latest }
+  update { latest = request pending = pending + request }
+}
+behavior resolve(request: Request) {
+  guard { request in pending }
+  update {
+    pending = pending - request
+    shown = if { request = latest } then request else shown
+  }
+}
+
+transition CurrentResultStays {
+  (unchanged(latest) and some before(shown) and before(shown) = before(latest))
+    implies unchanged(shown)
+}
+reachable CurrentVisibleWhileOldPending { shown = New Old in pending }
+scope steps = 6

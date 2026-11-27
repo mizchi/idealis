@@ -1,0 +1,30 @@
+model WorkerLocks
+enum Worker = Left | Right
+enum Lock = Alpha | Beta
+rel first: Worker -> one Lock
+var owner: Lock -> lone Worker
+var pending: Worker -> lone Lock
+var finished: set Worker
+
+init { no owner pending = first no finished }
+
+behavior acquire(worker: Worker) {
+  guard { some worker.pending no worker.pending.owner }
+  update {
+    owner = owner + worker.pending -> worker
+    pending = (pending - worker -> worker.pending) +
+      (if { worker in Lock.owner } then none else worker -> (Lock - worker.pending))
+  }
+}
+behavior release(worker: Worker) {
+  guard { no worker.pending worker not in finished }
+  update { owner = owner - Lock -> worker finished = finished + worker }
+}
+
+reachable Deadlocked {
+  some Worker - finished
+  { all worker: Worker | worker not in finished implies some worker.pending }
+  { all lock: Lock | lock in Worker.pending implies some lock.owner }
+}
+reachable BothFinished { finished = Worker }
+scope steps = 8

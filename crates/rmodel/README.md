@@ -32,6 +32,20 @@ right-hand side in `update` is evaluated in that same state. The updates
 take effect together. This is the same transition as
 `action acquire(p: Proc, l: Lock) { no l.holder holder' = holder + l -> p }`.
 
+An `update` block can group assignments under
+`if { condition } then { assignments } else { assignments }`.
+The `else` block is optional. Variables omitted from the selected branch
+keep their previous values.
+
+In a condition block, a comma can separate adjacent conditions. For example,
+`invariant Consistent { no published, (some draft) implies ready }`.
+
+In a `transition` property, `unchanged(expr)` expands to
+`before(expr) = after(expr)`. See the [grammar cheatsheet](CHEATSHEET.md)
+for runnable examples of state, transition, and temporal properties. The
+[language and workflow review](review.md) records coverage, usability gaps,
+and priorities from the model-pattern corpus.
+
 `entity` gives a domain concept an identity and an optional one-line
 definition. Relations, parameters, and scopes refer to that same name. Rust
 and TypeScript bindings copy the definition to the generated type, and

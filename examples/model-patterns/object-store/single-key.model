@@ -1,0 +1,8 @@
+var object: lone Body
+
+init { no object }
+behavior put(body: Body) { update { object = body } }
+behavior remove() { update { object = none } }
+
+reachable CanWrite { some object }
+scope steps = 3

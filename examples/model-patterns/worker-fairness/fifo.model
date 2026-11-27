@@ -1,0 +1,24 @@
+model FifoWorkers
+enum Worker = Left | Right
+sequence Waiters = Worker, max = 2
+var queue: one Waiters
+var owner: lone Worker
+init { queue = Waiters[] no owner }
+
+behavior request(worker: Worker) {
+  guard { len(queue) < 2 worker != owner worker != at(queue, 0) worker != at(queue, 1) }
+  update { queue = append(queue, worker) }
+}
+behavior acquire(worker: Worker) {
+  guard { no owner worker = at(queue, 0) }
+  update { queue = tail(queue) owner = worker }
+}
+behavior release() {
+  guard { some owner }
+  update { owner = none }
+}
+
+reachable BothWait { len(queue) = 2 }
+leads_to FifoWeak(worker: Worker) with { weak acquire weak release }
+  { worker = at(queue, 0) or worker = at(queue, 1) } { owner = worker }
+scope Int = 0..2, steps = 12

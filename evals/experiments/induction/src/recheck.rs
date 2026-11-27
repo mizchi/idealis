@@ -11,14 +11,19 @@ fn expr(e: &Expr) -> String {
     match e {
         Expr::None => "none".into(),
         Expr::Name(name) => name.clone(),
+        Expr::Binary(SetOp::WithoutKeys, relation, keys) => {
+            format!("withoutKeys({}, {})", expr(relation), expr(keys))
+        }
         Expr::Binary(op, l, r) => {
             let symbol = match op {
-                SetOp::Union => "+",
-                SetOp::Difference => "-",
+                SetOp::Union | SetOp::SetUnion => "+",
+                SetOp::Override => "++",
+                SetOp::Difference | SetOp::SetDifference => "-",
                 SetOp::Intersection => "&",
                 SetOp::Product => "->",
                 SetOp::Join => ".",
                 SetOp::Multiply => "*",
+                SetOp::WithoutKeys => unreachable!("handled as a function"),
             };
             format!("({} {symbol} {})", expr(l), expr(r))
         }
@@ -62,7 +67,7 @@ fn formula(f: &Formula) -> String {
             };
             format!("({word} {v}: {sort} | {})", formula(body))
         }
-        Formula::Ints(..) => unreachable!("no counts in the fragment"),
+        Formula::Ints(..) | Formula::HasTag(..) => unreachable!("outside the fragment"),
     }
 }
 

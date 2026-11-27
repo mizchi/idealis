@@ -1,0 +1,99 @@
+model PartitionSnapshot
+enum Partition = Orders | Payments | Audit
+enum CursorOrigin = Zero
+enum EntryPosition = One | Two | Three
+type Position = CursorOrigin + EntryPosition
+enum Decision = Waiting | Accepted | Rejected
+
+rel next: Position -> lone EntryPosition
+fact { next = (Zero -> One) + (One -> Two) + (Two -> Three) }
+
+var head: Partition -> one Position
+var cursor: Partition -> one Position
+var captured: Partition -> lone Position
+var buffered: Partition -> set EntryPosition
+var decision: one Decision
+
+init {
+  head = (Orders -> One) + ((Payments + Audit) -> Zero)
+  cursor = Partition -> Zero
+  no captured no buffered decision = Waiting
+}
+
+behavior append(partition: Partition) {
+  guard {
+    (partition = Orders and Orders.head = One) or
+    (partition = Payments and Payments.head = Zero and Orders.head = Two) or
+    (partition = Audit and some Audit.head.next)
+  }
+  update { head = head ++ partition -> partition.head.next }
+}
+
+behavior capture(partition: Partition) {
+  guard { decision != Accepted no partition.captured }
+  update { captured = captured ++ partition -> partition.head }
+}
+
+behavior read(partition: Partition, position: EntryPosition) {
+  guard {
+    position in reachableFrom(partition.cursor.next, next) - reachableFrom(partition.head.next, next)
+  }
+  update { buffered = buffered + partition -> position }
+}
+
+behavior publish() {
+  guard { keys(captured) = Partition }
+  update {
+    if { Payments.captured = Zero or Orders.captured = Two } then {
+      cursor = captured
+      buffered = buffered & captured.closure(next)
+      decision = Accepted
+    } else { decision = Rejected }
+    captured = none
+  }
+}
+
+behavior advance(partition: Partition) {
+  guard {
+    decision = Accepted
+    some partition.cursor.next & partition.buffered
+    partition = Payments implies Orders.cursor = Two
+  }
+  update {
+    let position = partition.cursor.next
+    cursor = cursor ++ partition -> position
+    buffered = buffered - partition -> position
+  }
+}
+
+invariant AppliedPaymentsHaveTheirOrder {
+  Payments.cursor = One implies Orders.cursor = Two
+}
+invariant CursorStaysWithinItsPartition {
+  all p: Partition | p.cursor not in reachableFrom(p.head.next, next)
+}
+invariant BufferContainsOnlyFutureRows {
+  all p: Partition |
+    p.buffered in reachableFrom(p.cursor.next, next) - reachableFrom(p.head.next, next)
+}
+transition RejectDoesNotMutateReplica on publish {
+  after(decision) = Rejected implies unchanged(cursor) and unchanged(buffered)
+}
+transition PublishUsesPartitionCut on publish {
+  after(decision) = Accepted implies after(cursor) = before(captured)
+}
+transition PublishKeepsBufferedSuffix on publish {
+  all p: Partition |
+    after(decision) = Accepted implies
+      after(p.buffered) = before(p.buffered & reachableFrom(p.captured.next, next))
+}
+reachable InconsistentCut {
+  Orders.captured = One Payments.captured = One Audit.captured = Zero
+  Audit.head = Zero decision = Waiting no buffered
+}
+reachable DifferentOffsetsWithBufferedSuffix {
+  Orders.captured = Two Payments.captured = Zero Audit.captured = Zero
+  Orders.buffered = One Payments.buffered = One Audit.buffered = Three
+  decision = Waiting
+}
+scope steps = 13

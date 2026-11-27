@@ -1,0 +1,51 @@
+model TaskGroupExit
+enum Child = Left | Right
+enum ChildStage = Running | Cleaning | Exited
+enum ParentStage = Open | Succeeded | Rejected
+
+var stages: Child -> one ChildStage
+var failedBy: lone Child
+var signalled: set Child
+var parent: one ParentStage
+
+init { stages = Child -> Running no failedBy no signalled parent = Open }
+behavior fail(child: Child) {
+  guard { child.stages = Running no failedBy }
+  update {
+    failedBy = child
+    signalled = stages.Running - child
+    stages = stages ++ (stages.Running -> Cleaning)
+  }
+}
+behavior finish(child: Child) {
+  guard { child.stages = Running }
+  update { stages = stages ++ child -> Cleaning }
+}
+behavior exitCleanup(child: Child) {
+  guard { child.stages = Cleaning }
+  update {
+    stages = stages ++ child -> Exited
+    if { stages.Exited + child = Child } then {
+      parent = if { some failedBy } then Rejected else Succeeded
+    }
+  }
+}
+
+transition RunningSiblingsGetCancelled on fail {
+  after(signalled) = (before(stages.Running) - child)
+}
+invariant ParentWaitsForAllCleanups {
+  parent != Open implies stages.Exited = Child
+}
+invariant ParentReportsRecordedFailure {
+  (parent = Rejected implies some failedBy),
+  (parent = Succeeded implies no failedBy)
+}
+reachable LeftFailedWhileSiblingIsCleaning {
+  failedBy = Left Right.stages = Cleaning Left.stages = Cleaning
+}
+leads_to FailedGroupEventuallyReturns
+  with { weak exitCleanup(*) }
+  { some failedBy } { parent = Rejected }
+
+scope steps = 6

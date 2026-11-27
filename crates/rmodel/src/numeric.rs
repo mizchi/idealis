@@ -3,6 +3,22 @@
 use crate::{Arith, Error, Expr, Formula, Int, Model, SetOp};
 use std::ops::RangeInclusive;
 
+pub(crate) fn validate_predicate(model: &Model, formula: &Formula) -> Result<(), Error> {
+    Arithmetic {
+        model,
+        limits: i64::MIN..=i64::MAX,
+    }
+    .formula(formula)
+}
+
+pub(crate) fn validate_binding(model: &Model, expression: &Expr) -> Result<(), Error> {
+    Arithmetic {
+        model,
+        limits: i64::MIN..=i64::MAX,
+    }
+    .expression(expression)
+}
+
 pub(crate) fn validate(model: &Model, limits: RangeInclusive<i64>) -> Result<(), Error> {
     let check = Arithmetic { model, limits };
     if let Some((lo, hi)) = model.scope.ints {
@@ -59,11 +75,10 @@ impl Arithmetic<'_> {
         if let Expr::At(_, inner) = expression {
             return self.projected(inner);
         }
-        if let Expr::Binary(SetOp::Join, left, right) = expression
-            && let Expr::Name(field) = right.as_ref()
-            && let Some((record, index)) = self.model.field(field)
-            && let Expr::Record(name, fields) = self.projected(left)
-            && name == &record.name
+        if let Expr::Field(receiver, field) = expression
+            && let Expr::Record(name, fields) = self.projected(receiver)
+            && let Some(record) = self.model.record(name)
+            && let Some(index) = record.field_index(field)
         {
             return self.projected(&fields[index]);
         }
@@ -81,12 +96,21 @@ impl Arithmetic<'_> {
                 (atoms * atoms).min(MAX)
             }
             Expr::At(_, expr) => self.cardinality_bound(expr),
+            Expr::Field(receiver, _) | Expr::Keys(receiver) => self.cardinality_bound(receiver),
+            Expr::If(_, yes, no) => self.cardinality_bound(yes).max(self.cardinality_bound(no)),
+            Expr::Elements(seq) => self.length_bound(seq),
+            Expr::ReachableFrom(..) | Expr::Select(..) => crate::syntax::atoms(self.model) as i128,
+            Expr::Closure(_) => (crate::syntax::atoms(self.model) as i128).pow(2).min(MAX),
             Expr::Literal(_)
             | Expr::Count(_)
             | Expr::Arith(..)
             | Expr::Record(..)
             | Expr::Sequence(..)
             | Expr::Append(..)
+            | Expr::Tail(_)
+            | Expr::Take(..)
+            | Expr::RemoveAt(..)
+            | Expr::RemoveAll(..)
             | Expr::Length(_)
             | Expr::Index(..)
             | Expr::Variant(..)
@@ -95,8 +119,8 @@ impl Arithmetic<'_> {
                 let l = self.cardinality_bound(left);
                 let r = self.cardinality_bound(right);
                 match op {
-                    SetOp::Union => (l + r).min(MAX),
-                    SetOp::Difference => l,
+                    SetOp::Union | SetOp::SetUnion | SetOp::Override => (l + r).min(MAX),
+                    SetOp::Difference | SetOp::SetDifference | SetOp::WithoutKeys => l,
                     SetOp::Intersection => l.min(r),
                     SetOp::Product | SetOp::Join => (l * r).min(MAX),
                     SetOp::Multiply => unreachable!("rewritten by the type checker"),
@@ -109,6 +133,11 @@ impl Arithmetic<'_> {
         match self.projected(expr) {
             Expr::Sequence(_, items) => items.len() as i128,
             Expr::Append(seq, _) => 1 + self.length_bound(seq),
+            Expr::Tail(seq) => (self.length_bound(seq) - 1).max(0),
+            Expr::Take(seq, _) | Expr::RemoveAt(seq, _) | Expr::RemoveAll(seq, _) => {
+                self.length_bound(seq)
+            }
+            Expr::If(_, yes, no) => self.length_bound(yes).max(self.length_bound(no)),
             _ => crate::structured::MAX_SEQUENCE_LENGTH as i128,
         }
     }
@@ -118,6 +147,11 @@ impl Arithmetic<'_> {
             Expr::Literal(value) => (i128::from(*value), i128::from(*value)),
             Expr::Count(inner) => (0, self.cardinality_bound(inner)),
             Expr::Length(seq) => (0, self.length_bound(seq)),
+            Expr::If(_, yes, no) => {
+                let (a, b) = self.bounds(yes)?;
+                let (c, d) = self.bounds(no)?;
+                (a.min(c), b.max(d))
+            }
             Expr::Arith(op, left, right) => {
                 let (a, b) = self.bounds(left)?;
                 let (c, d) = self.bounds(right)?;
@@ -144,12 +178,24 @@ impl Arithmetic<'_> {
             Expr::Literal(value) => {
                 self.require((i128::from(*value), i128::from(*value)), "integer literal")?;
             }
+            Expr::If(condition, yes, no) => {
+                self.formula(condition)?;
+                self.expression(yes)?;
+                self.expression(no)?;
+            }
+            Expr::Select(_, _, predicate) => self.formula(predicate)?,
             Expr::Arith(_, left, right) => {
                 self.expression(left)?;
                 self.expression(right)?;
                 self.bounds(expression)?;
             }
-            Expr::Binary(_, left, right) | Expr::Append(left, right) | Expr::Index(left, right) => {
+            Expr::Binary(_, left, right)
+            | Expr::Append(left, right)
+            | Expr::Take(left, right)
+            | Expr::RemoveAt(left, right)
+            | Expr::RemoveAll(left, right)
+            | Expr::ReachableFrom(left, right)
+            | Expr::Index(left, right) => {
                 self.expression(left)?;
                 self.expression(right)?;
             }
@@ -167,9 +213,14 @@ impl Arithmetic<'_> {
                     self.expression(expr)?;
                 }
             }
-            Expr::Length(expr) | Expr::Payload(expr, _) | Expr::At(_, expr) => {
-                self.expression(expr)?
-            }
+            Expr::Tail(expr)
+            | Expr::Keys(expr)
+            | Expr::Closure(expr)
+            | Expr::Length(expr)
+            | Expr::Elements(expr)
+            | Expr::Field(expr, _)
+            | Expr::Payload(expr, _)
+            | Expr::At(_, expr) => self.expression(expr)?,
             Expr::Name(_) | Expr::None => {}
         }
         Ok(())
@@ -184,7 +235,7 @@ impl Arithmetic<'_> {
                 self.expression(expr)?;
                 self.require((0, self.cardinality_bound(expr)), "integer count")
             }
-            Int::Value(expr) => self.expression(expr),
+            Int::Value(expr) | Int::LocatedValue(expr, _) => self.expression(expr),
         }
     }
 

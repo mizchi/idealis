@@ -6,8 +6,10 @@
 
 - [x] sig: トップレベル・`abstract`・`extends`・親が1つの`in`、one/lone/some、`sig A, B {}`、signature fact。子の明示scopeは親を超えず、one/exactlyの子は親を広げる（0080）。
 - [x] field: 名前が一意で4項まで、`A m -> n B`。fact、assert、run/check、全体scope・型ごとの上限・exactly、`for`なしの既定3（0079、0080）。
+- [x] 宣言数はシグネチャ16、フィールド8、述語とアサーションの合計64、コマンド64まで。複数名を展開した後の件数を数え、上限を超えた種類・件数・上限を返す。[上限チェック](src/lib.rs)
 - [x] 式: 4項までの和・差・交差・積・join・domain/range制限、転置・閉包、比較・論理結合、atomを束縛する量化とdisj、none/univ/iden/Int/String、引数付きpred/funとbox join（0079、0081）。
 - [x] 整数: リテラル、`#e`、`plus`などの算術、比較。Int型の関係は値の和になり、bit幅の2の補数で桁あふれする（0082）。
+- [x] `条件 implies 値 else 値` は、同じ種類の式または同じ項数の関係から値を選ぶ。有限列挙と SAT が同じ結果を返し、反例を評価器で再検査する。[条件式のテスト](tests/semantics.rs)。
 - [x] 入れ替えられるatomの対称性を、lex-leaderで探索の途中で除く。2列以上のfieldとsubset sigも扱う（0083、0084）。
 - [x] `div`・`rem`を含まないモデルで、fieldのslotの幅が24 bitを超えるcommandは、関係・階層・整数をSATへ符号化してralloy内のCDCLで解く（0085、0086）。
 - [x] 時相（Alloy 6）: fieldの`var`、`always`・`eventually`・`after`、prime、`N steps`（既定10）。長さstepsのlassoをSATへ展開して解き、traceを評価器で検査し直す。時相の演算子のないfactとcommandは最初の状態で、fieldの宣言は全状態で成り立つ（0090）。

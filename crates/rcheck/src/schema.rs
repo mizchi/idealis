@@ -2,7 +2,8 @@
 //! writes (plan 0102): `$ref` into `$defs`, `enum`, `const`, `type`,
 //! `properties`, `required`, `additionalProperties: false`, `items`,
 //! `uniqueItems`, `minItems`, `maxItems`, `minimum`, `maximum`, `anyOf` and `oneOf`. Any other keyword is an
-//! error rather than ignored. The tests compare it with ajv.
+//! error rather than ignored. Boolean schemas accept or reject every value.
+//! The tests compare it with ajv.
 use serde_json::Value;
 
 pub fn validate(schema: &Value, definition: &str, value: &Value) -> Result<(), String> {
@@ -14,6 +15,11 @@ pub fn validate(schema: &Value, definition: &str, value: &Value) -> Result<(), S
 }
 
 fn check(root: &Value, schema: &Value, value: &Value, path: &str) -> Result<(), String> {
+    if let Some(allowed) = schema.as_bool() {
+        return allowed
+            .then_some(())
+            .ok_or_else(|| format!("{path}: no value is allowed"));
+    }
     let schema = schema
         .as_object()
         .ok_or_else(|| format!("{path}: schema is not an object"))?;

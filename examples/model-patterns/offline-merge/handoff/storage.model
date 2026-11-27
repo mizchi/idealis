@@ -1,0 +1,19 @@
+var head: one Nat
+init { head = 0 }
+
+behavior commit(request: Request) {
+  guard { no request.receipt }
+  update {
+    let nextRevision = head + 1
+    head = nextRevision
+    receipt = receipt ++ request -> nextRevision
+  }
+}
+
+invariant ReceiptWithinHead {
+  all request: Request |
+    some request.receipt implies request.receipt > 0 and request.receipt <= head
+}
+transition OtherReceiptsStay on commit {
+  all earlier: Request | earlier != request implies unchanged(earlier.receipt)
+}

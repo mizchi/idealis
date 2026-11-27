@@ -1,0 +1,65 @@
+model OfflineMerge
+enum Editor = Alice | Bob
+enum Setting = Original | Remote | Local
+enum Reply = Merged | Conflict
+record Document { title: Setting, label: Setting }
+
+var live: one Document
+var bases: Editor -> lone Document
+var results: Editor -> lone Reply
+
+init {
+  live = Document { title: Original, label: Original }
+  no bases no results
+}
+behavior checkout(editor: Editor) {
+  guard { no editor.bases }
+  update { bases = bases ++ editor -> live }
+}
+behavior submit(editor: Editor, edit: Document) {
+  guard { some editor.bases no editor.results }
+  update {
+    if {
+      (edit.title = editor.bases.title or live.title = editor.bases.title or edit.title = live.title) and
+      (edit.label = editor.bases.label or live.label = editor.bases.label or edit.label = live.label)
+    } then {
+      live = Document {
+        title: if { edit.title = editor.bases.title } then live.title else edit.title,
+        label: if { edit.label = editor.bases.label } then live.label else edit.label
+      }
+      results = results ++ editor -> Merged
+    } else {
+      results = results ++ editor -> Conflict
+    }
+  }
+}
+transition MergePreservesUntouchedFields on submit {
+  after(editor.results) = Merged implies {
+    edit.title = before(editor.bases.title) implies unchanged(live.title),
+    edit.label = before(editor.bases.label) implies unchanged(live.label)
+  }
+}
+transition MergeAppliesEditedFields on submit {
+  after(editor.results) = Merged implies {
+    edit.title != before(editor.bases.title) implies after(live.title) = edit.title,
+    edit.label != before(editor.bases.label) implies after(live.label) = edit.label
+  }
+}
+transition DivergingChangesAreConflicts on submit {
+  (
+    (edit.title != before(editor.bases.title) and edit.title != before(live.title) and
+      before(live.title) != before(editor.bases.title)) or
+    (edit.label != before(editor.bases.label) and edit.label != before(live.label) and
+      before(live.label) != before(editor.bases.label))
+  ) implies after(editor.results) = Conflict
+}
+transition AConflictDoesNotChangeTheDocument on submit {
+  after(editor.results) = Conflict implies unchanged(live)
+}
+reachable BobHasStaleBase {
+  Bob.bases = Document { title: Original, label: Original }
+  live = Document { title: Remote, label: Original }
+  Alice.results = Merged
+  no Bob.results
+}
+scope steps = 5

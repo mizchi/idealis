@@ -1,0 +1,7 @@
+model EditHandoff
+enum Request = First | Second
+
+// Storage publishes a durable revision keyed by request. Transport reads it.
+var receipt: Request -> lone Nat
+init { no receipt }
+scope Int = 0..2, steps = 8

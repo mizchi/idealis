@@ -1,0 +1,79 @@
+model PartitionRestart
+enum Attempt = First | Second | Third
+enum Checkpoint = Older | Newer
+enum Stage = Recovering | RestartRequired | Ready | Published
+
+rel successor: Attempt -> lone Attempt
+fact { successor = (First -> Second) + (Second -> Third) }
+
+var active: one Attempt
+var checkpoint: one Checkpoint
+var requested: Attempt -> lone Checkpoint
+var delivered: set Attempt
+var expired: set Checkpoint
+var accepted: lone Attempt
+var visible: lone Checkpoint
+var stage: one Stage
+
+derive outstanding = keys(requested) - delivered
+
+init {
+  active = First checkpoint = Older stage = Recovering
+  no requested no delivered no expired no accepted no visible
+}
+
+behavior request() {
+  guard { stage = Recovering no active.requested }
+  update { requested = requested + (active -> checkpoint) }
+}
+
+behavior expire() {
+  guard { stage = Recovering checkpoint = Older some active.requested }
+  update { expired = expired + checkpoint stage = RestartRequired }
+}
+
+behavior switchCheckpoint() {
+  guard { stage = RestartRequired }
+  update { active = active.successor checkpoint = Newer stage = Recovering }
+}
+
+behavior retry() {
+  guard { stage = Recovering checkpoint = Newer active = Second active in outstanding }
+  update { active = active.successor }
+}
+
+behavior receive(attempt: Attempt) {
+  guard { attempt in outstanding }
+  update {
+    delivered = delivered + attempt
+    if { stage = Recovering and attempt = active } then {
+      accepted = attempt
+      stage = Ready
+    }
+  }
+}
+
+behavior publish() {
+  guard { stage = Ready }
+  update { visible = accepted.requested stage = Published }
+}
+
+invariant AcceptedReplyBelongsToActiveAttempt {
+  some accepted implies (accepted = active and accepted in delivered)
+}
+
+invariant PublishedRowBelongsToCurrentCheckpoint {
+  stage = Published implies (visible = checkpoint and visible not in expired)
+}
+
+transition ObsoleteReplyDoesNotChangeRecovery on receive {
+  (attempt != before(active) or before(stage) != Recovering) implies
+    (unchanged(stage) and unchanged(accepted) and unchanged(visible))
+}
+
+transition CurrentReplyCanFinishRecovery on receive {
+  (attempt = before(active) and before(stage) = Recovering) implies
+    (after(accepted) = attempt and after(stage) = Ready)
+}
+
+scope steps = 12

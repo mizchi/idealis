@@ -1,0 +1,79 @@
+model ReceiptMigration
+enum Request = Primary | Tail
+enum Body = A | B
+enum Issuance = V1 | V2
+enum Phase = Legacy | Snapshot | Following | Current
+
+record Receipt { body: Body, issuedAs: Issuance }
+
+rel content: Request -> one Body
+fact { content = (Primary -> A) + (Tail -> B) }
+
+var phase: one Phase
+var old: Request -> lone Receipt
+var captured: Request -> lone Receipt
+var migrated: Request -> lone Receipt
+var effects: one Nat
+var reply: lone Receipt
+
+derive authoritative = if { phase = Current } then migrated else old
+
+init { phase = Legacy no old no captured no migrated effects = 0 no reply }
+
+behavior submit(request: Request) {
+  update {
+    let saved = request.authoritative
+    let fresh = Receipt { body: request.content, issuedAs: if { phase = Current } then V2 else V1 }
+    if { some saved } then {
+      reply = saved
+    } else {
+      effects = effects + 1
+      reply = fresh
+      if { phase = Current } then { migrated = migrated + (request -> fresh) }
+      else { old = old + (request -> fresh) }
+    }
+  }
+}
+
+behavior snapshot() {
+  guard { phase = Legacy }
+  update { captured = old phase = Snapshot }
+}
+
+behavior restore() {
+  guard { phase = Snapshot }
+  update { migrated = captured phase = Following }
+}
+
+behavior catchUp(request: Request) {
+  guard { phase = Following some request.old no request.migrated }
+  update { migrated = migrated + (request -> request.old) }
+}
+
+behavior cutover() {
+  guard { phase = Following }
+  update {
+    if { old = migrated } then { phase = Current }
+  }
+}
+
+invariant OneEffectPerAuthoritativeReceipt { effects = #keys(authoritative) }
+
+invariant MigratedReceiptsKeepTheirMeaning {
+  phase != Current implies migrated in old
+}
+
+transition CutoverKeepsEveryReceipt on cutover {
+  after(phase) = Current implies unchanged(authoritative)
+}
+
+transition ResubmissionReturnsHistoricalReceipt on submit {
+  some before(request.authoritative) implies
+    (after(reply) = before(request.authoritative) and unchanged(effects))
+}
+
+transition RestoreUsesCapturedCut on restore {
+  after(migrated) = before(captured)
+}
+
+scope Int = 0..2, steps = 10

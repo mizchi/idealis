@@ -2187,13 +2187,16 @@ impl Compiler<'_> {
     }
     fn bind(&mut self, bounds: &[ast::Bound], context: &Context) -> Result<(Vec<Json>, Context)> {
         let mut child = context.clone();
+        let mut domain_context = context.clone();
         let mut bindings = vec![];
         for bound in bounds {
             if child.bound >= 40 {
                 return unsupported("more than 40 bound variables");
             }
             let slot = child.bound;
-            let mut binding = json!({"slot":slot,"domain":self.domain(&bound.set,context,true)?});
+            domain_context.bound = slot;
+            let domain = self.domain(&bound.set, &domain_context, true)?;
+            let mut binding = json!({"slot":slot,"domain":domain});
             match &bound.pattern {
                 Pattern::Name { name } => {
                     child.order.retain(|item| item != name);

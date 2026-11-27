@@ -46,9 +46,13 @@ pub struct Term {
     pub group: String,
     pub name: Text,
     pub definition: Text,
+    #[serde(default)]
     pub aliases: Vec<String>,
+    #[serde(default)]
     pub avoid: Vec<String>,
+    #[serde(default)]
     pub model: Vec<ModelRef>,
+    #[serde(default)]
     pub code: Vec<CodeRef>,
 }
 #[derive(Clone, Debug, Deserialize)]
@@ -71,6 +75,7 @@ pub struct Rule {
     pub id: String,
     pub text: Text,
     pub terms: Vec<String>,
+    #[serde(default)]
     pub claims: Vec<Claim>,
     #[serde(default)]
     pub clauses: Vec<Clause>,
@@ -99,12 +104,14 @@ pub struct Spec {
     pub name: Text,
     pub groups: Vec<String>,
     pub terms: Vec<Term>,
+    #[serde(default)]
     pub rules: Vec<Rule>,
     #[serde(default)]
     pub groundings: Vec<Grounding>,
 }
 
-/// Reads the JSON of `pkl eval -f json`, whose module has a `spec` property.
+/// Reads a JSON module with a `spec` property, as produced by `pkl eval -f json`.
+/// Lists whose Pkl default is empty may be omitted.
 pub fn from_json(json: &str) -> Result<Spec, String> {
     #[derive(Deserialize)]
     struct Module {

@@ -1,0 +1,62 @@
+model WorkerTransferRejection
+enum Buffer = Left | Right
+enum Byte = LeftByte | RightByte
+enum Issue = Duplicate | Uncloneable | Blocked | Valid
+enum Result = Rejected | Accepted
+
+var held: Buffer -> lone Byte
+var pending: Buffer -> lone Byte
+var receiver: Buffer -> lone Byte
+var result: lone Result
+var last: lone Issue
+
+init {
+  held = (Left -> LeftByte) + (Right -> RightByte)
+  no pending no receiver no result no last
+}
+
+behavior send(issue: Issue) {
+  guard { held.Byte = Buffer no pending no receiver }
+  update {
+    last = issue
+    if { issue = Valid } then {
+      result = Accepted
+      pending = held
+      held = held - (Left -> Byte)
+    } else {
+      result = Rejected
+    }
+  }
+}
+
+behavior poll() {
+  update {
+    if { some pending } then {
+      receiver = pending
+      pending = none
+    }
+  }
+}
+
+transition RejectionKeepsBothBuffers on send {
+  issue != Valid implies after(result) = Rejected and unchanged(held)
+}
+transition RejectionDoesNotEnqueue on send {
+  issue != Valid implies unchanged(pending) and unchanged(receiver)
+}
+transition RetryMovesOnlyListedBuffer on send {
+  issue = Valid implies after(result) = Accepted and no after(Left.held) and unchanged(Right.held)
+}
+transition AcceptedSendQueuesBothValues on send {
+  issue = Valid implies after(pending) = before(held)
+}
+transition PollWithoutSendDoesNotDeliver on poll {
+  no before(pending) implies unchanged(receiver)
+}
+
+reachable RejectedDuplicate { last = Duplicate result = Rejected }
+reachable RejectedUncloneable { last = Uncloneable result = Rejected }
+reachable RejectedBlocked { last = Blocked result = Rejected }
+reachable DeliveredAfterValidSend { result = Accepted receiver.Byte = Buffer }
+
+scope steps = 5

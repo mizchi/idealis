@@ -1,0 +1,60 @@
+model BrowserEventSource
+
+var online: one Bool
+var sent: one Nat
+var browserId: one Nat
+var header: lone Nat
+var inbox: lone Nat
+var cursor: one Nat
+var applied: one Nat
+
+init {
+  online = false sent = 0 browserId = 0 cursor = 0 applied = 0
+  no header no inbox
+}
+behavior connect() {
+  guard { not online }
+  update {
+    online = true
+    header = if { browserId > 0 } then browserId else none
+    sent = cursor
+  }
+}
+behavior deliver() {
+  guard { online no inbox sent < 3 }
+  update { sent = sent + 1 browserId = sent + 1 inbox = sent + 1 }
+}
+behavior repeat() {
+  guard { online no inbox sent > 0 sent = cursor }
+  update { browserId = sent inbox = sent }
+}
+behavior commit() {
+  guard { online some inbox }
+  update {
+    if { inbox = cursor + 1 } then { cursor = inbox applied = applied + 1 }
+    inbox = none
+  }
+}
+behavior disconnect() {
+  guard { online }
+  update { online = false inbox = none }
+}
+
+transition HeaderReportsBrowserPosition on connect {
+  (before(browserId) > 0 implies after(header) = before(browserId)),
+  (before(browserId) = 0 implies no after(header))
+}
+transition ResumeUsesApplicationCommit on connect {
+  after(sent) = before(cursor)
+}
+transition NextEventContinuesTheCommitPrefix on deliver {
+  after(inbox) = before(cursor) + 1
+}
+transition RepeatedEventDoesNotReapply on commit {
+  before(inbox) = before(cursor) implies unchanged(cursor) and unchanged(applied)
+}
+invariant ApplicationCommitsContiguousPrefix { applied = cursor }
+reachable BrowserAheadOfCommit {
+  online browserId = 2 cursor = 1 inbox = 2 no header
+}
+scope Int = 0..3, steps = 10

@@ -1,0 +1,67 @@
+model AbortComposition
+enum Source = Left | Right
+enum Event = LeftEvent | RightEvent | JoinedEvent
+sequence Events = Event, max = 3
+
+var stopped: set Source
+var composed: one Bool
+var joined: lone Source
+var seen: Source -> lone Source
+var history: one Events
+
+init { no stopped not composed no joined no seen history = Events[] }
+
+behavior compose(first: Source) {
+  guard { not composed }
+  update {
+    composed = true
+    joined = if { first in stopped } then first else stopped
+  }
+}
+
+behavior abort(source: Source) {
+  guard { source not in stopped }
+  update {
+    let event = if { source = Left } then LeftEvent else RightEvent
+    let reason = if { composed and no joined } then source else joined
+    stopped = stopped + source
+    joined = reason
+    seen = seen ++ source -> reason
+    history = if { composed and no joined }
+      then append(append(history, event), JoinedEvent)
+      else append(history, event)
+  }
+}
+
+behavior abortWithReentry(first: Source) {
+  guard { composed no stopped }
+  update {
+    stopped = Source
+    joined = first
+    seen = Source -> first
+    history = if { first = Left }
+      then Events[LeftEvent, RightEvent, JoinedEvent]
+      else Events[RightEvent, LeftEvent, JoinedEvent]
+  }
+}
+
+invariant JoinedReasonComesFromAStoppedSource {
+  some joined implies composed and joined in stopped
+}
+transition FirstReasonSticks { some before(joined) implies unchanged(joined) }
+transition ComposeChoosesFirstAbortedInput on compose {
+  first in before(stopped) implies after(joined) = first
+}
+transition ComposeDoesNotReplayAnAbortEvent on compose { unchanged(history) }
+transition SourceListenerSeesJoinedReason on abort {
+  before(composed) implies after(source.seen) = after(joined)
+}
+transition ReentryKeepsOriginalReason on abortWithReentry {
+  after(joined) = first and after(Source.seen) = first
+}
+
+reachable LiveComposition { composed no stopped }
+reachable BothStoppedLeftFirst {
+  not composed stopped = Source history = Events[LeftEvent, RightEvent]
+}
+scope steps = 5

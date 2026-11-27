@@ -1,0 +1,48 @@
+model ConditionWait
+enum Stage = Idle | Checked | Parked | Ready | Finished
+
+var reader: one Stage
+var ready: one Bool
+var notified: one Bool
+
+init { reader = Idle ready = false notified = false }
+
+behavior check() {
+  guard { reader = Idle }
+  update { reader = if { ready } then Ready else Checked }
+}
+behavior park() {
+  guard { reader = Checked }
+  update { reader = if { ready } then Ready else Parked }
+}
+behavior publish() {
+  guard { not ready }
+  update { ready = true }
+}
+behavior notify() {
+  guard { ready not notified }
+  update {
+    notified = true
+    if { reader = Parked } then { reader = Ready }
+  }
+}
+behavior ping() {
+  guard { not ready reader = Parked }
+  update { reader = Idle }
+}
+behavior consume() {
+  guard { reader = Ready }
+  update { reader = Finished }
+}
+
+invariant NoSleepAfterNotify { notified implies reader != Parked }
+invariant OnlyReadyCanProceed { (reader = Ready or reader = Finished) implies ready }
+
+reachable ParkedBeforePublication { reader = Parked not ready }
+reachable NotifiedBeforePark { reader = Checked notified }
+
+leads_to CompletesAfterNotify
+  with { weak check weak park weak consume }
+  { notified } { reader = Finished }
+
+scope steps = 9

@@ -1,0 +1,34 @@
+model Autosave
+entity Tab "自動保存を送信するタブ"
+var revision: one Nat
+var saved: lone Nat
+var pending: Tab -> lone Nat
+
+init { revision = 0, no saved, no pending }
+
+behavior edit() {
+  guard { revision < 2 }
+  update { revision = revision + 1 }
+}
+
+behavior start(tab: Tab) {
+  guard { no tab.pending }
+  update { pending = pending ++ tab -> revision }
+}
+
+behavior finish(tab: Tab) {
+  guard { some tab.pending }
+  update {
+    pending = withoutKeys(pending, tab)
+    if { tab.pending = revision } then { saved = tab.pending }
+  }
+}
+
+transition StaleKeepsSaved on finish {
+  before(tab.pending) != before(revision) implies unchanged(saved)
+}
+transition CurrentMarksSaved on finish {
+  before(tab.pending) = before(revision) implies after(saved) = before(revision)
+}
+
+scope Tab = 2, Int = 0..2, steps = 6

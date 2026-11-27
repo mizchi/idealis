@@ -1,5 +1,5 @@
 //! Witness pairs for property tests, derived from the reference model.
-use super::{canonical, command, relations};
+use super::{command, relations};
 use rmodel::reference::{Machine, Next, Outcome, Snapshot, Step, analyze};
 use serde_json::{Value, json};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -102,7 +102,7 @@ pub fn boundary_cases(model: &rmodel::Model, max_states: usize) -> Result<Value,
     }
     let machine = Machine::new(model)?;
     let mut corpus = Vec::new();
-    let encode = |state: &Snapshot| canonical(&relations(model, machine.state_data(state)));
+    let encode = |state: &Snapshot| relations(model, machine.state_data(state));
     for config in machine.configurations() {
         let initial = machine.initial(&config);
         if initial.len() != 1 {
@@ -193,7 +193,7 @@ pub fn boundary_cases(model: &rmodel::Model, max_states: usize) -> Result<Value,
                 }
             }
         }
-        let config = canonical(&relations(model, machine.configuration_data(&config)));
+        let config = relations(model, machine.configuration_data(&config));
         corpus.extend(witnesses.into_values().map(|mut pair| {
             pair["config"] = config.clone();
             pair

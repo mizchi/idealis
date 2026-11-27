@@ -2,19 +2,20 @@
 //! declares, per question, whether it answers completely, within a bound, or
 //! not at all; answers use the glossary's words, and `auto` prefers a
 //! complete answer.
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 pub mod project;
 
 /// A question a model asks: one of its checks, or the built-in multiplicity
 /// check `Declarations` (plan 0099).
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct Question {
     pub name: String,
     pub kind: Kind,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Kind {
     Temporal,
@@ -24,12 +25,12 @@ pub enum Kind {
 }
 
 /// How far a checker's answer reaches.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
-#[serde(tag = "kind", rename_all = "lowercase")]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(tag = "kind", rename_all = "lowercase", deny_unknown_fields)]
 pub enum Coverage {
     /// Every reachable state of every configuration.
     Complete,
-    /// Only traces of at most `steps` steps.
+    /// Traces with at most `steps` states, including the initial state.
     Bounded { steps: usize },
 }
 
@@ -49,7 +50,7 @@ pub enum Verdict {
     Unreachable,
     /// No initial state: not a pass.
     Empty,
-    /// The budget ran out.
+    /// An incomplete search could not establish a verdict.
     Unknown,
     /// The checker failed; never read as any other verdict.
     Error,
@@ -66,9 +67,71 @@ pub struct Answer {
     pub depth: Option<usize>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub detail: Option<String>,
-    /// The explicit engine's temporal counterexample, if it found a cycle.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub diagnostics: Vec<Diagnostic>,
+    /// The checker's temporal counterexample, if it found a cycle.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lasso: Option<serde_json::Value>,
+}
+
+/// Why a search could not cover the question's declared range.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[serde(tag = "kind", rename_all = "snake_case")]
+pub enum Diagnostic {
+    Budget {
+        resource: String,
+    },
+    ScopeExit {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        depth: Option<usize>,
+    },
+    DeclarationViolation {
+        depth: usize,
+    },
+    EnumerationLimit {
+        relation: String,
+    },
+    ArgumentEnumerationLimit {
+        action: String,
+        sort: String,
+    },
+}
+
+impl Diagnostic {
+    fn budget(resource: impl Into<String>) -> Self {
+        Self::Budget {
+            resource: resource.into(),
+        }
+    }
+}
+
+/// Translate reference coverage information without inferring causes from a verdict.
+pub fn reference_diagnostics(
+    scope: rmodel::reference::Outcome,
+    stop: Option<&rmodel::reference::StopReason>,
+) -> Vec<Diagnostic> {
+    use rmodel::reference::{Outcome, StopReason};
+    let mut diagnostics = Vec::new();
+    if let Outcome::Violated { depth } = scope {
+        diagnostics.push(Diagnostic::ScopeExit { depth: Some(depth) });
+    }
+    match stop {
+        Some(StopReason::Budget) => diagnostics.push(Diagnostic::budget("states")),
+        Some(StopReason::ArgumentBudget) => diagnostics.push(Diagnostic::budget("arguments")),
+        Some(StopReason::EnumerationLimit { relation }) => {
+            diagnostics.push(Diagnostic::EnumerationLimit {
+                relation: relation.clone(),
+            });
+        }
+        Some(StopReason::ArgumentEnumerationLimit { action, sort }) => {
+            diagnostics.push(Diagnostic::ArgumentEnumerationLimit {
+                action: action.clone(),
+                sort: sort.clone(),
+            });
+        }
+        None => {}
+    }
+    diagnostics
 }
 
 impl Answer {
@@ -85,7 +148,8 @@ impl Answer {
 }
 
 /// Budgets shared by the checkers.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct Budget {
     pub states: usize,
     pub work: u64,
@@ -142,6 +206,7 @@ pub fn checkers() -> Vec<Box<dyn Checker>> {
         Box::new(checkers::Reference),
         Box::new(checkers::Explicit),
         Box::new(checkers::Sat),
+        Box::new(checkers::Rprob),
     ]
 }
 
@@ -157,6 +222,7 @@ pub enum Selection {
 pub enum Error {
     NoQuestion(String),
     NoChecker(String),
+    DuplicateChecker(&'static str),
     /// No checker answers the question; each one's reason.
     Unsupported(String, Vec<(&'static str, String)>),
 }
@@ -166,6 +232,7 @@ impl std::fmt::Display for Error {
         match self {
             Error::NoQuestion(name) => write!(f, "no question named {name}"),
             Error::NoChecker(name) => write!(f, "no checker named {name}"),
+            Error::DuplicateChecker(name) => write!(f, "duplicate checker {name}"),
             Error::Unsupported(name, reasons) => {
                 write!(f, "no checker answers {name}:")?;
                 for (checker, reason) in reasons {
@@ -183,6 +250,14 @@ pub struct Report {
     pub question: String,
     pub answers: Vec<Answer>,
     pub disagreement: bool,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub unsupported: Vec<UnsupportedChecker>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct UnsupportedChecker {
+    pub checker: &'static str,
+    pub reason: String,
 }
 
 pub fn check(
@@ -191,20 +266,38 @@ pub fn check(
     selection: &Selection,
     budget: Budget,
 ) -> Result<Report, Error> {
+    let checkers = checkers();
+    let registered: Vec<_> = checkers.iter().map(Box::as_ref).collect();
+    check_with(model, name, selection, budget, &registered)
+}
+
+/// Check a question with an ordered list of caller-supplied checkers.
+pub fn check_with(
+    model: &rmodel::Model,
+    name: &str,
+    selection: &Selection,
+    budget: Budget,
+    registered: &[&dyn Checker],
+) -> Result<Report, Error> {
     let question = questions(model)
         .into_iter()
         .find(|question| question.name == name)
         .ok_or_else(|| Error::NoQuestion(name.to_owned()))?;
-    let registered = checkers();
+    let mut names = std::collections::BTreeSet::new();
+    for checker in registered {
+        if !names.insert(checker.name()) {
+            return Err(Error::DuplicateChecker(checker.name()));
+        }
+    }
     let candidates: Vec<&dyn Checker> = match selection {
         Selection::Named(wanted) => vec![
             registered
                 .iter()
+                .copied()
                 .find(|checker| checker.name() == wanted)
-                .ok_or_else(|| Error::NoChecker(wanted.clone()))?
-                .as_ref(),
+                .ok_or_else(|| Error::NoChecker(wanted.clone()))?,
         ],
-        _ => registered.iter().map(|checker| checker.as_ref()).collect(),
+        _ => registered.to_vec(),
     };
     let mut reasons = Vec::new();
     let mut supported = Vec::new();
@@ -217,18 +310,21 @@ pub fn check(
     if supported.is_empty() {
         return Err(Error::Unsupported(question.name, reasons));
     }
-    let chosen: Vec<&dyn Checker> = match selection {
+    let chosen = match selection {
         Selection::Auto => {
             let complete = supported
                 .iter()
                 .find(|(_, coverage)| *coverage == Coverage::Complete);
-            vec![complete.unwrap_or(&supported[0]).0]
+            vec![*complete.unwrap_or(&supported[0])]
         }
-        _ => supported.iter().map(|(checker, _)| *checker).collect(),
+        _ => supported,
     };
     let answers: Vec<Answer> = chosen
         .iter()
-        .map(|checker| checker.answer(model, &question, budget))
+        .map(|&(checker, coverage)| {
+            let answer = checker.answer(model, &question, budget);
+            validate_answer(checker, &question, coverage, answer)
+        })
         .collect();
     let disagreement = answers.iter().enumerate().any(|(i, a)| {
         answers[i + 1..]
@@ -239,19 +335,59 @@ pub fn check(
         question: question.name,
         answers,
         disagreement,
+        unsupported: reasons
+            .into_iter()
+            .map(|(checker, reason)| UnsupportedChecker { checker, reason })
+            .collect(),
     })
+}
+
+fn validate_answer(
+    checker: &dyn Checker,
+    question: &Question,
+    coverage: Coverage,
+    answer: Answer,
+) -> Answer {
+    let problem = if answer.question != question.name || answer.checker != checker.name() {
+        "answer identifies a different checker or question"
+    } else if answer.coverage != coverage {
+        "answer coverage differs from declared support"
+    } else if match answer.verdict {
+        Verdict::Reachable | Verdict::Unreachable => question.kind != Kind::Reachable,
+        Verdict::Holds | Verdict::Violated => question.kind == Kind::Reachable,
+        _ => false,
+    } {
+        "answer verdict does not fit the question"
+    } else if let Coverage::Bounded { steps } = coverage
+        && matches!(answer.verdict, Verdict::Reachable | Verdict::Violated)
+        && answer.depth.is_some_and(|depth| depth >= steps)
+    {
+        "witness depth lies outside the declared coverage"
+    } else {
+        return answer;
+    };
+    Answer {
+        question: question.name.clone(),
+        checker: checker.name(),
+        verdict: Verdict::Error,
+        coverage,
+        depth: None,
+        detail: Some(problem.into()),
+        diagnostics: Vec::new(),
+        lasso: None,
+    }
 }
 
 /// Two answers contradict each other. A bounded negative answer only claims
 /// there is no witness shallower than the bound, so a deeper witness from a
 /// complete search does not contradict it.
-pub fn disagree(a: &Answer, b: &Answer, steps: usize) -> bool {
+pub fn disagree(a: &Answer, b: &Answer, _model_steps: usize) -> bool {
     let decided = |answer: &Answer| !matches!(answer.verdict, Verdict::Unknown | Verdict::Error);
     if !decided(a) || !decided(b) || a.verdict == b.verdict {
         return false;
     }
     for (bounded, other) in [(a, b), (b, a)] {
-        if matches!(bounded.coverage, Coverage::Bounded { .. })
+        if let Coverage::Bounded { steps } = bounded.coverage
             && matches!(bounded.verdict, Verdict::Holds | Verdict::Unreachable)
         {
             if other.depth.is_some_and(|depth| depth >= steps) {

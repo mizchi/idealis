@@ -1,0 +1,85 @@
+model HalfOpenBreaker
+enum Phase = Closed | Open | HalfOpen
+enum Generation = Initial | Retry | Final
+enum Request = First | Second | Third
+enum Outcome = Succeeded | Failed
+enum Admission = Admitted | Rejected
+
+rel successor: Generation -> lone Generation
+var phase: one Phase
+var generation: one Generation
+var probe: lone Request
+var pending: Request -> lone Generation
+var admission: Request -> lone Admission
+
+fact { successor = Initial -> Retry + Retry -> Final }
+init {
+  phase = Closed, generation = Initial, no probe, no pending, no admission
+}
+
+behavior attempt(request: Request) {
+  guard { no request.pending }
+  update {
+    let allowed = bool { phase = Closed or (phase = HalfOpen and no probe) }
+    admission = admission ++ request -> (if { allowed } then Admitted else Rejected)
+    if { allowed } then {
+      pending = pending ++ request -> generation
+      if { phase = HalfOpen } then { probe = request }
+    }
+  }
+}
+
+behavior elapsed() {
+  guard { phase = Open }
+  update { phase = HalfOpen }
+}
+
+behavior complete(request: Request, outcome: Outcome) {
+  guard {
+    some request.pending
+    outcome = Succeeded or request.pending != generation or some generation.successor
+  }
+  update {
+    pending = withoutKeys(pending, request)
+    if { request.pending = generation } then {
+      if { outcome = Failed } then {
+        generation = generation.successor
+        phase = Open
+        probe = none
+      } else {
+        if { request = probe } then {
+          phase = Closed
+          probe = none
+        }
+      }
+    }
+  }
+}
+
+invariant ProbeIsCurrent {
+  some probe implies (phase = HalfOpen and probe.pending = generation)
+}
+invariant CurrentTrialIsUnique {
+  phase = HalfOpen implies
+    (all request: Request | request.pending = generation implies request = probe)
+}
+transition CompetingProbeRejected on attempt {
+  before(phase) = HalfOpen and some before(probe) implies
+    (after(request.admission) = Rejected and unchanged(pending) and unchanged(probe))
+}
+transition OldResultKeepsGate on complete {
+  before(request.pending) != before(generation) implies
+    (unchanged(phase) and unchanged(generation) and unchanged(probe))
+}
+transition SuccessfulProbeClosesGate on complete {
+  request = before(probe) and outcome = Succeeded implies after(phase) = Closed
+}
+reachable TrialWithOlderPending {
+  phase = HalfOpen, some probe,
+  (some request: Request | some request.pending and request.pending != generation)
+}
+
+leads_to TrialEventuallyResolves(request: Request) with { weak complete(*) }
+  { request = probe } { request != probe }
+
+scope steps = 9

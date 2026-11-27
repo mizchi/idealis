@@ -6,14 +6,18 @@
 //! specification links its rules to (plan 0092).
 pub mod bindings;
 mod emit;
+mod initial;
 mod numeric;
 mod print;
 pub mod reference;
 mod structured;
 mod syntax;
-pub use structured::{Case, Sequence, Variant};
+pub use structured::{Case, Sequence, ValueType, Variant};
 
-pub use emit::{DECLARATIONS, SCOPE, alloy_label, alloy_supports, tla_supports, to_alloy, to_tla};
+pub use emit::{
+    DECLARATIONS, GroundAction, SCOPE, TemporalWitnessTla, alloy_label, alloy_supports,
+    alloy_transition_supports, tla_supports, to_alloy, to_tla, to_tla_temporal_witness,
+};
 pub use print::quint_like;
 use std::fmt;
 pub use syntax::{
@@ -53,9 +57,121 @@ impl fmt::Display for Error {
 }
 impl std::error::Error for Error {}
 
+/// A source diagnostic. A location is a zero-based Unicode character offset.
+/// Type errors can point to their enclosing declaration.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ParseDiagnostic {
+    pub error: Error,
+    pub offset: Option<usize>,
+}
+
+impl fmt::Display for ParseDiagnostic {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.error.fmt(formatter)
+    }
+}
+
+impl std::error::Error for ParseDiagnostic {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        Some(&self.error)
+    }
+}
+
 /// Parses and checks a model.
 pub fn parse(source: &str) -> Result<Model, Error> {
-    syntax::parse(source)
+    parse_diagnostic(source).map_err(|diagnostic| diagnostic.error)
+}
+
+/// Parses and checks a model, retaining the source location of an error when available.
+pub fn parse_diagnostic(source: &str) -> Result<Model, ParseDiagnostic> {
+    syntax::parse(source, false).map(|located| located.model)
+}
+
+/// A checked model with source offsets in characters.
+pub struct LocatedModel {
+    pub model: Model,
+    pub declarations: std::collections::BTreeMap<String, usize>,
+    /// Mutable state read by each declaration, including expanded derived expressions.
+    pub state_reads: std::collections::BTreeMap<usize, std::collections::BTreeSet<String>>,
+    /// Source-level update groups and value branches, in source order per action.
+    pub update_branches: std::collections::BTreeMap<String, Vec<UpdateBranch>>,
+}
+
+/// One source-level `if` in an update, located before lowering.
+pub struct UpdateBranch {
+    pub offset: usize,
+    assignee: String,
+    ancestors: Vec<bool>,
+    sites: Vec<(String, Vec<usize>)>,
+    binding: bool,
+    value_conditional: bool,
+    unreachable_reasons: [Option<String>; 2],
+}
+
+impl UpdateBranch {
+    /// Assignment and enclosing arm choices used to find the condition after lowering.
+    pub fn selector(&self) -> (&str, &[bool]) {
+        (&self.assignee, &self.ancestors)
+    }
+
+    /// Restore a selector carried alongside the lowered model. The search
+    /// resolves it against the checked action before evaluating it.
+    pub fn from_selector(offset: usize, assignee: String, ancestors: Vec<bool>) -> Self {
+        Self {
+            offset,
+            assignee,
+            ancestors,
+            sites: Vec::new(),
+            binding: false,
+            value_conditional: false,
+            unreachable_reasons: [None, None],
+        }
+    }
+
+    pub fn is_value_conditional(&self) -> bool {
+        self.value_conditional
+    }
+
+    /// Assignment and child paths for a conditional inside an expression.
+    pub fn value_sites(&self) -> &[(String, Vec<usize>)] {
+        &self.sites
+    }
+
+    pub fn binding_name(&self) -> Option<&str> {
+        self.binding.then_some(&self.assignee)
+    }
+
+    pub fn with_value_sites(mut self, sites: Vec<(String, Vec<usize>)>, binding: bool) -> Self {
+        self.sites = sites;
+        self.binding = binding;
+        self
+    }
+
+    pub fn with_value_conditional(mut self, value_conditional: bool) -> Self {
+        self.value_conditional = value_conditional;
+        self
+    }
+
+    /// Coverage expectations for the then and else arms, in source order.
+    pub fn unreachable_reasons(&self) -> &[Option<String>; 2] {
+        &self.unreachable_reasons
+    }
+
+    pub fn with_unreachable_reasons(mut self, reasons: [Option<String>; 2]) -> Self {
+        self.unreachable_reasons = reasons;
+        self
+    }
+}
+
+pub fn parse_located(source: &str) -> Result<LocatedModel, ParseDiagnostic> {
+    syntax::parse(source, true)
+}
+
+/// The byte spans of unquoted `@name` references in component source.
+pub fn component_slots(
+    source: &str,
+) -> Result<Vec<(std::ops::Range<usize>, String)>, ParseDiagnostic> {
+    syntax::component_slots(source)
 }
 
 /// Type-checks a syntax tree that did not come from the parser, such as

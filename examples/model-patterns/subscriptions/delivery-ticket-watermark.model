@@ -1,0 +1,85 @@
+model DeliveryTicketWatermark
+enum Work = First | Second
+enum Phase = Fresh | Active | Retiring | Available
+sequence Mailbox = Work, max = 2
+
+var phase: one Phase
+var owner: lone Work
+var sender: lone Work
+var issued: set Work
+var sent: one Nat
+var seen: one Nat
+var control: lone Nat
+var finalCount: lone Nat
+var queued: one Mailbox
+var delivered: Work -> lone Work
+
+init {
+  phase = Fresh no owner no sender no issued
+  sent = 0 seen = 0 no control no finalCount
+  queued = Mailbox[] no delivered
+}
+
+behavior allocate(work: Work) {
+  guard {
+    phase = Fresh or phase = Available
+    work not in issued
+    work = First or First in issued
+  }
+  update {
+    phase = Active owner = work sender = work issued = issued + work
+    sent = 0 seen = 0 finalCount = none
+  }
+}
+behavior cancel() {
+  guard { phase = Active }
+  update { phase = Retiring owner = none }
+}
+behavior send() {
+  guard { some sender sent < 2 len(queued) < 2 }
+  update { queued = append(queued, sender) sent = sent + 1 }
+}
+behavior seal() {
+  guard { phase = Retiring some sender no control }
+  update { sender = none control = sent }
+}
+behavior readControl() {
+  guard { some control }
+  update { finalCount = control control = none }
+}
+behavior readData() {
+  guard { some at(queued, 0) }
+  update {
+    let work = at(queued, 0)
+    queued = tail(queued)
+    seen = seen + 1
+    if { some owner } then { delivered = delivered ++ owner -> work }
+  }
+}
+behavior recycle() {
+  guard { phase = Retiring some finalCount seen = finalCount }
+  update { phase = Available }
+}
+
+invariant DataCountsMatchQueue { sent = seen + len(queued) }
+invariant EachJobGetsItsOwnNotice { all work: Work | work.delivered in work }
+invariant AvailableMeansDrained {
+  phase = Available implies no sender and no control and len(queued) = 0
+}
+transition RecycleRequiresReceivedWatermark on recycle {
+  some before(finalCount) and before(seen) = before(finalCount)
+}
+reachable ControlOvertakesData {
+  phase = Retiring finalCount = 2 seen = 0 queued = Mailbox[First, First] no delivered
+}
+reachable DataOvertakesControl {
+  phase = Retiring control = 2 no finalCount seen = 2 no delivered
+}
+reachable ZeroDataSealed {
+  phase = Retiring finalCount = 0 sent = 0 seen = 0 no delivered
+}
+reachable ReusedTicketDelivers { Second.delivered = Second }
+leads_to SealedEventuallyReleases
+  with { weak readControl weak readData weak recycle }
+  { phase = Retiring no sender } { phase = Available }
+scope Int = 0..2, steps = 13

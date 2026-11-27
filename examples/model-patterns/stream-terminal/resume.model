@@ -1,0 +1,55 @@
+model StreamResume
+
+var online: one Bool
+var sent: one Nat
+var wire: lone Nat
+var inbox: lone Nat
+var cursor: one Nat
+var applied: one Nat
+
+init { online = false sent = 0 cursor = 0 applied = 0 no wire no inbox }
+behavior connect() {
+  guard { not online }
+  update { online = true sent = cursor }
+}
+behavior send() {
+  guard { online no wire no inbox sent < 3 }
+  update { sent = sent + 1 wire = sent + 1 }
+}
+behavior replayBoundary() {
+  guard { online no wire no inbox cursor > 0 }
+  update { wire = cursor }
+}
+behavior receive() {
+  guard { online some wire no inbox }
+  update { inbox = wire wire = none }
+}
+behavior commit() {
+  guard { online some inbox }
+  update {
+    if { inbox = cursor + 1 } then {
+      cursor = inbox
+      applied = applied + 1
+    }
+    inbox = none
+  }
+}
+behavior disconnect() {
+  guard { online }
+  update { online = false wire = none inbox = none }
+}
+
+transition ReconnectUsesCommittedPosition on connect {
+  after(sent) = before(cursor)
+}
+transition BoundaryReplayHasNoSecondEffect on commit {
+  before(inbox) = before(cursor) implies unchanged(cursor) and unchanged(applied)
+}
+invariant EachPositionAppliedOnce { applied = cursor }
+reachable SentButUnread {
+  online cursor = 1 sent = 2 wire = 2 no inbox
+}
+reachable ReadButUncommitted {
+  online cursor = 1 sent = 2 inbox = 2 no wire
+}
+scope Int = 0..3, steps = 14

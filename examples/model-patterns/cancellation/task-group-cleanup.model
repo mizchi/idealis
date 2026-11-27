@@ -1,0 +1,57 @@
+model TaskGroupCleanup
+enum Child = Left | Right
+enum Stage = Running | Cleaning | Exited
+enum Result = Open | Succeeded | Rejected
+enum Outcome = Clean | Broken
+enum Failure = WorkFailed | LeftCleanup | RightCleanup
+
+rel cleanupFailure: Child -> one Failure
+fact { cleanupFailure = (Left -> LeftCleanup) + (Right -> RightCleanup) }
+var stages: Child -> one Stage
+var primary: lone Failure
+var cleanupErrors: set Failure
+var result: one Result
+var publishedPrimary: lone Failure
+var publishedErrors: set Failure
+
+init {
+  stages = Child -> Running result = Open
+  no primary no cleanupErrors no publishedPrimary no publishedErrors
+}
+behavior failWork() {
+  guard { Left.stages = Running }
+  update { primary = WorkFailed stages = stages ++ (stages.Running -> Cleaning) }
+}
+behavior finish(child: Child) {
+  guard { child.stages = Running }
+  update { stages = stages ++ child -> Cleaning }
+}
+behavior exitCleanup(child: Child, outcome: Outcome) {
+  guard { child.stages = Cleaning }
+  update {
+    stages = stages ++ child -> Exited
+    if { outcome = Broken } then { cleanupErrors = cleanupErrors + child.cleanupFailure }
+    if { stages.Exited + child = Child } then {
+      result = if { some primary or some cleanupErrors or outcome = Broken } then Rejected else Succeeded
+      publishedPrimary = primary
+      publishedErrors = if { outcome = Broken } then cleanupErrors + child.cleanupFailure else cleanupErrors
+    }
+  }
+}
+
+invariant ReportsOnlyAfterEveryChildExits {
+  result != Open implies stages.Exited = Child
+}
+invariant PreservesOriginalFailure {
+  result = Rejected implies publishedPrimary = primary
+}
+invariant IncludesEveryCleanupError {
+  result = Rejected implies publishedErrors = cleanupErrors
+}
+invariant CleanupFailureRejectsTheGroup {
+  (stages.Exited = Child and some cleanupErrors) implies result = Rejected
+}
+reachable BothCleaningAfterWorkFailure {
+  primary = WorkFailed stages = Child -> Cleaning
+}
+scope steps = 6

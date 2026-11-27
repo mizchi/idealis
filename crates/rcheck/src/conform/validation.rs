@@ -1,6 +1,8 @@
 //! Validate an implementation request against a tracked reference state.
-use super::{canonical, element, relation_value, relations};
-use rmodel::reference::{Machine, Next, Snapshot};
+use super::{canonical, element, relations};
+use rmodel::bindings::command_argument_key;
+use rmodel::reference::{BoundCommand, Data, LassoError, Next, Runtime, Snapshot};
+use rmodel::{INT, Model, Mult, NAT, Shape};
 use serde_json::Value;
 use std::fmt;
 
@@ -28,13 +30,13 @@ impl std::error::Error for ValidationError {}
 
 pub struct Validator<'m> {
     model: &'m rmodel::Model,
-    machine: Machine<'m>,
+    runtime: Runtime<'m>,
     schema: Value,
 }
 
 impl<'m> Validator<'m> {
     pub fn new(model: &'m rmodel::Model) -> Result<Self, String> {
-        let machine = Machine::new(model)?;
+        let runtime = Runtime::new(model);
         let mut schema: Value = serde_json::from_str(&rmodel::bindings::json_schema(model))
             .expect("the generator emits JSON Schema");
         if let Some((low, high)) = model.scope.ints {
@@ -47,7 +49,7 @@ impl<'m> Validator<'m> {
         }
         Ok(Self {
             model,
-            machine,
+            runtime,
             schema,
         })
     }
@@ -58,24 +60,32 @@ impl<'m> Validator<'m> {
         config: &Value,
         initial: &Value,
     ) -> Result<Session<'v, 'm>, ValidationError> {
+        let session = self.start_path(config, initial)?;
+        self.check_invariants(&session.configuration, &session.state)?;
+        Ok(session)
+    }
+
+    fn start_path<'v>(
+        &'v self,
+        config: &Value,
+        initial: &Value,
+    ) -> Result<Session<'v, 'm>, ValidationError> {
         self.check_input("Config", config)?;
         self.check_input("State", initial)?;
-        let matching = |wire: &Value, name: &str, data: Vec<Vec<rmodel::reference::Data>>| {
-            canonical(&relation_value(self.model, name, &data)) == wire[name]
-        };
-        let config = canonical(config);
         let configuration = self
-            .machine
-            .match_configuration(|name, data| matching(&config, name, data))
+            .runtime
+            .read_configuration(|relation| {
+                relation_input(self.model, &relation.shape, &config[&relation.name])
+            })
             .ok_or_else(|| {
                 ValidationError::InvalidInput("configuration does not satisfy the facts".into())
             })?;
-        let initial = canonical(initial);
         let state = self
-            .machine
-            .match_initial(&configuration, |name, data| matching(&initial, name, data))
+            .runtime
+            .read_initial(&configuration, |relation| {
+                relation_input(self.model, &relation.shape, &initial[&relation.name])
+            })
             .ok_or_else(|| ValidationError::InvalidInput("state does not satisfy init".into()))?;
-        self.check_invariants(&configuration, &state)?;
         Ok(Session {
             validator: self,
             configuration,
@@ -90,14 +100,86 @@ impl<'m> Validator<'m> {
     }
 
     fn check_invariants(&self, config: &Snapshot, state: &Snapshot) -> Result<(), ValidationError> {
-        match self.machine.violated_invariant(config, state) {
+        match self.runtime.violated_invariant(config, state) {
             Some(name) => Err(ValidationError::OutsideModel(format!("invariant {name}"))),
             None => Ok(()),
         }
     }
 
     fn state_json(&self, state: &Snapshot) -> Value {
-        canonical(&relations(self.model, self.machine.state_data(state)))
+        relations(self.model, self.runtime.state_data(state))
+    }
+}
+
+fn typed_value(model: &Model, sort: &str, wire: &Value) -> Option<Data> {
+    if matches!(sort, INT | NAT) {
+        return wire.as_i64().map(Data::Int);
+    }
+    if let Some(record) = model.record(sort) {
+        let fields = record
+            .fields
+            .iter()
+            .map(|(name, sort)| Some((name.clone(), typed_value(model, sort, wire.get(name)?)?)))
+            .collect::<Option<_>>()?;
+        return Some(Data::Record(record.name.clone(), fields));
+    }
+    if let Some(sequence) = model.sequence(sort) {
+        let items = wire.get("$sequence")?.as_array()?;
+        return items
+            .iter()
+            .map(|item| typed_value(model, &sequence.element, item))
+            .collect::<Option<_>>()
+            .map(Data::Sequence);
+    }
+    if let Some(variant) = model.variant(sort) {
+        let tag = wire.get("tag")?.as_str()?;
+        let case = variant.cases.iter().find(|case| case.tag == tag)?;
+        let payload = match case.payload.as_deref() {
+            Some(sort) => Some(Box::new(typed_value(model, sort, wire.get("value")?)?)),
+            None => None,
+        };
+        return Some(Data::Variant(tag.to_owned(), payload));
+    }
+    let name = if let Some(boolean) = wire.as_bool() {
+        boolean.to_string()
+    } else {
+        wire.as_str()?.to_owned()
+    };
+    let atom = Data::Atom(name);
+    (element(&atom) == *wire).then_some(atom)
+}
+
+fn values(model: &Model, sort: &str, mult: Mult, wire: &Value) -> Option<Vec<Data>> {
+    match mult {
+        Mult::Set | Mult::Some => wire
+            .as_array()?
+            .iter()
+            .map(|item| typed_value(model, sort, item))
+            .collect(),
+        Mult::Lone if wire.is_null() => Some(Vec::new()),
+        Mult::Lone | Mult::One => Some(vec![typed_value(model, sort, wire)?]),
+    }
+}
+
+fn relation_input(model: &Model, shape: &Shape, wire: &Value) -> Option<Vec<Vec<Data>>> {
+    match shape {
+        Shape::Unary { sig, mult } => Some(
+            values(model, sig, *mult, wire)?
+                .into_iter()
+                .map(|atom| vec![atom])
+                .collect(),
+        ),
+        Shape::Binary { to, mult, .. } => {
+            let mut tuples = Vec::new();
+            for (key, row) in wire.as_object()? {
+                tuples.extend(
+                    values(model, to, *mult, row)?
+                        .into_iter()
+                        .map(|atom| vec![Data::Atom(key.clone()), atom]),
+                );
+            }
+            Some(tuples)
+        }
     }
 }
 
@@ -108,26 +190,38 @@ pub struct Session<'v, 'm> {
     diverged: bool,
 }
 
-impl Session<'_, '_> {
+impl<'m> Session<'_, 'm> {
+    /// Read the current reference state in the bindings' JSON form.
+    pub fn snapshot(&self) -> Value {
+        self.validator.state_json(&self.state)
+    }
+
+    /// Project named derivations at the current reference state.
+    pub fn snapshot_derivations(&self, names: &[String]) -> Result<Value, ValidationError> {
+        self.project_derivations(&self.state, names)
+    }
+
+    fn project_derivations(
+        &self,
+        state: &Snapshot,
+        names: &[String],
+    ) -> Result<Value, ValidationError> {
+        self.validator
+            .runtime
+            .derived_data(&self.configuration, state, names)
+            .map(|fields| super::observation_json(self.validator.model, fields))
+            .map_err(ValidationError::InvalidInput)
+    }
+
     fn next(&self, input: &Value) -> Result<Snapshot, ValidationError> {
         if self.diverged {
             return Err(ValidationError::Domain(
                 "previous operation did not match the model".into(),
             ));
         }
-        self.validator.check_input("Command", input)?;
-        let action = input["kind"]
-            .as_str()
-            .ok_or_else(|| ValidationError::InvalidInput("missing command kind".into()))?;
-        let next = self
-            .validator
-            .machine
-            .match_step(&self.configuration, &self.state, action, |param, value| {
-                element(&value) == input[param]
-            })
-            .ok_or_else(|| {
-                ValidationError::InvalidInput("command is outside the action domain".into())
-            })?;
+        let (action, command) = self.bind_command(input)?;
+        let runtime = &self.validator.runtime;
+        let next = runtime.execute(&self.configuration, &self.state, &command);
         match next {
             None => Err(ValidationError::Disabled(action.to_owned())),
             Some(Next::Outside(_)) => Err(ValidationError::OutsideModel(format!(
@@ -139,10 +233,11 @@ impl Session<'_, '_> {
             Some(Next::State(state)) => {
                 self.validator
                     .check_invariants(&self.configuration, &state)?;
-                if let Some(name) = self.validator.machine.violated_transition(
+                if let Some(name) = runtime.violated_command_transition(
                     &self.configuration,
                     &self.state,
                     &state,
+                    &command,
                 ) {
                     return Err(ValidationError::OutsideModel(format!("transition {name}")));
                 }
@@ -151,10 +246,50 @@ impl Session<'_, '_> {
         }
     }
 
+    fn bind_command<'i>(
+        &self,
+        input: &'i Value,
+    ) -> Result<(&'i str, BoundCommand<'m>), ValidationError> {
+        self.validator.check_input("Command", input)?;
+        let action = input["kind"]
+            .as_str()
+            .ok_or_else(|| ValidationError::InvalidInput("missing command kind".into()))?;
+        let command = self
+            .validator
+            .runtime
+            .read_command(action, |param, sort| {
+                typed_value(
+                    self.validator.model,
+                    sort,
+                    &input[command_argument_key(param)],
+                )
+            })
+            .ok_or_else(|| {
+                ValidationError::InvalidInput("command is outside the action domain".into())
+            })?;
+        Ok((action, command))
+    }
+
     /// Pure preflight for a command. Returns its expected next snapshot.
     pub fn validate(&self, input: &Value) -> Result<Value, ValidationError> {
         self.next(input)
             .map(|state| self.validator.state_json(&state))
+    }
+
+    /// Preflight a command and project named derivations at both endpoints.
+    pub fn validate_with_derivations(
+        &self,
+        input: &Value,
+        names: &[String],
+    ) -> Result<Value, ValidationError> {
+        let next = self.next(input)?;
+        Ok(serde_json::json!({
+            "state": self.validator.state_json(&next),
+            "derived": {
+                "before": self.snapshot_derivations(names)?,
+                "after": self.project_derivations(&next, names)?
+            }
+        }))
     }
 
     /// Advance the model only, for replaying an accepted prefix.
@@ -183,4 +318,128 @@ impl Session<'_, '_> {
         self.diverged = false;
         Ok(expected)
     }
+}
+
+/// Replay a finite path as evidence about one property.
+pub(super) fn verify_witness(
+    mut model: Model,
+    question: &crate::Question,
+    witness: &super::external::Witness,
+) -> Result<(), String> {
+    use crate::Kind;
+    model.checks.retain(|check| check.name == question.name);
+    model
+        .transitions
+        .retain(|check| check.name == question.name);
+    if question.kind == Kind::Reachable {
+        let check = &mut model.checks[0];
+        check.kind = rmodel::CheckKind::Invariant;
+        check.formula = rmodel::Formula::Not(Box::new(check.formula.clone()));
+    }
+    let validator = Validator::new(&model)?;
+    let mut session = validator
+        .start_path(&witness.config, &witness.initial)
+        .map_err(|error| format!("step 0: {error}"))?;
+    let declares = question.name == rmodel::DECLARATIONS;
+    let mut verified_step = false;
+    for (index, input) in witness.commands.iter().enumerate() {
+        let step = index + 1;
+        let (action, command) = session
+            .bind_command(input)
+            .map_err(|error| format!("step {step}: {error}"))?;
+        let runtime = &validator.runtime;
+        let last = step == witness.commands.len();
+        match runtime.execute(&session.configuration, &session.state, &command) {
+            None => return Err(format!("step {step}: guard is false: {action}")),
+            Some(Next::Outside(_)) => return Err(format!("step {step}: {action} leaves Scope")),
+            Some(Next::Broken(state)) if last && declares => {
+                session.state = state;
+                verified_step = true;
+            }
+            Some(Next::Broken(_)) => {
+                return Err(format!("step {step}: {action} violates Declarations"));
+            }
+            Some(Next::State(state)) => {
+                if last && question.kind == Kind::Transition {
+                    verified_step = runtime.violated_command_transition(
+                        &session.configuration,
+                        &session.state,
+                        &state,
+                        &command,
+                    ) == Some(question.name.as_str());
+                }
+                session.state = state;
+            }
+        }
+    }
+    if session.snapshot() != canonical(&witness.final_state) {
+        return Err("witness final state does not match the replayed state".into());
+    }
+    if !declares && matches!(question.kind, Kind::Invariant | Kind::Reachable) {
+        verified_step = validator
+            .runtime
+            .violated_invariant(&session.configuration, &session.state)
+            == Some(question.name.as_str());
+    }
+    if !verified_step {
+        return Err(format!("witness does not establish {}", question.name));
+    }
+    Ok(())
+}
+
+/// Replay legal edges and stuttering from a model initial state before checking liveness.
+pub(super) fn verify_lasso(
+    model: &Model,
+    question: &crate::Question,
+    witness: &super::external::Witness,
+    loop_start: usize,
+    work: u64,
+) -> Result<(), LassoError> {
+    if loop_start >= witness.commands.len() {
+        return Err(LassoError::Invalid(
+            "loopStart must name a state before the closing edge".into(),
+        ));
+    }
+    let validator = Validator::new(model).map_err(LassoError::Invalid)?;
+    let mut session = validator
+        .start_path(&witness.config, &witness.initial)
+        .map_err(|error| LassoError::Invalid(format!("step 0: {error}")))?;
+    let mut states = vec![session.state.clone()];
+    for (index, input) in witness.commands.iter().enumerate() {
+        if !input.is_null() {
+            let invalid = |reason: &dyn fmt::Display| {
+                LassoError::Invalid(format!("step {}: {reason}", index + 1))
+            };
+            let (action, command) = session
+                .bind_command(input)
+                .map_err(|error| invalid(&error))?;
+            session.state =
+                match validator
+                    .runtime
+                    .execute(&session.configuration, &session.state, &command)
+                {
+                    None => return Err(invalid(&format_args!("guard is false: {action}"))),
+                    Some(Next::Outside(_)) => {
+                        return Err(invalid(&format_args!("{action} leaves Scope")));
+                    }
+                    Some(Next::Broken(_)) => {
+                        return Err(invalid(&format_args!("{action} violates Declarations")));
+                    }
+                    Some(Next::State(state)) => state,
+                };
+        }
+        states.push(session.state.clone());
+    }
+    if session.snapshot() != canonical(&witness.final_state) {
+        return Err(LassoError::Invalid(
+            "witness final state does not match the replayed state".into(),
+        ));
+    }
+    validator.runtime.verify_temporal_lasso(
+        &session.configuration,
+        &states,
+        loop_start,
+        &question.name,
+        work,
+    )
 }

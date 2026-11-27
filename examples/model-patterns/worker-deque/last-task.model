@@ -1,0 +1,48 @@
+model LastTask
+enum Actor = Owner | Thief
+enum Task = Back | Front
+
+rel preferred: Actor -> one Task
+fact { preferred = (Owner -> Back) + (Thief -> Front) }
+
+var queued: set Task
+var pending: set Actor
+var candidate: Actor -> lone Task
+var claimed: Task -> set Actor
+
+init { queued = Task no pending no candidate no claimed }
+
+behavior snapshot(actor: Actor) {
+  guard { actor not in pending }
+  update {
+    pending = pending + actor
+    candidate = candidate ++ actor -> (if { actor.preferred in queued } then actor.preferred else queued)
+  }
+}
+
+behavior claim(actor: Actor) {
+  guard { actor in pending }
+  update {
+    pending = pending - actor
+    candidate = candidate - (actor -> Task)
+    if { some (actor.candidate & queued) } then {
+      queued = queued - actor.candidate
+      claimed = claimed + (actor.candidate -> actor)
+    }
+  }
+}
+
+invariant OneClaimantPerTask { all task: Task | lone task.claimed }
+invariant EveryTaskQueuedOrClaimed { queued = Task - claimed.Actor }
+transition SnapshotPrefersOwnEnd on snapshot {
+  actor.preferred in before(queued) implies after(actor.candidate) = actor.preferred
+}
+transition ClaimOfRemovedTaskLeavesResultsUnchanged on claim {
+  no (before(actor.candidate) & before(queued)) implies unchanged(claimed) and unchanged(queued)
+}
+reachable BothReadLastTask {
+  one queued pending = Actor Owner.candidate = queued Thief.candidate = queued
+}
+reachable ReadOppositeEnds { Owner.candidate = Back Thief.candidate = Front queued = Task }
+
+scope steps = 8

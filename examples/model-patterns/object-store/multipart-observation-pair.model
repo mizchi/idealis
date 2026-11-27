@@ -1,0 +1,60 @@
+model MultipartObservationPair
+enum Run = Left | Right
+enum Version = Original | Mine | Other
+
+var finished: set Run
+var stored: set Run
+var current: Run -> one Version
+var observed: Run -> lone Version
+var scanned: set Run
+var proof: Run -> lone Version
+
+init { no finished no stored current = Run -> Original no observed no scanned no proof }
+
+behavior finish(run: Run, committed: Bool) {
+  guard { run not in finished }
+  update {
+    finished = finished + run
+    if { committed } then { stored = stored + run current = current ++ run -> Mine }
+  }
+}
+
+behavior overwrite(run: Run) {
+  guard { run in finished run.current != Other }
+  update { current = current ++ run -> Other }
+}
+
+behavior readCurrent(run: Run) {
+  guard { run in finished }
+  update {
+    observed = observed ++ run -> run.current
+    if { run.current = Mine } then { proof = proof ++ run -> Mine }
+  }
+}
+
+behavior scanHistory(run: Run) {
+  guard { some run.observed run not in scanned }
+  update {
+    scanned = scanned + run
+    if { run in stored } then { proof = proof ++ run -> Mine }
+  }
+}
+
+invariant ProofRequiresCommit { all run: Run | some run.proof implies run in stored }
+
+reachable LatestIsAmbiguous {
+  some Left.observed Left.observed = Right.observed
+  Left in stored Right not in stored Left.proof = Right.proof no scanned
+}
+
+reachable HistoryDistinguishes {
+  some Left.observed Left.observed = Right.observed
+  Left in stored Right not in stored scanned = Run Left.proof = Mine no Right.proof
+}
+
+reachable EqualHistoryWithDifferentCommit {
+  some Left.observed Left.observed = Right.observed
+  Left in stored Right not in stored scanned = Run Left.proof = Right.proof
+}
+
+scope steps = 10

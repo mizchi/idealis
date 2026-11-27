@@ -1,0 +1,12 @@
+model NestedIoBatch
+enum Callback = Microtask | NestedMicrotask | Immediate | Timer
+sequence Invocations = Callback, max = 4
+var calls: one Invocations
+
+init { calls = Invocations[] }
+behavior drainIoBatch() {
+  guard { calls = Invocations[] }
+  update { calls = Invocations[Microtask, NestedMicrotask, Immediate, Timer] }
+}
+reachable ObservedBatch { calls = Invocations[Microtask, NestedMicrotask, Immediate, Timer] }
+scope steps = 2

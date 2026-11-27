@@ -1,0 +1,84 @@
+model RecoveryReceipt
+enum Writer = Original | Replacement
+enum Request = Primary | Fresh
+enum Body = A | B
+
+record Receipt { body: Body, author: Writer }
+variant Reply = Silent | Stored(Receipt) | Conflict | Fenced
+
+var owner: one Writer
+var receipts: Request -> lone Receipt
+var visible: lone Body
+var writes: one Nat
+var reply: one Reply
+
+init {
+  owner = Original
+  no receipts no visible
+  writes = 0 reply = Silent()
+}
+
+behavior submit(writer: Writer, request: Request, body: Body) {
+  guard { reply = Silent() }
+  update {
+    let known = request.receipts
+    let fresh = Receipt { body: body, author: writer }
+    if { some known } then {
+      reply = if { body = known.body } then Stored(known) else Conflict()
+    } else {
+      if { writer = owner } then {
+        receipts = receipts + (request -> fresh)
+        visible = body
+        writes = writes + 1
+        reply = Stored(fresh)
+      } else {
+        reply = Fenced()
+      }
+    }
+  }
+}
+
+behavior loseReply() {
+  guard { not is(reply, Silent) }
+  update { reply = Silent() }
+}
+
+behavior promote() {
+  guard { owner = Original }
+  update { owner = Replacement }
+}
+
+invariant WritesMatchReceipts { writes = #keys(receipts) }
+
+transition ReplayPreservesReceiptAndEffect on submit {
+  some before(request.receipts) implies
+    (unchanged(receipts) and unchanged(writes) and unchanged(visible))
+}
+
+transition MatchingReplayReturnsStoredReceipt on submit {
+  (some before(request.receipts) and body = before(request.receipts.body)) implies
+    after(reply) = Stored(before(request.receipts))
+}
+
+transition ConflictingReplayReturnsConflict on submit {
+  (some before(request.receipts) and body != before(request.receipts.body)) implies
+    after(reply) = Conflict()
+}
+
+transition NewSubmissionNeedsAuthority on submit {
+  (no before(request.receipts) and writer != before(owner)) implies
+    (after(reply) = Fenced() and unchanged(receipts) and unchanged(writes) and unchanged(visible))
+}
+
+transition NewAuthorizedSubmissionCommits on submit {
+  (no before(request.receipts) and writer = before(owner)) implies
+    (after(request.receipts) = Receipt { body: body, author: writer } and
+     after(visible) = body and after(writes) = before(writes) + 1 and
+     after(reply) = Stored(Receipt { body: body, author: writer }))
+}
+
+transition LosingReplyPreservesDurableResult on loseReply {
+  unchanged(receipts) and unchanged(writes) and unchanged(visible)
+}
+
+scope Int = 0..2, steps = 8

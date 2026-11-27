@@ -1,0 +1,53 @@
+model WasmGrowFailure
+enum Entry = Instruction | Host
+enum Amount = One | Two
+enum Pages = FirstPage | BothPages
+enum Epoch = Initial | Refreshed
+enum Result = Grown | MinusOne | RangeFailure
+
+var pages: one Pages
+var epoch: one Epoch
+var view: lone Epoch
+var result: lone Result
+var byteRead: one Bool
+
+init { pages = FirstPage epoch = Initial no view no result byteRead = false }
+
+behavior borrow() {
+  guard { no view }
+  update { view = epoch }
+}
+
+behavior attempt(entry: Entry, amount: Amount) {
+  update {
+    if { pages = FirstPage and amount = One } then {
+      pages = BothPages epoch = Refreshed result = Grown
+    } else {
+      result = if { entry = Instruction } then MinusOne else RangeFailure
+    }
+  }
+}
+
+behavior read() {
+  guard { some view }
+  update { view = epoch byteRead = true }
+}
+
+transition FailedGrowthPreservesMemory on attempt {
+  after(result) != Grown implies unchanged(pages) and unchanged(epoch) and unchanged(view)
+}
+transition InstructionFailureReturnsMinusOne on attempt {
+  (entry = Instruction and after(result) != Grown) implies after(result) = MinusOne
+}
+transition HostFailureReturnsRangeError on attempt {
+  (entry = Host and after(result) != Grown) implies after(result) = RangeFailure
+}
+transition SuccessfulGrowthRefreshesBuffer on attempt {
+  after(result) = Grown implies after(pages) = BothPages and before(epoch) != after(epoch) and unchanged(view)
+}
+transition ReadUsesCurrentView on read { after(view) = after(epoch) and after(byteRead) }
+
+reachable InstructionFailedWithView { pages = FirstPage view = Initial result = MinusOne }
+reachable HostFailedWithView { pages = FirstPage view = Initial result = RangeFailure }
+
+scope steps = 8

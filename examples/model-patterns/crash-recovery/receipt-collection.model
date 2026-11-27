@@ -1,0 +1,84 @@
+model ReceiptCollection
+enum Registration = Old | New
+enum Sequence = First | Second
+enum Reply = Applied | Duplicate | Expired
+
+var active: one Registration
+var sealed: one Bool
+var closed: one Bool
+var receipts: Registration -> set Sequence
+var applied: Registration -> set Sequence
+var effects: one Nat
+var reply: lone Reply
+
+init {
+  active = Old not sealed not closed
+  no receipts no applied effects = 0 no reply
+}
+
+behavior rotate() {
+  guard { active = Old }
+  update { active = New }
+}
+
+behavior seal() {
+  guard { not sealed }
+  update { sealed = true }
+}
+
+behavior collect() {
+  guard { active = New sealed not closed }
+  update {
+    if { Old.receipts = Sequence } then {
+      closed = true
+      receipts = receipts - (Old -> Sequence)
+    }
+  }
+}
+
+behavior reopen() {}
+
+behavior submit(registration: Registration, sequence: Sequence) {
+  guard { registration = Old or active = New }
+  update {
+    let key = registration -> sequence
+    if { registration = Old and closed } then {
+      reply = Expired
+    } else {
+      if { key in receipts } then { reply = Duplicate }
+      else {
+        receipts = receipts + key
+        applied = applied + key
+        effects = effects + 1
+        reply = Applied
+      }
+    }
+  }
+}
+
+invariant EffectsStayUnique { effects = #applied }
+
+invariant ClosedOnlyAfterAllOldEffects {
+  closed implies (sealed and Old.applied = Sequence)
+}
+
+invariant RemovedOldReceiptsAreFenced {
+  some Old.applied - Old.receipts implies closed
+}
+
+transition CollectionKeepsNewReceipts on collect {
+  unchanged(New.receipts)
+  unchanged(effects)
+}
+
+transition ClosedRegistrationRejectsStaleDelivery on submit {
+  (registration = Old and before(closed)) implies
+    (after(reply) = Expired and unchanged(effects) and unchanged(receipts))
+}
+
+transition NewRegistrationCanApplyAnUnseenSequence on submit {
+  (registration = New and sequence not in before(New.applied)) implies
+    (after(reply) = Applied and after(effects) = before(effects) + 1)
+}
+
+scope Int = 0..5, steps = 12

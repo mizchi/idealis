@@ -1,0 +1,50 @@
+model FirstFitSemaphore
+enum Client = Heavy | LightA | LightB
+enum Permit = Left | Right
+sequence Waiters = Client, max = 3
+
+rel weight: Client -> one Nat
+var held: Client -> set Permit
+var waiting: one Waiters
+
+fact { Heavy.weight = 2, LightA.weight = 1, LightB.weight = 1 }
+init { held = LightA -> Left + LightB -> Right, waiting = Waiters[] }
+
+derive free = Permit - Client.held
+derive fitting = select(candidate: Client | #free >= candidate.weight)
+derive firstFitting = select(candidate: Client |
+  candidate in fitting and (some index: Nat |
+    at(waiting, index) = candidate and
+    (all earlier: Nat | earlier < index implies at(waiting, earlier) not in fitting)))
+
+behavior enqueue(client: Client) {
+  guard { no client.held, client not in elements(waiting) }
+  update { waiting = append(waiting, client) }
+}
+
+behavior release(client: Client) {
+  guard { some client.held }
+  update { held = withoutKeys(held, client) }
+}
+
+behavior grant(client: Client) {
+  guard { client in firstFitting }
+  update {
+    let permits = if { client.weight = 2 } then free
+      else if { Left in free } then Left else Right
+    held = held ++ client -> permits
+    waiting = removeAll(waiting, client)
+  }
+}
+
+invariant EachPermitHasOneHolder { all permit: Permit | lone held.permit }
+invariant AcquiredWeightMatches {
+  all client: Client | some client.held implies #(client.held) = client.weight
+}
+reachable FittingWaiterBehindHeavy {
+  at(waiting, 0) = Heavy, one free, some firstFitting
+}
+leads_to HeavyEventuallyAcquires with { strong grant(*) weak release(*) }
+  { Heavy in elements(waiting) } { some Heavy.held }
+
+scope Int = 0..3, steps = 16

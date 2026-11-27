@@ -1,0 +1,48 @@
+model DeliveryRace
+enum Attempt = Primary | Hedge
+enum Evidence = Pending | Delivered | Missing
+
+var open: set Attempt
+var readout: Attempt -> lone Evidence
+var outcome: one Evidence
+var winner: lone Attempt
+var conflict: one Bool
+
+init { no open no readout outcome = Pending no winner not conflict }
+
+behavior connect(attempt: Attempt) {
+  guard { outcome = Pending attempt not in open no attempt.readout }
+  update { open = open + attempt }
+}
+behavior finish(attempt: Attempt, evidence: Evidence) {
+  guard { attempt in open }
+  update {
+    open = open - attempt
+    readout = readout ++ attempt -> evidence
+    if { evidence != Pending } then {
+      if { outcome = Pending } then { outcome = evidence winner = attempt }
+      else {
+        if { outcome != evidence } then { conflict = true }
+      }
+    }
+  }
+}
+
+invariant WinnerHasPublishedEvidence {
+  outcome = Pending implies no winner
+  no winner implies outcome = Pending
+  some winner implies winner.readout = outcome
+}
+invariant ConflictHasTwoCompleteAnswers {
+  conflict iff some readout.Delivered and some readout.Missing
+}
+transition FirstCompleteAnswerSticks on finish {
+  before(outcome) != Pending implies unchanged(outcome) and unchanged(winner)
+}
+transition UnfinishedAttemptHasNoEvidence on finish {
+  evidence = Pending implies unchanged(outcome) and unchanged(winner) and unchanged(conflict)
+}
+reachable PrimaryWinsOpenRace { winner = Primary outcome = Delivered Hedge in open }
+reachable HedgeWinsOpenRace { winner = Hedge outcome = Delivered Primary in open }
+reachable MissingWinsOpenRace { winner = Hedge outcome = Missing Primary in open }
+scope steps = 5

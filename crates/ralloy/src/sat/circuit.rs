@@ -65,6 +65,14 @@ impl Circuit {
     pub(crate) fn implies(&mut self, left: Gate, right: Gate) -> Gate {
         self.or(left ^ 1, right)
     }
+    pub(crate) fn select(&mut self, test: Gate, yes: Gate, no: Gate) -> Gate {
+        if yes == no {
+            return yes;
+        }
+        let yes = self.and(test, yes);
+        let no = self.and(test ^ 1, no);
+        self.or(yes, no)
+    }
     pub(crate) fn iff(&mut self, left: Gate, right: Gate) -> Gate {
         let forward = self.implies(left, right);
         let backward = self.implies(right, left);

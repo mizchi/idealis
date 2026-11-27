@@ -386,6 +386,14 @@ impl Evaluator<'_> {
                 }
                 Ok(Value::Relation(Relation::Binary(rows)))
             }
+            Expr::Conditional(test, yes, no) => {
+                let branch = if self.expression(test, locals)?.formula() {
+                    yes
+                } else {
+                    no
+                };
+                self.expression(branch, locals)
+            }
             Expr::Binary(operator, left, right) => {
                 let left = self.expression(left, locals)?;
                 if matches!(operator, Binary::And) && !left.formula_ref() {

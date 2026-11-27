@@ -1,0 +1,53 @@
+model RaceResource
+enum Candidate = Primary | Hedge
+enum Attempt = Pending | Succeeded | Failed
+variant Decision = Racing | Won(Candidate) | Rejected(Candidate)
+
+var attempts: Candidate -> one Attempt
+var decision: one Decision
+var open: set Candidate
+
+init { attempts = Candidate -> Pending decision = Racing() no open }
+
+behavior succeed(candidate: Candidate) {
+  guard { candidate.attempts = Pending }
+  update {
+    attempts = attempts ++ candidate -> Succeeded
+    if { is(decision, Racing) } then {
+      decision = Won(candidate)
+      open = open + candidate
+    }
+  }
+}
+
+behavior fail(candidate: Candidate) {
+  guard { candidate.attempts = Pending }
+  update {
+    attempts = attempts ++ candidate -> Failed
+    if { is(decision, Racing) } then { decision = Rejected(candidate) }
+  }
+}
+
+behavior release() {
+  guard { some open }
+  update { open = none }
+}
+
+invariant OnlyWinnerMayRemainOpen { open in payload(decision, Won) }
+transition FirstDecisionSticks {
+  not is(before(decision), Racing) implies unchanged(decision)
+}
+transition LateSuccessDisposesItsResource on succeed {
+  not is(before(decision), Racing) implies candidate not in after(open)
+}
+
+reachable WonWithHedgePending {
+  decision = Won(Primary) open = Primary Hedge.attempts = Pending
+}
+reachable RejectedWithPrimaryPending {
+  decision = Rejected(Hedge) Primary.attempts = Pending
+}
+reachable ReleasedWithHedgePending {
+  decision = Won(Primary) no open Hedge.attempts = Pending
+}
+scope steps = 5

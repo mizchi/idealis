@@ -358,6 +358,11 @@ rcheck-test:
 rcheck-lean-oracle:
   cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test lean_oracle -- --include-ignored
 
+# Runtime traces compared with the checked model.
+model-patterns-test: build
+  cargo build --locked --manifest-path crates/rcheck/Cargo.toml
+  node --test dist/tests/model-patterns/*.test.js
+
 # The generated fast-check property and its seeded fault control.
 rcheck-boundaries: build
   cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test linked_projects --test withdrawal
@@ -395,6 +400,7 @@ checker-receipts *args:
 evidence-adoption-test:
   cargo test --locked --manifest-path crates/rspec/Cargo.toml --test adoption --test comparison
   cargo test --locked --manifest-path crates/rprob/Cargo.toml --test reference versioned_adoption
+  cargo test --locked --manifest-path crates/rprob/Cargo.toml --test reference adoption_lifetime
   cargo test --locked --manifest-path crates/rprob/Cargo.toml --test reference comparison_requires
   cargo test --locked --manifest-path crates/rprob/Cargo.toml --test reference goal_improvement_requires
   python3 -B -m unittest discover -s evals/experiments/rprob -p test_goal.py
@@ -572,6 +578,7 @@ install:
 
 build-sdk:
   pnpm exec tsc -p packages/idealis/tsconfig.json
+  node --experimental-strip-types scripts/prepare-rmodel-pattern-assets.ts
 
 build: build-sdk
   pnpm exec tsc -p tsconfig.json
@@ -754,6 +761,7 @@ package-prepare *args: build rusmt-build
 
 [positional-arguments]
 package-test *args: build
+  cargo build --locked --manifest-path crates/rcheck/Cargo.toml --bin rcheck
   node dist/scripts/package-test.js "$@"
 
 cli-wasm-build:

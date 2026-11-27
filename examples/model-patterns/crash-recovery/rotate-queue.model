@@ -1,0 +1,24 @@
+model RotateQueue
+enum Work = First | Second | Third | Fourth
+sequence Queue = Work, max = 4
+var pending: one Queue
+
+init { pending = Queue[First, Second, Third, Second] }
+
+behavior retry() {
+  guard { some at(pending, 0) }
+  update { pending = append(tail(pending), at(pending, 0)) }
+}
+
+transition RetryMovesHeadToTail on retry {
+  some at(before(pending), 0) implies
+    after(pending) = append(tail(before(pending)), at(before(pending), 0))
+}
+
+transition RetryKeepsLength on retry { len(before(pending)) = len(after(pending)) }
+
+reachable Retried {
+  pending = Queue[Second, Third, Second, First]
+}
+
+scope Int = 0..4, steps = 5

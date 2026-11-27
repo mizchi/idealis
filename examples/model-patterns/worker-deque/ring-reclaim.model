@@ -1,0 +1,64 @@
+model RingReclaim
+enum Generation = Original | Replacement
+enum Status = Copying | TimedOut | Stopped | Finished
+
+var owner: lone Generation
+var payload: one Generation
+var status: one Status
+var readBack: lone Generation
+
+init { owner = Original payload = Original status = Copying no readBack }
+
+behavior timeout() {
+  guard { status = Copying }
+  update { status = TimedOut }
+}
+
+behavior resume() {
+  guard { status = TimedOut }
+  update { status = Copying readBack = payload }
+}
+
+behavior finishOriginal() {
+  guard { status = Copying some readBack }
+  update {
+    status = Finished
+    if { owner = Original } then { owner = none }
+    else expect unreachable "A copying reader remains the owner until finish or confirmed stop" {}
+  }
+}
+
+behavior confirmStop() {
+  guard { status = TimedOut }
+  update { status = Stopped }
+}
+
+behavior reclaim() {
+  guard { status = Stopped owner = Original }
+  update { owner = none }
+}
+
+behavior tryAssign() {
+  guard { payload = Original }
+  update {
+    if { no owner } then { owner = Replacement payload = Replacement }
+  }
+}
+
+behavior lateRelease() {
+  guard { status = Stopped or status = Finished }
+  update { if { owner = Original } then { owner = none } }
+}
+
+invariant LiveReaderKeepsSlot { (status = Copying or status = TimedOut) implies owner = Original }
+invariant OriginalReaderOnlyCopiesOriginal { no readBack or readBack = Original }
+transition LateReleaseCannotClearReplacement on lateRelease {
+  before(owner) = Replacement implies unchanged(owner) and unchanged(payload)
+}
+
+reachable TimedOutButStillOwned { status = TimedOut owner = Original }
+reachable StoppedButStillOwned { status = Stopped owner = Original }
+leads_to StoppedReaderEventuallyReclaimed with { weak reclaim }
+  { status = Stopped owner = Original } { owner != Original }
+
+scope steps = 7

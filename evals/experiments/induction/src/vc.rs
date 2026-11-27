@@ -170,15 +170,33 @@ impl<'a> Encoder<'a> {
                 }
             }
             Expr::Binary(op, l, r) => match op {
-                SetOp::Union => format!(
+                SetOp::Union | SetOp::SetUnion => format!(
                     "(or {} {})",
                     self.member(l, tuple, scope, copy),
                     self.member(r, tuple, scope, copy)
                 ),
-                SetOp::Difference => format!(
+                SetOp::Override => {
+                    let Ty::Pair(_, sort) = self.ty(expression, scope) else {
+                        unreachable!("typed binary override");
+                    };
+                    let column = self.var();
+                    let row = [tuple[0].clone(), column.clone()];
+                    format!(
+                        "(or {} (and {} (not (exists (({column} S_{sort})) {}))))",
+                        self.member(r, tuple, scope, copy),
+                        self.member(l, tuple, scope, copy),
+                        self.member(r, &row, scope, copy)
+                    )
+                }
+                SetOp::Difference | SetOp::SetDifference => format!(
                     "(and {} (not {}))",
                     self.member(l, tuple, scope, copy),
                     self.member(r, tuple, scope, copy)
+                ),
+                SetOp::WithoutKeys => format!(
+                    "(and {} (not {}))",
+                    self.member(l, tuple, scope, copy),
+                    self.member(r, &tuple[..1], scope, copy)
                 ),
                 SetOp::Intersection => format!(
                     "(and {} {})",
@@ -276,7 +294,7 @@ impl<'a> Encoder<'a> {
                     enc.member(e, tuple, scope, copy)
                 })
             }
-            Formula::Ints(..) => unreachable!("counts are outside the fragment"),
+            Formula::Ints(..) | Formula::HasTag(..) => unreachable!("outside the fragment"),
             Formula::Not(inner) => format!("(not {})", self.formula(inner, scope, copy)),
             Formula::And(parts) if parts.is_empty() => "true".into(),
             Formula::And(parts) => {

@@ -1,0 +1,56 @@
+model WorkerFence
+enum Attempt = Original | Replacement
+
+var current: one Attempt
+var completed: set Attempt
+var ready: set Attempt
+var effects: set Attempt
+var receipt: lone Attempt
+var replyFrom: lone Attempt
+var replyReceipt: lone Attempt
+
+init {
+  current = Original
+  no completed no ready no effects no receipt no replyFrom no replyReceipt
+}
+
+behavior replace() {
+  guard { current = Original no replyFrom }
+  update { current = Replacement }
+}
+
+behavior write(attempt: Attempt) {
+  guard { attempt not in completed attempt = Original or current = Replacement }
+  update {
+    completed = completed + attempt
+    if { attempt = current } then { ready = ready + attempt }
+    if { attempt = current and no receipt } then {
+      effects = effects + attempt
+      receipt = attempt
+    }
+  }
+}
+
+behavior deliver(attempt: Attempt) {
+  guard { attempt in ready }
+  update {
+    if { attempt = current } then {
+      replyFrom = attempt
+      replyReceipt = receipt
+    }
+  }
+}
+
+invariant ReceiptMatchesOneEffect { effects = receipt }
+invariant AcceptedReplyComesFromCurrent { some replyFrom implies replyFrom = current }
+invariant AcceptedReplyCarriesReceipt { some replyFrom implies some replyReceipt and replyReceipt = receipt }
+transition RejectOldWrite on write {
+  attempt != before(current) implies unchanged(effects) and unchanged(receipt) and attempt not in after(ready)
+}
+transition ReuseCommittedReceipt on write { some before(receipt) implies unchanged(receipt) and unchanged(effects) }
+transition RejectOldReply on deliver { attempt != before(current) implies unchanged(replyFrom) and unchanged(replyReceipt) }
+
+reachable ReplacementBeforeAnyCommit { current = Replacement no receipt no completed }
+reachable OldCommitAwaitingReply { current = Replacement receipt = Original no replyFrom Replacement not in completed }
+
+scope steps = 6
