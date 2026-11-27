@@ -1,0 +1,38 @@
+model CheckerComparison
+enum Revision = First | Second
+enum Checker = Reference | Fast
+var current: one Revision
+var received: Revision -> set Checker
+var completed: Revision -> set Checker
+// A complete result can have either of two abstract report values.
+var valueA: Revision -> set Checker
+var published: lone Revision
+
+init { current = First no received no completed no valueA no published }
+behavior receiveA(r: Revision, c: Checker) {
+  guard { (r = current or r = First) and c not in r.received }
+  update { received = received + r -> c completed = completed + r -> c valueA = valueA + r -> c }
+}
+behavior receiveB(r: Revision, c: Checker) {
+  guard { (r = current or r = First) and c not in r.received }
+  update { received = received + r -> c completed = completed + r -> c }
+}
+behavior receiveIncomplete(r: Revision, c: Checker) {
+  guard { (r = current or r = First) and c not in r.received }
+  update { received = received + r -> c }
+}
+behavior revise() {
+  guard { current = First }
+  update { current = Second published = none }
+}
+behavior publish() {
+  guard { no published current.completed = Checker and (current.valueA = Checker or no current.valueA) }
+  update { published = current }
+}
+
+invariant PublishedNeedsCurrentResults { all r: Revision | r in published implies r = current and r.completed = Checker }
+invariant PublishedNeedsAgreement { all r: Revision | r in published implies r.valueA = Checker or no r.valueA }
+reachable OneCompleteResult { current = Second one Second.completed no published }
+reachable OldResultsOnly { current = Second First.completed = Checker no Second.received no published }
+reachable CurrentAgreementPublished { published = Second }
+scope steps = 7

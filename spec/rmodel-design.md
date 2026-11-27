@@ -102,6 +102,113 @@
 - id: `revise`
 - モデル: `spec/models/rmodel-calibration.model` の `revise`
 
+### 候補の版（candidate revision）
+
+改版前後の候補を区別する。
+
+- id: `candidate-revision`
+- モデル: `spec/models/evidence-adoption.model` の `Revision`
+- モデル: `spec/models/evidence-adoption.model` の `First`
+- モデル: `spec/models/evidence-adoption.model` の `Second`
+- モデル: `spec/models/evidence-adoption.model` の `current`
+- モデル: `spec/models/evidence-adoption.model` の `revise`
+
+### レビューを終えた版（reviewed revision）
+
+要件の節と式のレビューが済み、各節の検査が期待値と一致した版。
+
+- id: `reviewed-revision`
+- モデル: `spec/models/evidence-adoption.model` の `reviewed`
+- モデル: `spec/models/evidence-adoption.model` の `recordReview`
+
+### 意味比較が一致した版（compared revision）
+
+遅れて届いた結果にも、検査した時点の版を保持する。
+
+- id: `compared-revision`
+- モデル: `spec/models/evidence-adoption.model` の `equivalent`
+- モデル: `spec/models/evidence-adoption.model` の `lateSemantic`
+- モデル: `spec/models/evidence-adoption.model` の `recordSemantics`
+- モデル: `spec/models/evidence-adoption.model` の `receiveLateSemantics`
+
+### ゴールが改善した版（improved revision）
+
+測定した時点の版でゴールが改善した。
+
+- id: `improved-revision`
+- モデル: `spec/models/evidence-adoption.model` の `improved`
+- モデル: `spec/models/evidence-adoption.model` の `recordGoal`
+
+### 採用した版（adopted revision）
+
+現行の候補に必要な証拠がそろった状態。
+
+- id: `adopted-revision`
+- モデル: `spec/models/evidence-adoption.model` の `adopted`
+- モデル: `spec/models/evidence-adoption.model` の `adopt`
+
+### 比較結果の版（comparison revision）
+
+受け取った結果は実行時の版を維持する。
+
+- id: `comparison-origin`
+- モデル: `spec/models/checker-comparison.model` の `Revision`
+- モデル: `spec/models/checker-comparison.model` の `First`
+- モデル: `spec/models/checker-comparison.model` の `Second`
+- モデル: `spec/models/checker-comparison.model` の `current`
+- モデル: `spec/models/checker-comparison.model` の `revise`
+
+### 比較する検査器（required checkers）
+
+参照評価器と rprob の二つ。
+
+- id: `required-checkers`
+- モデル: `spec/models/checker-comparison.model` の `Checker`
+- モデル: `spec/models/checker-comparison.model` の `Reference`
+- モデル: `spec/models/checker-comparison.model` の `Fast`
+
+### 検査器の結果（checker result）
+
+到着・完了を区別し、二種類の結果を抽象化して比較する。
+
+- id: `checker-receipt`
+- モデル: `spec/models/checker-comparison.model` の `received`
+- モデル: `spec/models/checker-comparison.model` の `completed`
+- モデル: `spec/models/checker-comparison.model` の `valueA`
+- モデル: `spec/models/checker-comparison.model` の `receiveA`
+- モデル: `spec/models/checker-comparison.model` の `receiveB`
+- モデル: `spec/models/checker-comparison.model` の `receiveIncomplete`
+
+### 比較結果の発行（publish comparison）
+
+現行の対象を二つの検査器が完了まで調べ、結果が一致したときに発行する。
+
+- id: `comparison-publication`
+- モデル: `spec/models/checker-comparison.model` の `published`
+- モデル: `spec/models/checker-comparison.model` の `publish`
+
+### 改善の判定条件（improvement prerequisites）
+
+測定が同じ計画に属し、有効で安定した標本があり、事前に決めた改善幅に達する。
+
+- id: `measurement-prerequisite`
+- モデル: `spec/models/measurement-gate.model` の `Prerequisite`
+- モデル: `spec/models/measurement-gate.model` の `PinnedRun`
+- モデル: `spec/models/measurement-gate.model` の `StableSamples`
+- モデル: `spec/models/measurement-gate.model` の `ThresholdMet`
+- モデル: `spec/models/measurement-gate.model` の `confirmed`
+- モデル: `spec/models/measurement-gate.model` の `confirm`
+
+### 測定から発行した改善（published improvement）
+
+条件を満たしたときにだけ発行できるゴール改善の証拠。
+
+- id: `published-measurement`
+- モデル: `spec/models/measurement-gate.model` の `GoalDecision`
+- モデル: `spec/models/measurement-gate.model` の `Improvement`
+- モデル: `spec/models/measurement-gate.model` の `published`
+- モデル: `spec/models/measurement-gate.model` の `publishImprovement`
+
 ### 値（toggle value）
 
 例の変数に入る二通りの値。
@@ -227,6 +334,9 @@
 
 ## 実装の照合
 
+- `evals/experiments/rprob/goal.py` の `score` を、`evals/experiments/rprob/test_goal.py` の `test_measurement_is_bound_to_pinned_inputs` がモデル `spec/models/measurement-gate.model` と照合する
+- `crates/rspec/src/comparison.rs` の `compare_receipts` を、`crates/rspec/tests/comparison.rs` の `real_checker_results_feed_adoption` がモデル `spec/models/checker-comparison.model` と照合する
+- `crates/rspec/src/adoption.rs` の `assess_adoption` を、`crates/rspec/tests/adoption.rs` の `a_late_result_cannot_authorize_the_current_candidate` がモデル `spec/models/evidence-adoption.model` と照合する
 - `crates/rmodel/src/syntax.rs` の `action` を、`crates/rmodel/tests/behavior.rs` の `behavior_has_the_same_guard_parallel_updates_and_frame_as_action` がモデル `spec/models/rmodel-behavior.model` と照合する
 - `crates/rmodel/src/reference.rs` の `steps` を、`crates/rmodel/tests/calibration.rs` の `the_next_revision_must_collect_new_evidence` がモデル `spec/models/rmodel-calibration.model` と照合する
 
@@ -255,6 +365,40 @@
 改版した候補は評価中になり、旧版で集めた意味とゴールの証拠を取り直す。
 
 - 形式化しない理由: 遷移の前後を比較する条件は、calibration.rs の the_next_revision_must_collect_new_evidence が参照評価器で検査する。
+
+### RMODEL-EVIDENCE-PROVENANCE
+
+節レビュー・意味の一致・ゴール改善を、評価した候補の版に結び付けて採用を判断する。
+
+- `spec/models/evidence-adoption.model` の `AdoptedIsCurrent` は holds
+- `spec/models/evidence-adoption.model` の `OldAgreementArrives` は reachable
+- `spec/models/evidence-adoption.model` の `CurrentEvidenceCanAdopt` は reachable
+- `review`　採用した版には、対応レビューと期待通りのモデル検査が必要。
+  - `spec/models/evidence-adoption.model` の `AdoptionNeedsCurrentReview` は holds
+- `agreement`　採用した版の意味比較が一致していなければならない。旧版の結果はその版に留める。
+  - `spec/models/evidence-adoption.model` の `AdoptionNeedsCurrentAgreement` は holds
+- `goal`　採用した版でゴールが改善していなければならない。
+  - `spec/models/evidence-adoption.model` の `AdoptionNeedsCurrentImprovement` は holds
+
+### RMODEL-EXPECTED-CHECKERS
+
+比較対象の版で、予定した二つの検査器が完了し、判定が一致して初めて意味の一致を発行できる。
+
+- `spec/models/checker-comparison.model` の `PublishedNeedsCurrentResults` は holds
+- `spec/models/checker-comparison.model` の `PublishedNeedsAgreement` は holds
+- `spec/models/checker-comparison.model` の `OneCompleteResult` は reachable
+- `spec/models/checker-comparison.model` の `OldResultsOnly` は reachable
+- `spec/models/checker-comparison.model` の `CurrentAgreementPublished` は reachable
+
+### RMODEL-MEASURED-IMPROVEMENT
+
+測定前に固定した計画に属し、標本が有効で安定し、改善幅を満たすときにゴール改善を発行する。
+
+- `spec/models/measurement-gate.model` の `ImprovementNeedsPinnedRun` は holds
+- `spec/models/measurement-gate.model` の `ImprovementNeedsStableSamples` は holds
+- `spec/models/measurement-gate.model` の `ImprovementNeedsThreshold` は holds
+- `spec/models/measurement-gate.model` の `UnsettledMeasurement` は reachable
+- `spec/models/measurement-gate.model` の `ImprovementPublished` は reachable
 
 ### RMODEL-SWAP
 
@@ -326,6 +470,14 @@
 
 - `fixtures/rcheck/structured/shipped-transition.model` の `ShippedStays` は holds
 - `fixtures/rcheck/structured/shipped-transition.model` の `WasShipped` は reachable
+- `status`　発送済みの注文は、実行可能な操作の直後も発送済みのままとする。
+  - `fixtures/rcheck/structured/shipped-transition.model` の `StaysShipped` は holds
+- `tracking`　操作の前後とも発送済みなら、追跡方法は等しい。
+  - `fixtures/rcheck/structured/shipped-transition.model` の `KeepsTracking` は holds
+- `confirm-courier`　Courier で発送し、追跡方法を維持したまま確認済みになる経路がある。
+  - `fixtures/rcheck/structured/shipped-transition.model` の `ConfirmCourier` は reachable
+- `confirm-post`　Post で発送し、追跡方法を維持したまま確認済みになる経路がある。
+  - `fixtures/rcheck/structured/shipped-transition.model` の `ConfirmPost` は reachable
 
 ### RMODEL-TRANSITION
 

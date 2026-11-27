@@ -1,0 +1,26 @@
+model SparseSets
+sig A
+sig B
+sig C
+type Item = A + B + C
+var selected: set Item
+init { no selected }
+behavior addA(i: A) {
+  guard { no selected & A }
+  update { selected = selected + i }
+}
+behavior addB(i: B) {
+  guard { no selected & B }
+  update { selected = selected + i }
+}
+behavior addC(i: C) {
+  guard { no selected & C }
+  update { selected = selected + i }
+}
+behavior remove(i: Item) {
+  guard { i in selected }
+  update { selected = selected - i }
+}
+invariant Small { lone selected & A and lone selected & B and lone selected & C }
+reachable Three { some selected & A and some selected & B and some selected & C }
+scope A = 6, B = 6, C = 6, steps = 5

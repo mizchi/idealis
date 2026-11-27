@@ -1,0 +1,102 @@
+{
+  "schema_version": 2,
+  "metadata": {
+    "hyperfine_version": "2.0.0",
+    "start_time": "2026-11-25T20:48:41Z",
+    "platform": {
+      "os": "Darwin",
+      "architecture": "arm64"
+    }
+  },
+  "primary_metric": "time_wall_clock",
+  "results": [
+    {
+      "command": "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/0127/rprob-initial rprob prepared fixtures/rprob/sparse-sets.model 3",
+      "name": "before",
+      "summary": {
+        "instructions": {
+          "count": 9,
+          "mean": 19966719.777777776,
+          "stddev": 56519.54514099034,
+          "median": 19947091.0,
+          "min": 19911537.0,
+          "max": 20075806.0
+        },
+        "memory_peak_resident": {
+          "unit": "byte",
+          "count": 9,
+          "mean": 2191815.111111111,
+          "stddev": 10922.666666666668,
+          "median": 2195456.0,
+          "min": 2179072.0,
+          "max": 2211840.0
+        },
+        "time_cpu": {
+          "unit": "second",
+          "count": 9,
+          "mean": 0.0013376666666666667,
+          "stddev": 4.805985850998735e-05,
+          "median": 0.001328,
+          "min": 0.001274,
+          "max": 0.001415
+        },
+        "time_wall_clock": {
+          "unit": "second",
+          "count": 9,
+          "mean": 0.001732546111111111,
+          "stddev": 7.991139327318171e-05,
+          "median": 0.001701,
+          "min": 0.0016485830000000001,
+          "max": 0.001874208
+        }
+      },
+      "exit_codes": [
+        0
+      ]
+    },
+    {
+      "command": "/Users/mz/ghq/github.com/mizchi/idealis/evals/experiments/rprob/target/release/rprob-benchmark rprob prepared fixtures/rprob/sparse-sets.model 3",
+      "name": "after",
+      "summary": {
+        "instructions": {
+          "count": 9,
+          "mean": 18867232.0,
+          "stddev": 67558.34526540744,
+          "median": 18864860.0,
+          "min": 18783895.0,
+          "max": 18988333.0
+        },
+        "memory_peak_resident": {
+          "unit": "byte",
+          "count": 9,
+          "mean": 2250069.3333333335,
+          "stddev": 11585.237502960394,
+          "median": 2244608.0,
+          "min": 2228224.0,
+          "max": 2260992.0
+        },
+        "time_cpu": {
+          "unit": "second",
+          "count": 9,
+          "mean": 0.0012256666666666666,
+          "stddev": 5.6683330883073544e-05,
+          "median": 0.001218,
+          "min": 0.001166,
+          "max": 0.0013469999999999999
+        },
+        "time_wall_clock": {
+          "unit": "second",
+          "count": 9,
+          "mean": 0.0015584535555555556,
+          "stddev": 4.038006917438081e-05,
+          "median": 0.001551875,
+          "min": 0.001500875,
+          "max": 0.0016180830000000002
+        }
+      },
+      "exit_codes": [
+        0
+      ]
+    }
+  ]
+}

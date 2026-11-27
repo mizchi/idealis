@@ -24,6 +24,23 @@ transition ShippedStays {
   }
 }
 reachable WasShipped { is(status, Shipped) }
+transition StaysShipped {
+  is(before(status), Shipped) implies is(after(status), Shipped)
+}
+transition KeepsTracking {
+  (is(before(status), Shipped) and is(after(status), Shipped)) implies
+  { payload(before(status), Shipped) = payload(after(status), Shipped) }
+}
+reachable ConfirmCourier {
+  is(status, Shipped)
+  payload(status, Shipped) = Courier
+  acknowledged = true
+}
+reachable ConfirmPost {
+  is(status, Shipped)
+  payload(status, Shipped) = Post
+  acknowledged = true
+}
 scope steps = 4"####;
 
 fn to_Int(x: &i64) -> Value {

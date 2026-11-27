@@ -1,0 +1,12 @@
+model LargeCandidateDomains
+sig A
+sig B
+sig C
+type Item = A + B + C
+var first: set Item
+var second: set Item
+var third: set Item
+var fourth: set Item
+init { no first no second no third no fourth }
+reachable Initialized { no first }
+scope A = 7, B = 7, C = 6, steps = 2

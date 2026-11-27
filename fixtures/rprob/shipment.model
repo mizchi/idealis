@@ -1,0 +1,23 @@
+model RelationShipment
+sig Order
+enum Carrier = Post | Courier
+var shipped: set Order
+var tracking: Order -> lone Carrier
+var acknowledged: set Order
+init { no shipped no tracking no acknowledged }
+behavior ship(o: Order, c: Carrier) {
+  guard { o not in shipped }
+  update { shipped = shipped + o tracking = tracking + o -> c }
+}
+behavior acknowledge(o: Order) {
+  guard { o in shipped }
+  update { acknowledged = acknowledged + o }
+}
+invariant HasTracking { shipped = tracking.Carrier }
+transition StaysShipped { before(shipped) in after(shipped) }
+transition KeepsTracking {
+  all o: Order | o in before(shipped) implies before(o.tracking) = after(o.tracking)
+}
+reachable ConfirmCourier { some o: Order | o in acknowledged and Courier in o.tracking }
+reachable ConfirmPost { some o: Order | o in acknowledged and Post in o.tracking }
+scope Order = 2, steps = 6

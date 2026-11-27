@@ -1,6 +1,9 @@
 import "Schema.pkl" as s
 
 local calibration = "spec/models/rmodel-calibration.model"
+local measurementGate = "spec/models/measurement-gate.model"
+local checkerComparison = "spec/models/checker-comparison.model"
+local evidenceAdoption = "spec/models/evidence-adoption.model"
 local behavior = "spec/models/rmodel-behavior.model"
 local shipment = "fixtures/rcheck/structured/shipped-transition.model"
 local natAccount = "fixtures/rcheck/nat-account.model"
@@ -38,6 +41,17 @@ spec: s.Spec = new {
     term("record-goal", "action", "ゴールの証拠を記録", "record goal evidence", "評価中でゴールが未測定の版に、測定結果を記録する。", "Record measurement for a trial revision with an unmeasured goal.", calibration, new Listing { "recordGoal" })
     term("adopt", "action", "採用", "adopt", "評価中の版の意味とゴールの証拠を確認し、採用に進める。", "Advance a trial to adoption after considering both kinds of evidence.", calibration, new Listing { "adopt" })
     term("revise", "action", "改版", "revise", "次の版を評価中に戻し、証拠を取り直す。", "Start a new trial and require fresh evidence.", calibration, new Listing { "revise" })
+    term("candidate-revision", "state", "候補の版", "candidate revision", "改版前後の候補を区別する。", "Distinguishes the candidate before and after revision.", evidenceAdoption, new Listing { "Revision"; "First"; "Second"; "current"; "revise" })
+    term("reviewed-revision", "state", "レビューを終えた版", "reviewed revision", "要件の節と式のレビューが済み、各節の検査が期待値と一致した版。", "A revision with reviewed clauses and the expected model verdicts.", evidenceAdoption, new Listing { "reviewed"; "recordReview" })
+    term("compared-revision", "state", "意味比較が一致した版", "compared revision", "遅れて届いた結果にも、検査した時点の版を保持する。", "Even a late comparison retains the revision it evaluated.", evidenceAdoption, new Listing { "equivalent"; "lateSemantic"; "recordSemantics"; "receiveLateSemantics" })
+    term("improved-revision", "state", "ゴールが改善した版", "improved revision", "測定した時点の版でゴールが改善した。", "Improvement belongs to the revision measured.", evidenceAdoption, new Listing { "improved"; "recordGoal" })
+    term("adopted-revision", "state", "採用した版", "adopted revision", "現行の候補に必要な証拠がそろった状態。", "The current candidate with all required evidence.", evidenceAdoption, new Listing { "adopted"; "adopt" })
+    term("comparison-origin", "state", "比較結果の版", "comparison revision", "受け取った結果は実行時の版を維持する。", "A result retains the revision it evaluated.", checkerComparison, new Listing { "Revision"; "First"; "Second"; "current"; "revise" })
+    term("required-checkers", "entity", "比較する検査器", "required checkers", "参照評価器と rprob の二つ。", "The reference evaluator and rprob.", checkerComparison, new Listing { "Checker"; "Reference"; "Fast" })
+    term("checker-receipt", "state", "検査器の結果", "checker result", "到着・完了を区別し、二種類の結果を抽象化して比較する。", "Separate received and complete results, and compare two abstract result values.", checkerComparison, new Listing { "received"; "completed"; "valueA"; "receiveA"; "receiveB"; "receiveIncomplete" })
+    term("comparison-publication", "action", "比較結果の発行", "publish comparison", "現行の対象を二つの検査器が完了まで調べ、結果が一致したときに発行する。", "Publish once both checkers have completed the current comparison and their results agree.", checkerComparison, new Listing { "published"; "publish" })
+    term("measurement-prerequisite", "state", "改善の判定条件", "improvement prerequisites", "測定が同じ計画に属し、有効で安定した標本があり、事前に決めた改善幅に達する。", "The observation belongs to the pinned plan, has stable valid samples, and meets the predeclared improvement margin.", measurementGate, new Listing { "Prerequisite"; "PinnedRun"; "StableSamples"; "ThresholdMet"; "confirmed"; "confirm" })
+    term("published-measurement", "state", "測定から発行した改善", "published improvement", "条件を満たしたときにだけ発行できるゴール改善の証拠。", "Goal improvement evidence issued once the prerequisites hold.", measurementGate, new Listing { "GoalDecision"; "Improvement"; "published"; "publishImprovement" })
     term("toggle-value", "concept", "値", "toggle value", "例の変数に入る二通りの値。", "The two values in the example.", behavior, new Listing { "Value"; "On"; "Off" })
     term("toggle-state", "state", "状態変数", "state variables", "入れ替える二変数と、代入せずに保持する変数。", "The pair to swap and a third variable kept by the frame.", behavior, new Listing { "left"; "right"; "update" })
     term("swap", "action", "入れ替え", "swap", "左が Off かつ右が On のとき、二変数を同時に入れ替える。", "Swap the two values simultaneously when left is Off and right is On.", behavior, new Listing { "swap" })
@@ -162,6 +176,57 @@ spec: s.Spec = new {
       terms { "adoption"; "semantic-evidence"; "goal-evidence"; "revise" }
       unformalized = "遷移の前後を比較する条件は、calibration.rs の the_next_revision_must_collect_new_evidence が参照評価器で検査する。"
     }
+    new s.ClauseRule {
+      id = "RMODEL-EVIDENCE-PROVENANCE"
+      text = s.text("節レビュー・意味の一致・ゴール改善を、評価した候補の版に結び付けて採用を判断する。", "Tie clause review, semantic agreement, and goal improvement to the candidate revision they evaluated before adopting it.")
+      terms { "candidate-revision"; "reviewed-revision"; "compared-revision"; "improved-revision"; "adopted-revision" }
+      claims {
+        s.claim(evidenceAdoption, "AdoptedIsCurrent", "holds")
+        s.claim(evidenceAdoption, "OldAgreementArrives", "reachable")
+        s.claim(evidenceAdoption, "CurrentEvidenceCanAdopt", "reachable")
+      }
+      clauses {
+        new {
+          id = "review"
+          text = s.text("採用した版には、対応レビューと期待通りのモデル検査が必要。", "The adopted revision must have reviewed correspondence and the expected model verdicts.")
+          claim = s.claim(evidenceAdoption, "AdoptionNeedsCurrentReview", "holds")
+        }
+        new {
+          id = "agreement"
+          text = s.text("採用した版の意味比較が一致していなければならない。旧版の結果はその版に留める。", "Agreement is required for the adopted revision. Results from an earlier revision remain tied to that revision.")
+          claim = s.claim(evidenceAdoption, "AdoptionNeedsCurrentAgreement", "holds")
+        }
+        new {
+          id = "goal"
+          text = s.text("採用した版でゴールが改善していなければならない。", "The goal must improve on the adopted revision.")
+          claim = s.claim(evidenceAdoption, "AdoptionNeedsCurrentImprovement", "holds")
+        }
+      }
+    }
+    new {
+      id = "RMODEL-EXPECTED-CHECKERS"
+      text = s.text("比較対象の版で、予定した二つの検査器が完了し、判定が一致して初めて意味の一致を発行できる。", "Publish agreement only when both scheduled checkers have finished the expected revision and their verdicts agree.")
+      terms { "comparison-origin"; "required-checkers"; "checker-receipt"; "comparison-publication" }
+      claims {
+        s.claim(checkerComparison, "PublishedNeedsCurrentResults", "holds")
+        s.claim(checkerComparison, "PublishedNeedsAgreement", "holds")
+        s.claim(checkerComparison, "OneCompleteResult", "reachable")
+        s.claim(checkerComparison, "OldResultsOnly", "reachable")
+        s.claim(checkerComparison, "CurrentAgreementPublished", "reachable")
+      }
+    }
+    new {
+      id = "RMODEL-MEASURED-IMPROVEMENT"
+      text = s.text("測定前に固定した計画に属し、標本が有効で安定し、改善幅を満たすときにゴール改善を発行する。", "Publish goal improvement when the observations match the pinned plan, the samples are valid and stable, and the gain meets the threshold.")
+      terms { "measurement-prerequisite"; "published-measurement" }
+      claims {
+        s.claim(measurementGate, "ImprovementNeedsPinnedRun", "holds")
+        s.claim(measurementGate, "ImprovementNeedsStableSamples", "holds")
+        s.claim(measurementGate, "ImprovementNeedsThreshold", "holds")
+        s.claim(measurementGate, "UnsettledMeasurement", "reachable")
+        s.claim(measurementGate, "ImprovementPublished", "reachable")
+      }
+    }
     new {
       id = "RMODEL-SWAP"
       text = s.text("入れ替え例では左と右を遷移前の値から同時に更新する。二つの値は異なり続け、入れ替え後の状態に到達でき、両方が On の状態には到達しない。代入しない変数 update は Off のままにする。", "The example swaps left and right simultaneously using the old state. The values remain distinct, the swapped state is reachable, both On is unreachable, and the unassigned variable update stays Off.")
@@ -230,13 +295,35 @@ spec: s.Spec = new {
       terms { "progress-obligation" }
       unformalized = "rcheck の structured_temporal.rs と TLC の 0116 評価で公平性ありとなしを照合する。"
     }
-    new {
+    new s.ClauseRule {
       id = "SHIPMENT-TRACKING"
       text = s.text("注文が発送済みなら、実行可能な操作の直後も発送済みであり、追跡方法は操作直前と同じでなければならない。", "Once an order is shipped, every enabled operation must leave it shipped with the same tracking method it had immediately before the operation.")
       terms { "shipment-carrier"; "shipment-status"; "ship-order"; "acknowledge-shipment" }
       claims {
         s.claim(shipment, "ShippedStays", "holds")
         s.claim(shipment, "WasShipped", "reachable")
+      }
+      clauses {
+        new {
+          id = "status"
+          text = s.text("発送済みの注文は、実行可能な操作の直後も発送済みのままとする。", "An enabled operation leaves a shipped order in the shipped state.")
+          claim = s.claim(shipment, "StaysShipped", "holds")
+        }
+        new {
+          id = "tracking"
+          text = s.text("操作の前後とも発送済みなら、追跡方法は等しい。", "If the order is shipped on both sides of an operation, the tracking method is unchanged.")
+          claim = s.claim(shipment, "KeepsTracking", "holds")
+        }
+        new {
+          id = "confirm-courier"
+          text = s.text("Courier で発送し、追跡方法を維持したまま確認済みになる経路がある。", "There is an execution that ships with Courier and reaches an acknowledged state retaining Courier.")
+          claim = s.claim(shipment, "ConfirmCourier", "reachable")
+        }
+        new {
+          id = "confirm-post"
+          text = s.text("Post で発送し、追跡方法を維持したまま確認済みになる経路がある。", "There is an execution that ships with Post and reaches an acknowledged state retaining Post.")
+          claim = s.claim(shipment, "ConfirmPost", "reachable")
+        }
       }
     }
     new {
@@ -247,6 +334,21 @@ spec: s.Spec = new {
     }
   }
   groundings {
+    new {
+      model = measurementGate
+      implementation = s.code("evals/experiments/rprob/goal.py", "score")
+      test = s.code("evals/experiments/rprob/test_goal.py", "test_measurement_is_bound_to_pinned_inputs")
+    }
+    new {
+      model = checkerComparison
+      implementation = s.code("crates/rspec/src/comparison.rs", "compare_receipts")
+      test = s.code("crates/rspec/tests/comparison.rs", "real_checker_results_feed_adoption")
+    }
+    new {
+      model = evidenceAdoption
+      implementation = s.code("crates/rspec/src/adoption.rs", "assess_adoption")
+      test = s.code("crates/rspec/tests/adoption.rs", "a_late_result_cannot_authorize_the_current_candidate")
+    }
     new {
       model = behavior
       implementation = s.code(syntax, "action")

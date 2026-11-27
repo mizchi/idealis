@@ -313,6 +313,43 @@ rmodel-test:
   cargo test --all-targets --locked --manifest-path crates/rmodel/Cargo.toml
   cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/rmodel/Cargo.toml
 
+rprob-test:
+  cargo fmt --manifest-path crates/rprob/Cargo.toml -- --check
+  cargo clippy --all-targets --locked --manifest-path crates/rprob/Cargo.toml -- -D warnings
+  cargo test --all-targets --locked --manifest-path crates/rprob/Cargo.toml
+  python3 -B -m unittest discover -s evals/experiments/rprob -p test_goal.py
+
+rprob-bench output:
+  cargo build --release --locked --manifest-path evals/experiments/rprob/Cargo.toml
+  python3 evals/experiments/rprob/bench.py {{quote(output)}}
+
+rprob-candidate-bench output baseline:
+  cargo build --release --locked --manifest-path evals/experiments/rprob/Cargo.toml
+  python3 -B evals/experiments/rprob/candidates.py {{quote(output)}} {{quote(baseline)}}
+
+rprob-hot-path-bench output baseline:
+  cargo build --release --locked --manifest-path evals/experiments/rprob/Cargo.toml
+  python3 -B evals/experiments/rprob/hot_paths.py {{quote(output)}} {{quote(baseline)}}
+
+rprob-stress-bench output baseline:
+  cargo build --release --locked --manifest-path evals/experiments/rprob/Cargo.toml
+  python3 -B evals/experiments/rprob/hot_paths.py --stress {{quote(output)}} {{quote(baseline)}}
+
+rprob-order-bench output baseline:
+  cargo build --release --locked --manifest-path evals/experiments/rprob/Cargo.toml
+  python3 -B evals/experiments/rprob/alternating.py {{quote(output)}} {{quote(baseline)}}
+
+rprob-goal-pin:
+  cargo build --release --locked --manifest-path evals/experiments/rprob/Cargo.toml
+  just adoption-evidence --pin "$(python3 -B evals/experiments/rprob/goal.py identify)"
+
+rprob-goal output revision:
+  cargo build --release --locked --manifest-path evals/experiments/rprob/Cargo.toml
+  python3 -B evals/experiments/rprob/goal.py record {{quote(output)}} {{quote(revision)}}
+
+rprob-goal-replay output:
+  python3 -B evals/experiments/rprob/goal.py replay {{quote(output)}}
+
 rcheck-test:
   cargo fmt --manifest-path crates/rcheck/Cargo.toml -- --check
   cargo clippy --all-targets --locked --manifest-path crates/rcheck/Cargo.toml -- -D warnings
@@ -337,12 +374,36 @@ shipment-write: shipment-build
   python3 evals/experiments/shipment/trace.py --write
 
 shipment-test: shipment-build build
-  cargo test --locked --manifest-path crates/rspec/Cargo.toml --test links
+  cargo test --locked --manifest-path crates/rspec/Cargo.toml --test links --test clauses
   cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check -- --rmodel-design
   python3 evals/experiments/shipment/trace.py
   cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test shipment
   node --test dist/tests/rcheck/shipment.pbt.test.js
   cd tests/rcheck/go && CGO_ENABLED=0 go test -count=1 -v ./shipment
+
+clause-report rule="SHIPMENT-TRACKING" spec="spec/rmodel-design.pkl":
+  cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example clause_report -- {{quote(spec)}} {{quote(rule)}}
+
+[positional-arguments]
+adoption-evidence *args:
+  cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example clause_report -- spec/rmodel-design.pkl RMODEL-EVIDENCE-PROVENANCE "$@"
+
+[positional-arguments]
+checker-receipts *args:
+  cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example checker_receipts -- "$@"
+
+evidence-adoption-test:
+  cargo test --locked --manifest-path crates/rspec/Cargo.toml --test adoption --test comparison
+  cargo test --locked --manifest-path crates/rprob/Cargo.toml --test reference versioned_adoption
+  cargo test --locked --manifest-path crates/rprob/Cargo.toml --test reference comparison_requires
+  cargo test --locked --manifest-path crates/rprob/Cargo.toml --test reference goal_improvement_requires
+  python3 -B -m unittest discover -s evals/experiments/rprob -p test_goal.py
+
+requirement-links output: shipment-build
+  mkdir -p {{quote(output)}}
+  python3 evals/experiments/requirement-links/run.py {{quote(output / "comparison.json")}}
+  python3 -B evals/experiments/requirement-links/repair.py {{quote(output / "repair.json")}}
+  python3 evals/experiments/requirement-links/packets.py {{quote(output / "comparison.json")}} {{quote(output / "readers")}}
 
 shipment-drift output:
   cargo run --locked --quiet --manifest-path crates/rspec/Cargo.toml --example spec_check -- --rmodel-design

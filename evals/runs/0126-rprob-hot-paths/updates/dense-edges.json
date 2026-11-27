@@ -1,0 +1,102 @@
+{
+  "schema_version": 2,
+  "metadata": {
+    "hyperfine_version": "2.0.0",
+    "start_time": "2026-11-25T20:44:24Z",
+    "platform": {
+      "os": "Darwin",
+      "architecture": "arm64"
+    }
+  },
+  "primary_metric": "time_wall_clock",
+  "results": [
+    {
+      "command": "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/0126/rprob-before-updates rprob prepared .artifacts/0126/updates/edges-4x4.model 3",
+      "name": "before",
+      "summary": {
+        "instructions": {
+          "count": 5,
+          "mean": 1466854360.6,
+          "stddev": 907646.843840874,
+          "median": 1466304850.0,
+          "min": 1466090642.0,
+          "max": 1468112099.0
+        },
+        "memory_peak_resident": {
+          "unit": "byte",
+          "count": 5,
+          "mean": 2516582.4,
+          "stddev": 8973.886382164641,
+          "median": 2523136.0,
+          "min": 2506752.0,
+          "max": 2523136.0
+        },
+        "time_cpu": {
+          "unit": "second",
+          "count": 5,
+          "mean": 0.06896820000000001,
+          "stddev": 0.0009726045959175779,
+          "median": 0.069151,
+          "min": 0.067731,
+          "max": 0.07017699999999999
+        },
+        "time_wall_clock": {
+          "unit": "second",
+          "count": 5,
+          "mean": 0.0697666668,
+          "stddev": 0.0009159507733656883,
+          "median": 0.06982475,
+          "min": 0.068403792,
+          "max": 0.07089050000000001
+        }
+      },
+      "exit_codes": [
+        0
+      ]
+    },
+    {
+      "command": "/Users/mz/ghq/github.com/mizchi/idealis/evals/experiments/rprob/target/release/rprob-benchmark rprob prepared .artifacts/0126/updates/edges-4x4.model 3",
+      "name": "after",
+      "summary": {
+        "instructions": {
+          "count": 5,
+          "mean": 1335859220.8,
+          "stddev": 626040.4675847241,
+          "median": 1335620334.0,
+          "min": 1335337911.0,
+          "max": 1336804586.0
+        },
+        "memory_peak_resident": {
+          "unit": "byte",
+          "count": 5,
+          "mean": 2513305.6,
+          "stddev": 8973.886382164641,
+          "median": 2506752.0,
+          "min": 2506752.0,
+          "max": 2523136.0
+        },
+        "time_cpu": {
+          "unit": "second",
+          "count": 5,
+          "mean": 0.069857,
+          "stddev": 0.021663694433313996,
+          "median": 0.060851,
+          "min": 0.057734,
+          "max": 0.10847699999999999
+        },
+        "time_wall_clock": {
+          "unit": "second",
+          "count": 5,
+          "mean": 0.0707095002,
+          "stddev": 0.02153721199791803,
+          "median": 0.061350666000000005,
+          "min": 0.058474584,
+          "max": 0.10909350000000001
+        }
+      },
+      "exit_codes": [
+        0
+      ]
+    }
+  ]
+}

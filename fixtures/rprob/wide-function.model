@@ -1,0 +1,6 @@
+model WideFunction
+enum Node = A | B | C | D | E | F
+var successor: Node -> one Node
+init { successor = Node -> A }
+reachable Initialized { successor = Node -> A }
+scope steps = 2

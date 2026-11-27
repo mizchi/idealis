@@ -1,0 +1,16 @@
+model Edges
+sig Left
+sig Right
+var edges: Left -> set Right
+init { no edges }
+behavior add(l: Left, r: Right) {
+  guard { r not in l.edges }
+  update { edges = edges + l -> r }
+}
+behavior remove(l: Left, r: Right) {
+  guard { r in l.edges }
+  update { edges = edges - l -> r }
+}
+invariant Bipartite { all l: Left | l.edges in Right }
+reachable Full { edges = Left -> Right }
+scope Left = 3, Right = 4, steps = 14

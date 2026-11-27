@@ -1,0 +1,190 @@
+{
+  "schema_version": 2,
+  "metadata": {
+    "hyperfine_version": "2.0.0",
+    "start_time": "2026-11-25T19:50:30Z",
+    "platform": {
+      "os": "Darwin",
+      "architecture": "arm64"
+    }
+  },
+  "primary_metric": "time_wall_clock",
+  "results": [
+    {
+      "command": "evals/experiments/rprob/target/release/rprob-benchmark reference cold fixtures/rmodel/permissions.model 3",
+      "name": "reference-cold",
+      "summary": {
+        "instructions": {
+          "count": 7,
+          "mean": 8547149736.857142,
+          "stddev": 18922460.1627826,
+          "median": 8547726871.0,
+          "min": 8526843511.0,
+          "max": 8571997628.0
+        },
+        "memory_peak_resident": {
+          "unit": "byte",
+          "count": 7,
+          "mean": 2670592.0,
+          "stddev": 9459.306810402828,
+          "median": 2670592.0,
+          "min": 2654208.0,
+          "max": 2686976.0
+        },
+        "time_cpu": {
+          "unit": "second",
+          "count": 7,
+          "mean": 0.32428871428571426,
+          "stddev": 0.005589811556581787,
+          "median": 0.322784,
+          "min": 0.317391,
+          "max": 0.331656
+        },
+        "time_wall_clock": {
+          "unit": "second",
+          "count": 7,
+          "mean": 0.3256266787142858,
+          "stddev": 0.006676399940452032,
+          "median": 0.3235155,
+          "min": 0.31807208400000003,
+          "max": 0.33668770800000003
+        }
+      },
+      "exit_codes": [
+        0
+      ]
+    },
+    {
+      "command": "evals/experiments/rprob/target/release/rprob-benchmark rprob cold fixtures/rmodel/permissions.model 3",
+      "name": "rprob-cold",
+      "summary": {
+        "instructions": {
+          "count": 7,
+          "mean": 268357449.7142857,
+          "stddev": 280405.91901546007,
+          "median": 268439432.0,
+          "min": 267870851.0,
+          "max": 268690414.0
+        },
+        "memory_peak_resident": {
+          "unit": "byte",
+          "count": 7,
+          "mean": 2415469.714285714,
+          "stddev": 22892.974276797133,
+          "median": 2408448.0,
+          "min": 2392064.0,
+          "max": 2457600.0
+        },
+        "time_cpu": {
+          "unit": "second",
+          "count": 7,
+          "mean": 0.011653142857142857,
+          "stddev": 7.81098128095496e-05,
+          "median": 0.011683,
+          "min": 0.011543,
+          "max": 0.011752
+        },
+        "time_wall_clock": {
+          "unit": "second",
+          "count": 7,
+          "mean": 0.012062434428571429,
+          "stddev": 7.615433604388978e-05,
+          "median": 0.012076958,
+          "min": 0.011960625,
+          "max": 0.012159542
+        }
+      },
+      "exit_codes": [
+        0
+      ]
+    },
+    {
+      "command": "evals/experiments/rprob/target/release/rprob-benchmark reference prepared fixtures/rmodel/permissions.model 3",
+      "name": "reference-prepared",
+      "summary": {
+        "instructions": {
+          "count": 7,
+          "mean": 8581603312.0,
+          "stddev": 31888913.247532357,
+          "median": 8600023019.0,
+          "min": 8544422020.0,
+          "max": 8621916905.0
+        },
+        "memory_peak_resident": {
+          "unit": "byte",
+          "count": 7,
+          "mean": 2586331.4285714286,
+          "stddev": 23983.720192783152,
+          "median": 2588672.0,
+          "min": 2555904.0,
+          "max": 2621440.0
+        },
+        "time_cpu": {
+          "unit": "second",
+          "count": 7,
+          "mean": 0.33334342857142857,
+          "stddev": 0.014225197407618444,
+          "median": 0.33214,
+          "min": 0.32115099999999996,
+          "max": 0.362477
+        },
+        "time_wall_clock": {
+          "unit": "second",
+          "count": 7,
+          "mean": 0.34093442871428575,
+          "stddev": 0.027508501598071628,
+          "median": 0.33305725,
+          "min": 0.32196720900000003,
+          "max": 0.39983500000000005
+        }
+      },
+      "exit_codes": [
+        0
+      ]
+    },
+    {
+      "command": "evals/experiments/rprob/target/release/rprob-benchmark rprob prepared fixtures/rmodel/permissions.model 3",
+      "name": "rprob-prepared",
+      "summary": {
+        "instructions": {
+          "count": 7,
+          "mean": 267529340.42857143,
+          "stddev": 115056.08336931044,
+          "median": 267488037.0,
+          "min": 267420135.0,
+          "max": 267727570.0
+        },
+        "memory_peak_resident": {
+          "unit": "byte",
+          "count": 7,
+          "mean": 2249289.1428571427,
+          "stddev": 15584.292556166623,
+          "median": 2244608.0,
+          "min": 2228224.0,
+          "max": 2277376.0
+        },
+        "time_cpu": {
+          "unit": "second",
+          "count": 7,
+          "mean": 0.011801571428571429,
+          "stddev": 0.0003049419929226191,
+          "median": 0.011640000000000001,
+          "min": 0.011555,
+          "max": 0.012256999999999999
+        },
+        "time_wall_clock": {
+          "unit": "second",
+          "count": 7,
+          "mean": 0.012178797714285716,
+          "stddev": 0.00031397771403222994,
+          "median": 0.012011084,
+          "min": 0.011940625000000002,
+          "max": 0.012647542000000001
+        }
+      },
+      "exit_codes": [
+        0
+      ]
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "schema_version": 2,
+  "metadata": {
+    "hyperfine_version": "2.0.0",
+    "start_time": "2026-11-25T20:40:30Z",
+    "platform": {
+      "os": "Darwin",
+      "architecture": "arm64"
+    }
+  },
+  "primary_metric": "time_wall_clock",
+  "results": [
+    {
+      "command": "/Users/mz/ghq/github.com/mizchi/idealis/.artifacts/0126/rprob-cursors rprob prepared .artifacts/0126/pair/edges-4x4.model 3",
+      "name": "before",
+      "summary": {
+        "instructions": {
+          "count": 5,
+          "mean": 1457096721.8,
+          "stddev": 3963032.9907466955,
+          "median": 1455601962.0,
+          "min": 1454661361.0,
+          "max": 1464057383.0
+        },
+        "memory_peak_resident": {
+          "unit": "byte",
+          "count": 5,
+          "mean": 2503475.2,
+          "stddev": 7327.147548671312,
+          "median": 2506752.0,
+          "min": 2490368.0,
+          "max": 2506752.0
+        },
+        "time_cpu": {
+          "unit": "second",
+          "count": 5,
+          "mean": 0.08455359999999999,
+          "stddev": 0.025351173479742518,
+          "median": 0.07351,
+          "min": 0.07224699999999999,
+          "max": 0.129891
+        },
+        "time_wall_clock": {
+          "unit": "second",
+          "count": 5,
+          "mean": 0.08683249180000001,
+          "stddev": 0.028640594618957096,
+          "median": 0.074728291,
+          "min": 0.072783709,
+          "max": 0.13804633400000002
+        }
+      },
+      "exit_codes": [
+        0
+      ]
+    },
+    {
+      "command": "/Users/mz/ghq/github.com/mizchi/idealis/evals/experiments/rprob/target/release/rprob-benchmark rprob prepared .artifacts/0126/pair/edges-4x4.model 3",
+      "name": "after",
+      "summary": {
+        "instructions": {
+          "count": 5,
+          "mean": 1452837207.2,
+          "stddev": 2215283.8635183303,
+          "median": 1451721805.0,
+          "min": 1451591089.0,
+          "max": 1456747730.0
+        },
+        "memory_peak_resident": {
+          "unit": "byte",
+          "count": 5,
+          "mean": 2493644.8,
+          "stddev": 7327.147548671312,
+          "median": 2490368.0,
+          "min": 2490368.0,
+          "max": 2506752.0
+        },
+        "time_cpu": {
+          "unit": "second",
+          "count": 5,
+          "mean": 0.0896666,
+          "stddev": 0.03522544587084741,
+          "median": 0.073314,
+          "min": 0.070604,
+          "max": 0.15226800000000001
+        },
+        "time_wall_clock": {
+          "unit": "second",
+          "count": 5,
+          "mean": 0.0908753,
+          "stddev": 0.035140816302892654,
+          "median": 0.07386100000000001,
+          "min": 0.07124029200000001,
+          "max": 0.153030042
+        }
+      },
+      "exit_codes": [
+        0
+      ]
+    }
+  ]
+}

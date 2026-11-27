@@ -1,0 +1,190 @@
+{
+  "schema_version": 2,
+  "metadata": {
+    "hyperfine_version": "2.0.0",
+    "start_time": "2026-11-25T19:50:37Z",
+    "platform": {
+      "os": "Darwin",
+      "architecture": "arm64"
+    }
+  },
+  "primary_metric": "time_wall_clock",
+  "results": [
+    {
+      "command": "evals/experiments/rprob/target/release/rprob-benchmark reference cold fixtures/rprob/edges.model 4",
+      "name": "reference-cold",
+      "summary": {
+        "instructions": {
+          "count": 7,
+          "mean": 13075053981.857143,
+          "stddev": 7138185.646611922,
+          "median": 13074963609.0,
+          "min": 13064182572.0,
+          "max": 13087024351.0
+        },
+        "memory_peak_resident": {
+          "unit": "byte",
+          "count": 7,
+          "mean": 9638473.142857144,
+          "stddev": 89095.56618116784,
+          "median": 9650176.0,
+          "min": 9519104.0,
+          "max": 9797632.0
+        },
+        "time_cpu": {
+          "unit": "second",
+          "count": 7,
+          "mean": 0.4893085714285714,
+          "stddev": 0.026566092404022246,
+          "median": 0.47755099999999995,
+          "min": 0.465219,
+          "max": 0.538004
+        },
+        "time_wall_clock": {
+          "unit": "second",
+          "count": 7,
+          "mean": 0.4988192378571429,
+          "stddev": 0.04497704218814355,
+          "median": 0.47852479200000003,
+          "min": 0.46605291600000004,
+          "max": 0.592372833
+        }
+      },
+      "exit_codes": [
+        0
+      ]
+    },
+    {
+      "command": "evals/experiments/rprob/target/release/rprob-benchmark rprob cold fixtures/rprob/edges.model 4",
+      "name": "rprob-cold",
+      "summary": {
+        "instructions": {
+          "count": 7,
+          "mean": 204944780.57142857,
+          "stddev": 89140.94112856177,
+          "median": 204939212.0,
+          "min": 204827936.0,
+          "max": 205099813.0
+        },
+        "memory_peak_resident": {
+          "unit": "byte",
+          "count": 7,
+          "mean": 3047424.0,
+          "stddev": 35393.48520090479,
+          "median": 3047424.0,
+          "min": 2998272.0,
+          "max": 3096576.0
+        },
+        "time_cpu": {
+          "unit": "second",
+          "count": 7,
+          "mean": 0.009445714285714285,
+          "stddev": 8.638038798576593e-05,
+          "median": 0.009422,
+          "min": 0.009331999999999998,
+          "max": 0.009552999999999999
+        },
+        "time_wall_clock": {
+          "unit": "second",
+          "count": 7,
+          "mean": 0.009841738285714286,
+          "stddev": 0.00010216850676817262,
+          "median": 0.009824167,
+          "min": 0.009717042,
+          "max": 0.010002500000000001
+        }
+      },
+      "exit_codes": [
+        0
+      ]
+    },
+    {
+      "command": "evals/experiments/rprob/target/release/rprob-benchmark reference prepared fixtures/rprob/edges.model 4",
+      "name": "reference-prepared",
+      "summary": {
+        "instructions": {
+          "count": 7,
+          "mean": 13101218303.714285,
+          "stddev": 19581156.630923413,
+          "median": 13109088748.0,
+          "min": 13072022917.0,
+          "max": 13116798905.0
+        },
+        "memory_peak_resident": {
+          "unit": "byte",
+          "count": 7,
+          "mean": 9514422.857142856,
+          "stddev": 56530.170621325655,
+          "median": 9519104.0,
+          "min": 9437184.0,
+          "max": 9568256.0
+        },
+        "time_cpu": {
+          "unit": "second",
+          "count": 7,
+          "mean": 0.47770785714285713,
+          "stddev": 0.006021654518722985,
+          "median": 0.47497999999999996,
+          "min": 0.471553,
+          "max": 0.48472599999999993
+        },
+        "time_wall_clock": {
+          "unit": "second",
+          "count": 7,
+          "mean": 0.47882466671428575,
+          "stddev": 0.006212071687715374,
+          "median": 0.475864459,
+          "min": 0.472451375,
+          "max": 0.48612037500000005
+        }
+      },
+      "exit_codes": [
+        0
+      ]
+    },
+    {
+      "command": "evals/experiments/rprob/target/release/rprob-benchmark rprob prepared fixtures/rprob/edges.model 4",
+      "name": "rprob-prepared",
+      "summary": {
+        "instructions": {
+          "count": 7,
+          "mean": 201975244.7142857,
+          "stddev": 62219.073650326565,
+          "median": 201972890.0,
+          "min": 201910191.0,
+          "max": 202059666.0
+        },
+        "memory_peak_resident": {
+          "unit": "byte",
+          "count": 7,
+          "mean": 2785280.0,
+          "stddev": 0.0,
+          "median": 2785280.0,
+          "min": 2785280.0,
+          "max": 2785280.0
+        },
+        "time_cpu": {
+          "unit": "second",
+          "count": 7,
+          "mean": 0.009309142857142858,
+          "stddev": 9.437766079503629e-05,
+          "median": 0.009339,
+          "min": 0.009173999999999998,
+          "max": 0.009438
+        },
+        "time_wall_clock": {
+          "unit": "second",
+          "count": 7,
+          "mean": 0.009723571285714288,
+          "stddev": 0.00010431265582007826,
+          "median": 0.00975675,
+          "min": 0.009600791000000001,
+          "max": 0.009875875000000001
+        }
+      },
+      "exit_codes": [
+        0
+      ]
+    }
+  ]
+}

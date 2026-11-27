@@ -1,0 +1,72 @@
+{
+  "host": "macOS-26.6.2-arm64-arm-64bit",
+  "hyperfine": "hyperfine 2.0.0",
+  "samples_per_command": 8,
+  "order": [
+    "AB",
+    "BA",
+    "AB",
+    "BA",
+    "AB",
+    "BA",
+    "AB",
+    "BA"
+  ],
+  "iterations_per_command": 3,
+  "sha256": {
+    "before": "94250910caf764265c055522844520fa830d827d20c1257fb076150fd6962156",
+    "after": "5a9595ecd03dbb4405527699267af4d99bf2fab23d9d352dbdd60d0987e47796",
+    "model": "36652eec83677e4fb53f61ab4849622ba759f58650101921ae1e1f5f2b355b4a",
+    "raw": "06ca92981352d9288fb9ab3df6652e6c957fe317a783fd83a58d3c93c73ccf08"
+  },
+  "summary": {
+    "time_wall_clock": {
+      "A": {
+        "min": 0.056663334,
+        "median": 0.058192375000000005,
+        "max": 0.068003667
+      },
+      "B": {
+        "min": 0.012706875000000001,
+        "median": 0.013151687500000002,
+        "max": 0.018266125
+      },
+      "before_over_after_by_order": {
+        "AB": 4.406944768740718,
+        "BA": 4.366434088791868
+      }
+    },
+    "instructions": {
+      "A": {
+        "min": 1335046852,
+        "median": 1335155854.0,
+        "max": 1335251141
+      },
+      "B": {
+        "min": 393629345,
+        "median": 393690435.5,
+        "max": 393729705
+      },
+      "before_over_after_by_order": {
+        "AB": 3.391381477826654,
+        "BA": 3.39149036927344
+      }
+    },
+    "memory_peak_resident": {
+      "A": {
+        "min": 2490368.0,
+        "median": 2506752.0,
+        "max": 2523136.0
+      },
+      "B": {
+        "min": 2506752.0,
+        "median": 2523136.0,
+        "max": 2539520.0
+      },
+      "before_over_after_by_order": {
+        "AB": 0.9935274403016339,
+        "BA": 0.9870548806032677
+      }
+    }
+  }
+}

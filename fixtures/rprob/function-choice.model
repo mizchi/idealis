@@ -1,0 +1,7 @@
+model FunctionChoice
+enum From = F0 | F1 | F2 | F3
+enum To = T0 | T1 | T2 | T3
+var mapping: From -> one To
+init { mapping = From -> T0 }
+reachable Initialized { mapping = From -> T0 }
+scope steps = 2
