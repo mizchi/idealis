@@ -1,0 +1,48 @@
+model DurableOutbox
+enum Request = First | Second
+var committed: set Request
+var pending: set Request
+var sent: set Request
+var delivered: set Request
+var duplicated: set Request
+var offline: one Bool
+
+init { no committed no pending no sent no delivered no duplicated offline = false }
+
+behavior commit(request: Request) {
+  guard { not offline request not in committed }
+  update { committed = committed + request pending = pending + request }
+}
+behavior send(request: Request) {
+  guard { not offline request in pending request not in sent }
+  update { delivered = delivered + request sent = sent + request }
+}
+behavior finalize(request: Request) {
+  guard { not offline request in sent }
+  update { pending = pending - request sent = sent - request }
+}
+behavior crash() {
+  guard { not offline some pending }
+  update { offline = true sent = none }
+}
+behavior restart() {
+  guard { offline }
+  update { offline = false }
+}
+invariant CommittedIsRecoverable { committed in pending + delivered }
+invariant AtMostOneEffect { no duplicated }
+invariant DeliveredWasCommitted { delivered in committed }
+transition ResendKeepsEffect on send {
+  request in before(delivered) implies unchanged(duplicated)
+}
+reachable StoppedBeforeSend {
+  offline First in pending First not in delivered
+}
+reachable StoppedAfterSend {
+  offline First in pending First in delivered
+}
+reachable BothFinalized { delivered = Request no pending }
+leads_to QueuedEventuallyDelivered(request: Request)
+  with { weak restart strong send(*) }
+  { request in pending } { request in delivered }
+scope steps = 9

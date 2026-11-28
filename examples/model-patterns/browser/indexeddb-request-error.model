@@ -1,0 +1,53 @@
+model IndexedDbRequestError
+enum Policy = Recover | Rollback
+enum Row = First | Second
+enum Result = Idle | Committed | Aborted
+enum Notice = FirstSucceeded | Duplicate | SecondSucceeded
+sequence Notices = Notice, max = 3
+
+var result: one Result
+var requests: one Notices
+var committed: set Row
+var published: set Row
+var visibleAtConflict: one Bool
+var reopened: one Bool
+var readBack: set Row
+
+init {
+  result = Idle requests = Notices[] no committed no published
+  not visibleAtConflict not reopened no readBack
+}
+
+behavior writeBatch(policy: Policy) {
+  guard { result = Idle }
+  update {
+    if { policy = Recover } then {
+      requests = Notices[FirstSucceeded, Duplicate, SecondSucceeded]
+      result = Committed
+      committed = Row
+      published = Row
+    } else {
+      requests = Notices[FirstSucceeded, Duplicate]
+      result = Aborted
+    }
+  }
+}
+
+behavior reopen() {
+  guard { result != Idle not reopened }
+  update { reopened = true readBack = committed }
+}
+
+invariant PublishesOnlyCommittedRows { published in committed }
+invariant RequestSuccessDoesNotAcknowledge { not visibleAtConflict }
+transition FailedRequestRollsBackEarlierSuccess on writeBatch {
+  policy = Rollback implies after(result) = Aborted and unchanged(committed)
+}
+transition HandledErrorLeavesTransactionUsable on writeBatch {
+  policy = Recover implies after(result) = Committed and after(committed) = Row
+}
+invariant FreshConnectionReadsCommittedRows { reopened implies readBack = committed }
+reachable ReadyToReopenAfterAbort { result = Aborted not reopened }
+reachable ReadyToReopenAfterCommit { result = Committed not reopened }
+
+scope steps = 3

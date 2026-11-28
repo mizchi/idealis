@@ -14,10 +14,11 @@
 //!   domain, each holding the value a unary relation of the same
 //!   multiplicity would;
 //! - the configuration and the state are objects of their relations, and a
-//!   command is `{"kind": action, param: element, ...}`.
+//!   command is `{"kind": action, param: element, ...}`. An argument named
+//!   `kind` uses the key `"$kind"` to preserve the action tag.
 mod structured;
 
-use crate::syntax::{BOOL, INT, Model, Mult, NAT, Record, Shape};
+use idealis_syntax::{BOOL, INT, Model, Mult, NAT, Record, Shape};
 
 /// What a sort is, for the bindings.
 enum Kind<'a> {
@@ -80,11 +81,72 @@ fn quote(text: &str) -> String {
     format!("\"{text}\"")
 }
 
+#[derive(Clone, Copy)]
+enum RefinementTarget {
+    Rust,
+    TypeScript,
+    Go,
+    MoonBit,
+}
+
+fn refinement_test(record: &Record, target: RefinementTarget) -> String {
+    use crate::RefinementOperand;
+    let mut tests = Vec::new();
+    for clause in &record.refinements {
+        let mut operand = |operand: &RefinementOperand| match operand {
+            RefinementOperand::Literal(value) => match target {
+                RefinementTarget::Rust => format!("{value}i128"),
+                RefinementTarget::Go => format!("int64({value})"),
+                _ => value.to_string(),
+            },
+            RefinementOperand::Field(path) => {
+                let fields = path
+                    .iter()
+                    .map(|field| match target {
+                        RefinementTarget::Go => capital(field),
+                        RefinementTarget::Rust => rust_ident(field).into_owned(),
+                        _ => field.clone(),
+                    })
+                    .collect::<Vec<_>>()
+                    .join(".");
+                let field = format!("x.{fields}");
+                match target {
+                    RefinementTarget::Rust => format!("i128::from({field})"),
+                    RefinementTarget::Go => format!("int64({field})"),
+                    RefinementTarget::TypeScript => {
+                        let safe = format!("Number.isSafeInteger({field})");
+                        if !tests.contains(&safe) {
+                            tests.push(safe);
+                        }
+                        field
+                    }
+                    RefinementTarget::MoonBit => field,
+                }
+            }
+        };
+        let left = operand(&clause.left);
+        let right = operand(&clause.right);
+        let op = match (clause.symbol(), target) {
+            ("=", RefinementTarget::TypeScript) => "===",
+            ("!=", RefinementTarget::TypeScript) => "!==",
+            ("=", _) => "==",
+            (op, _) => op,
+        };
+        tests.push(format!("{left} {op} {right}"));
+    }
+    tests.join(" && ")
+}
+
 fn target(shape: &Shape) -> (&str, Mult) {
     match shape {
         Shape::Unary { sig, mult } => (sig, *mult),
         Shape::Binary { to, mult, .. } => (to, *mult),
     }
+}
+
+/// The key of an argument in the flat command JSON object.
+pub fn command_argument_key(param: &str) -> &str {
+    if param == "kind" { "$kind" } else { param }
 }
 
 /// JSON Schema (draft 2020-12) of `Config`, `State` and `Command`.
@@ -209,14 +271,18 @@ pub fn json_schema(model: &Model) -> String {
                 action
                     .params
                     .iter()
-                    .map(|(param, sort)| (param.clone(), element(sort))),
+                    .map(|(param, sort)| (command_argument_key(param).to_owned(), element(sort))),
             );
             object(properties)
         })
         .collect();
     defs.push((
         "Command".into(),
-        format!("{{\"oneOf\":[{}]}}", commands.join(",")),
+        if commands.is_empty() {
+            "false".to_owned()
+        } else {
+            format!("{{\"oneOf\":[{}]}}", commands.join(","))
+        },
     ));
     let defs: Vec<String> = defs
         .iter()
@@ -237,12 +303,27 @@ fn indent(text: &str, width: usize) -> String {
 }
 
 /// The Rust type of an element of a sort.
+fn rust_ident(name: &str) -> std::borrow::Cow<'_, str> {
+    if matches!(name, "_" | "self" | "Self" | "crate" | "super") || name.starts_with("__idealis_") {
+        return format!("__idealis_{name}").into();
+    }
+    match name {
+        "as" | "break" | "const" | "continue" | "else" | "enum" | "extern" | "false" | "fn"
+        | "for" | "if" | "impl" | "in" | "let" | "loop" | "match" | "mod" | "move" | "mut"
+        | "pub" | "ref" | "return" | "static" | "struct" | "trait" | "true" | "type" | "unsafe"
+        | "use" | "where" | "while" | "async" | "await" | "dyn" | "abstract" | "become" | "box"
+        | "do" | "final" | "gen" | "macro" | "override" | "priv" | "try" | "typeof" | "unsized"
+        | "virtual" | "yield" => format!("r#{name}").into(),
+        _ => name.into(),
+    }
+}
+
 fn rust_type(sort: &str) -> String {
     match sort {
         INT => "i64".into(),
         NAT => "u64".into(),
         BOOL => "bool".into(),
-        other => other.into(),
+        other => rust_ident(other).into_owned(),
     }
 }
 
@@ -274,6 +355,15 @@ fn rust_relation(shape: &Shape) -> String {
 /// conformance check against the reference semantics through rcheck.
 /// `source` is the model's text, embedded for the conformance check.
 pub fn rust(model: &Model, source: &str) -> String {
+    rust_module(model, Some(source))
+}
+
+/// Rust API bindings for the supplied action surface, without a full-model driver.
+pub fn rust_api(model: &Model) -> String {
+    rust_module(model, None)
+}
+
+fn rust_module(model: &Model, source: Option<&str>) -> String {
     let mut out = format!(
         "//! Generated by rmodel from the model {} (plan 0102). Do not edit.\n\
          #![allow(dead_code, unused_imports, unused_mut, unused_variables, non_snake_case, non_camel_case_types, clippy::all)]\n\
@@ -281,13 +371,14 @@ pub fn rust(model: &Model, source: &str) -> String {
          use std::collections::{{BTreeMap, BTreeSet}};\n\n",
         model.name
     );
-    let source = source.trim_end();
-    let literal = if source.contains("\"####") {
-        format!("{source:?}")
-    } else {
-        format!("r####\"{source}\"####")
-    };
-    out.push_str(&format!("pub const MODEL: &str = {literal};\n\n"));
+    if let Some(source) = source.map(str::trim_end) {
+        let literal = if source.contains("\"####") {
+            format!("{source:?}")
+        } else {
+            format!("r####\"{source}\"####")
+        };
+        out.push_str(&format!("pub const MODEL: &str = {literal};\n\n"));
+    }
     let definitions_start = out.len();
     let derive = "#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]";
     out.push_str(
@@ -304,17 +395,20 @@ pub fn rust(model: &Model, source: &str) -> String {
         );
     }
     for sig in &model.sigs {
-        if let Some(definition) = model.entity_definitions.get(sig) {
-            out.push_str(&format!("/// {definition}\n"));
+        if let Some(definition) = entity_documentation(model, sig) {
+            for line in definition.split('\n') {
+                out.push_str(&format!("/// {line}\n"));
+            }
         }
         let size = model.scope.sizes[sig];
-        let all: Vec<String> = (0..size).map(|index| format!("{sig}({index})")).collect();
+        let ident = rust_ident(sig);
+        let all: Vec<String> = (0..size).map(|index| format!("{ident}({index})")).collect();
         out.push_str(&format!(
-            "{derive}\npub struct {sig}(pub u8);\n\
-             impl {sig} {{\n    pub const ALL: [{sig}; {size}] = [{}];\n}}\n\
-             fn to_{sig}(x: &{sig}) -> Value {{\n    Value::String(format!(\"{sig}{{}}\", x.0))\n}}\n\
-             fn from_{sig}(v: &Value) -> Result<{sig}, String> {{\n    let s = v.as_str().ok_or_else(|| format!(\"{sig}: not a string: {{v}}\"))?;\n    key_{sig}(s)\n}}\n\
-             fn key_{sig}(s: &str) -> Result<{sig}, String> {{\n    s.strip_prefix(\"{sig}\")\n        .and_then(|n| n.parse::<u8>().ok())\n        .filter(|n| (*n as usize) < {size})\n        .map({sig})\n        .ok_or_else(|| format!(\"not a {sig}: {{s}}\"))\n}}\n\n",
+            "{derive}\npub struct {ident}(pub u8);\n\
+             impl {ident} {{\n    pub const ALL: [{ident}; {size}] = [{}];\n}}\n\
+             fn to_{sig}(x: &{ident}) -> Value {{\n    Value::String(format!(\"{sig}{{}}\", x.0))\n}}\n\
+             fn from_{sig}(v: &Value) -> Result<{ident}, String> {{\n    let s = v.as_str().ok_or_else(|| format!(\"{sig}: not a string: {{v}}\"))?;\n    key_{sig}(s)\n}}\n\
+             fn key_{sig}(s: &str) -> Result<{ident}, String> {{\n    s.strip_prefix(\"{sig}\")\n        .and_then(|n| n.parse::<u8>().ok())\n        .filter(|n| (*n as usize) < {size})\n        .map({ident})\n        .ok_or_else(|| format!(\"not a {sig}: {{s}}\"))\n}}\n\n",
             all.join(", ")
         ));
     }
@@ -322,22 +416,26 @@ pub fn rust(model: &Model, source: &str) -> String {
         if name == BOOL {
             continue;
         }
-        let variants: Vec<String> = members.iter().map(|m| format!("{name}::{m}")).collect();
+        let ident = rust_ident(name);
+        let variants: Vec<String> = members
+            .iter()
+            .map(|m| format!("{ident}::{}", rust_ident(m)))
+            .collect();
         let to: Vec<String> = members
             .iter()
-            .map(|m| format!("        {name}::{m} => \"{m}\","))
+            .map(|m| format!("        {ident}::{} => \"{m}\",", rust_ident(m)))
             .collect();
         let from: Vec<String> = members
             .iter()
-            .map(|m| format!("        \"{m}\" => Ok({name}::{m}),"))
+            .map(|m| format!("        \"{m}\" => Ok({ident}::{}),", rust_ident(m)))
             .collect();
         out.push_str(&format!(
-            "{derive}\npub enum {name} {{\n    {}\n}}\n\
-             impl {name} {{\n    pub const ALL: [{name}; {}] = [{}];\n}}\n\
-             fn to_{name}(x: &{name}) -> Value {{\n    Value::String(\n        match x {{\n{}\n        }}\n        .into(),\n    )\n}}\n\
-             fn from_{name}(v: &Value) -> Result<{name}, String> {{\n    let s = v.as_str().ok_or_else(|| format!(\"{name}: not a string: {{v}}\"))?;\n    key_{name}(s)\n}}\n\
-             fn key_{name}(s: &str) -> Result<{name}, String> {{\n    match s {{\n{}\n        _ => Err(format!(\"not a {name}: {{s}}\")),\n    }}\n}}\n\n",
-            members.join(",\n    "),
+            "{derive}\npub enum {ident} {{\n    {}\n}}\n\
+             impl {ident} {{\n    pub const ALL: [{ident}; {}] = [{}];\n}}\n\
+             fn to_{name}(x: &{ident}) -> Value {{\n    Value::String(\n        match x {{\n{}\n        }}\n        .into(),\n    )\n}}\n\
+             fn from_{name}(v: &Value) -> Result<{ident}, String> {{\n    let s = v.as_str().ok_or_else(|| format!(\"{name}: not a string: {{v}}\"))?;\n    key_{name}(s)\n}}\n\
+             fn key_{name}(s: &str) -> Result<{ident}, String> {{\n    match s {{\n{}\n        _ => Err(format!(\"not a {name}: {{s}}\")),\n    }}\n}}\n\n",
+            members.iter().map(|name| rust_ident(name)).collect::<Vec<_>>().join(",\n    "),
             members.len(),
             variants.join(", "),
             to.join("\n"),
@@ -345,29 +443,40 @@ pub fn rust(model: &Model, source: &str) -> String {
         ));
     }
     for (name, children) in &model.sums {
-        let variants: Vec<String> = children.iter().map(|c| format!("{c}({c})")).collect();
+        let ident = rust_ident(name);
+        let variants: Vec<String> = children
+            .iter()
+            .map(|c| {
+                let child = rust_ident(c);
+                format!("{child}({child})")
+            })
+            .collect();
         let to: Vec<String> = children
             .iter()
-            .map(|c| format!("        {name}::{c}(x) => to_{c}(x),"))
+            .map(|c| format!("        {ident}::{}(x) => to_{c}(x),", rust_ident(c)))
             .collect();
         let from: Vec<String> = children
             .iter()
             .map(|c| {
                 format!(
-                    "    if let Ok(x) = key_{c}(s) {{\n        return Ok({name}::{c}(x));\n    }}"
+                    "    if let Ok(x) = key_{c}(s) {{\n        return Ok({ident}::{}(x));\n    }}",
+                    rust_ident(c)
                 )
             })
             .collect();
         let all: Vec<String> = children
             .iter()
-            .map(|c| format!("{c}::ALL.iter().map(|x| {name}::{c}(*x))"))
+            .map(|c| {
+                let child = rust_ident(c);
+                format!("{child}::ALL.iter().map(|x| {ident}::{child}(*x))")
+            })
             .collect();
         out.push_str(&format!(
-            "{derive}\npub enum {name} {{\n    {}\n}}\n\
-             impl {name} {{\n    pub fn all() -> Vec<{name}> {{\n        std::iter::empty(){}.collect()\n    }}\n}}\n\
-             fn to_{name}(x: &{name}) -> Value {{\n    match x {{\n{}\n    }}\n}}\n\
-             fn from_{name}(v: &Value) -> Result<{name}, String> {{\n    let s = v.as_str().ok_or_else(|| format!(\"{name}: not a string: {{v}}\"))?;\n    key_{name}(s)\n}}\n\
-             fn key_{name}(s: &str) -> Result<{name}, String> {{\n{}\n    Err(format!(\"not a {name}: {{s}}\"))\n}}\n\n",
+            "{derive}\npub enum {ident} {{\n    {}\n}}\n\
+             impl {ident} {{\n    pub fn all() -> Vec<{ident}> {{\n        std::iter::empty(){}.collect()\n    }}\n}}\n\
+             fn to_{name}(x: &{ident}) -> Value {{\n    match x {{\n{}\n    }}\n}}\n\
+             fn from_{name}(v: &Value) -> Result<{ident}, String> {{\n    let s = v.as_str().ok_or_else(|| format!(\"{name}: not a string: {{v}}\"))?;\n    key_{name}(s)\n}}\n\
+             fn key_{name}(s: &str) -> Result<{ident}, String> {{\n{}\n    Err(format!(\"not a {name}: {{s}}\"))\n}}\n\n",
             variants.join(",\n    "),
             all.iter().map(|a| format!(".chain({a})")).collect::<String>(),
             to.join("\n"),
@@ -376,6 +485,7 @@ pub fn rust(model: &Model, source: &str) -> String {
     }
     structured::rust(model, &mut out);
     for record in &model.records {
+        let ident = rust_ident(&record.name);
         let derive = if model.has_structures() {
             "#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]"
         } else {
@@ -384,13 +494,16 @@ pub fn rust(model: &Model, source: &str) -> String {
         let fields: Vec<String> = record
             .fields
             .iter()
-            .map(|(field, sort)| format!("    pub {field}: {},", rust_type(sort)))
+            .map(|(field, sort)| format!("    pub {}: {},", rust_ident(field), rust_type(sort)))
             .collect();
         let to: Vec<String> = record
             .fields
             .iter()
             .map(|(field, sort)| {
-                format!("    m.insert(\"{field}\".into(), to_{sort}(&x.{field}));")
+                format!(
+                    "    m.insert(\"{field}\".into(), to_{sort}(&x.{}));",
+                    rust_ident(field)
+                )
             })
             .collect();
         let from: Vec<String> = record
@@ -398,19 +511,40 @@ pub fn rust(model: &Model, source: &str) -> String {
             .iter()
             .map(|(field, sort)| {
                 format!(
-                    "        {field}: from_{sort}(o.get(\"{field}\").ok_or(\"{}: missing {field}\")?)?,",
+                    "        {}: from_{sort}(o.get(\"{field}\").ok_or(\"{}: missing {field}\")?)?,",
+                    rust_ident(field),
                     record.name
                 )
             })
             .collect();
+        let refinement = refinement_test(record, RefinementTarget::Rust);
+        let validate = if refinement.is_empty() {
+            String::new()
+        } else {
+            format!(
+                "    if !({refinement}) {{\n        return Err(\"{}: violates where constraint\".into());\n    }}\n",
+                record.name
+            )
+        };
+        let constructor = if record.refinements.is_empty() {
+            format!("    Ok({ident} {{\n{}\n    }})", from.join("\n"))
+        } else {
+            format!(
+                "    let x = {ident} {{\n{}\n    }};\n{validate}    Ok(x)",
+                from.join("\n")
+            )
+        };
+        if !record.refinements.is_empty() {
+            let name = &record.name;
+            out.push_str(&format!("pub fn decode_{name}(value: &Value) -> Result<{ident}, String> {{ from_{name}(value) }}\n"));
+        }
         out.push_str(&format!(
-            "{derive}\npub struct {name} {{\n{}\n}}\n\
-             fn to_{name}(x: &{name}) -> Value {{\n    let mut m = Map::new();\n{}\n    Value::Object(m)\n}}\n\
-             fn from_{name}(v: &Value) -> Result<{name}, String> {{\n    let o = v.as_object().ok_or_else(|| format!(\"{name}: not an object: {{v}}\"))?;\n    if o.len() != {} {{\n        return Err(format!(\"{name}: unexpected fields: {{v}}\"));\n    }}\n    Ok({name} {{\n{}\n    }})\n}}\n\n",
+            "{derive}\npub struct {ident} {{\n{}\n}}\n\
+             fn to_{name}(x: &{ident}) -> Value {{\n    let mut m = Map::new();\n{}\n    Value::Object(m)\n}}\n\
+             fn from_{name}(v: &Value) -> Result<{ident}, String> {{\n    let o = v.as_object().ok_or_else(|| format!(\"{name}: not an object: {{v}}\"))?;\n    if o.len() != {} {{\n        return Err(format!(\"{name}: unexpected fields: {{v}}\"));\n    }}\n{constructor}\n}}\n\n",
             fields.join("\n"),
             to.join("\n"),
             record.fields.len(),
-            from.join("\n"),
             name = record.name
         ));
     }
@@ -418,8 +552,8 @@ pub fn rust(model: &Model, source: &str) -> String {
     let all = |sort: &str| -> String {
         match kind(model, sort) {
             Kind::Bool => "[false, true].to_vec()".into(),
-            Kind::Sum(_) => format!("{sort}::all()"),
-            _ => format!("{sort}::ALL.to_vec()"),
+            Kind::Sum(_) => format!("{}::all()", rust_ident(sort)),
+            _ => format!("{}::ALL.to_vec()", rust_ident(sort)),
         }
     };
     let key_fn = |sort: &str| format!("key_{sort}");
@@ -428,12 +562,19 @@ pub fn rust(model: &Model, source: &str) -> String {
         let relations: Vec<_> = model.relations.iter().filter(|r| r.var == var).collect();
         let fields: Vec<String> = relations
             .iter()
-            .map(|r| format!("    pub {}: {},", r.name, rust_relation(&r.shape)))
+            .map(|r| {
+                format!(
+                    "    pub {}: {},",
+                    rust_ident(&r.name),
+                    rust_relation(&r.shape)
+                )
+            })
             .collect();
         let mut to = Vec::new();
         let mut from = Vec::new();
         for relation in &relations {
             let field = &relation.name;
+            let ident = rust_ident(field);
             let (sort, mult) = target(&relation.shape);
             let held_to = |value: &str| match mult {
                 Mult::Set | Mult::Some => {
@@ -455,10 +596,10 @@ pub fn rust(model: &Model, source: &str) -> String {
                 Shape::Unary { .. } => {
                     to.push(format!(
                         "    m.insert(\"{field}\".into(), {});",
-                        held_to(&format!("self.{field}"))
+                        held_to(&format!("self.{ident}"))
                     ));
                     from.push(format!(
-                        "        {field}: {{\n            let v = o.get(\"{field}\").ok_or(\"missing {field}\")?;\n            {}\n        }},",
+                        "        {ident}: {{\n            let v = o.get(\"{field}\").ok_or(\"missing {field}\")?;\n            {}\n        }},",
                         held_from("v")
                     ));
                 }
@@ -473,7 +614,7 @@ pub fn rust(model: &Model, source: &str) -> String {
                         _ => format!("to_{sort}(x)"),
                     };
                     to.push(format!(
-                        "    {{\n        let mut r = Map::new();\n        for k in {} {{\n            let key = match to_{domain}(&k) {{\n                Value::String(s) => s,\n                other => other.to_string(),\n            }};\n            r.insert(key, self.{field}.get(&k).map_or({empty}, |x| {present}));\n        }}\n        m.insert(\"{field}\".into(), Value::Object(r));\n    }}",
+                        "    {{\n        let mut r = Map::new();\n        for k in {} {{\n            let key = match to_{domain}(&k) {{\n                Value::String(s) => s,\n                other => other.to_string(),\n            }};\n            r.insert(key, self.{ident}.get(&k).map_or({empty}, |x| {present}));\n        }}\n        m.insert(\"{field}\".into(), Value::Object(r));\n    }}",
                         all(domain)
                     ));
                     let insert = match mult {
@@ -486,7 +627,7 @@ pub fn rust(model: &Model, source: &str) -> String {
                         Mult::One => format!("r.insert(k, from_{sort}(v)?);"),
                     };
                     from.push(format!(
-                        "        {field}: {{\n            let mut r = BTreeMap::new();\n            let o = o.get(\"{field}\").and_then(Value::as_object).ok_or(\"{field}: not an object\")?;\n            for (key, v) in o {{\n                let k = {}(key)?;\n                {insert}\n            }}\n            r\n        }},",
+                        "        {ident}: {{\n            let mut r = BTreeMap::new();\n            let o = o.get(\"{field}\").and_then(Value::as_object).ok_or(\"{field}: not an object\")?;\n            for (key, v) in o {{\n                let k = {}(key)?;\n                {insert}\n            }}\n            r\n        }},",
                         key_fn(domain)
                     ));
                 }
@@ -512,9 +653,13 @@ pub fn rust(model: &Model, source: &str) -> String {
             let params: Vec<String> = action
                 .params
                 .iter()
-                .map(|(param, sort)| format!("{param}: {}", rust_type(sort)))
+                .map(|(param, sort)| format!("{}: {}", rust_ident(param), rust_type(sort)))
                 .collect();
-            format!("    {} {{ {} }},", action.name, params.join(", "))
+            format!(
+                "    {} {{ {} }},",
+                rust_ident(&action.name),
+                params.join(", ")
+            )
         })
         .collect();
     let from: Vec<String> = model
@@ -526,14 +671,17 @@ pub fn rust(model: &Model, source: &str) -> String {
                 .iter()
                 .map(|(param, sort)| {
                     format!(
-                        "{param}: from_{sort}(o.get(\"{param}\").ok_or(\"{}: missing {param}\")?)?",
-                        action.name
+                        "{}: from_{sort}(o.get(\"{key}\").ok_or(\"{}: missing {param}\")?)?",
+                        rust_ident(param),
+                        action.name,
+                        key = command_argument_key(param)
                     )
                 })
                 .collect();
             format!(
-                "            \"{0}\" => Command::{0} {{ {1} }},",
+                "            \"{}\" => Command::{} {{ {} }},",
                 action.name,
+                rust_ident(&action.name),
                 params.join(", ")
             )
         })
@@ -551,40 +699,31 @@ pub fn rust(model: &Model, source: &str) -> String {
             let params: Vec<String> = action
                 .params
                 .iter()
-                .map(|(param, sort)| format!(", {param}: {}", rust_type(sort)))
+                .map(|(param, sort)| format!(", {}: {}", rust_ident(param), rust_type(sort)))
                 .collect();
             format!(
-                "    /// Applies `{0}` when its guards hold, and says whether it did.\n    fn {0}(&mut self{1}) -> bool;",
-                action.name,
+                "    /// Applies `{}` when its guards hold, and says whether it did.\n    fn {}(&mut self{}) -> bool;",
+                action.name, rust_ident(&action.name),
                 params.concat()
             )
         })
         .collect();
-    let calls: Vec<String> = model
-        .actions
-        .iter()
-        .map(|action| {
-            let params: Vec<&str> = action.params.iter().map(|(p, _)| p.as_str()).collect();
-            format!(
-                "            Command::{0} {{ {1} }} => domain.{0}({1}),",
-                action.name,
-                params.join(", ")
-            )
-        })
-        .collect();
+    let actions = if source.is_some() {
+        "actions; `conformance` checks it against the model."
+    } else {
+        "public actions."
+    };
     out.push_str(&format!(
         "/// The model {0}: an implementation keeps the state and applies the\n\
-         /// actions; `conformance` checks it against the model.\n\
-         pub trait {0}: Sized {{\n    fn new(config: &Config) -> Self;\n    fn state(&self) -> State;\n{1}\n}}\n\n\
-         /// Drives an implementation for rcheck's conformance check.\n\
-         pub struct Driver<I>(pub Option<I>);\n\
-         impl<I: {0}> rcheck::conform::Driver for Driver<I> {{\n    fn reset(&mut self, config: &Value) -> Result<Value, String> {{\n        let domain = I::new(&Config::from_json(config)?);\n        let state = domain.state().to_json();\n        self.0 = Some(domain);\n        Ok(state)\n    }}\n    fn apply(&mut self, command: &Value) -> Result<(bool, Value), String> {{\n        let domain = self.0.as_mut().ok_or(\"apply before reset\")?;\n        let accepted = match Command::from_json(command)? {{\n{2}\n        }};\n        Ok((accepted, domain.state().to_json()))\n    }}\n}}\n\n\
-         /// Checks an implementation against the model's reference semantics.\n\
-         pub fn conformance<I: {0}>(budget: rcheck::conform::Budget) -> rcheck::conform::Report {{\n    let model = rmodel::parse(MODEL).expect(\"the generated model parses\");\n    rcheck::conform::conform(&model, &mut Driver::<I>(None), budget)\n}}\n",
+         /// {actions}\n\
+         pub trait {model_ident}: Sized {{\n    fn new(config: &Config) -> Self;\n    fn state(&self) -> State;\n{1}\n}}\n\n",
         model.name,
         methods.join("\n"),
-        calls.join("\n")
+        model_ident = rust_ident(&model.name),
     ));
+    if source.is_some() {
+        rust_driver(model, &mut out);
+    }
     // A domain result type can be named Result. Qualify the generated
     // return types in that case, leaving the embedded source intact.
     if model.variant("Result").is_some() {
@@ -592,6 +731,34 @@ pub fn rust(model: &Model, source: &str) -> String {
         out.replace_range(definitions_start.., &qualified);
     }
     out
+}
+
+fn rust_driver(model: &Model, out: &mut String) {
+    let calls: Vec<String> = model
+        .actions
+        .iter()
+        .map(|action| {
+            let params: Vec<_> = action
+                .params
+                .iter()
+                .map(|(name, _)| rust_ident(name))
+                .collect();
+            format!(
+                "            Command::{0} {{ {1} }} => domain.{0}({1}),",
+                rust_ident(&action.name),
+                params.join(", ")
+            )
+        })
+        .collect();
+    out.push_str(&format!(
+        "/// Drives an implementation for rcheck's conformance check.\n\
+         pub struct Driver<I>(pub Option<I>);\n\
+         impl<I: {0}> rcheck::conform::Driver for Driver<I> {{\n    fn reset(&mut self, config: &Value) -> Result<Value, String> {{\n        let domain = I::new(&Config::from_json(config)?);\n        let state = domain.state().to_json();\n        self.0 = Some(domain);\n        Ok(state)\n    }}\n    fn apply(&mut self, command: &Value) -> Result<(bool, Value), String> {{\n        let domain = self.0.as_mut().ok_or(\"apply before reset\")?;\n        let accepted = match Command::from_json(command)? {{\n{1}\n        }};\n        Ok((accepted, domain.state().to_json()))\n    }}\n}}\n\n\
+         /// Checks an implementation against the model's reference semantics.\n\
+         pub fn conformance<I: {0}>(budget: rcheck::conform::Budget) -> rcheck::conform::Report {{\n    let model = rmodel::parse(MODEL).expect(\"the generated model parses\");\n    rcheck::conform::conform(&model, &mut Driver::<I>(None), budget)\n}}\n",
+        rust_ident(&model.name),
+        calls.join("\n")
+    ));
 }
 
 /// The TypeScript type of an element of a sort.
@@ -621,6 +788,20 @@ fn ts_relation(shape: &Shape) -> String {
     }
 }
 
+fn entity_documentation(model: &Model, name: &str) -> Option<String> {
+    let default = model.entity_definitions.get(name).map(String::as_str);
+    let Some(translations) = model.entity_translations.get(name) else {
+        return default.map(str::to_owned);
+    };
+    let mut sections: Vec<_> = default.into_iter().map(str::to_owned).collect();
+    sections.extend(
+        translations
+            .iter()
+            .map(|(tag, text)| format!("[{tag}] {text}")),
+    );
+    Some(sections.join("\n\n"))
+}
+
 /// A TypeScript module: the sorts as types, `Config`, `State`, `Command`,
 /// the `Domain` an implementation provides, JSON conversions, and `serve`,
 /// which speaks rcheck's JSON Lines driver protocol on stdin and stdout.
@@ -631,9 +812,17 @@ pub fn typescript(model: &Model) -> String {
     );
     let mut converters = String::new();
     for sig in &model.sigs {
-        if let Some(definition) = model.entity_definitions.get(sig) {
+        if let Some(definition) = entity_documentation(model, sig) {
             let definition = definition.replace("*/", "*&#47;");
-            out.push_str(&format!("/** {definition} */\n"));
+            if definition.contains('\n') {
+                out.push_str("/**\n");
+                for line in definition.split('\n') {
+                    out.push_str(&format!(" * {line}\n"));
+                }
+                out.push_str(" */\n");
+            } else {
+                out.push_str(&format!("/** {definition} */\n"));
+            }
         }
         let names: Vec<String> = keys(model, sig).iter().map(|k| quote(k)).collect();
         out.push_str(&format!(
@@ -683,12 +872,23 @@ pub fn typescript(model: &Model) -> String {
         ));
     }
     structured::typescript(model, &mut out, &mut converters);
+    if model.records.iter().any(|record| record.data.is_some()) {
+        out.push_str("declare const $data: unique symbol;\n");
+    }
     for record in &model.records {
-        let fields: Vec<String> = record
+        let mut fields: Vec<String> = record
             .fields
             .iter()
             .map(|(field, sort)| format!("readonly {field}: {}", ts_type(sort)))
             .collect();
+        let cast = if record.data.is_some() {
+            let name = &record.name;
+            fields.push(format!("readonly [$data]: \"{name}\""));
+            out.push_str(&format!("export {{ from_{name} as decode{name} }};\n"));
+            format!(" as {name}")
+        } else {
+            String::new()
+        };
         out.push_str(&format!(
             "export interface {} {{ {} }}\n",
             record.name,
@@ -704,11 +904,20 @@ pub fn typescript(model: &Model) -> String {
             .iter()
             .map(|(field, sort)| format!("{field}: to_{sort}(x.{field})"))
             .collect();
+        let refinement = refinement_test(record, RefinementTarget::TypeScript);
+        let value = from.join(", ");
+        let constructor = if refinement.is_empty() {
+            format!("  return {{ {value} }}{cast};")
+        } else {
+            format!(
+                "  const x = {{ {value} }};\n  if (!({refinement})) throw new Error(\"{}: violates where constraint\");\n  return x{cast};",
+                record.name
+            )
+        };
         converters.push_str(&format!(
-            "function from_{0}(v: unknown): {0} {{\n  if (typeof v !== \"object\" || v === null || Object.keys(v).length !== {1}) throw new Error(`not a {0}: ${{JSON.stringify(v)}}`);\n  const o = v as Record<string, unknown>;\n  return {{ {2} }};\n}}\nconst to_{0} = (x: {0}): unknown => ({{ {3} }});\n",
+            "function from_{0}(v: unknown): {0} {{\n  if (typeof v !== \"object\" || v === null || Object.keys(v).length !== {1}) throw new Error(`not a {0}: ${{JSON.stringify(v)}}`);\n  const o = v as Record<string, unknown>;\n{constructor}\n}}\nconst to_{0} = (x: {0}): unknown => ({{ {2} }});\n",
             record.name,
             record.fields.len(),
-            from.join(", "),
             to.join(", ")
         ));
     }
@@ -802,17 +1011,27 @@ pub fn typescript(model: &Model) -> String {
             let params: Vec<String> = action
                 .params
                 .iter()
-                .map(|(param, sort)| format!("readonly {param}: {}", ts_type(sort)))
+                .map(|(param, sort)| {
+                    format!(
+                        "readonly {}: {}",
+                        command_argument_key(param),
+                        ts_type(sort)
+                    )
+                })
                 .collect();
             let mut parts = vec![format!("readonly kind: \"{}\"", action.name)];
             parts.extend(params);
             format!("  | {{ {} }}", parts.join("; "))
         })
         .collect();
-    out.push_str(&format!(
-        "export type Command =\n{};\n",
-        variants.join("\n")
-    ));
+    if variants.is_empty() {
+        out.push_str("export type Command = never;\n");
+    } else {
+        out.push_str(&format!(
+            "export type Command =\n{};\n",
+            variants.join("\n")
+        ));
+    }
     let cases: Vec<String> = model
         .actions
         .iter()
@@ -820,7 +1039,10 @@ pub fn typescript(model: &Model) -> String {
             let params: Vec<String> = action
                 .params
                 .iter()
-                .map(|(param, sort)| format!(", {param}: from_{sort}(o.{param})"))
+                .map(|(param, sort)| {
+                    let key = command_argument_key(param);
+                    format!(", {key}: from_{sort}(o.{key})")
+                })
                 .collect();
             format!(
                 "    case \"{0}\":\n      return {{ kind: \"{0}\"{1} }};",
@@ -1149,10 +1371,21 @@ fn go_text(model: &Model, package: &str) -> String {
                 )
             })
             .collect();
+        let refinement = refinement_test(record, RefinementTarget::Go);
+        let validate = if refinement.is_empty() {
+            String::new()
+        } else {
+            format!(
+                "\tif !({refinement}) {{\n\t\treturn {name}{{}}, fmt.Errorf(\"{name}: violates where constraint\")\n\t}}\n"
+            )
+        };
+        if !record.refinements.is_empty() {
+            out.push_str(&format!("// Decode{name} checks the value at the input boundary.\nfunc Decode{name}(raw json.RawMessage) ({name}, error) {{ return decode{name}(raw) }}\n\n"));
+        }
         out.push_str(&format!(
             "// {name} is a record, equal when its fields are.\ntype {name} struct {{\n{}\n}}\n\n\
              func encode{name}(x {name}) any {{ return map[string]any{{{}}} }}\n\n\
-             func decode{name}(raw json.RawMessage) ({name}, error) {{\n\tvar x {name}\n\tfields, err := object(raw, {})\n\tif err != nil {{\n\t\treturn x, fmt.Errorf(\"{name}: %w\", err)\n\t}}\n{}\n\treturn x, nil\n}}\n\n",
+             func decode{name}(raw json.RawMessage) ({name}, error) {{\n\tvar x {name}\n\tfields, err := object(raw, {})\n\tif err != nil {{\n\t\treturn x, fmt.Errorf(\"{name}: %w\", err)\n\t}}\n{}\n{validate}\treturn x, nil\n}}\n\n",
             fields.join("\n"),
             encoded.join(", "),
             names.join(", "),
@@ -1287,15 +1520,21 @@ fn go_text(model: &Model, package: &str) -> String {
             fields.join("\n")
         ));
         let mut names = vec![quote("kind")];
-        names.extend(action.params.iter().map(|(p, _)| quote(p)));
+        names.extend(
+            action
+                .params
+                .iter()
+                .map(|(p, _)| quote(command_argument_key(p))),
+        );
         let decoded: Vec<String> = action
             .params
             .iter()
             .map(|(param, sort)| {
                 format!(
-                    "\t\tif c.{0}, err = decode{sort}(fields[\"{param}\"]); err != nil {{\n\t\t\treturn nil, fmt.Errorf(\"{1}.{param}: %w\", err)\n\t\t}}",
+                    "\t\tif c.{0}, err = decode{sort}(fields[\"{key}\"]); err != nil {{\n\t\t\treturn nil, fmt.Errorf(\"{1}.{param}: %w\", err)\n\t\t}}",
                     capital(param),
-                    action.name
+                    action.name,
+                    key = command_argument_key(param)
                 )
             })
             .collect();
@@ -1333,11 +1572,16 @@ fn go_text(model: &Model, package: &str) -> String {
         cases.join("\n")
     ));
     let model_name = &model.name;
+    let dispatch = if applies.is_empty() {
+        "command.(type)"
+    } else {
+        "c := command.(type)"
+    };
     out.push_str(&format!(
         "// {model_name} is the model: an implementation keeps the state and applies the actions.\n\
          type {model_name} interface {{\n\tState() State\n{}\n}}\n\n\
          // Apply runs a command on an implementation.\n\
-         func Apply(domain {model_name}, command Command) bool {{\n\tswitch c := command.(type) {{\n{}\n\t}}\n\tpanic(\"unknown command\")\n}}\n\n\
+         func Apply(domain {model_name}, command Command) bool {{\n\tswitch {dispatch} {{\n{}\n\t}}\n\tpanic(\"unknown command\")\n}}\n\n\
          // Serve speaks rcheck's JSON Lines driver protocol.\n\
          func Serve(create func(Config) {model_name}, in io.Reader, out io.Writer) error {{\n\
          \tscanner := bufio.NewScanner(in)\n\tscanner.Buffer(make([]byte, 1<<20), 1<<26)\n\tencoder := json.NewEncoder(out)\n\tvar domain {model_name}\n\
@@ -1560,10 +1804,18 @@ pub fn moonbit(model: &Model) -> String {
             .iter()
             .map(|(field, sort)| format!("{field}: decode_{}(m[\"{field}\"])", mbt_codec(sort)))
             .collect();
+        let refinement = refinement_test(record, RefinementTarget::MoonBit);
+        let value = decoded.join(", ");
+        let constructor = if refinement.is_empty() {
+            format!("  {{ {value} }}")
+        } else {
+            format!(
+                "  let x : {name} = {{ {value} }}\n  guard {refinement} else {{ raise DecodeError(\"{name}: violates where constraint\") }}\n  x"
+            )
+        };
         out.push_str(&block(format!(
-            "fn decode_{c}(v : Json) -> {name} raise DecodeError {{\n  let m = fields(v, [{}])\n  {{ {} }}\n}}",
-            names.join(", "),
-            decoded.join(", ")
+            "fn decode_{c}(v : Json) -> {name} raise DecodeError {{\n  let m = fields(v, [{}])\n{constructor}\n}}",
+            names.join(", ")
         )));
     }
     for var in [false, true] {
@@ -1600,7 +1852,7 @@ pub fn moonbit(model: &Model) -> String {
             };
             let decode_held = |value: &str| match mult {
                 Mult::Set | Mult::Some => format!(
-                    "{{\n    let set : Set[{t}] = Set([])\n    for item in items({value}) {{\n      set.add(decode_{c}(item))\n    }}\n    set\n  }}",
+                    "{{\n    let set : Set[{t}] = Set([])\n    for item in items({value}) {{\n      set.insert(decode_{c}(item))\n    }}\n    set\n  }}",
                     t = mbt_type(sort)
                 ),
                 Mult::Lone => format!(
@@ -1644,7 +1896,7 @@ pub fn moonbit(model: &Model) -> String {
                         ),
                         Mult::One => format!("{field}[k] = decode_{c}(raw)"),
                         _ => format!(
-                            "let set : Set[{t}] = Set([])\n    for item in items(raw) {{\n      set.add(decode_{c}(item))\n    }}\n    {field}[k] = set",
+                            "let set : Set[{t}] = Set([])\n    for item in items(raw) {{\n      set.insert(decode_{c}(item))\n    }}\n    {field}[k] = set",
                             t = mbt_type(sort)
                         ),
                     };
@@ -1698,11 +1950,19 @@ pub fn moonbit(model: &Model) -> String {
         .iter()
         .map(|action| {
             let mut names = vec![quote("kind")];
-            names.extend(action.params.iter().map(|(p, _)| quote(p)));
+            names.extend(
+                action
+                    .params
+                    .iter()
+                    .map(|(p, _)| quote(command_argument_key(p))),
+            );
             let args: Vec<String> = action
                 .params
                 .iter()
-                .map(|(param, sort)| format!("{param}=decode_{}(m[\"{param}\"])", mbt_codec(sort)))
+                .map(|(param, sort)| {
+                    let key = command_argument_key(param);
+                    format!("{param}=decode_{}(m[\"{key}\"])", mbt_codec(sort))
+                })
                 .collect();
             let make = if args.is_empty() {
                 capital(&action.name)
@@ -1761,8 +2021,13 @@ pub fn moonbit(model: &Model) -> String {
             }
         })
         .collect();
+    let apply_param = if applies.is_empty() {
+        "D".to_owned()
+    } else {
+        format!("D : {model_name}")
+    };
     out.push_str(&block(format!(
-        "/// Runs a command on an implementation.\npub fn[D : {model_name}] apply(domain : D, command : Command) -> Bool {{\n  match command {{\n{}\n  }}\n}}",
+        "/// Runs a command on an implementation.\npub fn[{apply_param}] apply(domain : D, command : Command) -> Bool {{\n  match command {{\n{}\n  }}\n}}",
         applies.join("\n")
     )));
     out.push_str(&block(

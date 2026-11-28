@@ -1,0 +1,70 @@
+{
+  "spec": {
+    "groups": [
+      "貸出と会員管理"
+    ],
+    "id": "library-membership",
+    "name": {
+      "en": "Library lending and membership",
+      "ja": "貸出と会員管理"
+    },
+    "terms": [
+      {
+        "code": [],
+        "definition": {
+          "en": "A single copy held by the library. Copies with the same title are tracked separately.",
+          "ja": "図書館が所蔵する1冊。同じ題名の本も1冊ずつ区別する。"
+        },
+        "group": "貸出と会員管理",
+        "id": "copy",
+        "kind": "entity",
+        "name": {
+          "en": "Library copy",
+          "ja": "蔵書"
+        }
+      },
+      {
+        "code": [],
+        "definition": {
+          "en": "A member currently eligible to borrow according to the membership authority.",
+          "ja": "会員管理の正本で、現在貸出資格を持つ会員。"
+        },
+        "group": "貸出と会員管理",
+        "id": "active-member",
+        "kind": "state",
+        "name": {
+          "en": "Active member",
+          "ja": "有効な会員"
+        }
+      },
+      {
+        "code": [],
+        "definition": {
+          "en": "A member considered eligible according to the information applied by lending. This may differ from the authority until a suspension is applied.",
+          "ja": "貸出側が反映済みの情報で有効と判断する会員。資格停止の反映までは正本とずれることがある。"
+        },
+        "group": "貸出と会員管理",
+        "id": "known-active-member",
+        "kind": "state",
+        "name": {
+          "en": "Member known to be active by lending",
+          "ja": "貸出側が有効と把握している会員"
+        }
+      },
+      {
+        "code": [],
+        "definition": {
+          "en": "The set of copies that have been lent at least once in this model.",
+          "ja": "このモデルでは、一度でも貸し出された蔵書の集合。"
+        },
+        "group": "貸出と会員管理",
+        "id": "loan-record",
+        "kind": "state",
+        "name": {
+          "en": "Loan history",
+          "ja": "貸出履歴"
+        }
+      }
+    ]
+  }
+}

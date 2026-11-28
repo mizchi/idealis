@@ -796,7 +796,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rmodel/src/syntax.rs",
+            "path": "crates/idealis-syntax/src/syntax.rs",
             "symbol": "entity_definitions"
           }
         ]
@@ -818,7 +818,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rmodel/src/reference.rs",
+            "path": "crates/idealis-semantics/src/reference.rs",
             "symbol": "enabled"
           }
         ]
@@ -972,7 +972,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rmodel/src/syntax.rs",
+            "path": "crates/idealis-syntax/src/syntax.rs",
             "symbol": "NAT"
           }
         ]
@@ -1016,7 +1016,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rmodel/src/structured.rs",
+            "path": "crates/idealis-syntax/src/structured.rs",
             "symbol": "Sequence"
           }
         ]
@@ -1038,7 +1038,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rmodel/src/structured.rs",
+            "path": "crates/idealis-syntax/src/structured.rs",
             "symbol": "Variant"
           }
         ]
@@ -1060,7 +1060,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rmodel/src/syntax.rs",
+            "path": "crates/idealis-syntax/src/syntax.rs",
             "symbol": "TemporalCheck"
           }
         ]
@@ -1082,7 +1082,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rmodel/src/syntax.rs",
+            "path": "crates/idealis-syntax/src/syntax.rs",
             "symbol": "TransitionCheck"
           }
         ]
@@ -1244,6 +1244,30 @@
         ]
       },
       {
+        "id": "RMODEL-ADOPTION-LIFETIME",
+        "text": {
+          "ja": "版が変わらない間は、旧版の検査結果が遅れて届いても採用を保持する。版を変えたときに採用を解除する。",
+          "en": "Keep the adoption while the revision stays the same, including when results for an older revision arrive late. Clear the adoption when the revision changes."
+        },
+        "terms": [
+          "candidate-revision",
+          "compared-revision",
+          "adopted-revision"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/evidence-adoption.model",
+            "check": "AdoptionSurvivesSameRevision",
+            "expect": "holds"
+          },
+          {
+            "model": "spec/models/evidence-adoption.model",
+            "check": "RevisionClearsAdoption",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
         "id": "RMODEL-EXPECTED-CHECKERS",
         "text": {
           "ja": "比較対象の版で、予定した二つの検査器が完了し、判定が一致して初めて意味の一致を発行できる。",
@@ -1280,6 +1304,25 @@
             "model": "spec/models/checker-comparison.model",
             "check": "CurrentAgreementPublished",
             "expect": "reachable"
+          }
+        ]
+      },
+      {
+        "id": "RMODEL-RECEIPT-IMMUTABILITY",
+        "text": {
+          "ja": "一度受領した検査結果は、版と検査器の組ごとに受領記録・完了状態・判定を保持する。",
+          "en": "Keep the receipt, completion status, and verdict for every revision and checker pair once received."
+        },
+        "terms": [
+          "comparison-origin",
+          "required-checkers",
+          "checker-receipt"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/checker-comparison.model",
+            "check": "ReceivedResultStays",
+            "expect": "holds"
           }
         ]
       },
@@ -1322,6 +1365,24 @@
         ]
       },
       {
+        "id": "RMODEL-PREREQUISITE-AT-PUBLICATION",
+        "text": {
+          "ja": "ゴール改善を発行するとき、その操作は確認済みの条件を変更しない。",
+          "en": "Publishing a goal improvement preserves the prerequisites already confirmed."
+        },
+        "terms": [
+          "measurement-prerequisite",
+          "published-measurement"
+        ],
+        "claims": [
+          {
+            "model": "spec/models/measurement-gate.model",
+            "check": "PublicationKeepsPrerequisites",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
         "id": "RMODEL-SWAP",
         "text": {
           "ja": "入れ替え例では左と右を遷移前の値から同時に更新する。二つの値は異なり続け、入れ替え後の状態に到達でき、両方が On の状態には到達しない。代入しない変数 update は Off のままにする。",
@@ -1358,8 +1419,8 @@
       {
         "id": "RMODEL-ENTITY",
         "text": {
-          "ja": "個体型の宣言を型と用語の正本とする。同じ名前を二重に宣言した場合や存在しない型を参照した場合は拒否する。用語の説明は IR、Rust と TypeScript の型、用語集へ引き継ぐ。",
-          "en": "The entity declaration defines both its type and its term. Duplicate names and unknown type references are rejected. The definition carries through the IR, the Rust and TypeScript types, and the glossary."
+          "ja": "個体型の宣言を型と用語の正本とする。同じ名前を二重に宣言した場合や存在しない型を参照した場合は拒否する。複数行の用語説明と翻訳は IR、Rust と TypeScript の型、全言語の用語集へ引き継ぐ。",
+          "en": "The entity declaration defines both its type and its term. Duplicate names and unknown type references are rejected. Multiline definitions and translations carry through the IR, the Rust and TypeScript types, and the localized glossary."
         },
         "terms": [
           "entity"
@@ -1582,29 +1643,29 @@
       {
         "model": "spec/models/checker-comparison.model",
         "implementation": {
-          "path": "crates/rspec/src/comparison.rs",
+          "path": "crates/idealis-spec/src/comparison.rs",
           "symbol": "compare_receipts"
         },
         "test": {
-          "path": "crates/rspec/tests/comparison.rs",
+          "path": "crates/idealis-spec/tests/comparison.rs",
           "symbol": "real_checker_results_feed_adoption"
         }
       },
       {
         "model": "spec/models/evidence-adoption.model",
         "implementation": {
-          "path": "crates/rspec/src/adoption.rs",
+          "path": "crates/idealis-spec/src/adoption.rs",
           "symbol": "assess_adoption"
         },
         "test": {
-          "path": "crates/rspec/tests/adoption.rs",
+          "path": "crates/idealis-spec/tests/adoption.rs",
           "symbol": "a_late_result_cannot_authorize_the_current_candidate"
         }
       },
       {
         "model": "spec/models/rmodel-behavior.model",
         "implementation": {
-          "path": "crates/rmodel/src/syntax.rs",
+          "path": "crates/idealis-syntax/src/syntax.rs",
           "symbol": "action"
         },
         "test": {
@@ -1615,7 +1676,7 @@
       {
         "model": "spec/models/rmodel-calibration.model",
         "implementation": {
-          "path": "crates/rmodel/src/reference.rs",
+          "path": "crates/idealis-semantics/src/reference.rs",
           "symbol": "steps"
         },
         "test": {

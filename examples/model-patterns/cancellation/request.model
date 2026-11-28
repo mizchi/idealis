@@ -1,0 +1,22 @@
+model RequestCancellation
+enum Result = Done | Cancelled
+var pending: one Bool
+var outcome: lone Result
+init { pending = true no outcome }
+
+behavior cancel() {
+  update { outcome = if { no outcome } then Cancelled else outcome }
+}
+behavior complete() {
+  guard { pending }
+  update {
+    pending = false
+    outcome = if { no outcome } then Done else outcome
+  }
+}
+
+transition TerminalOutcomeStays { some before(outcome) implies unchanged(outcome) }
+invariant DrainedHasOutcome { not pending implies some outcome }
+reachable CompletionAfterCancellation { not pending outcome = Cancelled }
+reachable CompletionWins { not pending outcome = Done }
+scope steps = 4

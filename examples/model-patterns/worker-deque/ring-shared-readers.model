@@ -1,0 +1,63 @@
+model RingSharedReaders
+enum Reader = First | Second
+enum Count = Zero | One | Two
+enum Ticket = Old | Next
+
+rel lower: Count -> lone Count
+fact { lower = (Two -> One) + (One -> Zero) }
+
+var pins: set Reader
+var refs: one Count
+var stopped: set Reader
+var finished: set Reader
+var payload: one Ticket
+var copies: Reader -> lone Ticket
+
+init { pins = Reader refs = Two payload = Old no stopped no finished no copies }
+
+behavior stop(reader: Reader) {
+  guard { reader not in stopped + finished }
+  update { stopped = stopped + reader }
+}
+
+behavior reclaim(reader: Reader) {
+  guard { reader in stopped }
+  update {
+    if { reader in pins } then { pins = pins - reader refs = refs.lower }
+  }
+}
+
+behavior copy(reader: Reader) {
+  guard { reader not in stopped + finished no reader.copies }
+  update { copies = copies + (reader -> payload) }
+}
+
+behavior finish(reader: Reader) {
+  guard { reader not in stopped + finished some reader.copies }
+  update {
+    finished = finished + reader
+    if { reader in pins } then { pins = pins - reader refs = refs.lower }
+    else expect unreachable "Only stopped readers may lose their pins before finish" {}
+  }
+}
+
+behavior tryReuse() {
+  guard { payload = Old }
+  update { if { refs = Zero } then { payload = Next } }
+}
+
+invariant RefCountMatchesPins {
+  (no pins and refs = Zero) or (one pins and refs = One) or (pins = Reader and refs = Two)
+}
+invariant LiveReadersKeepTheirPins { Reader - (stopped + finished) in pins }
+invariant ReadersCopyOnlyOriginal { copies in Reader -> Old }
+transition RepeatedReclaimIsNoOp on reclaim {
+  reader not in before(pins) implies unchanged(refs) and unchanged(pins)
+}
+transition ReuseRequiresNoPins on tryReuse { some before(pins) implies unchanged(payload) }
+
+reachable FirstStoppedWithBothPins { stopped = First pins = Reader refs = Two }
+reachable SecondReadsAfterFirstReclaimed { stopped = First pins = Second Second.copies = Old }
+reachable ReusedAfterLastReference { payload = Next no pins }
+
+scope steps = 8

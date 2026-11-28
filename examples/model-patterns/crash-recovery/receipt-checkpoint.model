@@ -1,0 +1,125 @@
+model ReceiptCheckpoint
+enum Revision = BeforeClose | AfterClose
+enum Frame = OldOne | OldTwo | NewOne | NewTwo
+enum Reply = Applied | Expired | Duplicate
+
+rel required: one Revision
+rel closedAt: set Revision
+rel appliedAt: Revision -> set Frame
+rel receiptsAt: Revision -> set Frame
+fact {
+  required = AfterClose
+  closedAt = AfterClose
+  appliedAt = (BeforeClose -> OldOne) + (AfterClose -> (OldOne + OldTwo + NewOne))
+  receiptsAt = (BeforeClose -> OldOne) + (AfterClose -> NewOne)
+}
+
+var ready: one Bool
+var closed: one Bool
+var localRevision: lone Revision
+var fenceOffer: lone Revision
+var ledgerOffer: lone Revision
+var applied: set Frame
+var receipts: set Frame
+var effects: one Nat
+var reply: lone Reply
+
+derive oldFrames = OldOne + OldTwo
+derive verifiedLocal = bool {
+  localRevision = required and closed and required.appliedAt in applied
+  receipts = applied - oldFrames and effects = #applied
+}
+
+init {
+  not ready not closed no localRevision no fenceOffer no ledgerOffer no reply
+  applied = OldOne receipts = OldOne effects = 1
+}
+
+behavior receiveFence(revision: Revision) {
+  guard { not ready }
+  update { fenceOffer = revision }
+}
+
+behavior receiveLedger(revision: Revision) {
+  guard { not ready }
+  update { ledgerOffer = revision }
+}
+
+behavior beginRestore() {
+  guard { ready }
+  update { ready = false fenceOffer = none ledgerOffer = none }
+}
+
+behavior install() {
+  guard { not ready some fenceOffer some ledgerOffer }
+  update {
+    if { fenceOffer = required and ledgerOffer = required and applied in ledgerOffer.appliedAt
+        and (not closed or fenceOffer in closedAt) } then {
+      closed = (if { fenceOffer in closedAt } then true
+        else expect unreachable "The required checkpoint is the closed revision" false)
+      applied = ledgerOffer.appliedAt
+      receipts = ledgerOffer.receiptsAt
+      effects = #(ledgerOffer.appliedAt)
+      localRevision = required
+      ready = true
+    }
+  }
+}
+
+behavior abortRestore() {
+  guard { not ready }
+  update {
+    fenceOffer = none
+    ledgerOffer = none
+    ready = verifiedLocal
+  }
+}
+
+behavior submit(frame: Frame) {
+  guard { ready }
+  update {
+    if { closed and frame in oldFrames } then { reply = Expired }
+    else {
+      if { frame in receipts } then { reply = Duplicate }
+      else {
+        applied = applied + frame
+        receipts = receipts + frame
+        effects = effects + 1
+        reply = Applied
+      }
+    }
+  }
+}
+
+behavior reopen() {}
+
+invariant EffectsStayUnique { effects = #applied }
+invariant ServingHasRequiredEffects { ready implies required.appliedAt in applied }
+invariant ServingKeepsFence { ready implies closed }
+invariant ServingHasVerifiedRevision { ready implies localRevision = required }
+invariant ReceiptsReflectFence {
+  closed implies (receipts = applied - oldFrames and oldFrames in applied)
+  not closed implies receipts = applied
+}
+
+transition InstallationNeedsMatchedRevision on install {
+  after(ready) implies (before(fenceOffer) = required and before(ledgerOffer) = required)
+}
+
+transition InstallationPreservesLocalEffects on install {
+  before(applied) in after(applied)
+}
+
+transition AbortUsesVerifiedLocalState on abortRestore {
+  after(ready) = before(verifiedLocal)
+  no after(fenceOffer) no after(ledgerOffer)
+  unchanged(localRevision) unchanged(closed)
+  unchanged(applied) unchanged(receipts) unchanged(effects)
+}
+
+transition ClosedFramesStayExpired on submit {
+  frame in oldFrames implies
+    (after(reply) = Expired and unchanged(effects) and unchanged(applied))
+}
+
+scope Int = 0..5, steps = 16

@@ -1,0 +1,80 @@
+model LatestUpload
+enum Request = Old | New
+rel newer: Request -> set Request
+fact { newer = Old -> New }
+
+var latest: lone Request
+var serverLatest: lone Request
+var inTransit: set Request
+var writing: set Request
+var stored: set Request
+var replyPending: set Request
+var published: lone Request
+var shown: lone Request
+
+init {
+  no latest no serverLatest no inTransit no writing
+  no stored no replyPending no published no shown
+}
+
+behavior choose(request: Request) {
+  guard {
+    request not in inTransit + writing + stored
+    no (request.newer & (inTransit + writing + stored))
+  }
+  update {
+    latest = request
+    inTransit = inTransit + request
+  }
+}
+
+behavior accept(request: Request) {
+  guard { request in inTransit }
+  update {
+    inTransit = inTransit - request
+    writing = writing + request
+    serverLatest = if { no (request.newer & serverLatest) } then request else serverLatest
+  }
+}
+
+behavior persist(request: Request) {
+  guard { request in writing }
+  update {
+    writing = writing - request
+    stored = stored + request
+    replyPending = replyPending + request
+    published = if { request = serverLatest } then request else published
+  }
+}
+
+behavior deliver(request: Request) {
+  guard { request in replyPending }
+  update {
+    replyPending = replyPending - request
+    shown = if { request = latest } then request else shown
+  }
+}
+
+invariant PublishedWasStored { published in stored }
+invariant VisibleWasStored { shown in stored }
+invariant ServerKnowsNewestAccepted {
+  serverLatest in writing + stored,
+  (some (writing + stored)) implies some serverLatest,
+  no (serverLatest.newer & (writing + stored))
+}
+transition NeverPublishAnOlderUpload on persist {
+  some (request.newer & before(writing + stored)) implies unchanged(published)
+}
+transition NeverShowAnOlderUpload on deliver {
+  request != before(latest) implies unchanged(shown)
+}
+reachable NewVisibleWhileOldInTransit {
+  latest = New shown = New published = New Old in inTransit
+}
+reachable NewVisibleWhileOldWriting {
+  latest = New shown = New published = New Old in writing
+}
+reachable NewVisibleWhileOldReplyPending {
+  latest = New shown = New published = New Old in replyPending
+}
+scope steps = 8

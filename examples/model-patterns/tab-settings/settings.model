@@ -1,0 +1,48 @@
+model TabSettings
+enum Tab = Left | Right
+enum Setting = Default | Light | Dark
+enum Response = Ready | Saved | Conflict
+
+var version: one Nat
+var value: one Setting
+var loaded: Tab -> lone Nat
+var responses: Tab -> lone Response
+
+init { version = 0 value = Default no loaded no responses }
+
+behavior load(tab: Tab) {
+  update {
+    loaded = loaded ++ tab -> version
+    responses = responses ++ tab -> Ready
+  }
+}
+behavior save(tab: Tab, setting: Setting) {
+  guard {
+    some tab.loaded
+    tab.loaded != version or version < 3
+  }
+  update {
+    if { tab.loaded = version } then {
+      value = setting
+      version = version + 1
+      loaded = loaded ++ tab -> (version + 1)
+      responses = responses ++ tab -> Saved
+    } else {
+      responses = responses ++ tab -> Conflict
+    }
+  }
+}
+
+transition StaleSaveKeepsServer on save {
+  before(tab.loaded) != before(version) implies {
+    unchanged(value)
+    unchanged(version)
+    after(tab.responses) = Conflict
+  }
+}
+transition LoadKeepsOtherTab on load {
+  all other: Tab | other != tab implies unchanged(other.loaded)
+}
+reachable CanRejectStale { Conflict in Tab.responses }
+reachable CanSaveDarkAtSecondVersion { version = 2 value = Dark }
+scope Int = 0..3, steps = 8

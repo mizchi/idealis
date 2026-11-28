@@ -1,5 +1,9 @@
 # rmodel
 
+The shared source and checked model types live in [idealis-syntax](../idealis-syntax),
+and the reference evaluator lives in [idealis-semantics](../idealis-semantics).
+This crate provides the existing Rust API and the backend and binding adapters.
+
 One model of structure, state and behavior. Static relations (`rel`) are the
 configuration space, `var` relations are the state, and actions change the
 state with an implicit frame: a var an action does not assign keeps its
@@ -32,11 +36,28 @@ right-hand side in `update` is evaluated in that same state. The updates
 take effect together. This is the same transition as
 `action acquire(p: Proc, l: Lock) { no l.holder holder' = holder + l -> p }`.
 
-`entity` gives a domain concept an identity and an optional one-line
-definition. Relations, parameters, and scopes refer to that same name. Rust
-and TypeScript bindings copy the definition to the generated type, and
-`rcheck generate <model> glossary` exports the definitions as JSON. Existing
-`sig` declarations have the same finite-domain semantics.
+An `update` block can group assignments under
+`if { condition } then { assignments } else { assignments }`.
+The `else` block is optional. Variables omitted from the selected branch
+keep their previous values.
+
+In a condition block, a comma can separate adjacent conditions. For example,
+`invariant Consistent { no published, (some draft) implies ready }`.
+
+In a `transition` property, `unchanged(expr)` expands to
+`before(expr) = after(expr)`. See the [grammar cheatsheet](CHEATSHEET.md)
+for runnable examples of state, transition, and temporal properties. The
+[language and workflow review](review.md) records coverage, usability gaps,
+and priorities from the model-pattern corpus.
+
+`entity` gives a domain concept an identity and an optional description.
+Use `entity Account "…"` for a one-line definition or
+`entity Account description = """…"""` for multiple lines. A description map
+such as `description = { ja: "口座", en: "Account" }` records translations.
+Relations, parameters, and scopes refer to the same name. Rust and TypeScript
+bindings copy descriptions to the generated type, and
+`rcheck generate <model> glossary-localized` exports all descriptions as JSON.
+Existing `sig` declarations have the same finite-domain semantics.
 
 ```rust
 let model = rmodel::parse(source)?;

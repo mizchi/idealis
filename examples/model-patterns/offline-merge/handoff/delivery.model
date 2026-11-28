@@ -1,0 +1,26 @@
+var waiting: set Request
+var received: Request -> lone Nat
+init { no waiting no received }
+
+behavior open(request: Request) {
+  guard { request not in waiting no request.received }
+  update { waiting = waiting + request }
+}
+behavior drop(request: Request) {
+  guard { request in waiting }
+  update { waiting = waiting - request }
+}
+behavior send(request: Request) {
+  guard { request in waiting some request.receipt }
+  update {
+    waiting = waiting - request
+    received = received ++ request -> request.receipt
+  }
+}
+
+invariant DeliveredFromReceipt {
+  all request: Request | some request.received implies request.received = request.receipt
+}
+transition DeliveryPreservesReceipts on send { unchanged(receipt) }
+transition DroppingPreservesReceipts on drop { unchanged(receipt) }
+reachable WaitingForFirstReceipt { First in waiting no First.receipt }

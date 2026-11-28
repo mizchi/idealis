@@ -1,0 +1,10 @@
+model LibraryMembership
+var activeMembers: set Member
+term "active-member" for activeMembers
+init { activeMembers = Member }
+
+// 貸出の時点で会員管理の正本が有効であることを求める。
+transition BorrowRequiresActive on library_borrow {
+  m in before(activeMembers)
+}
+scope Copy = 1, steps = 5

@@ -1,0 +1,27 @@
+model WasmOutputLifetime
+enum Output = First | Second
+
+var current: lone Output
+var captured: lone Output
+var retained: lone Output
+
+init { no current no captured no retained }
+
+behavior dispatch(output: Output) {
+  update { current = output }
+}
+
+behavior retain() {
+  guard { some current no captured }
+  update { captured = current retained = current }
+}
+
+invariant SavedOutputMatchesCapture { retained = captured }
+transition RetainCapturesCurrentOutput on retain {
+  after(captured) = before(current) and after(retained) = before(current)
+}
+transition DispatchKeepsSavedOutput on dispatch { unchanged(captured) and unchanged(retained) }
+
+reachable RetainedFirstThenDispatchedSecond { captured = First current = Second }
+
+scope steps = 5

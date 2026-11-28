@@ -1,0 +1,82 @@
+model ReceiptWire
+enum Format = Legacy | Current
+enum Code = Zero | One
+enum Decision = Accepted | Declined
+enum Attempt = First | Second
+
+record Frame { format: Format, code: Code }
+
+rel result: one Decision
+
+var storage: one Format
+var preferred: one Format
+var sent: Attempt -> lone Frame
+var received: set Attempt
+var accepted: lone Decision
+var decoded: lone Decision
+var conflicts: set Attempt
+
+derive outstanding = keys(sent) - received
+
+init {
+  storage = Legacy preferred = Legacy
+  no sent no received no accepted no decoded no conflicts
+}
+
+behavior migrate() {
+  guard { storage = Legacy }
+  update { storage = Current }
+}
+
+behavior negotiate() {
+  guard { storage = Current preferred = Legacy }
+  update { preferred = Current }
+}
+
+behavior send(attempt: Attempt) {
+  guard { no attempt.sent }
+  update {
+    let code = if {
+      (preferred = Legacy and result = Accepted) or
+      (preferred = Current and result = Declined)
+    } then One else Zero
+    sent = sent + (attempt -> Frame { format: preferred, code: code })
+  }
+}
+
+behavior deliver(attempt: Attempt) {
+  guard { attempt in outstanding }
+  update {
+    let frame = attempt.sent
+    let decision = if {
+      (frame.format = Legacy and frame.code = One) or
+      (frame.format = Current and frame.code = Zero)
+    } then Accepted else Declined
+    decoded = decision
+    received = received + attempt
+    if { no accepted } then { accepted = decision }
+    else {
+      if { accepted != decision }
+        then expect unreachable "Compatible encodings decode to the same decision" {
+          conflicts = conflicts + attempt
+        }
+    }
+  }
+}
+
+invariant AcceptedResultMatchesServer {
+  some accepted implies accepted = result
+}
+
+invariant EquivalentRepliesDoNotConflict { no conflicts }
+
+transition DecodePreservesMeaning on deliver {
+  after(decoded) = result
+  unchanged(sent)
+}
+
+transition DuplicateKeepsSettledDecision on deliver {
+  some before(accepted) implies unchanged(accepted)
+}
+
+scope steps = 9

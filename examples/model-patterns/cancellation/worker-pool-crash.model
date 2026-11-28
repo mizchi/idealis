@@ -1,0 +1,56 @@
+model WorkerPoolCrash
+enum Generation = Original | Replacement
+enum Job = Active | Waiting
+enum Status = Running | Failed | Queued | Done
+
+var live: lone Generation
+var slot: lone Job
+var jobs: Job -> one Status
+var started: set Job
+
+init {
+  live = Original slot = Active
+  jobs = (Active -> Running) + (Waiting -> Queued)
+  started = Active
+}
+behavior crash() {
+  guard { live = Original slot = Active }
+  update {
+    live = none
+    slot = none
+    jobs = jobs ++ Active -> Failed
+  }
+}
+behavior replace() {
+  guard { no live }
+  update { live = Replacement }
+}
+behavior startWaiting() {
+  guard { Waiting.jobs = Queued }
+  update {
+    if { some live and no slot } then {
+      slot = Waiting
+      jobs = jobs ++ Waiting -> Running
+      started = started + Waiting
+    }
+  }
+}
+behavior finish() {
+  guard { some live slot = Waiting }
+  update { slot = none jobs = jobs ++ Waiting -> Done }
+}
+
+transition CrashReportsFailure on crash {
+  after(Active.jobs) = Failed and unchanged(Waiting.jobs)
+}
+transition CrashFreesTheSlot on crash {
+  no after(slot) and no after(live)
+}
+invariant RunningJobOwnsTheSlot { jobs.Running = slot }
+invariant NoWorkerMeansNoAssignedJob { no live implies no slot }
+reachable CrashWasObserved { no live Active.jobs = Failed Waiting.jobs = Queued }
+leads_to QueuedWorkSurvivesOriginalCrash
+  with { weak replace weak startWaiting weak finish }
+  { Active.jobs = Failed } { Waiting.jobs = Done }
+
+scope steps = 6

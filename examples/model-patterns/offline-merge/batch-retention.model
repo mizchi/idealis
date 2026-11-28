@@ -1,0 +1,39 @@
+model BatchReceiptRetention
+enum Ticket = Earliest | Earlier | Boundary | Future | Unseen
+
+rel issued: Ticket -> one Nat
+fact { issued = (Earliest -> 0) + (Earlier -> 1) + (Boundary -> 2) + (Future -> 3) + (Unseen -> 3) }
+var floor: one Nat
+var receipts: Ticket -> lone Nat
+
+init {
+  floor = 0
+  receipts = (Earliest -> 1) + (Earlier -> 2) + (Boundary -> 3) + (Future -> 4)
+}
+
+behavior advanceFloor() {
+  guard { floor = 0 }
+  update { floor = 2 }
+}
+
+behavior collect() {
+  guard { floor = 2 }
+  update {
+    let expired = select(ticket: Ticket | ticket.issued < floor)
+    receipts = withoutKeys(receipts, expired)
+  }
+}
+
+transition CollectionRemovesOnlyExpired on collect {
+  all ticket: Ticket | {
+    (before(ticket.issued) < before(floor) implies no after(ticket.receipts))
+    (before(ticket.issued) >= before(floor) implies unchanged(ticket.receipts))
+  }
+}
+
+reachable RemovedBothAndKeptBoundary {
+  floor = 2 no Earliest.receipts no Earlier.receipts
+  Boundary.receipts = 3 Future.receipts = 4 no Unseen.receipts
+}
+
+scope Int = 0..4, steps = 4

@@ -1,0 +1,51 @@
+model FencedStoreCutover
+enum Store = Source | Target
+enum Generation = Old | New
+enum Contents = Initial | Changed
+enum Phase = ServingSource | Sealed | Copied | ServingTarget
+
+var phase: one Phase
+var floor: Store -> one Generation
+var body: Store -> lone Contents
+
+init {
+  phase = ServingSource
+  floor = (Source -> New) + (Target -> Old)
+  body = Source -> Initial
+}
+
+behavior seal() {
+  guard { phase = ServingSource }
+  update { phase = Sealed }
+}
+behavior copy() {
+  guard { phase = Sealed }
+  update {
+    body = (body - Target -> Contents) + Target -> Source.body
+    floor = floor ++ Target -> Source.floor
+    phase = Copied
+  }
+}
+behavior cutover() {
+  guard { phase = Copied }
+  update { phase = ServingTarget }
+}
+behavior write(store: Store, generation: Generation, contents: Contents) {
+  update {
+    if {
+      (store = Source and phase = ServingSource) or (store = Target and phase = ServingTarget),
+      generation = New or generation = store.floor
+    } then {
+      body = body ++ store -> contents
+    }
+  }
+}
+
+invariant TargetKeepsFence { phase = ServingTarget implies Target.floor = Source.floor }
+transition SealedSourceStaysFrozen { before(phase) != ServingSource implies unchanged(Source.body) }
+transition OldCannotWriteAfterCutover on write {
+  before(phase) = ServingTarget and generation = Old implies unchanged(Target.body)
+}
+transition CopyUsesSealedSnapshot on copy { after(Target.body) = before(Source.body) }
+reachable TargetOpen { phase = ServingTarget Source.body = Initial }
+scope steps = 8

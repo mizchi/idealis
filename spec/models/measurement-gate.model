@@ -17,6 +17,9 @@ behavior publishImprovement() {
 invariant ImprovementNeedsPinnedRun { some published implies PinnedRun in confirmed }
 invariant ImprovementNeedsStableSamples { some published implies StableSamples in confirmed }
 invariant ImprovementNeedsThreshold { some published implies ThresholdMet in confirmed }
+transition PublicationKeepsPrerequisites {
+  (no before(published) and some after(published)) implies unchanged(confirmed)
+}
 reachable UnsettledMeasurement { PinnedRun in confirmed StableSamples not in confirmed no published }
 reachable ImprovementPublished { some published }
 scope steps = 5

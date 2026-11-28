@@ -1,0 +1,25 @@
+model RetryThreshold
+enum Phase = Ready | Pending | Done
+enum Attempts = NoneYet | Once | Exhausted
+enum Cause = Transient | Fatal
+
+var phase: one Phase
+var attempts: one Attempts
+var lastCause: lone Cause
+derive exhaustion = attempts & Exhausted
+derive publicExhaustion = phase -> exhaustion
+init { phase = Ready attempts = NoneYet no lastCause }
+
+behavior start() { guard { phase = Ready } update { phase = Pending } }
+
+behavior retry(cause: Cause) {
+  guard { phase = Pending attempts != Exhausted }
+  update { attempts = (if { cause = Fatal or attempts = Once } then Exhausted else Once) lastCause = cause }
+}
+
+behavior finish() { guard { phase = Pending } update { phase = Done } }
+
+reachable Finished { phase = Done }
+reachable WithoutFirstRetry { phase = Done attempts != Once }
+reachable ExhaustionReached { phase = Done some exhaustion }
+scope steps = 6

@@ -1,0 +1,41 @@
+model SuppressedErrorGraph
+enum Leaf = Earlier | Recent
+enum Wrapper = Original | Clone | Wrapped
+type ErrorNode = Leaf + Wrapper
+enum Identity = Reuse | Copy
+
+var root: lone Wrapper
+var primary: Wrapper -> lone ErrorNode
+var suppressed: Wrapper -> lone ErrorNode
+
+derive edges = primary + suppressed
+derive reachableErrors = reachableFrom(root, edges)
+
+init { no root no primary no suppressed }
+
+behavior unwind(identity: Identity) {
+  guard { no root }
+  update {
+    let thrown = if { identity = Reuse } then Original else Clone
+    root = Wrapped
+    primary = (Original -> Recent) + (thrown -> Recent) + (Wrapped -> thrown)
+    suppressed = (Original -> Earlier) + (thrown -> Earlier) + (Wrapped -> Original)
+  }
+}
+
+invariant ErrorGraphHasNoCycles {
+  all node: ErrorNode | node not in node.closure(edges)
+}
+invariant AllObservedErrorsAreReachable { keys(edges) in reachableErrors and ErrorNode.edges in reachableErrors }
+transition RetainsOriginalBodyError on unwind { Wrapped.after(suppressed) = Original }
+transition ReusedErrorRemainsOneObject on unwind {
+  identity = Reuse implies Wrapped.after(primary) = Wrapped.after(suppressed)
+}
+transition CopiesKeepDistinctIdentity on unwind {
+  identity = Copy implies (
+    Wrapped.after(primary) = Clone and Clone.after(primary) = Original.after(primary)
+    and Clone.after(suppressed) = Original.after(suppressed)
+  )
+}
+reachable InitialErrorScope { no root }
+scope steps = 2

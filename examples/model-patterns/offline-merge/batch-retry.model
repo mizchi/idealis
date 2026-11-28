@@ -1,0 +1,54 @@
+model BatchRetry
+enum Item = First | Second
+enum Effect = Once | Twice
+enum Status = Partial | Complete
+
+var receipts: set Item
+var effects: Item -> lone Effect
+var open: one Bool
+var disconnected: one Bool
+var sent: lone Status
+var responseItems: set Item
+
+init { no receipts no effects open = false disconnected = false no sent no responseItems }
+behavior start() {
+  guard { not open }
+  update { open = true sent = none responseItems = none }
+}
+behavior apply(item: Item) {
+  guard { open }
+  update {
+    if { item not in receipts } then {
+      receipts = receipts + item
+      effects = effects ++ item -> Once
+    }
+  }
+}
+behavior disconnect() {
+  guard { open }
+  update { open = false disconnected = true }
+}
+behavior finish() {
+  guard { open }
+  update {
+    open = false
+    sent = if { receipts = Item } then Complete else Partial
+    responseItems = receipts
+  }
+}
+transition AlreadyCommittedItemHasNoNewEffect on apply {
+  item in before(receipts) implies unchanged(item.effects)
+}
+transition ApplyingMissingItemCommitsIt on apply {
+  item not in before(receipts) implies item in after(receipts) and after(item.effects) = Once
+}
+transition CompleteRequiresEveryItem on finish {
+  after(sent) = Complete implies before(receipts) = Item
+}
+transition ResponseListsCommittedItems on finish {
+  after(responseItems) = before(receipts)
+}
+reachable FirstCommittedBeforeDisconnect {
+  disconnected not open receipts = First First.effects = Once no sent
+}
+scope steps = 10

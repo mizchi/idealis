@@ -1,0 +1,54 @@
+model CompensateFailedReservation
+enum Stage = New | Charged | Reserved | Refunding | Cancelled
+enum RefundEffect = NoRefund | Refunded | Repeated
+
+var stage: one Stage
+var effect: one RefundEffect
+var replyPending: one Bool
+
+init { stage = New effect = NoRefund replyPending = false }
+
+behavior charge() {
+  guard { stage = New }
+  update { stage = Charged }
+}
+behavior reserve() {
+  guard { stage = Charged }
+  update { stage = Reserved }
+}
+behavior rejectInventory() {
+  guard { stage = Charged }
+  update { stage = Refunding }
+}
+behavior refund() {
+  guard { stage = Refunding not replyPending }
+  update {
+    effect = if { effect = NoRefund } then Refunded else effect
+    replyPending = true
+  }
+}
+behavior loseReply() {
+  guard { replyPending }
+  update { replyPending = false }
+}
+behavior confirmRefund() {
+  guard { replyPending }
+  update { stage = Cancelled replyPending = false }
+}
+invariant ReservationKeepsCharge { stage = Reserved implies effect = NoRefund }
+invariant CancelledRequiresRefund { stage = Cancelled implies effect = Refunded }
+invariant NoDoubleRefund { effect != Repeated }
+transition RetryPreservesRefund on refund {
+  before(effect) = Refunded implies unchanged(effect)
+}
+transition LostReplyDoesNotConfirm on loseReply { unchanged(stage) }
+
+reachable OrderReserved { stage = Reserved }
+reachable RefundCommittedAndReplyLost { stage = Refunding effect = Refunded not replyPending }
+reachable OrderCancelled { stage = Cancelled }
+
+leads_to RefundEventuallyConfirmed
+  with { weak refund strong confirmRefund }
+  { stage = Refunding } { stage = Cancelled }
+
+scope steps = 6

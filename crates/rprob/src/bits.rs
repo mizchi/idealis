@@ -1,4 +1,6 @@
-use rmodel::Mult;
+use crate::indexed_rows;
+use idealis_syntax::Mult;
+use std::sync::Arc;
 
 pub(crate) const ROW: usize = 8;
 pub(crate) const COLUMN: u64 = 0x0101_0101_0101_0101;
@@ -29,6 +31,14 @@ pub(crate) fn preimage(matrix: u64, columns: u64) -> u64 {
     })
 }
 
+pub(crate) fn override_rows(left: u64, right: u64) -> u64 {
+    without_keys(left, preimage(right, 0xff)) | right
+}
+
+pub(crate) fn without_keys(matrix: u64, keys: u64) -> u64 {
+    matrix & !product(keys, 0xff)
+}
+
 pub(crate) fn compose(left: u64, right: u64) -> u64 {
     (0..ROW).fold(0, |result, row| {
         let destinations = image((left >> (ROW * row)) & 0xff, right);
@@ -50,24 +60,72 @@ pub(crate) fn admits(mult: Mult, value: u64) -> bool {
 /// differ from that ordinal for sums.
 pub(crate) struct Domain {
     pub(crate) mult: Mult,
-    pub(crate) rows: Option<u64>,
+    pub(crate) rows: Option<Rows>,
     pub(crate) row_width: usize,
     pub(crate) tuples: Vec<u64>,
+    pub(crate) integer_mask: Option<u64>,
+    pub(crate) ordinal_count: Option<usize>,
+    pub(crate) refinement: Option<Refinement>,
+}
+
+pub(crate) enum Refinement {
+    Bits(u64),
+    Ordinals(Arc<[u64]>),
+}
+
+pub(crate) enum Rows {
+    Dense(u64),
+    Sparse(Vec<u64>),
+    Indexed(Arc<indexed_rows::Layout>),
 }
 
 impl Domain {
+    pub(crate) fn is_indexed(&self) -> bool {
+        self.ordinal_count.is_some() || matches!(self.rows, Some(Rows::Indexed(_)))
+    }
+
     pub(crate) fn admits(&self, value: u64) -> bool {
+        if let Some(count) = self.ordinal_count {
+            return if value == 0 {
+                self.mult == Mult::Lone
+            } else {
+                value <= count as u64
+                    && match &self.refinement {
+                        Some(Refinement::Ordinals(valid)) => valid.binary_search(&value).is_ok(),
+                        _ => true,
+                    }
+            };
+        }
+        if let Some(Refinement::Bits(mask)) = self.refinement
+            && value & !mask != 0
+        {
+            return false;
+        }
         if self.mult == Mult::Set {
             return true;
         }
-        match self.rows {
+        match &self.rows {
             None => admits(self.mult, value),
-            Some(rows) => indices(rows).all(|row| admits(self.mult, (value >> (ROW * row)) & 0xff)),
+            Some(Rows::Dense(rows)) => {
+                indices(*rows).all(|row| admits(self.mult, (value >> (ROW * row)) & 0xff))
+            }
+            Some(Rows::Sparse(rows)) => rows.iter().all(|row| admits(self.mult, value & row)),
+            Some(Rows::Indexed(rows)) => rows.admits(value),
         }
     }
 
     pub(crate) fn candidates(&self) -> Candidates {
-        match self.rows {
+        if let Some(Refinement::Ordinals(valid)) = &self.refinement {
+            let absent = (self.mult == Mult::Lone).then_some(0);
+            return Candidates::Table(absent.into_iter().chain(valid.iter().copied()).collect());
+        }
+        if let Some(count) = self.ordinal_count {
+            return Candidates::Ordinals {
+                start: usize::from(self.mult == Mult::One),
+                count,
+            };
+        }
+        match &self.rows {
             None => match self.mult {
                 Mult::One => Candidates::Table(self.tuples.clone()),
                 Mult::Lone => Candidates::Table(
@@ -79,6 +137,7 @@ impl Domain {
                     Candidates::subsets(&self.tuples, usize::from(self.mult == Mult::Some))
                 }
             },
+            Some(Rows::Indexed(rows)) => Candidates::IndexedRows(Arc::clone(rows)),
             Some(_) if self.row_width == 0 => {
                 Candidates::Table(self.admits(0).then_some(0).into_iter().collect())
             }
@@ -113,6 +172,11 @@ fn subset(bits: &[u64], ordinal: usize) -> u64 {
 /// fastest. Each row owns only its own choices.
 pub(crate) enum Candidates {
     Table(Vec<u64>),
+    IndexedRows(Arc<indexed_rows::Layout>),
+    Ordinals {
+        start: usize,
+        count: usize,
+    },
     Subsets {
         bits: Vec<u64>,
         start: usize,
@@ -159,7 +223,7 @@ impl Candidates {
     /// relation, only the rows affected by the carry need updating.
     pub(crate) fn advance(&self, cursor: &mut Cursor, value: &mut u64) -> bool {
         match self {
-            Self::Rows { rows, .. } => {
+            Self::Rows { rows, .. } if rows.len() <= ROW => {
                 for (choices, digit) in rows.iter().zip(&mut cursor.rows) {
                     let old = usize::from(*digit);
                     let next = old + 1;
@@ -187,6 +251,8 @@ impl Candidates {
     pub(crate) fn len(&self) -> usize {
         match self {
             Self::Table(values) => values.len(),
+            Self::IndexedRows(layout) => layout.candidate_count(),
+            Self::Ordinals { start, count } => count + 1 - start,
             Self::Subsets { bits, start } => (1 << bits.len()) - start,
             Self::Packed { width, start, .. } => (1 << width) - start,
             Self::Rows { count, .. } => *count,
@@ -199,6 +265,8 @@ impl Candidates {
         }
         Some(match self {
             Self::Table(values) => values[position],
+            Self::IndexedRows(layout) => layout.candidate(position),
+            Self::Ordinals { start, .. } => (position + start) as u64,
             Self::Subsets { bits, start } => subset(bits, position + start),
             Self::Packed { shift, start, .. } => ((position + start) as u64) << shift,
             Self::Rows { rows, .. } => {
@@ -263,9 +331,12 @@ mod tests {
         for mult in [Mult::Set, Mult::Some, Mult::One, Mult::Lone] {
             let domain = Domain {
                 mult,
-                rows: Some(0b1111),
+                rows: Some(Rows::Dense(0b1111)),
                 row_width: order.len(),
                 tuples: tuples.clone(),
+                integer_mask: None,
+                ordinal_count: None,
+                refinement: None,
             };
             let choices = domain.candidates();
             let expected = (0..1 << tuples.len()).filter_map(|ordinal| {

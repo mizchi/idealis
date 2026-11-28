@@ -1,0 +1,28 @@
+model DelayedNotice
+
+var accepted: one Bool
+var replied: one Bool
+var dispatched: one Bool
+var checked: one Bool
+var beforeResponse: one Bool
+
+init { not accepted not replied not dispatched not checked not beforeResponse }
+
+behavior accept() { guard { not accepted } update { accepted = true } }
+behavior reply() { guard { accepted not replied } update { replied = true } }
+behavior dispatch() { guard { accepted not dispatched } update { dispatched = true } }
+behavior receive() {
+  guard { dispatched not checked }
+  update { checked = true beforeResponse = (if { replied } then false else true) }
+}
+
+invariant CheckRequiresDispatch { checked implies dispatched }
+transition ReplyDoesNotCheckDelivery on reply { unchanged(checked) }
+reachable RepliedWhilePending { replied not dispatched not checked }
+reachable Completed { replied checked }
+
+leads_to DeliveryProgress
+  with { weak dispatch weak receive }
+  { accepted } { checked }
+
+scope steps = 6

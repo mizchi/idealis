@@ -16,4 +16,4 @@
 
 評価を依頼した時点に、候補 ID、要件 ID、評価版を記録する。評価版は、節の文と式の対応に加えて、リンク先モデルの操作や初期条件も含む。節の対応レビューの版と、評価結果を受け取る版を独立して扱う。ガードだけを変えると節の版が一致しても、変更前に集めた検査結果は失効する。
 
-`just adoption-evidence --pin CANDIDATE` で依頼時の版を取得し、`--assess CANDIDATE COMPARISON.json GOAL.json` で現行版の節レポートと合わせて判定する。比較とゴールの測定結果は、評価した時点の版を含む外部入力とする。検査では、旧い候補、同じ候補 ID でモデルだけ変更、未レビュー、予算切れ、不一致、空、未完了、結果の欠落、ゴール悪化を採用から除いた。正の対照では同じ版で三つを満たすと採用可能になった。初版8通り・新版27通りについて、証拠の到着状態と版を変え、実装の判定が rmodel の採用ガードと一致することも確認した。 [使い方](../../crates/rspec/README.md#evidence-for-adoption) · [実装テスト](../../crates/rspec/tests/adoption.rs)
+`just adoption-evidence --pin CANDIDATE` で依頼時の版を取得し、`--assess CANDIDATE COMPARISON.json GOAL.json` で現行版の節レポートと合わせて判定する。比較とゴールの測定結果は、評価した時点の版を含む外部入力とする。検査では、旧い候補、同じ候補 ID でモデルだけ変更、未レビュー、予算切れ、不一致、空、未完了、結果の欠落、ゴール悪化を採用から除いた。正の対照では同じ版で三つを満たすと採用可能になった。初版8通り・新版27通りについて、証拠の到着状態と版を変え、実装の判定が rmodel の採用ガードと一致することも確認した。 [使い方](../../crates/idealis-spec/README.md#evidence-for-adoption) · [実装テスト](../../crates/idealis-spec/tests/adoption.rs)

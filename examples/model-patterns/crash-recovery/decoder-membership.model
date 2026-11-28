@@ -1,0 +1,96 @@
+model DecoderMembership
+enum Slot = Primary | Hedge
+enum LegacyRegistration = Original | Secondary
+enum CurrentRegistration = Replacement
+type Registration = LegacyRegistration + CurrentRegistration
+enum Phase = Idle | Draining | Retired
+
+var live: Slot -> one Registration
+var phase: one Phase
+var cohort: set Registration
+var stopped: set Registration
+var sent: set LegacyRegistration
+var taken: set Registration
+var sealed: set Registration
+var promised: set LegacyRegistration
+var decoded: set LegacyRegistration
+var dropped: set LegacyRegistration
+var replacementDecoded: one Bool
+
+derive unread = sent - decoded - dropped
+
+init {
+  live = (Primary -> Original) + (Hedge -> Secondary)
+  phase = Idle no cohort no stopped no sent no taken no sealed no promised
+  no decoded no dropped not replacementDecoded
+}
+
+behavior begin() {
+  guard { phase = Idle }
+  update { cohort = Slot.live phase = Draining }
+}
+
+behavior replace() {
+  guard { phase = Draining Primary.live = Original }
+  update { live = live ++ (Primary -> Replacement) }
+}
+
+behavior sendLegacy(registration: LegacyRegistration) {
+  guard { registration not in stopped + sent }
+  update { sent = sent + registration }
+}
+
+behavior stop(registration: Registration) {
+  guard { registration in (LegacyRegistration + Slot.live) - stopped }
+  update { stopped = stopped + registration }
+}
+
+behavior takeSeal(registration: Registration) {
+  guard { registration in stopped - taken }
+  update {
+    taken = taken + registration
+    sealed = sealed + registration
+    promised = promised + (registration & sent)
+  }
+}
+
+behavior takeLegacy(registration: LegacyRegistration) {
+  guard { registration in unread }
+  update {
+    if { phase = Retired } then expect unreachable "The frozen cohort covers all legacy senders and retirement drains their promised replies" {
+      dropped = dropped + registration
+    }
+    else { decoded = decoded + registration }
+  }
+}
+
+behavior retire() {
+  guard { phase = Draining }
+  update {
+    if { cohort in sealed and (cohort & promised) in decoded } then {
+      phase = Retired
+    }
+  }
+}
+
+behavior takeReplacement() {
+  guard { Primary.live = Replacement not replacementDecoded }
+  update { replacementDecoded = true }
+}
+
+invariant SafeRetirement {
+  phase = Retired implies (LegacyRegistration in stopped and sent in decoded)
+}
+
+invariant NoDroppedLegacyReply { no dropped }
+
+transition ReplacementKeepsFrozenCohort on replace {
+  unchanged(cohort)
+}
+
+transition ReceivedSealIsAttributedToItsRegistration on takeSeal {
+  after(sealed) = before(sealed) + registration
+  unchanged(live)
+}
+
+scope steps = 16

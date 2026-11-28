@@ -1,0 +1,94 @@
+model DecoderIdentity
+enum Registration = Old | New
+enum Sequence = First | Second
+enum Decoder = Both | CurrentOnly
+enum Life = Online | Offline | Restarted
+
+var life: one Life
+var active: one Registration
+var decoder: one Decoder
+var seen: Registration -> set Sequence
+var dropped: Registration -> set Sequence
+var pendingAck: Registration -> set Sequence
+var acked: Registration -> set Sequence
+var effects: one Nat
+
+init {
+  life = Online active = Old decoder = Both
+  no seen no dropped no pendingAck no acked effects = 0
+}
+
+behavior rotate() {
+  guard { life != Offline active = Old }
+  update { active = New }
+}
+
+behavior retire() {
+  guard { life != Offline active = New decoder = Both Old.seen = Sequence }
+  update { decoder = CurrentOnly }
+}
+
+behavior crash() {
+  guard { life = Online }
+  update { life = Offline pendingAck = none }
+}
+
+behavior restart() {
+  guard { life = Offline }
+  update { life = Restarted }
+}
+
+behavior receive(registration: Registration, sequence: Sequence) {
+  guard {
+    life != Offline
+    registration = Old or active = New,
+    (registration -> sequence) not in acked
+  }
+  update {
+    let key = registration -> sequence
+    if { key in seen } then {
+      pendingAck = pendingAck + key
+    } else {
+      if { registration = New or decoder = Both } then {
+        seen = seen + key
+        effects = effects + 1
+        pendingAck = pendingAck + key
+      } else expect unreachable "Retirement requires receipts for every old sequence" {
+        dropped = dropped + key
+      }
+    }
+  }
+}
+
+behavior ack(registration: Registration, sequence: Sequence) {
+  guard { life != Offline, (registration -> sequence) in pendingAck }
+  update {
+    let key = registration -> sequence
+    pendingAck = pendingAck - key
+    acked = acked + key
+  }
+}
+
+invariant ReceiptsAreUniquePerRegistration {
+  effects = #seen
+}
+
+invariant NoOldFrameDropped { no dropped }
+invariant AckNamesItsOwnAppliedFrame { (pendingAck + acked) in seen }
+
+transition NewFrameIsAppliedEvenIfOldSequenceMatches on receive {
+  (registration = New and sequence not in before(New.seen)) implies
+    after(effects) = before(effects) + 1
+}
+
+transition DuplicateRenewsOnlyItsOwnAck on receive {
+  (registration -> sequence) in before(seen) implies
+    ((registration -> sequence) in after(pendingAck) and unchanged(effects))
+}
+
+transition AcknowledgmentChangesOnlyItsOwnKey on ack {
+  after(acked) = before(acked) + (registration -> sequence)
+  after(pendingAck) = before(pendingAck) - (registration -> sequence)
+}
+
+scope Int = 0..4, steps = 13

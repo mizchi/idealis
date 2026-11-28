@@ -1,0 +1,31 @@
+model NoticeHistory
+enum Policy = Strict | Optional
+enum Phase = Ready | Published | Done
+
+rel policy: one Policy
+var phase: one Phase
+var delivered: one Bool
+var notice: one Bool
+
+init { phase = Ready not delivered not notice }
+
+behavior publish(visible: Bool, sent: Bool) {
+  guard {
+    phase = Ready,
+    (visible implies sent),
+    (policy = Strict implies visible = sent)
+  }
+  update { phase = Published delivered = sent notice = visible }
+}
+
+behavior acknowledge() {
+  guard { phase = Published }
+  update { phase = Done notice = false }
+}
+
+behavior wait() { guard { phase = Done } }
+
+reachable StrictDone { policy = Strict phase = Done }
+reachable OptionalDone { policy = Optional phase = Done }
+
+scope steps = 5

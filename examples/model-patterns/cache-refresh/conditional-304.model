@@ -1,0 +1,51 @@
+model ConditionalCache
+enum Validator = Old | New
+enum Body = BodyA | BodyB
+enum Policy = Initial | Refreshed | Replacement
+record Entry { tag: Validator, body: Body, policy: Policy }
+
+var cached: lone Entry
+var requested: lone Validator
+
+init { cached = Entry { tag: Old, body: BodyA, policy: Initial } no requested }
+
+behavior start() {
+  guard { some cached no requested }
+  update { requested = cached.tag }
+}
+behavior replace() {
+  update { cached = Entry { tag: New, body: BodyB, policy: Replacement } }
+}
+behavior evict() {
+  guard { some cached }
+  update { cached = none }
+}
+behavior finish() {
+  guard { some requested }
+  update {
+    if { some cached and cached.tag = requested } then {
+      cached = Entry { tag: cached.tag, body: cached.body, policy: Refreshed }
+    }
+    requested = none
+  }
+}
+
+invariant ValidatorIdentifiesBody {
+  (cached.tag = Old implies cached.body = BodyA) and
+  (cached.tag = New implies cached.body = BodyB)
+}
+transition MismatchedTagPreservesEntry on finish {
+  before(cached.tag) != before(requested) implies unchanged(cached)
+}
+transition MatchingTagRefreshesOnlyPolicy on finish {
+  before(cached.tag) = before(requested) implies
+    unchanged(cached.tag) and unchanged(cached.body) and after(cached.policy) = Refreshed
+}
+transition MissingEntryStaysMissing on finish {
+  no before(cached) implies no after(cached)
+}
+reachable PendingOldTag { requested = Old cached.tag = Old cached.policy = Initial }
+reachable ReplacedWhileRequested { requested = Old cached.tag = New }
+reachable EvictedWhileRequested { requested = Old no cached }
+
+scope steps = 6

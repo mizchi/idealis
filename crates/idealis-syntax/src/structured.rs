@@ -1,0 +1,212 @@
+use crate::{Error, INT, Model, NAT, Record};
+use std::collections::BTreeMap;
+
+pub const MAX_SEQUENCE_LENGTH: usize = 4;
+// Keep backend materialization separate from the type's mathematical domain.
+const MAX_ENUMERATION_NODES: usize = 16_384;
+
+pub struct ValueDomain<'a> {
+    pub kind: ValueType<'a>,
+    pub size: usize,
+    nodes_per_value: usize,
+}
+
+impl ValueDomain<'_> {
+    pub fn indexable(&self) -> bool {
+        self.nodes_per_value <= MAX_ENUMERATION_NODES
+    }
+
+    pub fn enumerable(&self) -> bool {
+        self.size.saturating_mul(self.nodes_per_value) <= MAX_ENUMERATION_NODES
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct Sequence {
+    pub name: String,
+    pub element: String,
+    pub max: usize,
+}
+
+#[derive(Clone, Debug)]
+pub struct Variant {
+    pub name: String,
+    pub cases: Vec<Case>,
+}
+
+#[derive(Clone, Debug)]
+pub struct Case {
+    pub tag: String,
+    pub payload: Option<String>,
+}
+
+#[derive(Clone, Copy)]
+/// A declared structured value type.
+pub enum ValueType<'a> {
+    Record(&'a Record),
+    Sequence(&'a Sequence),
+    Variant(&'a Variant),
+}
+
+impl<'a> ValueType<'a> {
+    pub fn name(self) -> &'a str {
+        match self {
+            Self::Record(r) => &r.name,
+            Self::Sequence(s) => &s.name,
+            Self::Variant(v) => &v.name,
+        }
+    }
+
+    pub fn size(self, size_of: impl Fn(&str) -> usize) -> usize {
+        match self {
+            ValueType::Record(record) => record
+                .fields
+                .iter()
+                .fold(1usize, |size, (_, sort)| size.saturating_mul(size_of(sort))),
+            ValueType::Sequence(seq) => {
+                let elements = size_of(&seq.element);
+                (0..=seq.max).fold(0usize, |total, length| {
+                    total.saturating_add(elements.saturating_pow(length as u32))
+                })
+            }
+            ValueType::Variant(v) => v.cases.iter().fold(0usize, |size, case| {
+                size.saturating_add(case.payload.as_deref().map_or(1, &size_of))
+            }),
+        }
+    }
+
+    pub fn children(self) -> Vec<&'a str> {
+        match self {
+            Self::Record(r) => r.fields.iter().map(|(_, sort)| sort.as_str()).collect(),
+            Self::Sequence(s) => vec![&s.element],
+            Self::Variant(v) => v
+                .cases
+                .iter()
+                .filter_map(|case| case.payload.as_deref())
+                .collect(),
+        }
+    }
+}
+
+impl Model {
+    /// Structured type declarations, with each dependency before its users.
+    pub fn value_types_in_dependency_order(&self) -> Result<Vec<ValueType<'_>>, Error> {
+        Ok(self
+            .value_domains()?
+            .into_iter()
+            .map(|domain| domain.kind)
+            .collect())
+    }
+
+    pub fn sequence(&self, name: &str) -> Option<&Sequence> {
+        self.sequences.iter().find(|s| s.name == name)
+    }
+
+    pub fn variant(&self, name: &str) -> Option<&Variant> {
+        self.variants.iter().find(|v| v.name == name)
+    }
+
+    pub fn case(&self, tag: &str) -> Option<(&Variant, &Case)> {
+        self.variants.iter().find_map(|variant| {
+            variant
+                .cases
+                .iter()
+                .find(|case| case.tag == tag)
+                .map(|case| (variant, case))
+        })
+    }
+
+    pub fn has_structures(&self) -> bool {
+        !self.sequences.is_empty() || !self.variants.is_empty()
+    }
+
+    pub fn value_domains(&self) -> Result<Vec<ValueDomain<'_>>, Error> {
+        let mut types: Vec<_> = self
+            .records
+            .iter()
+            .map(ValueType::Record)
+            .chain(self.sequences.iter().map(ValueType::Sequence))
+            .chain(self.variants.iter().map(ValueType::Variant))
+            .collect();
+        let mut sizes = BTreeMap::new();
+        for name in &self.sigs {
+            sizes.insert(name.as_str(), self.scope.sizes[name]);
+        }
+        for (name, members) in &self.enums {
+            sizes.insert(name.as_str(), members.len());
+        }
+        for (name, children) in &self.sums {
+            sizes.insert(
+                name.as_str(),
+                children.iter().map(|child| sizes[child.as_str()]).sum(),
+            );
+        }
+        if let Some((low, high)) = self.scope.ints {
+            sizes.insert(INT, (high - low + 1) as usize);
+            sizes.insert(NAT, (high - low.max(0) + 1).max(0) as usize);
+        }
+
+        let mut ordered = Vec::new();
+        let mut nodes = BTreeMap::new();
+        while !types.is_empty() {
+            let index = types
+                .iter()
+                .position(|ty| ty.children().iter().all(|t| sizes.contains_key(t)))
+                .ok_or_else(|| {
+                    Error::kind(format!(
+                        "{}: unknown or recursive value type",
+                        types[0].name()
+                    ))
+                })?;
+            let ty = types.remove(index);
+            match ty {
+                ValueType::Sequence(seq) if !(1..=MAX_SEQUENCE_LENGTH).contains(&seq.max) => {
+                    return Err(Error::kind(format!(
+                        "{}: sequence max must be 1..={MAX_SEQUENCE_LENGTH}",
+                        seq.name
+                    )));
+                }
+                ValueType::Variant(v) if v.cases.is_empty() => {
+                    return Err(Error::kind(format!("{}: variant needs a case", v.name)));
+                }
+                _ => {}
+            }
+            let size = ty.size(|sort| sizes[sort]);
+            let child_nodes = |name: &str| nodes.get(name).copied().unwrap_or(1usize);
+            let payload_nodes = match ty {
+                ValueType::Record(record) => {
+                    record.fields.iter().fold(0usize, |total, (_, sort)| {
+                        total.saturating_add(child_nodes(sort))
+                    })
+                }
+                ValueType::Sequence(seq) => seq.max.saturating_mul(child_nodes(&seq.element)),
+                ValueType::Variant(v) => v
+                    .cases
+                    .iter()
+                    .filter_map(|case| case.payload.as_deref())
+                    .map(child_nodes)
+                    .max()
+                    .unwrap_or_default(),
+            };
+            let nodes_per_value = payload_nodes.saturating_add(1);
+            sizes.insert(ty.name(), size);
+            nodes.insert(ty.name(), nodes_per_value);
+            let domain = ValueDomain {
+                kind: ty,
+                size,
+                nodes_per_value,
+            };
+            if let ValueType::Record(record) = ty
+                && !record.refinements.is_empty()
+                && !domain.enumerable()
+            {
+                return Err(Error::kind(format!(
+                    "{}: where exceeds the value materialization limit",
+                    record.name
+                )));
+            }
+            ordered.push(domain);
+        }
+        Ok(ordered)
+    }
+}

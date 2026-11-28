@@ -1,0 +1,58 @@
+model DeliveryGeneration
+enum Generation = Original | Renewed
+enum Attempt = Primary | Hedge
+enum Result = Waiting | Retry | Expired | Delivered | Missing
+
+var generation: one Generation
+var pinned: one Nat
+var result: one Result
+var outstanding: Attempt -> lone Generation
+
+init { generation = Original pinned = 1 result = Waiting no outstanding }
+
+behavior connect(attempt: Attempt) {
+  guard { no attempt.outstanding result = Waiting or result = Retry }
+  update { outstanding = outstanding + attempt -> generation }
+}
+behavior finish(attempt: Attempt, answer: Result) {
+  guard { some attempt.outstanding answer != Waiting }
+  update {
+    outstanding = outstanding - attempt -> Generation
+    if { attempt.outstanding = generation and (result = Waiting or result = Retry) }
+    then { result = answer }
+  }
+}
+behavior restart() {
+  guard { generation = Original result = Waiting or result = Expired }
+  update {
+    generation = Renewed
+    if { result = Expired } then { pinned = 2 }
+    result = Waiting
+  }
+}
+
+invariant InitialGenerationReadsFirstVersion { generation = Original implies pinned = 1 }
+transition LateAnswerCannotSettle on finish {
+  before(attempt.outstanding) != before(generation) implies unchanged(result)
+}
+transition CompleteAnswerSticks on finish {
+  before(result) in Delivered + Missing + Expired implies unchanged(result)
+}
+transition FinishingConsumesOnlyThatAttempt on finish {
+  no after(attempt.outstanding)
+  unchanged((Attempt - attempt).outstanding)
+  unchanged(pinned)
+}
+transition RestartRetainsOutstandingRequests on restart {
+  unchanged(outstanding)
+  before(result) = Waiting implies unchanged(pinned)
+}
+reachable PrunedVersionReopened {
+  generation = Renewed pinned = 2 result = Waiting
+  Primary.outstanding = Original Hedge.outstanding = Renewed
+}
+reachable SameVersionReopened {
+  generation = Renewed pinned = 1 result = Waiting
+  Primary.outstanding = Original Hedge.outstanding = Renewed
+}
+scope Int = 1..2, steps = 8

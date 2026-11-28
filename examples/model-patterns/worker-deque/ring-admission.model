@@ -1,0 +1,53 @@
+model RingAdmission
+enum Generation = Old | Next
+
+var current: one Generation
+var accepting: one Bool
+var seen: lone Generation
+var pin: lone Generation
+
+init { current = Old accepting = true no seen no pin }
+
+behavior inspect() {
+  guard { no pin }
+  update { seen = if { accepting } then current else none }
+}
+
+behavior retire() {
+  guard { accepting }
+  update { accepting = false }
+}
+
+behavior tryReuse() {
+  guard { current = Old }
+  update {
+    if { not accepting and no pin } then { current = Next accepting = true }
+  }
+}
+
+behavior register() {
+  guard { some seen no pin }
+  update { if { accepting and seen = current } then { pin = current } }
+}
+
+behavior release() {
+  guard { some pin }
+  update { pin = none }
+}
+
+invariant PinMatchesObservedGeneration { some pin implies pin = seen and pin = current }
+transition ClosedGenerationRejectsNewPins on register { not before(accepting) implies unchanged(pin) }
+transition OldObservationCannotPinReplacement on register {
+  before(seen) != before(current) implies unchanged(pin)
+}
+transition RetirementKeepsExistingPin on retire { unchanged(pin) }
+transition ExistingPinPreventsReuse on tryReuse {
+  some before(pin) implies unchanged(current) and unchanged(pin)
+}
+
+reachable ObservedBeforeRetirement { current = Old seen = Old not accepting no pin }
+reachable OldViewAfterReuse { current = Next seen = Old accepting no pin }
+reachable PinSurvivesRetirement { current = Old pin = Old not accepting }
+reachable NextPinAfterFreshView { current = Next seen = Next pin = Next }
+
+scope steps = 8

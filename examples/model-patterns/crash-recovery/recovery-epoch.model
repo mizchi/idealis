@@ -1,0 +1,69 @@
+model RecoveryEpoch
+enum Process = FirstProcess | SecondProcess
+enum Generation = FirstBoot | SecondBoot
+enum Slot = FirstSlot
+
+record AttemptKey { generation: Generation, slot: Slot }
+
+var active: lone Process
+var generation: one Generation
+var broker: Process -> lone AttemptKey
+var consumed: set Process
+var pending: lone AttemptKey
+var accepted: lone Process
+
+init {
+  active = FirstProcess generation = FirstBoot
+  no broker no consumed no pending no accepted
+}
+
+behavior request() {
+  guard { some active no active.broker }
+  update {
+    let key = AttemptKey { generation: generation, slot: FirstSlot }
+    pending = key
+    broker = broker + (active -> key)
+  }
+}
+
+behavior crash() {
+  guard { active = FirstProcess some pending }
+  update { active = none pending = none accepted = none }
+}
+
+behavior restart() {
+  guard { no active }
+  update { active = SecondProcess generation = SecondBoot }
+}
+
+derive outstanding = keys(broker) - consumed
+
+behavior deliver(origin: Process) {
+  guard { some active origin in outstanding }
+  update {
+    consumed = consumed + origin
+    if { some pending and pending = origin.broker } then {
+      pending = none
+      accepted = origin
+    }
+  }
+}
+
+invariant AcceptedByCurrentProcess { some accepted implies accepted = active }
+
+transition CrashKeepsBrokerAndGeneration on crash {
+  unchanged(broker)
+  unchanged(generation)
+  no after(pending)
+}
+
+transition BootPersistsNewGeneration on restart {
+  before(generation) != after(generation)
+  unchanged(broker)
+}
+
+transition OldReplyPreservesNewRequest on deliver {
+  origin != before(active) implies (unchanged(pending) and unchanged(accepted))
+}
+
+scope steps = 8

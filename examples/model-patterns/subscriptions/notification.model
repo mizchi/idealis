@@ -1,0 +1,45 @@
+model SubscriptionNotification
+enum Subscriber = Left | Right
+enum Ticket = L0 | L1 | R0
+
+rel owners: Ticket -> one Subscriber
+var active: Subscriber -> lone Ticket
+var used: set Ticket
+var pending: set Ticket
+var delivered: set Ticket
+var started: one Bool
+
+fact { owners = (L0 + L1) -> Left + R0 -> Right }
+init { no active no used no pending no delivered started = false }
+
+behavior subscribe(subscriber: Subscriber, ticket: Ticket) {
+  guard { no subscriber.active ticket.owners = subscriber ticket not in used }
+  update { active = active ++ subscriber -> ticket used = used + ticket }
+}
+behavior unsubscribe(subscriber: Subscriber) {
+  guard { some subscriber.active }
+  update { active = active - subscriber -> Ticket }
+}
+behavior announce() {
+  guard { not started some Subscriber.active }
+  update { started = true pending = Subscriber.active }
+}
+behavior dispatch(ticket: Ticket) {
+  guard { ticket in pending }
+  update {
+    pending = pending - ticket
+    delivered = delivered + ticket & Subscriber.active
+  }
+}
+
+transition DispatchUsesSameRegistration on dispatch {
+  ticket not in before(Subscriber.active) implies unchanged(delivered)
+  ticket in before(Subscriber.active) implies ticket in after(delivered)
+  after(delivered) in before(delivered) + ticket
+}
+transition NewRegistrationDoesNotJoinOldAnnouncement on subscribe { unchanged(pending) }
+transition UnsubscribingKeepsDelivered on unsubscribe { unchanged(delivered) }
+reachable LeftDeliveredWithRightPending { L0 in delivered R0 in pending Left.active = L0 }
+reachable ReplacedWhileQueued { Left.active = L1 L0 in pending R0 in pending }
+reachable RightJoinsAfterAnnouncement { Right.active = R0 L0 in pending R0 not in pending R0 not in delivered }
+scope steps = 9

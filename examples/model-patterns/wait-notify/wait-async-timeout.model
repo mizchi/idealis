@@ -1,0 +1,56 @@
+model WaitAsyncTimeout
+enum Limit = Poll | Finite | Forever
+enum Count = Zero | One
+enum Wait = Idle | Waiting | Mismatch | PollTimeout | AsyncTimeout | Notified
+
+var changed: one Bool
+var limit: lone Limit
+var result: one Wait
+var wakeCount: lone Count
+
+init { not changed no limit result = Idle no wakeCount }
+
+behavior publish() {
+  guard { not changed }
+  update { changed = true }
+}
+
+behavior wait(timeout: Limit) {
+  guard { result = Idle }
+  update {
+    limit = timeout
+    result = if { changed } then Mismatch
+      else if { timeout = Poll } then PollTimeout else Waiting
+  }
+}
+
+behavior expire() {
+  guard { result = Waiting limit = Finite }
+  update { result = AsyncTimeout }
+}
+
+behavior notify(count: Count) {
+  update {
+    let picked = bool { result = Waiting and count = One }
+    wakeCount = if { picked } then One else Zero
+    if { picked } then { result = Notified }
+  }
+}
+
+transition CompareBeforeCheckingZeroTimeout on wait {
+  before(changed) implies after(result) = Mismatch
+}
+transition ZeroCountNeverRemovesAWaiter on notify {
+  count = Zero implies after(wakeCount) = Zero and unchanged(result)
+}
+transition NonWaitingCannotBeNotified on notify {
+  before(result) != Waiting implies after(wakeCount) = Zero and unchanged(result)
+}
+transition TerminalResultSticks {
+  before(result) not in (Idle + Waiting) implies unchanged(result)
+}
+reachable AlreadyChanged { changed result = Idle }
+reachable FiniteWaitRegistered { result = Waiting limit = Finite }
+reachable InfiniteWaitRegistered { result = Waiting limit = Forever }
+
+scope steps = 6

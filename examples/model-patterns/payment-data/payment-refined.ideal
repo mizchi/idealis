@@ -1,0 +1,25 @@
+model Payment
+
+// 支払額は 1000 以下。手数料はその申請の支払額以下。
+data Amount = Nat where { value <= 1000 }
+data Fee = Nat
+data Request = {
+  amount: Amount,
+  fee: Fee,
+} where { fee.value <= amount.value }
+
+var request: lone Request
+init { no request }
+
+behavior submit(input: Request) {
+  guard { no request }
+  update { request = input }
+}
+
+invariant FeeWithinAmount {
+  some request implies request.fee.value <= request.amount.value
+}
+reachable Submitted { request.amount = Amount(1) and request.fee = Fee(0) }
+
+// この実行では 0、1、2 を探索する。
+scope Int = 0..2

@@ -1,0 +1,43 @@
+import "../../../spec/Schema.pkl" as s
+import "pkl:json"
+
+local direct = "direct.rmodel.json"
+local notification = "notification.rmodel.json"
+local vocabulary = (new json.Parser {}).parse(read("dictionary.spec.json").text).spec
+
+spec: s.Spec = new {
+  id = vocabulary.id
+  name = s.text(vocabulary.name.ja, vocabulary.name.en)
+  groups { for (group in vocabulary.groups) { group } }
+  terms {
+    for (entry in vocabulary.terms) {
+      new {
+        id = entry.id
+        kind = entry.kind
+        group = entry.group
+        name = s.text(entry.name.ja, entry.name.en)
+        definition = s.text(entry.definition.ja, entry.definition.en)
+      }
+    }
+  }
+  rules {
+    new {
+      id = "LIBRARY-ACTIVE-AT-BORROW"
+      text = s.text("貸出の直前に、会員管理の正本でその会員が有効でなければならない。", "Immediately before borrowing, the member must be active according to the membership authority.")
+      terms { "active-member"; "known-active-member" }
+      claims {
+        s.claim(direct, "BorrowRequiresActive", "holds")
+        s.claim(notification, "BorrowRequiresActive", "holds")
+      }
+    }
+    new {
+      id = "LIBRARY-RETURN-KEEPS-RECORD"
+      text = s.text("返却しても貸出履歴を変えない。", "Returning a copy preserves the loan history.")
+      terms { "loan-record" }
+      claims {
+        s.claim(direct, "library_ReturnKeepsRecord", "holds")
+        s.claim(notification, "library_ReturnKeepsRecord", "holds")
+      }
+    }
+  }
+}

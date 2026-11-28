@@ -34,7 +34,7 @@ pub fn compile_tla_with_options(
         config,
         &BTreeMap::new(),
         options,
-        rtla::SyntaxVersion::default(),
+        rtla_compiler::SyntaxVersion::default(),
     )
 }
 
@@ -43,33 +43,10 @@ fn compile_tla_bundle(
     config: &str,
     sources: &BTreeMap<String, String>,
     options: CompileOptions,
-    syntax: rtla::SyntaxVersion,
+    syntax: rtla_compiler::SyntaxVersion,
 ) -> Result<SafetyProgram, CoreError> {
-    if sources.len() > 256 {
-        return Err(CoreError::protocol("source bundle exceeds 256 modules"));
-    }
-    let module = rtla::parse_module_with_version(source, syntax)
-        .map_err(|error| CoreError::protocol(&format!("TLA parsing: {error}")))?;
-    let config = rtla::parse_config(config)
-        .map_err(|error| CoreError::protocol(&format!("TLC configuration: {error}")))?;
-    let mut modules = vec![];
-    for (name, source) in sources {
-        let module = rtla::parse_module_with_version(source, syntax)
-            .map_err(|error| CoreError::protocol(&format!("TLA module {name}: {error}")))?;
-        if module.name != *name {
-            return Err(CoreError::protocol(&format!(
-                "module key {name} differs from MODULE {}",
-                module.name
-            )));
-        }
-        modules.push(module);
-    }
-    let result = if modules.is_empty() {
-        rtla_compiler::compile_with_options(&module, &config, options)
-    } else {
-        rtla_compiler::compile_modules_with_options(&module, &config, &modules, options)
-    };
-    result.map_err(|error| CoreError::protocol(&error.to_string()))
+    rtla_compiler::compile_source_bundle(source, config, sources, options, syntax)
+        .map_err(|error| CoreError::protocol(&error))
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -195,7 +172,7 @@ pub enum Request {
         #[serde(default = "default_ir_version")]
         irVersion: u8,
         #[serde(default)]
-        syntaxVersion: rtla::SyntaxVersion,
+        syntaxVersion: rtla_compiler::SyntaxVersion,
     },
     CheckTla {
         source: String,
@@ -205,7 +182,7 @@ pub enum Request {
         #[serde(default = "default_ir_version")]
         irVersion: u8,
         #[serde(default)]
-        syntaxVersion: rtla::SyntaxVersion,
+        syntaxVersion: rtla_compiler::SyntaxVersion,
         bounds: SafetyBounds,
     },
     #[cfg(not(target_arch = "wasm32"))]

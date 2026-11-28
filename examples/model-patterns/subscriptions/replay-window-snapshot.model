@@ -1,0 +1,85 @@
+model ReplayWindowSnapshot
+enum Position = Zero | One | Two | Three
+
+rel next: Position -> lone Position
+fact { next = (Zero -> One) + (One -> Two) + (Two -> Three) }
+
+var head: one Position
+var floor: one Position
+var cursor: one Position
+var captured: lone Position
+var buffered: set Position
+var materialized: set Position
+var gap: one Bool
+
+init {
+  head = One floor = One cursor = Zero
+  no captured no buffered no materialized gap
+}
+
+behavior append() {
+  guard { some head.next }
+  update { head = head.next }
+}
+behavior compact() {
+  guard { floor != head }
+  update { floor = head }
+}
+behavior read(position: Position) {
+  guard {
+    position in reachableFrom(cursor.next, next)
+    position in reachableFrom(floor.next, next) - reachableFrom(head.next, next)
+  }
+  update { buffered = buffered + position }
+}
+behavior capture() {
+  guard { gap no captured }
+  update { captured = head }
+}
+behavior install() {
+  guard { gap some captured }
+  update {
+    let suffix = reachableFrom(captured.next, next)
+    materialized = Position - Zero - suffix
+    cursor = captured
+    buffered = buffered & suffix
+    captured = none
+    gap = false
+  }
+}
+behavior advance() {
+  guard { not gap some cursor.next & buffered }
+  update {
+    cursor = cursor.next
+    materialized = materialized + cursor.next
+    buffered = buffered - cursor.next
+  }
+}
+behavior pull() {
+  guard { not gap cursor != head some cursor.next cursor.next not in buffered }
+  update {
+    if { cursor.next in reachableFrom(floor.next, next) } then {
+      buffered = buffered + cursor.next
+    } else { gap = true }
+  }
+}
+
+invariant CursorMatchesMaterialized {
+  materialized = Position - Zero - reachableFrom(cursor.next, next)
+}
+invariant BufferContainsOnlyFutureRows {
+  buffered in reachableFrom(cursor.next, next) - reachableFrom(head.next, next)
+}
+transition InstallUsesCapturedVersion on install {
+  after(cursor) = before(captured)
+}
+transition InstallKeepsBufferedSuffix on install {
+  after(buffered) = before(buffered & reachableFrom(captured.next, next))
+}
+reachable SnapshotWithBufferedPrefixAndSuffix {
+  head = Three floor = One captured = Two buffered = Two + Three gap
+}
+reachable NextBufferedRowIsNoLongerRetained {
+  head = Three floor = Three cursor = Two buffered = Three no captured not gap
+}
+scope steps = 13

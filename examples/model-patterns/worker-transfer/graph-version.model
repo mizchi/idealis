@@ -1,0 +1,63 @@
+model GraphVersion
+enum Node = Root | Middle | Target
+enum Version = Original | Replaced
+
+var generation: one Version
+var outgoing: Node -> lone Node
+var startedAt: lone Version
+var cursor: lone Node
+var seen: set Node
+var published: one Bool
+
+init {
+  generation = Original
+  outgoing = Root -> Middle
+  no startedAt no cursor no seen
+  published = false
+}
+
+behavior replaceGraph() {
+  guard { generation = Original not published }
+  update { outgoing = Middle -> Target generation = Replaced }
+}
+
+behavior start() {
+  guard { no startedAt }
+  update { startedAt = generation cursor = Root seen = Root }
+}
+
+behavior visit() {
+  guard { some cursor }
+  update {
+    cursor = cursor.outgoing - seen
+    seen = seen + cursor.outgoing
+  }
+}
+
+behavior finish() {
+  guard { some startedAt no cursor not published }
+  update {
+    if { startedAt = generation } then { published = true }
+    else { startedAt = generation cursor = Root seen = Root }
+  }
+}
+
+invariant PublishedMatchesCurrentGraph {
+  published implies startedAt = generation and seen = reachableFrom(Root, outgoing)
+}
+
+transition RetryDiscardsTheOldWalk on finish {
+  before(startedAt) != before(generation) implies {
+    not after(published)
+    after(startedAt) = before(generation)
+    after(cursor) = Root
+    after(seen) = Root
+  }
+}
+
+reachable OriginalPublished { published generation = Original }
+reachable MixedAttemptNeedsRetry {
+  startedAt = Original generation = Replaced Target in seen no cursor not published
+}
+reachable ReplacementPublished { published generation = Replaced }
+scope steps = 9

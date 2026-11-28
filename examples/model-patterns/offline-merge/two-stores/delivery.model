@@ -1,0 +1,17 @@
+var @received: Request -> lone Nat
+init { no @received }
+
+behavior @send(request: Request) {
+  guard { some request.@receipt no request.@received }
+  update { @received = @received ++ request -> request.@receipt }
+}
+
+invariant @DeliveredFromReceipt {
+  all request: Request | some request.@received implies request.@received = request.@receipt
+}
+
+transition @StableInput {
+  all request: Request | some before(request.@receipt) implies unchanged(request.@receipt)
+}
+
+reachable @CanDeliver { some @received }

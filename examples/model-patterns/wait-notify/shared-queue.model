@@ -1,0 +1,47 @@
+model SharedWaitQueue
+enum Waiter = Left | Right
+sequence Queue = Waiter, max = 2
+
+var queue: one Queue
+var favored: lone Waiter
+var notified: one Bool
+var woken: set Waiter
+var finished: set Waiter
+
+init {
+  queue = Queue[] no favored notified = false no woken no finished
+}
+
+behavior park(worker: Waiter) {
+  guard { no favored worker not in elements(queue) }
+  update { queue = append(queue, worker) }
+}
+behavior publish(worker: Waiter) {
+  guard { elements(queue) = Waiter no favored }
+  update { favored = worker }
+}
+behavior notify() {
+  guard { some favored not notified }
+  update {
+    queue = Queue[]
+    woken = elements(queue)
+    notified = true
+  }
+}
+behavior resume(worker: Waiter) {
+  guard { worker in woken }
+  update {
+    woken = woken - worker
+    if { worker = favored } then { finished = finished + worker }
+  }
+}
+
+invariant OnlyReadyFinishes { finished in favored }
+invariant ReadyWaiterIsNotLeftQueued { notified implies no (favored & elements(queue)) }
+reachable LeftBeforeRight { queue = Queue[Left, Right] no favored }
+
+leads_to ReadyWorkerFinishes
+  with { weak resume(*) }
+  { notified } { favored in finished }
+
+scope Int = 0..2, steps = 6

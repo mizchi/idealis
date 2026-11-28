@@ -82,7 +82,7 @@ jobs:
           echo "618f13955d755cafbfe8c9cba1d27635848cd49dbc6abffd398d2751db1231bf  $RUNNER_TEMP/pkl" | sha256sum -c -
           chmod +x "$RUNNER_TEMP/pkl"
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
-      - run: just rspec-test
+      - run: just idealis-spec-test
       - run: just spec-check
       - run: just rcheck-adapters
       - run: cargo fmt --manifest-path crates/rusmt/Cargo.toml -- --check

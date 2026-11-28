@@ -1,0 +1,60 @@
+model RosterSnapshot
+enum Doctor = Ada | Ben
+enum Epoch = V0 | V1 | V2 | V3
+enum Result = Committed | Conflict
+
+rel nextEpoch: Epoch -> lone Epoch
+fact { nextEpoch = (V0 -> V1) + (V1 -> V2) + (V2 -> V3) }
+
+var onDuty: set Doctor
+var epoch: one Epoch
+var captured: lone Epoch
+var basis: set Doctor
+var outcome: lone Result
+
+init { onDuty = Doctor epoch = V0 no captured no basis no outcome }
+
+behavior inspect() {
+  guard { onDuty = Doctor no captured no outcome }
+  update { captured = epoch basis = onDuty }
+}
+
+behavior pause() {
+  guard { epoch = V0 onDuty = Doctor }
+  update { onDuty = Ada epoch = epoch.nextEpoch }
+}
+
+behavior resume() {
+  guard { epoch = V1 onDuty = Ada }
+  update { onDuty = Doctor epoch = epoch.nextEpoch }
+}
+
+behavior submit() {
+  guard { some captured }
+  update {
+    captured = none
+    basis = none
+    if { captured = epoch } then {
+      onDuty = onDuty - Ada
+      epoch = epoch.nextEpoch
+      outcome = Committed
+    } else {
+      outcome = Conflict
+    }
+  }
+}
+
+invariant AtLeastOneDoctor { some onDuty }
+
+transition RestoringRowsDoesNotRestoreTheSnapshot on submit {
+  (before(basis) = before(onDuty) and before(captured) != before(epoch))
+    implies unchanged(onDuty) and unchanged(epoch) and after(outcome) = Conflict
+}
+
+transition FreshSnapshotCanCommit on submit {
+  before(captured) = before(epoch) implies after(outcome) = Committed
+}
+
+reachable SameRosterAtDifferentEpoch { captured = V0 epoch = V2 basis = onDuty }
+
+scope steps = 5

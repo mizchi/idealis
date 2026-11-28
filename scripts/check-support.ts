@@ -428,7 +428,7 @@ const scopes: readonly CrateScope[] = [
     ],
   },
   {
-    name: "rspec",
+    name: "idealis-spec",
     evidence: [
       {
         path: "src/lib.rs",
@@ -455,12 +455,28 @@ const scopes: readonly CrateScope[] = [
     ],
   },
   {
-    name: "rmodel",
+    name: "idealis-syntax",
     evidence: [
       {
         path: "src/syntax.rs",
-        topic: "モデル言語の構文・型・actionの形の検査と拒否する入力",
+        topic: "Idealis のモデル構文と型検査",
+        context: ["src/lib.rs"],
       },
+    ],
+  },
+  {
+    name: "idealis-semantics",
+    evidence: [
+      {
+        path: "src/reference.rs",
+        topic: "検査済みモデルの有限探索、判定、反例とその再生",
+        context: ["src/reference/input.rs"],
+      },
+    ],
+  },
+  {
+    name: "rmodel",
+    evidence: [
       {
         path: "src/emit.rs",
         topic: "AlloyとTLA+への2つの写し方、暗黙のframeと多重度の意味",
@@ -634,6 +650,9 @@ export const sourceView = (root: string, staged: boolean): SourceView => {
       },
     };
   }
+  const deleted = new Set(
+    git(root, ["ls-files", "--deleted", "-z"]).toString().split("\0"),
+  );
   return {
     paths: git(root, [
       "ls-files",
@@ -644,7 +663,7 @@ export const sourceView = (root: string, staged: boolean): SourceView => {
     ])
       .toString()
       .split("\0")
-      .filter(Boolean)
+      .filter((path) => path && !deleted.has(path))
       .sort(),
     read: async (path) => {
       assert.ok(!posix.isAbsolute(path) && !path.split("/").includes(".."));

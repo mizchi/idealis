@@ -20,6 +20,10 @@ pub struct Ir {
     pub sigs: Vec<String>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub entity_definitions: BTreeMap<String, String>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub entity_translations: BTreeMap<String, BTreeMap<String, String>>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub term_bindings: BTreeMap<String, String>,
     #[serde(default)]
     pub enums: Vec<Named>,
     #[serde(default)]
@@ -32,6 +36,8 @@ pub struct Ir {
     pub variants: Vec<VariantIr>,
     #[serde(default)]
     pub relations: Vec<RelationIr>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub derivations: Vec<DerivationIr>,
     #[serde(default)]
     pub facts: Vec<F>,
     #[serde(default)]
@@ -68,9 +74,60 @@ pub struct Field {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
+pub struct DerivationIr {
+    pub name: String,
+    pub value: E,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct RecordIr {
     pub name: String,
     pub fields: Vec<Field>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub data: Option<DataKindIr>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty", rename = "where")]
+    pub refinements: Vec<RefinementIr>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RefinementIr {
+    pub left: RefinementOperandIr,
+    pub op: String,
+    pub right: RefinementOperandIr,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum RefinementOperandIr {
+    Field(Vec<String>),
+    Literal(i64),
+}
+
+impl From<&rmodel::RefinementOperand> for RefinementOperandIr {
+    fn from(operand: &rmodel::RefinementOperand) -> Self {
+        match operand {
+            rmodel::RefinementOperand::Field(path) => Self::Field(path.clone()),
+            rmodel::RefinementOperand::Literal(n) => Self::Literal(*n),
+        }
+    }
+}
+
+impl From<&RefinementOperandIr> for rmodel::RefinementOperand {
+    fn from(operand: &RefinementOperandIr) -> Self {
+        match operand {
+            RefinementOperandIr::Field(path) => Self::Field(path.clone()),
+            RefinementOperandIr::Literal(n) => Self::Literal(*n),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum DataKindIr {
+    Newtype,
+    Record,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -165,6 +222,8 @@ pub struct CheckIr {
 #[serde(deny_unknown_fields)]
 pub struct TransitionIr {
     pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub action: Option<String>,
     pub formula: F,
 }
 
@@ -184,8 +243,20 @@ pub struct TemporalIr {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "lowercase", deny_unknown_fields)]
 pub enum FairnessIr {
-    Weak { action: String },
-    Strong { action: String },
+    Weak {
+        action: String,
+        #[serde(default, skip_serializing_if = "is_false")]
+        each: bool,
+    },
+    Strong {
+        action: String,
+        #[serde(default, skip_serializing_if = "is_false")]
+        each: bool,
+    },
+}
+
+fn is_false(value: &bool) -> bool {
+    !*value
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -195,7 +266,8 @@ pub struct ScopeIr {
     pub sizes: BTreeMap<String, usize>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ints: Option<(i64, i64)>,
-    pub steps: usize,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub steps: Option<usize>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -213,11 +285,37 @@ pub enum E {
         name: String,
     },
     None,
+    If {
+        condition: Box<F>,
+        then: Box<E>,
+        otherwise: Box<E>,
+    },
+    Select {
+        var: String,
+        sort: String,
+        predicate: Box<F>,
+    },
     Union {
         left: Box<E>,
         right: Box<E>,
     },
+    SetUnion {
+        left: Box<E>,
+        right: Box<E>,
+    },
+    Override {
+        left: Box<E>,
+        right: Box<E>,
+    },
+    WithoutKeys {
+        relation: Box<E>,
+        keys: Box<E>,
+    },
     Difference {
+        left: Box<E>,
+        right: Box<E>,
+    },
+    SetDifference {
         left: Box<E>,
         right: Box<E>,
     },
@@ -259,8 +357,36 @@ pub enum E {
         seq: Box<E>,
         item: Box<E>,
     },
+    Tail {
+        of: Box<E>,
+    },
+    Take {
+        seq: Box<E>,
+        count: Box<E>,
+    },
+    RemoveAt {
+        seq: Box<E>,
+        index: Box<E>,
+    },
     Length {
         of: Box<E>,
+    },
+    Elements {
+        of: Box<E>,
+    },
+    RemoveAll {
+        seq: Box<E>,
+        excluded: Box<E>,
+    },
+    Keys {
+        of: Box<E>,
+    },
+    Closure {
+        of: Box<E>,
+    },
+    ReachableFrom {
+        roots: Box<E>,
+        edges: Box<E>,
     },
     Index {
         seq: Box<E>,
@@ -398,16 +524,40 @@ fn mult_back(m: MultIr) -> Mult {
     }
 }
 
-fn expr(e: &Expr) -> E {
-    let pair = |l: &Expr, r: &Expr| (Box::new(expr(l)), Box::new(expr(r)));
-    match e {
+fn expr(e: &Expr) -> Result<E, String> {
+    let pair =
+        |l: &Expr, r: &Expr| -> Result<_, String> { Ok((Box::new(expr(l)?), Box::new(expr(r)?))) };
+    Ok(match e {
         Expr::Name(name) => E::Name { name: name.clone() },
+        Expr::Field(receiver, field) => E::Join {
+            left: Box::new(expr(receiver)?),
+            right: Box::new(E::Name {
+                name: field.clone(),
+            }),
+        },
         Expr::None => E::None,
+        Expr::If(condition, yes, no) => E::If {
+            condition: Box::new(formula(condition)?),
+            then: Box::new(expr(yes)?),
+            otherwise: Box::new(expr(no)?),
+        },
+        Expr::Select(var, sort, predicate) => E::Select {
+            var: var.clone(),
+            sort: sort.clone(),
+            predicate: Box::new(formula(predicate)?),
+        },
         Expr::Binary(op, l, r) => {
-            let (left, right) = pair(l, r);
+            let (left, right) = pair(l, r)?;
             match op {
                 SetOp::Union => E::Union { left, right },
+                SetOp::SetUnion => E::SetUnion { left, right },
+                SetOp::Override => E::Override { left, right },
+                SetOp::WithoutKeys => E::WithoutKeys {
+                    relation: left,
+                    keys: right,
+                },
                 SetOp::Difference => E::Difference { left, right },
+                SetOp::SetDifference => E::SetDifference { left, right },
                 SetOp::Intersection => E::Intersection { left, right },
                 SetOp::Product => E::Product { left, right },
                 SetOp::Join => E::Join { left, right },
@@ -416,10 +566,10 @@ fn expr(e: &Expr) -> E {
         }
         Expr::Literal(value) => E::Literal { value: *value },
         Expr::Count(of) => E::Count {
-            of: Box::new(expr(of)),
+            of: Box::new(expr(of)?),
         },
         Expr::Arith(op, l, r) => {
-            let (left, right) = pair(l, r);
+            let (left, right) = pair(l, r)?;
             match op {
                 Arith::Add => E::Add { left, right },
                 Arith::Sub => E::Sub { left, right },
@@ -428,29 +578,57 @@ fn expr(e: &Expr) -> E {
         }
         Expr::Sequence(name, items) => E::Sequence {
             name: name.clone(),
-            items: items.iter().map(expr).collect(),
+            items: items.iter().map(expr).collect::<Result<_, _>>()?,
         },
         Expr::Append(seq, item) => E::Append {
-            seq: Box::new(expr(seq)),
-            item: Box::new(expr(item)),
+            seq: Box::new(expr(seq)?),
+            item: Box::new(expr(item)?),
+        },
+        Expr::Tail(seq) => E::Tail {
+            of: Box::new(expr(seq)?),
+        },
+        Expr::Take(seq, count) => E::Take {
+            seq: Box::new(expr(seq)?),
+            count: Box::new(expr(count)?),
+        },
+        Expr::RemoveAt(seq, index) => E::RemoveAt {
+            seq: Box::new(expr(seq)?),
+            index: Box::new(expr(index)?),
         },
         Expr::Length(seq) => E::Length {
-            of: Box::new(expr(seq)),
+            of: Box::new(expr(seq)?),
+        },
+        Expr::RemoveAll(seq, excluded) => E::RemoveAll {
+            seq: Box::new(expr(seq)?),
+            excluded: Box::new(expr(excluded)?),
+        },
+        Expr::Closure(edges) => E::Closure {
+            of: Box::new(expr(edges)?),
+        },
+        Expr::Keys(relation) => E::Keys {
+            of: Box::new(expr(relation)?),
+        },
+        Expr::ReachableFrom(roots, edges) => E::ReachableFrom {
+            roots: Box::new(expr(roots)?),
+            edges: Box::new(expr(edges)?),
+        },
+        Expr::Elements(seq) => E::Elements {
+            of: Box::new(expr(seq)?),
         },
         Expr::Index(seq, index) => E::Index {
-            seq: Box::new(expr(seq)),
-            index: Box::new(expr(index)),
+            seq: Box::new(expr(seq)?),
+            index: Box::new(expr(index)?),
         },
         Expr::Variant(tag, payload) => E::Variant {
             tag: tag.clone(),
-            payload: payload.as_ref().map(|v| Box::new(expr(v))),
+            payload: payload.as_deref().map(expr).transpose()?.map(Box::new),
         },
         Expr::Payload(of, tag) => E::Payload {
-            of: Box::new(expr(of)),
+            of: Box::new(expr(of)?),
             tag: tag.clone(),
         },
         Expr::At(phase, value) => {
-            let of = Box::new(expr(value));
+            let of = Box::new(expr(value)?);
             match phase {
                 rmodel::Phase::Before => E::Before { of },
                 rmodel::Phase::After => E::After { of },
@@ -458,9 +636,9 @@ fn expr(e: &Expr) -> E {
         }
         Expr::Record(name, fields) => E::Record {
             name: name.clone(),
-            fields: fields.iter().map(expr).collect(),
+            fields: fields.iter().map(expr).collect::<Result<_, _>>()?,
         },
-    }
+    })
 }
 
 fn expr_back(e: &E) -> Expr {
@@ -468,13 +646,43 @@ fn expr_back(e: &E) -> Expr {
     match e {
         E::Name { name } => Expr::Name(name.clone()),
         E::None => Expr::None,
+        E::If {
+            condition,
+            then,
+            otherwise,
+        } => Expr::If(
+            Box::new(formula_back(condition)),
+            Box::new(expr_back(then)),
+            Box::new(expr_back(otherwise)),
+        ),
+        E::Select {
+            var,
+            sort,
+            predicate,
+        } => Expr::Select(var.clone(), sort.clone(), Box::new(formula_back(predicate))),
         E::Union { left, right } => {
             let (l, r) = pair(left, right);
             Expr::Binary(SetOp::Union, l, r)
         }
+        E::SetUnion { left, right } => {
+            let (l, r) = pair(left, right);
+            Expr::Binary(SetOp::SetUnion, l, r)
+        }
+        E::Override { left, right } => {
+            let (l, r) = pair(left, right);
+            Expr::Binary(SetOp::Override, l, r)
+        }
+        E::WithoutKeys { relation, keys } => {
+            let (relation, keys) = pair(relation, keys);
+            Expr::Binary(SetOp::WithoutKeys, relation, keys)
+        }
         E::Difference { left, right } => {
             let (l, r) = pair(left, right);
             Expr::Binary(SetOp::Difference, l, r)
+        }
+        E::SetDifference { left, right } => {
+            let (l, r) = pair(left, right);
+            Expr::Binary(SetOp::SetDifference, l, r)
         }
         E::Intersection { left, right } => {
             let (l, r) = pair(left, right);
@@ -509,7 +717,21 @@ fn expr_back(e: &E) -> Expr {
         E::Append { seq, item } => {
             Expr::Append(Box::new(expr_back(seq)), Box::new(expr_back(item)))
         }
+        E::Tail { of } => Expr::Tail(Box::new(expr_back(of))),
+        E::Take { seq, count } => Expr::Take(Box::new(expr_back(seq)), Box::new(expr_back(count))),
+        E::RemoveAt { seq, index } => {
+            Expr::RemoveAt(Box::new(expr_back(seq)), Box::new(expr_back(index)))
+        }
         E::Length { of } => Expr::Length(Box::new(expr_back(of))),
+        E::RemoveAll { seq, excluded } => {
+            Expr::RemoveAll(Box::new(expr_back(seq)), Box::new(expr_back(excluded)))
+        }
+        E::Closure { of } => Expr::Closure(Box::new(expr_back(of))),
+        E::Keys { of } => Expr::Keys(Box::new(expr_back(of))),
+        E::ReachableFrom { roots, edges } => {
+            Expr::ReachableFrom(Box::new(expr_back(roots)), Box::new(expr_back(edges)))
+        }
+        E::Elements { of } => Expr::Elements(Box::new(expr_back(of))),
         E::Index { seq, index } => {
             Expr::Index(Box::new(expr_back(seq)), Box::new(expr_back(index)))
         }
@@ -526,12 +748,12 @@ fn expr_back(e: &E) -> Expr {
     }
 }
 
-fn int(i: &Int) -> I {
-    match i {
-        Int::Count(e) => I::Count { of: expr(e) },
+fn int(i: &Int) -> Result<I, String> {
+    Ok(match i {
+        Int::Count(e) => I::Count { of: expr(e)? },
         Int::Literal(value) => I::Literal { value: *value },
-        Int::Value(e) => I::Value { of: expr(e) },
-    }
+        Int::Value(e) | Int::LocatedValue(e, _) => I::Value { of: expr(e)? },
+    })
 }
 
 fn int_back(i: &I) -> Int {
@@ -545,7 +767,7 @@ fn int_back(i: &I) -> Int {
 fn formula(f: &Formula) -> Result<F, String> {
     Ok(match f {
         Formula::Compare(op, l, r) => {
-            let (left, right) = (expr(l), expr(r));
+            let (left, right) = (expr(l)?, expr(r)?);
             match op {
                 Compare::In => F::In { left, right },
                 Compare::NotIn => F::NotIn { left, right },
@@ -554,7 +776,7 @@ fn formula(f: &Formula) -> Result<F, String> {
             }
         }
         Formula::Ints(op, l, r) => {
-            let (left, right) = (int(l), int(r));
+            let (left, right) = (int(l)?, int(r)?);
             match op {
                 IntCompare::Less => F::Lt { left, right },
                 IntCompare::LessEqual => F::Le { left, right },
@@ -565,7 +787,7 @@ fn formula(f: &Formula) -> Result<F, String> {
             }
         }
         Formula::Mult(m, e) => {
-            let of = expr(e);
+            let of = expr(e)?;
             match m {
                 Mult::Some => F::Some { of },
                 Mult::One => F::One { of },
@@ -574,10 +796,10 @@ fn formula(f: &Formula) -> Result<F, String> {
             }
         }
         Formula::HasTag(of, tag) => F::HasTag {
-            of: expr(of),
+            of: expr(of)?,
             tag: tag.clone(),
         },
-        Formula::Empty(e) => F::No { of: expr(e) },
+        Formula::Empty(e) => F::No { of: expr(e)? },
         Formula::Not(inner) => F::Not {
             arg: Box::new(formula(inner)?),
         },
@@ -649,21 +871,24 @@ fn fairness(rule: &rmodel::Fairness) -> FairnessIr {
     match rule.kind {
         rmodel::FairnessKind::Weak => FairnessIr::Weak {
             action: rule.action.clone(),
+            each: rule.each,
         },
         rmodel::FairnessKind::Strong => FairnessIr::Strong {
             action: rule.action.clone(),
+            each: rule.each,
         },
     }
 }
 
 fn fairness_back(rule: &FairnessIr) -> rmodel::Fairness {
-    let (kind, action) = match rule {
-        FairnessIr::Weak { action } => (rmodel::FairnessKind::Weak, action),
-        FairnessIr::Strong { action } => (rmodel::FairnessKind::Strong, action),
+    let (kind, action, each) = match rule {
+        FairnessIr::Weak { action, each } => (rmodel::FairnessKind::Weak, action, each),
+        FairnessIr::Strong { action, each } => (rmodel::FairnessKind::Strong, action, each),
     };
     rmodel::Fairness {
         kind,
         action: action.clone(),
+        each: *each,
     }
 }
 
@@ -683,6 +908,8 @@ pub fn to_ir(model: &Model) -> Result<Ir, String> {
         name: model.name.clone(),
         sigs: model.sigs.clone(),
         entity_definitions: model.entity_definitions.clone(),
+        entity_translations: model.entity_translations.clone(),
+        term_bindings: model.term_bindings.clone(),
         enums: named(&model.enums),
         sums: named(&model.sums),
         records: model
@@ -690,6 +917,19 @@ pub fn to_ir(model: &Model) -> Result<Ir, String> {
             .iter()
             .map(|r| RecordIr {
                 name: r.name.clone(),
+                data: r.data.map(|kind| match kind {
+                    rmodel::DataKind::Newtype => DataKindIr::Newtype,
+                    rmodel::DataKind::Record => DataKindIr::Record,
+                }),
+                refinements: r
+                    .refinements
+                    .iter()
+                    .map(|clause| RefinementIr {
+                        left: (&clause.left).into(),
+                        op: clause.symbol().into(),
+                        right: (&clause.right).into(),
+                    })
+                    .collect(),
                 fields: r
                     .fields
                     .iter()
@@ -743,6 +983,16 @@ pub fn to_ir(model: &Model) -> Result<Ir, String> {
                 },
             })
             .collect(),
+        derivations: model
+            .derivations
+            .iter()
+            .map(|(name, value)| {
+                Ok(DerivationIr {
+                    name: name.clone(),
+                    value: expr(value)?,
+                })
+            })
+            .collect::<Result<_, String>>()?,
         facts: model.facts.iter().map(formula).collect::<Result<_, _>>()?,
         init: model.init.iter().map(formula).collect::<Result<_, _>>()?,
         actions: model
@@ -767,11 +1017,13 @@ pub fn to_ir(model: &Model) -> Result<Ir, String> {
                     assignments: a
                         .assignments
                         .iter()
-                        .map(|(var, value)| Assignment {
-                            var: var.clone(),
-                            value: expr(value),
+                        .map(|(var, value)| {
+                            Ok(Assignment {
+                                var: var.clone(),
+                                value: expr(value)?,
+                            })
                         })
-                        .collect(),
+                        .collect::<Result<_, String>>()?,
                 })
             })
             .collect::<Result<_, String>>()?,
@@ -818,6 +1070,7 @@ pub fn to_ir(model: &Model) -> Result<Ir, String> {
             .map(|check| {
                 Ok(TransitionIr {
                     name: check.name.clone(),
+                    action: check.action.clone(),
                     formula: formula(&check.formula)?,
                 })
             })
@@ -832,15 +1085,26 @@ pub fn to_ir(model: &Model) -> Result<Ir, String> {
     })
 }
 
+fn check_version(version: u32) -> Result<(), String> {
+    if version != VERSION {
+        return Err(format!("IR version {version} (want {VERSION})"));
+    }
+    Ok(())
+}
+
 /// A checked model from the IR, through rmodel's type checker.
 pub fn from_ir(ir: &Ir) -> Result<Model, String> {
-    if ir.version != VERSION {
-        return Err(format!("IR version {} (want {VERSION})", ir.version));
-    }
+    from_ir_checked(ir).map(rmodel::CheckedModel::into_model)
+}
+
+fn from_ir_checked(ir: &Ir) -> Result<rmodel::CheckedModel, String> {
+    check_version(ir.version)?;
     let model = Model {
         name: ir.name.clone(),
         sigs: ir.sigs.clone(),
         entity_definitions: ir.entity_definitions.clone(),
+        entity_translations: ir.entity_translations.clone(),
+        term_bindings: ir.term_bindings.clone(),
         enums: ir
             .enums
             .iter()
@@ -854,15 +1118,35 @@ pub fn from_ir(ir: &Ir) -> Result<Model, String> {
         records: ir
             .records
             .iter()
-            .map(|r| rmodel::Record {
-                name: r.name.clone(),
-                fields: r
-                    .fields
-                    .iter()
-                    .map(|f| (f.name.clone(), f.sort.clone()))
-                    .collect(),
+            .map(|r| {
+                Ok(rmodel::Record {
+                    name: r.name.clone(),
+                    data: r.data.map(|kind| match kind {
+                        DataKindIr::Newtype => rmodel::DataKind::Newtype,
+                        DataKindIr::Record => rmodel::DataKind::Record,
+                    }),
+                    refinements: r
+                        .refinements
+                        .iter()
+                        .map(|clause| {
+                            let op = rmodel::Refinement::operator(&clause.op).ok_or_else(|| {
+                                format!("{}: unknown where operator {:?}", r.name, clause.op)
+                            })?;
+                            Ok(rmodel::Refinement {
+                                left: (&clause.left).into(),
+                                op,
+                                right: (&clause.right).into(),
+                            })
+                        })
+                        .collect::<Result<_, String>>()?,
+                    fields: r
+                        .fields
+                        .iter()
+                        .map(|f| (f.name.clone(), f.sort.clone()))
+                        .collect(),
+                })
             })
-            .collect(),
+            .collect::<Result<_, String>>()?,
         sequences: ir
             .sequences
             .iter()
@@ -905,6 +1189,11 @@ pub fn from_ir(ir: &Ir) -> Result<Model, String> {
                     },
                 },
             })
+            .collect(),
+        derivations: ir
+            .derivations
+            .iter()
+            .map(|d| (d.name.clone(), expr_back(&d.value)))
             .collect(),
         facts: ir.facts.iter().map(formula_back).collect(),
         init: ir.init.iter().map(formula_back).collect(),
@@ -961,6 +1250,7 @@ pub fn from_ir(ir: &Ir) -> Result<Model, String> {
             .iter()
             .map(|check| rmodel::TransitionCheck {
                 name: check.name.clone(),
+                action: check.action.clone(),
                 formula: formula_back(&check.formula),
             })
             .collect(),
@@ -971,11 +1261,22 @@ pub fn from_ir(ir: &Ir) -> Result<Model, String> {
             steps: ir.scope.steps,
         },
     };
-    rmodel::validate(model).map_err(|e| e.to_string())
+    rmodel::validate_checked(model).map_err(|e| e.to_string())
 }
 
 /// Reads IR JSON, rejecting unknown tags and fields, and checks the model.
 pub fn parse(json: &str) -> Result<(Model, Vec<Omitted>), String> {
+    parse_checked(json).map(|(model, omitted)| (model.into_model(), omitted))
+}
+
+/// Read versioned JSON into the same validated model boundary as source.
+pub fn parse_checked(json: &str) -> Result<(rmodel::CheckedModel, Vec<Omitted>), String> {
+    #[derive(Deserialize)]
+    struct Header {
+        version: u32,
+    }
+    let header: Header = serde_json::from_str(json).map_err(|error| format!("IR: {error}"))?;
+    check_version(header.version)?;
     let ir: Ir = serde_json::from_str(json).map_err(|e| format!("IR: {e}"))?;
-    Ok((from_ir(&ir)?, ir.omitted))
+    Ok((from_ir_checked(&ir)?, ir.omitted))
 }

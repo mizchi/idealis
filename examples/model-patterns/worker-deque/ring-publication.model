@@ -1,0 +1,50 @@
+model RingPublication
+enum Ticket = Old | Next
+enum Field = Data | Header
+
+var reserved: one Bool
+var visible: lone Ticket
+var body: Field -> one Ticket
+var seen: lone Ticket
+var copy: Field -> lone Ticket
+
+init {
+  reserved = false
+  no visible no seen no copy
+  body = Field -> Old
+}
+
+behavior reserve() {
+  guard { not reserved }
+  update { reserved = true }
+}
+
+behavior writePart(field: Field) {
+  guard { reserved field.body = Old }
+  update { body = body ++ field -> Next }
+}
+
+behavior publish() {
+  guard { reserved no visible body = Field -> Next }
+  update { visible = Next }
+}
+
+behavior read() {
+  guard { no seen }
+  update {
+    if { some visible } then {
+      seen = visible
+      copy = body
+    }
+  }
+}
+
+invariant VisibleTicketHasCompleteBody { some visible implies body = Field -> visible }
+invariant ReaderGetsBodyForTicket { some seen implies copy = Field -> seen }
+transition BodyIsPreservedOnPublish on publish { unchanged(body) }
+transition EmptySlotCannotBeRead on read { no before(visible) implies no after(seen) and no after(copy) }
+
+reachable HeaderStagedWithoutPublication { reserved Header.body = Next Data.body = Old no visible }
+reachable PublishedUnread { visible = Next no seen }
+
+scope steps = 6

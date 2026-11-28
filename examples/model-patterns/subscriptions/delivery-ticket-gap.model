@@ -1,0 +1,71 @@
+model DeliveryTicketGap
+enum Epoch = Original | Renewed
+enum Position = One | Two
+
+var epoch: one Epoch
+var sealed: one Bool
+var receipts: set Position
+var arrivals: one Nat
+var lastAccepted: lone Epoch
+var waiting: set Position
+var replayable: set Position
+var requested: set Position
+
+init {
+  epoch = Original not sealed no receipts arrivals = 0 no lastAccepted
+  waiting = Position no replayable no requested
+}
+
+behavior seal() {
+  guard { epoch = Original not sealed }
+  update { sealed = true }
+}
+behavior drop(position: Position) {
+  guard { position in waiting }
+  update { waiting = waiting - position }
+}
+behavior request(position: Position) {
+  guard { epoch = Original sealed position not in receipts + requested }
+  update { requested = requested + position }
+}
+behavior resend(position: Position) {
+  guard { position in requested }
+  update { requested = requested - position waiting = waiting + position }
+}
+behavior arrive(stream: Epoch, position: Position) {
+  guard {
+    (stream = Original and position in waiting + replayable) or
+      (stream = Renewed and epoch = Renewed)
+  }
+  update {
+    if { stream = Original } then {
+      waiting = waiting - position
+      replayable = replayable + position
+    }
+    if { stream = epoch } then {
+      receipts = receipts + position
+      if { arrivals < 2 } then { arrivals = arrivals + 1 }
+      lastAccepted = stream
+    }
+  }
+}
+behavior recycle() {
+  guard { epoch = Original sealed receipts = Position }
+  update { epoch = Renewed receipts = none arrivals = 0 lastAccepted = none }
+}
+
+invariant LastAcceptedBelongsToCurrentEpoch { lastAccepted in epoch }
+transition RecycleRequiresCompletePrefix on recycle { before(receipts) = Position }
+transition StalePacketDoesNotFillGap on arrive {
+  stream != before(epoch) implies unchanged(receipts) and unchanged(arrivals)
+}
+reachable DuplicateMasksGap {
+  epoch = Original sealed arrivals = 2 receipts = One Two not in waiting
+}
+reachable OutOfOrderLeavesGap {
+  epoch = Original sealed arrivals = 1 receipts = Two One not in waiting
+}
+leads_to SealedEventuallyRecycles
+  with { weak request(*) weak resend(*) strong arrive(*) weak recycle }
+  { epoch = Original sealed } { epoch = Renewed }
+scope Int = 0..2, steps = 13

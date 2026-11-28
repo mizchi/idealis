@@ -1,0 +1,60 @@
+model StreamTerminal
+enum Chunk = First | Second
+enum Phase = Open | Closing | Closed | Failed
+enum WriteResult = Waiting | Delivered | WriteError
+enum ReadResult = End | ReadError
+sequence Chunks = Chunk, max = 2
+
+var phase: one Phase
+var pending: one Chunks
+var received: one Chunks
+var outcome: Chunk -> lone WriteResult
+var terminal: lone ReadResult
+
+init { phase = Open pending = Chunks[] received = Chunks[] no outcome no terminal }
+
+behavior write(chunk: Chunk) {
+  guard { phase = Open no chunk.outcome }
+  update { pending = append(pending, chunk) outcome = outcome ++ chunk -> Waiting }
+}
+behavior close() {
+  guard { phase = Open }
+  update { phase = if { len(pending) = 0 } then Closed else Closing }
+}
+behavior read(chunk: Chunk) {
+  guard { phase = Open or phase = Closing chunk = at(pending, 0) }
+  update {
+    received = append(received, chunk)
+    pending = tail(pending)
+    outcome = outcome ++ chunk -> Delivered
+    phase = if { phase = Closing and len(pending) = 1 } then Closed else phase
+  }
+}
+behavior fail() {
+  guard { phase = Open or phase = Closing }
+  update {
+    phase = Failed
+    pending = Chunks[]
+    outcome = outcome ++ elements(pending) -> WriteError
+  }
+}
+behavior readTerminal() {
+  guard { phase = Closed or phase = Failed }
+  update { terminal = if { phase = Closed } then End else ReadError }
+}
+
+invariant PendingWritesMatch { elements(pending) = outcome.Waiting }
+invariant ReceivedWritesMatch { elements(received) = outcome.Delivered }
+invariant ClosedDrained { phase = Closed implies len(pending) = 0 }
+invariant ErrorIsNotEnd { phase = Failed implies terminal != End }
+transition ReadFollowsQueue on read {
+  before(at(pending, 0)) = chunk
+  after(received) = append(before(received), chunk)
+}
+transition ClosingPreservesPending on close { unchanged(pending) unchanged(outcome) }
+transition FailureRejectsPending on fail {
+  all chunk: Chunk | chunk in before(elements(pending)) implies after(chunk.outcome) = WriteError
+}
+reachable EndAfterTwoWrites { terminal = End received = Chunks[First, Second] }
+reachable ErrorWithWaitingWrite { terminal = ReadError some outcome.WriteError }
+scope Int = 0..2, steps = 7

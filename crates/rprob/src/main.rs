@@ -1,31 +1,45 @@
-use rmodel::reference::Report;
+use rprob::SafetyAnalysis;
 use std::process::ExitCode;
 
-fn check() -> Result<Report, String> {
+fn check() -> Result<SafetyAnalysis, String> {
     let args: Vec<_> = std::env::args().skip(1).collect();
-    let (path, budget) = match args.as_slice() {
+    let (safety, args) = match args.split_first() {
+        Some((flag, rest)) if flag == "--safety" => (true, rest),
+        _ => (false, args.as_slice()),
+    };
+    let (path, budget) = match args {
         [path] => (path, 1_000_000),
         [path, flag, value] if flag == "--max-states" => {
             let budget = value.parse().map_err(|_| "invalid --max-states")?;
             (path, budget)
         }
-        _ => return Err("usage: rprob <model> [--max-states N]".into()),
+        _ => return Err("usage: rprob [--safety] <model> [--max-states N]".into()),
     };
     let source = std::fs::read_to_string(path).map_err(|error| error.to_string())?;
-    let model = rmodel::parse(&source).map_err(|error| error.to_string())?;
-    let compiled = rprob::Compiled::new(&model).map_err(|error| format!("unsupported: {error}"))?;
-    Ok(compiled.analyze(budget))
+    let model = idealis_syntax::parse(&source).map_err(|error| error.to_string())?;
+    if !safety && !model.temporal.is_empty() {
+        return Err(
+            "unsupported: temporal obligations are outside the finite atom fragment".into(),
+        );
+    }
+    rprob::analyze_safety(&model, budget).map_err(|error| format!("unsupported: {error}"))
 }
 
 fn main() -> ExitCode {
     match check() {
-        Ok(report) => {
+        Ok(SafetyAnalysis {
+            report,
+            omitted_temporal,
+        }) => {
             println!(
                 "Scope: {:?}\nDeclarations: {:?}",
                 report.scope, report.declarations
             );
             for verdict in report.verdicts {
                 println!("{}: {:?}", verdict.check, verdict.outcome);
+            }
+            for name in omitted_temporal {
+                println!("{name}: unsupported (temporal)");
             }
             for (action, enabled) in report.enabled {
                 println!("action {action}: {enabled:?}");

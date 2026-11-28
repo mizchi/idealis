@@ -1,0 +1,57 @@
+model RecoveryPublish
+enum Writer = Original | Replacement
+enum Decision = Stored | Rejected
+
+var owner: one Writer
+var staged: set Writer
+var published: lone Writer
+var receipts: Writer -> lone Decision
+
+init { owner = Original no staged no published no receipts }
+
+behavior prepare(writer: Writer) {
+  guard { writer = owner writer not in staged no writer.receipts }
+  update { staged = staged + writer }
+}
+
+behavior promote() {
+  guard { owner = Original }
+  update { owner = Replacement }
+}
+
+behavior publish(writer: Writer) {
+  guard { writer in staged }
+  update {
+    staged = staged - writer
+    if { writer = owner } then {
+      published = writer
+      receipts = receipts + (writer -> Stored)
+    } else {
+      receipts = receipts + (writer -> Rejected)
+    }
+  }
+}
+
+invariant VisibleHasStoredReceipt {
+  some published implies published.receipts = Stored
+}
+
+transition PromotionKeepsPreviouslyPublishedData on promote {
+  unchanged(published)
+  unchanged(receipts)
+}
+
+transition StalePublicationKeepsVisibleData on publish {
+  writer != before(owner) implies unchanged(published)
+}
+
+transition StalePublicationRecordsRejection on publish {
+  writer != before(owner) implies after(writer.receipts) = Rejected
+}
+
+transition CurrentPublicationCommitsDataAndReceipt on publish {
+  writer = before(owner) implies
+    (after(published) = writer and after(writer.receipts) = Stored)
+}
+
+scope steps = 8

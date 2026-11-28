@@ -1,0 +1,58 @@
+model RetryRetention
+enum Ticket = Older | Current
+enum Outcome = Accepted | Expired
+record Reply { outcome: Outcome, atRevision: Nat }
+
+rel issued: Ticket -> one Nat
+fact { issued = (Older -> 0) + (Current -> 1) }
+var floor: one Nat
+var revision: one Nat
+var receipts: Ticket -> lone Nat
+var reply: lone Reply
+
+init { floor = 0 revision = 0 no receipts no reply }
+behavior submit(ticket: Ticket) {
+  guard { ticket.issued < floor or some ticket.receipts or revision < 3 }
+  update {
+    if { ticket.issued < floor } then {
+      reply = Reply { outcome: Expired, atRevision: revision }
+    } else {
+      if { some ticket.receipts } then {
+        reply = Reply { outcome: Accepted, atRevision: ticket.receipts }
+      } else {
+        revision = revision + 1
+        receipts = receipts ++ ticket -> (revision + 1)
+        reply = Reply { outcome: Accepted, atRevision: revision + 1 }
+      }
+    }
+  }
+}
+behavior advanceFloor() {
+  guard { floor = 0 }
+  update { floor = 1 }
+}
+behavior collect(ticket: Ticket) {
+  update {
+    if { ticket.issued < floor } then { receipts = receipts - (ticket -> ticket.receipts) }
+  }
+}
+behavior reopen() {}
+
+transition ExpiredTicketIsRejected on submit {
+  before(ticket.issued) < before(floor) implies
+    (unchanged(revision) and unchanged(receipts) and after(reply.outcome) = Expired)
+}
+transition AdmittedTicketKeepsItsReceipt on collect {
+  before(ticket.issued) >= before(floor) implies unchanged(ticket.receipts)
+}
+transition RetriedTicketKeepsItsRevision on submit {
+  (before(ticket.issued) >= before(floor) and some before(ticket.receipts)) implies
+    (unchanged(revision) and after(reply.atRevision) = before(ticket.receipts))
+}
+reachable OldReceiptHasBeenCollected {
+  floor = 1 revision = 1 no receipts
+}
+reachable NewTicketIsAtBoundary {
+  floor = 1 revision = 1 Current.receipts = 1
+}
+scope Int = 0..3, steps = 9

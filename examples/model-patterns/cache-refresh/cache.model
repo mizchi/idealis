@@ -1,0 +1,49 @@
+model CacheRefresh
+enum Reader = Left | Middle | Right
+enum Generation = Old | New
+enum StartCount = Once | Repeated
+
+var generation: one Generation
+var cache: lone Generation
+var inflight: set Generation
+var waiting: Reader -> lone Generation
+var visible: Reader -> lone Generation
+var starts: Generation -> lone StartCount
+
+init { generation = Old no cache no inflight no waiting no visible no starts }
+
+behavior read(reader: Reader) {
+  guard { no reader.waiting }
+  update {
+    waiting = if { cache = generation } then waiting else waiting ++ reader -> generation
+    visible = if { cache = generation } then visible ++ reader -> generation else visible - reader -> Generation
+    inflight = if { cache = generation } then inflight else inflight + generation
+    starts = if { not (cache = generation or generation in inflight) }
+      then starts ++ generation -> Once else starts
+  }
+}
+behavior invalidate() {
+  guard { generation = Old }
+  update { generation = New cache = none }
+}
+behavior resolve(completed: Generation) {
+  guard { completed in inflight }
+  update {
+    inflight = inflight - completed
+    waiting = waiting - Reader -> completed
+    cache = if { completed = generation } then completed else cache
+    visible = if { completed = generation }
+      then visible ++ (waiting.completed) -> completed else visible
+  }
+}
+
+invariant OneLoadPerGeneration { Repeated not in Generation.starts }
+transition OldCompletionKeepsCurrent on resolve {
+  completed != before(generation) implies {
+    unchanged(cache)
+    unchanged(visible)
+  }
+}
+reachable SharedLoad { Left.waiting = Old Middle.waiting = Old Old.starts = Once }
+reachable CurrentReadyWhileOldWaits { cache = New Old in inflight }
+scope steps = 9

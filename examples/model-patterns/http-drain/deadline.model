@@ -1,0 +1,63 @@
+model DrainDeadline
+enum Phase = Accepting | Draining | Halted
+enum Outcome = Idle | Pending | Success | Aborted
+
+var phase: one Phase
+var outcome: one Outcome
+var due: one Bool
+var releaseCount: one Nat
+
+init { phase = Accepting outcome = Idle due = false releaseCount = 0 }
+behavior accept() {
+  guard { phase = Accepting outcome = Idle }
+  update { outcome = Pending }
+}
+behavior beginDrain() {
+  guard { phase = Accepting }
+  update { phase = Draining }
+}
+behavior reachDeadline() {
+  guard { phase = Draining not due }
+  update { due = true }
+}
+behavior expire() {
+  guard { phase = Draining }
+  update {
+    if { due and outcome = Pending } then {
+      outcome = Aborted
+      releaseCount = releaseCount + 1
+    }
+  }
+}
+behavior finish() {
+  guard { phase != Halted }
+  update {
+    if { outcome = Pending } then {
+      outcome = Success
+      releaseCount = releaseCount + 1
+    }
+  }
+}
+behavior halt() {
+  guard { phase = Draining }
+  update {
+    if { outcome != Pending } then { phase = Halted }
+  }
+}
+transition ExpiryBeforeDeadlineHasNoEffect on expire {
+  not before(due) implies unchanged(outcome) and unchanged(releaseCount)
+}
+transition FirstOutcomeIsFinal {
+  (before(outcome) = Success or before(outcome) = Aborted) implies
+    unchanged(outcome) and unchanged(releaseCount)
+}
+invariant SettledWorkReleasesOnce {
+  (outcome = Success or outcome = Aborted) implies releaseCount = 1
+}
+invariant HaltedHasNoPendingWork { phase = Halted implies outcome != Pending }
+reachable DrainingWithPendingWork { phase = Draining outcome = Pending not due }
+leads_to DeadlineEventuallyStopsDraining
+  with { weak reachDeadline weak expire weak halt }
+  { phase = Draining } { phase = Halted }
+
+scope Int = 0..2, steps = 9

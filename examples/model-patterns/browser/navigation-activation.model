@@ -1,0 +1,46 @@
+model NavigationActivation
+enum Screen = Detail | Catalog
+
+var current: one Screen
+var visit: one Nat
+var pending: set Nat
+var shown: lone Nat
+
+init { current = Detail visit = 0 no pending no shown }
+
+behavior loadDetail() {
+  guard { visit = 0 }
+  update { visit = 1 pending = union(pending, 1) }
+}
+
+behavior openCatalog() {
+  guard { visit = 1 }
+  update { visit = 2 current = Catalog shown = none }
+}
+
+behavior back() {
+  guard { visit = 2 }
+  update { visit = 3 current = Detail pending = union(pending, 3) }
+}
+
+behavior finish(visitId: Nat) {
+  guard { visitId in pending }
+  update {
+    pending = difference(pending, visitId)
+    if { visitId = visit } then { shown = visitId }
+  }
+}
+
+invariant ShownBelongsToCurrentVisit {
+  some shown implies (current = Detail and shown = visit)
+}
+
+transition OldResponsePreservesScreen on finish {
+  visitId != before(visit) implies unchanged(shown)
+}
+
+reachable FreshDetailWhileOldPending {
+  visit = 3 shown = 3 1 in pending
+}
+
+scope Int = 0..3, steps = 6

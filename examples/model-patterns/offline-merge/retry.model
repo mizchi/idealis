@@ -1,0 +1,85 @@
+model OfflineEditRetry
+enum Request = First | Second
+enum Value = Original | Remote | Local
+enum Outcome = Saved | Conflict | ReusedKey
+record Edit { baseValue: Value, desired: Value }
+record Reply { outcome: Outcome, atRevision: Nat }
+
+var live: one Value
+var revision: one Nat
+var edits: Request -> lone Edit
+var receipts: Request -> lone Reply
+var inFlight: lone Request
+var pending: lone Reply
+var lastReply: lone Reply
+var firstLost: one Bool
+
+init {
+  live = Original revision = 0 firstLost = false
+  no edits no receipts no inFlight no pending no lastReply
+}
+behavior submit(request: Request, edit: Edit) {
+  guard { no inFlight }
+  update {
+    let nextRevision = revision + 1
+    let savedReply = Reply { outcome: Saved, atRevision: nextRevision }
+    let conflictReply = Reply { outcome: Conflict, atRevision: revision }
+    inFlight = request
+    if { some request.edits } then {
+      pending = if { edit = request.edits } then request.receipts
+        else Reply { outcome: ReusedKey, atRevision: revision }
+    } else {
+      edits = edits ++ request -> edit
+      if { live = edit.baseValue or live = edit.desired } then {
+        live = edit.desired
+        revision = nextRevision
+        pending = savedReply
+        receipts = receipts ++ request -> savedReply
+      } else {
+        pending = conflictReply
+        receipts = receipts ++ request -> conflictReply
+      }
+    }
+  }
+}
+behavior loseResponse() {
+  guard { some inFlight }
+  update {
+    if { inFlight = First } then { firstLost = true }
+    inFlight = none
+    pending = none
+  }
+}
+behavior takeResponse() {
+  guard { some inFlight }
+  update { lastReply = pending pending = none inFlight = none }
+}
+transition ExactRetryKeepsHistory on submit {
+  edit = before(request.edits) implies unchanged(live) and unchanged(revision)
+}
+transition ExactRetryUsesOriginalReply on submit {
+  edit = before(request.edits) implies after(pending) = before(request.receipts)
+}
+transition ReusedKeyKeepsOriginalReceipt on submit {
+  (some before(request.edits) and edit != before(request.edits)) implies
+    (after(pending.outcome) = ReusedKey and unchanged(live) and unchanged(revision)
+      and unchanged(request.edits) and unchanged(request.receipts))
+}
+reachable FirstCommittedWithLostResponse {
+  firstLost no inFlight no lastReply revision = 1 live = Remote
+  First.edits = Edit { baseValue: Original, desired: Remote }
+}
+reachable OtherEditCommittedAfterLoss {
+  firstLost no inFlight revision = 2 live = Local
+  First.edits = Edit { baseValue: Original, desired: Remote }
+  Second.edits = Edit { baseValue: Remote, desired: Local }
+  lastReply = Reply { outcome: Saved, atRevision: 2 }
+}
+reachable OriginalConflictWouldNowSucceed {
+  firstLost no inFlight revision = 1 live = Remote
+  First.edits = Edit { baseValue: Remote, desired: Local }
+  First.receipts = Reply { outcome: Conflict, atRevision: 0 }
+  Second.edits = Edit { baseValue: Original, desired: Remote }
+  lastReply = Reply { outcome: Saved, atRevision: 1 }
+}
+scope Int = 0..3, steps = 10

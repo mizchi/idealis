@@ -1,0 +1,66 @@
+model GraphVersionReuse
+enum Node = Root | Middle | Target
+enum Label = A | B
+enum Generation = First | Second | Third
+
+var label: one Label
+var generation: one Generation
+var outgoing: Node -> lone Node
+var capturedLabel: lone Label
+var capturedGeneration: lone Generation
+var cursor: lone Node
+var seen: set Node
+var published: one Bool
+
+init {
+  label = A generation = First outgoing = Root -> Middle
+  no capturedLabel no capturedGeneration no cursor no seen
+  published = false
+}
+
+behavior replaceGraph() {
+  guard { generation != Third not published }
+  update {
+    if { generation = First } then { label = B generation = Second outgoing = none }
+    else { label = A generation = Third outgoing = Root -> Target }
+  }
+}
+
+behavior start() {
+  guard { no capturedGeneration }
+  update { capturedLabel = label capturedGeneration = generation cursor = Root seen = Root }
+}
+
+behavior visit() {
+  guard { some cursor }
+  update { cursor = cursor.outgoing - seen seen = seen + cursor.outgoing }
+}
+
+behavior finish() {
+  guard { some capturedGeneration no cursor not published }
+  update {
+    if { capturedGeneration = generation } then { published = true }
+    else { capturedLabel = label capturedGeneration = generation cursor = Root seen = Root }
+  }
+}
+
+invariant LabelFollowsGeneration {
+  label = (if { generation = Second } then B else A)
+}
+
+invariant PublishedMatchesCurrentGraph {
+  published implies capturedGeneration = generation and seen = reachableFrom(Root, outgoing)
+}
+
+transition ReusedLabelDoesNotAllowStalePublication on finish {
+  (before(capturedLabel) = before(label) and before(capturedGeneration) != before(generation)) implies
+    not after(published) and after(capturedGeneration) = before(generation)
+}
+
+reachable ReturnedToCapturedLabel {
+  generation = Third capturedGeneration = First label = capturedLabel
+  Middle in seen no cursor not published
+}
+
+reachable CurrentGraphPublished { generation = Third published }
+scope steps = 10

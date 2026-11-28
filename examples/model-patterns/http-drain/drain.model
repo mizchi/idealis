@@ -1,0 +1,42 @@
+model HttpDrain
+enum Request = Long | Late
+enum Phase = Accepting | Draining | Halted
+enum Result = Pending | Delivered | Rejected | Dropped
+
+var phase: one Phase
+var results: Request -> lone Result
+
+init { phase = Accepting no results }
+behavior submit(request: Request) {
+  guard { phase != Halted no request.results }
+  update {
+    results = results ++ request -> (if { phase = Accepting } then Pending else Rejected)
+  }
+}
+behavior beginDrain() {
+  guard { phase = Accepting }
+  update { phase = Draining }
+}
+behavior finish(request: Request) {
+  guard { request.results = Pending phase != Halted }
+  update { results = results ++ request -> Delivered }
+}
+behavior stop() {
+  guard { phase = Draining }
+  update {
+    if { no results.Pending } then { phase = Halted }
+  }
+}
+transition AdmissionClosesBeforeShutdown on submit {
+  before(phase) = Draining implies after(request.results) = Rejected
+}
+transition StopKeepsInFlightWork on stop {
+  some before(results.Pending) implies unchanged(phase) and unchanged(results)
+}
+invariant HaltedHasNoInFlightWork { phase = Halted implies no results.Pending }
+reachable DrainingWithLongRequest { phase = Draining Long.results = Pending }
+leads_to DrainStopsWithFairCompletion
+  with { weak finish(*) weak stop }
+  { phase = Draining } { phase = Halted }
+
+scope steps = 8

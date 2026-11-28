@@ -102,6 +102,7 @@ pub(crate) enum Expr {
     Block(Vec<Self>),
     Unary(Unary, Box<Self>),
     Binary(Binary, Box<Self>, Box<Self>),
+    Conditional(Box<Self>, Box<Self>, Box<Self>),
     Quantified(Quantifier, Vec<Declaration>, Box<Self>),
 }
 pub(crate) struct RawScope {
@@ -137,6 +138,9 @@ pub(crate) fn uses_temporal(expression: &Expr) -> bool {
             ) || uses_temporal(child)
         }
         Expr::Binary(_, left, right) => uses_temporal(left) || uses_temporal(right),
+        Expr::Conditional(test, yes, no) => {
+            [test, yes, no].into_iter().any(|part| uses_temporal(part))
+        }
         Expr::Quantified(_, declarations, body) => {
             declarations
                 .iter()

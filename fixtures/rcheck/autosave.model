@@ -1,0 +1,20 @@
+model Autosave
+entity Tab "自動保存を実行するタブ"
+var revision: one Nat
+var pending: Tab -> lone Nat
+init { revision = 0, no pending }
+behavior start(tab: Tab) {
+  guard { no tab.pending }
+  update { pending = pending ++ tab -> revision }
+}
+behavior edit() {
+  guard { revision < 2 }
+  update { revision = revision + 1 }
+}
+behavior finish(tab: Tab) {
+  guard { some tab.pending, tab.pending = revision }
+  update { pending = pending - tab -> tab.pending }
+}
+transition FinishDoesNotEdit on finish { unchanged(revision) }
+reachable CanFinishSetup { some pending }
+scope Tab = 2, Int = 0..2, steps = 6

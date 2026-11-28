@@ -1,0 +1,20 @@
+import * as fc from "fast-check";
+
+type Decoder = (input: unknown) => unknown;
+
+export function checkDataBoundaries(decoders: Readonly<Record<string, Decoder>>) {
+  const matches = (example: (typeof dataBoundaryCases.cases)[number]) => {
+    const decoder = decoders[example.sort];
+    if (!decoder) throw new Error(`Missing decoder for ${example.sort}`);
+    try {
+      decoder(structuredClone(example.input));
+      return example.valid;
+    } catch {
+      return !example.valid;
+    }
+  };
+  fc.assert(
+    fc.property(fc.constantFrom(...dataBoundaryCases.cases), matches),
+    { examples: dataBoundaryCases.cases.map((example) => [example]) },
+  );
+}

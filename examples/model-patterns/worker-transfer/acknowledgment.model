@@ -1,0 +1,50 @@
+model WorkerTransferAck
+enum Status = Idle | Pending | Confirmed | Unknown | Failed
+
+var open: one Bool
+var source: one Bool
+var pending: one Bool
+var delivered: one Bool
+var ack: one Bool
+var status: one Status
+
+init { open = true source = true pending = false delivered = false ack = false status = Idle }
+
+behavior send() {
+  guard { open status = Idle }
+  update { source = false pending = true status = Pending }
+}
+
+behavior deliver() {
+  guard { open pending }
+  update { pending = false delivered = true }
+}
+
+behavior acknowledge() {
+  guard { open delivered status = Pending }
+  update { ack = true status = Confirmed }
+}
+
+behavior close() {
+  guard { open }
+  update {
+    open = false
+    pending = false
+    if { status = Pending } then { status = Unknown }
+  }
+}
+
+invariant ConfirmedNeedsAcknowledgment { status = Confirmed implies ack }
+invariant AckFollowsDelivery { ack implies delivered }
+invariant ClosedHasNoPendingDelivery { not open implies not pending }
+transition SendMovesWithoutConfirming on send { not after(source) and not after(ack) and after(status) = Pending }
+transition UnacknowledgedCloseLeavesOutcomeUnknown on close {
+  before(status) = Pending implies after(status) = Unknown and not after(source)
+}
+transition ClosePreservesFinishedDelivery on close { unchanged(delivered) and unchanged(ack) }
+
+reachable ClosedBeforeDelivery { not open status = Unknown not delivered not source }
+reachable ClosedAfterDeliveryWithoutAck { not open status = Unknown delivered not ack not source }
+reachable ConfirmedThenClosed { not open status = Confirmed ack }
+
+scope steps = 5

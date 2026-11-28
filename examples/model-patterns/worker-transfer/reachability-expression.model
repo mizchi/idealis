@@ -1,0 +1,40 @@
+model GraphReachabilityExpression
+enum Node = Root | Near | Bend | Deep | External | Orphan
+enum Result = Safe | Leaked
+
+var outgoing: Node -> lone Node
+var result: lone Result
+
+init {
+  outgoing = (Root -> Near) + (Near -> Bend) + (Bend -> Deep)
+  no result
+}
+
+behavior attachSource() {
+  guard { no result no Deep.outgoing }
+  update { outgoing = outgoing + (Deep -> External) }
+}
+
+behavior classify() {
+  guard { no result }
+  update {
+    result = if { External in reachableFrom(Root, outgoing + (Bend -> Near)) }
+      then Leaked else Safe
+  }
+}
+
+invariant RootReachesItsCycle { Root + Near + Bend + Deep in reachableFrom(Root, outgoing + (Bend -> Near)) }
+invariant IsolatedNodeStaysOut { Orphan not in reachableFrom(Root, outgoing + (Bend -> Near)) }
+invariant EmptyRootHasNoReachableNodes { no reachableFrom(none, outgoing + (Bend -> Near)) }
+transition ClassificationUsesReachableNodes on classify {
+  after(result) = (if { External in before(reachableFrom(Root, outgoing + (Bend -> Near))) } then Leaked else Safe)
+}
+transition AttachAddsTheExternalNode on attachSource {
+  External not in before(reachableFrom(Root, outgoing + (Bend -> Near))) and
+    External in after(reachableFrom(Root, outgoing + (Bend -> Near)))
+}
+
+reachable FinishedWithoutSource { result = Safe no Deep.outgoing }
+reachable FinishedWithSource { result = Leaked External in reachableFrom(Root, outgoing + (Bend -> Near)) }
+
+scope steps = 4

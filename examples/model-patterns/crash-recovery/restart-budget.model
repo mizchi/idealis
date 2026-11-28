@@ -1,0 +1,34 @@
+model RestartBudget
+enum Work = First | Second | Third | Fourth
+sequence Pending = Work, max = 4
+record Checkpoint { pending: Pending, retries: Nat }
+
+var saved: one Checkpoint
+var restored: lone Checkpoint
+init { no restored }
+
+behavior restart() {
+  guard { no restored, saved.retries > 0 }
+  update {
+    restored = Checkpoint { pending: saved.pending, retries: saved.retries - 1 }
+  }
+}
+
+invariant RestartConsumesRetry {
+  some restored implies restored.retries + 1 = saved.retries
+}
+
+invariant RestartKeepsOrder {
+  some restored implies restored.pending = saved.pending
+}
+
+reachable RestartsFullQueue {
+  some restored and restored.pending = Pending[Fourth, Third, Second, First]
+    and restored.retries = 6
+}
+
+reachable RestartsWithoutBudget {
+  saved.retries = 0 and some restored
+}
+
+scope Int = 0..7, steps = 2

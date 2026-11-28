@@ -1,0 +1,29 @@
+model RetryObservation
+enum Policy = Quiet | Exposed
+enum Phase = Ready | Pending | Done
+
+rel policy: one Policy
+var phase: one Phase
+var notice: one Bool
+var retried: one Bool
+
+init { phase = Ready not notice not retried }
+
+behavior start() {
+  guard { phase = Ready }
+  update { phase = Pending notice = true }
+}
+
+behavior retry() {
+  guard { phase = Pending }
+  update { retried = true notice = false }
+}
+
+behavior finish() {
+  guard { phase = Pending }
+  update { phase = Done notice = (if { policy = Exposed } then retried else false) }
+}
+
+reachable QuietDone { policy = Quiet phase = Done }
+reachable ExposedDone { policy = Exposed phase = Done }
+scope steps = 6

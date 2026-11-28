@@ -1,0 +1,55 @@
+model SharedFetchGeneration
+enum Generation = Old | Renewed
+
+var registered: lone Generation
+var started: set Generation
+var settled: set Generation
+var pendingCleanup: set Generation
+var attached: lone Generation
+
+init { no registered no started no settled no pendingCleanup no attached }
+behavior start(generation: Generation) {
+  guard { no registered generation not in started }
+  update { registered = generation started = started + generation }
+}
+behavior abort(generation: Generation) {
+  guard { generation = registered generation not in settled }
+  update {
+    registered = none
+    settled = settled + generation
+    pendingCleanup = pendingCleanup + generation
+  }
+}
+behavior finish(generation: Generation) {
+  guard { generation = registered generation not in settled }
+  update {
+    settled = settled + generation
+    pendingCleanup = pendingCleanup + generation
+  }
+}
+behavior cleanup(generation: Generation) {
+  guard { generation in pendingCleanup }
+  update {
+    if { registered = generation } then { registered = none }
+    pendingCleanup = pendingCleanup - generation
+  }
+}
+behavior attach() {
+  guard { some registered no attached }
+  update { attached = registered }
+}
+
+transition StaleCleanupKeepsTheRegistration on cleanup {
+  generation != before(registered) implies unchanged(registered)
+}
+transition OwnerCanReleaseTheRegistration on cleanup {
+  generation = before(registered) implies no after(registered)
+}
+transition AttachmentKeepsTheSameRequest on attach {
+  after(attached) = before(registered) and unchanged(started)
+}
+reachable ReplacementRegisteredBeforeOldCleanup {
+  registered = Renewed Old in pendingCleanup Renewed not in settled
+}
+
+scope steps = 8

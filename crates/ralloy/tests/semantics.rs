@@ -6,6 +6,53 @@ fn analyze(source: &str) -> ralloy::Analysis {
 }
 
 #[test]
+fn conditional_relations_match_in_the_enumerator_and_sat() {
+    let model = Model::parse(
+        "one sig A, B {} sig C {}
+         check { (some C implies A else B) + A = (some C implies A else A + B) }
+           for 1 but 0 Int
+         check { (some C implies A -> B else none -> none) = A -> B }
+           for 1 but 0 Int
+         check { (some C implies A else (no C implies B else A)) = (some C implies A else B) }
+           for 1 but 0 Int
+         check { (some C implies no C implies A else B else A) = (some C implies B else A) }
+           for 1 but 0 Int
+         check { (some C implies some A else some B) } for 1 but 0 Int
+         check { (some C implies #A else #B) = 1 } for 1 but 3 Int",
+    )
+    .unwrap();
+    for (index, status) in [
+        Status::NoCounterexample,
+        Status::Counterexample,
+        Status::NoCounterexample,
+        Status::NoCounterexample,
+        Status::NoCounterexample,
+        Status::NoCounterexample,
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        for use_sat in [false, true] {
+            let result = model
+                .analyze_backend(index, 2_000_000, use_sat)
+                .unwrap()
+                .unwrap();
+            assert_eq!(result.status, status, "command {index}, SAT {use_sat}");
+            if let Some(instance) = result.instance {
+                assert_eq!(
+                    model
+                        .check_instance(index, &instance, 2_000_000)
+                        .unwrap()
+                        .status,
+                    CheckStatus::Mismatch
+                );
+            }
+        }
+    }
+    assert!(Model::parse("sig A {} run { some (some A implies A else A -> A) }").is_err());
+}
+
+#[test]
 fn directed_cycle_yields_a_concrete_counterexample() {
     let result = analyze(
         "sig Node { edge: set Node } fact { no iden & edge } assert Acyclic { no iden & ^edge } check Acyclic for 2 but exactly 2 Node, 0 Int",

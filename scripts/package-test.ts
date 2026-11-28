@@ -208,6 +208,20 @@ const node = execFileSync(process.execPath, [join(consumer, "consumer.mjs")], {
 })
   .toString()
   .trim();
+await cp(
+  "tests/package/pattern-consumer.mts",
+  join(consumer, "pattern-consumer.mts"),
+);
+await cp(
+  "examples/model-patterns/semaphore/weighted-fifo.model",
+  join(consumer, "weighted-fifo.model"),
+);
+await cp("crates/rcheck/target/debug/rcheck", join(consumer, "rcheck"));
+const patterns = execFileSync(
+  process.execPath,
+  ["pattern-consumer.mts", "./rcheck"],
+  { cwd: consumer, encoding: "utf8" },
+).trim();
 await writeFile(
   join(consumer, "consumer.ts"),
   `import type {Model} from '@mizchi/idealis';
@@ -255,6 +269,7 @@ execFileSync(
     "--types",
     "node",
     "consumer.ts",
+    "pattern-consumer.mts",
   ],
   { cwd: consumer, stdio: "pipe" },
 );
@@ -706,6 +721,7 @@ const result = {
     .map((entry: { name: string }) => entry.name)
     .sort(),
   node,
+  patterns,
   typecheck: "passed without solver declarations",
   rust,
   rtlc,

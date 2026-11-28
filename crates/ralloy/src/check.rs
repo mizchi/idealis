@@ -527,6 +527,22 @@ impl Checker<'_> {
                     }
                 }
             }
+            Expr::Conditional(test, yes, no) => {
+                self.expression(test, locals, depth + 1)?.boolean()?;
+                let yes = self.expression(yes, locals, depth + 1)?;
+                let no = self.expression(no, locals, depth + 1)?;
+                match (yes, no) {
+                    (Type::Boolean, Type::Boolean) => Ok(Type::Boolean),
+                    (Type::Integer, Type::Integer) => Ok(Type::Integer),
+                    (Type::Relation(yes), Type::Relation(no)) if yes.len() == no.len() => Ok(
+                        Type::Relation(yes.into_iter().zip(no).map(|(yes, no)| yes | no).collect()),
+                    ),
+                    _ => Err(Error::new(
+                        ErrorKind::Type,
+                        "conditional branches must have matching types or relation arities",
+                    )),
+                }
+            }
             Expr::Binary(operator, left, right) => {
                 let left = self.expression(left, locals, depth + 1)?;
                 let right = self.expression(right, locals, depth + 1)?;
@@ -667,6 +683,9 @@ fn temporal_predicate(module: &Module, name: &str, visiting: &mut BTreeSet<Strin
             Expr::Binary(_, left, right) => {
                 calls(left, module, bound, visiting) || calls(right, module, bound, visiting)
             }
+            Expr::Conditional(test, yes, no) => [test, yes, no]
+                .into_iter()
+                .any(|part| calls(part, module, bound, visiting)),
             Expr::Quantified(_, declarations, body) => {
                 let mut inner = bound.clone();
                 for declaration in declarations {
@@ -740,6 +759,9 @@ fn reads_var(
         Expr::Binary(_, left, right) => {
             reads_var(left, module, bound, visiting) || reads_var(right, module, bound, visiting)
         }
+        Expr::Conditional(test, yes, no) => [test, yes, no]
+            .into_iter()
+            .any(|part| reads_var(part, module, bound, visiting)),
         Expr::Quantified(_, declarations, body) => {
             let mut inner = bound.clone();
             for declaration in declarations {

@@ -1,0 +1,49 @@
+model RingCopy
+enum SlotPhase = Published | Held | Free | Refilled
+enum ReaderPhase = Idle | Copying | Returned
+enum Field = Data | Header
+enum Ticket = Old | Next
+
+var slot: one SlotPhase
+var reader: one ReaderPhase
+var body: Field -> one Ticket
+var copy: Field -> lone Ticket
+
+init { slot = Published reader = Idle body = Field -> Old no copy }
+
+behavior pin() {
+  guard { slot = Published reader = Idle }
+  update { slot = Held reader = Copying }
+}
+
+behavior copyPart(field: Field) {
+  guard { reader = Copying no field.copy }
+  update { copy = copy + (field -> field.body) }
+}
+
+behavior finish() {
+  guard { reader = Copying no (Field - copy.Ticket) }
+  update {
+    reader = Returned
+    if { slot = Held } then { slot = Free }
+    else expect unreachable "The reader holds the slot until both fields have been copied" {}
+  }
+}
+
+behavior tryReuse() {
+  update {
+    if { slot = Free } then { slot = Refilled body = Field -> Next }
+  }
+}
+
+invariant ReaderOwnsSlotWhileCopying { reader = Copying implies slot = Held }
+invariant CopiedWordsBelongToOldTicket { copy in Field -> Old }
+invariant ReturnedCopyIsComplete { reader = Returned implies copy = Field -> Old }
+transition ProducerDoesNotTouchHeldSlot on tryReuse {
+  before(slot) = Held implies unchanged(slot) and unchanged(body)
+}
+
+reachable PausedAfterHeader { slot = Held reader = Copying Header.copy = Old no Data.copy }
+reachable ReusedAfterReturning { slot = Refilled reader = Returned copy = Field -> Old }
+
+scope steps = 7

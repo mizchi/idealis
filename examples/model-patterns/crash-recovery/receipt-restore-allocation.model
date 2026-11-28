@@ -1,0 +1,79 @@
+model ReceiptRestoreAllocation
+enum Ticket = First | Second
+enum Phase = Idle | Preparing | Durable | Waiting | Finished | Offline
+
+var phase: one Phase
+var high: one Nat
+var ticket: lone Ticket
+var number: lone Nat
+var issued: Ticket -> lone Nat
+var consumed: set Ticket
+var accepted: lone Ticket
+
+init { phase = Idle high = 0 no ticket no number no issued no consumed no accepted }
+
+behavior reserve(slot: Ticket) {
+  guard { phase = Idle high < 3 no slot.issued }
+  update { phase = Preparing ticket = slot number = high + 1 }
+}
+
+behavior commit() {
+  guard { phase = Preparing some number }
+  update { high = number phase = Durable }
+}
+
+behavior send() {
+  guard { phase = Durable some ticket some number }
+  update { issued = issued ++ ticket -> number phase = Waiting }
+}
+
+behavior crash() {
+  guard { phase != Offline }
+  update { phase = Offline ticket = none number = none accepted = none }
+}
+
+behavior restart() {
+  guard { phase = Offline }
+  update { phase = Idle }
+}
+
+behavior deliver(origin: Ticket) {
+  guard { phase != Offline some origin.issued origin not in consumed }
+  update {
+    consumed = consumed + origin
+    if { phase = Waiting and origin.issued = number } then {
+      accepted = origin
+      phase = Finished
+    }
+  }
+}
+
+invariant SentIdsAreDurable {
+  all slot: Ticket | some slot.issued implies slot.issued <= high
+}
+
+invariant SentIdsAreDistinct {
+  (some First.issued and some Second.issued) implies First.issued != Second.issued
+}
+
+invariant AcceptedReplyBelongsToCurrentRequest {
+  some accepted implies (accepted = ticket and phase = Finished)
+}
+
+transition CommitAdvancesHigh on commit { after(high) = before(high) + 1 }
+
+transition SendPublishesCommittedId on send {
+  after(ticket.issued) = before(high)
+}
+
+transition CrashKeepsCommittedBoundary on crash {
+  unchanged(high) unchanged(issued)
+  no after(ticket) no after(number)
+}
+
+transition StaleReplyDoesNotFinish on deliver {
+  (before(phase) = Waiting and origin != before(ticket)) implies
+    (unchanged(phase) and unchanged(accepted))
+}
+
+scope Int = 0..3, steps = 16

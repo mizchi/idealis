@@ -124,27 +124,31 @@ impl<'a> Frontier<'a> {
         }
     }
 
-    pub(crate) fn push(&mut self, words: &[u64], depth: usize) {
+    pub(crate) fn push(&mut self, words: &[u64], depth: usize) -> bool {
         match self {
             Self::Single { seen, queue } => {
-                if seen.insert(words[0]) {
-                    queue.push_back((words[0], depth));
+                if !seen.insert(words[0]) {
+                    return false;
                 }
+                queue.push_back((words[0], depth));
             }
             Self::Pair { seen, queue } => {
                 let value = [words[0], words[1]];
-                if seen.insert(value) {
-                    queue.push_back((value, depth));
+                if !seen.insert(value) {
+                    return false;
                 }
+                queue.push_back((value, depth));
             }
             Self::Shared { seen, queue } => {
-                if !seen.contains(words) {
-                    let state = Rc::<[u64]>::from(words);
-                    seen.insert(state.clone());
-                    queue.push_back((state, depth));
+                if seen.contains(words) {
+                    return false;
                 }
+                let state = Rc::<[u64]>::from(words);
+                seen.insert(state.clone());
+                queue.push_back((state, depth));
             }
         }
+        true
     }
 
     pub(crate) fn pop(&mut self) -> Option<(Snapshot, usize)> {

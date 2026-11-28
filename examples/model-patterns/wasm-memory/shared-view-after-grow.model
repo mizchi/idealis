@@ -1,0 +1,48 @@
+model WasmSharedMemoryView
+enum Pages = FirstPage | BothPages
+enum Region = Prefix | Suffix
+enum Byte = Original | Updated | Added
+
+var pages: one Pages
+var prefix: one Byte
+var suffix: lone Byte
+var view: lone Pages
+var value: lone Byte
+
+init { pages = FirstPage prefix = Original no suffix no view no value }
+
+behavior borrow() {
+  guard { no view }
+  update { view = pages }
+}
+
+behavior growAndWrite() {
+  guard { pages = FirstPage }
+  update { pages = BothPages prefix = Updated suffix = Added }
+}
+
+behavior read(region: Region) {
+  guard { some view }
+  update {
+    if { region = Prefix } then { value = prefix } else {
+      view = pages
+      value = suffix
+    }
+  }
+}
+
+invariant ViewDoesNotExceedMemory { view = BothPages implies pages = BothPages }
+transition GrowthKeepsFixedView on growAndWrite { unchanged(view) }
+transition PrefixReadSeesSharedWrites on read {
+  region = Prefix implies after(value) = before(prefix) and unchanged(view)
+}
+transition SuffixReadRefreshesView on read {
+  (region = Suffix and before(pages) = BothPages) implies after(view) = BothPages and after(value) = Added
+}
+transition MissingPageReturnsNoByte on read {
+  (region = Suffix and before(pages) = FirstPage) implies no after(value)
+}
+
+reachable OldViewAfterGrowth { pages = BothPages view = FirstPage prefix = Updated suffix = Added }
+
+scope steps = 6

@@ -1,0 +1,57 @@
+model ChangeFeedCutover
+
+var head: one Nat
+var cursor: one Nat
+var total: one Nat
+var online: one Bool
+var wroteWhileOffline: one Bool
+var sealed: one Bool
+var routed: one Bool
+
+init {
+  head = 0 cursor = 0 total = 0 online = true wroteWhileOffline = false sealed = false routed = false
+}
+behavior append() {
+  guard { not sealed head < 2 }
+  update {
+    head = head + 1
+    if { not online } then { wroteWhileOffline = true }
+  }
+}
+behavior apply(position: Nat) {
+  guard { online position > 0 position <= head }
+  update {
+    if { position = cursor + 1 } then {
+      total = total + 1
+      cursor = position
+    }
+  }
+}
+behavior stop() {
+  guard { online not routed }
+  update { online = false }
+}
+behavior restart() {
+  guard { not online }
+  update { online = true wroteWhileOffline = false }
+}
+behavior seal() {
+  guard { not sealed }
+  update { sealed = true }
+}
+behavior cutover() {
+  guard { online sealed not routed }
+  update {
+    if { cursor = head } then { routed = true }
+  }
+}
+
+invariant EachDeltaAppliedOnce { total = cursor }
+invariant OnlyCaughtUpCanServe { routed implies cursor = head }
+transition DuplicateDoesNotChangeData on apply {
+  position <= before(cursor) implies unchanged(total) and unchanged(cursor)
+}
+reachable SourceWritesWhileReplicaStopped {
+  head = 2 cursor = 1 not online wroteWhileOffline not sealed
+}
+scope Int = 0..3, steps = 10

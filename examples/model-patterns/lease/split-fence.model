@@ -1,0 +1,56 @@
+model SeparateLeaseStores
+enum Generation = Old | New
+
+var active: lone Generation
+var prepared: lone Generation
+var floor: one Generation
+var written: lone Generation
+var confirmed: one Bool
+var online: one Bool
+
+init {
+  active = Old no prepared floor = Old no written
+  confirmed = false online = true
+}
+
+behavior prepare() {
+  guard { online active = Old }
+  update { active = none prepared = New }
+}
+behavior install() {
+  guard { online prepared = New }
+  update { floor = New }
+}
+behavior confirm() {
+  guard { online prepared = New floor = New }
+  update { confirmed = true }
+}
+behavior activate() {
+  guard { online prepared = New confirmed }
+  update { active = prepared prepared = none confirmed = false }
+}
+behavior stop() {
+  guard { online some prepared }
+  update { online = false confirmed = false }
+}
+behavior restart() {
+  guard { not online }
+  update { online = true }
+}
+behavior write(generation: Generation) {
+  guard { generation = Old or generation = active }
+  update {
+    if { generation = floor } then { written = generation }
+  }
+}
+
+invariant ExposedLeaseHasFence { active = New implies floor = New }
+invariant ConfirmedFenceIsDurable { confirmed implies floor = New }
+transition OldWriteCannotChangeNewLease on write {
+  before(active) = New and generation = Old implies unchanged(written)
+}
+transition RetryInstallKeepsData on install { unchanged(written) }
+
+reachable StoppedBeforeInstall { not online prepared = New floor = Old no written }
+reachable StoppedAfterInstall { not online prepared = New floor = New no written }
+scope steps = 10

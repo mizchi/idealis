@@ -1,0 +1,9 @@
+model TwoStores
+var eastReceipt: Request -> lone Nat
+var westReceipt: Request -> lone Nat
+init { no eastReceipt no westReceipt }
+
+reachable IndependentReceipts {
+  First.eastDelivery_received = 2 and First.westDelivery_received = 1
+}
+scope Int = 0..2, steps = 8

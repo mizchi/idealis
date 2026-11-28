@@ -1,0 +1,53 @@
+model TaggedRegister
+enum Slot = A | B | C
+enum Result = Pending | Applied | Rejected
+record Word { slot: Slot, tag: Nat }
+
+var current: one Word
+var saved: lone Word
+var writes: one Nat
+var seenAt: lone Nat
+var result: one Result
+
+init {
+  current = Word { slot: A, tag: 0 }
+  no saved no seenAt writes = 0 result = Pending
+}
+
+behavior load() {
+  guard { no saved result = Pending }
+  update { saved = current seenAt = writes }
+}
+
+behavior write(destination: Slot) {
+  guard { result = Pending writes < 2 destination != C destination != current.slot }
+  update {
+    current = Word { slot: destination, tag: current.tag + 1 }
+    writes = writes + 1
+  }
+}
+
+behavior cas() {
+  guard { some saved result = Pending }
+  update {
+    if { saved = current } then {
+      current = Word { slot: C, tag: current.tag + 1 }
+      result = Applied
+    } else {
+      result = Rejected
+    }
+  }
+}
+
+transition NoStaleSuccess on cas {
+  before(seenAt) != before(writes) implies after(result) = Rejected
+}
+transition FreshCasSucceeds on cas {
+  before(seenAt) = before(writes) implies after(result) = Applied
+}
+reachable ReturnedToStaleValue {
+  some saved result = Pending saved.slot = current.slot seenAt != writes
+}
+reachable FreshRead { some saved result = Pending writes = 0 }
+
+scope Int = 0..3, steps = 4

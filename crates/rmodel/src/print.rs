@@ -7,7 +7,7 @@
 //! notes, method calls for set and relation operators, `S.forall(x => ...)`,
 //! `action a(x: T) = all { ... }` with an implicit frame, and `invariant` /
 //! `reachable` properties.
-use crate::syntax::{
+use idealis_syntax::{
     Arith, CheckKind, Compare, Expr, Formula, Int, IntCompare, Model, Mult, Quantifier, SetOp,
     Shape,
 };
@@ -128,8 +128,13 @@ impl QuintLike<'_> {
             .iter()
             .map(|(sig, size)| format!("{sig} = {size}"))
             .collect();
-        scope.push(format!("steps = {}", model.scope.steps));
-        out.push_str(&format!("  check {{ {} }}\n}}\n", scope.join(", ")));
+        if let Some(steps) = model.scope.steps {
+            scope.push(format!("steps = {steps}"));
+        }
+        if !scope.is_empty() {
+            out.push_str(&format!("  check {{ {} }}\n", scope.join(", ")));
+        }
+        out.push_str("}\n");
         out
     }
     fn is_atom(&self, expression: &Expr) -> bool {
@@ -148,31 +153,53 @@ impl QuintLike<'_> {
                         Some(Shape::Binary { .. })
                     )
             }
-            Expr::Binary(SetOp::Product, _, _) => true,
+            Expr::Binary(SetOp::Product | SetOp::WithoutKeys, _, _) | Expr::Closure(_) => true,
             Expr::Binary(SetOp::Join, left, right) => self.is_pair(left) && self.is_pair(right),
             Expr::Binary(_, left, right) => self.is_pair(left) || self.is_pair(right),
             Expr::At(_, expr) => self.is_pair(expr),
+            Expr::Field(receiver, _) => self.is_pair(receiver),
+            Expr::If(_, yes, no) => self.is_pair(yes) || self.is_pair(no),
             Expr::Literal(_)
             | Expr::Count(_)
             | Expr::Arith(..)
             | Expr::Record(..)
             | Expr::Sequence(..)
             | Expr::Append(..)
+            | Expr::Tail(_)
+            | Expr::Take(..)
+            | Expr::RemoveAt(..)
+            | Expr::RemoveAll(..)
+            | Expr::ReachableFrom(..)
+            | Expr::Select(..)
+            | Expr::Keys(..)
             | Expr::Length(_)
+            | Expr::Elements(_)
             | Expr::Index(..)
             | Expr::Variant(..)
             | Expr::Payload(..) => false,
         }
     }
     /// A set-valued expression; a single atom is written `Set(x)`.
-    fn set(&self, expression: &Expr) -> String {
+    fn set(&mut self, expression: &Expr) -> String {
         if self.is_atom(expression) {
             return format!("Set({})", self.expression(expression));
         }
         self.expression(expression)
     }
-    fn expression(&self, expression: &Expr) -> String {
+    fn expression(&mut self, expression: &Expr) -> String {
         match expression {
+            Expr::Select(variable, sort, predicate) => {
+                self.atoms.insert(variable.clone());
+                let body = self.formula(predicate);
+                self.atoms.remove(variable);
+                format!("{sort}.filter({variable} => {body})")
+            }
+            Expr::If(condition, yes, no) => format!(
+                "(if ({}) {} else {})",
+                self.formula(condition),
+                self.expression(yes),
+                self.expression(no)
+            ),
             Expr::None => "Set()".into(),
             Expr::Name(name) => name.clone(),
             // Values (plan 0103), written as in Quint.
@@ -211,7 +238,33 @@ impl QuintLike<'_> {
                 self.expression(seq),
                 self.expression(value)
             ),
+            Expr::Tail(seq) => format!("tail({})", self.expression(seq)),
+            Expr::Take(seq, count) => {
+                format!("take({}, {})", self.expression(seq), self.expression(count))
+            }
+            Expr::Elements(seq) => format!("{}.elements()", self.expression(seq)),
             Expr::Length(seq) => format!("{}.length()", self.expression(seq)),
+            Expr::RemoveAll(seq, excluded) => {
+                format!(
+                    "removeAll({}, {})",
+                    self.expression(seq),
+                    self.expression(excluded)
+                )
+            }
+            Expr::Closure(edges) => format!("closure({})", self.set(edges)),
+            Expr::Keys(relation) => format!("{}.map(row => row._1)", self.set(relation)),
+            Expr::ReachableFrom(roots, edges) => format!(
+                "reachableFrom({}, {})",
+                self.set(roots),
+                self.expression(edges)
+            ),
+            Expr::RemoveAt(seq, index) => {
+                format!(
+                    "removeAt({}, {})",
+                    self.expression(seq),
+                    self.expression(index)
+                )
+            }
             Expr::Index(seq, index) => {
                 format!("at({}, {})", self.expression(seq), self.expression(index))
             }
@@ -222,6 +275,14 @@ impl QuintLike<'_> {
                     .map_or(String::new(), |v| self.expression(v))
             ),
             Expr::Payload(value, tag) => format!("payload({}, {tag})", self.expression(value)),
+            Expr::Field(receiver, field) => {
+                let value = if self.is_pair(receiver) {
+                    format!("(row._1, row._2.{field})")
+                } else {
+                    format!("row.{field}")
+                };
+                format!("{}.map(row => {value})", self.set(receiver))
+            }
             Expr::Record(name, values) => {
                 let record = self.model.record(name).expect("a declared record");
                 let fields: Vec<String> = record
@@ -234,8 +295,22 @@ impl QuintLike<'_> {
             }
             Expr::Binary(SetOp::Multiply, ..) => unreachable!("the checker rewrites *"),
             Expr::Binary(operator, left, right) => match operator {
-                SetOp::Union => format!("{}.union({})", self.set(left), self.set(right)),
-                SetOp::Difference => format!("{}.exclude({})", self.set(left), self.set(right)),
+                SetOp::Union | SetOp::SetUnion => {
+                    format!("{}.union({})", self.set(left), self.set(right))
+                }
+                SetOp::Override => format!(
+                    "{}.override({})",
+                    self.expression(left),
+                    self.expression(right)
+                ),
+                SetOp::WithoutKeys => format!(
+                    "{}.filter(row => not({}.contains(row._1)))",
+                    self.set(left),
+                    self.set(right)
+                ),
+                SetOp::Difference | SetOp::SetDifference => {
+                    format!("{}.exclude({})", self.set(left), self.set(right))
+                }
                 SetOp::Intersection => format!("{}.intersect({})", self.set(left), self.set(right)),
                 SetOp::Product => format!("tuples({}, {})", self.set(left), self.set(right)),
                 SetOp::Multiply => unreachable!("the checker rewrites *"),
@@ -272,10 +347,10 @@ impl QuintLike<'_> {
                 }
             }
             Formula::Ints(operator, left, right) => {
-                let int = |int: &Int| match int {
+                let mut int = |int: &Int| match int {
                     Int::Count(counted) => format!("{}.size()", self.set(counted)),
                     Int::Literal(value) => value.to_string(),
-                    Int::Value(value) => self.expression(value),
+                    Int::Value(value) | Int::LocatedValue(value, _) => self.expression(value),
                 };
                 let symbol = match operator {
                     IntCompare::Less => "<",

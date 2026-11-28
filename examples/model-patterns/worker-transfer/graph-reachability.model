@@ -1,0 +1,61 @@
+model GraphReachability
+enum Node = Root | Near | Bend | Deep | External | Orphan
+enum Result = Safe | Leaked
+
+var outgoing: Node -> lone Node
+var back: Node -> lone Node
+var started: one Bool
+var seen: set Node
+var frontier: set Node
+var short: set Node
+var result: lone Result
+
+init {
+  outgoing = (Root -> Near) + (Near -> Bend) + (Bend -> Deep)
+  back = Bend -> Near
+  started = false
+  no seen no frontier no short no result
+}
+
+behavior attachSource() {
+  guard { not started no Deep.outgoing }
+  update { outgoing = outgoing + (Deep -> External) }
+}
+
+behavior start() {
+  guard { not started }
+  update {
+    started = true
+    seen = Root
+    frontier = Root
+    short = Root + Root.(outgoing + back) + Root.(outgoing + back).(outgoing + back)
+  }
+}
+
+behavior expand() {
+  guard { some frontier }
+  update {
+    frontier = (frontier.outgoing + frontier.back) - seen
+    seen = seen + frontier.outgoing + frontier.back
+  }
+}
+
+behavior finish() {
+  guard { started no frontier no result }
+  update { result = if { External in seen } then Leaked else Safe }
+}
+
+invariant FinishedSetIsClosed { some result implies (seen.outgoing + seen.back) in seen }
+invariant FinishedSetContainsTwoHopResult { some result implies short in seen }
+invariant IsolatedNodeStaysOut { Orphan not in seen }
+transition FrontierOnlyContainsNewNodes on expand {
+  no (before(seen) & after(frontier))
+}
+transition FinishClassifiesExternalNode on finish {
+  after(result) = (if { External in before(seen) } then Leaked else Safe)
+}
+
+reachable FinishedWithoutSource { result = Safe no Deep.outgoing }
+reachable FinishedWithSource { result = Leaked External in seen External not in short }
+
+scope steps = 9

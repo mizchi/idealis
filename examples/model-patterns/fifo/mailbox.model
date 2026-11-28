@@ -1,0 +1,22 @@
+sequence Messages = Message, max = 3
+var queue: one Messages
+var delivered: lone Message
+init { queue = Messages[] no delivered }
+
+behavior enqueue(message: Message) {
+  guard { len(queue) < 3 }
+  update { queue = append(queue, message) }
+}
+behavior dequeue() {
+  guard { len(queue) > 0 }
+  update { delivered = at(queue, 0) queue = tail(queue) }
+}
+invariant EmptyTail { tail(Messages[]) = Messages[] }
+transition DequeueKeepsOrder {
+  (len(after(queue)) < len(before(queue))) implies {
+    after(delivered) = before(at(queue, 0))
+    after(queue) = before(tail(queue))
+  }
+}
+reachable DuplicatesRemain { delivered = B queue = Messages[A, A] }
+scope Int = 0..3, steps = 6

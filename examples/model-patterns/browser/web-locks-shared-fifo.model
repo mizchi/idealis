@@ -1,0 +1,60 @@
+model WebLocksSharedFifo
+enum Initial = ReaderA | ReaderB
+enum Request = Writer | Later
+type Client = Initial + Request
+enum Availability = Available | Unavailable
+sequence Queue = Request, max = 2
+
+var held: set Client
+var started: set Request
+var waiting: one Queue
+var probe: lone Availability
+
+init { held = Initial no started waiting = Queue[] no probe }
+
+behavior acquire(client: Request) {
+  guard { client not in started }
+  update {
+    started = started + client
+    if { len(waiting) = 0 and (no held or (client = Later and Writer not in held)) } then {
+      held = held + client
+    } else {
+      waiting = append(waiting, client)
+    }
+  }
+}
+
+behavior release(client: Client) {
+  guard { client in held }
+  update {
+    let others = held - client
+    if { no others } then {
+      held = at(waiting, 0)
+      waiting = tail(waiting)
+    } else {
+      held = others
+    }
+  }
+}
+
+behavior tryShared() {
+  update {
+    probe = if { len(waiting) = 0 and Writer not in held } then Available else Unavailable
+  }
+}
+
+invariant WriterIsExclusive { Writer in held implies held = Writer }
+transition SharedRequestCannotPassWriter on acquire {
+  client = Later and Writer in elements(before(waiting)) implies
+    Later in elements(after(waiting)) and Later not in after(held)
+}
+transition SharedProbeCannotPassWriter on tryShared {
+  Writer in elements(before(waiting)) implies after(probe) = Unavailable
+}
+transition LastReaderHandsOffToWriter on release {
+  before(held) = client and at(before(waiting), 0) = Writer implies after(held) = Writer
+}
+
+reachable WriterWaitingForBoth { held = Initial waiting = Queue[Writer] }
+reachable SharedRequestsOverlap { held = Initial + Later }
+scope Int = 0..2, steps = 9

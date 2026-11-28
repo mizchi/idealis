@@ -1,0 +1,65 @@
+model GraphPublication
+enum Node = Root | Middle | Target
+enum Generation = Old | New
+enum Phase = Idle | Prepared | Checked | Retry | Done
+
+var generation: one Generation
+var outgoing: Node -> lone Node
+var phase: one Phase
+var capturedAt: lone Generation
+var candidate: set Node
+var publishedAt: lone Generation
+var publishedNodes: set Node
+
+init {
+  generation = Old outgoing = Root -> Middle phase = Idle
+  no capturedAt no candidate no publishedAt no publishedNodes
+}
+
+behavior prepare() {
+  guard { phase in Idle + Retry }
+  update { capturedAt = generation candidate = reachableFrom(Root, outgoing) phase = Prepared }
+}
+
+behavior check() {
+  guard { phase = Prepared }
+  update { phase = if { capturedAt = generation } then Checked else Retry }
+}
+
+behavior replaceGraph() {
+  guard { generation = Old }
+  update { generation = New outgoing = Root -> Target }
+}
+
+behavior publish() {
+  guard { phase = Checked }
+  update {
+    if { capturedAt = generation } then {
+      phase = Done publishedAt = capturedAt publishedNodes = candidate
+    } else { phase = Retry }
+  }
+}
+
+invariant ReceiptRecordsOneGraph {
+  some publishedAt implies publishedNodes = reachableFrom(Root,
+    if { publishedAt = Old } then (Root -> Middle) else (Root -> Target))
+}
+
+transition PublishedAgainstCurrentGraph on publish {
+  some after(publishedAt) implies after(publishedAt) = before(generation) and
+    after(publishedNodes) = reachableFrom(Root, before(outgoing))
+}
+
+transition ReplacementPreservesReceipt on replaceGraph {
+  unchanged(publishedAt) and unchanged(publishedNodes)
+}
+
+reachable GraphChangedAfterCheck { phase = Checked capturedAt = Old generation = New }
+reachable GraphChangedAfterPublication { publishedAt = Old generation = New }
+reachable PublicationForNewGraph { publishedAt = New and Target in publishedNodes }
+
+leads_to CheckedEventuallyResolves
+  with { weak publish }
+  { phase = Checked } { phase in Retry + Done }
+
+scope steps = 8

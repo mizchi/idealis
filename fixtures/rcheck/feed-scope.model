@@ -1,0 +1,11 @@
+model FeedScope
+var head: one Nat
+var sourceTotal: one Nat
+
+init { head = 0 sourceTotal = 0 }
+behavior append() {
+  guard { head < 3 }
+  update { head = head + 1 sourceTotal = sourceTotal + 2 }
+}
+
+scope Int = 0..4, steps = 4

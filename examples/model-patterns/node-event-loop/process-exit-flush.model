@@ -1,0 +1,40 @@
+model ProcessExitFlush
+enum Schedule = Before | Unref | AtExit
+enum Path = Natural | Explicit
+enum Hook = BeforeHook | ExitHook
+enum Location = BetweenBeforeHooks | OutsideBeforeHooks
+sequence Hooks = Hook, max = 3
+
+var hooks: one Hooks
+var flushAt: lone Location
+var exited: lone Path
+
+init { hooks = Hooks[] no flushAt no exited }
+
+behavior run(schedule: Schedule, path: Path) {
+  guard { no exited }
+  update {
+    let drains = bool { path = Natural }
+    let flushes = bool { drains and schedule = Before }
+    exited = path
+    hooks = if { flushes } then Hooks[BeforeHook, BeforeHook, ExitHook]
+      else if { drains } then Hooks[BeforeHook, ExitHook] else Hooks[ExitHook]
+    if { flushes } then { flushAt = BetweenBeforeHooks }
+  }
+}
+
+transition ExplicitExitSkipsBeforeExit on run {
+  path = Explicit implies after(hooks) = Hooks[ExitHook] and no after(flushAt)
+}
+transition ReferencedWorkRunsBeforeFinalExit on run {
+  path = Natural and schedule = Before implies
+    after(flushAt) = BetweenBeforeHooks and after(hooks) = Hooks[BeforeHook, BeforeHook, ExitHook]
+}
+transition ExitHookDoesNotDrainAsyncWork on run {
+  schedule = AtExit implies no after(flushAt)
+}
+transition UnrefAloneDoesNotKeepProcessAlive on run {
+  schedule = Unref implies no after(flushAt)
+}
+reachable InitialProcess { no exited }
+scope steps = 2

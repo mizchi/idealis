@@ -1,0 +1,49 @@
+model TaskGroupAdmission
+enum Child = Initial | Added
+enum Phase = Open | Closing | Joined
+enum Admission = Accepted | Rejected
+
+var phase: one Phase
+var decision: lone Admission
+var running: set Child
+var started: set Child
+
+init { phase = Open no decision running = Initial started = Initial }
+behavior offer() {
+  guard { no decision }
+  update {
+    if { phase = Open } then {
+      decision = Accepted
+      running = running + Added
+      started = started + Added
+    } else {
+      decision = Rejected
+    }
+  }
+}
+behavior close() {
+  guard { phase = Open }
+  update { phase = if { no running } then Joined else Closing }
+}
+behavior finish(child: Child) {
+  guard { child in running }
+  update {
+    running = running - child
+    if { phase = Closing and running = child } then { phase = Joined }
+  }
+}
+
+transition LateOfferIsRejected on offer {
+  before(phase) != Open implies after(decision) = Rejected and unchanged(started)
+}
+transition OpenOfferStartsItsChild on offer {
+  before(phase) = Open implies after(decision) = Accepted and Added in after(running)
+}
+invariant JoinedHasNoActiveChildren { phase = Joined implies no running }
+reachable AcceptedBeforeClosure { decision = Accepted phase = Closing }
+reachable ClosedWhileInitialRuns { phase = Closing running = Initial no decision }
+leads_to ClosedGroupEventuallyJoins
+  with { weak finish(*) }
+  { phase = Closing } { phase = Joined }
+
+scope steps = 6

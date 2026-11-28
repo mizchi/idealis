@@ -1,0 +1,57 @@
+model AsyncContextQueue
+enum Task = First | Second
+enum Request = Alpha | Beta
+enum Executor = Dispatcher
+type Context = Request + Executor
+enum Outcome = Completed | Failed
+sequence Pending = Task, max = 2
+
+var queue: one Pending
+var submitted: Task -> lone Request
+var entered: Task -> lone Context
+var resumed: Task -> lone Context
+var restored: Task -> lone Context
+var outcomes: Task -> lone Outcome
+
+init {
+  queue = Pending[] no submitted no entered no resumed no restored no outcomes
+}
+
+behavior enqueue(task: Task, context: Request) {
+  guard { no task.submitted }
+  update {
+    queue = append(queue, task)
+    submitted = submitted ++ task -> context
+  }
+}
+
+behavior runNext(outcome: Outcome) {
+  guard { len(queue) > 0 }
+  update {
+    let task = at(queue, 0)
+    let context = task.submitted
+    queue = tail(queue)
+    entered = entered ++ task -> context
+    resumed = resumed ++ task -> context
+    restored = restored ++ task -> Dispatcher
+    outcomes = outcomes ++ task -> outcome
+  }
+}
+
+invariant TasksKeepSubmissionContext {
+  all task: Task | some task.outcomes implies (
+    some task.submitted and task.entered = task.submitted and task.resumed = task.submitted
+  )
+}
+invariant DispatcherContextIsRestored {
+  all task: Task | some task.outcomes implies task.restored = Dispatcher
+}
+transition ProcessesQueueHead on runNext {
+  at(before(queue), 0).after(outcomes) = outcome
+  after(queue) = tail(before(queue))
+}
+reachable DistinctQueuedContexts {
+  queue = Pending[First, Second] First.submitted = Alpha Second.submitted = Beta
+}
+
+scope Int = 0..2, steps = 5

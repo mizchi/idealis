@@ -1,0 +1,55 @@
+model ReusableBarrier
+enum Worker = Fast | Slow
+enum Round = R1 | R2 | Done
+
+rel nextRound: Round -> lone Round
+fact { nextRound = (R1 -> R2) + (R2 -> Done) }
+
+var generation: one Round
+var rounds: Worker -> one Round
+var arrived: set Worker
+var waiting: set Worker
+
+init { generation = R1 rounds = Worker -> R1 no arrived no waiting }
+
+behavior arrive(worker: Worker) {
+  guard { generation != Done worker.rounds = generation worker not in waiting }
+  update {
+    waiting = waiting + worker
+    if { some arrived } then {
+      generation = generation.nextRound
+      arrived = none
+    } else {
+      arrived = arrived + worker
+    }
+  }
+}
+
+behavior tryPass(worker: Worker) {
+  guard { worker in waiting }
+  update {
+    if { generation != worker.rounds } then {
+      rounds = rounds ++ (worker -> worker.rounds.nextRound)
+      waiting = waiting - worker
+    }
+  }
+}
+
+invariant ArrivalsWaitInTheirGeneration {
+  all worker: Worker | worker in arrived implies worker in waiting and worker.rounds = generation
+}
+transition CannotPassCurrentRound on tryPass {
+  before(worker.rounds) = before(generation) implies unchanged(worker.rounds) and unchanged(waiting)
+}
+transition ReleaseRequiresBothWorkers on arrive {
+  not unchanged(generation) implies before(arrived) + worker = Worker
+}
+reachable FastArrivesWhileSlowStillWaits {
+  generation = R2 Fast.rounds = R2 Slow.rounds = R1
+  waiting = Worker arrived = Fast
+}
+reachable EveryonePassed { Done = Worker.rounds }
+eventually BothRoundsFinish with { weak arrive(*) weak tryPass(*) } {
+  Done = Worker.rounds
+}
+scope steps = 9

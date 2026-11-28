@@ -9,7 +9,8 @@
       "探索の範囲",
       "判定",
       "比較",
-      "モデル"
+      "モデル",
+      "TLA+ の処理系"
     ],
     "terms": [
       {
@@ -696,7 +697,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rmodel/src/syntax.rs",
+            "path": "crates/idealis-syntax/src/syntax.rs",
             "symbol": "Relation"
           }
         ]
@@ -718,7 +719,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rmodel/src/syntax.rs",
+            "path": "crates/idealis-syntax/src/syntax.rs",
             "symbol": "var"
           }
         ]
@@ -740,7 +741,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rmodel/src/syntax.rs",
+            "path": "crates/idealis-syntax/src/syntax.rs",
             "symbol": "Action"
           }
         ]
@@ -816,10 +817,275 @@
             "symbol": "Scope"
           },
           {
-            "path": "crates/rmodel/src/syntax.rs",
+            "path": "crates/idealis-syntax/src/syntax.rs",
             "symbol": "Scope"
           }
         ]
+      },
+      {
+        "id": "tla",
+        "kind": "concept",
+        "group": "TLA+ の処理系",
+        "name": {
+          "ja": "TLA",
+          "en": "TLA"
+        },
+        "definition": {
+          "ja": "Temporal Logic of Actions。状態と状態間の変化を扱い、実行列全体について性質を記述する時相論理。",
+          "en": "Temporal Logic of Actions, a temporal logic for specifying states, transitions and properties of whole behaviors."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [],
+        "flow": {
+          "role": "logic",
+          "input": [],
+          "output": [],
+          "comparedWith": []
+        }
+      },
+      {
+        "id": "tla-plus",
+        "kind": "concept",
+        "group": "TLA+ の処理系",
+        "name": {
+          "ja": "TLA+",
+          "en": "TLA+"
+        },
+        "definition": {
+          "ja": "TLA、集合論、一階述語論理を土台とする形式仕様言語。状態、次状態への遷移、実行列が満たす性質をモジュールに記述する。",
+          "en": "A formal specification language based on TLA, set theory and first-order logic. Its modules describe states, next-state transitions and properties of behaviors."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [],
+        "flow": {
+          "role": "language",
+          "input": [],
+          "output": [],
+          "comparedWith": []
+        }
+      },
+      {
+        "id": "sany",
+        "kind": "concept",
+        "group": "TLA+ の処理系",
+        "name": {
+          "ja": "SANY",
+          "en": "SANY"
+        },
+        "definition": {
+          "ja": "TLA+ の公式ツール群の構文解析・意味解析器。Idealis では対応する構文や演算子の優先順位を照合する基準として使う。",
+          "en": "The syntax and semantic analyzer in the official TLA+ tools. Idealis uses it as a reference for supported syntax and operator precedence."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [],
+        "flow": {
+          "role": "parser",
+          "input": [
+            "tla-plus"
+          ],
+          "output": [],
+          "comparedWith": []
+        }
+      },
+      {
+        "id": "tlc",
+        "kind": "concept",
+        "group": "TLA+ の処理系",
+        "name": {
+          "ja": "TLC",
+          "en": "TLC"
+        },
+        "definition": {
+          "ja": "実行可能な TLA+ 仕様を検査・シミュレーションする公式ツール。Idealis では、対応する入力でモデル検査の判定や反例を照合する基準として使う。",
+          "en": "The official model checker and simulator for executable TLA+ specifications. Idealis uses TLC as a reference for verdicts and counterexamples on supported inputs."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [],
+        "flow": {
+          "role": "checker",
+          "input": [
+            "tla-plus",
+            "tlc-config"
+          ],
+          "output": [],
+          "comparedWith": []
+        }
+      },
+      {
+        "id": "rtla",
+        "kind": "concept",
+        "group": "TLA+ の処理系",
+        "name": {
+          "ja": "rtla",
+          "en": "rtla"
+        },
+        "definition": {
+          "ja": "TLA+ ソースと TLC 設定を型付きの構文木へ変換する Idealis の Rust パーサー。",
+          "en": "The Idealis Rust parser for TLA+ source and TLC configuration, producing typed syntax trees."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rtla/src/parser.rs",
+            "symbol": "parse_module"
+          }
+        ],
+        "flow": {
+          "role": "parser",
+          "input": [
+            "tla-plus",
+            "tlc-config"
+          ],
+          "output": [
+            "rtla-ast"
+          ],
+          "comparedWith": [
+            "sany"
+          ]
+        }
+      },
+      {
+        "id": "rtla-compiler",
+        "kind": "concept",
+        "group": "TLA+ の処理系",
+        "name": {
+          "ja": "rtla-compiler",
+          "en": "rtla-compiler"
+        },
+        "definition": {
+          "ja": "rtla の TLA+ モジュールと TLC 設定から名前を解決し、対応する仕様を rtlc の SafetyProgram に変換する Rust コンパイラー。",
+          "en": "The Rust compiler that resolves names in rtla modules and TLC configurations and lowers the supported specifications to rtlc SafetyProgram inputs."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rtla-compiler/src/source.rs",
+            "symbol": "compile_source_bundle"
+          }
+        ],
+        "flow": {
+          "role": "compiler",
+          "input": [
+            "rtla-ast"
+          ],
+          "output": [
+            "safety-program"
+          ],
+          "comparedWith": []
+        }
+      },
+      {
+        "id": "rtlc",
+        "kind": "concept",
+        "group": "TLA+ の処理系",
+        "name": {
+          "ja": "rtlc",
+          "en": "rtlc"
+        },
+        "definition": {
+          "ja": "SafetyProgram を入力に状態を列挙し、対応する有限モデルの不変条件・デッドロック・時相性質を調べる Idealis の Rust モデル検査ライブラリ。",
+          "en": "The Idealis Rust model-checking library that explores states from a SafetyProgram and checks invariants, deadlocks and temporal properties of supported finite models."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [
+          {
+            "path": "crates/rtlc/src/ir.rs",
+            "symbol": "SafetyProgram"
+          }
+        ],
+        "flow": {
+          "role": "checker",
+          "input": [
+            "safety-program"
+          ],
+          "output": [],
+          "comparedWith": [
+            "tlc"
+          ]
+        }
+      },
+      {
+        "id": "tlc-config",
+        "kind": "concept",
+        "group": "TLA+ の処理系",
+        "name": {
+          "ja": "TLC 設定",
+          "en": "TLC configuration"
+        },
+        "definition": {
+          "ja": "初期条件、遷移、定数、検査する性質などを選ぶ TLC の設定ファイル。",
+          "en": "TLC configuration selecting initial conditions, transitions, constants and properties to check."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [],
+        "flow": {
+          "role": "artifact",
+          "input": [],
+          "output": [],
+          "comparedWith": []
+        }
+      },
+      {
+        "id": "rtla-ast",
+        "kind": "concept",
+        "group": "TLA+ の処理系",
+        "name": {
+          "ja": "rtla AST",
+          "en": "rtla AST"
+        },
+        "definition": {
+          "ja": "rtla が解析した TLA+ のモジュールと TLC 設定の型付き構文木。",
+          "en": "The typed syntax trees for TLA+ modules and TLC configuration parsed by rtla."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [],
+        "flow": {
+          "role": "artifact",
+          "input": [],
+          "output": [],
+          "comparedWith": []
+        }
+      },
+      {
+        "id": "safety-program",
+        "kind": "concept",
+        "group": "TLA+ の処理系",
+        "name": {
+          "ja": "SafetyProgram",
+          "en": "SafetyProgram"
+        },
+        "definition": {
+          "ja": "状態の生成、遷移、検査する性質を rtlc に渡す型付きの中間表現。",
+          "en": "A typed intermediate representation carrying state generation, transitions and properties to rtlc."
+        },
+        "aliases": [],
+        "avoid": [],
+        "model": [],
+        "code": [],
+        "flow": {
+          "role": "artifact",
+          "input": [],
+          "output": [],
+          "comparedWith": []
+        }
       }
     ],
     "rules": [
@@ -993,7 +1259,7 @@
           "symbol": "compare"
         },
         "test": {
-          "path": "crates/rspec/tests/grounding.rs",
+          "path": "crates/idealis-spec/tests/grounding.rs",
           "symbol": "compare_conforms_to_the_compare_model"
         }
       },
@@ -1004,7 +1270,7 @@
           "symbol": "aggregate"
         },
         "test": {
-          "path": "crates/rspec/tests/grounding.rs",
+          "path": "crates/idealis-spec/tests/grounding.rs",
           "symbol": "aggregate_conforms_to_the_report_model"
         }
       }

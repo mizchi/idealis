@@ -131,7 +131,7 @@ fn one(seed: u64, output: &str) -> String {
         let sat = alloy
             .as_ref()
             .map_or("unsupported".to_owned(), |alloy| sat(alloy, name, *kind));
-        let deep = depth.is_some_and(|d| d >= model.scope.steps);
+        let deep = depth.is_some_and(|d| d >= rmodel::alloy_steps(&model));
         let explicit_agrees = explicit == reference;
         let sat_agrees = sat == "unsupported"
             || sat == reference

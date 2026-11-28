@@ -1,0 +1,80 @@
+model DecoderRecovery
+enum Sequence = First | Second
+enum Life = Online | Offline | Restarted
+enum Decoder = Both | CurrentOnly
+
+var life: one Life
+var decoder: one Decoder
+var sealed: one Bool
+var applied: set Sequence
+var dropped: set Sequence
+var effects: one Nat
+var pendingAck: set Sequence
+var acked: set Sequence
+
+init {
+  life = Online decoder = Both not sealed
+  no applied no dropped effects = 0 no pendingAck no acked
+}
+
+behavior seal() {
+  guard { life != Offline not sealed }
+  update { sealed = true }
+}
+
+behavior receive(sequence: Sequence) {
+  guard { life != Offline sequence not in acked }
+  update {
+    if { sequence in applied } then {
+      pendingAck = pendingAck + sequence
+    } else {
+      if { decoder = Both } then {
+        applied = applied + sequence
+        effects = effects + 1
+        pendingAck = pendingAck + sequence
+      } else expect unreachable "Retirement requires a durable effect for every sequence" {
+        dropped = dropped + sequence
+      }
+    }
+  }
+}
+
+behavior ack(sequence: Sequence) {
+  guard { life != Offline sequence in pendingAck }
+  update { pendingAck = pendingAck - sequence acked = acked + sequence }
+}
+
+behavior retire() {
+  guard { life != Offline decoder = Both }
+  update {
+    if { sealed and applied = Sequence } then { decoder = CurrentOnly }
+  }
+}
+
+behavior crash() {
+  guard { life = Online }
+  update { life = Offline pendingAck = none }
+}
+
+behavior restart() {
+  guard { life = Offline }
+  update { life = Restarted }
+}
+
+invariant RetiredOnlyAfterDurableEffects {
+  decoder = CurrentOnly implies sealed and applied = Sequence
+}
+invariant EffectsAreUnique { effects = #applied }
+invariant NoLegacyFrameDropped { no dropped }
+invariant AckMeansDurablyApplied { pendingAck + acked in applied }
+
+transition CrashKeepsDurableProgress on crash {
+  unchanged(sealed) and unchanged(applied) and unchanged(effects) and unchanged(decoder)
+}
+
+transition DuplicateRenewsAckWithoutReapplying on receive {
+  sequence in before(applied) implies
+    (sequence in after(pendingAck) and unchanged(effects))
+}
+
+scope Int = 0..3, steps = 12

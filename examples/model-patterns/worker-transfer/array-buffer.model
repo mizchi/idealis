@@ -1,0 +1,46 @@
+model WorkerArrayBuffer
+enum Mode = Copy | Move
+enum Byte = Initial | SenderEdit | ReceiverEdit
+
+var sent: lone Mode
+var sender: lone Byte
+var pending: lone Byte
+var receiver: lone Byte
+
+init { sender = Initial no sent no pending no receiver }
+
+behavior send(mode: Mode) {
+  guard { no sent some sender }
+  update {
+    sent = mode
+    pending = sender
+    if { mode = Move } then { sender = none }
+  }
+}
+
+behavior deliver() {
+  guard { some pending }
+  update { receiver = pending pending = none }
+}
+
+behavior editSender() {
+  guard { some sender }
+  update { sender = SenderEdit }
+}
+
+behavior editReceiver() {
+  guard { some receiver }
+  update { receiver = ReceiverEdit }
+}
+
+transition MoveDetachesSenderOnSend on send { mode = Move implies no after(sender) }
+transition CopyRetainsSenderOnSend on send { mode = Copy implies unchanged(sender) }
+transition SendCapturesBytesBeforeDelivery on send { after(pending) = before(sender) and no after(receiver) }
+transition SenderEditsDoNotChangePostedBytes on editSender { unchanged(pending) and unchanged(receiver) }
+transition ReceiverEditsDoNotChangeSender on editReceiver { unchanged(sender) }
+transition DeliveryReceivesPostedBytes on deliver { after(receiver) = before(pending) and no after(pending) }
+
+reachable MovedBeforeDelivery { sent = Move no sender pending = Initial no receiver }
+reachable CopiedBeforeDelivery { sent = Copy sender = Initial pending = Initial no receiver }
+
+scope steps = 7

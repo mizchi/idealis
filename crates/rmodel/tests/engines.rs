@@ -9,6 +9,73 @@ fn root() -> &'static Path {
     Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."))
 }
 
+#[test]
+fn alloy_compares_conditional_values_in_invariants() {
+    let path = root().join("examples/model-patterns/worker-transfer/graph-version-reuse.model");
+    let source = std::fs::read_to_string(path).unwrap();
+    let equivalent = source.replace(
+        "label = (if { generation = Second } then B else A)",
+        "(generation = Second implies label = B) and (generation != Second implies label = A)",
+    );
+    assert_ne!(source, equivalent);
+    for (source, expected) in [(source, "holds"), (equivalent, "holds")] {
+        let faulty = source.replace(
+            "label = B generation = Second",
+            "label = A generation = Second",
+        );
+        assert_ne!(source, faulty);
+        for (fixture, want) in [(source, expected), (faulty, "violated")] {
+            let model = rmodel::parse(&fixture).unwrap();
+            rmodel::alloy_supports(&model).unwrap();
+            let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
+            let check = model
+                .checks
+                .iter()
+                .find(|check| check.name == "LabelFollowsGeneration")
+                .unwrap();
+            assert_eq!(sat(&model, &alloy, check), want);
+            assert_eq!(explicit(&model, check).verdict, want);
+        }
+    }
+}
+
+#[test]
+fn alloy_keeps_binary_arity_and_count_width_inside_conditionals() {
+    let model = rmodel::parse(
+        "model ConditionalEdges
+         enum Node = A | B | C | D | E | F | G | H
+         invariant Edges {
+           reachableFrom(A, if { #Node > 0 } then (A -> B) else none) = A + B
+         }
+         invariant DirectEdge {
+           A.(if { #Node > 0 } then (A -> B) else none) = B
+         }
+         scope steps = 1",
+    )
+    .unwrap();
+    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
+    for check in &model.checks {
+        assert_eq!(sat(&model, &alloy, check), "holds");
+        assert_eq!(explicit(&model, check).verdict, "holds");
+    }
+
+    let too_wide = rmodel::parse(
+        "model WideConditional
+         sig Node
+         sig Other
+         sig Spare
+         invariant I { (if { #Node > 0 } then Node else none) = Node }
+         scope Node = 7, Other = 7, Spare = 2, steps = 1",
+    )
+    .unwrap();
+    assert!(
+        rmodel::alloy_supports(&too_wide)
+            .unwrap_err()
+            .contains("15")
+    );
+    assert_eq!(explicit(&too_wide, &too_wide.checks[0]).verdict, "holds");
+}
+
 /// Expected verdicts by model file stem and check, from the claims of the
 /// corpus specification (plan 0092; they replaced expected.json).
 fn claims() -> std::collections::BTreeMap<String, std::collections::BTreeMap<String, String>> {
@@ -129,11 +196,11 @@ fn both_engines_give_the_expected_verdicts() {
             assert_eq!(explicit.verdict, want, "{file} {} explicit", check.name);
             // The SAT bound covers the explicit search's depth.
             assert!(
-                (explicit.depth as usize) < model.scope.steps,
+                (explicit.depth as usize) < rmodel::alloy_steps(&model),
                 "{file} {}: depth {} needs more than {} steps",
                 check.name,
                 explicit.depth,
-                model.scope.steps
+                rmodel::alloy_steps(&model)
             );
             assert_eq!(
                 sat(&model, &alloy, check),
@@ -253,16 +320,14 @@ fn malformed_models_are_rejected() {
         ("action a() { v' = v  v' = none }", "assigned twice"),
         ("action a() { r' = r }", "is not a var"),
         ("action a(x: A) { v' = x -> x }", "another arity"),
-        ("invariant I { #(A -> A) < 2 }", "# counts only sets"),
         ("invariant I { all v: A | some v }", "shadows"),
-        ("invariant I { #v < 9 }", "literal 9"),
         ("sig A", "duplicate name A"),
     ] {
         let error = rmodel::parse(&format!("{base}{body}{scope}")).unwrap_err();
         assert!(error.message.contains(needle), "{body}: {error}");
     }
     assert!(rmodel::parse("model M\nsig A\nscope A = 8, steps = 3").is_err());
-    assert!(rmodel::parse("model M\nsig A\nscope A = 2").is_err());
+    assert!(rmodel::parse("model M\nsig A\nscope A = 2").is_ok());
     assert!(rmodel::parse("model M\nsig A\nsig B\nscope A = 2, steps = 3").is_err());
 }
 
@@ -367,12 +432,12 @@ scope A = 7, B = 4, steps = 9",
         );
         assert_eq!(sat(&model, &alloy, check), want, "{} SAT", check.name);
     }
-    // Beyond 15 atoms no supported width holds every count.
-    let error = rmodel::parse(
+    // Explicit exploration can still check counts when the Alloy width is insufficient.
+    let wide = rmodel::parse(
         "model Wide\nsig A\nsig B\nsig C\ninvariant I { #A > 0 }\nscope A = 6, B = 6, C = 6, steps = 1",
-    )
-    .unwrap_err();
-    assert!(error.message.contains("15"), "{error}");
+    ).unwrap();
+    assert!(rmodel::alloy_supports(&wide).unwrap_err().contains("15"));
+    assert_eq!(explicit(&wide, &wide.checks[0]).verdict, "holds");
 }
 
 /// Review of #102: `none` takes the arity of the relation it stands for.
@@ -684,5 +749,143 @@ fn malformed_sum_sorts_are_rejected() {
     ] {
         let error = rmodel::parse(&format!("{base}{body}{scope}")).unwrap_err();
         assert!(error.message.contains(needle), "{body}: {error}");
+    }
+}
+
+#[test]
+fn relational_override_agrees_in_alloy_and_tla() {
+    let model = rmodel::parse(include_str!(
+        "../../../fixtures/rmodel/relations/override.model"
+    ))
+    .unwrap();
+    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
+    for check in &model.checks {
+        let expected = if check.kind == rmodel::CheckKind::Reachable {
+            "reachable"
+        } else {
+            "holds"
+        };
+        assert_eq!(sat(&model, &alloy, check), expected, "{}", check.name);
+        assert_eq!(explicit(&model, check).verdict, expected, "{}", check.name);
+    }
+}
+
+#[test]
+fn relation_keys_agree_in_alloy_and_explicit_exploration() {
+    let model = rmodel::parse(include_str!(
+        "../../../fixtures/rmodel/relations/keys.model"
+    ))
+    .unwrap();
+    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
+    for check in &model.checks {
+        let expected = if check.name == "FirstIsActive" {
+            "reachable"
+        } else {
+            "holds"
+        };
+        assert_eq!(sat(&model, &alloy, check), expected);
+        assert_eq!(explicit(&model, check).verdict, expected);
+    }
+}
+
+#[test]
+fn transitive_closure_agrees_in_reference_alloy_and_explicit_exploration() {
+    let model = rmodel::parse(include_str!(
+        "../../../fixtures/rmodel/relations/closure.model"
+    ))
+    .unwrap();
+    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
+    let reference = rmodel::reference::analyze(&model, 500_000);
+    for (check, verdict) in model.checks.iter().zip(&reference.verdicts) {
+        use rmodel::reference::Outcome;
+        let expected = match check.name.as_str() {
+            "LongPath" => Outcome::Reachable { depth: 0 },
+            "CycleReturnsToStart" | "Cleared" => Outcome::Reachable { depth: 1 },
+            _ => Outcome::Holds,
+        };
+        assert_eq!(verdict.outcome, expected, "{}", check.name);
+        let expected = if check.kind == rmodel::CheckKind::Reachable {
+            "reachable"
+        } else {
+            "holds"
+        };
+        assert_eq!(sat(&model, &alloy, check), expected, "{}", check.name);
+        assert_eq!(explicit(&model, check).verdict, expected, "{}", check.name);
+    }
+}
+
+#[test]
+fn binary_cardinality_counts_pairs_in_all_backends() {
+    let model = rmodel::parse(include_str!(
+        "../../../fixtures/rmodel/relations/count-pairs.model"
+    ))
+    .unwrap();
+    assert_eq!(rmodel::alloy_supports(&model), Ok(()));
+    assert_eq!(rmodel::alloy_transition_supports(&model), Ok(()));
+    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
+    for check in &model.checks {
+        let expected = if check.name == "FourthPair" {
+            "reachable"
+        } else {
+            "holds"
+        };
+        assert_eq!(sat(&model, &alloy, check), expected, "{}", check.name);
+        assert_eq!(explicit(&model, check).verdict, expected, "{}", check.name);
+    }
+    let transition = alloy
+        .commands()
+        .iter()
+        .position(|command| command.label == rmodel::alloy_label("CopyAddsOne"))
+        .unwrap();
+    assert_eq!(
+        alloy.analyze(transition, 50_000_000).unwrap().status,
+        ralloy::Status::NoCounterexample,
+    );
+    let report = rmodel::reference::analyze(&model, 10_000);
+    use rmodel::reference::Outcome;
+    assert_eq!(report.verdicts[3].outcome, Outcome::Reachable { depth: 1 });
+    assert_eq!(report.verdicts[4].outcome, Outcome::Holds);
+
+    let with_row_sum = include_str!("../../../fixtures/rmodel/relations/count-pairs.model").replace(
+        "scope steps",
+        "invariant RowsAgree { #seen = #(Old.seen) + #(New.seen) + #(Later.seen) }\nscope Int = 0..6, steps",
+    );
+    let model = rmodel::parse(&with_row_sum).unwrap();
+    let equivalent = rmodel::reference::witness(&model, "RowsAgree", 10_000).unwrap();
+    assert_eq!(equivalent.outcome, Outcome::Holds);
+}
+
+#[test]
+fn alloy_accepts_a_named_count_in_an_equality() {
+    let model = rmodel::parse(
+        "model NamedCount enum A = First | Second
+         var seen: A -> set A init { no seen }
+         derive size = #seen invariant Equal { size = #(seen + none) }
+         scope steps = 2",
+    )
+    .unwrap();
+    assert_eq!(rmodel::alloy_supports(&model), Ok(()));
+    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
+    assert_eq!(sat(&model, &alloy, &model.checks[0]), "holds");
+}
+
+#[test]
+fn alloy_pair_cardinality_selects_a_sound_width_or_declines() {
+    for (size, width) in [(3, Some(5)), (4, None)] {
+        let model = rmodel::parse(&format!(
+            "model PairCap sig A rel edges: A -> set A
+             fact {{ edges = A -> A }} invariant Exact {{ #edges > 0 }}
+             scope A = {size}, steps = 2"
+        ))
+        .unwrap();
+        if let Some(width) = width {
+            assert_eq!(rmodel::alloy_supports(&model), Ok(()));
+            let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
+            assert_eq!(alloy.commands()[0].scope.integer_bitwidth, width);
+            assert_eq!(sat(&model, &alloy, &model.checks[0]), "holds");
+        } else {
+            assert!(rmodel::alloy_supports(&model).unwrap_err().contains("16"));
+            assert_eq!(explicit(&model, &model.checks[0]).verdict, "holds");
+        }
     }
 }

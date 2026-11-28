@@ -1,0 +1,79 @@
+model ReplayWindow
+enum Position = Zero | One | Two | Three
+
+rel next: Position -> lone Position
+fact { next = (Zero -> One) + (One -> Two) + (Two -> Three) }
+
+var cursor: one Position
+var floor: one Position
+var ack: one Position
+var buffered: set Position
+var retained: set Position
+var received: set Position
+var gap: one Bool
+
+init {
+  cursor = Zero floor = Zero ack = Zero
+  retained = Position - Zero no buffered no received not gap
+}
+
+behavior read(position: Position) {
+  guard { not gap position in retained }
+  update {
+    received = received + position
+    if { position in reachableFrom(cursor.next, next) } then {
+      buffered = buffered + position
+    }
+  }
+}
+behavior advance() {
+  guard { not gap some cursor.next & buffered }
+  update { cursor = cursor.next buffered = buffered - cursor.next }
+}
+behavior acknowledge() {
+  guard { cursor != ack }
+  update { ack = cursor }
+}
+behavior trim() {
+  guard { ack in reachableFrom(floor.next, next) }
+  update { floor = ack retained = reachableFrom(ack.next, next) }
+}
+behavior expire() {
+  guard { some floor.next }
+  update { floor = floor.next retained = retained - floor.next }
+}
+behavior pull() {
+  guard { not gap some cursor.next cursor.next not in buffered }
+  update {
+    if { cursor.next in retained } then {
+      buffered = buffered + cursor.next
+      received = received + cursor.next
+    } else {
+      gap = true
+    }
+  }
+}
+behavior install() {
+  guard { gap }
+  update {
+    cursor = Three buffered = none received = Position - Zero gap = false
+  }
+}
+
+invariant PrefixAndBufferAgreeWithReceipts {
+  received = (Position - Zero - reachableFrom(cursor.next, next)) + buffered
+  buffered in reachableFrom(cursor.next, next)
+}
+invariant AckNeverAheadOfApplied { ack not in reachableFrom(cursor.next, next) }
+invariant RetainedMatchesFloor { retained = reachableFrom(floor.next, next) }
+transition AcknowledgementFollowsPrefix on acknowledge { after(ack) = before(cursor) }
+transition AcknowledgedTrimKeepsUnappliedRecords on trim {
+  before(reachableFrom(cursor.next, next) & retained) in after(retained)
+}
+reachable LaterRecordWithGap {
+  cursor = One ack = Zero floor = Zero buffered = Three received = One + Three not gap
+}
+reachable MissingPositionExpired {
+  cursor = One floor = Two buffered = Three received = One + Three gap
+}
+scope steps = 13

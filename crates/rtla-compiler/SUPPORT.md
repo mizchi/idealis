@@ -4,6 +4,8 @@
 
 ## 対応済み
 
+- [x] `compile_source_bundle` は TLA+ ソース、TLC 設定、補助モジュールを `rtla` で解析し、型付き AST のコンパイルに渡す。補助モジュールの名前と束の上限を検査する。
+
 - [x] `analyze_modules` で実行用設定なしのモジュール束に既存 linker と任意の level 検査を適用する。単独解析で proof・nested module は拒否する。直接 EXTENDS Sequences の Len 等と同名のトップレベル宣言には、衝突元と定義位置を示す。
 
 - [x] 共有IRの統合でも既存v1のSYMMETRY設定を保持する。明示v2のSYMMETRYはlowering前に理由を示して拒否する。
@@ -15,6 +17,7 @@
 - [x] v2の引数・captureをcaller lexical frame付きの遅延引数としてrtlcへ渡す。値のmemoizationは行わず、call entryと要求時の課金・予算判定はrtlcが担当する。
 
 - [x] 名前解決、定数・operatorとLETの展開、lexical scopeの保持。
+- [x] 複数の束縛を持つ内包式では、各束縛の範囲で外側の名前を参照し、範囲式内の束縛には先行する実行時スロットを避けて割り当てる。v1・v2 で照合した。[回帰試験](tests/binding_domains.rs)
 - [x] 既存語彙のcustom記号operatorを通常の定義として解決する。prefix `-.`、infix、postfix `^+`/`^*`/`^#`とnonfix呼出しをIR v1/v2で扱う。
 - [x] builtin・対応する標準moduleからimportした記号とのbinding衝突を拒否する。未使用定義とLET/formal宣言も検査し、SANY全体の意味解析とは区別する。
 - [x] 明示したModule集合のcompile_modulesで非再帰EXTENDSと引数なしnamed/unnamed INSTANCE、WITH、LOCALを解決する（IR v1/v2）。diamond import、定義元のscope、独立したinstanceを保持する。

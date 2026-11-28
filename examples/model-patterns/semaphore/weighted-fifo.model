@@ -1,0 +1,48 @@
+model WeightedSemaphore
+enum Client = Owner | Heavy | Light
+enum Permit = Left | Right
+sequence Waiters = Client, max = 2
+
+rel weight: Client -> one Nat
+var held: Client -> set Permit
+var waiting: one Waiters
+
+fact { Owner.weight = 1, Heavy.weight = 2, Light.weight = 1 }
+init { held = Owner -> Left, waiting = Waiters[] }
+
+behavior enqueue(client: Client) {
+  guard { client != Owner, no client.held, client not in elements(waiting) }
+  update { waiting = append(waiting, client) }
+}
+
+behavior release(client: Client) {
+  guard { some client.held }
+  update { held = withoutKeys(held, client) }
+}
+
+behavior grant(client: Client) {
+  guard { client = at(waiting, 0), #(Permit - Client.held) >= client.weight }
+  update {
+    let free = Permit - Client.held
+    let permits = if { client.weight = 2 } then free
+      else if { Left in free } then Left else Right
+    held = held ++ client -> permits
+    waiting = removeAll(waiting, client)
+  }
+}
+
+invariant EachPermitHasOneHolder {
+  all p: Permit | lone held.p
+}
+invariant AcquiredWeightMatches {
+  all client: Client | some client.held implies #(client.held) = client.weight
+}
+reachable HeavyWaitingWithOneFree {
+  Heavy = at(waiting, 0), Light in elements(waiting), one (Permit - Client.held)
+}
+leads_to HeadGetsCapacity with { weak grant(*) weak release(*) }
+  { Heavy = at(waiting, 0) } { some Heavy.held }
+leads_to HeadGetsCapacityUnderStrongGrant with { strong grant(*) weak release(*) }
+  { Heavy = at(waiting, 0) } { some Heavy.held }
+
+scope Int = 0..2, steps = 12

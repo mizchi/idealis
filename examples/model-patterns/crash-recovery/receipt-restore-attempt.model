@@ -1,0 +1,73 @@
+model ReceiptRestoreAttempt
+enum Attempt = First | Second
+enum Part = Boundary | Ledger
+enum Revision = Target | Older
+enum Phase = Idle | Fetching | Aborted | Published
+record Offer { attempt: Attempt, revision: Revision }
+
+var active: one Attempt
+var phase: one Phase
+var sent: Attempt -> set Part
+var received: Attempt -> set Part
+var staged: Part -> lone Offer
+
+derive expected = Offer { attempt: active, revision: Target }
+
+init { active = First phase = Idle no sent no received no staged }
+
+behavior begin() {
+  guard { phase = Idle or (phase = Aborted and active = First) }
+  update {
+    active = (if { phase = Aborted } then Second else active)
+    phase = Fetching
+  }
+}
+
+behavior abort() {
+  guard { phase = Fetching }
+  update { phase = Aborted staged = none }
+}
+
+behavior request(part: Part) {
+  guard { phase = Fetching part not in active.sent }
+  update { sent = sent + (active -> part) }
+}
+
+behavior receive(attempt: Attempt, part: Part, revision: Revision) {
+  guard { (attempt -> part) in sent - received }
+  update {
+    received = received + (attempt -> part)
+    if { phase = Fetching and attempt = active and revision = Target } then {
+      staged = staged ++ part -> Offer { attempt: attempt, revision: revision }
+    }
+  }
+}
+
+behavior publish() {
+  guard { phase = Fetching }
+  update { if { staged = Part -> expected } then { phase = Published } }
+}
+
+behavior reopen() {}
+
+invariant StagingBelongsToCurrentAttempt { staged in Part -> expected }
+invariant PublishedRequiresCurrentReplies {
+  phase = Published implies (active.received = Part and staged = Part -> expected)
+}
+
+transition AbortDiscardsStagedPieces on abort {
+  no after(staged)
+  unchanged(sent) unchanged(received)
+}
+
+transition ObsoletePieceLeavesStagingIntact on receive {
+  (attempt != before(active) or revision != Target or before(phase) != Fetching) implies
+    (unchanged(staged) and unchanged(phase))
+}
+
+transition CurrentPieceIsStaged on receive {
+  (attempt = before(active) and revision = Target and before(phase) = Fetching) implies
+    after(part.staged) = Offer { attempt: attempt, revision: revision }
+}
+
+scope steps = 16

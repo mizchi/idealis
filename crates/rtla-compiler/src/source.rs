@@ -1,4 +1,42 @@
 use rtla::ast::{self, DefinitionKind, Expression, ExpressionKind as E};
+use std::collections::BTreeMap;
+
+/// Parse a TLA+ source bundle and its TLC configuration, then compile it.
+pub fn compile_source_bundle(
+    source: &str,
+    config: &str,
+    sources: &BTreeMap<String, String>,
+    options: crate::CompileOptions,
+    syntax: rtla::SyntaxVersion,
+) -> Result<rtlc::SafetyProgram, String> {
+    if sources.len() > 256 {
+        return Err("source bundle exceeds 256 modules".into());
+    }
+    let module = rtla::parse_module_with_version(source, syntax)
+        .map_err(|error| format!("TLA parsing: {error}"))?;
+    let config =
+        rtla::parse_config(config).map_err(|error| format!("TLC configuration: {error}"))?;
+    let modules = sources
+        .iter()
+        .map(|(name, source)| {
+            let module = rtla::parse_module_with_version(source, syntax)
+                .map_err(|error| format!("TLA parsing: {error}"))?;
+            if module.name != *name {
+                return Err(format!(
+                    "module key {name} differs from MODULE {}",
+                    module.name
+                ));
+            }
+            Ok(module)
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    let result = if modules.is_empty() {
+        crate::compile_with_options(&module, &config, options)
+    } else {
+        crate::compile_modules_with_options(&module, &config, &modules, options)
+    };
+    result.map_err(|error| error.to_string())
+}
 
 pub(crate) fn children_mut(value: &mut Expression) -> Vec<&mut Expression> {
     match &mut value.node {

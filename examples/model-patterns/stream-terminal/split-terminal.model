@@ -1,0 +1,61 @@
+model SplitTerminal
+enum Chunk = First | Second
+enum Boundary = Empty | One | Two
+
+rel predecessor: Chunk -> lone Chunk
+rel required: Boundary -> set Chunk
+fact {
+  predecessor = Second -> First
+  required = (One -> First) + (Two -> Chunk)
+}
+
+var sent: set Chunk
+var arrived: set Chunk
+var applied: set Chunk
+var sealed: lone Boundary
+var announced: lone Boundary
+var ended: one Bool
+
+init { no sent no arrived no applied no sealed no announced not ended }
+
+behavior send(chunk: Chunk) {
+  guard { no sealed chunk not in sent chunk.predecessor in sent }
+  update { sent = sent + chunk }
+}
+
+behavior close() {
+  guard { no sealed }
+  update {
+    sealed = if { no sent } then Empty else if { sent = Chunk } then Two else One
+  }
+}
+
+behavior receiveData(chunk: Chunk) {
+  guard { chunk in sent - arrived }
+  update { arrived = arrived + chunk }
+}
+
+behavior receiveClose() {
+  guard { some sealed no announced }
+  update { announced = sealed }
+}
+
+behavior applyChunk(chunk: Chunk) {
+  guard { chunk in arrived - applied }
+  update { if { chunk.predecessor in applied } then { applied = applied + chunk } }
+}
+
+behavior finish() {
+  guard { some announced not ended }
+  update { if { announced.required in applied } then { ended = true } }
+}
+
+invariant AppliedIsAPrefix { Second in applied implies First in applied }
+invariant EndCoversEverySentChunk { ended implies sent in applied }
+reachable ControlAndSecondOvertakeFirst { announced = Two arrived = Second no applied not ended }
+reachable EmptyEnds { ended no sent }
+leads_to EndEventuallyFollowsTheSeal
+  with { weak receiveData(*) weak receiveClose weak applyChunk(*) weak finish }
+  { some sealed } { ended }
+
+scope steps = 12

@@ -1,0 +1,38 @@
+model WasmMemoryView
+enum Epoch = Initial | Refreshed
+enum Delta = Zero | One
+enum Address = Payload | Adjacent
+enum Byte = Expected | Neighbor
+
+var epoch: one Epoch
+var expanded: one Bool
+var view: lone Epoch
+var used: lone Address
+var value: lone Byte
+
+init { epoch = Initial expanded = false no view no used no value }
+
+behavior borrow() {
+  guard { no view }
+  update { view = epoch }
+}
+
+behavior grow(delta: Delta) {
+  guard { epoch = Initial }
+  update { epoch = Refreshed expanded = if { delta = One } then true else false }
+}
+
+behavior read() {
+  guard { some view }
+  update { view = epoch used = Payload value = Expected }
+}
+
+transition ReadUsesLiveBuffer on read { after(view) = after(epoch) }
+transition ReadUsesPayloadAddress on read { after(used) = Payload }
+transition ReadReturnsExpectedByte on read { after(value) = Expected }
+transition GrowthDoesNotRefreshCachedView on grow { unchanged(view) }
+
+reachable DetachedWithoutMorePages { epoch = Refreshed view = Initial not expanded }
+reachable DetachedWithMorePages { epoch = Refreshed view = Initial expanded }
+
+scope steps = 5

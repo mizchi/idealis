@@ -1,0 +1,63 @@
+model LockUpgrade
+enum Worker = Left | Right
+enum Revision = Original | LeftWrite | RightWrite
+enum Result = Applied | Stale
+
+rel proposal: Worker -> one Revision
+fact { proposal = (Left -> LeftWrite) + (Right -> RightWrite) }
+
+var readers: set Worker
+var queued: set Worker
+var owner: lone Worker
+var current: one Revision
+var basis: Worker -> lone Revision
+var outcome: Worker -> lone Result
+
+init { no readers no queued no owner current = Original no basis no outcome }
+
+behavior read(worker: Worker) {
+  guard { no owner no worker.basis }
+  update { readers = readers + worker basis = basis + (worker -> current) }
+}
+
+behavior requestUpgrade(worker: Worker) {
+  guard { worker in readers - queued }
+  update { queued = queued + worker readers = readers - worker }
+}
+
+behavior tryGrant(worker: Worker) {
+  guard { worker in queued }
+  update {
+    if { no owner no (readers - worker) } then {
+      owner = worker queued = queued - worker readers = readers - worker
+    }
+  }
+}
+
+behavior finish(worker: Worker) {
+  guard { owner = worker }
+  update {
+    owner = none
+    if { worker.basis = current } then {
+      current = worker.proposal outcome = outcome + (worker -> Applied)
+    } else {
+      outcome = outcome + (worker -> Stale)
+    }
+  }
+}
+
+invariant WriterExcludesReaders { some owner implies no readers }
+
+transition StaleUpgradeKeepsCurrent on finish {
+  before(worker.basis) != before(current) implies unchanged(current) and after(worker.outcome) = Stale
+}
+transition WriteUsesTheWorkersProposal on finish {
+  before(worker.basis) = before(current) implies after(current) = worker.proposal and after(worker.outcome) = Applied
+}
+
+reachable BothReadSameRevision { readers = Worker current = Original }
+reachable EveryoneFinished { keys(outcome) = Worker }
+eventually AllUpgradesDecide with { weak read(*) weak requestUpgrade(*) weak tryGrant(*) weak finish(*) } {
+  keys(outcome) = Worker
+}
+scope steps = 9

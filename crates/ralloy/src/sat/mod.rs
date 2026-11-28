@@ -63,6 +63,9 @@ pub(crate) fn supported_for(module: &Module, body: &Expr) -> bool {
             Expr::Block(expressions) => expressions.iter().all(|e| plain(e, module)),
             Expr::Unary(_, child) => plain(child, module),
             Expr::Binary(_, left, right) => plain(left, module) && plain(right, module),
+            Expr::Conditional(test, yes, no) => {
+                [test, yes, no].into_iter().all(|part| plain(part, module))
+            }
             Expr::Quantified(_, declarations, body) => {
                 declarations.iter().all(|d| plain(&d.domain, module)) && plain(body, module)
             }
@@ -664,6 +667,42 @@ impl<'a> Translator<'a> {
                         Value::Integer(self.circuit.count(&gates, self.bitwidth))
                     }
                     _ => unreachable!("temporal operators are translated by position"),
+                }
+            }
+            Expr::Conditional(test, yes, no) => {
+                let test = self.expression(test, locals)?.formula();
+                if test == TRUE || test == FALSE {
+                    let branch = if test == TRUE { yes } else { no };
+                    return self.expression(branch, locals);
+                }
+                let yes = self.expression(yes, locals)?;
+                let no = self.expression(no, locals)?;
+                match (yes, no) {
+                    (Value::Formula(yes), Value::Formula(no)) => {
+                        Value::Formula(self.circuit.select(test, yes, no))
+                    }
+                    (Value::Integer(yes), Value::Integer(no)) => Value::Integer(
+                        yes.into_iter()
+                            .zip(no)
+                            .map(|(yes, no)| self.circuit.select(test, yes, no))
+                            .collect(),
+                    ),
+                    (Value::Relation(yes), Value::Relation(no)) => {
+                        let mut output = Relation::new(yes.arity);
+                        for tuple in yes.tuples.keys().chain(
+                            no.tuples
+                                .keys()
+                                .filter(|tuple| !yes.tuples.contains_key(*tuple)),
+                        ) {
+                            self.budget.tick()?;
+                            let gate = self.circuit.select(test, yes.get(tuple), no.get(tuple));
+                            if gate != FALSE {
+                                output.tuples.insert(tuple.clone(), gate);
+                            }
+                        }
+                        Value::Relation(output)
+                    }
+                    _ => unreachable!("validated conditional branches"),
                 }
             }
             Expr::Binary(operator, left, right) => {

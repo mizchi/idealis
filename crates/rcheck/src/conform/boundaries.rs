@@ -1,5 +1,5 @@
 //! Witness pairs for property tests, derived from the reference model.
-use super::{canonical, command, relations};
+use super::{command, relations};
 use rmodel::reference::{Machine, Next, Outcome, Snapshot, Step, analyze};
 use serde_json::{Value, json};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -102,7 +102,7 @@ pub fn boundary_cases(model: &rmodel::Model, max_states: usize) -> Result<Value,
     }
     let machine = Machine::new(model)?;
     let mut corpus = Vec::new();
-    let encode = |state: &Snapshot| canonical(&relations(model, machine.state_data(state)));
+    let encode = |state: &Snapshot| relations(model, machine.state_data(state));
     for config in machine.configurations() {
         let initial = machine.initial(&config);
         if initial.len() != 1 {
@@ -193,7 +193,7 @@ pub fn boundary_cases(model: &rmodel::Model, max_states: usize) -> Result<Value,
                 }
             }
         }
-        let config = canonical(&relations(model, machine.configuration_data(&config)));
+        let config = relations(model, machine.configuration_data(&config));
         corpus.extend(witnesses.into_values().map(|mut pair| {
             pair["config"] = config.clone();
             pair
@@ -205,14 +205,19 @@ pub fn boundary_cases(model: &rmodel::Model, max_states: usize) -> Result<Value,
     Ok(json!({ "version": 1, "pairs": corpus }))
 }
 
-/// Emit a portable source module containing the reference cases and a fast-check property.
-pub fn boundary_typescript(model: &rmodel::Model, max_states: usize) -> Result<String, String> {
+fn require_safe_scope(model: &rmodel::Model) -> Result<(), String> {
     const MAX_SAFE_INTEGER: i64 = (1 << 53) - 1;
     if let Some((low, high)) = model.scope.ints
         && (low < -MAX_SAFE_INTEGER || high > MAX_SAFE_INTEGER)
     {
         return Err("pbt-typescript requires a scope within JavaScript's safe integers".into());
     }
+    Ok(())
+}
+
+/// Emit a portable source module containing the reference cases and a fast-check property.
+pub fn boundary_typescript(model: &rmodel::Model, max_states: usize) -> Result<String, String> {
+    require_safe_scope(model)?;
     let cases = boundary_cases(model, max_states)?;
     let source = include_str!("boundary_property.ts.in");
     Ok(format!(
@@ -231,4 +236,29 @@ pub fn boundary_go(model: &rmodel::Model, max_states: usize) -> Result<String, S
         .expect("JSON")
         .replace('`', "\\u0060");
     Ok(format!("{source}\nconst boundaryCorpus = `{cases}`\n"))
+}
+
+/// Value boundaries probe decoders. In particular, invalid values never reach
+/// the implementation of an action.
+pub fn data_boundary_cases(model: &rmodel::Model) -> Result<Value, String> {
+    let cases = rmodel::reference::data_boundaries(model)
+        .into_iter()
+        .map(|case| {
+            json!({ "sort": case.sort, "input": super::element(&case.input), "valid": case.valid })
+        })
+        .collect::<Vec<_>>();
+    if cases.is_empty() {
+        return Err("no data refinement boundary cases found".into());
+    }
+    Ok(json!({ "version": 1, "cases": cases }))
+}
+
+pub fn data_boundary_typescript(model: &rmodel::Model) -> Result<String, String> {
+    require_safe_scope(model)?;
+    let cases = data_boundary_cases(model)?;
+    let data = serde_json::to_string_pretty(&cases).expect("JSON");
+    let source = include_str!("data_boundary_property.ts.in");
+    Ok(format!(
+        "{source}\nexport const dataBoundaryCases = {data};\n"
+    ))
 }

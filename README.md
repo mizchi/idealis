@@ -4,6 +4,8 @@
 
 仕様を起点に、モデルの性質と実装の振る舞いを検査する、ポータブルな形式モデル駆動のツールキット。
 
+[Idealis の仕様を読む](spec/README.md) と、最初の `.ideal` モデル、検査の実行方法、処理系の構成をたどれます。
+
 **このリポジトリは開発途中の未完成なツールキットです。** 現在は`0.1.0-alpha.0`の試作段階で、API・対応範囲・backend間の統合を整備しています。npm / crates.ioには未公開です。
 
 設計の軸は、値や制約を扱うZ3/SMTと、状態遷移や並行実行を扱うTLA+。この二つを相互運用できるライブラリとして用意し、モデル検査・オラクル生成・実装照合を各テストツールへつなぎたい。最初の対象言語はTypeScript、Rust、Go。[目指す構成と進める順序](docs/vision.md)を参照。
@@ -106,6 +108,10 @@ TLA+はRust/Wasm frontendとtla-ts経路を持ち、`z3-solver`を任意のSMT a
 開発用の[構造付きfuzzing](evals/experiments/structured-fuzz/README.md)では、testing protocolと保存caseをASanで検査し、保存corpusをnative/Wasmで再生する。到達性、状態破損の対照、実行予算と採用範囲は[0039の評価](evals/iterations/0039-structured-fuzz.md)に記録した。
 
 [SAT/CNF候補の評価](evals/iterations/0037-sat-foundation.md)では、Varisat 0.2.2のnative/Wasmを独立全列挙と照合し、実ブラウザの動作を確認した。実行バジェットを保証するbackendへの採用は保留中。`ralloy`や`rusmt`には組み込まず、非公開のeval crateとして分離している。
+
+`@mizchi/idealis/patterns` は、ブラウザ履歴・Node.js のコールバック順序・オブジェクトストアを、同梱の rmodel と照合する接続パターンを提供する。保存した観測は ITF にして再照合できる。[使い方](docs/rmodel-patterns.md)
+
+[はじめての Idealis](docs/ideal-tutorial.md) では、図書館の貸出を `.ideal` で書き、不変条件・到達性・返却を待つ性質を検査する。
 
 ## 実行
 
@@ -387,6 +393,6 @@ Z3 は `init()` の結果を `createSmtOracle(api)` に渡す。Node では利�
 - `composeModels` は独立操作の interleaving と明示した `both` 操作の直積を探索する。モデル間の境界不変条件を指定できる。assume-guarantee 推論は行わない。
 - TLA+ アダプターは成功時に witness を捏造しない。lasso の反例は有限オラクルへ変換せず、元の検査結果を残す。型や整数意味論を Z3 と自動で一致させる変換は含まない。
 
-[設計](docs/architecture.md)、[テスト手法の調査](docs/testing-research.md)、[検証記録](docs/validation.md) を参照。
+[Idealis 言語の設計](docs/language-architecture.md)、[実装照合の設計](docs/architecture.md)、[テスト手法の調査](docs/testing-research.md)、[検証記録](docs/validation.md) を参照。
 
 再帰actionの呼出しは引数ごとに複製していた親frameを共有する。初期実装とのCriterion比較では、複数引数の準備済みcheckが1,036.8 µsから808.6 µsへ短縮した（約1.28倍）。捕捉変数の2ケースは約17〜19%短縮し、単一引数と分岐の準備済みcheckはほぼ同等だった。[対応範囲](docs/recursive-actions.md)と[測定条件・全結果](evals/iterations/0071-recursive-actions.md)を参照。TLCに対する速度比ではない。

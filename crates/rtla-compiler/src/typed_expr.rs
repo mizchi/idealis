@@ -402,16 +402,19 @@ impl Compiler<'_> {
         context: &Context,
     ) -> Result<(Vec<ir::Binding>, Context)> {
         let mut child = context.clone();
+        let mut domain_context = context.clone();
         let mut bindings = vec![];
         for bound in bounds {
             if child.bound >= 40 {
                 return unsupported("more than 40 bound variables");
             }
             let slot = child.bound;
+            // Domains keep the outer lexical names but run after earlier slots are occupied.
+            domain_context.bound = slot;
             let mut binding = ir::Binding {
                 slot,
                 tuple_size: None,
-                domain: self.domain_ir(&bound.set, context, true)?,
+                domain: self.domain_ir(&bound.set, &domain_context, true)?,
             };
             let names = match &bound.pattern {
                 Pattern::Name { name } => vec![name],

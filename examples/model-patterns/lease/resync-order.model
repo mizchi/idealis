@@ -1,0 +1,58 @@
+model ResyncOrder
+enum Epoch = Old | New
+
+var head: one Nat
+var cursor: one Nat
+var replicaTotal: one Nat
+var latest: lone Epoch
+var installed: lone Epoch
+var outstanding: set Epoch
+var captured: Epoch -> lone Nat
+
+init {
+  head = 0 cursor = 0 replicaTotal = 0
+  no latest no installed no outstanding no captured
+}
+
+behavior append() {
+  guard { head < 2 }
+  update { head = head + 1 }
+}
+behavior pull() {
+  guard { cursor < head }
+  update { cursor = cursor + 1 replicaTotal = replicaTotal + 2 }
+}
+behavior start(epoch: Epoch) {
+  guard { (epoch = Old and no latest) or (epoch = New and latest = Old) }
+  update { latest = epoch outstanding = outstanding + epoch }
+}
+behavior capture(epoch: Epoch) {
+  guard { epoch in outstanding no epoch.captured }
+  update { captured = captured ++ epoch -> head }
+}
+behavior deliver(epoch: Epoch) {
+  guard { epoch in outstanding some epoch.captured }
+  update {
+    outstanding = outstanding - epoch
+    captured = captured - (epoch -> epoch.captured)
+    if { epoch = latest and epoch.captured >= cursor } then {
+      cursor = epoch.captured
+      replicaTotal = epoch.captured + epoch.captured
+      installed = epoch
+    }
+  }
+}
+
+transition SupersededResponseLeavesReplicaUnchanged on deliver {
+  epoch != before(latest) implies unchanged(cursor) and unchanged(replicaTotal) and unchanged(installed)
+}
+transition AcceptedPositionCannotRecede on deliver {
+  after(cursor) >= before(cursor)
+}
+reachable NewAppliedWhileOldHoldsAheadImage {
+  installed = New cursor = 1 Old.captured = 2
+}
+reachable CurrentCaptureFellBehind {
+  latest = New New.captured = 1 cursor = 2
+}
+scope Int = 0..4, steps = 12

@@ -1,0 +1,60 @@
+model QueuedNotifications
+enum Notice = First | Second
+enum Registration = Old | New
+
+var active: lone Registration
+var used: set Registration
+var announced: set Notice
+var captured: Notice -> set Registration
+var pending: Notice -> set Registration
+var delivered: Notice -> set Registration
+var dropped: Notice -> set Registration
+
+init {
+  no active no used no announced no captured no pending no delivered no dropped
+}
+
+behavior subscribe(registration: Registration) {
+  guard { no active registration not in used }
+  update { active = registration used = used + registration }
+}
+behavior unsubscribe() {
+  guard { some active }
+  update { active = none }
+}
+behavior announce(notice: Notice) {
+  guard { notice not in announced }
+  update {
+    announced = announced + notice
+    captured = captured + notice -> active
+    pending = pending + notice -> active
+  }
+}
+behavior dispatch(notice: Notice, registration: Registration) {
+  guard { notice -> registration in pending }
+  update {
+    pending = pending - notice -> registration
+    if { registration in active } then {
+      delivered = delivered + notice -> registration
+    } else {
+      dropped = dropped + notice -> registration
+    }
+  }
+}
+
+invariant EveryCapturedPairAccountedFor { captured = pending + delivered + dropped }
+invariant DispositionsDisjoint {
+  no (pending & delivered) no (pending & dropped) no (delivered & dropped)
+}
+transition NoDeliveryToAReplacement on dispatch {
+  registration not in before(active) implies unchanged(delivered)
+  registration in before(active) implies notice -> registration in after(delivered)
+}
+transition SubscriptionKeepsQueue on subscribe { unchanged(pending) }
+
+reachable BothQueuedForOld { active = Old pending = Notice -> Old }
+reachable BothQueuedAcrossReregistration { active = New pending = Notice -> Old }
+reachable QueuedAcrossGenerations {
+  active = New pending = (First -> Old) + (Second -> New)
+}
+scope steps = 7

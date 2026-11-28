@@ -6,12 +6,14 @@ description = "One model of structure, state and behavior, lowered to Alloy 6 an
 repository = "https://github.com/mizchi/idealis"
 license = "MIT"
 readme = "README.md"
-include = ["src/**", "tests/**", "Cargo.toml", "Cargo.lock", "README.md", "SUPPORT.md", "LICENSE"]
+include = ["src/**", "tests/**", "Cargo.toml", "Cargo.lock", "README.md", "CHEATSHEET.md", "backlog.md", "SUPPORT.md", "review.md", "grammar-decisions.md", "design.md", "LICENSE"]
 
 [lib]
 crate-type = ["rlib"]
 
 [dependencies]
+idealis-semantics = { path = "../idealis-semantics" }
+idealis-syntax = { path = "../idealis-syntax" }
 
 [dev-dependencies]
 idealis-core = { path = "../idealis-core" }

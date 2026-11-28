@@ -1,0 +1,10 @@
+model DeliveryHarness
+var input: Request -> lone Nat
+init { no input }
+
+behavior publish(request: Request, revision: Nat) {
+  guard { no request.input revision > 0 }
+  update { input = input ++ request -> revision }
+}
+
+scope Int = 0..2, steps = 6

@@ -1,0 +1,77 @@
+model DeliveryTicketDrain
+enum Work = First | Second
+enum Phase = Fresh | Active | Retiring | Available
+variant Frame = Notice(Work) | Seal
+sequence Mailbox = Frame, max = 2
+
+var phase: one Phase
+var owner: lone Work
+var sender: lone Work
+var issued: set Work
+var sent: set Work
+var queued: one Mailbox
+var delivered: Work -> lone Work
+
+init {
+  phase = Fresh no owner no sender no issued no sent
+  queued = Mailbox[] no delivered
+}
+
+behavior allocate(work: Work) {
+  guard {
+    phase = Fresh or phase = Available
+    work not in issued
+    work = First or First in issued
+  }
+  update { phase = Active owner = work sender = work issued = issued + work }
+}
+behavior cancel() {
+  guard { phase = Active }
+  update { phase = Retiring owner = none }
+}
+behavior send() {
+  guard { some sender sender not in sent len(queued) < 2 }
+  update { queued = append(queued, Notice(sender)) sent = sent + sender }
+}
+behavior seal() {
+  guard { phase = Retiring some sender len(queued) < 2 }
+  update { sender = none queued = append(queued, Seal()) }
+}
+behavior receive() {
+  guard { some at(queued, 0) }
+  update {
+    let frame = at(queued, 0)
+    queued = tail(queued)
+    if { is(frame, Seal) } then { phase = Available }
+    else {
+      if { some owner } then {
+        delivered = delivered ++ owner -> payload(frame, Notice)
+      }
+    }
+  }
+}
+
+invariant AvailableMeansDrained {
+  phase = Available implies no sender and no owner and len(queued) = 0
+}
+invariant EachJobGetsItsOwnNotice {
+  all work: Work | work.delivered in work
+}
+invariant OnlyIssuedJobsReceive { keys(delivered) in issued }
+transition AllocationStartsWithAnEmptyMailbox on allocate {
+  len(before(queued)) = 0
+}
+transition PostingTheSealDoesNotReleaseTheTicket on seal {
+  after(phase) = Retiring
+}
+reachable SealQueuedWhileRetiring {
+  phase = Retiring no sender queued = Mailbox[Notice(First), Seal()]
+}
+reachable CancelledBeforeSend {
+  phase = Retiring sender = First len(queued) = 0 no sent
+}
+reachable ReusedTicketDelivers { Second.delivered = Second }
+leads_to SealedEventuallyReleases
+  with { weak receive }
+  { phase = Retiring no sender } { phase = Available }
+scope Int = 0..2, steps = 10

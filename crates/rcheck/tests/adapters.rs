@@ -160,8 +160,11 @@ fn pkl_service_carries_a_property_specific_fairness_assumption() {
     ] {
         for source in [&model, &direct] {
             let all = rcheck::check(source, name, &Selection::All, Budget::default()).unwrap();
-            assert_eq!(all.answers.len(), 1, "{all:?}");
-            assert_eq!(all.answers[0].verdict, expected, "{all:?}");
+            assert_eq!(all.answers.len(), 2, "{all:?}");
+            assert!(
+                all.answers.iter().all(|answer| answer.verdict == expected),
+                "{all:?}"
+            );
         }
     }
 }
@@ -175,7 +178,7 @@ fn pkl_order_preserves_the_shipped_tracking_transition_property() {
     assert_eq!(model.variants[0].name, "Status");
     assert!(omitted.is_empty(), "{omitted:?}");
     let report = rcheck::check(&model, "ShippedStays", &Selection::All, Budget::default()).unwrap();
-    assert_eq!(report.answers.len(), 2);
+    assert_eq!(report.answers.len(), 3);
     assert!(
         report
             .answers

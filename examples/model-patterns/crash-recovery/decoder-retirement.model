@@ -1,0 +1,84 @@
+model DecoderRetirement
+enum Producer = Alpha | Beta
+enum Decoder = Both | CurrentOnly
+
+var decoder: one Decoder
+var stopped: set Producer
+var sentLegacy: set Producer
+var sealed: set Producer
+var promised: set Producer
+var decodedLegacy: set Producer
+var droppedLegacy: set Producer
+var sentCurrent: set Producer
+var decodedCurrent: set Producer
+
+derive undelivered = sentLegacy - decodedLegacy - droppedLegacy
+derive waitingFor = promised - decodedLegacy
+
+init {
+  decoder = Both
+  no stopped no sentLegacy no sealed no promised
+  no decodedLegacy no droppedLegacy no sentCurrent no decodedCurrent
+}
+
+behavior sendLegacy(producer: Producer) {
+  guard { producer not in stopped + sentLegacy }
+  update { sentLegacy = sentLegacy + producer }
+}
+
+behavior stop(producer: Producer) {
+  guard { producer not in stopped }
+  update { stopped = stopped + producer }
+}
+
+behavior takeSeal(producer: Producer) {
+  guard { producer in stopped - sealed }
+  update {
+    sealed = sealed + producer
+    promised = promised + (producer & sentLegacy)
+  }
+}
+
+behavior takeLegacy(producer: Producer) {
+  guard { producer in undelivered }
+  update {
+    if { decoder = Both } then { decodedLegacy = decodedLegacy + producer }
+    else expect unreachable "Each sender is sealed and its promised legacy reply drained before retirement" {
+      droppedLegacy = droppedLegacy + producer
+    }
+  }
+}
+
+behavior retire() {
+  guard { decoder = Both }
+  update {
+    if { sealed = Producer and no waitingFor } then { decoder = CurrentOnly }
+  }
+}
+
+behavior sendCurrent(producer: Producer) {
+  guard { producer in stopped - sentCurrent }
+  update { sentCurrent = sentCurrent + producer }
+}
+
+behavior takeCurrent(producer: Producer) {
+  guard { producer in sentCurrent - decodedCurrent }
+  update { decodedCurrent = decodedCurrent + producer }
+}
+
+invariant RetiredOnlyAfterAllOldTraffic {
+  decoder = CurrentOnly implies (stopped = Producer and sentLegacy in decodedLegacy)
+}
+
+invariant SealsDescribeEachStoppedSender {
+  sealed in stopped
+  promised = sealed & sentLegacy
+}
+
+invariant NoLegacyReplyDropped { no droppedLegacy }
+
+transition CurrentReplyRemainsDecodable on takeCurrent {
+  producer in after(decodedCurrent)
+}
+
+scope steps = 13

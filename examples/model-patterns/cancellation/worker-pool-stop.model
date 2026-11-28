@@ -1,0 +1,60 @@
+model WorkerPoolStop
+enum Job = Active | Waiting
+enum JobState = Running | Queued | Reserved | Done | Cancelled
+enum Phase = Open | Stopping | Halted
+
+var phase: one Phase
+var jobs: Job -> one JobState
+var started: set Job
+var scheduled: one Bool
+
+init {
+  phase = Open jobs = (Active -> Running) + (Waiting -> Queued)
+  started = Active scheduled = false
+}
+behavior finish(job: Job) {
+  guard { job.jobs = Running }
+  update { jobs = jobs ++ job -> Done }
+}
+behavior reserve() {
+  guard { phase = Open no jobs.Running Waiting.jobs = Queued }
+  update { jobs = jobs ++ Waiting -> Reserved scheduled = true }
+}
+behavior dispatch() {
+  guard { scheduled }
+  update {
+    scheduled = false
+    if { phase = Open and Waiting.jobs = Reserved } then {
+      jobs = jobs ++ Waiting -> Running
+      started = started + Waiting
+    }
+  }
+}
+behavior stop() {
+  guard { phase = Open }
+  update {
+    phase = Stopping
+    jobs = jobs ++ ((jobs.Queued + jobs.Reserved) -> Cancelled)
+  }
+}
+behavior join() {
+  guard { phase = Stopping }
+  update { if { no jobs.Running } then { phase = Halted } }
+}
+
+transition StopCancelsUnstartedJobs on stop {
+  all job: Job | job in before(jobs.Queued + jobs.Reserved) implies after(job.jobs) = Cancelled
+}
+transition DispatchCannotStartAfterStop on dispatch {
+  before(phase) != Open implies unchanged(started) and unchanged(jobs)
+}
+invariant HaltedHasNoUnfinishedWork {
+  phase = Halted implies no (jobs.Running + jobs.Queued + jobs.Reserved)
+}
+reachable SlotOccupiedWithWorkWaiting { Active.jobs = Running Waiting.jobs = Queued }
+reachable PendingDispatchHasReservedSlot { phase = Open Waiting.jobs = Reserved scheduled }
+leads_to StoppingEventuallyHalts
+  with { weak finish(*) weak join }
+  { phase = Stopping } { phase = Halted }
+
+scope steps = 8

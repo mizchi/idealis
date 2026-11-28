@@ -1,0 +1,60 @@
+model MultipartPublication
+enum Upload = First | Next
+enum Part = Head | Tail
+enum Phase = Open | Aborted | Completed
+enum Result = Committed | NoSuchUpload
+
+var uploads: Upload -> lone Phase
+var staged: Upload -> set Part
+var pending: lone Upload
+var visible: lone Upload
+var result: lone Result
+
+init { no uploads no staged no pending no visible no result }
+
+behavior begin(upload: Upload) {
+  guard { no upload.uploads, (upload = First or First.uploads = Aborted or First.uploads = Completed) }
+  update { uploads = uploads ++ upload -> Open }
+}
+
+behavior uploadPart(upload: Upload, part: Part) {
+  guard { upload.uploads = Open part not in upload.staged }
+  update { staged = staged + upload -> part }
+}
+
+behavior requestComplete(upload: Upload) {
+  guard { upload.uploads = Open upload.staged = Part no pending }
+  update { pending = upload result = none }
+}
+
+behavior abort(upload: Upload) {
+  guard { upload.uploads = Open }
+  update { uploads = uploads ++ upload -> Aborted staged = staged - upload -> Part }
+}
+
+behavior commit() {
+  guard { some pending }
+  update {
+    if { pending.uploads = Open } then {
+      visible = pending uploads = uploads ++ pending -> Completed
+      staged = staged - pending -> Part result = Committed
+    } else { result = NoSuchUpload }
+    pending = none
+  }
+}
+
+invariant OnlyCompletedUploadsAreVisible {
+  some visible implies visible.uploads = Completed
+}
+
+transition PartsStayPrivate on uploadPart { unchanged(visible) }
+transition RequestIsNotPublication on requestComplete { unchanged(visible) }
+transition AbortPreservesVisibleObject on abort { unchanged(visible) }
+transition CommitRequiresLiveUpload on commit {
+  (before(pending.uploads) = Aborted) implies unchanged(visible) and after(result) = NoSuchUpload
+}
+
+reachable AbortedWithCompletionWaiting { pending = First First.uploads = Aborted }
+reachable ReplacementPartsArePrivate { visible = First Next.uploads = Open Next.staged = Part no pending }
+reachable ReplacementPublished { visible = Next }
+scope steps = 12

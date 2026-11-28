@@ -1,0 +1,23 @@
+model RestoredQueue
+enum Work = First | Second | Third | Fourth
+sequence Pending = Work, max = 4
+record Checkpoint { pending: Pending, retries: Nat }
+
+var saved: one Checkpoint
+var restored: lone Checkpoint
+init { no restored }
+
+behavior restart() {
+  guard { no restored }
+  update { restored = saved }
+}
+
+invariant RestoresCheckpoint {
+  some restored implies restored = saved
+}
+
+reachable RestoresFullQueue {
+  restored = Checkpoint { pending: Pending[Fourth, Third, Second, First], retries: 7 }
+}
+
+scope Int = 0..7, steps = 2

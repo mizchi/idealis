@@ -1,0 +1,18 @@
+model RelationKeys
+enum Ticket = First | Second
+enum Slot = Primary | Hedge
+var pending: Ticket -> set Slot
+var active: set Ticket
+
+init { pending = First -> Slot no active }
+
+behavior snapshot() { update { active = keys(pending) } }
+behavior clear() { update { pending = none } }
+
+invariant ProjectsDistinctKeys { active in First }
+invariant TypedEmptyRelation { no keys(if { some pending } then none else pending) }
+reachable FirstIsActive { active = First }
+transition SnapshotProjectsKeys on snapshot {
+  after(active) = before(keys(pending))
+}
+scope steps = 3

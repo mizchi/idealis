@@ -1,0 +1,53 @@
+model WorkerTransferRoundTrip
+enum Stage = AtHost | Outbound | AtWorker | Returning | Returned
+enum Byte = Initial | Updated | Final
+
+var stage: one Stage
+var original: lone Byte
+var workerView: lone Byte
+var inFlight: lone Byte
+var returned: lone Byte
+
+init { stage = AtHost original = Initial no workerView no inFlight no returned }
+
+behavior send() {
+  guard { stage = AtHost }
+  update { stage = Outbound inFlight = original original = none }
+}
+
+behavior acceptAtWorker() {
+  guard { stage = Outbound }
+  update { stage = AtWorker workerView = inFlight inFlight = none }
+}
+
+behavior editAtWorker() {
+  guard { stage = AtWorker }
+  update { workerView = Updated }
+}
+
+behavior sendBack() {
+  guard { stage = AtWorker }
+  update { stage = Returning inFlight = workerView workerView = none }
+}
+
+behavior acceptAtHost() {
+  guard { stage = Returning }
+  update { stage = Returned returned = inFlight inFlight = none }
+}
+
+behavior editAtHost() {
+  guard { stage = Returned }
+  update { returned = Final }
+}
+
+invariant OriginalHandleNeverRevives { stage != AtHost implies no original }
+invariant WorkerViewExistsOnlyWhileOwned { some workerView implies stage = AtWorker }
+transition OutboundTransferDetachesOriginal on send { no after(original) and after(inFlight) = before(original) }
+transition ReturnTransferDetachesWorker on sendBack { no after(workerView) and after(inFlight) = before(workerView) }
+transition ReceiveMakesFreshHandle on acceptAtHost { after(returned) = before(inFlight) and unchanged(original) }
+transition EditingReturnedBytesDoesNotReviveOldHandles on editAtHost { unchanged(original) and unchanged(workerView) }
+
+reachable ReturnedUpdated { stage = Returned returned = Updated }
+reachable NewHandleWasEdited { stage = Returned returned = Final }
+
+scope steps = 7

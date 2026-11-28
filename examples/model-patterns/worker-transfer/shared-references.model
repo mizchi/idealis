@@ -1,0 +1,50 @@
+model WorkerStructuredCopy
+enum Field = Left | Right | Twin
+enum Node = SourceShared | SourceTwin | CopyShared | CopyTwin | CopyRight
+enum Value = Original | Edited
+
+var source: Field -> one Node
+var target: Field -> lone Node
+var values: Node -> one Value
+
+init {
+  source = (Left -> SourceShared) + (Right -> SourceShared) + (Twin -> SourceTwin)
+  no target
+  values = Node -> Original
+}
+
+behavior send() {
+  guard { no target }
+  update {
+    target = (Left -> CopyShared) + (Right -> CopyShared) + (Twin -> CopyTwin)
+    values = values ++ ((CopyShared -> Left.source.values) + (CopyTwin -> Twin.source.values))
+  }
+}
+
+behavior editReceiver() {
+  guard { some target }
+  update { values = values ++ (Left.target -> Edited) }
+}
+
+behavior editSender() {
+  update { values = values ++ (Twin.source -> Edited) }
+}
+
+invariant ReceiverPreservesAlias { some target implies Left.target = Right.target }
+invariant EqualTwinsStayDistinct { some target implies Left.target != Twin.target }
+invariant SenderAndReceiverHaveIndependentNodes { no (Field.source & Field.target) }
+transition SendCopiesFieldValues on send {
+  all field: Field | after(field.target.values) = before(field.source.values)
+}
+transition ReceiverEditKeepsSenderValues on editReceiver {
+  all field: Field | unchanged(field.source.values)
+}
+transition ReceiverEditIsVisibleThroughAlias on editReceiver { after(Right.target.values) = Edited }
+transition ReceiverEditKeepsTwinValue on editReceiver { unchanged(Twin.target.values) }
+transition SenderEditKeepsReceiverValues on editSender {
+  all field: Field | unchanged(field.target.values)
+}
+
+reachable MessageCopied { some target }
+
+scope steps = 5

@@ -1,0 +1,60 @@
+model MultipartReconciliation
+enum Version = Original | Mine | Other
+enum Result = Unknown | Confirmed | Rejected
+
+var finished: one Bool
+var current: one Version
+var versions: set Version
+var observed: lone Version
+var result: one Result
+var proof: lone Version
+var scanned: one Bool
+
+init { not finished current = Original versions = Original no observed result = Unknown no proof not scanned }
+
+behavior finish(committed: Bool) {
+  guard { not finished }
+  update {
+    finished = true
+    if { committed } then { current = Mine versions = versions + Mine }
+  }
+}
+
+behavior overwrite() {
+  guard { finished Other not in versions }
+  update { current = Other versions = versions + Other }
+}
+
+behavior readCurrent() {
+  guard { finished }
+  update {
+    observed = current
+    if { current = Mine } then { result = Confirmed proof = current }
+  }
+}
+
+behavior scanHistory() {
+  guard { some observed }
+  update {
+    scanned = true
+    if { Mine in versions } then { result = Confirmed proof = Mine }
+  }
+}
+
+invariant ConfirmationNamesOriginalVersion {
+  result = Confirmed implies proof = Mine and Mine in versions
+}
+transition OtherCurrentVersionDoesNotSettle on readCurrent {
+  before(current) != Mine implies unchanged(result) and unchanged(proof)
+}
+transition MissingVersionDoesNotSettle on scanHistory {
+  Mine not in before(versions) implies unchanged(result) and unchanged(proof)
+}
+
+reachable OverwrittenAfterCommit { observed = Other Mine in versions result = Unknown }
+reachable OverwrittenWithoutCommit { observed = Other Mine not in versions result = Unknown }
+reachable HistoricalConfirmation { observed = Other proof = Mine result = Confirmed }
+reachable LatestObservation { observed = Other not scanned }
+reachable HistoryObservation { observed = Other scanned }
+
+scope steps = 6

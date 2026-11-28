@@ -1,0 +1,62 @@
+model Checkout
+entity Order "顧客が金額を指定して決済を依頼する注文。"
+record Amount { units: Nat }
+record Receipt { units: Nat }
+enum Reason = IssuerDeclined | Expired
+variant Payment = Unplaced | Pending | Captured(Receipt) | Rejected(Reason)
+
+var requested: Order -> lone Amount
+var payment: Order -> one Payment
+var chargeCount: Order -> one Nat
+
+init {
+  no requested
+  payment = Order -> Unplaced()
+  chargeCount = Order -> 0
+}
+
+behavior place(order: Order, amount: Amount) {
+  guard { is(order.payment, Unplaced) amount.units > 0 }
+  update {
+    requested = requested ++ order -> amount
+    payment = payment ++ order -> Pending()
+  }
+}
+behavior capture(order: Order, amount: Amount) {
+  guard {
+    order.requested = amount
+    is(order.payment, Pending) or payload(order.payment, Captured).units = amount.units
+  }
+  update {
+    if { is(order.payment, Pending) } then {
+      payment = payment ++ order -> Captured(Receipt { units: amount.units })
+      chargeCount = chargeCount ++ order -> 1
+    }
+  }
+}
+behavior reject(order: Order, reason: Reason) {
+  guard { is(order.payment, Pending) }
+  update { payment = payment ++ order -> Rejected(reason) }
+}
+
+invariant CaptureMatchesOrder {
+  all order: Order |
+    is(order.payment, Captured) implies
+      payload(order.payment, Captured).units = order.requested.units
+}
+invariant OneCharge {
+  all order: Order |
+    (is(order.payment, Captured) implies order.chargeCount = 1) and
+    (not is(order.payment, Captured) implies order.chargeCount = 0)
+}
+transition DuplicateIsIdempotent on capture {
+  is(before(order.payment), Captured) implies
+    unchanged(order.payment) and unchanged(order.chargeCount)
+}
+
+reachable CanCapture { some order: Order | order.payment = Captured(Receipt { units: 2 }) }
+reachable CanReject { some order: Order | order.payment = Rejected(IssuerDeclined) }
+eventually OrderDecides with { weak place weak capture } {
+  all order: Order | is(order.payment, Captured) or is(order.payment, Rejected)
+}
+scope Order = 1, Int = 0..2, steps = 5

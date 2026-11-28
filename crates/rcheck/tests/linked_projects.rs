@@ -218,3 +218,268 @@ fn explicit_checker_finishes_negative_checks_for_values_within_scope() {
     assert_eq!(row[0]["answers"][0]["verdict"], "holds");
     assert_eq!(row[0]["answers"][0]["coverage"]["kind"], "complete");
 }
+
+#[test]
+fn help_lists_existing_entry_points_without_opening_a_model() {
+    let output = Command::new(env!("CARGO_BIN_EXE_rcheck"))
+        .arg("--help")
+        .output()
+        .unwrap();
+    let help = String::from_utf8(output.stdout).unwrap();
+    assert!(output.status.success(), "{:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    assert!(help.lines().any(|line| line.contains("rcheck witness")));
+    assert!(help.lines().any(|line| line.contains("rcheck generate")));
+}
+
+#[test]
+fn syntax_and_type_errors_point_to_the_original_fragment() {
+    let root =
+        std::env::temp_dir().join(format!("rcheck-fragment-location-{}", std::process::id()));
+    std::fs::create_dir_all(&root).unwrap();
+    let manifest = root.join("project.rmodel.json");
+    let checks = root.join("checks.model");
+    std::fs::write(
+        &manifest,
+        r#"{"fragments":["domain.model","checks.model"]}"#,
+    )
+    .unwrap();
+    std::fs::write(
+        root.join("domain.model"),
+        "model Split\nentity Client \"利用者\"\nscope Client = 1, steps = 2",
+    )
+    .unwrap();
+
+    for (body, position, message) in [
+        (
+            "// 型エラー\ninvariant Valid { some Unknown }\n",
+            "2:1",
+            "Type: unknown name Unknown",
+        ),
+        (
+            "// 構文エラー\n  @\n",
+            "2:3",
+            "Syntax: unexpected character",
+        ),
+        (
+            "// 構文エラー\ninvariant Valid ]\n",
+            "2:17",
+            "Syntax: expected {",
+        ),
+    ] {
+        std::fs::write(&checks, body).unwrap();
+        for generate in [false, true] {
+            let mut cmd = Command::new(env!("CARGO_BIN_EXE_rcheck"));
+            cmd.current_dir(&root);
+            if generate {
+                cmd.arg("generate");
+            }
+            cmd.arg("project.rmodel.json");
+            if generate {
+                cmd.arg("ir");
+            }
+            let output = cmd.output().unwrap();
+            let diagnostic = String::from_utf8(output.stderr).unwrap();
+            assert_eq!(output.status.code(), Some(2), "{diagnostic}");
+            assert!(
+                diagnostic.starts_with(&format!("checks.model:{position}: ")),
+                "{diagnostic}"
+            );
+            assert!(diagnostic.contains(message), "{diagnostic}");
+        }
+    }
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn one_component_source_can_be_instantiated_twice_with_distinct_state() {
+    let project = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../examples/model-patterns/offline-merge/two-stores/project.rmodel.json"
+    );
+    let result = invoke(&[
+        "witness",
+        project,
+        "IndependentReceipts",
+        "--max-states",
+        "20000",
+    ]);
+    assert_eq!(result["verdict"], "reachable");
+    assert_eq!(result["complete"], true);
+    let state = &result["trace"]["finalState"];
+    assert_eq!(state["east_head"], 2);
+    assert_eq!(state["west_head"], 1);
+    assert_eq!(state["eastDelivery_received"]["First"], 2);
+    assert_eq!(state["westDelivery_received"]["First"], 1);
+    let ir = invoke(&["generate", project, "ir"]);
+    assert!(
+        ir["actions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|a| a["name"] == "east_commit")
+    );
+    assert!(
+        ir["actions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|a| a["name"] == "west_commit")
+    );
+}
+
+#[test]
+fn project_rejects_unowned_writes_and_keeps_component_source_positions() {
+    use serde_json::json;
+    let root = std::env::temp_dir().join(format!("rcheck-write-owner-{}", std::process::id()));
+    std::fs::create_dir_all(&root).unwrap();
+    let manifest = root.join("project.rmodel.json");
+    let run = |body: &str, other: serde_json::Value, contract_extra: &str, expected: &str| {
+        std::fs::write(
+            root.join("contract.model"),
+            format!("model Ownership\nvar shared: one Bool\ninit {{ not shared }}\nscope steps = 2\n{contract_extra}"),
+        ).unwrap();
+        std::fs::write(root.join("part.model"), body).unwrap();
+        std::fs::write(
+            root.join("writer.model"),
+            "behavior @update() { update { @output = true } }",
+        )
+        .unwrap();
+        let project = json!({
+            "fragments": [
+                "contract.model",
+                {"path":"part.model", "namespace":"observer", "ports": {
+                    "input":{"state":"shared","access":"read"}
+                }},
+                other
+            ]
+        });
+        std::fs::write(&manifest, project.to_string()).unwrap();
+        let error = rcheck::project::load_source(manifest.to_str().unwrap()).unwrap_err();
+        assert!(error.contains(expected), "{error}");
+    };
+    let writer = json!({
+        "path":"writer.model","namespace":"writer","ports":{
+            "output":{"state":"shared","access":"write"}
+        }
+    });
+    for body in [
+        "// 日本語 @ignored\nbehavior @clear() { update { @input = false } }",
+        "// 日本語 @ignored\nbehavior @clear() { update { shared = false } }",
+    ] {
+        run(
+            body,
+            writer.clone(),
+            "",
+            "part.model:2:1: observer_clear cannot write shared",
+        );
+    }
+    run(
+        "var @local: one Bool\ninit { not @local }",
+        writer.clone(),
+        "behavior spoof() { update { observer_local = true } }",
+        "contract.model:5:1: spoof cannot write observer_local",
+    );
+    run(
+        "behavior @watch() { guard { @input } }",
+        writer.clone(),
+        "behavior spoof() { update { shared = true } }",
+        "contract.model:5:1: spoof cannot write shared",
+    );
+    run(
+        "// 日本語\nbehavior @watch() ]",
+        writer.clone(),
+        "",
+        "part.model:2:19: Syntax: expected {",
+    );
+    let mut second_writer = writer.clone();
+    second_writer["namespace"] = json!("other");
+    std::fs::write(
+        &manifest,
+        json!({"fragments": ["contract.model", writer, second_writer]}).to_string(),
+    )
+    .unwrap();
+    let error = rcheck::project::load_model_source(manifest.to_str().unwrap()).unwrap_err();
+    assert!(
+        error.contains("shared has two write ports, other and writer"),
+        "{error}"
+    );
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn component_reads_only_local_state_or_declared_ports() {
+    use serde_json::json;
+
+    let root = std::env::temp_dir().join(format!("rcheck-read-owner-{}", std::process::id()));
+    std::fs::create_dir_all(&root).unwrap();
+    let manifest = root.join("project.rmodel.json");
+    std::fs::write(
+        root.join("contract.model"),
+        "model Reads\nrecord Event { left: Bool }\nvar left: one Bool\nvar right: one Bool\n\
+         rel ready: one Bool\nderive leak = left\ninit { left right }\nscope steps = 3\n\
+         invariant ProjectCanReadPrivateState { observer_local }",
+    )
+    .unwrap();
+    std::fs::write(
+        root.join("other.model"),
+        "var @private: one Bool\ninit { @private }",
+    )
+    .unwrap();
+    std::fs::write(
+        &manifest,
+        json!({"fragments":[
+            "contract.model",
+            {"path":"other.model", "namespace":"other"},
+            {"path":"part.model", "namespace":"observer", "ports":{
+                "input":{"state":"right","access":"read"}
+            }}
+        ]})
+        .to_string(),
+    )
+    .unwrap();
+    let part = root.join("part.model");
+    let local = "var @local: one Bool\ninit { @local }\n";
+    std::fs::write(
+        &part,
+        format!("{local}behavior @accept(event: Event) {{ guard {{ @input and @local and ready and event.left }} }}"),
+    )
+    .unwrap();
+    let path = manifest.to_str().unwrap();
+    let result = invoke(&[path, "--question", "ProjectCanReadPrivateState"]);
+    assert_eq!(result[0]["answers"][0]["verdict"], "holds");
+    for (body, state) in [
+        ("behavior @accept() { guard { left } }", "left"),
+        (
+            "behavior @accept() { guard { other_private } }",
+            "other_private",
+        ),
+        ("behavior @accept() { guard { leak } }", "left"),
+        (
+            "behavior @accept() { update { @local = if { left } then true else false } }",
+            "left",
+        ),
+        (
+            "behavior @accept() { update { let hidden = left @local = true } }",
+            "left",
+        ),
+        ("derive @hidden = left", "left"),
+        ("invariant @Safe { left }", "left"),
+        ("eventually @Progress { left }", "left"),
+        ("transition @Safe { after(left) }", "left"),
+        ("init { left }", "left"),
+    ] {
+        std::fs::write(&part, format!("{local}{body}")).unwrap();
+        let output = Command::new(env!("CARGO_BIN_EXE_rcheck"))
+            .args(["generate", path, "ir"])
+            .output()
+            .unwrap();
+        assert!(!output.status.success(), "{body} read {state}");
+        let error = String::from_utf8_lossy(&output.stderr);
+        assert!(
+            error.contains(&format!("part.model:3:1: observer cannot read {state}")),
+            "{body}: {error}"
+        );
+    }
+    std::fs::remove_dir_all(root).unwrap();
+}

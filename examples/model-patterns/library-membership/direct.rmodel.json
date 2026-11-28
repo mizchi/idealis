@@ -1,0 +1,18 @@
+{
+  "dictionary": "dictionary.ideal",
+  "exports": ["library_borrow", "library_giveBack"],
+  "fragments": [
+    "system.ideal",
+    "types.ideal",
+    {
+      "component": "membership.component.json",
+      "namespace": "membership",
+      "ports": { "eligible": "activeMembers" }
+    },
+    {
+      "component": "library.component.json",
+      "namespace": "library",
+      "ports": { "eligible": "activeMembers" }
+    }
+  ]
+}

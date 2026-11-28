@@ -1,0 +1,10 @@
+{
+  "interface": "receipt-interface.model",
+  "types": ["request-types.model"],
+  "body": "storage.model",
+  "ports": { "receipt": "write" },
+  "contract": {
+    "guarantees": ["ReceiptWithinHead", "ReceiptStable"],
+    "exercises": ["CanCommit"]
+  }
+}

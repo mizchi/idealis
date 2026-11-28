@@ -91,12 +91,22 @@ dependencies = [
 name = "idealis-core"
 version = "0.1.0-alpha.0"
 dependencies = [
- "rtla",
  "rtla-compiler",
  "rtlc",
  "serde",
  "serde_json",
 ]
+
+[[package]]
+name = "idealis-semantics"
+version = "0.1.0-alpha.0"
+dependencies = [
+ "idealis-syntax",
+]
+
+[[package]]
+name = "idealis-syntax"
+version = "0.1.0-alpha.0"
 
 [[package]]
 name = "itoa"
@@ -167,6 +177,8 @@ name = "rmodel"
 version = "0.1.0-alpha.0"
 dependencies = [
  "idealis-core",
+ "idealis-semantics",
+ "idealis-syntax",
  "ralloy",
  "serde_json",
  "sha2",

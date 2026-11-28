@@ -1,0 +1,59 @@
+model PulseEpoch
+enum Stage = Idle | Checked | Parked | Ready | Finished
+
+var reader: one Stage
+var generation: one Nat
+var signaled: one Nat
+var level: one Bool
+var baseline: lone Nat
+var observed: lone Nat
+
+init { reader = Idle generation = 0 signaled = 0 not level no baseline no observed }
+
+behavior check() {
+  guard { reader = Idle }
+  update { baseline = generation reader = Checked }
+}
+behavior publish() {
+  guard { not level generation < 2 }
+  update { generation = generation + 1 level = true }
+}
+behavior clear() {
+  guard { level }
+  update { level = false }
+}
+behavior notify() {
+  guard { signaled != generation }
+  update {
+    signaled = generation
+    if { reader = Parked } then {
+      reader = if { baseline != generation } then Ready else Checked
+    }
+  }
+}
+behavior park() {
+  guard { reader = Checked }
+  update { reader = if { baseline = generation } then Parked else Ready }
+}
+behavior consume() {
+  guard { reader = Ready }
+  update { reader = Finished observed = generation }
+}
+
+transition ChangedEpochCannotBlockOnPark on park {
+  before(baseline) != before(generation) implies after(reader) = Ready
+}
+transition ConsumeObservesANewPulse on consume {
+  before(baseline) != after(observed)
+}
+
+reachable ClearedAndNotifiedBeforePark {
+  reader = Checked baseline = 0 generation = 1 signaled = 1 not level
+}
+reachable ParkedBeforePulse { reader = Parked generation = 0 }
+
+leads_to PulseEventuallyObserved
+  with { weak park weak notify weak consume }
+  { some baseline baseline != generation } { reader = Finished }
+
+scope Int = 0..2, steps = 9

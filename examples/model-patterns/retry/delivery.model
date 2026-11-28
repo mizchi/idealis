@@ -1,0 +1,31 @@
+model RetryDelivery
+enum Request = First | Second
+enum Effect = Posted | Duplicate
+var effects: Request -> lone Effect
+var receipts: set Request
+var replies: set Request
+
+init { no effects no receipts no replies }
+
+behavior deliver(request: Request) {
+  update {
+    effects = if { request in receipts } then effects else effects + request -> Posted
+    receipts = receipts + request
+    replies = replies + request
+  }
+}
+behavior loseResponse(request: Request) {
+  guard { request in replies }
+  update { replies = replies - request }
+}
+
+transition RetryPreservesEffect on deliver {
+  request in before(receipts) implies unchanged(request.effects)
+}
+transition DeliveryReturnsReceipt on deliver {
+  request in after(receipts) and request in after(replies)
+}
+
+reachable LostAfterCommit { First in receipts First not in replies }
+reachable IndependentRequests { receipts = Request }
+scope steps = 6

@@ -1,0 +1,54 @@
+model FilteredStreamProgress
+enum Row = R1 | R2 | R3 | R4
+
+rel offsets: Row -> one Nat
+rel wanted: set Row
+fact {
+  offsets = (R1 -> 1) + (R2 -> 2) + (R3 -> 3) + (R4 -> 4)
+  wanted = R2 + R4
+}
+var online: one Bool
+var cursor: one Nat
+var scanned: one Nat
+var floor: one Nat
+var pending: lone Nat
+var applied: set Row
+
+init { online = false cursor = 0 scanned = 0 floor = 0 no pending no applied }
+behavior connect() {
+  guard { not online }
+  update { online = true scanned = cursor }
+}
+behavior scan() {
+  guard { online scanned < 4, (scanned + 1 not in wanted.offsets or no pending) }
+  update {
+    scanned = scanned + 1
+    if { scanned + 1 in wanted.offsets } then { pending = scanned + 1 }
+  }
+}
+behavior progress() {
+  guard { online }
+  update { cursor = if { some pending } then pending - 1 else scanned }
+}
+behavior commit() {
+  guard { online some pending }
+  update { cursor = pending applied = applied + offsets.pending pending = none }
+}
+behavior compact() {
+  guard { floor < cursor }
+  update { floor = cursor }
+}
+behavior disconnect() {
+  guard { online }
+  update { online = false pending = none }
+}
+
+transition ProgressAdvancesOverScannedGap on progress {
+  no before(pending) implies after(cursor) = before(scanned)
+}
+invariant CheckpointNeverCoversUnappliedMatch {
+  all row: Row | (row in wanted and row.offsets <= cursor) implies row in applied
+}
+invariant CompactionNeverPassesCheckpoint { floor <= cursor }
+reachable FirstGapScanned { online cursor = 0 scanned = 1 no pending }
+scope Int = 0..4, steps = 16

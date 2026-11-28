@@ -32,6 +32,13 @@ behavior publish() {
 
 invariant PublishedNeedsCurrentResults { all r: Revision | r in published implies r = current and r.completed = Checker }
 invariant PublishedNeedsAgreement { all r: Revision | r in published implies r.valueA = Checker or no r.valueA }
+transition ReceivedResultStays {
+  all r: Revision | all c: Checker | c in before(r.received) implies {
+    c in after(r.received)
+    unchanged(c & r.completed)
+    unchanged(c & r.valueA)
+  }
+}
 reachable OneCompleteResult { current = Second one Second.completed no published }
 reachable OldResultsOnly { current = Second First.completed = Checker no Second.received no published }
 reachable CurrentAgreementPublished { published = Second }

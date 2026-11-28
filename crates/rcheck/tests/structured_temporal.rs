@@ -26,10 +26,13 @@ fn fairness_changes_progress_without_changing_reachability() {
                 .all(|a| a.verdict == Verdict::Reachable)
         );
         let temporal = answers("Delivers");
-        assert_eq!(temporal.len(), 1);
+        assert_eq!(temporal.len(), 2);
         assert_eq!(temporal[0].checker, "explicit");
-        assert_eq!(temporal[0].coverage, Coverage::Complete);
-        assert_eq!(temporal[0].verdict, expected, "{temporal:?}");
+        assert_eq!(temporal[1].checker, "rprob");
+        for answer in &temporal {
+            assert_eq!(answer.coverage, Coverage::Complete);
+            assert_eq!(answer.verdict, expected, "{temporal:?}");
+        }
     }
 }
 
@@ -50,7 +53,7 @@ fn structured_values_round_trip_and_have_the_same_verdict_in_the_explicit_checke
         ("Missing", Verdict::Reachable, Some(0)),
     ] {
         let all = rcheck::check(&model, name, &Selection::All, Budget::default()).unwrap();
-        assert_eq!(all.answers.len(), 2, "{all:?}");
+        assert_eq!(all.answers.len(), 3, "{all:?}");
         for answer in all.answers {
             assert_eq!(
                 (answer.verdict, answer.depth),
@@ -204,7 +207,7 @@ fn a_payment_can_carry_a_numeric_record_or_a_rejection_reason() {
         ("CanReject", Verdict::Reachable),
     ] {
         let all = rcheck::check(&model, name, &Selection::All, Budget::default()).unwrap();
-        assert_eq!(all.answers.len(), 2, "{all:?}");
+        assert_eq!(all.answers.len(), 3, "{all:?}");
         assert!(all.answers.iter().all(|a| a.verdict == expected), "{all:?}");
     }
 
@@ -257,5 +260,51 @@ fn integer_boundaries_inside_a_sequence_keep_the_other_elements_fixed() {
     assert_eq!(
         pair["examples"][1]["command"]["values"]["$sequence"],
         serde_json::json!([0, 1])
+    );
+}
+
+#[test]
+fn a_list_of_record_literals_is_reachable_in_all_supported_checkers() {
+    let model = rmodel::parse(
+        "model NestedLiteral
+enum Label = Outer | Inner
+enum Value = Original | Staged
+record Mark { label: Label, snapshot: Value }
+sequence Marks = Mark, max = 2
+var marks: one Marks
+init { marks = Marks[] }
+behavior push() {
+  guard { len(marks) = 0 }
+  update {
+    marks = Marks[Mark { label: Outer, snapshot: Original }, Mark { label: Outer, snapshot: Staged }]
+  }
+}
+reachable Found {
+  marks = Marks[Mark { label: Outer, snapshot: Original }, Mark { label: Outer, snapshot: Staged }]
+}
+scope Int = 0..2, steps = 3",
+    )
+    .unwrap();
+    let result = rcheck::check(&model, "Found", &Selection::All, Budget::default()).unwrap();
+    assert!(!result.disagreement);
+    assert_eq!(result.answers.len(), 3);
+    for answer in result.answers {
+        assert_eq!(
+            (&answer.verdict, answer.depth),
+            (&Verdict::Reachable, Some(1)),
+            "{answer:?}"
+        );
+    }
+    let witness = rcheck::conform::witness(&model, "Found", 1000).unwrap();
+    assert_eq!(
+        witness["trace"]["commands"],
+        serde_json::json!([{"kind": "push"}])
+    );
+    assert_eq!(
+        witness["trace"]["finalState"]["marks"]["$sequence"],
+        serde_json::json!([
+            {"label": "Outer", "snapshot": "Original"},
+            {"label": "Outer", "snapshot": "Staged"}
+        ])
     );
 }

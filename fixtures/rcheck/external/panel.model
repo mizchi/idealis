@@ -1,0 +1,7 @@
+model Panel
+var open: one Bool
+init { not open }
+behavior openPanel() { guard { not open } update { open = true } }
+behavior closePanel() { guard { open } update { open = false } }
+reachable CanOpen { open }
+scope steps = 4

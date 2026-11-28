@@ -1,0 +1,66 @@
+model TaskGroupCause
+enum Child = Left | Right
+enum Stage = Running | Cleaning | Exited
+enum Reason = ParentCancelled | LeftFailed | RightFailed | ChildCancelled
+
+rel failures: Child -> one Reason
+fact { failures = (Left -> LeftFailed) + (Right -> RightFailed) }
+var stages: Child -> one Stage
+var signalled: set Child
+var reported: Child -> lone Reason
+var cause: lone Reason
+var returned: lone Reason
+var parentCancelled: one Bool
+
+init {
+  stages = Child -> Running
+  no signalled no reported no cause no returned parentCancelled = false
+}
+behavior cancelParent() {
+  guard { not parentCancelled no returned }
+  update {
+    parentCancelled = true
+    cause = if { no cause } then ParentCancelled else cause
+    signalled = signalled + stages.Running
+  }
+}
+behavior fail(child: Child) {
+  guard { child.stages = Running }
+  update {
+    cause = if { no cause } then child.failures else cause
+    reported = reported ++ child -> child.failures
+    stages = stages ++ child -> Cleaning
+    signalled = signalled + (stages.Running - child)
+  }
+}
+behavior acceptCancel(child: Child) {
+  guard { child in signalled child.stages = Running }
+  update {
+    reported = reported ++ child -> ChildCancelled
+    stages = stages ++ child -> Cleaning
+  }
+}
+behavior exitCleanup(child: Child) {
+  guard { child.stages = Cleaning }
+  update {
+    stages = stages ++ child -> Exited
+    if { stages.Exited + child = Child } then { returned = cause }
+  }
+}
+
+transition FirstCauseDoesNotChange {
+  some before(cause) implies unchanged(cause)
+}
+invariant ParentReturnsFirstCauseAfterCleanup {
+  some returned implies returned = cause and stages.Exited = Child
+}
+invariant EveryChildExitedMeansParentReturned {
+  stages.Exited = Child implies some returned
+}
+reachable ParentCancelledBeforeChildFailure {
+  cause = ParentCancelled no reported stages = Child -> Running
+}
+reachable ChildFailedBeforeParentCancellation {
+  cause = LeftFailed not parentCancelled Left.reported = LeftFailed
+}
+scope steps = 8

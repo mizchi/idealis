@@ -1,0 +1,54 @@
+model DeliveryRevision
+enum Attempt = Primary | Hedge
+enum Answer = Delivered | Missing
+record Snapshot { revision: Nat, outcome: Answer }
+
+var minimum: one Nat
+var open: set Attempt
+var readout: Attempt -> lone Snapshot
+var accepted: lone Snapshot
+var winner: lone Attempt
+var conflict: one Bool
+
+init { minimum = 1 no open no readout no accepted no winner not conflict }
+
+behavior connect(attempt: Attempt) {
+  guard { no accepted attempt not in open no attempt.readout }
+  update { open = open + attempt }
+}
+behavior finish(attempt: Attempt, revision: Nat, outcome: Answer) {
+  guard { attempt in open }
+  update {
+    open = open - attempt
+    readout = readout ++ attempt -> Snapshot { revision: revision, outcome: outcome }
+    if { revision >= minimum } then {
+      if { no accepted } then {
+        accepted = Snapshot { revision: revision, outcome: outcome }
+        winner = attempt
+      } else {
+        if { revision = accepted.revision and outcome != accepted.outcome } then { conflict = true }
+      }
+    }
+  }
+}
+
+invariant WitnessMatchesWinner { some winner implies winner.readout = accepted }
+invariant AcceptsRequestedFloor { some accepted implies accepted.revision >= minimum }
+transition StaleSnapshotCannotSettle on finish {
+  revision < before(minimum) implies unchanged(accepted) and unchanged(winner) and unchanged(conflict)
+}
+transition DifferentSnapshotsCannotConflict on finish {
+  some before(accepted) and revision != before(accepted.revision) implies unchanged(conflict)
+}
+transition PinnedResultSticks on finish {
+  some before(accepted) implies unchanged(accepted) and unchanged(winner)
+}
+reachable StaleMissingWhileHedgeOpen {
+  Primary.readout = Snapshot { revision: 0, outcome: Missing }
+  Hedge in open no accepted
+}
+reachable DeliveredAtFloorWhilePrimaryOpen {
+  accepted = Snapshot { revision: 1, outcome: Delivered }
+  winner = Hedge Primary in open
+}
+scope Int = 0..2, steps = 5

@@ -99,7 +99,7 @@ fn a_negative_result_in_a_nat_field_leaves_scope_in_both_checkers() {
         rcheck::Budget::default(),
     )
     .unwrap();
-    assert_eq!(all.answers.len(), 2, "{all:?}");
+    assert_eq!(all.answers.len(), 3, "{all:?}");
     for answer in &all.answers {
         assert_eq!(answer.verdict, rcheck::Verdict::Unknown, "{answer:?}");
     }
@@ -138,6 +138,63 @@ fn a_next_state_must_satisfy_the_model_invariants() {
         Err(ValidationError::OutsideModel(
             "invariant AlwaysLocked".into()
         ))
+    );
+}
+
+#[test]
+fn cli_projects_derivations_at_the_prefix_and_around_a_command() {
+    use std::{
+        io::Write,
+        process::{Command, Stdio},
+    };
+
+    let model = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../examples/model-patterns/auth-history/history.model");
+    let run = |derive, command: Option<serde_json::Value>| {
+        let mut child = Command::new(env!("CARGO_BIN_EXE_rcheck"))
+            .args(["validate", model.to_str().unwrap(), "-"])
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .unwrap();
+        let mut request = json!({
+            "config": {},
+            "initial": {"history":{"$sequence":["Home"]},"cursor":0,"current":"Home","signedIn":false},
+            "prefix":[{"kind":"signIn"},{"kind":"push","destination":"Account"}],
+            "derive": derive
+        });
+        if let Some(command) = command {
+            request["command"] = command;
+        }
+        write!(child.stdin.take().unwrap(), "{request}").unwrap();
+        child.wait_with_output().unwrap()
+    };
+    let sign_out = json!({"kind":"signOut"});
+    let approved = run(json!(["screen"]), Some(sign_out.clone()));
+    assert!(approved.status.success(), "{approved:?}");
+    assert_eq!(
+        serde_json::from_slice::<serde_json::Value>(&approved.stdout).unwrap(),
+        json!({
+            "state": {"history":{"$sequence":["Home","Account"]},"cursor":1,"current":"Account","signedIn":false},
+            "derived": {"before":{"screen":[["Account"]]},"after":{"screen":[["SignIn"]]}}
+        })
+    );
+    for names in [json!(["current"]), json!(["screen", "screen"])] {
+        assert_eq!(run(names, Some(sign_out.clone())).status.code(), Some(2));
+    }
+    let snapshot = run(json!(["screen"]), None);
+    assert!(snapshot.status.success(), "{snapshot:?}");
+    assert_eq!(
+        serde_json::from_slice::<serde_json::Value>(&snapshot.stdout).unwrap(),
+        json!({
+            "state": {"history":{"$sequence":["Home","Account"]},"cursor":1,"current":"Account","signedIn":true},
+            "derived": {"screen":[["Account"]]}
+        })
+    );
+    assert_eq!(
+        run(json!(["screen"]), Some(json!(null))).status.code(),
+        Some(2)
     );
 }
 
@@ -207,4 +264,107 @@ fn nat_round_trips_and_ir_passes_through_the_same_arithmetic_checks() {
     };
     let error = from_ir(&ir).unwrap_err();
     assert!(error.contains("integer arithmetic"), "{error}");
+}
+
+#[test]
+fn validates_the_saved_queue_witness_without_enumerating_checkpoints() {
+    let source =
+        include_str!("../../../examples/model-patterns/crash-recovery/restored-queue.model");
+    let model = rmodel::parse(source).unwrap();
+    let witness = rcheck::conform::witness(&model, "RestoresFullQueue", 9000).unwrap();
+    let trace = &witness["trace"];
+    let validator = Validator::new(&model).unwrap();
+    let mut session = validator
+        .start(&trace["config"], &trace["initial"])
+        .unwrap();
+    assert_eq!(
+        session.validate(&trace["commands"][0]).unwrap(),
+        trace["finalState"]
+    );
+    session.replay(&trace["commands"][0]).unwrap();
+    assert!(matches!(
+        session.validate(&trace["commands"][0]),
+        Err(ValidationError::Disabled(_))
+    ));
+
+    let mut wrong = trace["initial"].clone();
+    wrong["saved"]["pending"]["$sequence"] = json!(["First", "Second", "Third", "Fourth", "First"]);
+    assert!(matches!(
+        validator.start(&trace["config"], &wrong),
+        Err(ValidationError::InvalidInput(_))
+    ));
+    wrong["saved"] = trace["initial"]["saved"].clone();
+    wrong["restored"] = wrong["saved"].clone();
+    assert!(matches!(
+        validator.start(&trace["config"], &wrong),
+        Err(ValidationError::InvalidInput(_))
+    ));
+}
+
+#[test]
+fn validates_supplied_arguments_and_transition_properties_in_a_large_domain() {
+    let model = rmodel::parse(
+        "model RestoreArgument
+         enum Work = First | Second | Third | Fourth
+         sequence Batch = Work, max = 4
+         sequence History = Batch, max = 2
+         var current: one History
+         init { current = History[] }
+         behavior replace(history: History) { update { current = history } }
+         transition Matches on replace { after(current) = history }
+         transition NonEmpty on replace { some at(history, 0) }
+         scope Int = 0..2, steps = 2",
+    )
+    .unwrap();
+    assert!(rmodel::reference::Machine::new(&model).is_err());
+    let validator = Validator::new(&model).unwrap();
+    let session = validator
+        .start(&json!({}), &json!({"current":{"$sequence":[]}}))
+        .unwrap();
+    let held = json!({"$sequence":[{"$sequence":["Third","First"]}]});
+    assert_eq!(
+        session
+            .validate(&json!({"kind":"replace","history":held}))
+            .unwrap(),
+        json!({"current":held})
+    );
+    assert_eq!(
+        session.validate(&json!({"kind":"replace","history":{"$sequence":[]}})),
+        Err(ValidationError::OutsideModel("transition NonEmpty".into()))
+    );
+}
+
+#[test]
+fn validates_a_supplied_relation_without_enumerating_its_subsets() {
+    let model = rmodel::parse(
+        "model GivenLinks
+         enum Node = A | B | C | D | E
+         rel links: Node -> set Node
+         var enabled: one Bool
+         fact { no C.links }
+         init { not enabled }
+         behavior ready() { guard { B in A.links } update { enabled = true } }
+         scope steps = 2",
+    )
+    .unwrap();
+    assert!(rmodel::reference::enumerable(&model).is_err());
+    let validator = Validator::new(&model).unwrap();
+    let mut config = json!({"links":{"A":["B","A"],"B":[],"C":[],"D":[],"E":[]}});
+    let initial = json!({"enabled":false});
+    let session = validator.start(&config, &initial).unwrap();
+    assert_eq!(
+        session.validate(&json!({"kind":"ready"})).unwrap(),
+        json!({"enabled":true})
+    );
+    config["links"]["C"] = json!(["A"]);
+    assert!(matches!(
+        validator.start(&config, &initial),
+        Err(ValidationError::InvalidInput(_))
+    ));
+    config["links"]["C"] = json!([]);
+    config["links"]["A"] = json!(["B", "B"]);
+    assert!(matches!(
+        validator.start(&config, &initial),
+        Err(ValidationError::InvalidInput(_))
+    ));
 }
