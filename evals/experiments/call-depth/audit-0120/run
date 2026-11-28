@@ -1,0 +1,8 @@
+#!/bin/bash
+# usage: run [--timeout S] name cwd cmd...
+source <scratch>/env.sh
+export E=$S
+opts=()
+while [[ "$1" == --* ]]; do opts+=("$1" "$2"); shift 2; done
+name=$1; cwd=$2; shift 2
+exec python3 -I $W/evals/experiments/call-depth/audit-0120/run.py "${opts[@]}" "$name" "$cwd" -- "$@"

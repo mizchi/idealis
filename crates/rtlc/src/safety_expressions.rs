@@ -26,6 +26,7 @@ pub(crate) struct EvalContext<'a> {
     pub prime: bool,
     pub(crate) frame: Option<&'a CallFrame>,
     pub(crate) evaluation_depth: u16,
+    pub(crate) forwarded: u16,
     pub(crate) recursive: bool,
 }
 
@@ -56,27 +57,82 @@ impl Argument {
             old: context.old,
         }
     }
+}
 
-    fn evaluate<T>(
-        &self,
-        context: EvalContext<'_>,
-        arena: &mut Arena,
-        evaluate: fn(&Expression, EvalContext<'_>, &mut Arena) -> Result<T, CoreError>,
-    ) -> Result<T, CoreError> {
-        arena.consume(1)?;
-        evaluate(
-            &self.expression,
-            EvalContext {
-                locals: &self.locals,
-                frame: self.frame.as_deref(),
-                old: self.old,
-                ..context
-            },
-            arena,
-        )
+#[derive(Clone, Copy)]
+struct Reference {
+    slot: usize,
+    captured: bool,
+}
+
+impl Reference {
+    fn argument(slot: usize) -> Self {
+        Self {
+            slot,
+            captured: false,
+        }
+    }
+    fn capture(slot: usize) -> Self {
+        Self {
+            slot,
+            captured: true,
+        }
     }
 }
+
+impl Expression {
+    fn reference(&self) -> Option<Reference> {
+        match self {
+            Self::Parameter { slot } => Some(Reference::argument(*slot)),
+            Self::Capture { slot } => Some(Reference::capture(*slot)),
+            _ => None,
+        }
+    }
+}
+
+#[inline(never)]
+fn evaluate_forwarded<T>(
+    mut reference: Reference,
+    mut ctx: EvalContext<'_>,
+    arena: &mut Arena,
+    evaluate: fn(&Expression, EvalContext<'_>, &mut Arena) -> Result<T, CoreError>,
+) -> Result<T, CoreError> {
+    loop {
+        let argument = ctx
+            .frame
+            .ok_or_else(|| CoreError::protocol("Missing lexical call frame"))?
+            .binding(reference)?;
+        arena.consume(1)?;
+        let inner = EvalContext {
+            locals: &argument.locals,
+            frame: argument.frame.as_deref(),
+            old: argument.old,
+            ..ctx
+        };
+        let Some(next) = argument.expression.reference() else {
+            return evaluate(&argument.expression, inner, arena);
+        };
+        inner.check_nesting(arena)?;
+        reference = next;
+        ctx = EvalContext {
+            forwarded: inner.forwarded.saturating_add(1),
+            ..inner
+        };
+    }
+}
+
 impl CallFrame {
+    fn binding(&self, reference: Reference) -> Result<&Argument, CoreError> {
+        let bindings = if reference.captured {
+            &self.captures
+        } else {
+            &self.arguments
+        };
+        bindings
+            .get(reference.slot)
+            .ok_or_else(|| CoreError::protocol("Invalid lexical reference"))
+    }
+
     pub(crate) fn new(
         arguments: &[Expression],
         captures: &[Expression],
@@ -110,15 +166,21 @@ impl<'a> EvalContext<'a> {
             prime: false,
             frame: None,
             evaluation_depth: 0,
+            forwarded: 0,
             recursive: false,
         }
     }
     #[inline]
-    pub(crate) fn descend(&mut self, arena: &Arena) -> Result<(), CoreError> {
-        if arena.metadata.is_none() && arena.definitions.is_empty() && self.frame.is_none() {
-            return Ok(());
-        }
-        if self.evaluation_depth >= RECURSIVE_DEPTH_LIMIT {
+    pub(crate) fn nesting_depth(&self) -> u16 {
+        self.evaluation_depth.saturating_add(self.forwarded)
+    }
+    #[inline]
+    fn nesting_is_unbounded(&self, arena: &Arena) -> bool {
+        arena.metadata.is_none() && arena.definitions.is_empty() && self.frame.is_none()
+    }
+    #[inline]
+    fn refuse_excess_nesting(&self) -> Result<(), CoreError> {
+        if self.nesting_depth() >= RECURSIVE_DEPTH_LIMIT {
             if self.recursive {
                 return Err(CoreError {
                     code: "evaluation-budget",
@@ -129,6 +191,21 @@ impl<'a> EvalContext<'a> {
                 return Err(CoreError::protocol("Safety evaluation nesting exceeds 256"));
             }
         }
+        Ok(())
+    }
+    #[inline]
+    fn check_nesting(&self, arena: &Arena) -> Result<(), CoreError> {
+        if self.nesting_is_unbounded(arena) {
+            return Ok(());
+        }
+        self.refuse_excess_nesting()
+    }
+    #[inline]
+    pub(crate) fn descend(&mut self, arena: &Arena) -> Result<(), CoreError> {
+        if self.nesting_is_unbounded(arena) {
+            return Ok(());
+        }
+        self.refuse_excess_nesting()?;
         self.evaluation_depth += 1;
         Ok(())
     }
@@ -816,7 +893,7 @@ impl Expression {
         ctx: EvalContext<'_>,
         arena: &mut Arena,
     ) -> Result<Scalar, CoreError> {
-        if ctx.evaluation_depth >= RECURSIVE_DEPTH_LIMIT {
+        if ctx.nesting_depth() >= RECURSIVE_DEPTH_LIMIT {
             let mut checked = ctx;
             checked.descend(arena)?;
         }
@@ -923,19 +1000,11 @@ impl Expression {
                     arena,
                 )
             }
-            Self::Parameter { slot } | Self::Capture { slot } => {
-                let frame = ctx
-                    .frame
-                    .ok_or_else(|| CoreError::protocol("Missing lexical call frame"))?;
-                let bindings = if matches!(self, Self::Parameter { .. }) {
-                    &frame.arguments
-                } else {
-                    &frame.captures
-                };
-                bindings
-                    .get(*slot)
-                    .ok_or_else(|| CoreError::protocol("Invalid lexical reference"))?
-                    .evaluate(ctx, arena, evaluate)
+            Self::Parameter { slot } => {
+                evaluate_forwarded(Reference::argument(*slot), ctx, arena, evaluate)
+            }
+            Self::Capture { slot } => {
+                evaluate_forwarded(Reference::capture(*slot), ctx, arena, evaluate)
             }
             _ => Err(CoreError::protocol("Expected a lexical reference")),
         }
@@ -1210,6 +1279,7 @@ impl Expression {
                             prime: false,
                             frame: ctx.frame,
                             evaluation_depth: ctx.evaluation_depth,
+                            forwarded: ctx.forwarded,
                             recursive: ctx.recursive,
                         },
                         &mut next,
@@ -1222,6 +1292,7 @@ impl Expression {
                                     evaluation_depth: ctx.evaluation_depth.saturating_add(
                                         u16::try_from(branch.steps.len() + 1).unwrap_or(u16::MAX),
                                     ),
+                                    forwarded: ctx.forwarded,
                                     old,
                                     recursive: ctx.recursive,
                                     ..EvalContext::new(&current, next)
@@ -3197,6 +3268,7 @@ mod tests {
             prime: false,
             frame: None,
             evaluation_depth: 0,
+            forwarded: 0,
             recursive: false,
         };
         let mut arena = Arena::new(0);

@@ -20,7 +20,7 @@ impl @sessions.Sessions for Domain with fn login(self, u) {
     (self.active.length() >= 2 && self.fault != "login") {
     return false
   }
-  self.active.add(u)
+  self.active.insert(u)
   true
 }
 

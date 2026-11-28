@@ -50,7 +50,7 @@ captureは自由なlexical bindingの集合を、束縛の宣言順へ並べる�
 
 callはactualの式とcallerのimmutableなlexical frame（locals、parameter / captureのthunk、EXCEPTのold）を持つ新しいframeを作る。parameter / captureは読むたびに式を評価し、値cacheを持たない。current / next / primeはlexical frameへ固定せず、読んだ時点の動的contextを使う。定義本体の外側oldは直接読めず、明示captureが必要。ENABLEDのfresh next列挙と短絡順は従来どおり。
 
-動的評価の入れ子は、再帰しない経路で256段までを受理し、深さ256に達する入力を検査時の`Safety evaluation nesting exceeds 256`（protocolエラー）で拒否する。再帰する定義に入った経路は128段で`bounded / evaluation`になり、この上限は変えない。256段の評価に必要なnativeのstackは、releaseで2 MiB、debugで8 MiBのthreadが要件で、並列検査のworkerのthreadは8 MiBを明示して確保する。Wasmは線形メモリのstackが尽きる前に型付きの拒否を返す。
+動的評価の入れ子は、再帰しない経路で256段までを受理し、深さ256に達する入力を検査時の`Safety evaluation nesting exceeds 256`（protocolエラー）で拒否する。引数が`Parameter` / `Capture`だけの転送は、段ごとの再帰ではなく1つのloopでたどる。hopごとに`consume(1)`と深さの判定を行い、work・エラーの順序は変えない。hopは評価の再帰の段ではなく転送の段に積み、再帰しない経路の256は評価の再帰の段だけと比べる。再帰する定義に入った経路は、転送を含めた2つの段の合計（転送を段ごとに数えた深さ）が128に達すると`bounded / evaluation`になり、この上限は変えない。葉の検査・ENABLEDのsubscriptの見積もり・遅延関数のsnapshotも合計を使う。256段の評価に必要なnativeのstackは、releaseで2 MiB、debugで8 MiBのthreadが要件で、並列検査のworkerのthreadは8 MiBを明示して確保する。Wasmは線形メモリのstackが尽きる前に型付きの拒否を返す。
 
 v2のmembership descriptorでは、単一のrange bindingとそのslotだけを返す`map-set`を整数区間として検査する。`tupleSize`を持たないidentity形だけを対象とし、区間を列挙せず両端を評価する。空区間、model value、整数以外の診断は従来のrange所属と同じ順に処理する。v2のIF/CASEで選ばれたmembership結果へも用途を保ち、条件と選択枝を毎回評価する。未選択枝を評価せず、通常の値としての`map-set`とv1の評価は列挙を維持する。
 

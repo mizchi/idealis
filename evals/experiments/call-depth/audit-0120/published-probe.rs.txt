@@ -1,0 +1,53 @@
+use idealis_core::Engine;
+use serde_json::{Value, json};
+use std::io::Write;
+
+fn dispatch(engine: &mut Engine, observed: bool, command: &Value) -> Vec<u8> {
+    dispatch_text(engine, observed, &serde_json::to_vec(command).unwrap())
+}
+
+fn dispatch_text(engine: &mut Engine, observed: bool, bytes: &[u8]) -> Vec<u8> {
+    if observed {
+        engine.dispatch_observed(bytes)
+    } else {
+        serde_json::to_vec(&engine.dispatch(bytes)).unwrap()
+    }
+}
+
+#[test]
+fn dump_responses() {
+    let observed = std::env::var("MODE").unwrap() == "observed";
+    let files = std::env::var("CASES").unwrap();
+    let out = std::env::var("OUT").unwrap();
+    let handle = std::thread::Builder::new()
+        .stack_size(1 << 30)
+        .spawn(move || {
+            let mut file = std::fs::File::create(out).unwrap();
+            let mut seen = std::collections::BTreeSet::new();
+            for path in files.split(',') {
+                let cases: Vec<Value> = serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap();
+                for case in cases {
+                    let name = case["name"].as_str().unwrap().to_string();
+                    if !seen.insert(name.clone()) {
+                        continue;
+                    }
+                    let mut engine = Engine::default();
+                    let compile = json!({"version":1,"request":{"kind":"compile-tla","source":case["source"],"config":case["config"],"irVersion":2}});
+                    let reply = String::from_utf8(dispatch(&mut engine, false, &compile)).unwrap();
+                    let Some(program) = reply
+                        .strip_prefix("{\"kind\":\"compiled\",\"program\":")
+                        .and_then(|rest| rest.strip_suffix('}'))
+                    else {
+                        continue;
+                    };
+                    let check = format!(
+                        "{{\"version\":1,\"request\":{{\"kind\":\"check-safety\",\"program\":{program},\"bounds\":{{\"maxDepth\":100,\"maxStates\":1000,\"maxWork\":1000000}}}}}}"
+                    );
+                    let bytes = dispatch_text(&mut engine, observed, check.as_bytes());
+                    writeln!(file, "{name}\t{}", String::from_utf8(bytes).unwrap()).unwrap();
+                }
+            }
+        })
+        .unwrap();
+    handle.join().unwrap();
+}

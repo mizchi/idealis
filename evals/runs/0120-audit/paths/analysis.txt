@@ -1,0 +1,60 @@
+cells: 3280 (410 inputs x v1/v2 x 4 paths)
+before vs after IR sha256 differs: 0
+[before] same frontend, Wasm vs native outcome differs: 0
+[oracle] same frontend, Wasm vs native outcome differs: 0
+[after] same frontend, Wasm vs native outcome differs: 0
+[oracleAfter] same frontend, Wasm vs native outcome differs: 0
+TS vs Rust normalized IR where both compile: equal 772, differ 0
+v1 raw response differs from before (after, oracle, oracle-after): 0
+v2 cells with a check reply: hits256 = 0 in 1110, hits256 >= 1 in 92; no check reply (compile refusal) 438
+hit 0 cells where after differs from before (required 0): 0
+hit 0 cells where the oracle differs from before (required 0): 0
+oracle published256 self-check: own 1110, published 92
+oracle published256 does not reproduce the before response: 0
+oracle-after published256 vs after: own 1156, published 46
+after differs from oracle-after published256: 0
+oracle vs oracle-after raw response differs (required 0): 0
+oracle vs oracle-after peakTotal differs (required 0): 0
+oracle-after peakDepth > peakTotal (required 0): 0
+oracle-after hits256 > oracle hits256 (required 0): 0
+cells where oracle-after peakDepth < peakTotal (forwarding involved): 172
+cells with peakDepth = peakTotal but peak or hits differ from the oracle: 0
+oracle published256 is a fold diagnostic: 0
+v2 cells where after differs from before, by kind:
+  2 Safety evaluation nesting exceeds 256 -> Integer division by zero
+  40 Safety evaluation nesting exceeds 256 -> complete
+  4 Safety evaluation nesting exceeds 256 -> invariant-violation
+after bounded cells: 16
+  recursive-if-54-from-40 rust-wasm
+  recursive-if-54-from-40 rust-native
+  recursive-plain-from-40 rust-wasm
+  recursive-plain-from-40 rust-native
+  recursive-if-54-from-60 rust-wasm
+  recursive-if-54-from-60 rust-native
+  recursive-plain-from-60 rust-wasm
+  recursive-plain-from-60 rust-native
+  recursion-loop rust-wasm
+  recursion-loop rust-native
+  recursion-sum-200 rust-wasm
+  recursion-sum-200 rust-native
+  recursion-from-hop-50 rust-wasm
+  recursion-from-hop-50 rust-native
+  recursion-from-hop-38 rust-wasm
+  recursion-from-hop-38 rust-native
+after vs recorded expectations mismatches: 0
+fixture expectations derived from the oracles: hit 0 1102, oracle own 46, oracle-after published256 46
+fixture expectation differs from the oracle-derived value: 0
+declared depths compared with the probes: 100
+declared depth mismatches (128 or more: equal; below 128: equal or one less): 0
+byte comparisons (response bytes before parsing, compile error text where there is no response): compared 11184 (response 7680, compile text 3504), unjudged 0 (the dump has no wire digest or compile text)
+bytes: v1 before vs after differs: 0
+bytes: v1 before vs oracle differs: 0
+bytes: v1 before vs oracle-after differs: 0
+bytes: v2 hit 0 before vs after differs: 0
+bytes: v2 hit 0 before vs oracle differs: 0
+bytes: v2 oracle vs oracle-after differs: 0
+published256 branch (bytes of the published reply against the real response): byte-identical 138, identical only up to object key order 0 (a failure), different beyond key order 0 (a failure)
+compile response program bytes (raw text of the program member, before parsing; TS paths hash the JSON text of the program object): compared 5460 (before against after, oracle and oracle-after), unjudged 0
+bytes: program member differs from before: 0
+bytes: own or published256 comparison fails: 0
+bytes: cells not judged by bytes: 0

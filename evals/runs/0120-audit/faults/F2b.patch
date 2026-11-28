@@ -1,0 +1,25 @@
+--- <scratch>/trees/fault-safety_expressions.rs.orig	2026-11-26 22:43:06
++++ <scratch>/trees/fault/crates/rtlc/src/safety_expressions.rs	2026-11-26 22:43:33
+@@ -97,12 +97,13 @@
+     arena: &mut Arena,
+     evaluate: fn(&Expression, EvalContext<'_>, &mut Arena) -> Result<T, CoreError>,
+ ) -> Result<T, CoreError> {
++    let mut hops = 0usize;
+     loop {
+         let argument = ctx
+             .frame
+             .ok_or_else(|| CoreError::protocol("Missing lexical call frame"))?
+             .binding(reference)?;
+-        arena.consume(1)?;
++        hops += 1;
+         let inner = EvalContext {
+             locals: &argument.locals,
+             frame: argument.frame.as_deref(),
+@@ -110,6 +111,7 @@
+             ..ctx
+         };
+         let Some(next) = argument.expression.reference() else {
++            arena.consume(hops)?;
+             return evaluate(&argument.expression, inner, arena);
+         };
+         inner.check_nesting(arena)?;

@@ -1,0 +1,69 @@
+{
+ "comparisons": {
+  "v1 before vs after": {
+   "responseBytes": 618,
+   "compileErrorText": 1022,
+   "unjudged": 0,
+   "differ": 0
+  },
+  "v1 before vs oracle": {
+   "responseBytes": 618,
+   "compileErrorText": 1022,
+   "unjudged": 0,
+   "differ": 0
+  },
+  "v1 before vs oracle-after": {
+   "responseBytes": 618,
+   "compileErrorText": 1022,
+   "unjudged": 0,
+   "differ": 0
+  },
+  "v2 hit 0 (and compile refusals): before vs after": {
+   "responseBytes": 1110,
+   "compileErrorText": 438,
+   "unjudged": 0,
+   "differ": 0
+  },
+  "v2 hit 0: before vs oracle": {
+   "responseBytes": 1110,
+   "compileErrorText": 0,
+   "unjudged": 0,
+   "differ": 0
+  },
+  "v2 changed cells: after vs oracle-after own response": {
+   "responseBytes": 46,
+   "compileErrorText": 0,
+   "unjudged": 0,
+   "differ": 0
+  },
+  "v2 oracle vs oracle-after (own response, hit cells included)": {
+   "responseBytes": 1202,
+   "compileErrorText": 0,
+   "unjudged": 0,
+   "differ": 0,
+   "hit0": 1110,
+   "hitAtLeast1": 92
+  }
+ },
+ "ir": {
+  "cellsWithIr": 1820,
+  "irSha256Differ": 0
+ },
+ "v2ChangedCells": 46,
+ "v2ChangedInputs": 14,
+ "changedCellsWithBeforeHitsAtLeast1": 46,
+ "v2CellsWithHitsAtLeast1": 92,
+ "published256BranchCells": 138,
+ "note": "computed from the final dumps (paths-r8: response bytes = sha256 of the response text with the probe member cut out; compile error text where there is no response); the counts are the ones printed in paths/analysis.txt (round 3 analysis: oracle vs oracle-after also compares the hit cells, 1,202 pairs; 11,184 comparisons, response 7,680)",
+ "published256Branch": {
+  "cells": 138,
+  "byteIdentical": 138,
+  "identicalOnlyUpToKeyOrder": 0,
+  "different": 0
+ },
+ "programBytes": {
+  "compared": 5460,
+  "differ": 0,
+  "note": "raw text of the program member of each compile response (TS paths: JSON text of the program object), before against after, oracle and oracle-after, over 4 paths x 2 IR versions x 410 inputs where a program exists"
+ }
+}

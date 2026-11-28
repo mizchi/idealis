@@ -1,0 +1,12 @@
+--- <scratch>/trees/fault-safety_expressions.rs.orig	2026-11-26 22:43:06
++++ <scratch>/trees/fault/crates/rtlc/src/safety_expressions.rs	2026-11-26 22:43:48
+@@ -202,6 +202,9 @@
+     }
+     #[inline]
+     pub(crate) fn descend(&mut self, arena: &Arena) -> Result<(), CoreError> {
++        if !self.recursive && self.evaluation_depth >= DEPTH_LIMIT {
++            return Err(CoreError::protocol("Safety evaluation nesting exceeds 256"));
++        }
+         if self.nesting_is_unbounded(arena) {
+             return Ok(());
+         }

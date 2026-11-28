@@ -1,0 +1,352 @@
+{
+  "version": 1,
+  "runId": "0120-loop-confirmation",
+  "split": "confirmation",
+  "startedAt": "2026-11-26T17:09:58.016Z",
+  "plan": {
+    "version": 1,
+    "id": "0002-mixed-depth",
+    "scope": "synthetic-counter",
+    "hypothesis": "0001 の長い履歴による追加検出を残しつつ、短い履歴との交互実行で配信順序の検出の後退を減らせる",
+    "change": "uniform-8 を基準に、8操作と16操作のケースを交互に生成する。PRNG・モデル・故障・総予算は変更しない",
+    "baseline": {
+      "id": "uniform-8",
+      "strategy": "uniform",
+      "maxDepth": 8
+    },
+    "candidate": {
+      "id": "alternating-8-16",
+      "strategy": "alternating",
+      "maxDepth": 16
+    },
+    "maxOperations": 512,
+    "developmentSeeds": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "confirmationSeeds": [
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60
+    ],
+    "decisionRule": "故障別の検出数と seed ごとの勝敗、反例長、reset 数を記録し、追加検出があっても後退と診断費用を隠さない。正常対照と再現の失敗を採用材料にしない",
+    "limitations": "0001 の結果を見て作った探索的な次の仮説。開発用 seed は再利用し、確認用 seed は新規。人工故障の種類は既知のまま"
+  },
+  "planDigest": "884abe90dcd63100a9003fa8f2c1333847ff08018f4f96420fd1ed6e248fd520",
+  "sourceDigest": "15ff6dd43470505f35ddc8e8276bba304bbee23549815c75acf0093d1b79c3d0",
+  "files": [
+    {
+      "path": "evals/experiments/benchmark.ts",
+      "sha256": "8beee3810e60182c51587256f21b43521fee728002ecb7cc0f2e38f9dc9e9185"
+    },
+    {
+      "path": "evals/experiments/harness/counter-faults.ts",
+      "sha256": "52e81d76b99209ce28c3de1fc4e68b0b231252c2c5ad3a449b3d8555312f62f2"
+    },
+    {
+      "path": "evals/experiments/harness/evaluate.ts",
+      "sha256": "b8ff200be563eb6ad7d945b59a68004183f58b4b63125175a7c6203b0e9471fc"
+    },
+    {
+      "path": "evals/experiments/harness/history.ts",
+      "sha256": "be84848677987cf72717399ca01e91937b5442671b3ffe85233fc4de8329828c"
+    },
+    {
+      "path": "evals/experiments/harness/replay.ts",
+      "sha256": "0715760f7bd85afdb7cde53c1adc3ded827e18b9f506a74999181f90407e932a"
+    },
+    {
+      "path": "evals/experiments/harness/scheduled-counter.ts",
+      "sha256": "660df920aca1c760a1a0fa7b0d87e5ebc3f776b27b1b510e390f5a8c67c6d72f"
+    },
+    {
+      "path": "evals/experiments/harness/search.ts",
+      "sha256": "07cc0123cb6b3a5e4509fb45cff9ff267380fb88efaeeb20db993d084c998f79"
+    },
+    {
+      "path": "evals/experiments/harness/ttl.ts",
+      "sha256": "07f05418d1ac47b84a234ef005fefa5c5dc41a4568a0a72a3098c8e83b915ea0"
+    },
+    {
+      "path": "evals/experiments/loop.ts",
+      "sha256": "e51e0d29204c4392847385b50a07004b65edd5e115575846771b8cd63acaee72"
+    },
+    {
+      "path": "evals/experiments/protocol.ts",
+      "sha256": "7b221905b837352dfb6cd3bd2656c85ef316e3cbee6b399a517283fc007dc1e7"
+    },
+    {
+      "path": "evals/experiments/replay.ts",
+      "sha256": "8922e1cbade7daf00c91f7639ba433afb5b1603a0c730a9bd8d366e4aef8dcc3"
+    },
+    {
+      "path": "evals/experiments/runner.ts",
+      "sha256": "6ef99248a2757fe2689033f5e97fbc16509937bab4617fe3bb77e898e052eced"
+    },
+    {
+      "path": "evals/experiments/snapshot-module.ts",
+      "sha256": "46bd28669c80f194f040f4cab43ef992845df746811e50e69201fc02df646530"
+    },
+    {
+      "path": "evals/experiments/source-files.ts",
+      "sha256": "5f62121e4523e4c2dbb1623e9c569e15ddac544571125385d2aa691ed1f2cf8f"
+    },
+    {
+      "path": "examples/counter-model.ts",
+      "sha256": "92ecc88aafaf78d9ed09c4fe2de56fdcdafb2f64b6c0b19d530b5787b5397121"
+    },
+    {
+      "path": "examples/demo.ts",
+      "sha256": "addbe1ae9697fad4ad26dac12fec6f3f2e0189ad05de42cf3653faf07ca5e440"
+    },
+    {
+      "path": "examples/durable-counter.ts",
+      "sha256": "90826338808f6dffad2844572ba859df958390c40cfdbd477c52a713f426a5b3"
+    },
+    {
+      "path": "justfile",
+      "sha256": "268317bbe300027032c2149d01db660dc1f9575cf390674dfa17bd95013171d7"
+    },
+    {
+      "path": "package.json",
+      "sha256": "f4f1ada3aa8767cfe1c32771bb9202371f57762fe1466a3112c5d166981e86b4"
+    },
+    {
+      "path": "packages/idealis/package.json",
+      "sha256": "5093a45ccb1a57497d82539eeb009eaf3771378b223ee8bb80a5a81d374abb05"
+    },
+    {
+      "path": "packages/idealis/src/alloy.ts",
+      "sha256": "1e23731c68a5f7312eb983e41f49e51e4938c7b2f694197ede792c6cf08c9060"
+    },
+    {
+      "path": "packages/idealis/src/backend.ts",
+      "sha256": "16868116d6609b16f4234b9dc23dd95b091fcdfc1443fd834873296a25842884"
+    },
+    {
+      "path": "packages/idealis/src/budget.ts",
+      "sha256": "59239e0c17b0e6670d22c031de983434c9444cdc74f58dde3f4ed42f2e0d2ba8"
+    },
+    {
+      "path": "packages/idealis/src/cached-scheduling.ts",
+      "sha256": "3354f7f3565c7311a32ce4629feaf086734229302abab49f7bb0a0de1cef2005"
+    },
+    {
+      "path": "packages/idealis/src/check-cache-errors.ts",
+      "sha256": "b80d1b92a29b0df64cd3579758048ab75bc3ce1064fe7558bcd3b4623613f252"
+    },
+    {
+      "path": "packages/idealis/src/check-cache-http.ts",
+      "sha256": "33566bdbf1ba11612ccde9b5f4d5a29e7c7bbd4072542b0c7d591ec39035b12e"
+    },
+    {
+      "path": "packages/idealis/src/check-cache-node.ts",
+      "sha256": "fcaec765849962a4ea622e956ed2f75be0c00a96d0ec9f9d70f19f817ac4247e"
+    },
+    {
+      "path": "packages/idealis/src/check-cache-policy.ts",
+      "sha256": "ca10243077db12d65b4d01c74e4e6b641861e74858ed5da07c9527066f3dd77d"
+    },
+    {
+      "path": "packages/idealis/src/check-cache-wire.ts",
+      "sha256": "533ca9c5d249548eff7f06033bc26d3b010e1ffd0764ae41a4185d03a3468ef2"
+    },
+    {
+      "path": "packages/idealis/src/check-cache.ts",
+      "sha256": "93b3e6b72eb1e9c4e9063de967e386907dcdef6a4c1a9102e2b235d276a1fff6"
+    },
+    {
+      "path": "packages/idealis/src/checker.ts",
+      "sha256": "0d3d22b03dddd84e9b523f298a1c111b2a61dc4cec8731b8969d640124692e4b"
+    },
+    {
+      "path": "packages/idealis/src/compose.ts",
+      "sha256": "489edcd8536d44f63672453d1a83171627809bda6e9446011031ea5477fd6748"
+    },
+    {
+      "path": "packages/idealis/src/conformance.ts",
+      "sha256": "fde9957b697b171e252b9abc6fdbd765f283389212684d99b262617a3bb12326"
+    },
+    {
+      "path": "packages/idealis/src/contracts.ts",
+      "sha256": "13c8132f8d27f5a0a3dc935db9e3da779b7e14e15bc31c1442674a7de11d5244"
+    },
+    {
+      "path": "packages/idealis/src/finite.ts",
+      "sha256": "69c6c67e3ab8cc6ec33359c7668a8717a40d3f4c62367606a2afacb7ca936489"
+    },
+    {
+      "path": "packages/idealis/src/generated/roracle.ts",
+      "sha256": "3b0156a459205d3520a2349a39d1fd5e56d8f5feb8b44962d065a8fd59ceaf62"
+    },
+    {
+      "path": "packages/idealis/src/history.ts",
+      "sha256": "78cfeda2537605446f7226fe3e6865acc047299105aca0273d90b9d1c09d8bd5"
+    },
+    {
+      "path": "packages/idealis/src/host.ts",
+      "sha256": "c952e1da81a9c0a1a71a78b2c35a4441b156e087c96a6c1241c712647a0ca30b"
+    },
+    {
+      "path": "packages/idealis/src/index.ts",
+      "sha256": "d8219cc54aabba15e4f04c604decdaf61d3f8dbcab9b01b721298e35f047867f"
+    },
+    {
+      "path": "packages/idealis/src/portable-value.ts",
+      "sha256": "0c9391402f23a6b6ddc1995b09b582ea43d37f0abdf2726031932443dedf0643"
+    },
+    {
+      "path": "packages/idealis/src/portable-wasm.ts",
+      "sha256": "bdd5fca416c8f1d7d843539e25bdec23b9e2ff74971ecee42532d1f7567a9c76"
+    },
+    {
+      "path": "packages/idealis/src/portable.ts",
+      "sha256": "2e8f69369f0fa4fea0a6e029ba12ce8c7858ece8c87f7dd41a290fd83fe50f6c"
+    },
+    {
+      "path": "packages/idealis/src/prepared-safety.ts",
+      "sha256": "937ef30ba8b3a5be7201c2cb706cd3976dbf0fed3c8c939725c09b2678afc3f8"
+    },
+    {
+      "path": "packages/idealis/src/property.ts",
+      "sha256": "52b5afd86848a425e27423241de275dfe7c67f8bc812119eab8593bcf0f6e60a"
+    },
+    {
+      "path": "packages/idealis/src/safety-coverage.ts",
+      "sha256": "f325cc119bee3ba4e83234bc535f0738a20f991d2586d8840e9e2a70c43fc008"
+    },
+    {
+      "path": "packages/idealis/src/safety-expansions.ts",
+      "sha256": "43aee824c535a9f7be5c3d47bccf9463ef8edae9e34831556e7a107f5976471f"
+    },
+    {
+      "path": "packages/idealis/src/safety-program.ts",
+      "sha256": "d6fdded5dec1ab09a9e11262c804c5d28b4ec7997c99eee4f78c1ca9b3d54875"
+    },
+    {
+      "path": "packages/idealis/src/safety.ts",
+      "sha256": "7a921a71a6af97906807a2b1aa3878986dcf4215c4ced0598db65177a8390ecd"
+    },
+    {
+      "path": "packages/idealis/src/scheduling.ts",
+      "sha256": "b48010720d2641a8da84fb7146cae21214ccf77c8b79d9cd778a2f952b3dde0a"
+    },
+    {
+      "path": "packages/idealis/src/sharding.ts",
+      "sha256": "ed7b6f23dd4f2ec86a732828990f38f12ee50151788de734b0fd6c3a19f73b19"
+    },
+    {
+      "path": "packages/idealis/src/shrink.ts",
+      "sha256": "2b0cfe9a1586a1b52e106695df11378acbcd61c2e6e967349c2cc03dda5cf57c"
+    },
+    {
+      "path": "packages/idealis/src/smt.ts",
+      "sha256": "702836572848046b6e91585cbb21f96b2cacff42a2180f06e04cfc27e05b94ac"
+    },
+    {
+      "path": "packages/idealis/src/testing-wire.ts",
+      "sha256": "d7352b089bd96c2c9e4b1540983573d19b2a7b46af59b42b589071a535813e0a"
+    },
+    {
+      "path": "packages/idealis/src/testing.ts",
+      "sha256": "475d5b3f99e32366d6ed0f0b5cd9d86fdaad1aa7b9453d13a5ed4ddae495be2a"
+    },
+    {
+      "path": "packages/idealis/src/tla-safety-analysis.ts",
+      "sha256": "967c50a61937c5f2fc06d8a1837f985e616a2ae238c784e2b9c26b885fc399b3"
+    },
+    {
+      "path": "packages/idealis/src/tla-safety.ts",
+      "sha256": "d114857b244e05873f3f9762ea6086d51f79bbc0f4f252fef29e6dd0bfaea7af"
+    },
+    {
+      "path": "packages/idealis/src/tla-source.ts",
+      "sha256": "aaed2f21dd28dd5301367fbc2d9dccbbd6a64cc8a1a40919cdeceaa18442d245"
+    },
+    {
+      "path": "packages/idealis/src/tla.ts",
+      "sha256": "eb9ad130861c0adc49e08428320b4c120f23dbd0bacfe1724347e25dc425edac"
+    },
+    {
+      "path": "packages/idealis/src/trace.ts",
+      "sha256": "0a20a45ba0d84841139bec2dd8178c40585276fffc75e536d33ea1ca2c077cf3"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "3b4714e80332835b038784ff1cba66e6cd40ec8e5a6bd268858a0a8a16a2eda6"
+    },
+    {
+      "path": "pnpm-workspace.yaml",
+      "sha256": "169d3edaf39673c1fa352d1dc0d2110a893b5d9284687c12d3ac9be25f3137a5"
+    }
+  ],
+  "parent": {
+    "runId": "0120-loop-development",
+    "resultDigest": "d3a2e2bd59b141b1f4014cb6ac3fe206d58fea7e73e08be5a11d024c7c21765e"
+  },
+  "revision": "0087a7ac48da4a0b0fe6372fd9eb1cf3651371da",
+  "dirtyPaths": [
+    "M evals/experiments/call-depth/browser-ceiling.ts",
+    " M evals/experiments/call-depth/stack-harness/src/main.rs",
+    " M evals/experiments/call-depth/wasm-ceiling.ts",
+    " M evals/experiments/usable/native.ts",
+    " M evals/runs/ledger.jsonl",
+    "?? evals/experiments/call-depth/analyze-0120.ts",
+    "?? evals/experiments/call-depth/analyze-sweep-0120.ts",
+    "?? evals/experiments/call-depth/analyze-tlc-0120.ts",
+    "?? evals/experiments/call-depth/audit-0120/",
+    "?? evals/experiments/call-depth/go-0120.ts",
+    "?? evals/experiments/call-depth/oracle-0120-after.patch",
+    "?? evals/experiments/call-depth/oracle-0120.patch",
+    "?? evals/experiments/call-depth/paths-0120.ts",
+    "?? evals/experiments/call-depth/records-0120.ts",
+    "?? evals/experiments/call-depth/summarize-stack-0120.ts",
+    "?? evals/experiments/call-depth/summarize-wasm-0120.ts",
+    "?? evals/experiments/call-depth/sweep-0120.ts",
+    "?? evals/experiments/call-depth/tlc-0120.ts",
+    "?? evals/iterations/0120-forwarding-depth.md",
+    "?? evals/runs/0120-audit/",
+    "?? evals/runs/0120-evaluate/",
+    "?? evals/runs/0120-loop-development/"
+  ],
+  "runtime": {
+    "node": "v24.22.3",
+    "platform": "darwin",
+    "arch": "arm64"
+  }
+}

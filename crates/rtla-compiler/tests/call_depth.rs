@@ -37,6 +37,76 @@ fn hop_source(levels: usize) -> String {
     lines.join("\n") + "\n"
 }
 
+const WALK: &str = "counter' = IF counter < 4 THEN counter + 1 ELSE 0";
+
+fn family_source(family: &str, levels: usize) -> String {
+    let chain = |name: &str, parameter: &str, innermost: &str, layer: &dyn Fn(usize) -> String| {
+        let mut lines = vec![format!("{name}0({parameter}) == {innermost}")];
+        lines.extend((1..=levels).map(layer));
+        lines
+    };
+    let (variable, declarations, init, step, inv) = match family {
+        "record-hop" => (
+            "state",
+            chain(
+                "rec",
+                "s",
+                "[s EXCEPT !.count = IF s.count < 4 THEN s.count + 1 ELSE 0]",
+                &|level| format!("rec{level}(s) == rec{}(s)", level - 1),
+            ),
+            "state = [count |-> 0]".to_string(),
+            format!("state' = rec{levels}(state)"),
+            "state.count >= 0".to_string(),
+        ),
+        "let-hop" => (
+            "counter",
+            chain("lhop", "x", "x + 1", &|level| {
+                format!(
+                    "lhop{level}(x) == LET inner == lhop{}(x) + 1 IN inner",
+                    level - 1
+                )
+            }),
+            "counter = 0".to_string(),
+            WALK.to_string(),
+            format!("lhop{levels}(counter) >= 0"),
+        ),
+        "set-hop" => (
+            "counter",
+            chain("shop", "S", "S", &|level| {
+                format!("shop{level}(S) == shop{}(S)", level - 1)
+            }),
+            "counter = 0".to_string(),
+            WALK.to_string(),
+            format!("counter \\in shop{levels}(0..4)"),
+        ),
+        "function-hop" => (
+            "counter",
+            chain("fhop", "f", "f[1]", &|level| {
+                format!("fhop{level}(f) == fhop{}(f)", level - 1)
+            }),
+            "counter = 0".to_string(),
+            WALK.to_string(),
+            format!("fhop{levels}([k \\in {{1}} |-> counter]) >= 0"),
+        ),
+        "primed-hop" => (
+            "counter",
+            chain("fwd", "x", "x", &|level| {
+                format!("fwd{level}(x) == fwd{}(x)", level - 1)
+            }),
+            "counter = 0".to_string(),
+            format!(
+                "counter' = (IF counter < 4 THEN counter + 1 ELSE 0) /\\ fwd{levels}(counter)' = fwd{levels}((counter + 0)')"
+            ),
+            "counter >= 0".to_string(),
+        ),
+        _ => panic!("family {family}"),
+    };
+    format!(
+        "---- MODULE CallDepth ----\nEXTENDS Integers\nVARIABLE {variable}\n{}\ninit == {init}\ninv == {inv}\nstep == {step}\nq_init == init\nq_step == step\nq_inv == inv\n====\n",
+        declarations.join("\n")
+    )
+}
+
 fn compiled(source: String) -> SafetyProgram {
     std::thread::Builder::new()
         .stack_size(64 * 1024 * 1024)
@@ -75,23 +145,74 @@ fn outcome(source: String) -> String {
 
 #[test]
 fn layered_calls_complete_up_to_the_nesting_limit() {
+    let mut disagreements = vec![];
     for (levels, expected) in [
         (40, "complete 5 6 432"),
         (41, "complete 5 6 442"),
         (76, "complete 5 6 792"),
         (83, "complete 5 6 862"),
+        (84, "complete 1 2 176"),
+        (85, "complete 5 6 882"),
+        (124, "complete 1 2 256"),
+        (125, "complete 5 6 1282"),
     ] {
-        assert_eq!(outcome(hop_source(levels)), expected, "hop {levels}");
+        let observed = outcome(hop_source(levels));
+        if observed != expected {
+            disagreements.push(format!(
+                "hop {levels}: expected `{expected}`, observed `{observed}`"
+            ));
+        }
     }
+    assert!(disagreements.is_empty(), "\n{}", disagreements.join("\n"));
 }
 
 #[test]
 fn layered_calls_past_the_nesting_limit_are_refused() {
-    for levels in [84, 85, 168, 169] {
+    for levels in [126, 168, 169] {
         assert_eq!(
             outcome(hop_source(levels)),
             "error protocol: Safety evaluation nesting exceeds 256",
             "hop {levels}"
+        );
+    }
+}
+
+#[test]
+fn forwarding_families_complete_up_to_the_nesting_limit() {
+    let mut disagreements = vec![];
+    for (family, slope, intercept, accepted) in [
+        ("record-hop", 19, 53, [10, 124, 248]),
+        ("let-hop", 20, 32, [10, 49, 83]),
+        ("set-hop", 10, 32, [10, 124, 249]),
+        ("function-hop", 10, 37, [10, 123, 246]),
+        ("primed-hop", 20, 47, [10, 124, 248]),
+    ] {
+        for levels in accepted {
+            let expected = format!("complete 5 6 {}", slope * levels + intercept);
+            let observed = outcome(family_source(family, levels));
+            if observed != expected {
+                disagreements.push(format!(
+                    "{family} {levels}: expected `{expected}`, observed `{observed}`"
+                ));
+            }
+        }
+    }
+    assert!(disagreements.is_empty(), "\n{}", disagreements.join("\n"));
+}
+
+#[test]
+fn forwarding_families_past_the_nesting_limit_are_refused() {
+    for (family, levels) in [
+        ("record-hop", 249),
+        ("let-hop", 84),
+        ("set-hop", 250),
+        ("function-hop", 247),
+        ("primed-hop", 249),
+    ] {
+        assert_eq!(
+            outcome(family_source(family, levels)),
+            "error protocol: Safety evaluation nesting exceeds 256",
+            "{family} {levels}"
         );
     }
 }

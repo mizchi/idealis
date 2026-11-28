@@ -1,0 +1,11 @@
+--- <scratch>/trees/fault-safety_lazy.rs.orig	2026-11-26 22:43:06
++++ <scratch>/trees/fault/crates/rtlc/src/safety_lazy.rs	2026-11-26 22:46:53
+@@ -26,7 +26,7 @@
+             prime: context.prime,
+             frame: context.frame.cloned().map(Arc::new),
+             evaluation_depth: context.evaluation_depth,
+-            forwarded: context.forwarded,
++            forwarded: 0,
+             recursive: context.recursive,
+         }
+     }

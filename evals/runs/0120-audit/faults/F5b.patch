@@ -1,0 +1,11 @@
+--- <scratch>/trees/fault-safety_expressions.rs.orig	2026-11-26 22:43:06
++++ <scratch>/trees/fault/crates/rtlc/src/safety_expressions.rs	2026-11-26 22:43:43
+@@ -1279,7 +1279,7 @@
+                             prime: false,
+                             frame: ctx.frame,
+                             evaluation_depth: ctx.evaluation_depth,
+-                            forwarded: ctx.forwarded,
++                            forwarded: 0,
+                             recursive: ctx.recursive,
+                         },
+                         &mut next,

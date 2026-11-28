@@ -1,0 +1,13 @@
+{
+ "status": "complete",
+ "cases": 156,
+ "commands": 1560,
+ "byteComparisons": 4680,
+ "byteDifferences": 0,
+ "plan": "0120-forwarding-depth",
+ "command": "IDEALIS_PARITY_PLAN=0120-forwarding-depth node dist/evals/experiments/temporal-tuning/parity.js <before snapshot: native and Wasm> <run>",
+ "rule": "every response of before Wasm, before native, after Wasm and after native is deep-equal (assertOracle), including the bound-exhausted responses (maxWork 1 and 17); in addition the raw response text (sha256 before parsing) of before Wasm is compared with after Wasm, before native and after native for every command",
+ "resultSha256": "d66c8bb34b46a3890b5daba134599ee167c91147fd1144ab6bbd967b85310f9c",
+ "exit": 0,
+ "note": "Rerun with the byte digests. The after native binary of the worktree was replaced for the run by the evaluation snapshot (sha256 in checks/snapshot-after.sha256) and restored afterwards (its sha256 was checked); the after Wasm is byte-identical to the snapshot. Raw run under target/0120-audit-raw/temporal-r2."
+}

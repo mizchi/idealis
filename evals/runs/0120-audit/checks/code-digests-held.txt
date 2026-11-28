@@ -1,0 +1,144 @@
+# Source of every driver, script and entry point that the rows of commands.tsv executed, with the SHA-256 of the file as it was when those rows ran.
+# Format: `<sha256>  <path>  rows: ...` is the run-time digest of the listed rows (the file was not modified after their start).
+# `NOT-REPRODUCIBLE  <path>  ...` marks rows whose run-time digest was not recorded because the file was modified (vp fmt, later fixes) after they ran; the current digest is given where no row has a reproducible one. Such a digest is NOT the run-time digest.
+# Rows are ordered by start; `a, b ... z (n rows)` abbreviates the list. Local modules imported by a driver are listed with the rows of the drivers that import them.
+# `<scratch>/run` is the wrapper the rows ran under (host paths inside; the copy under audit-0120/ has placeholders and a different digest). `<scratch>/copy-bench-to-deps.sh` is not kept in the repository.
+# Not listed one by one: crate sources, test files and recipe contents that cargo and the `just` test recipes build and run; they are pinned by checks/snapshot-*.sha256, checks/frozen-final.sha256 and checks/protected-*.txt.
+433344914bd23032905a2c20d6d51d8e6339fabfde74dbfe775d545e0ea1e4af  <scratch>/copy-bench-to-deps.sh  rows: copy-before-bench-to-deps, copy-after-bench-to-deps
+73c21dc8d4b608681fd5b79eb68a5ddcd77ce4c4a83d4d09ca8d83813514d0fb  <scratch>/run  rows: build-oracle-core, build-oracle-wasm ... check-vp-r7 (207 rows)
+577b167591548448fec9241691b0329f540a6fa36578f9c44b15f52b19e03254  crates/idealis-cli/src/main.rs  rows: cli-build-after
+8beee3810e60182c51587256f21b43521fee728002ecb7cc0f2e38f9dc9e9185  evals/experiments/benchmark.ts  rows: s4-eval-loop, s4-replay-loop
+18f3c0a4648f6fc9f19c16265612684a838f72e0528b3f96a97d8e2855c395c3  evals/experiments/call-depth/analyze-0120.ts  rows from 2026-11-26T18:19:36Z: analyze-paths-r9, analyze-paths-r9b, analyze-paths-r10
+NOT-REPRODUCIBLE  evals/experiments/call-depth/analyze-0120.ts  rows before 2026-11-26T18:19:16Z: analyze-paths, analyze-paths-r2 ... analyze-paths-r8 (8 rows) ran an earlier content (modified 2026-11-26T18:19:16Z); its digest was not recorded
+NOT-REPRODUCIBLE  evals/experiments/call-depth/analyze-sweep-0120.ts  current sha256 4c9e23be27587d5a841b43415d3c8b70280461e214cee3f27440926a2fe13c37 (modified 2026-11-26T13:53:36Z, after the last row 2026-11-26T13:22:57Z); run-time digest of rows analyze-sweep not recorded
+0f3966a24eacc18c9b457deb73fe04bdefacddcf89e42b0e1d0355ff0eec18d6  evals/experiments/call-depth/analyze-tlc-0120.ts  rows from 2026-11-26T18:19:36Z: analyze-tlc-r10, analyze-tlc-r10b ... analyze-tlc-control-r12 (6 rows)
+NOT-REPRODUCIBLE  evals/experiments/call-depth/analyze-tlc-0120.ts  rows before 2026-11-26T18:19:16Z: analyze-tlc, analyze-tlc-r2, analyze-tlc-r6 ran an earlier content (modified 2026-11-26T18:19:16Z); its digest was not recorded
+NOT-REPRODUCIBLE  evals/experiments/call-depth/audit-0120/fault-one.sh  current sha256 758c94f3c03cfb91362264063e277857aecd969298d829c7dc55a4b967cc44c2 (modified 2026-11-26T14:27:06Z, after the last row 2026-11-26T13:47:09Z); run-time digest of rows fault-baseline, fault-F1 ... fault-F3b (13 rows) not recorded
+fb2e94b18db714b5af3c7d7814b444e370f237fd8508cb6e613975fde036ea20  evals/experiments/call-depth/audit-0120/faults.py  rows from 2026-11-26T13:47:09Z: fault-F3b
+NOT-REPRODUCIBLE  evals/experiments/call-depth/audit-0120/faults.py  rows before 2026-11-26T13:47:09Z: fault-baseline, fault-F1 ... fault-F7 (12 rows) ran an earlier content (modified 2026-11-26T13:47:09Z); its digest was not recorded
+NOT-REPRODUCIBLE  evals/experiments/call-depth/audit-0120/held-recipes.sh  current sha256 cdb09b7e900cece2ded7cd15c785fea7e8a12ef9fad5476b3a3440efa8a0f388 (modified 2026-11-26T17:17:35Z, after the last row 2026-11-26T17:10:00Z); run-time digest of rows s4-check, s4-wasm-test ... s4-runtime-test (12 rows) not recorded
+d74f7e02402b684b2d62acaa93810ad2f0ed2a178da8e537f11c9028c6cfc5dc  evals/experiments/call-depth/audit-0120/make-oracle.py  rows from 2026-11-26T17:28:16Z: build-oracle-core-r7, build-oracle-wasm-r7, build-oracle-after-core-r7, build-oracle-after-wasm-r7
+NOT-REPRODUCIBLE  evals/experiments/call-depth/audit-0120/make-oracle.py  rows before 2026-11-26T17:27:25Z: build-oracle-core, build-oracle-wasm ... build-probe-r1-oracle-after (10 rows) ran an earlier content (modified 2026-11-26T17:27:25Z); its digest was not recorded
+NOT-REPRODUCIBLE  evals/experiments/call-depth/audit-0120/probe-scan-check.mjs  current sha256 b5aa38e8ed172c3bdaf4457310a426b8b25405e9e65cb66c8853c694633d1a65 (modified 2026-11-26T17:19:44Z, after the last row 2026-11-26T17:15:47Z); run-time digest of rows probe-scan-check not recorded
+NOT-REPRODUCIBLE  evals/experiments/call-depth/audit-0120/published-key-order-check.mjs  current sha256 e116445da4c144062f1f5f99f95dc678e3758a0f4b9d39e4f790860e3b1856c1 (modified 2026-11-26T17:19:44Z, after the last row 2026-11-26T17:15:47Z); run-time digest of rows published-key-order-check not recorded
+14f0812bf2ed96c3f26935c607ff6ba3f288ec99728e3b42281ff063a5548981  evals/experiments/call-depth/audit-0120/run.py  rows from 2026-11-26T13:06:09Z: paths-oracle, paths-before ... check-vp-r7 (192 rows)
+NOT-REPRODUCIBLE  evals/experiments/call-depth/audit-0120/run.py  rows before 2026-11-26T13:06:09Z: build-oracle-core, build-oracle-wasm ... baseline-oracle-0120 (15 rows) ran an earlier content (modified 2026-11-26T13:06:09Z); its digest was not recorded
+NOT-REPRODUCIBLE  evals/experiments/call-depth/audit-0120/summarize-parallel.py  current sha256 ac8a8b5386278f5be520841f5ea9bd85d31ddb675911026b7f33c2e9d5361ab3 (modified 2026-11-26T13:51:45Z, after the last row 2026-11-26T13:51:29Z); run-time digest of rows parallel-probe-before-r0, parallel-probe-before-r1 ... parallel-probe-oracle-after-r3 (8 rows) not recorded
+NOT-REPRODUCIBLE  evals/experiments/call-depth/audit-0120/wasm-run.sh  current sha256 3e75e2ec846e3aea5abfac27c623b5823a1ec0251bb60813bfb9c2ecb34b7530 (modified 2026-11-26T14:27:06Z, after the last row 2026-11-26T13:37:25Z); run-time digest of rows wasm-oracle-after-node-default-r0, wasm-oracle-after-node-default ... wasm-after-chromium (9 rows) not recorded
+39d634fcf24a0a0ff009a840e5e072d056925e33b7bd94ca12aa485cc5c45b77  evals/experiments/call-depth/baseline-0120.ts  rows: baseline-before-0120, baseline-oracle-0120, baseline-oracle-0120-r2, baseline-oracle-after-0120
+b674f50accc7321b0ec5c82f8b400613fc00aa2291435531009f3585ff4e2998  evals/experiments/call-depth/browser-ceiling.ts  rows: wasm-oracle-after-chromium, wasm-after-chromium
+61c9a444b327260b98a7533ec1b2beaa28693be89e8bd07cebf0381d7afa6056  evals/experiments/call-depth/cli-ceiling.ts  rows: cli-after
+d5f61b30a7749bda0d7de86a554eaf727f4d9d52f9c4b023db174559759f7786  evals/experiments/call-depth/expectations-0119.ts  rows: baseline-before-0120, baseline-oracle-0120 ... contract-0120-after-correction (6 rows)
+4bfd6c146e448b90eef1c11848415d61c6f815102a6d87e179a7a481990b6b32  evals/experiments/call-depth/expectations-0120.ts  rows: baseline-before-0120, baseline-oracle-0120 ... contract-0120-after-correction (6 rows)
+ac264658fdaa176d62cd6d0fb3c175824fd7bda7919cbc8da6338a0ea2a4cb7d  evals/experiments/call-depth/go/go.mod  rows: go-build, go-after, go-oracle-after-check, go-oracle-after-top (unchanged from b57c0a376; modified 2026-11-26T09:54:55Z, before go-build 2026-11-26T13:39:08Z)
+cea54d921525fe5bc10db3146d1e25ef004400a3c2386acae505c4b582c0255f  evals/experiments/call-depth/go/go.sum  rows: go-build, go-after, go-oracle-after-check, go-oracle-after-top (unchanged from b57c0a376; modified 2026-11-26T09:54:55Z, before go-build 2026-11-26T13:39:08Z)
+6cd42684dcd310d37438a2d586a5d0b72e2727ad0de3a72e5baa65d830acb6d7  evals/experiments/call-depth/go/main.go  rows: go-build, go-after, go-oracle-after-check, go-oracle-after-top (unchanged from b57c0a376; modified 2026-11-26T09:54:55Z, before go-build 2026-11-26T13:39:08Z)
+NOT-REPRODUCIBLE  evals/experiments/call-depth/go-0120.ts  current sha256 f3ff42116a558fa46acca005a71891609539c9143c1b0920aabc6dfe993efce3 (modified 2026-11-26T17:42:20Z, after the last row 2026-11-26T13:39:49Z); run-time digest of rows go-after, go-oracle-after-check, go-oracle-after-top not recorded
+b1622af1269ef3e1cb6f68453695dc00d6dd91e45600e38d831256106c355f3b  evals/experiments/call-depth/paths-0120.ts  rows from 2026-11-26T18:06:11Z: paths-before-r8, paths-after-r8 ... analyze-tlc-control-r12 (14 rows)
+NOT-REPRODUCIBLE  evals/experiments/call-depth/paths-0120.ts  rows before 2026-11-26T17:42:20Z: paths-oracle, paths-before ... analyze-tlc-r6 (32 rows) ran an earlier content (modified 2026-11-26T17:42:20Z); its digest was not recorded
+a8cb447757eb68b2249c237584331c7531a4f77b74bce941d99286ed9f419135  evals/experiments/call-depth/records-0120.ts  rows: records-0120
+aaabbca2034dc20c79b9cdb62a002c0f4348701bbbdf8890389401773a6e609b  evals/experiments/call-depth/sources-0120.ts  rows: baseline-before-0120, baseline-oracle-0120 ... contract-0120-after-correction (7 rows)
+47813c4df82a627b9548db40c987a4a52328d869c77bb51e4ed790966b3550bd  evals/experiments/call-depth/sources.ts  rows: baseline-before-0120, baseline-oracle-0120 ... contract-0120-after-correction (7 rows)
+6c3f7a8ea92fe0c8502691dcbfbdbb99bc3ae8d172ead8da9d56690062fa0371  evals/experiments/call-depth/stack-harness/src/main.rs  rows: build-oracle-core, stack-build-oracle-release ... build-oracle-core-r7 (17 rows)
+5fad56d1d83197b996588ef497d962cc5b68c6803569871c7cfae2f5a54e246e  evals/experiments/call-depth/stack.ts  rows: stack-oracle-after-release, stack-after-release ... summarize-stack (7 rows)
+NOT-REPRODUCIBLE  evals/experiments/call-depth/summarize-stack-0120.ts  current sha256 8e34103f9b90489e2421fe5b2548787b39628b4e7ba241aaafa0eb6d555a3d1d (modified 2026-11-26T13:53:36Z, after the last row 2026-11-26T13:35:10Z); run-time digest of rows summarize-stack not recorded
+NOT-REPRODUCIBLE  evals/experiments/call-depth/summarize-wasm-0120.ts  current sha256 6c6ce064c00af1da259a8225fecd1d6ba2bc9027031d6d7e384e267f56b9b0ca (modified 2026-11-26T13:53:36Z, after the last row 2026-11-26T13:37:57Z); run-time digest of rows summarize-wasm not recorded
+NOT-REPRODUCIBLE  evals/experiments/call-depth/sweep-0120.ts  current sha256 f9973f8b1f9e4cdbe3908b8b84ed4eaac7bf3bb54a4b16ce19ef96a8b091f4b4 (modified 2026-11-26T13:53:36Z, after the last row 2026-11-26T13:22:57Z); run-time digest of rows sweep-oracle, sweep-oracle-after ... analyze-sweep (5 rows) not recorded
+28845482b7779dc0d8a713091e1b8858fcdba556150a71f9e012614dd9e5104e  evals/experiments/call-depth/tlc-0120.ts  rows from 2026-11-26T16:59:20Z: analyze-tlc-r6, judge-self-test-r9 ... analyze-tlc-control-r12 (10 rows)
+NOT-REPRODUCIBLE  evals/experiments/call-depth/tlc-0120.ts  rows before 2026-11-26T13:53:36Z: tlc-0120, tlc-0120-r2 ... analyze-tlc-r2 (5 rows) ran an earlier content (modified 2026-11-26T13:53:36Z); its digest was not recorded
+f8acf2b05dbd3277fa82f5726c04913a07463b56f05e65d55a0a4d4a07dae538  evals/experiments/call-depth/tlc-judge-0120.ts  rows between 2026-11-26T18:21:27Z and 2026-11-26T18:30:09Z: judge-self-test-r10, analyze-tlc-r11  (digest of the previous held list, taken while the file was unchanged since 2026-11-26T18:21:27Z)
+4c9ae71f59c5329a906d09c28376143bf4badbbec2fa895a2bbb65d79e51ad6e  evals/experiments/call-depth/tlc-judge-0120.ts  rows from 2026-11-26T18:30:35Z: judge-self-test-r11, analyze-tlc-r12, analyze-tlc-r12b, analyze-tlc-control-r12
+NOT-REPRODUCIBLE  evals/experiments/call-depth/tlc-judge-0120.ts  rows before 2026-11-26T18:30:09Z: analyze-tlc, analyze-tlc-r2 ... analyze-tlc-r10b (6 rows) ran an earlier content (modified 2026-11-26T18:30:09Z); its digest was not recorded
+9aba4e8d1cab1d818193d65861fd9f16657798ee11de0f28190bb144bf86f8a1  evals/experiments/call-depth/wasm-ceiling.ts  rows: wasm-oracle-after-node-default-r0, wasm-oracle-after-node-default ... go-oracle-after-top (14 rows)
+943a793f489aa34b3bccc96200f37a2d7f1e54287d3061d5ffda2dfcbcab4208  evals/experiments/checker-benchmark/engines.ts  rows: corpus-0120, corpus-0120-r2, corpus-0120-r3
+ca9dfb49c0cca1bfb3ad52b8f289424fc036ec92b98df8be3d4ef74f1ec30425  evals/experiments/checker-benchmark/protocol.ts  rows: corpus-0120, corpus-0120-r2, corpus-0120-r3
+60bdd08e9bba7d5763d0d6cf51051613275a81b006f9181011cca24dde794856  evals/experiments/checker-benchmark/provenance.ts  rows: corpus-0120, corpus-0120-r2, corpus-0120-r3
+57e33d74f51e70933d963107f74a5dce2b58f3c22510b5a42e263d8f9a523012  evals/experiments/collections-temporal/benchmarks.ts  rows: safety-eval, safety-replay ... corpus-0120-r3 (6 rows)
+402c8e49b29d7c48f9afb61087ca1a6bdd12248cae759aabadc2e9f97d95181e  evals/experiments/collections-temporal/cases.ts  rows: green-wasm-runCallDepth
+c2221beacff489b6c873ca4f242d75b77a79350737d842cab1ac032905d6a164  evals/experiments/compact-functions/freeze.ts  rows: freeze-before-kernel, freeze-after-kernel, freeze-before-kernel-r2, freeze-after-kernel-r2
+d3d02cd4f7bb81d7ace4c930e0703ca88fc02cce10320747b4be5388a5a19ed7  evals/experiments/evaluator-tuning/corpus-summary.ts  rows from 2026-11-26T18:08:42Z: corpus-summary-0120-r2, corpus-summary-0120-r3
+NOT-REPRODUCIBLE  evals/experiments/evaluator-tuning/corpus-summary.ts  rows before 2026-11-26T17:42:20Z: corpus-summary-0120 ran an earlier content (modified 2026-11-26T17:42:20Z); its digest was not recorded
+fda447f763267de22884361a6270c2ce23cca6a3701ba62623ab5dbd7bb81746  evals/experiments/evaluator-tuning/summarize.ts  rows: kernel-summary-0120
+805c6befa9135c0ee4accf1501279cfb0b080bbc0d6be66c8544aae510defa86  evals/experiments/go/prepare.ts  rows: s4-go-test
+52e81d76b99209ce28c3de1fc4e68b0b231252c2c5ad3a449b3d8555312f62f2  evals/experiments/harness/counter-faults.ts  rows: s4-evaluate, s4-replay-evaluation, s4-eval-loop, s4-replay-loop
+b8ff200be563eb6ad7d945b59a68004183f58b4b63125175a7c6203b0e9471fc  evals/experiments/harness/evaluate.ts  rows: s4-evaluate, s4-replay-evaluation
+be84848677987cf72717399ca01e91937b5442671b3ffe85233fc4de8329828c  evals/experiments/harness/history.ts  rows: s4-evaluate, s4-replay-evaluation
+0715760f7bd85afdb7cde53c1adc3ded827e18b9f506a74999181f90407e932a  evals/experiments/harness/replay.ts  rows: s4-replay-evaluation
+660df920aca1c760a1a0fa7b0d87e5ebc3f776b27b1b510e390f5a8c67c6d72f  evals/experiments/harness/scheduled-counter.ts  rows: s4-evaluate, s4-replay-evaluation
+07cc0123cb6b3a5e4509fb45cff9ff267380fb88efaeeb20db993d084c998f79  evals/experiments/harness/search.ts  rows: s4-evaluate, s4-replay-evaluation, s4-eval-loop, s4-replay-loop
+07f05418d1ac47b84a234ef005fefa5c5dc41a4568a0a72a3098c8e83b915ea0  evals/experiments/harness/ttl.ts  rows: s4-evaluate, s4-replay-evaluation
+e51e0d29204c4392847385b50a07004b65edd5e115575846771b8cd63acaee72  evals/experiments/loop.ts  rows: s4-eval-loop
+d852e4648f87d81f759eccface136c5e4f1718e487024d563dffc5917d3bf81f  evals/experiments/nesting-chains/cases.ts  rows: baseline-before-0120, baseline-oracle-0120 ... contract-0120-after-correction (6 rows)
+326405310e4314f7f9012b87be19b64b97aa50fa3d9f3e9c889a187e5038416d  evals/experiments/nesting-chains/frontends.ts  rows: baseline-before-0120, baseline-oracle-0120 ... contract-0120-after-correction (5 rows)
+9a0400029033853c5ed80a0d4a31e7c256eda6803c9f0bc44cde6ebfc9ff64b4  evals/experiments/nesting-chains/outcome.ts  rows: baseline-before-0120, baseline-oracle-0120 ... analyze-tlc-control-r12 (56 rows)
+3badf7e77f93173c157b6cbbbe7aa366db69a3fe0f91a6e6cf097a1815dd0481  evals/experiments/nesting-chains/sources-0075.ts  rows: baseline-before-0120, baseline-oracle-0120 ... contract-0120-after-correction (6 rows)
+cda1ca8e266b8df77bfa1722c12363c3e69500ee22c4c597ff37b65da35cac5b  evals/experiments/nesting-chains/sources.ts  rows: baseline-before-0120, baseline-oracle-0120 ... contract-0120-after-correction (7 rows)
+ad9c237c80398a50ed27005fe6646d037e0185919fa39c7821ebf7484ddf8065  evals/experiments/nesting-chains/stack-harness/cell.ts  rows: stack-oracle-after-release, stack-after-release ... summarize-stack (7 rows)
+4145c6433a8c39182b6bbfb5f29d3a4bfab6619b5bae7e1c4c9c6654a16c0f71  evals/experiments/oracle-tuning/kernel.ts  rows: kernel-0120
+c51812ad3a15d936437b1c67f58d4ea62c92f65701e7090b654855e3ca2e6f0b  evals/experiments/p0-checker/corpus.ts  rows from 2026-11-26T18:08:41Z: corpus-0120-r2, corpus-0120-r3
+NOT-REPRODUCIBLE  evals/experiments/p0-checker/corpus.ts  rows before 2026-11-26T17:32:24Z: corpus-0120 ran an earlier content (modified 2026-11-26T17:32:24Z); its digest was not recorded
+5d8a7a57593ca0fda712174e3a6151f15181463c591e926f0d7af3a23a088d0e  evals/experiments/p0-checker/inputs.ts  rows: corpus-0120, corpus-0120-r2, corpus-0120-r3
+7b221905b837352dfb6cd3bd2656c85ef316e3cbee6b399a517283fc007dc1e7  evals/experiments/protocol.ts  rows: s4-eval-loop, s4-replay-loop
+782809d7ca2977a915434e8ee943665aa9b90ba8fdc7a97333b5a762fa030454  evals/experiments/quint-generated/cases.ts  rows: green-wasm-runCallDepth, corpus-0120, corpus-0120-r2, corpus-0120-r3
+8922e1cbade7daf00c91f7639ba433afb5b1603a0c730a9bd8d366e4aef8dcc3  evals/experiments/replay.ts  rows: s4-replay-loop
+2be1c397f988261497d26fbe6377ba204f46a2abbe2a73219b8d8859d73674a0  evals/experiments/roracle-native/canonical.ts  rows: temporal-parity-0120, temporal-parity-0120-r2
+437b2142d597ed4299391a4ca5298f63a8b93bce76c5689851aa44e147f8d5cf  evals/experiments/roracle-native/client.ts  rows: temporal-parity-0120, temporal-parity-0120-r2
+6ef99248a2757fe2689033f5e97fbc16509937bab4617fe3bb77e898e052eced  evals/experiments/runner.ts  rows: s4-eval-loop, s4-replay-loop
+8a752897263ca0c2ca26df2bba9ada63b82625b4b912f888072a515c6d430b0b  evals/experiments/rust-safety/cases.ts  rows: safety-eval, safety-replay ... corpus-0120-r3 (6 rows)
+cd92993963424e8f3f4f9ea8268b4507cee8070eaa88d6a156de0685800037a3  evals/experiments/rust-safety/evaluate.ts  rows: safety-eval
+099f39df64da5e96fdd8d15dc248545bbe53f1327cd732800bb9a404e230edb5  evals/experiments/rust-safety/provenance.ts  rows: safety-eval, safety-replay ... corpus-0120-r3 (8 rows)
+f4331d8f44b751965dc322bd478292e9f8822856e0f1563b2da50e3e7e880e92  evals/experiments/rust-safety/replay.ts  rows: safety-replay
+d4c3b1eafe78a20b7a765c8f34343b8658cd1e6b66d94c42362fb1fa690cea09  evals/experiments/rust-safety/tlc-check.ts  rows: safety-tlc
+e470fd7d640992683c15260c22619daabbe9b8f3c2f92e32302ac83a92406f5c  evals/experiments/sat-foundation/native.ts  rows: green-wasm-runCallDepth
+e1baaa99c706ef838457ca5d53d7d1aa9009b38daabb0bd294fabb3301b544a9  evals/experiments/single-model/cases.ts  rows: corpus-0120, corpus-0120-r2, corpus-0120-r3
+5f62121e4523e4c2dbb1623e9c569e15ddac544571125385d2aa691ed1f2cf8f  evals/experiments/source-files.ts  rows: corpus-0120, corpus-0120-r2, corpus-0120-r3
+b44405d9e148fd6ba045404e3cb6778f17a646774a1f09530350ad1d4a67a5e6  evals/experiments/temporal-tuning/parity.ts  rows from 2026-11-26T18:08:42Z: temporal-parity-0120-r2
+NOT-REPRODUCIBLE  evals/experiments/temporal-tuning/parity.ts  rows before 2026-11-26T17:42:20Z: temporal-parity-0120 ran an earlier content (modified 2026-11-26T17:42:20Z); its digest was not recorded
+71653c12b0c6f9f9f5b3746a6de8a622471e6e643daf6875c7abc2f5e196fbe1  evals/experiments/usable/mutex.ts  rows: s4-go-test
+82910c3e36424eaa6e9001a25cb7c297cd4740ead7918ccd021050deb4a22e2e  evals/experiments/usable/native.ts  rows from 2026-11-26T16:55:24Z: paths-before-r6, paths-after-r6 ... analyze-tlc-control-r12 (26 rows)
+NOT-REPRODUCIBLE  evals/experiments/usable/native.ts  rows before 2026-11-26T14:25:03Z: baseline-before-0120, baseline-oracle-0120 ... safety-replay (31 rows) ran an earlier content (modified 2026-11-26T14:25:03Z); its digest was not recorded
+31f2bd9051508146059ad8db371353f8013544bb51abfbebd6070620cfdf4226  evals/experiments/usable/provenance.ts  rows: safety-eval, safety-replay ... corpus-summary-0120-r3 (16 rows)
+0b0d8a6c048b191e8666434a65964f1cf83adcaa55ff628a1b95cd9799eeb64f  evals/experiments/usable/scenario.ts  rows: s4-go-test
+beacad66f686a7c4843ccaf43ed47d7c5487deddcdeaaad7b48ca72e99c459b8  evals/experiments/usable/wasm-text.ts  rows from 2026-11-26T18:08:41Z: corpus-0120-r2, temporal-parity-0120-r2, corpus-0120-r3
+NOT-REPRODUCIBLE  evals/experiments/usable/wasm-text.ts  rows before 2026-11-26T17:32:24Z: corpus-0120, temporal-parity-0120 ran an earlier content (modified 2026-11-26T17:32:24Z); its digest was not recorded
+ca64ffd5bda8c7667c2fdeadb7454a9e5e48f8f101b05f84cfd8d6b73d0a0bc5  evals/experiments/workspace-oracle/node.ts  rows: temporal-parity-0120, temporal-parity-0120-r2
+f4f757998236aaac2c979404dff3d2d2fe165808a991ce3b4b3041a6dbca0052  evals/experiments/workspace-oracle/protocol.ts  rows: temporal-parity-0120, temporal-parity-0120-r2
+77d5a67bc673df13d57560115d0c7cff036cffd15829fdb27f27d9a33d5ce987  evals/experiments/workspace-oracle/snapshot.ts  rows: temporal-parity-0120, temporal-parity-0120-r2
+6483cbc68839c551c3816d5213b0db9bfd6d1670018bafe7ce73f3507432294f  evals/experiments/workspace-oracle/wasm.ts  rows: temporal-parity-0120, temporal-parity-0120-r2
+92ecc88aafaf78d9ed09c4fe2de56fdcdafb2f64b6c0b19d530b5787b5397121  examples/counter-model.ts  rows: s4-evaluate, s4-replay-evaluation, s4-eval-loop, s4-replay-loop
+90826338808f6dffad2844572ba859df958390c40cfdbd477c52a713f426a5b3  examples/durable-counter.ts  rows: s4-evaluate, s4-replay-evaluation, s4-eval-loop, s4-replay-loop
+268317bbe300027032c2149d01db660dc1f9575cf390674dfa17bd95013171d7  justfile  rows: safety-build, safety-eval ... mutation-0120 (29 rows)
+0d3d22b03dddd84e9b523f298a1c111b2a61dc4cec8731b8969d640124692e4b  packages/idealis/src/checker.ts  rows: baseline-before-0120, baseline-oracle-0120 ... corpus-0120-r3 (18 rows)
+489edcd8536d44f63672453d1a83171627809bda6e9446011031ea5477fd6748  packages/idealis/src/compose.ts  rows: s4-evaluate, s4-replay-evaluation, s4-eval-loop, s4-replay-loop
+fde9957b697b171e252b9abc6fdbd765f283389212684d99b262617a3bb12326  packages/idealis/src/conformance.ts  rows: baseline-before-0120, baseline-oracle-0120 ... corpus-0120-r3 (18 rows)
+13c8132f8d27f5a0a3dc935db9e3da779b7e14e15bc31c1442674a7de11d5244  packages/idealis/src/contracts.ts  rows: baseline-before-0120, baseline-oracle-0120 ... analyze-tlc-control-r12 (73 rows)
+69c6c67e3ab8cc6ec33359c7668a8717a40d3f4c62367606a2afacb7ca936489  packages/idealis/src/finite.ts  rows: baseline-before-0120, baseline-oracle-0120 ... corpus-0120-r3 (14 rows)
+3b0156a459205d3520a2349a39d1fd5e56d8f5feb8b44962d065a8fd59ceaf62  packages/idealis/src/generated/roracle.ts  rows: temporal-parity-0120, temporal-parity-0120-r2
+78cfeda2537605446f7226fe3e6865acc047299105aca0273d90b9d1c09d8bd5  packages/idealis/src/history.ts  rows: baseline-before-0120, baseline-oracle-0120 ... corpus-0120-r3 (14 rows)
+c952e1da81a9c0a1a71a78b2c35a4441b156e087c96a6c1241c712647a0ca30b  packages/idealis/src/host.ts  rows: s4-go-test
+d8219cc54aabba15e4f04c604decdaf61d3f8dbcab9b01b721298e35f047867f  packages/idealis/src/index.ts  rows: s4-evaluate, s4-replay-evaluation, s4-eval-loop, s4-replay-loop
+0c9391402f23a6b6ddc1995b09b582ea43d37f0abdf2726031932443dedf0643  packages/idealis/src/portable-value.ts  rows: baseline-before-0120, baseline-oracle-0120 ... corpus-summary-0120-r3 (18 rows)
+bdd5fca416c8f1d7d843539e25bdec23b9e2ff74971ecee42532d1f7567a9c76  packages/idealis/src/portable-wasm.ts  rows: baseline-before-0120, baseline-oracle-0120 ... corpus-0120-r3 (14 rows)
+2e8f69369f0fa4fea0a6e029ba12ce8c7858ece8c87f7dd41a290fd83fe50f6c  packages/idealis/src/portable.ts  rows: s4-go-test
+937ef30ba8b3a5be7201c2cb706cd3976dbf0fed3c8c939725c09b2678afc3f8  packages/idealis/src/prepared-safety.ts  rows: s4-go-test
+52b5afd86848a425e27423241de275dfe7c67f8bc812119eab8593bcf0f6e60a  packages/idealis/src/property.ts  rows: s4-evaluate, s4-replay-evaluation
+f325cc119bee3ba4e83234bc535f0738a20f991d2586d8840e9e2a70c43fc008  packages/idealis/src/safety-coverage.ts  rows: baseline-before-0120, baseline-oracle-0120 ... corpus-0120-r3 (14 rows)
+43aee824c535a9f7be5c3d47bccf9463ef8edae9e34831556e7a107f5976471f  packages/idealis/src/safety-expansions.ts  rows: baseline-before-0120, baseline-oracle-0120 ... corpus-0120-r3 (14 rows)
+d6fdded5dec1ab09a9e11262c804c5d28b4ec7997c99eee4f78c1ca9b3d54875  packages/idealis/src/safety-program.ts  rows: baseline-before-0120, baseline-oracle-0120 ... corpus-summary-0120-r3 (17 rows)
+7a921a71a6af97906807a2b1aa3878986dcf4215c4ced0598db65177a8390ecd  packages/idealis/src/safety.ts  rows: baseline-before-0120, baseline-oracle-0120 ... corpus-0120-r3 (14 rows)
+2b0cfe9a1586a1b52e106695df11378acbcd61c2e6e967349c2cc03dda5cf57c  packages/idealis/src/shrink.ts  rows: s4-go-test
+702836572848046b6e91585cbb21f96b2cacff42a2180f06e04cfc27e05b94ac  packages/idealis/src/smt.ts  rows: s4-evaluate, s4-replay-evaluation
+967c50a61937c5f2fc06d8a1837f985e616a2ae238c784e2b9c26b885fc399b3  packages/idealis/src/tla-safety-analysis.ts  rows: contract-0120-after-correction, safety-eval ... corpus-0120-r3 (8 rows)
+d114857b244e05873f3f9762ea6086d51f79bbc0f4f252fef29e6dd0bfaea7af  packages/idealis/src/tla-safety.ts  rows: contract-0120-after-correction, safety-eval ... corpus-0120-r3 (8 rows)
+aaed2f21dd28dd5301367fbc2d9dccbbd6a64cc8a1a40919cdeceaa18442d245  packages/idealis/src/tla-source.ts  rows: s4-go-test
+0a20a45ba0d84841139bec2dd8178c40585276fffc75e536d33ea1ca2c077cf3  packages/idealis/src/trace.ts  rows: baseline-before-0120, baseline-oracle-0120 ... analyze-tlc-control-r12 (73 rows)
+4cf4faaf3a9ed545d4124124bebd231c73c95414ff5aadfb0a9b36bd53cbf6a1  scripts/bundle-module.ts  rows: green-wasm-runCallDepth, s4-go-test
+b2b86c3f0c6bb234f9357bc1423069bb29cbc036b486c7464cb9c2735df10bdf  scripts/check-support.ts  rows: support-check
+a88aaa21d493c1ab3d5cf54ca060a61a017f57be73eb99a61d3d7f2c85d42a9a  tests/call-depth/contract-test.ts  rows: contract-0120-after-correction
+50cd7d87653ce6115781074ea0d2ccda170b9c97e183d0cfb6530ab65fe535c4  tests/ci/tlc-build.ts  rows: contract-0120-after-correction
+70cfe8a4b3f3b89316949bfc090ef342f66f5d7c3bb1bb873e5542de3fd32b3c  tests/ci/tlc-checkers.ts  rows: contract-0120-after-correction
+90f5ed4c7141b755f3a3d1b029648bc2a508b0fb6d40eac5a46ebc9cd927894f  tests/ci/tlc-result-cache.ts  rows: contract-0120-after-correction
+f1eae516029d39047996a1174a618e3c8dfc2b7d58ea7e3d45941a85190e1b55  tests/tlc-differential/operator-sharing-support.ts  rows: contract-0120-after-correction
+32b2aba7653e4ec16c748713a6e96cecd2cfbcaca5d48bbb1719e2dc859aefb6  tests/wasm-host/assets.ts  rows: green-wasm-runCallDepth
+c60cb9ef7790db4cd989fc102b36f31032110251b852750b8ae6a64b1ecdb0da  tests/wasm-host/contract-test.ts  rows: green-wasm-runCallDepth
+1745e55120b7f552bb905d53f3fb858ce1661ad2f5b43abcdbb97a3443fc5c1d  tests/wasm-host/contract.ts  rows: green-wasm-runCallDepth

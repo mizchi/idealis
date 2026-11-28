@@ -24,7 +24,7 @@ impl @permissions.Permissions for Domain with fn read(self, u, d) {
     return false
   }
   match self.open.get(u) {
-    Some(docs) => docs.add(d)
+    Some(docs) => docs.insert(d)
     None => self.open[u] = Set([d])
   }
   true

@@ -556,10 +556,10 @@ export const runCallDepth = async (assetBase = "") => {
     generated: result.generated,
     work: result.work,
   });
-  const accepted = summary(check(83));
+  const accepted = summary(check(125));
   let refusal: { code: string; message: string } | null = null;
   try {
-    check(84);
+    check(126);
   } catch (error) {
     if (!(error instanceof PortableCoreError)) throw error;
     refusal = { code: error.code, message: error.message };

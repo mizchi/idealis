@@ -1,0 +1,11 @@
+--- <scratch>/trees/fault-safety_expressions.rs.orig	2026-11-26 22:43:06
++++ <scratch>/trees/fault/crates/rtlc/src/safety_expressions.rs	2026-11-26 22:43:41
+@@ -1292,7 +1292,7 @@
+                                     evaluation_depth: ctx.evaluation_depth.saturating_add(
+                                         u16::try_from(branch.steps.len() + 1).unwrap_or(u16::MAX),
+                                     ),
+-                                    forwarded: ctx.forwarded,
++                                    forwarded: 0,
+                                     old,
+                                     recursive: ctx.recursive,
+                                     ..EvalContext::new(&current, next)

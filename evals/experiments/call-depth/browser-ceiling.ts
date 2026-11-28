@@ -2,7 +2,14 @@ import assert from "node:assert/strict";
 import { readFileSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { chromium } from "@playwright/test";
-import { type Ceiling, hopSource, programOf, search } from "./wasm-ceiling.js";
+import {
+  type Ceiling,
+  hopSource,
+  kindBounds,
+  parseFlags,
+  programOf,
+  search,
+} from "./wasm-ceiling.js";
 
 const dispatchSource = `
 const dispatch = (module, command) => {
@@ -22,21 +29,17 @@ const dispatch = (module, command) => {
     exports.modelt_output_len() >>> 0,
   ).slice();
   const reply = JSON.parse(new TextDecoder().decode(output));
-  if (reply.kind === "error") return "error " + reply.code + ": " + reply.message;
+  const probe = reply.probe ? " peak=" + reply.probe.peakDepth + " total=" + reply.probe.peakTotal + " hits=" + reply.probe.hits256 : "";
+  if (reply.kind === "error") return "error " + reply.code + ": " + reply.message + probe;
   const result = reply.result ?? reply;
-  return result.status + " " + result.states + " " + result.generated + " " + result.work;
+  return result.status + " " + result.states + " " + result.generated + " " + result.work + probe;
 };
 `;
 
 const hopBounds = { maxDepth: 64, maxStates: 10000, maxWork: 100_000_000 };
-const kindBounds = {
-  maxDepth: 10,
-  maxStates: 100,
-  maxWork: 1_000_000,
-  maxTemporalNodes: 100_000,
-};
-
-const [wasmPath, harness, output, ...cells] = process.argv.slice(2);
+const [wasmPath, harness, output, ...cells] = parseFlags(
+  process.argv.slice(2),
+).positional;
 assert.ok(
   wasmPath && harness && output && cells.length > 0,
   "usage: browser-ceiling.js <wasm> <harness> <output.json> <cell:low:high>...",
@@ -97,7 +100,7 @@ const request = (cell: string, size: number) => ({
       : {
           kind: "check-safety",
           program: programOf(harness, cell, size),
-          bounds: cell === "hop" ? hopBounds : kindBounds,
+          bounds: cell === "hop" ? hopBounds : kindBounds(),
         },
 });
 

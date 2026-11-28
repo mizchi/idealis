@@ -1,0 +1,136 @@
+sets-242 parallel
+  before: 20 runs, 1 distinct
+    20 x ok status=complete reason=None states=32 generated=64 work=423 trace= 
+  oracle: 20 runs, 1 distinct
+    20 x ok status=complete reason=None states=32 generated=64 work=423 trace= peak=255 total=255 hits=0 published=own
+  after: 20 runs, 1 distinct
+    20 x ok status=complete reason=None states=32 generated=64 work=423 trace= 
+  oracle-after: 20 runs, 1 distinct
+    20 x ok status=complete reason=None states=32 generated=64 work=423 trace= peak=255 total=255 hits=0 published=own
+  oracle vs before: published256 = own response; real matches (work compared only without a hit)
+  oracle-after vs after: published256 = own response; real matches (work compared only without a hit)
+sets-242 sequential
+  before: 1 runs, 1 distinct
+    1 x ok status=complete reason=None states=32 generated=64 work=420 trace= 
+  oracle: 1 runs, 1 distinct
+    1 x ok status=complete reason=None states=32 generated=64 work=420 trace= peak=255 total=255 hits=0 published=own
+  after: 1 runs, 1 distinct
+    1 x ok status=complete reason=None states=32 generated=64 work=420 trace= 
+  oracle-after: 1 runs, 1 distinct
+    1 x ok status=complete reason=None states=32 generated=64 work=420 trace= peak=255 total=255 hits=0 published=own
+  oracle vs before: published256 = own response; real matches (work compared only without a hit)
+  oracle-after vs after: published256 = own response; real matches (work compared only without a hit)
+sets-243 parallel
+  before: 20 runs, 1 distinct
+    20 x err code=protocol message=Safety evaluation nesting exceeds 256 
+  oracle: 20 runs, 1 distinct
+    20 x ok status=complete reason=None states=32 generated=64 work=423 trace= peak=256 total=256 hits=2 published=cut:err code=protocol message=Safety evaluation nesting exceeds 256
+  after: 20 runs, 1 distinct
+    20 x err code=protocol message=Safety evaluation nesting exceeds 256 
+  oracle-after: 20 runs, 1 distinct
+    20 x ok status=complete reason=None states=32 generated=64 work=423 trace= peak=256 total=256 hits=2 published=cut:err code=protocol message=Safety evaluation nesting exceeds 256
+  oracle vs before: published256 = cut:err code=protocol message=Safety evaluation nesting exceeds 256; real matches
+  oracle-after vs after: published256 = cut:err code=protocol message=Safety evaluation nesting exceeds 256; real matches
+sets-243 sequential
+  before: 1 runs, 1 distinct
+    1 x err code=protocol message=Safety evaluation nesting exceeds 256 
+  oracle: 1 runs, 1 distinct
+    1 x ok status=complete reason=None states=32 generated=64 work=420 trace= peak=256 total=256 hits=1 published=hit:Safety evaluation nesting exceeds 256
+  after: 1 runs, 1 distinct
+    1 x err code=protocol message=Safety evaluation nesting exceeds 256 
+  oracle-after: 1 runs, 1 distinct
+    1 x ok status=complete reason=None states=32 generated=64 work=420 trace= peak=256 total=256 hits=1 published=hit:Safety evaluation nesting exceeds 256
+  oracle vs before: published256 = hit:Safety evaluation nesting exceeds 256; real matches
+  oracle-after vs after: published256 = hit:Safety evaluation nesting exceeds 256; real matches
+forwards-253 parallel
+  before: 20 runs, 1 distinct
+    20 x err code=protocol message=Safety evaluation nesting exceeds 256 
+  oracle: 20 runs, 1 distinct
+    20 x ok status=complete reason=None states=32 generated=64 work=16289 trace= peak=507 total=507 hits=16096 published=cut:err code=protocol message=Safety evaluation nesting exceeds 256
+  after: 20 runs, 1 distinct
+    20 x ok status=complete reason=None states=32 generated=64 work=16289 trace= 
+  oracle-after: 20 runs, 1 distinct
+    20 x ok status=complete reason=None states=32 generated=64 work=16289 trace= peak=255 total=507 hits=0 published=own
+  oracle vs before: published256 = cut:err code=protocol message=Safety evaluation nesting exceeds 256; real matches
+  oracle-after vs after: published256 = own response; real matches (work compared only without a hit)
+forwards-253 sequential
+  before: 1 runs, 1 distinct
+    1 x err code=protocol message=Safety evaluation nesting exceeds 256 
+  oracle: 1 runs, 1 distinct
+    1 x ok status=complete reason=None states=32 generated=64 work=16289 trace= peak=507 total=507 hits=16096 published=hit:Safety evaluation nesting exceeds 256
+  after: 1 runs, 1 distinct
+    1 x ok status=complete reason=None states=32 generated=64 work=16289 trace= 
+  oracle-after: 1 runs, 1 distinct
+    1 x ok status=complete reason=None states=32 generated=64 work=16289 trace= peak=255 total=507 hits=0 published=own
+  oracle vs before: published256 = hit:Safety evaluation nesting exceeds 256; real matches
+  oracle-after vs after: published256 = own response; real matches (work compared only without a hit)
+forwards-254 parallel
+  before: 20 runs, 1 distinct
+    20 x err code=protocol message=Safety evaluation nesting exceeds 256 
+  oracle: 20 runs, 1 distinct
+    20 x ok status=complete reason=None states=32 generated=64 work=16353 trace= peak=509 total=509 hits=16224 published=cut:err code=protocol message=Safety evaluation nesting exceeds 256
+  after: 20 runs, 1 distinct
+    20 x err code=protocol message=Safety evaluation nesting exceeds 256 
+  oracle-after: 20 runs, 1 distinct
+    20 x ok status=complete reason=None states=32 generated=64 work=16353 trace= peak=256 total=509 hits=8128 published=cut:err code=protocol message=Safety evaluation nesting exceeds 256
+  oracle vs before: published256 = cut:err code=protocol message=Safety evaluation nesting exceeds 256; real matches
+  oracle-after vs after: published256 = cut:err code=protocol message=Safety evaluation nesting exceeds 256; real matches
+forwards-254 sequential
+  before: 1 runs, 1 distinct
+    1 x err code=protocol message=Safety evaluation nesting exceeds 256 
+  oracle: 1 runs, 1 distinct
+    1 x ok status=complete reason=None states=32 generated=64 work=16353 trace= peak=509 total=509 hits=16224 published=hit:Safety evaluation nesting exceeds 256
+  after: 1 runs, 1 distinct
+    1 x err code=protocol message=Safety evaluation nesting exceeds 256 
+  oracle-after: 1 runs, 1 distinct
+    1 x ok status=complete reason=None states=32 generated=64 work=16353 trace= peak=256 total=509 hits=8128 published=hit:Safety evaluation nesting exceeds 256
+  oracle vs before: published256 = hit:Safety evaluation nesting exceeds 256; real matches
+  oracle-after vs after: published256 = hit:Safety evaluation nesting exceeds 256; real matches
+example-b parallel
+  before: 20 runs, 1 distinct
+    20 x ok status=bounded reason=Some("evaluation") states=32 generated=32 work=415 trace= 
+  oracle: 20 runs, 1 distinct
+    20 x ok status=bounded reason=Some("evaluation") states=32 generated=32 work=6592 trace= peak=402 total=402 hits=4688 published=cut:ok status=bounded reason=Some("evaluation") states=32 generated=32 work=6592 trace=
+  after: 20 runs, 1 distinct
+    20 x ok status=bounded reason=Some("evaluation") states=32 generated=32 work=6592 trace= 
+  oracle-after: 20 runs, 1 distinct
+    20 x ok status=bounded reason=Some("evaluation") states=32 generated=32 work=6592 trace= peak=203 total=402 hits=0 published=own
+  oracle vs before: published256 = cut:ok status=bounded reason=Some("evaluation") states=32 generated=32 work=6592 trace=; real status, reason, states, generated and trace match (work not compared)
+  oracle-after vs after: published256 = own response; real matches (work compared only without a hit)
+example-b sequential
+  before: 1 runs, 1 distinct
+    1 x ok status=bounded reason=Some("evaluation") states=32 generated=32 work=160 trace= 
+  oracle: 1 runs, 1 distinct
+    1 x ok status=bounded reason=Some("evaluation") states=32 generated=32 work=160 trace= peak=128 total=128 hits=0 published=own
+  after: 1 runs, 1 distinct
+    1 x ok status=bounded reason=Some("evaluation") states=32 generated=32 work=160 trace= 
+  oracle-after: 1 runs, 1 distinct
+    1 x ok status=bounded reason=Some("evaluation") states=32 generated=32 work=160 trace= peak=128 total=128 hits=0 published=own
+  oracle vs before: published256 = own response; real matches (work compared only without a hit)
+  oracle-after vs after: published256 = own response; real matches (work compared only without a hit)
+example-c parallel
+  before: 20 runs, 1 distinct
+    20 x err code=protocol message=Safety evaluation nesting exceeds 256 
+  oracle: 20 runs, 1 distinct
+    20 x ok status=invariant-violation reason=None states=17 generated=17 work=9449 trace=[Int("0")]|[Int("16")] peak=602 total=602 hits=10690 published=cut:err code=protocol message=Safety evaluation nesting exceeds 256
+  after: 20 runs, 1 distinct
+    20 x ok status=invariant-violation reason=None states=17 generated=17 work=929 trace=[Int("0")]|[Int("16")] 
+  oracle-after: 20 runs, 1 distinct
+    20 x ok status=invariant-violation reason=None states=17 generated=17 work=9449 trace=[Int("0")]|[Int("16")] peak=303 total=602 hits=5910 published=cut:ok status=invariant-violation reason=None states=17 generated=17 work=9449 trace=[Int("0")]|[Int("16")]
+  oracle vs before: published256 = cut:err code=protocol message=Safety evaluation nesting exceeds 256; real matches
+  oracle-after vs after: published256 = cut:ok status=invariant-violation reason=None states=17 generated=17 work=9449 trace=[Int("0")]|[Int("16")]; real status, reason, states, generated and trace match (work not compared)
+example-c sequential
+  before: 1 runs, 1 distinct
+    1 x err code=protocol message=Safety evaluation nesting exceeds 256 
+  oracle: 1 runs, 1 distinct
+    1 x ok status=invariant-violation reason=None states=17 generated=17 work=419 trace=[Int("0")]|[Int("16")] peak=403 total=403 hits=295 published=hit:Safety evaluation nesting exceeds 256
+  after: 1 runs, 1 distinct
+    1 x ok status=invariant-violation reason=None states=17 generated=17 work=419 trace=[Int("0")]|[Int("16")] 
+  oracle-after: 1 runs, 1 distinct
+    1 x ok status=invariant-violation reason=None states=17 generated=17 work=419 trace=[Int("0")]|[Int("16")] peak=204 total=403 hits=0 published=own
+  oracle vs before: published256 = hit:Safety evaluation nesting exceeds 256; real matches
+  oracle-after vs after: published256 = own response; real matches (work compared only without a hit)
+
+cells with more than one distinct result over the 20 parallel samples: 0 []
+results that reached the work cap (bounded / work): 0
+published256 vs real mismatches: 0 []

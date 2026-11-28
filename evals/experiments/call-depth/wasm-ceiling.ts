@@ -5,10 +5,25 @@ import { fileURLToPath } from "node:url";
 
 export type Dispatch = (command: unknown) => string;
 
+export const options = { completeOnly: false, maxWork: 1_000_000 };
+
+export const parseFlags = (
+  argv: readonly string[],
+): { positional: string[] } => {
+  const positional: string[] = [];
+  for (const argument of argv) {
+    if (argument === "--complete-only") options.completeOnly = true;
+    else if (argument.startsWith("--max-work="))
+      options.maxWork = Number(argument.slice("--max-work=".length));
+    else positional.push(argument);
+  }
+  return { positional };
+};
+
 export const typedRefusal = (outcome: string): boolean =>
   outcome.startsWith("error ");
 export const accepted = (outcome: string): boolean =>
-  /^(complete|bounded)/.test(outcome);
+  (options.completeOnly ? /^complete/ : /^(complete|bounded)/).test(outcome);
 
 export const hopSource = (levels: number): string =>
   [
@@ -52,19 +67,23 @@ export const instantiateDispatch = (bytes: Uint8Array): Dispatch => {
       outputLength() >>> 0,
     ).slice();
     const reply = JSON.parse(new TextDecoder().decode(output));
-    if (reply.kind === "error") return `error ${reply.code}: ${reply.message}`;
+    if (reply.kind === "error")
+      return `error ${reply.code}: ${reply.message}${reply.probe ? ` peak=${reply.probe.peakDepth} total=${reply.probe.peakTotal} hits=${reply.probe.hits256}` : ""}`;
     const result = reply.result ?? reply;
-    return `${result.status} ${result.states} ${result.generated} ${result.work}`;
+    const probe = reply.probe
+      ? ` peak=${reply.probe.peakDepth} total=${reply.probe.peakTotal} hits=${reply.probe.hits256}`
+      : "";
+    return `${result.status} ${result.states} ${result.generated} ${result.work}${probe}`;
   };
 };
 
 const hopBounds = { maxDepth: 64, maxStates: 10000, maxWork: 100_000_000 };
-const kindBounds = {
+export const kindBounds = () => ({
   maxDepth: 10,
   maxStates: 100,
-  maxWork: 1_000_000,
+  maxWork: options.maxWork,
   maxTemporalNodes: 100_000,
-};
+});
 
 export const programOf = (harness: string, cell: string, size: number) =>
   JSON.parse(
@@ -96,7 +115,7 @@ export const probe =
       request: {
         kind: "check-safety",
         program: programOf(harness, cell, size),
-        bounds: cell === "hop" ? hopBounds : kindBounds,
+        bounds: cell === "hop" ? hopBounds : kindBounds(),
       },
     });
   };
@@ -160,8 +179,10 @@ export const search = async (
   };
 };
 
-const [wasmPath, harness, output, ...cells] = process.argv.slice(2);
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const [wasmPath, harness, output, ...cells] = parseFlags(
+    process.argv.slice(2),
+  ).positional;
   assert.ok(
     wasmPath && harness && output,
     "usage: wasm-ceiling.js <wasm> <harness> <output.json> <cell:low:high>...",

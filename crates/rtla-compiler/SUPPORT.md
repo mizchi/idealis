@@ -78,7 +78,7 @@
 ## 制約と根拠
 
 - [x] v2のUNCHANGED・ENABLED・SPECIFICATION subscriptのtuple別名展開は、v1と同じ入れ子の数え方で40を超える入力を`expression or operator nesting exceeds 40`で拒否し、node上限内の固定したtuple chainでv1の受理境界と照合し、「非対応・対象外」に記したUNCHANGEDの差を保持する。UNCHANGED・ENABLEDの展開はleafが後段の枝の上限と同じ256個を超える入力を`Safety branch exceeds 256 steps`で拒否する。
-- [x] frontendの式nesting / bound variable 40、checkerの定義内式48 / 値64、TS decoder128とv2の動的な評価入れ子（再帰しない経路は256、再帰する定義に入った経路は128）を緩めない。call経路長と定義内式のnestingを区別する。
+- [x] frontendの式nesting / bound variable 40、checkerの定義内式48 / 値64、TS decoder128とv2の動的な評価入れ子（再帰しない経路は256、再帰する定義に入った経路は128）を緩めない。引数を`Parameter` / `Capture`のまま受け渡すだけの転送は256に数えず、128には数える。call経路長と定義内式のnestingを区別する。
 - [x] 集合foldの値種と順序の制約を守る。文字列・recordや一部の関数を拒否する範囲と、順序に依存しないため受理する範囲は[README](README.md)に従う。
 - [x] 未対応・型エラー・予算切れを検査成功へ読み替えない。探索予算と結果はrtlcの契約。
 - [x] source bundleの追加moduleは256、importの深さは40、展開後のsymbolは4096まで。欠落・循環・衝突を拒否し、ファイルシステムやネットワークを読まない。
