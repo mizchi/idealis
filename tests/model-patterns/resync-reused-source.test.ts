@@ -23,8 +23,8 @@ type Command = {
     | "read";
 };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/lease/resync-reused-source.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/lease/resync-reused-source.ideal";
 
 async function startSource(t: TestContext, endpoint: Host) {
   const events = new EventEmitter();

@@ -18,8 +18,8 @@ type Command =
   | { kind: "receive"; sequence: Sequence }
   | { kind: "ack"; sequence: Sequence };
 type Fault = "volatile-dedup" | "decode-first";
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/crash-recovery/decoder-recovery.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/crash-recovery/decoder-recovery.ideal";
 
 async function message(child: ChildProcess, command?: Wire) {
   const response = once(child, "message", {

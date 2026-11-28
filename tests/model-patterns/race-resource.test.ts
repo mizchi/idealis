@@ -109,8 +109,8 @@ function openRace(t: TestContext, keepLoser = false) {
   };
 }
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/node-event-loop/race-resource.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/node-event-loop/race-resource.ideal";
 
 test(
   "a settled race closes a late resource independently of the returned result",

@@ -2,7 +2,7 @@
 
 **Experimental · ProB-inspired.** rprob is a bitset exploration kernel for
 finite sets and relations over atoms, scoped integers, records, tagged variants,
-and bounded sequences. Its input is checked rmodel
+and bounded sequences. Its input is checked Idealis
 syntax. ProB input formats and constraint solving are outside its current
 scope.
 
@@ -19,7 +19,7 @@ models with temporal questions. The same explicit choice is available as
 `rprob::analyze_safety`, which returns the report and the omitted names.
 
 ```sh
-cargo run --locked --manifest-path crates/rprob/Cargo.toml -- --safety examples/model-patterns/crash-recovery/transaction.model
+cargo run --locked --manifest-path crates/rprob/Cargo.toml -- --safety examples/model-patterns/crash-recovery/transaction.ideal
 ```
 
 The log compaction model exercises the scalar integer path with sequence
@@ -28,7 +28,7 @@ stores a value outside its declared range. Questions without a witness stay
 unknown after such an exit.
 
 ```sh
-cargo run --locked --manifest-path crates/rprob/Cargo.toml -- examples/model-patterns/lease/feed-compaction.model --max-states 20000
+cargo run --locked --manifest-path crates/rprob/Cargo.toml -- examples/model-patterns/lease/feed-compaction.ideal --max-states 20000
 ```
 
 An oversized sequence domain can fit the bitset when its scalar state slots
@@ -48,7 +48,7 @@ project a field directly from its ordinal. The restart budget example reads a
 queue and retry count without building a table of checkpoints. A model can
 derive a temporary set of indexed values with `elements`, use membership
 and set algebra, and pass the result to `removeAll`. A functional relation can store indexed values when the packed rows fit
-into one state word. Overwrite and key deletion operate on individual rows. [Restart budget](../../examples/model-patterns/crash-recovery/restart-budget.model) · [Queue refill](../../examples/model-patterns/crash-recovery/refill-queue.model) · [Retry rotation](../../examples/model-patterns/crash-recovery/rotate-queue.model) · [Batch journal](../../examples/model-patterns/crash-recovery/deduplicate-batch.model)
+into one state word. Overwrite and key deletion operate on individual rows. [Restart budget](../../examples/model-patterns/crash-recovery/restart-budget.ideal) · [Queue refill](../../examples/model-patterns/crash-recovery/refill-queue.ideal) · [Retry rotation](../../examples/model-patterns/crash-recovery/rotate-queue.ideal) · [Batch journal](../../examples/model-patterns/crash-recovery/deduplicate-batch.ideal)
 
 Benchmarks were tested with Hyperfine 2.0.0, including its `--metrics` flag. Use a fresh output directory for each run.
 
@@ -56,7 +56,7 @@ Sets use a bit per atom. Binary relations use an 8×8 bit matrix for models
 with up to eight atoms. In larger models, each possible ordered pair is
 assigned a shared bit, and products, joins and row replacements are compiled
 against those pairs. The ring-copy example uses eleven atoms and four ordered
-pairs. [Ring-copy model](../../examples/model-patterns/worker-deque/ring-copy.model)
+pairs. [Ring-copy model](../../examples/model-patterns/worker-deque/ring-copy.ideal)
 Candidate domains store small tables and generate larger choices on demand.
 Functions and partial functions select legal values per row.
 Lowering resolves slots and expands finite parameters and quantifiers
@@ -69,7 +69,7 @@ candidates and reached states. They first bind values from unconditional
 equalities or empty-set constraints in `fact` for configuration relations
 and in `init` for state variables. The low-level
 `Compiled::new` comparison path retains the full initial candidate charge
-for models over plain atoms, matching `rmodel::reference::analyze`.
+for models over plain atoms, matching `idealis_model::reference::analyze`.
 The report includes the verdicts
 and shortest witness depths, declared multiplicity violations, and
 action reachability.

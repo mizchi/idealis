@@ -13,8 +13,8 @@ import {
 
 type Command = { kind: "retry" };
 type State = { pending: { $sequence: string[] } };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/crash-recovery/rotate-queue.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/crash-recovery/rotate-queue.ideal";
 
 test("retry moves the SQLite queue head to the tail, preserving duplicate work", async () => {
   const scenario = await reachableScenario<Command>(checker, model, "Retried", {

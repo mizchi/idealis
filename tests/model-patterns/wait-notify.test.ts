@@ -15,8 +15,8 @@ type Command = {
   kind: "check" | "park" | "publish" | "notify" | "ping" | "consume";
 };
 type Stage = "Idle" | "Checked" | "Parked" | "Ready" | "Finished";
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/wait-notify/wait.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/wait-notify/wait.ideal";
 
 test(
   "wait registration handles early signals and notifications with a false predicate",

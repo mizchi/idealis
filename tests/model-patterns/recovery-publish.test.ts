@@ -21,8 +21,8 @@ import type {
 type Command = { kind: "promote" } | { kind: WorkerCommand; writer: Writer };
 type Fault = "cached-grant" | "success-on-rejection";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/crash-recovery/recovery-publish.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/crash-recovery/recovery-publish.ideal";
 const writers = ["Original", "Replacement"] as const;
 
 async function report(child: ChildProcess, command?: WorkerCommand) {

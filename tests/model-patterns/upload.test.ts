@@ -14,8 +14,8 @@ type Command = {
   request: RequestId;
 };
 
-const rcheck = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/upload/upload.model";
+const checkerPath = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/upload/upload.ideal";
 const bodies = { Old: "first file", New: "replacement file" };
 
 const document = `<!doctype html>
@@ -46,17 +46,17 @@ test(
     const browser = await chromium.launch();
     t.after(() => browser.close());
     const awaitingSave = await reachableScenario<Command>(
-      rcheck,
+      checkerPath,
       model,
       "NewVisibleWhileOldWriting",
     );
     const awaitingReply = await reachableScenario<Command>(
-      rcheck,
+      checkerPath,
       model,
       "NewVisibleWhileOldReplyPending",
     );
     const awaitingArrival = await reachableScenario<Command>(
-      rcheck,
+      checkerPath,
       model,
       "NewVisibleWhileOldInTransit",
     );
@@ -149,7 +149,7 @@ test(
           uploads.set(id, route);
           sent.emit(id);
         });
-        const result = await recordReplay(rcheck, scenario, {
+        const result = await recordReplay(checkerPath, scenario, {
           async apply({ kind, request }) {
             if (kind === "choose") {
               await Promise.all([

@@ -12,8 +12,8 @@ import {
 } from "../../examples/model-patterns/subscriptions/delivery-stream.js";
 
 type Command = { kind: "outage" | "restore" | "compact" | "probe" | "restart" };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/subscriptions/delivery-retention.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/subscriptions/delivery-retention.ideal";
 const id = "order-42";
 const frame = (kind: "notice" | "end") => JSON.stringify({ kind, id }) + "\n";
 

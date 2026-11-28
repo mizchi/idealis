@@ -16,9 +16,9 @@ type Command =
   | { kind: "append" | "capture" | "compact" | "install" | "advance" | "pull" };
 type Fault = "live-head" | "drop-buffer" | null;
 
-const checker = "crates/rcheck/target/debug/rcheck";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 const model =
-  "examples/model-patterns/subscriptions/replay-window-snapshot.model";
+  "examples/model-patterns/subscriptions/replay-window-snapshot.ideal";
 const install: Command = { kind: "install" };
 
 function transaction(database: DatabaseSync, operation: () => void) {

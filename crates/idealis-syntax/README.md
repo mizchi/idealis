@@ -7,4 +7,4 @@ externally constructed model. A `CheckedModel` can be given to
 [idealis-semantics](../idealis-semantics) for finite evaluation.
 
 The [language architecture](../../docs/language-architecture.md) describes
-the boundary and the [cheat sheet](../rmodel/CHEATSHEET.md) shows source syntax.
+the boundary and the [cheat sheet](../idealis-model/CHEATSHEET.md) shows source syntax.

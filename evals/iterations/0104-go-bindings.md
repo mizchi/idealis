@@ -1,6 +1,6 @@
 # 0104: Goのinterfaceとdecodeの生成
 
-[plan](../plans/0104-go-bindings.md)のとおり、`rcheck generate <model> go`でGoのpackageを生成した。JSONの形は[0102](0102-domain-bindings.md)の契約と同じで、照合器も同じ。
+[plan](../plans/0104-go-bindings.md)のとおり、`idealis-check generate <model> go`でGoのpackageを生成した。JSONの形は[0102](0102-domain-bindings.md)の契約と同じで、照合器も同じ。
 
 ```go
 type Permissions interface {
@@ -17,7 +17,7 @@ func Serve(create func(Config) Permissions, in io.Reader, out io.Writer) error
 
 ## 計画からの差（結果の前）
 
-- Goのdriverは`.artifacts/rcheck-go/`にbuildしたものを、rcheckのテストから動かす（`just rcheck-go`、CIのGoのjobに追加）。
+- Goのdriverは`.artifacts/idealis-check-go/`にbuildしたものを、rcheckのテストから動かす（`just idealis-check-go`、CIのGoのjobに追加）。
 
 ## 正しさ
 

@@ -11,11 +11,11 @@ use std::collections::BTreeMap;
 #[test]
 fn aggregate_conforms_to_the_report_model() {
     let root = std::path::Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
-    let model = rmodel::parse(
+    let model = idealis_model::parse(
         &std::fs::read_to_string(root.join("spec/models/roracle-report.model")).unwrap(),
     )
     .unwrap();
-    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
+    let alloy = ralloy::Model::parse(&idealis_model::to_alloy(&model)).unwrap();
     let all = [
         Status::Matched,
         Status::Mismatch,
@@ -81,11 +81,11 @@ fn aggregate_conforms_to_the_report_model() {
 #[test]
 fn compare_conforms_to_the_compare_model() {
     let root = std::path::Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
-    let model = rmodel::parse(
+    let model = idealis_model::parse(
         &std::fs::read_to_string(root.join("spec/models/roracle-compare.model")).unwrap(),
     )
     .unwrap();
-    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
+    let alloy = ralloy::Model::parse(&idealis_model::to_alloy(&model)).unwrap();
     let observations: Vec<roracle::Observation<u8>> = vec![
         roracle::Observation::value(0),
         roracle::Observation::value(1),

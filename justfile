@@ -266,8 +266,6 @@ ralloy-build: oracle-wire-build
   cargo build --release --locked --manifest-path crates/ralloy/Cargo.toml
   cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/ralloy/Cargo.toml
 
-alias rspec-test := idealis-spec-test
-
 idealis-spec-test:
   cargo fmt --manifest-path crates/idealis-spec/Cargo.toml -- --check
   cargo clippy --all-targets --locked --manifest-path crates/idealis-spec/Cargo.toml -- -D warnings
@@ -285,24 +283,24 @@ spec-write:
 vocabulary *args:
   cargo run --locked --quiet --manifest-path crates/idealis-spec/Cargo.toml --example vocabulary -- "$@"
 
-rmodel-design-write:
+idealis-model-design-write:
   cargo run --locked --quiet --manifest-path crates/idealis-spec/Cargo.toml --example spec_check -- --rmodel-design --write
 
-rmodel-design-check:
+idealis-model-design-check:
   cargo run --locked --quiet --manifest-path crates/idealis-spec/Cargo.toml --example spec_check -- --rmodel-design
-  cargo test --locked --manifest-path crates/rmodel/Cargo.toml --test calibration --test behavior --test entity
-  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test dead_code
+  cargo test --locked --manifest-path crates/idealis-model/Cargo.toml --test calibration --test behavior --test entity
+  cargo test --locked --manifest-path crates/idealis-check/Cargo.toml --test dead_code
 
 [positional-arguments]
-rmodel-design-drift *args:
+idealis-model-design-drift *args:
   cargo run --locked --quiet --manifest-path crates/idealis-spec/Cargo.toml --example spec_check -- --rmodel-design >&2
   pnpm exec jev-lint docs --document-manifest spec/rmodel-design-documents.json --ledger .jev-lint/judgments/rmodel-design "$@"
 
-rmodel-readability-eval output study="behavior":
-  cargo build --release --locked --manifest-path crates/rcheck/Cargo.toml
+idealis-model-readability-eval output study="behavior":
+  cargo build --release --locked --manifest-path crates/idealis-check/Cargo.toml
   node evals/experiments/rmodel-readability/run.mjs run {{quote(output)}} {{quote(study)}}
 
-rmodel-readability-replay output study="behavior":
+idealis-model-readability-replay output study="behavior":
   node evals/experiments/rmodel-readability/run.mjs replay {{quote(output)}} {{quote(study)}}
 
 # Advisory semantic drift between the glossary, crate documents, rules and
@@ -321,11 +319,11 @@ language-crate-test crate:
   cargo clippy --all-targets --locked --manifest-path crates/{{crate}}/Cargo.toml -- -D warnings
   cargo test --all-targets --locked --manifest-path crates/{{crate}}/Cargo.toml
 
-rmodel-test: idealis-language-test
-  cargo fmt --manifest-path crates/rmodel/Cargo.toml -- --check
-  cargo clippy --all-targets --locked --manifest-path crates/rmodel/Cargo.toml -- -D warnings
-  cargo test --all-targets --locked --manifest-path crates/rmodel/Cargo.toml
-  cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/rmodel/Cargo.toml
+idealis-model-test: idealis-language-test
+  cargo fmt --manifest-path crates/idealis-model/Cargo.toml -- --check
+  cargo clippy --all-targets --locked --manifest-path crates/idealis-model/Cargo.toml -- -D warnings
+  cargo test --all-targets --locked --manifest-path crates/idealis-model/Cargo.toml
+  cargo build --release --locked --lib --target wasm32-unknown-unknown --manifest-path crates/idealis-model/Cargo.toml
 
 rprob-test:
   cargo fmt --manifest-path crates/rprob/Cargo.toml -- --check
@@ -364,30 +362,30 @@ rprob-goal output revision:
 rprob-goal-replay output:
   python3 -B evals/experiments/rprob/goal.py replay {{quote(output)}}
 
-rcheck-test:
-  cargo fmt --manifest-path crates/rcheck/Cargo.toml -- --check
-  cargo clippy --all-targets --locked --manifest-path crates/rcheck/Cargo.toml -- -D warnings
-  cargo test --all-targets --locked --manifest-path crates/rcheck/Cargo.toml
+idealis-check-test:
+  cargo fmt --manifest-path crates/idealis-check/Cargo.toml -- --check
+  cargo clippy --all-targets --locked --manifest-path crates/idealis-check/Cargo.toml -- -D warnings
+  cargo test --all-targets --locked --manifest-path crates/idealis-check/Cargo.toml
 
-rcheck-lean-oracle:
-  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test lean_oracle -- --include-ignored
+idealis-check-lean-oracle:
+  cargo test --locked --manifest-path crates/idealis-check/Cargo.toml --test lean_oracle -- --include-ignored
 
 # Runtime traces compared with the checked model.
 model-patterns-test: build
-  cargo build --locked --manifest-path crates/rcheck/Cargo.toml
+  cargo build --locked --manifest-path crates/idealis-check/Cargo.toml
   node --test dist/tests/model-patterns/*.test.js
 
 # The generated fast-check property and its seeded fault control.
-rcheck-boundaries: build
-  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test linked_projects --test withdrawal
-  node --test dist/tests/rcheck/withdrawal.pbt.test.js
+idealis-check-boundaries: build
+  cargo test --locked --manifest-path crates/idealis-check/Cargo.toml --test linked_projects --test withdrawal
+  node --test dist/tests/idealis-check/withdrawal.pbt.test.js
 
-rcheck-transition:
-  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test transition
+idealis-check-transition:
+  cargo test --locked --manifest-path crates/idealis-check/Cargo.toml --test transition
 
 # Shipment requirement, generated bindings and model-derived ITF.
 shipment-build:
-  cargo build --locked --manifest-path crates/rcheck/Cargo.toml --bin rcheck
+  cargo build --locked --manifest-path crates/idealis-check/Cargo.toml --bin idealis-check
 
 shipment-write: shipment-build
   python3 evals/experiments/shipment/trace.py --write
@@ -396,9 +394,9 @@ shipment-test: shipment-build build
   cargo test --locked --manifest-path crates/idealis-spec/Cargo.toml --test links --test clauses
   cargo run --locked --quiet --manifest-path crates/idealis-spec/Cargo.toml --example spec_check -- --rmodel-design
   python3 evals/experiments/shipment/trace.py
-  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test shipment
-  node --test dist/tests/rcheck/shipment.pbt.test.js
-  cd tests/rcheck/go && CGO_ENABLED=0 go test -count=1 -v ./shipment
+  cargo test --locked --manifest-path crates/idealis-check/Cargo.toml --test shipment
+  node --test dist/tests/idealis-check/shipment.pbt.test.js
+  cd tests/idealis-check/go && CGO_ENABLED=0 go test -count=1 -v ./shipment
 
 clause-report rule="SHIPMENT-TRACKING" spec="spec/rmodel-design.pkl":
   cargo run --locked --quiet --manifest-path crates/idealis-spec/Cargo.toml --example clause_report -- {{quote(spec)}} {{quote(rule)}}
@@ -429,71 +427,71 @@ shipment-drift output:
   cargo run --locked --quiet --manifest-path crates/idealis-spec/Cargo.toml --example spec_check -- --rmodel-design
   python3 evals/experiments/shipment/drift.py {{quote(output)}}
 
-rmodel-transition-tlc output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" tlc=".artifacts/0068-tlc-1.8.0.jar":
-  cargo build --locked --manifest-path crates/rmodel/Cargo.toml --example emit
+idealis-model-transition-tlc output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" tlc=".artifacts/0068-tlc-1.8.0.jar":
+  cargo build --locked --manifest-path crates/idealis-model/Cargo.toml --example emit
   python3 evals/experiments/rmodel/structured-tlc.py {{quote(absolute_path(java))}} {{quote(absolute_path(tlc))}} {{quote(absolute_path(output))}} --transition
 
-rcheck-structured:
-  cargo test --locked --manifest-path crates/rmodel/Cargo.toml --test structured_temporal
-  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test structured_temporal
+idealis-check-structured:
+  cargo test --locked --manifest-path crates/idealis-model/Cargo.toml --test structured_temporal
+  cargo test --locked --manifest-path crates/idealis-check/Cargo.toml --test structured_temporal
 
-rmodel-structured-tlc output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" tlc=".artifacts/0068-tlc-1.8.0.jar":
-  cargo build --locked --manifest-path crates/rmodel/Cargo.toml --example emit
+idealis-model-structured-tlc output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" tlc=".artifacts/0068-tlc-1.8.0.jar":
+  cargo build --locked --manifest-path crates/idealis-model/Cargo.toml --example emit
   python3 evals/experiments/rmodel/structured-tlc.py {{quote(absolute_path(java))}} {{quote(absolute_path(tlc))}} {{quote(absolute_path(output))}}
 
-rcheck-validation:
-  cargo test --locked --manifest-path crates/rmodel/Cargo.toml --test values
-  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test validation
+idealis-check-validation:
+  cargo test --locked --manifest-path crates/idealis-model/Cargo.toml --test values
+  cargo test --locked --manifest-path crates/idealis-check/Cargo.toml --test validation
 
 # TypeScript implementations against the generated bindings and ajv on the
 # generated JSON Schema (plan 0102).
-rcheck-typescript: build
-  node --test dist/tests/rcheck/schema.test.js dist/tests/rcheck/withdrawal.pbt.test.js
-  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test typescript -- --ignored
+idealis-check-typescript: build
+  node --test dist/tests/idealis-check/schema.test.js dist/tests/idealis-check/withdrawal.pbt.test.js
+  cargo test --locked --manifest-path crates/idealis-check/Cargo.toml --test typescript -- --ignored
 
 # Go implementations against the generated interfaces (plan 0104).
-rcheck-go:
-  test -z "$(gofmt -l tests/rcheck/go)"
-  cd tests/rcheck/go && go vet ./...
-  cd tests/rcheck/go && CGO_ENABLED=0 go test -count=1 ./...
-  cd tests/rcheck/go && CGO_ENABLED=0 go build -o ../../../.artifacts/rcheck-go/ ./cmd/...
-  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test go -- --ignored
+idealis-check-go:
+  test -z "$(gofmt -l tests/idealis-check/go)"
+  cd tests/idealis-check/go && go vet ./...
+  cd tests/idealis-check/go && CGO_ENABLED=0 go test -count=1 ./...
+  cd tests/idealis-check/go && CGO_ENABLED=0 go build -o ../../../.artifacts/idealis-check-go/ ./cmd/...
+  cargo test --locked --manifest-path crates/idealis-check/Cargo.toml --test go -- --ignored
 
 # MoonBit implementations against the generated traits, on the JS target
 # (plan 0105).
-rcheck-moonbit:
-  cargo build --release --locked --manifest-path crates/rcheck/Cargo.toml
-  scripts/rcheck-moonbit-fresh.sh
-  cd tests/rcheck/moonbit && moon check --deny-warn --target js
-  cd tests/rcheck/moonbit && moon test --target js
-  cd tests/rcheck/moonbit && moon build --target js
-  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test moonbit -- --ignored
+idealis-check-moonbit:
+  cargo build --release --locked --manifest-path crates/idealis-check/Cargo.toml
+  scripts/idealis-check-moonbit-fresh.sh
+  cd tests/idealis-check/moonbit && moon check --deny-warn --target js
+  cd tests/idealis-check/moonbit && moon test --target js
+  cd tests/idealis-check/moonbit && moon build --target js
+  cargo test --locked --manifest-path crates/idealis-check/Cargo.toml --test moonbit -- --ignored
 
 # Adapters write the kernel IR; roracle compares their verdicts with the
-# rmodel source's (plan 0108). Needs pkl on PATH.
-rcheck-adapters:
-  scripts/rcheck-adapters-fresh.sh
-  cargo test --locked --manifest-path crates/rcheck/Cargo.toml --test adapters --test ir
+# Idealis source's (plan 0108). Needs pkl on PATH.
+idealis-check-adapters:
+  scripts/idealis-check-adapters-fresh.sh
+  cargo test --locked --manifest-path crates/idealis-check/Cargo.toml --test adapters --test ir
 
 # The surface-language evaluation loop with pluggable axes (plan 0109).
 # Tools are found through ISABELLE, IDRIS2_PREFIX and VEIL_HOME; a missing
 # one makes its candidate's checks unavailable, never passed.
 [positional-arguments]
 surface-eval-prepare plan run: build
-  cargo build --release --locked --manifest-path crates/rcheck/Cargo.toml
+  cargo build --release --locked --manifest-path crates/idealis-check/Cargo.toml
   node dist/evals/experiments/surface-eval/run.js prepare "$1" "$2"
 
 [positional-arguments]
 surface-eval-score plan run: build
   node dist/evals/experiments/surface-eval/run.js score "$1" "$2"
 
-rmodel-oracle output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" alloy=".artifacts/alloy-subset/org.alloytools.alloy.dist.jar" tlc=".artifacts/0068-tlc-1.8.0.jar":
+idealis-model-oracle output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" alloy=".artifacts/alloy-subset/org.alloytools.alloy.dist.jar" tlc=".artifacts/0068-tlc-1.8.0.jar":
   evals/experiments/rmodel/oracle.sh {{quote(absolute_path(java))}} {{quote(absolute_path(alloy))}} {{quote(absolute_path(tlc))}} {{quote(absolute_path(output))}}
 
 # Plan 0114: source/IR, registered checkers and independent JVM tools.
-rmodel-portability output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" alloy=".artifacts/alloy-subset/org.alloytools.alloy.dist.jar" tlc=".artifacts/0068-tlc-1.8.0.jar":
-  cargo build --locked --manifest-path crates/rmodel/Cargo.toml --example emit
-  cargo build --locked --manifest-path crates/rcheck/Cargo.toml
+idealis-model-portability output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" alloy=".artifacts/alloy-subset/org.alloytools.alloy.dist.jar" tlc=".artifacts/0068-tlc-1.8.0.jar":
+  cargo build --locked --manifest-path crates/idealis-model/Cargo.toml --example emit
+  cargo build --locked --manifest-path crates/idealis-check/Cargo.toml
   python3 evals/experiments/rmodel/portability.py {{quote(absolute_path(java))}} {{quote(absolute_path(tlc))}} {{quote(absolute_path(alloy))}} {{quote(absolute_path(output))}}
 
 rquint-tlc output java=".artifacts/tlc/arm64/jdk-21.0.13+9-jre/Contents/Home/bin/java" jar=".artifacts/0068-tlc-1.8.0.jar":
@@ -592,7 +590,7 @@ install:
 
 build-sdk:
   pnpm exec tsc -p packages/idealis/tsconfig.json
-  node --experimental-strip-types scripts/prepare-rmodel-pattern-assets.ts
+  node --experimental-strip-types scripts/prepare-model-pattern-assets.ts
 
 build: build-sdk
   pnpm exec tsc -p tsconfig.json
@@ -775,7 +773,7 @@ package-prepare *args: build rusmt-build
 
 [positional-arguments]
 package-test *args: build
-  cargo build --locked --manifest-path crates/rcheck/Cargo.toml --bin rcheck
+  cargo build --locked --manifest-path crates/idealis-check/Cargo.toml --bin idealis-check
   node dist/scripts/package-test.js "$@"
 
 cli-wasm-build:

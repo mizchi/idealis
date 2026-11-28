@@ -10,8 +10,8 @@ import {
 type Command =
   | { kind: "loadDetail" | "openCatalog" | "back" }
   | { kind: "finish"; visitId: number };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/browser/navigation-activation.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/browser/navigation-activation.ideal";
 
 const document = `<!doctype html><main></main><script>
   const routeOnly = location.search.includes("route-only");

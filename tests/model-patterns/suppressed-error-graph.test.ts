@@ -16,9 +16,9 @@ type NodeLabel = "Earlier" | "Recent" | "Original" | "Clone" | "Wrapped";
 type Wrapper = "Original" | "Clone" | "Wrapped";
 type Command = { kind: "unwind"; identity: Identity };
 
-const checker = "crates/rcheck/target/debug/rcheck";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 const model =
-  "examples/model-patterns/node-event-loop/suppressed-error-graph.model";
+  "examples/model-patterns/node-event-loop/suppressed-error-graph.ideal";
 
 // Exercise native await using even when the test bundle targets ES2023.
 const unwind = new Function(

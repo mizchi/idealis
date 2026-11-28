@@ -8,7 +8,7 @@ Idealis では、こうした業務の用語と操作を `.ideal` ファイル�
 
 次の内容を `library.ideal` として保存します。
 
-```rmodel
+```ideal
 model Library
 entity Copy "図書館が所蔵する1冊"
 enum Member = Aki | Ren
@@ -34,7 +34,7 @@ invariant LoanIsRecorded { keys(borrower) in everBorrowed }
 reachable RenCanBorrow { some c: Copy | Ren in c.borrower }
 transition ReturnKeepsRecord on giveBack { unchanged(everBorrowed) }
 
-scope Copy = 1, steps = 4
+scope Copy = 1
 ```
 
 `entity Copy` で「蔵書の1冊」に名前を付けます。引用符内の説明は、後で生成する用語集にも使われます。`scope Copy = 1` で検査対象を1冊に絞り、`enum Member` には名前付きの会員を2人置きます。
@@ -58,12 +58,12 @@ scope Copy = 1, steps = 4
 リポジトリのルートに `library.ideal` を保存した場合は、次のコマンドで実行できます。
 
 ```sh
-cargo build --locked --manifest-path crates/rcheck/Cargo.toml
-rcheck=crates/rcheck/target/debug/rcheck
+cargo build --locked --manifest-path crates/idealis-check/Cargo.toml
+checker=crates/idealis-check/target/debug/idealis-check
 
-"$rcheck" library.ideal --checker reference --question LoanIsRecorded --expect holds
-"$rcheck" library.ideal --checker reference --question ReturnKeepsRecord --expect holds
-"$rcheck" witness library.ideal RenCanBorrow
+"$checker" library.ideal --checker reference --question LoanIsRecorded --expect holds
+"$checker" library.ideal --checker reference --question ReturnKeepsRecord --expect holds
+"$checker" witness library.ideal RenCanBorrow
 ```
 
 最初の2件は `holds` です。3件目は `reachable` を返し、`trace.commands` に Ren が蔵書 `Copy0` を借りる操作が1件入ります。
@@ -75,20 +75,26 @@ rcheck=crates/rcheck/target/debug/rcheck
 貸出の `update` から `everBorrowed = everBorrowed + c` を外して、次のコマンドを実行します。
 
 ```sh
-"$rcheck" witness library.ideal LoanIsRecorded
+"$checker" witness library.ideal LoanIsRecorded
 ```
 
 `violated` が返ります。最初の貸出で `borrower` に組が入り、履歴は空のままです。違反までの操作は `trace.commands`、違反時の状態は `trace.finalState` にあります。
 
-確認したら更新を戻します。ここで確かめたのは、蔵書1冊と会員2人のモデルでの振る舞いです。`scope` はモデルの範囲を決め、`steps` は Alloy の有界検査などで使います。
+確認したら更新を戻します。ここで確かめたのは、蔵書1冊と会員2人のモデルでの振る舞いです。SAT のトレース長はコマンドで指定します。
 
-`--max-states` などで制限する探索予算は別にあり、予算切れなどで結果が未確定なら `unknown` が返ります。使える検査器は `"$rcheck" capabilities library.ideal` で確認できます。
+```sh
+"$checker" library.ideal --checker sat --question RenCanBorrow --sat-steps 2 --expect reachable
+```
+
+2状態は初期状態と貸出後の状態です。1状態にすると初期状態しか調べられず、`unreachable` はその上限内での未発見を表します。[検査の合格条件](language-architecture.md#一つのモデルから検査を組み合わせる)
+
+`--max-states` などで制限する探索予算は別にあり、予算切れなどで結果が未確定なら `unknown` が返ります。使える検査器は `"$checker" capabilities library.ideal` で確認できます。
 
 ## 「貸出中なら、いずれ返却される」を書く
 
 元のモデルの `scope` の前に次の性質を追加します。
 
-```rmodel
+```ideal
 leads_to LoanEventuallyReturns(c: Copy) with { weak giveBack(*) }
   { some c.borrower }
   { no c.borrower }
@@ -97,13 +103,13 @@ leads_to LoanEventuallyReturns(c: Copy) with { weak giveBack(*) }
 `leads_to` は1冊ごとに、貸出中になった時点からいずれ借り手がいない状態に戻ることを求めます。`weak giveBack(*)` は、実行可能なままに留まる引数の組について、返却がいずれ実行されるという仮定です。
 
 ```sh
-"$rcheck" library.ideal --checker rprob --question LoanEventuallyReturns --expect holds
+"$checker" library.ideal --checker rprob --question LoanEventuallyReturns --expect holds
 ```
 
 この仮定の下では `holds` です。`with { weak giveBack(*) }` を `with {}` にして、次のコマンドを実行すると、貸し出した後に返却せず留まり続ける反例が見つかります。確認したら `with { weak giveBack(*) }` に戻します。
 
 ```sh
-"$rcheck" witness library.ideal LoanEventuallyReturns --checker rprob
+"$checker" witness library.ideal LoanEventuallyReturns --checker rprob
 ```
 
 ## 用語と型を実装へ持っていく
@@ -111,10 +117,10 @@ leads_to LoanEventuallyReturns(c: Copy) with { weak giveBack(*) }
 ソースに書いた `Copy` の説明は用語集に、`Member` や操作の引数は実装用の型に出せます。TypeScript では会員の型が `"Aki" | "Ren"` になります。Rust や Go にも同じソースから型を生成できます。
 
 ```sh
-"$rcheck" generate library.ideal glossary
-"$rcheck" generate library.ideal typescript
-"$rcheck" generate library.ideal rust
-"$rcheck" generate library.ideal go
+"$checker" generate library.ideal glossary
+"$checker" generate library.ideal typescript
+"$checker" generate library.ideal rust
+"$checker" generate library.ideal go
 ```
 
 金額に名前を付けるなら `record Amount { units: Nat }`、決済状態ごとに持つ値が違うなら `variant Payment = Pending | Captured(Receipt)` と書けます。`scope Int = 0..2` と指定すると、このモデルで扱う自然数は0、1、2です。
@@ -127,7 +133,7 @@ leads_to LoanEventuallyReturns(c: Copy) with { weak giveBack(*) }
 
 最初のモデルの `entity Copy "図書館が所蔵する1冊"` を次の宣言に置き換えられます。`//` で始めた行はソースを読む人へのコメントで、`description` の本文は用語集に残ります。
 
-```rmodel
+```ideal
 // 貸出と返却は、所蔵する1冊を単位に扱う。
 entity Copy description = {
   default: "図書館が所蔵する1冊",
@@ -141,7 +147,7 @@ Copies with the same title are tracked separately."""
 `"""` の間は改行や空白も本文に入ります。言語指定が不要なら `entity Copy description = """…"""` と書けます。`"en-US"` のようにハイフンを含む言語タグは引用符で囲み、出力では `en-us` になります。
 
 ```sh
-"$rcheck" generate library.ideal glossary-localized
+"$checker" generate library.ideal glossary-localized
 ```
 
 `glossary-localized` は全言語を出力します。`glossary` は従来どおり、言語指定のない説明と `default` を平坦な JSON に出します。
@@ -150,6 +156,6 @@ Copies with the same title are tracked separately."""
 
 会員管理を貸出の外に出すと、資格を直接読む場合と通知で受け取る場合で、停止直後の振る舞いが変わります。[貸出と会員管理をつなぐ例](../examples/model-patterns/library-membership/README.md)
 
-待ち行列の `sequence`、固定の関係 `rel` とその制約 `fact`、複数ファイルの接続はチートシートに例があります。[文法チートシート](../crates/rmodel/CHEATSHEET.md)
+待ち行列の `sequence`、固定の関係 `rel` とその制約 `fact`、複数ファイルの接続はチートシートに例があります。[文法チートシート](../crates/idealis-model/CHEATSHEET.md)
 
-画面遷移や Node.js のタスク実行順序にも、同じ構文で状態と操作を書けます。[環境別のモデルパターン](rmodel-patterns.md)
+画面遷移や Node.js のタスク実行順序にも、同じ構文で状態と操作を書けます。[環境別のモデルパターン](model-patterns.md)

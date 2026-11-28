@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { mean, type Axis, type Context } from "../types.js";
 
-/** The checks compared through the IR (as crates/rcheck/tests/adapters.rs). */
+/** The checks compared through the IR (as crates/idealis-check/tests/adapters.rs). */
 const observed: Record<string, string[]> = {
   permissions: ["NoLeak", "OnlyGranted", "SecretRead", "UnclearedSecret"],
   bank: ["NonNegative", "Rich"],
@@ -21,7 +21,7 @@ const observed: Record<string, string[]> = {
 const kinds = ["complete-search", "bounded", "inductive", "proof"];
 
 const rcheck = (context: Context) =>
-  join(context.root, "crates/rcheck/target/release/rcheck");
+  join(context.root, "crates/idealis-check/target/release/idealis-check");
 
 /** Reference verdicts of a model or IR file, by check name. */
 function verdicts(

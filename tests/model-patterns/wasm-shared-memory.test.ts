@@ -13,9 +13,9 @@ type Command =
   | { kind: "read"; region: "Prefix" | "Suffix" };
 type Fault = "none" | "keep-short-view" | "copy-prefix";
 
-const checker = "crates/rcheck/target/debug/rcheck";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 const model =
-  "examples/model-patterns/wasm-memory/shared-view-after-grow.model";
+  "examples/model-patterns/wasm-memory/shared-view-after-grow.ideal";
 const page = 65_536;
 const prefixOffset = 16;
 const suffixOffset = page + prefixOffset;

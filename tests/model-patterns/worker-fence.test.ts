@@ -25,8 +25,8 @@ type Completion =
       readonly receipt: Attempt;
     };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/cancellation/worker-fence.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/cancellation/worker-fence.ideal";
 const job = "job-with-retry";
 
 async function startWorker(

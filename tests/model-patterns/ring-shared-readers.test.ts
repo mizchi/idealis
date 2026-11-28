@@ -14,8 +14,8 @@ type Command =
   | { kind: "stop" | "reclaim" | "copy" | "finish"; reader: Reader }
   | { kind: "tryReuse" };
 type Fault = "none" | "clear-all" | "double-debit";
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/worker-deque/ring-shared-readers.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/worker-deque/ring-shared-readers.ideal";
 
 async function openSlot(t: TestContext, fault: Fault) {
   // Reader bits, reference count, header and data.

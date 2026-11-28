@@ -12,8 +12,8 @@ type JobState = "Running" | "Queued" | "Reserved" | "Done" | "Cancelled";
 type Command =
   | { readonly kind: "finish"; readonly job: Job }
   | { readonly kind: "reserve" | "dispatch" | "stop" | "join" };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/cancellation/worker-pool-stop.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/cancellation/worker-pool-stop.ideal";
 
 test(
   "a worker pool cancels queued work and invalidates a scheduled dispatch during shutdown",

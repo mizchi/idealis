@@ -1,22 +1,22 @@
 # 保存した受領記録から応答する
 
-編集を保存する処理と、HTTP 応答を配信する処理を分ける。二つの要求 ID と、その要求を保存した版を扱う。保存の完了前に接続を開けるが、その要求の受領記録ができるまで応答は待つ。接続を開き直した場合も、同じ要求 ID の版を返す。[共有する受領記録](contract.model)
+編集を保存する処理と、HTTP 応答を配信する処理を分ける。二つの要求 ID と、その要求を保存した版を扱う。保存の完了前に接続を開けるが、その要求の受領記録ができるまで応答は待つ。接続を開き直した場合も、同じ要求 ID の版を返す。[共有する受領記録](contract.ideal)
 
 | 断片 | 担当する状態                                           | 操作                                                                |
 | ---- | ------------------------------------------------------ | ------------------------------------------------------------------- |
 | 保存 | 最新版 `head` と、要求ごとに固定する `receipt`         | `commit` が最新版と受領記録を一緒に更新する                         |
 | 配信 | 待っている接続 `waiting` と、実際に返した版 `received` | `open` と `drop` は接続を変え、`send` は同じ要求の `receipt` を読む |
 
-保存だけのプロジェクトで、受領記録の版が最新版の範囲にあり、別の要求の保存が以前の受領記録を変えないことを検査できる。合成したプロジェクトでは、配信した版が同じ要求の受領記録と一致することも検査する。ファイル間では一つの名前空間を使う。書き手と読み手の分担はモデルの操作と遷移条件に記述している。[保存](storage.model) · [配信](delivery.model)
+保存だけのプロジェクトで、受領記録の版が最新版の範囲にあり、別の要求の保存が以前の受領記録を変えないことを検査できる。合成したプロジェクトでは、配信した版が同じ要求の受領記録と一致することも検査する。ファイル間では一つの名前空間を使う。書き手と読み手の分担はモデルの操作と遷移条件に記述している。[保存](storage.ideal) · [配信](delivery.ideal)
 
 ```sh
-cargo build --locked --manifest-path crates/rcheck/Cargo.toml
-rcheck=crates/rcheck/target/debug/rcheck
+cargo build --locked --manifest-path crates/idealis-check/Cargo.toml
+checker=crates/idealis-check/target/debug/idealis-check
 pattern=examples/model-patterns/offline-merge/handoff
 
-"$rcheck" "$pattern/storage.rmodel.json" --checker reference
-"$rcheck" "$pattern/project.rmodel.json" --checker all --question DeliveredFromReceipt
-"$rcheck" witness "$pattern/project.rmodel.json" WaitingForFirstReceipt
+"$checker" "$pattern/storage.project.json" --checker reference
+"$checker" "$pattern/model.project.json" --checker all --question DeliveredFromReceipt
+"$checker" witness "$pattern/model.project.json" WaitingForFirstReceipt
 just build
 node --test dist/tests/model-patterns/edit-handoff.test.js
 ```

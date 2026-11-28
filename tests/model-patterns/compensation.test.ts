@@ -25,8 +25,8 @@ type Command = {
     | "loseReply"
     | "confirmRefund";
 };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/compensation/saga.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/compensation/saga.ideal";
 
 async function listen(
   t: TestContext,

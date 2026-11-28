@@ -17,8 +17,8 @@ type Command =
   | { kind: "claim"; reader: Reader }
   | { kind: "publishThird" };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/worker-deque/ring-reuse.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/worker-deque/ring-reuse.ideal";
 
 function openRing(t: TestContext, ignoreTicket: boolean) {
   const words = new Int32Array(

@@ -12,8 +12,8 @@ const rounds = ["R1", "R2", "Done"] as const;
 type Participant = (typeof participants)[number];
 type Command = { kind: "arrive" | "tryPass"; worker: Participant };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/worker-barrier/reuse.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/worker-barrier/reuse.ideal";
 
 function sharedBarrier(t: TestContext, staleRelease: boolean) {
   const shared = new Int32Array(

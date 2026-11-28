@@ -15,8 +15,8 @@ type Command =
   | { kind: "finish"; attempt: Attempt; answer: Answer }
   | { kind: "restart" };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/subscriptions/delivery-generation.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/subscriptions/delivery-generation.ideal";
 const id = "notice-1";
 
 test(

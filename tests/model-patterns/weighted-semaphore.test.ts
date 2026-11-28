@@ -12,8 +12,8 @@ import {
   type Scenario,
 } from "../../packages/idealis/src/patterns.js";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/semaphore/weighted-fifo.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/semaphore/weighted-fifo.ideal";
 const clients = ["Owner", "Heavy", "Light"] as const;
 const permits = ["Left", "Right"] as const;
 type Client = (typeof clients)[number] | "LightA" | "LightB";
@@ -162,7 +162,7 @@ test(
   { timeout: 60_000 },
   async () => {
     const firstFit =
-      "examples/model-patterns/semaphore/weighted-first-fit.model";
+      "examples/model-patterns/semaphore/weighted-first-fit.ideal";
     const { stdout } = await run(checker, [
       "witness",
       firstFit,

@@ -21,8 +21,8 @@ type Command =
       producer: Producer;
     };
 type Fault = "first-seal" | "seals-only" | "count-current";
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/crash-recovery/decoder-retirement.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/crash-recovery/decoder-retirement.ideal";
 const producers = ["Alpha", "Beta"] as const;
 
 function openReceiver(t: TestContext, fault?: Fault) {

@@ -15,8 +15,8 @@ interface Link {
 type Command = { kind: "send" | "editThroughCycle" };
 type Fault = "none" | "cut-cycle" | "reuse-source";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/worker-transfer/cyclic-references.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/worker-transfer/cyclic-references.ideal";
 
 function snapshot(root: Link) {
   const back = root.next?.next;

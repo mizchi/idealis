@@ -6,12 +6,12 @@ import subprocess
 import tempfile
 
 MODEL = Path("fixtures/rcheck/structured/shipped-transition.model")
-R_CHECK = Path("crates/rcheck/target/debug/rcheck")
+R_CHECK = Path("crates/idealis-check/target/debug/idealis-check")
 FIXTURES = Path("fixtures/rcheck/shipment")
 BINDINGS = {
-    "rust": Path("crates/rcheck/tests/generated/shipment.rs"),
-    "typescript": Path("tests/rcheck/generated/shipment.ts"),
-    "go": Path("tests/rcheck/go/shipment/bindings.go"),
+    "rust": Path("crates/idealis-check/tests/generated/shipment.rs"),
+    "typescript": Path("tests/idealis-check/generated/shipment.ts"),
+    "go": Path("tests/idealis-check/go/shipment/bindings.go"),
 }
 
 

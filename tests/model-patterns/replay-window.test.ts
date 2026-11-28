@@ -14,8 +14,8 @@ type Command =
       kind: "advance" | "acknowledge" | "trim" | "expire" | "pull" | "install";
     };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/subscriptions/replay-window.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/subscriptions/replay-window.ideal";
 
 function transaction(database: DatabaseSync, operation: () => void) {
   database.exec("BEGIN");

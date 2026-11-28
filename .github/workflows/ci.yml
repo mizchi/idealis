@@ -72,10 +72,10 @@ jobs:
       - run: cargo clippy --all-targets --locked --manifest-path crates/ralloy/Cargo.toml -- -D warnings
       - run: cargo test --all-targets --locked --manifest-path crates/ralloy/Cargo.toml
       - run: just rquint-test
-      - run: just rmodel-test
+      - run: just idealis-model-test
       - run: just rprob-test
-      - run: just rcheck-test
-      - run: just rcheck-typescript
+      - run: just idealis-check-test
+      - run: just idealis-check-typescript
       - name: Install Pkl 0.31.1
         run: |
           curl -fsSL -o "$RUNNER_TEMP/pkl" https://github.com/apple/pkl/releases/download/0.31.1/pkl-linux-amd64
@@ -84,7 +84,7 @@ jobs:
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
       - run: just idealis-spec-test
       - run: just spec-check
-      - run: just rcheck-adapters
+      - run: just idealis-check-adapters
       - run: cargo fmt --manifest-path crates/rusmt/Cargo.toml -- --check
       - run: cargo clippy --all-targets --locked --manifest-path crates/rusmt/Cargo.toml -- -D warnings
       - run: cargo test --all-targets --locked --manifest-path crates/rusmt/Cargo.toml
@@ -309,7 +309,7 @@ jobs:
             .artifacts/shared-oracle
             .artifacts/async-tuning
           if-no-files-found: warn
-      - run: just rcheck-go
+      - run: just idealis-check-go
 
   moonbit:
     name: MoonBit bindings
@@ -323,7 +323,7 @@ jobs:
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
-      - run: just rcheck-moonbit
+      - run: just idealis-check-moonbit
 
   cache-proof:
     runs-on: ubuntu-latest

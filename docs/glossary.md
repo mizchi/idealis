@@ -213,14 +213,14 @@ reachable の条件を満たす状態に、初期状態から到達できるこ�
 
 ### 設定（configuration）
 
-状態とともに変わらない関係（rmodel の rel）。solver はすべての候補を考え、明示状態の探索は初期状態で列挙する。
+状態とともに変わらない関係（Idealis の rel）。solver はすべての候補を考え、明示状態の探索は初期状態で列挙する。
 
 - id: `model.configuration`
 - コード: `crates/idealis-syntax/src/syntax.rs` の `Relation`
 
 ### 状態（state）
 
-action によって変わる関係（rmodel の var、Alloy の var field）の、ある時点の値。
+action によって変わる関係（Idealis の var、Alloy の var field）の、ある時点の値。
 
 - id: `model.state`
 - コード: `crates/idealis-syntax/src/syntax.rs` の `var`

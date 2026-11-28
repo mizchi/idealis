@@ -9,8 +9,8 @@ import {
 type Batch = { $sequence: string[] };
 type History = { $sequence: Batch[] };
 type Command = { kind: "refill"; history: History };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/crash-recovery/refill-queue.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/crash-recovery/refill-queue.ideal";
 
 test("the discovered refill argument preserves batch order in SQLite", async () => {
   const scenario = await reachableScenario<Command>(

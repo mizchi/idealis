@@ -10,8 +10,8 @@ import {
 type Command =
   | { kind: "start" | "finish" }
   | { kind: "retry"; cause: "Transient" | "Fatal" };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/subscriptions/retry-threshold.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/subscriptions/retry-threshold.ideal";
 
 async function retryService(
   t: TestContext,

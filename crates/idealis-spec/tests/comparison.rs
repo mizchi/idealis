@@ -21,7 +21,7 @@ const RULE: &str = "RMODEL-EVIDENCE-PROVENANCE";
 
 fn collect_plan(plan: &ComparisonPlan) -> [idealis_spec::CheckerReceipt; 2] {
     let reference = run_checker(plan, Checker::Reference, MODEL, |model, budget| {
-        Ok(rmodel::reference::analyze(model, budget))
+        Ok(idealis_model::reference::analyze(model, budget))
     })
     .unwrap();
     let fast = run_checker(plan, Checker::Rprob, MODEL, |model, budget| {
@@ -106,7 +106,7 @@ fn real_checker_results_feed_adoption() {
 
     let faulty = run_checker(&plan, Checker::Rprob, MODEL, |model, budget| {
         let mut report = rprob::Compiled::new(model).unwrap().analyze(budget);
-        report.verdicts[0].outcome = rmodel::reference::Outcome::Violated { depth: 1 };
+        report.verdicts[0].outcome = idealis_model::reference::Outcome::Violated { depth: 1 };
         Ok(report)
     })
     .unwrap();
@@ -130,7 +130,7 @@ fn empty_and_unsupported_are_distinct_from_agreement() {
     source.push_str(&format!("\nenum Unused = {}\n", members.join(" | ")));
     plan.source_sha256 = format!("{:x}", Sha256::digest(&source));
     let reference = run_checker(&plan, Checker::Reference, &source, |model, budget| {
-        Ok(rmodel::reference::analyze(model, budget))
+        Ok(idealis_model::reference::analyze(model, budget))
     })
     .unwrap();
     let fast = run_checker(&plan, Checker::Rprob, &source, |model, _| {
@@ -156,7 +156,7 @@ fn empty_and_unsupported_are_distinct_from_agreement() {
     .unwrap();
     plan.source_sha256 = format!("{:x}", Sha256::digest(&source));
     let reference = run_checker(&plan, Checker::Reference, &source, |model, budget| {
-        Ok(rmodel::reference::analyze(model, budget))
+        Ok(idealis_model::reference::analyze(model, budget))
     })
     .unwrap();
     let fast = run_checker(&plan, Checker::Rprob, &source, |model, budget| {

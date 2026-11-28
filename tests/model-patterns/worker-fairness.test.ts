@@ -85,7 +85,7 @@ test(
             { kind: "release" },
           ];
       const scenario: Scenario<Command> = {
-        model: `examples/model-patterns/worker-fairness/${fifo ? "fifo" : "competitive"}.model`,
+        model: `examples/model-patterns/worker-fairness/${fifo ? "fifo" : "competitive"}.ideal`,
         config: {},
         initial: fifo
           ? { queue: { $sequence: [] }, owner: null }
@@ -93,43 +93,48 @@ test(
         commands,
       };
       try {
-        await replay("crates/rcheck/target/debug/rcheck", scenario, {
-          async apply(command) {
-            const side = command.kind === "release" ? owner() : command.worker;
-            assert.ok(side);
-            statuses[side] = await send(side, command.kind);
-            assert.equal(statuses[side].blocked, false);
-            if (
-              fifo &&
-              command.kind === "request" &&
-              side === "Left" &&
-              statuses.Right.waiting !== null
-            ) {
-              const probe = await send("Left", "acquire");
-              assert.equal(probe.blocked, true);
-              assert.equal(probe.waiting, statuses.Left.waiting);
-              assert.equal(owner(), null);
-            }
-          },
-          async observe() {
-            const waiting = sides.filter(
-              (side) => statuses[side].waiting !== null,
-            );
-            if (fifo)
-              waiting.sort(
-                (left, right) =>
-                  Number(statuses[left].waiting) -
-                  Number(statuses[right].waiting),
+        await replay(
+          "crates/idealis-check/target/debug/idealis-check",
+          scenario,
+          {
+            async apply(command) {
+              const side =
+                command.kind === "release" ? owner() : command.worker;
+              assert.ok(side);
+              statuses[side] = await send(side, command.kind);
+              assert.equal(statuses[side].blocked, false);
+              if (
+                fifo &&
+                command.kind === "request" &&
+                side === "Left" &&
+                statuses.Right.waiting !== null
+              ) {
+                const probe = await send("Left", "acquire");
+                assert.equal(probe.blocked, true);
+                assert.equal(probe.waiting, statuses.Left.waiting);
+                assert.equal(owner(), null);
+              }
+            },
+            async observe() {
+              const waiting = sides.filter(
+                (side) => statuses[side].waiting !== null,
               );
-            return { waiting, owner: owner() };
+              if (fifo)
+                waiting.sort(
+                  (left, right) =>
+                    Number(statuses[left].waiting) -
+                    Number(statuses[right].waiting),
+                );
+              return { waiting, owner: owner() };
+            },
+            project(state) {
+              const waiting = fifo
+                ? (state.queue as { $sequence: string[] }).$sequence
+                : [...(state.waiting as string[])].sort();
+              return { waiting, owner: state.owner };
+            },
           },
-          project(state) {
-            const waiting = fifo
-              ? (state.queue as { $sequence: string[] }).$sequence
-              : [...(state.waiting as string[])].sort();
-            return { waiting, owner: state.owner };
-          },
-        });
+        );
         assert.equal(statuses.Right.waiting === null, fifo);
       } finally {
         await Promise.all(

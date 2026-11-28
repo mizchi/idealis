@@ -29,8 +29,8 @@ declare global {
   var modelLockHarness: LockHarness;
 }
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/browser/web-locks-cancellation.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/browser/web-locks-cancellation.ideal";
 const clients = ["Owner", "First", "Second"] as const;
 const resource = "document";
 

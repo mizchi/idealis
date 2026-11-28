@@ -30,11 +30,11 @@
 
 [0116: 有限列、値付き variant、公平性](iterations/0116-structured-temporal.md)は、ログ・決済・配信を IR、生成型、rtlc、TLC に通した。既存の Pkl の注文とサービスも変換した。
 
-[0115: Nat と処理前のモデル検証](iterations/0115-nat-validation.md)は、整数範囲の契約を検査器ごとに明示し、Nat の出金を使って実装を呼ぶ前のガードと不変条件の検査を確認した。`just rcheck-validation` で回帰テストを再生できる。
+[0115: Nat と処理前のモデル検証](iterations/0115-nat-validation.md)は、整数範囲の契約を検査器ごとに明示し、Nat の出金を使って実装を呼ぶ前のガードと不変条件の検査を確認した。`just idealis-check-validation` で回帰テストを再生できる。
 
 [0114: rmodel の核と移植先の再検証](iterations/0114-rmodel-portability.md)は、出金・Raft・ACL と対照モデルを IR、rtlc、ralloy、TLC、Alloy Analyzer に渡し、表現の限界と検査器間の不整合を区別した。
 
-[0113: 仕様から境界を導き PBT で再生](iterations/0113-linked-boundaries.md)は、分割した出金モデルと3ノードの選挙モデルから境界を選び、Rust と TypeScript の出金実装および故障対照で検査した。`just rcheck-boundaries` で再現できる。
+[0113: 仕様から境界を導き PBT で再生](iterations/0113-linked-boundaries.md)は、分割した出金モデルと3ノードの選挙モデルから境界を選び、Rust と TypeScript の出金実装および故障対照で検査した。`just idealis-check-boundaries` で再現できる。
 
 [0112: 条件と更新の読み取り](iterations/0112-rmodel-readability.md)は、同じ三題材の `action` と `behavior` を比較した。rmodel の意味は一致し、代理読み手の正答は26/27と27/27だった。
 

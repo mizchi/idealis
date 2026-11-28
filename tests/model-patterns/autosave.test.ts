@@ -13,8 +13,8 @@ import {
   type Scenario,
 } from "../../examples/model-patterns/replay.js";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/autosave/autosave.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/autosave/autosave.ideal";
 const spec = "examples/model-patterns/autosave/spec.json";
 const ruleId = "AUTOSAVE-STALE-RESPONSE";
 const tabs = ["Tab0", "Tab1"] as const;

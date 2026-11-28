@@ -7,8 +7,8 @@ import {
 } from "../../examples/model-patterns/replay.js";
 
 type Command = { kind: "start" | "retry" | "finish" };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/subscriptions/retry-observation.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/subscriptions/retry-observation.ideal";
 
 async function notifications(t: TestContext, exposeRetry: boolean) {
   let phase: "Ready" | "Pending" | "Done" = "Ready";

@@ -15,8 +15,8 @@ type Issue = "Duplicate" | "Uncloneable" | "Blocked" | "Valid";
 type Command = { kind: "send"; issue: Issue } | { kind: "poll" };
 type Fault = "none" | "detach-too-soon" | "enqueue-too-soon";
 type Value = "LeftByte" | "RightByte";
-const model = "examples/model-patterns/worker-transfer/rejection.model";
-const checker = "crates/rcheck/target/debug/rcheck";
+const model = "examples/model-patterns/worker-transfer/rejection.ideal";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 
 function openPort(t: TestContext, issue: Issue, fault: Fault) {
   const left = new Uint8Array([61]);

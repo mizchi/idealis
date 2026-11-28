@@ -76,7 +76,7 @@ function bundledModel(path: string): string {
 export function browserHistoryPattern(
   history: BrowserHistory,
   routes: Readonly<Record<HistoryRoute, Screen>>,
-  model = bundledModel("browser/project.rmodel.json"),
+  model = bundledModel("browser/model.project.json"),
 ): ConnectedPattern<Navigation<HistoryRoute>> {
   return {
     scenario: {
@@ -100,7 +100,7 @@ export function browserHistoryPattern(
 /** Observe the order of three callbacks scheduled inside a single I/O callback. */
 export function nodeIoBatchPattern(
   batch: IoBatch,
-  model = bundledModel("node-event-loop/io-batch.model"),
+  model = bundledModel("node-event-loop/io-batch.ideal"),
 ): ConnectedPattern<DrainIoBatch> {
   return {
     scenario: ioBatchScenario(model, { calls: { $sequence: [] } }),
@@ -111,7 +111,7 @@ export function nodeIoBatchPattern(
 /** Observe the two queue drains around next ticks registered from I/O and a microtask. */
 export function nodeNextTickPattern(
   batch: IoBatch<NextTickCallback>,
-  model = bundledModel("node-event-loop/next-tick.model"),
+  model = bundledModel("node-event-loop/next-tick.ideal"),
 ): ConnectedPattern<DrainIoBatch> {
   return {
     scenario: ioBatchScenario(model, {
@@ -137,7 +137,7 @@ function ioBatchScenario(
 export function objectStorePattern(
   store: ObjectStore,
   testKey: string,
-  model = bundledModel("object-store/project.rmodel.json"),
+  model = bundledModel("object-store/model.project.json"),
 ): ConnectedPattern<ObjectCommand> {
   return {
     scenario: {

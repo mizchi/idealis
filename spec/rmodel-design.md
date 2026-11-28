@@ -1,4 +1,4 @@
-# rmodel の文法設計仕様
+# Idealis の文法設計仕様
 
 <!-- Generated from spec/rmodel-design.pkl by idealis-spec (plan 0092). Do not edit. -->
 
@@ -260,14 +260,14 @@
 順序付きの宣言ファイルから構成し、型名と操作名を一つのモデルで解決する。
 
 - id: `linked-model`
-- コード: `crates/rcheck/src/project.rs` の `load_source`
+- コード: `crates/idealis-check/src/project.rs` の `load_source`
 
 ### ガードの境界（guard boundary）
 
 隣接する整数入力または一遷移の差で、同じ操作を受け付けるかどうかが変わる、到達可能な二例の組。
 
 - id: `guard-boundary`
-- コード: `crates/rcheck/src/conform/boundaries.rs` の `boundary_cases`
+- コード: `crates/idealis-check/src/conform/boundaries.rs` の `boundary_cases`
 
 ### 残高（balance）
 
@@ -302,7 +302,7 @@
 実装の処理に渡す前に、入力の型、現在のガード、予測した状態の宣言と不変条件を検査する。
 
 - id: `command-validation`
-- コード: `crates/rcheck/src/conform/validation.rs` の `dispatch`
+- コード: `crates/idealis-check/src/conform/validation.rs` の `dispatch`
 
 ### 有限列（bounded sequence）
 
@@ -337,8 +337,8 @@
 - `evals/experiments/rprob/goal.py` の `score` を、`evals/experiments/rprob/test_goal.py` の `test_measurement_is_bound_to_pinned_inputs` がモデル `spec/models/measurement-gate.model` と照合する
 - `crates/idealis-spec/src/comparison.rs` の `compare_receipts` を、`crates/idealis-spec/tests/comparison.rs` の `real_checker_results_feed_adoption` がモデル `spec/models/checker-comparison.model` と照合する
 - `crates/idealis-spec/src/adoption.rs` の `assess_adoption` を、`crates/idealis-spec/tests/adoption.rs` の `a_late_result_cannot_authorize_the_current_candidate` がモデル `spec/models/evidence-adoption.model` と照合する
-- `crates/idealis-syntax/src/syntax.rs` の `action` を、`crates/rmodel/tests/behavior.rs` の `behavior_has_the_same_guard_parallel_updates_and_frame_as_action` がモデル `spec/models/rmodel-behavior.model` と照合する
-- `crates/idealis-semantics/src/reference.rs` の `steps` を、`crates/rmodel/tests/calibration.rs` の `the_next_revision_must_collect_new_evidence` がモデル `spec/models/rmodel-calibration.model` と照合する
+- `crates/idealis-syntax/src/syntax.rs` の `action` を、`crates/idealis-model/tests/behavior.rs` の `behavior_has_the_same_guard_parallel_updates_and_frame_as_action` がモデル `spec/models/rmodel-behavior.model` と照合する
+- `crates/idealis-semantics/src/reference.rs` の `steps` を、`crates/idealis-model/tests/calibration.rs` の `the_next_revision_must_collect_new_evidence` がモデル `spec/models/rmodel-calibration.model` と照合する
 
 ## rule
 
@@ -432,7 +432,7 @@
 
 個体型の宣言を型と用語の正本とする。同じ名前を二重に宣言した場合や存在しない型を参照した場合は拒否する。複数行の用語説明と翻訳は IR、Rust と TypeScript の型、全言語の用語集へ引き継ぐ。
 
-- 形式化しない理由: 名前解決と生成物は rmodel の entity.rs、IR の往復は rcheck の ir.rs、生成した型を使う入出金の照合は rcheck の domain.rs と typescript.rs で検査する。
+- 形式化しない理由: 名前解決と生成物は idealis-syntax の entity 宣言、IR の往復は idealis-check の ir.rs、生成した型を使う入出金の照合は idealis-check の domain.rs と typescript.rs で検査する。
 
 ### RMODEL-DEAD-CODE
 

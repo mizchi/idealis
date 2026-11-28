@@ -16,8 +16,8 @@ type Command =
   | { kind: "close" | "receiveClose" | "finish" };
 type Fault = "end-on-tail" | "skip-prefix" | null;
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/stream-terminal/split-terminal.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/stream-terminal/split-terminal.ideal";
 
 function openReceiver(t: TestContext, fault: Fault) {
   const channel = () => {

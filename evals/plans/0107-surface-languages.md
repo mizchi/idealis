@@ -14,7 +14,7 @@
 
 ## 書き方（7つ）
 
-1. rmodel（今の核の構文）: `rmodel::parse`と参照評価器で検査する。
+1. rmodel（今の核の構文）: `idealis_model::parse`と参照評価器で検査する。
 2. Quint（本物）: `quint typecheck`と、できれば`quint verify`/`run`。
 3. OCaml: 小さなDSLのmoduleへの埋め込み。`ocaml`で型検査する。
 4. Isabelle/HOL: datatype・record・遷移関係の定義と、性質の命題（証明は求めない、`sorry`可）。`isabelle build`で検査する。

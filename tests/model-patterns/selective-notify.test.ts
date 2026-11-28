@@ -8,8 +8,8 @@ import {
   recordReplay,
 } from "../../examples/model-patterns/replay.js";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/wait-notify/shared-queue.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/wait-notify/shared-queue.ideal";
 type Waiter = "Left" | "Right";
 type Command =
   | { kind: "park" | "publish" | "resume"; worker: Waiter }

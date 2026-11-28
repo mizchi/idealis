@@ -7,8 +7,8 @@ from pathlib import Path
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[3]
-RCHECK = ROOT / "crates/rcheck/target/debug/rcheck"
-EMIT = ROOT / "crates/rmodel/target/debug/examples/emit"
+RCHECK = ROOT / "crates/idealis-check/target/debug/idealis-check"
+EMIT = ROOT / "crates/idealis-model/target/debug/examples/emit"
 FIXTURES = ROOT / "fixtures/rcheck/linked"
 
 EMPTY = """model EmptyInit

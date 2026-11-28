@@ -21,8 +21,8 @@ type Command =
   | { kind: "submit"; writer: Writer; request: Request; body: Body };
 type Fault = "owner-first" | "writer-scoped" | "key-only";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/crash-recovery/recovery-receipt.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/crash-recovery/recovery-receipt.ideal";
 
 async function openRecovery(t: TestContext, fault?: Fault) {
   const dir = await mkdtemp(join(tmpdir(), "idealis-recovery-receipt-"));

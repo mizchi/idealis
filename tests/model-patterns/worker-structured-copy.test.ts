@@ -11,8 +11,8 @@ type Command = { kind: "send" | "editReceiver" | "editSender" };
 type Fault = "none" | "split-fields" | "merge-equal-objects";
 type Field = "Left" | "Right" | "Twin";
 type Value = "Original" | "Edited";
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/worker-transfer/shared-references.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/worker-transfer/shared-references.ideal";
 const fields = ["Left", "Right", "Twin"] as const;
 
 function openWorker(t: TestContext, fault: Fault) {

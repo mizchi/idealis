@@ -15,8 +15,8 @@ type Command =
   | { kind: "compose" | "abortWithReentry"; first: Source }
   | { kind: "abort"; source: Source };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/cancellation/abort-composition.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/cancellation/abort-composition.ideal";
 const sources = ["Left", "Right"] as const;
 const other = { Left: "Right", Right: "Left" } as const;
 const event = { Left: "LeftEvent", Right: "RightEvent" } as const;

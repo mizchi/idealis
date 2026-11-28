@@ -14,8 +14,8 @@ type Command = {
   readonly kind: "crash" | "replace" | "startWaiting" | "finish";
 };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/cancellation/worker-pool-crash.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/cancellation/worker-pool-crash.ideal";
 
 function spawn(t: TestContext, generation: Generation) {
   const worker = new Worker(

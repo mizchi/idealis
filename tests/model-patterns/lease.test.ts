@@ -11,8 +11,8 @@ type Command = {
   kind: "offer" | "timeout" | "accept" | "release";
   client: Client;
 };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/lease/handoff.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/lease/handoff.ideal";
 
 test("a timed-out acquisition occupied its reservation before another offer", async () => {
   const offered = await reachableScenario<Command>(

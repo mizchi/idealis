@@ -10,8 +10,8 @@ type Command =
   | { kind: "publish"; visible: boolean; sent: boolean }
   | { kind: "acknowledge" | "wait" };
 type Policy = "Strict" | "Optional";
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/subscriptions/notice-history.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/subscriptions/notice-history.ideal";
 
 async function notifications(t: TestContext, policy: Policy) {
   let phase: "Ready" | "Published" | "Done" = "Ready";

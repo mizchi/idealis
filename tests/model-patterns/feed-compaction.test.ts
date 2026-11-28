@@ -14,8 +14,8 @@ type Command = {
 };
 type Fault = "none" | "ignore-gap" | "watermark-from-live-source";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/lease/feed-compaction.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/lease/feed-compaction.ideal";
 
 function sourceState(source: DatabaseSync) {
   const row = source

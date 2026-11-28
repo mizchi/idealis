@@ -227,13 +227,13 @@ fn design_drift_manifest(root: &Path) -> serde_json::Value {
 }
 
 fn reference(root: &Path, path: &str, name: &str) -> &'static str {
-    let model = rmodel::parse(&std::fs::read_to_string(root.join(path)).unwrap()).unwrap();
+    let model = idealis_model::parse(&std::fs::read_to_string(root.join(path)).unwrap()).unwrap();
     reference_verdict(&model, path, name)
 }
 
-fn reference_verdict(model: &rmodel::Model, path: &str, name: &str) -> &'static str {
-    use rmodel::reference::Outcome;
-    let verdict = rmodel::reference::evaluate(model, 2_000_000)
+fn reference_verdict(model: &idealis_model::Model, path: &str, name: &str) -> &'static str {
+    use idealis_model::reference::Outcome;
+    let verdict = idealis_model::reference::evaluate(model, 2_000_000)
         .into_iter()
         .find(|verdict| verdict.check == name)
         .unwrap_or_else(|| panic!("{path}: no check {name}"));
@@ -248,7 +248,7 @@ fn reference_verdict(model: &rmodel::Model, path: &str, name: &str) -> &'static 
 }
 
 fn engines(root: &Path, path: &str, name: &str) -> Vec<(&'static str, String)> {
-    let model = rmodel::parse(&std::fs::read_to_string(root.join(path)).unwrap()).unwrap();
+    let model = idealis_model::parse(&std::fs::read_to_string(root.join(path)).unwrap()).unwrap();
     if model.transitions.iter().any(|check| check.name == name) {
         return vec![("rmodel", reference_verdict(&model, path, name).to_owned())];
     }
@@ -257,8 +257,8 @@ fn engines(root: &Path, path: &str, name: &str) -> Vec<(&'static str, String)> {
         .iter()
         .find(|check| check.name == name)
         .unwrap();
-    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
-    let label = rmodel::alloy_label(name);
+    let alloy = ralloy::Model::parse(&idealis_model::to_alloy(&model)).unwrap();
+    let label = idealis_model::alloy_label(name);
     let index = alloy
         .commands()
         .iter()
@@ -271,7 +271,7 @@ fn engines(root: &Path, path: &str, name: &str) -> Vec<(&'static str, String)> {
         ralloy::Status::NoInstance => "unreachable",
         ralloy::Status::Unknown => "unknown",
     };
-    let (source, config) = rmodel::to_tla(&model, name).unwrap();
+    let (source, config) = idealis_model::to_tla(&model, name).unwrap();
     let result = idealis_core::compile_tla_with_options(
         &source,
         &config,
@@ -289,10 +289,10 @@ fn engines(root: &Path, path: &str, name: &str) -> Vec<(&'static str, String)> {
     .unwrap();
     let found = result.violation.is_some();
     let explicit = match (result.status.as_str(), check.kind, found) {
-        ("complete", rmodel::CheckKind::Invariant, _) => "holds",
-        ("complete", rmodel::CheckKind::Reachable, _) => "unreachable",
-        (_, rmodel::CheckKind::Invariant, true) => "violated",
-        (_, rmodel::CheckKind::Reachable, true) => "reachable",
+        ("complete", idealis_model::CheckKind::Invariant, _) => "holds",
+        ("complete", idealis_model::CheckKind::Reachable, _) => "unreachable",
+        (_, idealis_model::CheckKind::Invariant, true) => "violated",
+        (_, idealis_model::CheckKind::Reachable, true) => "reachable",
         (other, _, _) => other,
     };
     vec![("SAT", sat.to_owned()), ("rtlc", explicit.to_owned())]

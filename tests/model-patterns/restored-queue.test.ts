@@ -20,8 +20,8 @@ type Checkpoint = {
 };
 type State = { saved: Checkpoint; restored: Checkpoint | null };
 type Command = { kind: "restart" };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/crash-recovery/restored-queue.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/crash-recovery/restored-queue.ideal";
 
 test("SQLite recovery preserves the queue order and retry counter from the discovered checkpoint", async (t) => {
   const scenario = await reachableScenario<Command>(
@@ -105,7 +105,7 @@ test("SQLite recovery preserves the queue order and retry counter from the disco
 test("SQLite restart copies the stored queue and consumes one available retry", async () => {
   const scenario = await reachableScenario<Command>(
     checker,
-    "examples/model-patterns/crash-recovery/restart-budget.model",
+    "examples/model-patterns/crash-recovery/restart-budget.ideal",
     "RestartsFullQueue",
     { checker: "rprob" },
   );

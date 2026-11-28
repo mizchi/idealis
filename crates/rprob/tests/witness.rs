@@ -1,6 +1,6 @@
-use rmodel::reference::{Data, Outcome, Runtime};
+use idealis_model::reference::{Data, Outcome, Runtime};
 
-const BARRIER: &str = include_str!("../../../examples/model-patterns/worker-barrier/reuse.model");
+const BARRIER: &str = include_str!("../../../examples/model-patterns/worker-barrier/reuse.ideal");
 
 #[test]
 fn barrier_witness_replays_a_five_step_violation_with_its_arguments() {
@@ -18,7 +18,7 @@ fn check_barrier(baseline: &str) {
         "if { generation != R1 }",
     );
     assert_ne!(source, baseline);
-    let model = rmodel::parse(&source).unwrap();
+    let model = idealis_model::parse(&source).unwrap();
     let result = rprob::witness(&model, "CannotPassCurrentRound", 20_000).unwrap();
     assert!(result.complete);
     assert_eq!(result.outcome, Outcome::Violated { depth: 5 });
@@ -47,7 +47,8 @@ fn check_barrier(baseline: &str) {
                     .map(|(_, data)| data.clone())
             })
             .unwrap();
-        let Some(rmodel::reference::Next::State(next)) = runtime.execute(&config, &state, &bound)
+        let Some(idealis_model::reference::Next::State(next)) =
+            runtime.execute(&config, &state, &bound)
         else {
             panic!("unreplayable step {step}");
         };
@@ -61,7 +62,7 @@ fn check_barrier(baseline: &str) {
     assert!(!result.complete);
     assert_eq!(result.outcome, Outcome::Unknown);
     assert!(result.witness.is_none());
-    let normal = rmodel::parse(baseline).unwrap();
+    let normal = idealis_model::parse(baseline).unwrap();
     let result = rprob::witness(&normal, "CannotPassCurrentRound", 20_000).unwrap();
     assert_eq!(result.outcome, Outcome::Holds);
     assert!(result.witness.is_none());
@@ -69,7 +70,7 @@ fn check_barrier(baseline: &str) {
 
 #[test]
 fn later_configurations_can_shorten_an_already_found_path() {
-    let model = rmodel::parse(
+    let model = idealis_model::parse(
         "model Configured
          enum Mode = Longer | Shorter
          enum Level = Start | Middle | End
@@ -105,7 +106,7 @@ fn later_configurations_can_shorten_an_already_found_path() {
 
 #[test]
 fn declaration_witness_keeps_all_assignments_from_the_invalid_step() {
-    let model = rmodel::parse(
+    let model = idealis_model::parse(
         "model Broken
          enum Entry = A
          var required: one Entry
@@ -115,7 +116,7 @@ fn declaration_witness_keeps_all_assignments_from_the_invalid_step() {
          scope steps = 2",
     )
     .unwrap();
-    let result = rprob::witness(&model, rmodel::DECLARATIONS, 100).unwrap();
+    let result = rprob::witness(&model, idealis_model::DECLARATIONS, 100).unwrap();
     assert_eq!(result.outcome, Outcome::Violated { depth: 1 });
     let path = result.witness.unwrap();
     assert_eq!(path.commands[0].action, "breakState");
@@ -125,7 +126,7 @@ fn declaration_witness_keeps_all_assignments_from_the_invalid_step() {
 
 #[test]
 fn a_single_word_toggle_keeps_the_selected_atom() {
-    let model = rmodel::parse(
+    let model = idealis_model::parse(
         "model Members
          enum Item = A | B
          var picked: set Item

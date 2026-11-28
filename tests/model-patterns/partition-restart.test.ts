@@ -18,8 +18,8 @@ type Row = { readonly key: string; readonly checkpoint: Checkpoint };
 type Response = { readonly attempt: Attempt; readonly row: Row };
 type Fault = "by-row" | "by-checkpoint";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/subscriptions/partition-restart.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/subscriptions/partition-restart.ideal";
 
 function openRecovery(t: TestContext, fault?: Fault) {
   const snapshots: Record<Checkpoint, Row> = {

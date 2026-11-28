@@ -24,8 +24,8 @@ type Command =
       readonly source: Origin;
     };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/lease/resync-source.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/lease/resync-source.ideal";
 
 async function endpoint(t: TestContext, initial: Snapshot, next?: Snapshot) {
   const server = createServer((request, response) => {

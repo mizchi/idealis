@@ -6,8 +6,8 @@ import {
   type ObservationAdapter,
 } from "../../examples/model-patterns/replay.js";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/semaphore/cancel-reservation.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/semaphore/cancel-reservation.ideal";
 
 type Waiter = "First" | "Second";
 type Client = "Owner" | Waiter;

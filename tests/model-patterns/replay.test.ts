@@ -7,9 +7,9 @@ import {
   type Scenario,
 } from "../../examples/model-patterns/replay.js";
 
-const rcheck = "crates/rcheck/target/debug/rcheck";
+const checkerPath = "crates/idealis-check/target/debug/idealis-check";
 const scenario: Scenario<{ kind: "push"; destination: "Catalog" }> = {
-  model: "examples/model-patterns/browser/project.rmodel.json",
+  model: "examples/model-patterns/browser/model.project.json",
   config: { start: "Home" },
   initial: { current: "Home", nextRoute: null, atNext: false },
   commands: [{ kind: "push", destination: "Catalog" }],
@@ -18,7 +18,7 @@ const project = (state: Readonly<Record<string, unknown>>) => state.current;
 
 test("recording preserves earlier observations if the adapter reuses an object", async () => {
   const observation = { current: "Home" };
-  const result = await recordReplay(rcheck, scenario, {
+  const result = await recordReplay(checkerPath, scenario, {
     async apply(command) {
       observation.current = command.destination;
     },
@@ -37,7 +37,7 @@ test("recording preserves earlier observations if the adapter reuses an object",
 test("recording propagates an environment error instead of returning a mismatch", async () => {
   const failure = new Error("connection closed");
   await assert.rejects(
-    recordReplay(rcheck, scenario, {
+    recordReplay(checkerPath, scenario, {
       async apply() {
         throw failure;
       },
@@ -55,7 +55,7 @@ test("a saved observation reproduces the same mismatch without the environment",
   let mismatch: unknown;
   await assert.rejects(
     replay(
-      rcheck,
+      checkerPath,
       scenario,
       {
         async apply() {},
@@ -76,20 +76,20 @@ test("a saved observation reproduces the same mismatch without the environment",
   assert.deepEqual(observations, ["Home", "Home"]);
   const saved = JSON.parse(JSON.stringify(observations)) as unknown[];
   await assert.rejects(
-    replayObservations(rcheck, scenario, saved, project),
+    replayObservations(checkerPath, scenario, saved, project),
     mismatch as Error,
   );
 });
 
 test("offline replay requires the initial observation and one per command", async () => {
-  await replayObservations(rcheck, scenario, ["Home", "Catalog"], project);
+  await replayObservations(checkerPath, scenario, ["Home", "Catalog"], project);
   await assert.rejects(
-    replayObservations(rcheck, scenario, ["Home"], project),
+    replayObservations(checkerPath, scenario, ["Home"], project),
     /missing observation at step 1/,
   );
   await assert.rejects(
     replayObservations(
-      rcheck,
+      checkerPath,
       scenario,
       ["Home", "Catalog", "Detail"],
       project,

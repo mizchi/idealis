@@ -27,10 +27,10 @@ import {
   commandFromJson,
   decodeNat,
   stateToJson,
-} from "../rcheck/generated/checkout.js";
+} from "../idealis-check/generated/checkout.js";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/checkout/checkout.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/checkout/checkout.ideal";
 const run = promisify(execFile);
 
 function createCheckout(chargeDuplicate: boolean): Domain {
@@ -149,7 +149,7 @@ test(
     ] = await Promise.all([
       run(checker, ["generate", model, "glossary"]),
       run(checker, ["generate", model, "typescript"]),
-      readFile("tests/rcheck/generated/checkout.ts", "utf8"),
+      readFile("tests/idealis-check/generated/checkout.ts", "utf8"),
       reachableScenario<Command>(checker, model, "CanCapture", {
         checker: "rprob",
       }),

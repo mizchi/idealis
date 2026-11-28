@@ -22,8 +22,8 @@ type Fault =
   | "assume-failure";
 type Outcome = "Pending" | "Unknown" | "Done" | "Failed";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/cancellation/worker-retry.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/cancellation/worker-retry.ideal";
 
 function runWorker(
   t: TestContext,

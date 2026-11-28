@@ -19,8 +19,8 @@ type Command =
     };
 type Fault = "none" | "replace-document" | "ignore-conflict" | "partial-commit";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/offline-merge/merge.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/offline-merge/merge.ideal";
 
 test("offline edits merge against the saved base and reject conflicting updates atomically", async (t) => {
   const base = await reachableScenario<Command>(

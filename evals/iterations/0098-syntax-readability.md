@@ -1,6 +1,6 @@
 # 0098: 文法の候補を、意味と結果が読み取れるかで評価するループ
 
-[plan](../plans/0098-syntax-readability.md)のとおり、核のモデルをQuint風のテキストに出力するprinter（`rmodel::quint_like`、v0）と、参照評価器から問いと正解を作る仕組み（`examples/readability.rs`）を作った。dev（seed 300〜の空でない10モデル、42問）を、文脈を持たないhaikuのsubagent 2体に、文法の説明なしで読ませた。
+[plan](../plans/0098-syntax-readability.md)のとおり、核のモデルをQuint風のテキストに出力するprinter（`idealis_model::quint_like`、v0）と、参照評価器から問いと正解を作る仕組み（`examples/readability.rs`）を作った。dev（seed 300〜の空でない10モデル、42問）を、文脈を持たないhaikuのsubagent 2体に、文法の説明なしで読ませた。
 
 ## v0の結果
 

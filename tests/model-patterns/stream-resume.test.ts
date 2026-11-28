@@ -22,8 +22,8 @@ type Command = {
     | "disconnect";
 };
 type Fault = "none" | "resume-from-sent" | "duplicate-boundary";
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/stream-terminal/resume.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/stream-terminal/resume.ideal";
 
 test(
   "HTTP streams resume from the durable offset across two disconnect windows",

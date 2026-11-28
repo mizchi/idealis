@@ -61,7 +61,7 @@ test("backpressure keeps order when a blocked write is cancelled", async () => {
     const first = survivors[0];
     assert.ok(first);
     const scenario: Scenario<Command> = {
-      model: "examples/model-patterns/backpressure/channel.model",
+      model: "examples/model-patterns/backpressure/channel.ideal",
       config: {},
       initial: {
         buffer: "First",
@@ -87,38 +87,44 @@ test("backpressure keeps order when a blocked write is cancelled", async () => {
       const controllers = new Map<Item, AbortController>();
       const results = new Map<Item, Result | "Waiting">();
       const delivered: Item[] = [];
-      const run = replay("crates/rcheck/target/debug/rcheck", scenario, {
-        async apply(command) {
-          if (command.kind === "write") {
-            const controller = new AbortController();
-            controllers.set(command.item, controller);
-            results.set(command.item, "Waiting");
-            void slot.write(command.item, controller.signal).then((result) => {
-              results.set(command.item, result);
-            });
-          } else if (command.kind === "cancel") {
-            controllers.get(command.item)?.abort();
-          } else {
-            delivered.push(slot.take());
-          }
+      const run = replay(
+        "crates/idealis-check/target/debug/idealis-check",
+        scenario,
+        {
+          async apply(command) {
+            if (command.kind === "write") {
+              const controller = new AbortController();
+              controllers.set(command.item, controller);
+              results.set(command.item, "Waiting");
+              void slot
+                .write(command.item, controller.signal)
+                .then((result) => {
+                  results.set(command.item, result);
+                });
+            } else if (command.kind === "cancel") {
+              controllers.get(command.item)?.abort();
+            } else {
+              delivered.push(slot.take());
+            }
+          },
+          async observe() {
+            return {
+              buffer: slot.next,
+              outcome: Object.fromEntries(
+                requests.map((item) => [item, results.get(item) ?? null]),
+              ),
+              delivered: [...delivered].sort(),
+            };
+          },
+          project(state) {
+            return {
+              buffer: state.buffer,
+              outcome: state.outcome,
+              delivered: [...(state.delivered as Item[])].sort(),
+            };
+          },
         },
-        async observe() {
-          return {
-            buffer: slot.next,
-            outcome: Object.fromEntries(
-              requests.map((item) => [item, results.get(item) ?? null]),
-            ),
-            delivered: [...delivered].sort(),
-          };
-        },
-        project(state) {
-          return {
-            buffer: state.buffer,
-            outcome: state.outcome,
-            delivered: [...(state.delivered as Item[])].sort(),
-          };
-        },
-      });
+      );
       if (keepCancelled) {
         const step = position === 0 ? 5 : 6 + position;
         await assert.rejects(

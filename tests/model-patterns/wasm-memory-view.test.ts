@@ -11,8 +11,8 @@ type Command =
   | { kind: "grow"; delta: "Zero" | "One" };
 type Fault = "none" | "keep-detached" | "wrong-offset";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/wasm-memory/view-after-grow.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/wasm-memory/view-after-grow.ideal";
 const page = 65_536;
 const address = { Payload: 16, Adjacent: 17 } as const;
 

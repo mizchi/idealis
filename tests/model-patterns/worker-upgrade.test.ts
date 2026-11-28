@@ -18,8 +18,8 @@ type Command = {
   worker: (typeof names)[number];
 };
 type Local = { basis: number | null; result: "Applied" | "Stale" | null };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/worker-locks/upgrade.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/worker-locks/upgrade.ideal";
 
 function startLock(t: TestContext, retainRead: boolean, skipRecheck: boolean) {
   const shared = new Int32Array(

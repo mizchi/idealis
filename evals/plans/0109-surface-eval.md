@@ -13,7 +13,7 @@
 ## 最初の軸（v1）
 
 1. **ddd**（rubric）: DDDの概念（同一性を持つentity、値オブジェクト、payload付きの直和、集約の状態、command、不変条件、多態のentity、設定と前提）を、0107の書き手の報告から直接1・回避0.5・書けない0で数える。
-2. **formal**（automatic + rubric）: 核のIRへのadapterがあるか、IRへ写せた性質の割合と、roracleでrmodelと一致した割合（`just rcheck-adapters`の観測）、0107で答えを出せた検査の種類（完全な探索・証明・SMT・無作為のsimulation）。
+2. **formal**（automatic + rubric）: 核のIRへのadapterがあるか、IRへ写せた性質の割合と、roracleでrmodelと一致した割合（`just idealis-check-adapters`の観測）、0107で答えを出せた検査の種類（完全な探索・証明・SMT・無作為のsimulation）。
 3. **machine**（automatic + rubric）: 解析できる木を残すか、toolchainの検査が今も通るか（各候補の検査commandを再実行）。
 4. **human**（agent、代理）: コメントを除いた各候補の題材を、構文の説明なしで新しい読み手（haiku）に渡し、振る舞いの問いに答えさせた正答率。本物の人間の読み手ではない。
 5. **cost**（automatic）: 空行とコメントを除いた行数、検査commandの所要時間。

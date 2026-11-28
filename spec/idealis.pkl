@@ -8,7 +8,7 @@ import "pkl:json"
 local ralloy = "crates/ralloy/src/lib.rs"
 local rtlc = "crates/rtlc/src/safety.rs"
 local roracle = "crates/roracle/src/report.rs"
-local rmodel = "crates/idealis-syntax/src/syntax.rs"
+local idealisSyntax = "crates/idealis-syntax/src/syntax.rs"
 local report = "spec/models/roracle-report.model"
 local compare = "spec/models/roracle-compare.model"
 local toolchain = (new json.Parser {}).parse(read("toolchain.json").text).spec
@@ -312,10 +312,10 @@ spec: s.Spec = new {
       group = "モデル"
       name = s.text("設定", "configuration")
       definition = s.text(
-        "状態とともに変わらない関係（rmodel の rel）。solver はすべての候補を考え、明示状態の探索は初期状態で列挙する。",
-        "Relations that do not change with the state (rel in rmodel). A solver considers every candidate; the explicit search enumerates them in the initial states.",
+        "状態とともに変わらない関係（Idealis の rel）。solver はすべての候補を考え、明示状態の探索は初期状態で列挙する。",
+        "Relations that do not change with the state (rel in Idealis). A solver considers every candidate; the explicit search enumerates them in the initial states.",
       )
-      code { s.code(rmodel, "Relation") }
+      code { s.code(idealisSyntax, "Relation") }
     }
     new {
       id = "model.state"
@@ -323,10 +323,10 @@ spec: s.Spec = new {
       group = "モデル"
       name = s.text("状態", "state")
       definition = s.text(
-        "action によって変わる関係（rmodel の var、Alloy の var field）の、ある時点の値。",
-        "The value at one point in time of the relations actions change (var in rmodel, var fields in Alloy).",
+        "action によって変わる関係（Idealis の var、Alloy の var field）の、ある時点の値。",
+        "The value at one point in time of the relations actions change (var in Idealis, var fields in Alloy).",
       )
-      code { s.code(rmodel, "var") }
+      code { s.code(idealisSyntax, "var") }
     }
     new {
       id = "model.action"
@@ -337,7 +337,7 @@ spec: s.Spec = new {
         "状態を変える遷移。条件と代入を持ち、代入しない状態は変わらない（暗黙の frame）。",
         "A transition that changes the state, with guards and assignments; state it does not assign is unchanged (the implicit frame).",
       )
-      code { s.code(rmodel, "Action") }
+      code { s.code(idealisSyntax, "Action") }
     }
     new {
       id = "model.trace"
@@ -371,7 +371,7 @@ spec: s.Spec = new {
         "検査する atom の数・整数の bit 幅・steps などの範囲。判定はすべてこの範囲についてのもの。",
         "The range checked: atom counts, integer bit width, steps. Every verdict is about this range.",
       )
-      code { s.code(ralloy, "Scope"); s.code(rmodel, "Scope") }
+      code { s.code(ralloy, "Scope"); s.code(idealisSyntax, "Scope") }
     }
     for (term in toolchain.terms) {
       new s.VocabularyTerm {

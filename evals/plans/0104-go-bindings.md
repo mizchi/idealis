@@ -2,7 +2,7 @@
 
 [0102](../iterations/0102-domain-bindings.md)のRust・TypeScriptに続き、mizchiの依頼でGoのbindingsを生成する。JSONの形は0102の契約と同じ。
 
-## 生成するもの（`rmodel::bindings::go(model, package)`）
+## 生成するもの（`idealis_model::bindings::go(model, package)`）
 
 - sigは`type User uint8`（JSONは`"User0"`）、enumは`type Currency string`の定数、Boolは`bool`、Intは`int64`、recordはstruct、和のsortは子の型が満たすinterface。
 - 集合は`Set[T]`（`map[T]struct{}`）、`lone`は`*T`、`one`は`T`。二項関係は`map[A]Set[B]`・`map[A]B`（`lone`は鍵がないとき空）。

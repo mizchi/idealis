@@ -7,8 +7,8 @@ import {
 } from "../../examples/model-patterns/replay.js";
 
 type Command = { kind: "advanceFloor" | "collect" };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/offline-merge/batch-retention.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/offline-merge/batch-retention.ideal";
 
 test("batch expiry removes both older receipts and retains the cutoff row", async (t) => {
   const scenario = await reachableScenario<Command>(

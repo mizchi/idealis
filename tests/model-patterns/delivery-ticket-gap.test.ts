@@ -15,8 +15,8 @@ type Command =
   | ({ kind: "arrive" } & Frame);
 type Fault = "count-only" | "ignore-epoch" | null;
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/subscriptions/delivery-ticket-gap.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/subscriptions/delivery-ticket-gap.ideal";
 const positions = ["One", "Two"] as const;
 
 function openDelivery(t: TestContext, fault: Fault) {

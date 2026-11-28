@@ -18,8 +18,8 @@ type Command =
     };
 type Failure = "WorkFailed" | "LeftCleanup" | "RightCleanup";
 const children = ["Left", "Right"] as const;
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/cancellation/task-group-cleanup.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/cancellation/task-group-cleanup.ideal";
 
 test("a task group reports the work failure and every finally failure after both children exit", async (t) => {
   const base = await reachableScenario<Command>(

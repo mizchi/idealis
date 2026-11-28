@@ -20,8 +20,8 @@ type Command =
       readonly kind: "fail" | "acceptCancel" | "exitCleanup";
       readonly child: Child;
     };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/cancellation/task-group-cause.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/cancellation/task-group-cause.ideal";
 const children = ["Left", "Right"] as const;
 
 test("a task group retains the first cause across parent cancellation and child failure", async (t) => {

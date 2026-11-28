@@ -12,7 +12,7 @@ type Command =
   | { readonly kind: "resolve"; readonly completed: Generation };
 
 const scenario: Scenario<Command> = {
-  model: "examples/model-patterns/cache-refresh/cache.model",
+  model: "examples/model-patterns/cache-refresh/cache.ideal",
   config: {},
   initial: {
     generation: "Old",
@@ -72,57 +72,61 @@ test("cache readers share a promise and late completion cannot replace the new g
         readers.map((reader) => [reader, values.get(reader) ?? null]),
       );
     }
-    const run = replay("crates/rcheck/target/debug/rcheck", scenario, {
-      async apply(command) {
-        if (command.kind === "invalidate") {
-          generation = "New";
-          cache = null;
-        } else if (command.kind === "read") {
-          const reader = command.reader;
-          if (cache !== null) {
-            visible.set(reader, cache);
-            return;
+    const run = replay(
+      "crates/idealis-check/target/debug/idealis-check",
+      scenario,
+      {
+        async apply(command) {
+          if (command.kind === "invalidate") {
+            generation = "New";
+            cache = null;
+          } else if (command.kind === "read") {
+            const reader = command.reader;
+            if (cache !== null) {
+              visible.set(reader, cache);
+              return;
+            }
+            visible.delete(reader);
+            waiting.set(reader, generation);
+            void load(generation).promise.then((answer) => {
+              waiting.delete(reader);
+              if (answer === generation) visible.set(reader, answer);
+            });
+          } else {
+            const active = jobs.get(command.completed);
+            assert.ok(active);
+            jobs.delete(command.completed);
+            for (const job of active) job.resolve(command.completed);
+            await Promise.all(active.map((job) => job.promise));
           }
-          visible.delete(reader);
-          waiting.set(reader, generation);
-          void load(generation).promise.then((answer) => {
-            waiting.delete(reader);
-            if (answer === generation) visible.set(reader, answer);
-          });
-        } else {
-          const active = jobs.get(command.completed);
-          assert.ok(active);
-          jobs.delete(command.completed);
-          for (const job of active) job.resolve(command.completed);
-          await Promise.all(active.map((job) => job.promise));
-        }
+        },
+        async observe() {
+          return {
+            generation,
+            cache,
+            inflight: [...jobs.keys()].sort(),
+            waiting: slots(waiting),
+            visible: slots(visible),
+            starts: Object.fromEntries(
+              epochs.map((epoch) => [
+                epoch,
+                issued[epoch] === 0
+                  ? null
+                  : issued[epoch] === 1
+                    ? "Once"
+                    : "Repeated",
+              ]),
+            ),
+          };
+        },
+        project(state) {
+          return {
+            ...state,
+            inflight: [...(state.inflight as Generation[])].sort(),
+          };
+        },
       },
-      async observe() {
-        return {
-          generation,
-          cache,
-          inflight: [...jobs.keys()].sort(),
-          waiting: slots(waiting),
-          visible: slots(visible),
-          starts: Object.fromEntries(
-            epochs.map((epoch) => [
-              epoch,
-              issued[epoch] === 0
-                ? null
-                : issued[epoch] === 1
-                  ? "Once"
-                  : "Repeated",
-            ]),
-          ),
-        };
-      },
-      project(state) {
-        return {
-          ...state,
-          inflight: [...(state.inflight as Generation[])].sort(),
-        };
-      },
-    });
+    );
     if (fault === "split") {
       await assert.rejects(
         run,

@@ -13,4 +13,4 @@ TypeSafe の `jev-1.14.0` に、一回につき片方の構文で三問を出し
 
 全体で正答が増え、題材ごとの後退がなかったため、事前の基準では代理読み手の改善と判定した。差は一回答で、同じモデルによる選択肢を巡回させた比較。人の読みやすさは未測定。文法の選定では `behavior` を引き続き使い、この結果を次の判断の証拠に加える。
 
-`just rmodel-readability-eval <新しいrunディレクトリ>` は TypeSafe API を使って比較を実行する。`just rmodel-readability-replay evals/runs/0112-rmodel-readability-development` は保存した回答から同じ採点結果を再現する。
+`just idealis-model-readability-eval <新しいrunディレクトリ>` は TypeSafe API を使って比較を実行する。`just idealis-model-readability-replay evals/runs/0112-rmodel-readability-development` は保存した回答から同じ採点結果を再現する。

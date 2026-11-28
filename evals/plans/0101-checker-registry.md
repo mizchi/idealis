@@ -4,7 +4,7 @@ mizchiの方針: ドメイン記述言語としてドメインをモデル化し
 
 ## 変更
 
-- 新しいcrate `crates/rcheck`（rmodel・ralloy・idealis-coreに依存する。rmodelは依存なしのまま）。
+- 新しいcrate `crates/idealis-check`（rmodel・ralloy・idealis-coreに依存する。rmodelは依存なしのまま）。
 - **問い**: モデルの`invariant`・`reachable`と、組み込みの`Declarations`。
 - **検査器の宣言**: 各検査器は、問いごとに「complete」「bounded（steps）」「対応しない（理由）」のどれで答えるかを宣言する（`supports`）。
   - 参照評価器: 関係の定義域が列挙できる大きさならcomplete、そうでなければ対応しない。
@@ -12,7 +12,7 @@ mizchiの方針: ドメイン記述言語としてドメインをモデル化し
   - SAT（ralloy、Alloyの写し方）: steps以内のbounded。
 - **答え**: 判定（成り立つ・破れる・到達できる・到達できない・空・未確定）、範囲（complete・bounded）、答えた検査器、破れる・到達できるときの最短の深さ。用語集（`spec/idealis.pkl`）の語で返す。
 - **選び方**: `auto`は、completeで答えられる検査器を優先し、参照評価器・明示状態・SATの順に、対応する最初のものを使う。検査器を名前で指定することも、`all`で全部を走らせて判定の食い違いを報告することもできる。
-- **入口**: `rcheck <model> [--checker auto|reference|explicit|sat|all]`。結果はJSONで出す。
+- **入口**: `idealis-check <model> [--checker auto|reference|explicit|sat|all]`。結果はJSONで出す。
 
 ## 正しさ（結果を見る前に固定）
 

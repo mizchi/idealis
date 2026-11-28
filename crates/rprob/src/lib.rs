@@ -1,4 +1,4 @@
-//! Explicit exploration of finite rmodel sets and binary relations.
+//! Explicit exploration of finite Idealis sets and binary relations.
 //! Lowering is independent of the reference evaluator and can be reused
 //! across runs. The reference report types retain the same coverage semantics.
 

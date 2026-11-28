@@ -15,8 +15,8 @@ type Command =
       kind: "prepare" | "install" | "confirm" | "activate" | "stop" | "restart";
     }
   | { kind: "write"; generation: Generation };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/lease/split-fence.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/lease/split-fence.ideal";
 const token = { Old: 1, New: 2 };
 
 test("a recovering coordinator verifies the separate durable fence before activating a lease", async (t) => {

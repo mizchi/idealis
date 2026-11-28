@@ -79,7 +79,7 @@ test(
       const received: Chunk[] = [];
       let terminal: "End" | "ReadError" | null = null;
       const scenario: Scenario<Command> = {
-        model: "examples/model-patterns/stream-terminal/stream.model",
+        model: "examples/model-patterns/stream-terminal/stream.ideal",
         config: {},
         initial: {
           phase: "Open",
@@ -90,78 +90,82 @@ test(
         },
         commands,
       };
-      const run = replay("crates/rcheck/target/debug/rcheck", scenario, {
-        async apply(command) {
-          switch (command.kind) {
-            case "write": {
-              const { chunk } = command;
-              outcome.set(chunk, "Waiting");
-              const wrote = writer.write(chunk).then(
-                () => {
-                  outcome.set(chunk, "Delivered");
-                },
-                () => {
-                  outcome.set(chunk, "WriteError");
-                },
-              );
-              writes.set(chunk, wrote);
-              break;
-            }
-            case "close":
-              closing = true;
-              void writer.close().catch(() => {});
-              if (![...outcome.values()].includes("Waiting"))
-                await writerFinished;
-              break;
-            case "fail":
-              if (fault === "fail-as-end") controller.terminate();
-              else controller.error(new Error("transform failed"));
-              await Promise.all([writerFinished, ...writes.values()]);
-              break;
-            case "read": {
-              const read = await reader.read();
-              if (read.done) {
-                terminal = "End";
-                await Promise.all([writerFinished, ...writes.values()]);
-              } else {
-                received.push(read.value);
-                await writes.get(read.value);
-                if (closing && ![...outcome.values()].includes("Waiting"))
+      const run = replay(
+        "crates/idealis-check/target/debug/idealis-check",
+        scenario,
+        {
+          async apply(command) {
+            switch (command.kind) {
+              case "write": {
+                const { chunk } = command;
+                outcome.set(chunk, "Waiting");
+                const wrote = writer.write(chunk).then(
+                  () => {
+                    outcome.set(chunk, "Delivered");
+                  },
+                  () => {
+                    outcome.set(chunk, "WriteError");
+                  },
+                );
+                writes.set(chunk, wrote);
+                break;
+              }
+              case "close":
+                closing = true;
+                void writer.close().catch(() => {});
+                if (![...outcome.values()].includes("Waiting"))
                   await writerFinished;
-              }
-              break;
-            }
-            case "readTerminal":
-              try {
+                break;
+              case "fail":
+                if (fault === "fail-as-end") controller.terminate();
+                else controller.error(new Error("transform failed"));
+                await Promise.all([writerFinished, ...writes.values()]);
+                break;
+              case "read": {
                 const read = await reader.read();
-                assert.equal(read.done, true);
-                terminal = "End";
-              } catch (error) {
-                if (error instanceof assert.AssertionError) throw error;
-                terminal = "ReadError";
+                if (read.done) {
+                  terminal = "End";
+                  await Promise.all([writerFinished, ...writes.values()]);
+                } else {
+                  received.push(read.value);
+                  await writes.get(read.value);
+                  if (closing && ![...outcome.values()].includes("Waiting"))
+                    await writerFinished;
+                }
+                break;
               }
-              break;
-          }
+              case "readTerminal":
+                try {
+                  const read = await reader.read();
+                  assert.equal(read.done, true);
+                  terminal = "End";
+                } catch (error) {
+                  if (error instanceof assert.AssertionError) throw error;
+                  terminal = "ReadError";
+                }
+                break;
+            }
+          },
+          async observe() {
+            return {
+              phase: writerPhase ?? (closing ? "Closing" : "Open"),
+              received: { $sequence: [...received] },
+              outcome: Object.fromEntries(
+                chunks.map((chunk) => [chunk, outcome.get(chunk) ?? null]),
+              ),
+              terminal,
+            };
+          },
+          project(state) {
+            return {
+              phase: state.phase,
+              received: state.received,
+              outcome: state.outcome,
+              terminal: state.terminal,
+            };
+          },
         },
-        async observe() {
-          return {
-            phase: writerPhase ?? (closing ? "Closing" : "Open"),
-            received: { $sequence: [...received] },
-            outcome: Object.fromEntries(
-              chunks.map((chunk) => [chunk, outcome.get(chunk) ?? null]),
-            ),
-            terminal,
-          };
-        },
-        project(state) {
-          return {
-            phase: state.phase,
-            received: state.received,
-            outcome: state.outcome,
-            terminal: state.terminal,
-          };
-        },
-      });
+      );
       try {
         if (fault === "drop-on-close") {
           await assert.rejects(

@@ -4,7 +4,7 @@
 
 ## 変更
 
-- **IRのJSON（version 1）**: rmodelの構文木（型検査の前）をJSONにした形を契約にする。sort・enum・和・record・関係（形と多重度、`var`か）・fact・init・action（引数・guard・代入）・check・scope。式と論理式は`op`で区別する木。整数の算術は明示の`arith`。`rcheck ir <model>`がrmodelの文からIRを出し、`rcheck`はIRのJSONも入力に取る（型検査はrmodelの検査器で行う）。
+- **IRのJSON（version 1）**: rmodelの構文木（型検査の前）をJSONにした形を契約にする。sort・enum・和・record・関係（形と多重度、`var`か）・fact・init・action（引数・guard・代入）・check・scope。式と論理式は`op`で区別する木。整数の算術は明示の`arith`。`idealis-check ir <model>`がrmodelの文からIRを出し、`rcheck`はIRのJSONも入力に取る（型検査はrmodelの検査器で行う）。
 - **adapter**: 「表の構文 → IRのJSON」だけを担う。式は木として渡す（ホストの関数を渡さない）。IRにない機能を含む部分は、`omitted`（名前と理由）として返す。最初のadapterは2つ: rmodelの文（rcheck自身）と、0107のPklの木からIRのJSONを書くPklのmodule（`pkl eval`）。
 - **roracleでの差分テスト**: 入力は0107の題材。基準はrmodelの文 → IR → 参照評価器の判定（題材ごとに決めたcheckの名前の、判定と深さ）。対象は各adapterのIR → 参照評価器の判定。adapterが`omitted`にしたcheckは`unknown`として観測し、一致に数えない。
 

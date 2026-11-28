@@ -24,8 +24,8 @@ type Command =
   | { kind: "deliver"; origin: Origin };
 type Fault = "slot-only" | "reuse-generation";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/crash-recovery/recovery-epoch.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/crash-recovery/recovery-epoch.ideal";
 
 async function report(child: ChildProcess, command?: WorkerCommand) {
   const response = once(child, "message", {

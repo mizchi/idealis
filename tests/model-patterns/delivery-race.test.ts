@@ -22,8 +22,8 @@ type Command =
       readonly evidence: DeliveryResult;
     };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/subscriptions/delivery-race.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/subscriptions/delivery-race.ideal";
 const id = "order-42";
 const frame = (kind: "notice" | "end") => JSON.stringify({ kind, id }) + "\n";
 

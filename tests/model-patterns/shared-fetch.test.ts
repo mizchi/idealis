@@ -12,8 +12,8 @@ type Command =
   | { readonly kind: "join" | "cancel"; readonly caller: Caller }
   | { readonly kind: "complete" };
 type Result = "Done" | "Cancelled" | "Failed";
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/cancellation/shared-fetch.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/cancellation/shared-fetch.ideal";
 
 test(
   "shared fetch aborts its HTTP transport only when the last waiter cancels",

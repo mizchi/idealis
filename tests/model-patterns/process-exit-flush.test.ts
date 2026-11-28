@@ -17,9 +17,9 @@ type Hook = "BeforeHook" | "ExitHook";
 type Location = "BetweenBeforeHooks" | "OutsideBeforeHooks";
 type Command = { kind: "run"; schedule: Schedule; path: Path };
 
-const checker = "crates/rcheck/target/debug/rcheck";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 const model =
-  "examples/model-patterns/node-event-loop/process-exit-flush.model";
+  "examples/model-patterns/node-event-loop/process-exit-flush.ideal";
 
 const program = `
 const { writeSync } = require("node:fs");

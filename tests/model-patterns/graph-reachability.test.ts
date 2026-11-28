@@ -11,9 +11,9 @@ interface Node {
   refs: Node[];
 }
 type Command = { kind: "attachSource" | "start" | "expand" | "finish" };
-const checker = "crates/rcheck/target/debug/rcheck";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 const model =
-  "examples/model-patterns/worker-transfer/graph-reachability.model";
+  "examples/model-patterns/worker-transfer/graph-reachability.ideal";
 
 function traversal(useShortScan: boolean) {
   const deep: Node = { name: "Deep", refs: [] };

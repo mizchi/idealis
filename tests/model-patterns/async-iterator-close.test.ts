@@ -19,9 +19,9 @@ type Command =
   | { kind: "leave"; reason: Leave }
   | { kind: "finishClose"; result: Cleanup };
 
-const checker = "crates/rcheck/target/debug/rcheck";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 const model =
-  "examples/model-patterns/node-event-loop/async-iterator-close.model";
+  "examples/model-patterns/node-event-loop/async-iterator-close.ideal";
 
 function openIterator(manualClose = false) {
   const returning = taskGate();

@@ -213,13 +213,16 @@ await cp(
   join(consumer, "pattern-consumer.mts"),
 );
 await cp(
-  "examples/model-patterns/semaphore/weighted-fifo.model",
-  join(consumer, "weighted-fifo.model"),
+  "examples/model-patterns/semaphore/weighted-fifo.ideal",
+  join(consumer, "weighted-fifo.ideal"),
 );
-await cp("crates/rcheck/target/debug/rcheck", join(consumer, "rcheck"));
+await cp(
+  "crates/idealis-check/target/debug/idealis-check",
+  join(consumer, "idealis-check"),
+);
 const patterns = execFileSync(
   process.execPath,
-  ["pattern-consumer.mts", "./rcheck"],
+  ["pattern-consumer.mts", "./idealis-check"],
   { cwd: consumer, encoding: "utf8" },
 ).trim();
 await writeFile(

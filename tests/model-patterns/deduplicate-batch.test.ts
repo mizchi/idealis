@@ -14,8 +14,8 @@ import {
 type Batch = { $sequence: string[] };
 type State = { applied: { $sequence: Batch[] } };
 type Command = { kind: "receive"; batch: Batch };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/crash-recovery/deduplicate-batch.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/crash-recovery/deduplicate-batch.ideal";
 const project = (state: Readonly<Record<string, unknown>>) => state;
 
 test("a SQLite batch journal deduplicates by complete ordered content", async () => {

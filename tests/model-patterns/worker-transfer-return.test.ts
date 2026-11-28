@@ -18,8 +18,8 @@ type Command = {
 };
 type Fault = "none" | "copy-return" | "rebind-old-handle";
 type Byte = "Initial" | "Updated" | "Final";
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/worker-transfer/round-trip.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/worker-transfer/round-trip.ideal";
 
 function openPort(t: TestContext, fault: Fault) {
   const original = new Uint8Array([61]);

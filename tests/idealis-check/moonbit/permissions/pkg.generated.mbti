@@ -1,0 +1,70 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/idealis_check_moonbit/permissions"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+  "moonbitlang/core/set",
+}
+
+// Values
+pub fn[D : Permissions] apply(D, Command) -> Bool
+
+pub fn decode_command(@json.Json) -> Command raise DecodeError
+
+pub fn decode_config(@json.Json) -> Config raise DecodeError
+
+pub fn decode_state(@json.Json) -> State raise DecodeError
+
+pub fn encode_config(Config) -> @json.Json
+
+pub fn encode_state(State) -> @json.Json
+
+// Errors
+#derive(@debug.Debug)
+pub suberror DecodeError {
+  DecodeError(String)
+}
+
+// Types and methods
+#derive(Eq, @debug.Debug)
+pub(all) enum Command {
+  Read(u~ : User, d~ : Doc)
+  Close(u~ : User, d~ : Doc)
+}
+
+pub(all) struct Config {
+  grants : Map[User, @set.Set[Role]]
+  reads : Map[Role, @set.Set[Doc]]
+  secret : @set.Set[Doc]
+  cleared : @set.Set[User]
+}
+
+#derive(Compare, Eq, Hash, @debug.Debug)
+pub(all) struct Doc(Int32)
+
+#derive(Compare, Eq, Hash, @debug.Debug)
+pub(all) struct Role(Int32)
+
+pub struct Server[D] {
+  create : (Config) -> D
+  mut domain : D?
+}
+pub fn[D] Server::Server((Config) -> D) -> Self[D]
+pub fn[D : Permissions] Server::handle(Self[D], String) -> String
+
+pub(all) struct State {
+  open : Map[User, @set.Set[Doc]]
+}
+
+#derive(Compare, Eq, Hash, @debug.Debug)
+pub(all) struct User(Int32)
+
+// Type aliases
+
+// Traits
+pub(open) trait Permissions {
+  fn state(Self) -> State
+  fn read(Self, User, Doc) -> Bool
+  fn close(Self, User, Doc) -> Bool
+}

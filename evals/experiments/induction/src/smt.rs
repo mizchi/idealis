@@ -51,7 +51,7 @@ pub struct Cti {
 
 /// Atom names of a sort in a fixed universe.
 pub fn atoms(
-    model: &rmodel::Model,
+    model: &idealis_model::Model,
     sizes: &BTreeMap<String, usize>,
     sort: &str,
 ) -> Vec<(String, String)> {
@@ -67,7 +67,7 @@ pub fn atoms(
 }
 
 fn tuples(
-    model: &rmodel::Model,
+    model: &idealis_model::Model,
     sizes: &BTreeMap<String, usize>,
     columns: &[String],
 ) -> Vec<Vec<(String, String)>> {
@@ -88,10 +88,10 @@ fn tuples(
     all
 }
 
-fn columns(shape: &rmodel::Shape) -> Vec<String> {
+fn columns(shape: &idealis_model::Shape) -> Vec<String> {
     match shape {
-        rmodel::Shape::Unary { sig, .. } => vec![sig.clone()],
-        rmodel::Shape::Binary { from, to, .. } => vec![from.clone(), to.clone()],
+        idealis_model::Shape::Unary { sig, .. } => vec![sig.clone()],
+        idealis_model::Shape::Binary { from, to, .. } => vec![from.clone(), to.clone()],
     }
 }
 
@@ -116,7 +116,7 @@ fn size_orders(sigs: &[String], max: usize) -> Vec<BTreeMap<String, usize>> {
 
 /// The smallest concrete counterexample within `max` atoms per sort.
 pub fn concrete(
-    model: &rmodel::Model,
+    model: &idealis_model::Model,
     smt: &str,
     params: &[(String, String)],
     max: usize,

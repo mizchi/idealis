@@ -16,8 +16,8 @@ type Command = {
   generation: Generation;
 };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/subscriptions/ack.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/subscriptions/ack.ideal";
 const ack = (notice: Notice, generation: Generation): Command => ({
   kind: "ack",
   notice,

@@ -28,8 +28,8 @@ type Observation =
   | { kind: "reopened"; rows: Row[] }
   | ({ kind: "batch" } & Batch);
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/browser/indexeddb-request-error.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/browser/indexeddb-request-error.ideal";
 
 // An IndexedDB transaction can auto-commit between browser tasks. The entire
 // write stays in one browser evaluation, with new requests queued in callbacks.

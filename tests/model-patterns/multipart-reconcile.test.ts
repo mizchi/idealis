@@ -19,8 +19,8 @@ interface Version {
   body: string;
 }
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/object-store/multipart-reconcile.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/object-store/multipart-reconcile.ideal";
 const ids = {
   Original: "v-original",
   Mine: "v-completion",
@@ -236,7 +236,7 @@ test("a matching current object is ambiguous after a lost multipart completion",
 test("one paired witness yields two independent HTTP executions with the same latest observation", async (t) => {
   type Run = "Left" | "Right";
   const pairedModel =
-    "examples/model-patterns/object-store/multipart-observation-pair.model";
+    "examples/model-patterns/object-store/multipart-observation-pair.ideal";
   await assert.rejects(
     reachableScenario(checker, pairedModel, "EqualHistoryWithDifferentCommit"),
     /EqualHistoryWithDifferentCommit: unreachable/,

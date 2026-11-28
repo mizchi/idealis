@@ -164,7 +164,7 @@ fn reviews_follow_the_clause_and_model_checks_follow_the_current_behavior() {
 
 #[test]
 fn named_shipment_clauses_cover_the_aggregate_in_the_fixed_model() {
-    use rmodel::reference::Outcome::Holds;
+    use idealis_model::reference::Outcome::Holds;
     let root = Path::new(ROOT);
     let source = std::fs::read_to_string(root.join(MODEL)).unwrap();
     for replacement in [
@@ -173,8 +173,8 @@ fn named_shipment_clauses_cover_the_aggregate_in_the_fixed_model() {
         "acknowledged = true status = Ready() }",
     ] {
         let edited = source.replace("acknowledged = true }", replacement);
-        let model = rmodel::parse(&edited).unwrap();
-        let verdicts = rmodel::reference::evaluate(&model, 100);
+        let model = idealis_model::parse(&edited).unwrap();
+        let verdicts = idealis_model::reference::evaluate(&model, 100);
         let outcome = |name| {
             verdicts
                 .iter()

@@ -27,7 +27,7 @@ fn run() -> Result<(), String> {
                 .map_err(|error| format!("{}: {error}", plan.model))?;
             json!(run_checker(&plan, checker, &source, |model, budget| {
                 match checker {
-                    Checker::Reference => Ok(rmodel::reference::analyze(model, budget)),
+                    Checker::Reference => Ok(idealis_model::reference::analyze(model, budget)),
                     Checker::Rprob => rprob::Compiled::new(model)
                         .map(|compiled| compiled.analyze(budget))
                         .map_err(|error| error.to_string()),

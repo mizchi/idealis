@@ -1,6 +1,6 @@
 # 0111 自然言語の仕様から文法の検査を回す
 
-[計画](../plans/0111-rmodel-spec-drift.md)に沿って、[自然言語の仕様](../../spec/rmodel-design.pkl)に採用条件、改版、具体的な状態遷移を書いた。rmodel のモデルと実装テストをつなぎ、[意思決定ログ](../../crates/rmodel/grammar-decisions.md)から見られるようにした。
+[計画](../plans/0111-rmodel-spec-drift.md)に沿って、[自然言語の仕様](../../spec/rmodel-design.pkl)に採用条件、改版、具体的な状態遷移を書いた。rmodel のモデルと実装テストをつなぎ、[意思決定ログ](../../crates/idealis-model/grammar-decisions.md)から見られるようにした。
 
 | 確認                   | 結果                                                                                                                                  |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -10,7 +10,7 @@
 | Jev のライブ判定       | OpenRouter の認証が HTTP 401 で拒否され、通常版は3件とも判定なし。文章を反転した対照のライブ判定も未取得。                            |
 | ゴールの測定           | `behavior` の読みやすさは未測定。採用判断は評価中。                                                                                   |
 
-`just rmodel-design-write` で仕様の表示とモデルへの参照を生成する。`just rmodel-design-check` で機械的な検査を回す。`just rmodel-design-drift` は生成物を確認してから意味の比較に進む。生成した Markdown だけを変更した対照は、Jev の起動前に D6 で拒否した。ライブ判定の欠落は未検査として扱う。
+`just idealis-model-design-write` で仕様の表示とモデルへの参照を生成する。`just idealis-model-design-check` で機械的な検査を回す。`just idealis-model-design-drift` は生成物を確認してから意味の比較に進む。生成した Markdown だけを変更した対照は、Jev の起動前に D6 で拒否した。ライブ判定の欠落は未検査として扱う。
 
 ## TypeSafe API での再実行
 

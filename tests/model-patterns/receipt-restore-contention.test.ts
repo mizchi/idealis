@@ -20,9 +20,9 @@ type Reply = {
   published: number | null;
 };
 
-const checker = "crates/rcheck/target/debug/rcheck";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 const model =
-  "examples/model-patterns/crash-recovery/receipt-restore-contention.model";
+  "examples/model-patterns/crash-recovery/receipt-restore-contention.ideal";
 
 test("a stale allocator retries from the durable counter before publishing", async (t) => {
   const scenario = await reachableScenario<Command>(

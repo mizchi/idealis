@@ -1,0 +1,59 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/idealis_check_moonbit/bank"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn[D : Bank] apply(D, Command) -> Bool
+
+pub fn decode_command(@json.Json) -> Command raise DecodeError
+
+pub fn decode_config(@json.Json) -> Config raise DecodeError
+
+pub fn decode_state(@json.Json) -> State raise DecodeError
+
+pub fn encode_config(Config) -> @json.Json
+
+pub fn encode_state(State) -> @json.Json
+
+// Errors
+#derive(@debug.Debug)
+pub suberror DecodeError {
+  DecodeError(String)
+}
+
+// Types and methods
+#derive(Compare, Eq, Hash, @debug.Debug)
+pub(all) struct Account(Int32)
+
+#derive(Eq, @debug.Debug)
+pub(all) enum Command {
+  Deposit(a~ : Account, n~ : Int64)
+  Withdraw(a~ : Account, n~ : Int64)
+}
+
+pub(all) struct Config {
+}
+
+pub struct Server[D] {
+  create : (Config) -> D
+  mut domain : D?
+}
+pub fn[D] Server::Server((Config) -> D) -> Self[D]
+pub fn[D : Bank] Server::handle(Self[D], String) -> String
+
+pub(all) struct State {
+  balance : Map[Account, Int64]
+}
+
+// Type aliases
+
+// Traits
+pub(open) trait Bank {
+  fn state(Self) -> State
+  fn deposit(Self, Account, Int64) -> Bool
+  fn withdraw(Self, Account, Int64) -> Bool
+}

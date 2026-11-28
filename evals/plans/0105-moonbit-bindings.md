@@ -2,7 +2,7 @@
 
 [0102](../iterations/0102-domain-bindings.md)・[0104](../iterations/0104-go-bindings.md)に続き、mizchiの依頼でMoonBitのbindingsを生成する。JSONの形は0102の契約と同じで、照合器も同じ。
 
-## 生成するもの（`rmodel::bindings::moonbit(model)`）
+## 生成するもの（`idealis_model::bindings::moonbit(model)`）
 
 - sigは`struct User(Int)`（JSONは`"User0"`）、enumはMoonBitのenum、和のsortは子を持つenum、Boolは`Bool`、Intは`Int64`、recordはstruct。集合は`Set[T]`、`lone`は`T?`、二項関係は`Map[A, Set[B]]`・`Map[A, B]`。
 - `Config`・`State`、actionごとの構成子を持つ`Command`、モデルのtrait（`fn state(Self) -> State`と、actionごとの`fn read(Self, User, Doc) -> Bool`）。

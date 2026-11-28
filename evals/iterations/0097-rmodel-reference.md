@@ -1,6 +1,6 @@
 # 0097: rmodelの参照評価器と、写し方の差分テスト
 
-[plan](../plans/0097-rmodel-reference.md)のとおり、rmodelの意味論の正本として参照評価器（`crates/rmodel/src/reference.rs`）を作り、型の合ったモデルを乱数で生成して、参照評価器・rtlc（TLA+の写し方）・ralloyのSAT（Alloyの写し方）を比べた。意味論は[docs/kernel-semantics.md](../../docs/kernel-semantics.md)に、文法から独立してまとめた。
+[plan](../plans/0097-rmodel-reference.md)のとおり、rmodelの意味論の正本として参照評価器（`crates/idealis-model/src/reference.rs`）を作り、型の合ったモデルを乱数で生成して、参照評価器・rtlc（TLA+の写し方）・ralloyのSAT（Alloyの写し方）を比べた。意味論は[docs/kernel-semantics.md](../../docs/kernel-semantics.md)に、文法から独立してまとめた。
 
 - **corpus**: 参照評価器の判定は、仕様のclaim 32件（0091・0093・0094）すべてと一致した。
 - **生成したモデル**: dev（seed 0〜299）・確認（seed 1000〜1299）それぞれ300モデル・600 checkで、判定が出たものの間に食い違いは0件。

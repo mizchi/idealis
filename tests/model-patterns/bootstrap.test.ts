@@ -12,8 +12,8 @@ import {
   type ObservationProjection,
 } from "../../examples/model-patterns/replay.js";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/browser/bootstrap.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/browser/bootstrap.ideal";
 const project: ObservationProjection = (_state, derived) => {
   const screen = derived?.screen as [[string]];
   return { screen: screen[0][0] };
