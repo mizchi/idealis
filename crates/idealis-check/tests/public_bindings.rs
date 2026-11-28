@@ -26,6 +26,34 @@ fn success(output: Output) -> String {
 }
 
 #[test]
+fn typescript_types_generate_a_contract_without_a_runtime() {
+    let model = project();
+    let full = success(run(&model, &["generate"], &["typescript-types"]));
+    assert!(full.contains("export type Request"));
+    assert!(full.contains("export interface State"));
+    assert!(full.contains("kind: \"eastDelivery_send\""));
+    assert!(!full.contains("import "));
+    assert!(!full.contains("export const "));
+    assert!(!full.contains("function "));
+    assert!(!full.contains("interface Domain"));
+
+    let public = success(run(
+        &model,
+        &["generate"],
+        &["typescript-types", "--public"],
+    ));
+    assert!(public.contains("kind: \"east_commit\""));
+    assert!(!public.contains("kind: \"eastDelivery_send\""));
+
+    let payment = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../examples/model-patterns/payment-data/payment-refined.ideal");
+    let refined = success(run(&payment, &["generate"], &["typescript-types"]));
+    assert!(refined.contains("export interface Request"));
+    assert!(refined.contains("readonly [$data]: \"Request\""));
+    assert!(!refined.contains("decodeRequest"));
+}
+
+#[test]
 fn public_bindings_filter_commands_and_the_full_model_still_replays() {
     let model = project();
     for (target, exported, internal) in [

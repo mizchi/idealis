@@ -1,5 +1,5 @@
 //! Compose ordered source fragments before passing them to the existing parser.
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::ops::Range;
 use std::path::{Path, PathBuf};
@@ -15,6 +15,23 @@ struct Project {
     fragments: Vec<FragmentInput>,
     exports: Option<Vec<String>>,
     dictionary: Option<PathBuf>,
+    #[serde(default)]
+    domains: Vec<Domain>,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct Domain {
+    id: String,
+    name: DomainName,
+    models: Vec<String>,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct DomainName {
+    ja: String,
+    en: String,
 }
 
 #[derive(Deserialize)]
@@ -112,6 +129,64 @@ pub fn load_checked_model_source(
     Ok((model, source.text))
 }
 
+/// Export checked IR alongside source descriptions, domains, and state bindings.
+pub fn source_view(path: &str) -> Result<serde_json::Value, String> {
+    let source = read_source(path)?;
+    let located = source.located_model(path)?;
+    let descriptions: BTreeMap<_, _> = located
+        .descriptions
+        .iter()
+        .map(|(&offset, text)| (&source.fragment(offset).path, text))
+        .collect();
+    let mut ports = BTreeMap::<&str, Vec<_>>::new();
+    for instance in source.fragments.iter().filter_map(|f| f.instance.as_ref()) {
+        for (name, port) in &instance.ports {
+            ports
+                .entry(&port.state)
+                .or_default()
+                .push(serde_json::json!({
+                    "model": instance.namespace,
+                    "port": name,
+                    "access": match port.access {
+                        Access::Read => "read",
+                        Access::Write => "write",
+                    },
+                }));
+        }
+    }
+    let state_declarations: Vec<_> = located
+        .model
+        .relations
+        .iter()
+        .filter(|relation| relation.var)
+        .map(|relation| {
+            let name = relation.name.as_str();
+            let owner = located
+                .declarations
+                .get(name)
+                .and_then(|&offset| source.fragment(offset).instance.as_ref())
+                .map(|instance| instance.namespace.as_str());
+            let local_name = owner
+                .and_then(|namespace| name.strip_prefix(namespace))
+                .and_then(|slot| slot.strip_prefix('_'))
+                .unwrap_or(name);
+            serde_json::json!({
+                "name": name,
+                "localName": local_name,
+                "owner": owner,
+                "shape": component::shape_text(&relation.shape),
+                "ports": ports.get(name).map(Vec::as_slice).unwrap_or_default(),
+            })
+        })
+        .collect();
+    Ok(serde_json::json!({
+        "ir": crate::ir::to_ir(&located.model)?,
+        "descriptions": descriptions,
+        "domains": source.domains,
+        "stateDeclarations": state_declarations,
+    }))
+}
+
 /// Check data-value domains and locate each declaration in the original files.
 pub fn check_refinements(
     path: &str,
@@ -182,6 +257,7 @@ struct Source {
     fragments: Vec<Fragment>,
     characters: usize,
     exports: Option<Vec<String>>,
+    domains: Vec<Domain>,
     dictionary: Option<dictionary::Dictionary>,
     port_shapes: BTreeMap<String, BTreeMap<String, component::Contract>>,
     contracts: BTreeMap<String, component::BehaviorContract>,
@@ -319,6 +395,15 @@ impl Source {
                 .map_or_else(|| path.to_owned(), |offset| self.position(offset));
             format!("{location}: {}", diagnostic.error)
         })?;
+        let mut described = BTreeSet::new();
+        for &offset in located.descriptions.keys() {
+            if !described.insert(self.fragment(offset).start_char) {
+                return Err(format!(
+                    "{}: expected one description per source fragment",
+                    self.position(offset)
+                ));
+            }
+        }
         self.check_ownership(&located)?;
         if let Some(exports) = &self.exports {
             let mut seen = BTreeSet::new();
@@ -478,6 +563,40 @@ fn valid_identifier(name: &str) -> bool {
         && name.bytes().all(|c| c.is_ascii_alphanumeric() || c == b'_')
 }
 
+fn validate_domains(
+    path: &str,
+    domains: &[Domain],
+    namespaces: &BTreeSet<String>,
+) -> Result<(), String> {
+    let mut ids = BTreeSet::new();
+    let mut assigned = BTreeSet::new();
+    for domain in domains {
+        let id = &domain.id;
+        if !idealis_model::valid_term_id(id) || !ids.insert(id) {
+            return Err(format!("{path}: invalid or duplicate domain ID {id:?}"));
+        }
+        if domain.name.ja.trim().is_empty() || domain.name.en.trim().is_empty() {
+            return Err(format!(
+                "{path}: domain {id} needs both Japanese and English names"
+            ));
+        }
+        if domain.models.is_empty() {
+            return Err(format!("{path}: domain {id} needs at least one model"));
+        }
+        for model in &domain.models {
+            if !namespaces.contains(model) {
+                return Err(format!("{path}: domain {id} names unknown model {model}"));
+            }
+            if !assigned.insert(model) {
+                return Err(format!(
+                    "{path}: model {model} is assigned more than once; a model cannot be in more than one domain"
+                ));
+            }
+        }
+    }
+    Ok(())
+}
+
 fn read_source(path: &str) -> Result<Source, String> {
     let entry = Path::new(path);
     let read = |file: &Path| {
@@ -578,6 +697,8 @@ fn read_source(path: &str) -> Result<Source, String> {
         };
         source.append(file, text, instance)?;
     }
+    validate_domains(path, &project.domains, &namespaces)?;
+    source.domains = project.domains;
     for (namespace, descriptor) in type_dependencies {
         for (dependency, expected) in &components[&descriptor].types {
             let Some(&index) = files.get(dependency) else {

@@ -1,8 +1,8 @@
 //! idealis-check <model> [--checker auto|reference|explicit|sat|rprob|all] [--question NAME] [--max-states N] [--sat-steps N]
 //! idealis-check capabilities <model>
 //! idealis-check refinements <model> [--type NAME] [--max-work N]
-//! idealis-check generate <model> rust|typescript|go|moonbit|ir|schema|states|glossary|glossary-localized|dictionary|pbt-cases|pbt-typescript|pbt-go|pbt-data-cases|pbt-data-typescript|branch-map
-//! idealis-check generate <project> rust|typescript|go|moonbit|schema --public
+//! idealis-check generate <model> rust|typescript|typescript-types|go|moonbit|ir|source-view|schema|states|glossary|glossary-localized|dictionary|pbt-cases|pbt-typescript|pbt-go|pbt-data-cases|pbt-data-typescript|branch-map
+//! idealis-check generate <project> rust|typescript|typescript-types|go|moonbit|schema --public
 //! idealis-check component <component.json>
 //! idealis-check contracts <model.project.json> [--max-states N] [--max-arguments N]
 //! idealis-check dead-code <model> [--instances ACTION] [--max-states N] [--max-arguments N]
@@ -293,6 +293,12 @@ fn main() {
             println!("{}", serde_json::to_string_pretty(&map).expect("JSON"));
             return;
         }
+        if target == "source-view" && !public {
+            let view =
+                idealis_check::project::source_view(path).unwrap_or_else(|error| fail(&error));
+            println!("{}", serde_json::to_string_pretty(&view).expect("JSON"));
+            return;
+        }
         if target == "dictionary" && !public {
             let report = idealis_check::project::dictionary_report(path)
                 .unwrap_or_else(|error| fail(&error));
@@ -319,6 +325,7 @@ fn main() {
                 None => idealis_model::bindings::rust_api(&model),
             },
             "typescript" => idealis_model::bindings::typescript(&model),
+            "typescript-types" => idealis_model::bindings::typescript_types(&model),
             "go" => idealis_model::bindings::go(&model, &model.name.to_lowercase()),
             "moonbit" => idealis_model::bindings::moonbit(&model),
             "schema" => {
@@ -327,7 +334,9 @@ fn main() {
                         .expect("JSON");
                 format!("{}\n", serde_json::to_string_pretty(&schema).expect("JSON"))
             }
-            _ if public => fail("--public supports rust, typescript, go, moonbit, and schema"),
+            _ if public => fail(
+                "--public supports rust, typescript, typescript-types, go, moonbit, and schema",
+            ),
             // The kernel IR as JSON (plan 0108).
             "ir" => {
                 let ir = idealis_check::ir::to_ir(&model).unwrap_or_else(|error| fail(&error));
@@ -785,7 +794,7 @@ const USAGE: &str = "Usage:
   idealis-check capabilities <model>
   idealis-check refinements <model> [--type NAME] [--max-work N]
   idealis-check generate <model> <target>
-  idealis-check generate <project> rust|typescript|go|moonbit|schema --public
+  idealis-check generate <project> rust|typescript|typescript-types|go|moonbit|schema --public
   idealis-check component <component.json>
   idealis-check contracts <model.project.json> [--max-states N] [--max-arguments N]
   idealis-check dead-code <model> [--instances ACTION] [--max-states N] [--max-arguments N]
@@ -807,7 +816,7 @@ const USAGE: &str = "Usage:
 
 Model inputs: .ideal source (.model also accepted), .project.json project (.rmodel.json also accepted),
               or JSON IR (except for generate).
-Generation targets: rust, typescript, go, moonbit, ir, schema, states, glossary, glossary-localized, dictionary,
+Generation targets: rust, typescript, typescript-types, go, moonbit, ir, source-view, schema, states, glossary, glossary-localized, dictionary,
                     pbt-cases, pbt-typescript, pbt-go, pbt-data-cases, pbt-data-typescript, branch-map";
 
 fn usage() -> ! {

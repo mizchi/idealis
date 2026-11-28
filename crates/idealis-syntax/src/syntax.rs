@@ -660,6 +660,7 @@ fn lex(source: &str, component: bool) -> Result<(Vec<String>, Vec<usize>), Parse
 #[derive(Default)]
 struct Locations {
     named: BTreeMap<String, usize>,
+    descriptions: BTreeMap<usize, BTreeMap<String, String>>,
     terms: BTreeMap<String, usize>,
     facts: Vec<usize>,
     init: Vec<usize>,
@@ -892,6 +893,27 @@ impl Parser {
             self.nodes = 0;
             let start = self.position;
             match self.peek() {
+                "description" => {
+                    self.position += 1;
+                    self.expect("=")?;
+                    self.expect("{")?;
+                    let descriptions = self.description_entries()?;
+                    for (tag, text) in &descriptions {
+                        if !valid_language_tag(tag) || tag == "default" {
+                            return Err(Error::syntax(format!(
+                                "invalid description language tag {tag:?}"
+                            )));
+                        }
+                        if !valid_definition(text) {
+                            return Err(Error::syntax(format!(
+                                "expected a nonempty description with printable text for {tag}"
+                            )));
+                        }
+                    }
+                    self.locations
+                        .descriptions
+                        .insert(self.offsets[start], descriptions);
+                }
                 "term" => {
                     self.position += 1;
                     let id = self.term_id()?;
@@ -1174,7 +1196,7 @@ impl Parser {
                 "fact" => self.locations.facts.resize(model.facts.len(), offset),
                 "init" => self.locations.init.resize(model.init.len(), offset),
                 "scope" => self.locations.scope = Some(offset),
-                "fairness" | "term" => {}
+                "fairness" | "term" | "description" => {}
                 _ => {
                     self.locations
                         .named
@@ -1203,6 +1225,19 @@ impl Parser {
                 .insert(name.to_owned(), self.description_text()?);
             return Ok(());
         }
+        let mut descriptions = self.description_entries()?;
+        if let Some(default) = descriptions.remove("default") {
+            model.entity_definitions.insert(name.to_owned(), default);
+        }
+        if !descriptions.is_empty() {
+            model
+                .entity_translations
+                .insert(name.to_owned(), descriptions);
+        }
+        Ok(())
+    }
+
+    fn description_entries(&mut self) -> Result<BTreeMap<String, String>, Error> {
         let mut descriptions = BTreeMap::new();
         loop {
             let tag = if let Some(tag) = self.peek().strip_prefix('"') {
@@ -1226,15 +1261,7 @@ impl Parser {
                 break;
             }
         }
-        if let Some(default) = descriptions.remove("default") {
-            model.entity_definitions.insert(name.to_owned(), default);
-        }
-        if !descriptions.is_empty() {
-            model
-                .entity_translations
-                .insert(name.to_owned(), descriptions);
-        }
-        Ok(())
+        Ok(descriptions)
     }
 
     fn description_text(&mut self) -> Result<String, Error> {
@@ -3176,6 +3203,7 @@ pub(crate) fn parse(
         model,
         declarations: parser.locations.named,
         term_locations: parser.locations.terms,
+        descriptions: parser.locations.descriptions,
         state_reads: state_reads.into_inner(),
         update_branches: parser.locations.update_branches,
     })

@@ -24,6 +24,9 @@
 
 - [x] 実装の照合（`conform`、0102）: 参照評価器を正本に、設定ごとに実装の初期状態がモデルの初期状態であること、到達する各状態で各action instanceの受け付けと次の状態が一致することを、幅優先で確かめる。答えは一致・bounded（設定の上限）・不一致（最短のcommandの列、期待と実測）・invalid（JSON Schemaに合わない答え）・空・未確定（呼び出しの予算）・エラー。driverは同じプロセス（生成したRustのtrait）か、JSON Linesの外部プロセス（生成したTypeScriptの`serve`）。
 - [x] `generate`: モデルからRustのtrait、TypeScriptの型とdriver、Goのinterfaceとdecoder（0104）、MoonBitのtraitとdecoder・`Server::handle`（0105）、JSON Schema、到達できる状態を生成する（0102）。JSON Schemaの検査は、生成するキーワードだけを扱う`schema::validate`で、知らないキーワードはエラーにする。
+- [x] `generate <model> typescript-types` は値・設定・状態・操作の型宣言を生成する。`--public` で操作をプロジェクトの公開リストに絞れる。[CLI の回帰試験](tests/public_bindings.rs) · [Workers での利用例](../../examples/model-patterns/worker-microblog/README.md#idealis-から接続面の型を生成する)
+
+- [x] `generate <model> source-view` は検査済み IR、元のファイルごとの説明、名前付きフラグメントのドメイン境界を返す。境界の所属は既存の名前空間へ解決する。状態宣言の所有者・型・ポートの読み書きも返す。[Studio の利用例](../../tools/idealis-studio/README.md#model-descriptions)
 
 - [x] 核のIRのJSON（version 1、`ir`、0108）: Idealis の型検査前の構文木。式・論理式は`op`で区別する木、知らないtag・欠けたfield・知らないfieldは拒む。`idealis-check generate <model> ir`で書き、`.json`の入力は`idealis_model::validate`で型検査してから検査器に渡す。adapterが写せなかった部分は`omitted`。
 - [x] IR の版をフィールドや式の型より先に検査する。初期の Pkl IR を固定して現行ソースの判定と到達経路に照合する。[固定入力](../../fixtures/rcheck/ir-compat/README.md) · [回帰試験](tests/ir.rs)

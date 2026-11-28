@@ -35,6 +35,78 @@
 
 同じソースから生成した TLA+ では、TLC 2.19 が `LoanIsRecorded` の正常版で4状態を検査し、貸出履歴の更新を外した対照では最初の貸出で違反を返した。参照・明示・SAT・rprob もその対照を検出した。`RenCanBorrow` の生成物は条件の否定を不変条件にするため、TLC の違反が到達の証拠になる。この判定の読み替えは TLA+ 変換側が負い、業務側では `reachable` のまま書ける。[生成器の実行例](../crates/idealis-model/examples/emit.rs) · [期待判定の CLI 契約](../crates/idealis-check/README.md#check-an-expected-verdict-in-ci)
 
+## モデルを公開して別のファイルで組み合わせる案
+
+ひとつのファイルに複数の `model Name { ... }` を置き、それぞれで状態、初期条件、操作、性質をまとめる。`export model` は、その宣言を別ファイルの名前解決で引けるようにする。インポートが解決するモデルの識別子は、ファイルを解決した結果と公開名の組とする。モデルの版は検査結果に別に記録できる。実行時の状態は、組み合わせ先でインスタンスを宣言したときに割り当てる。
+
+組み合わせも `model` で宣言する。本体の `instance` が部品の割り当てを、`connect` が接続を表すので、`composed` という修飾子は省く。組み合わせモデルにも独自の状態・操作を書ける。たとえば通知版では、会員管理と貸出の部品に加えて、通知を受け取った側の状態と通知を届ける操作を持てる。
+
+共有型を一度だけ宣言し、貸出と会員管理の両方から参照する。`import` はファイル先頭に置き、複数のモデルに共通で使える。パスは `import` を書いたファイルからの相対パスとし、取り込む名前は波括弧に列挙する。
+
+```ideal
+// library-types.ideal
+export entity Copy
+export enum Member = Aki | Ren
+```
+
+```ideal
+// library.ideal
+import { Copy, Member } from "./library-types.ideal"
+
+export model Membership {
+  export var activeMembers: set Member
+  init { activeMembers = Member }
+
+  behavior suspend(m: Member) {
+    guard { m in activeMembers }
+    update { activeMembers = activeMembers - m }
+  }
+}
+
+export model Library {
+  port read eligible: set Member
+  var borrower: Copy -> lone Member
+  init { no borrower }
+
+  export behavior borrow(c: Copy, m: Member) {
+    guard { m in eligible, no c.borrower }
+    update { borrower = borrower + (c -> m) }
+  }
+}
+```
+
+`export var` で公開するのは外から読み取れる状態で、更新は所有するモデルの操作が行う。取り込んだ型を別ファイルでも使う場合は、定義元から取り込む。たとえば次の `scope Copy` は、貸出モデルが参照しているのと同じ `Copy` を指定する。
+
+```ideal
+// lending-check.ideal
+import { Copy } from "./library-types.ideal"
+import { Library as LoanLibrary, Membership } from "./library.ideal"
+
+export model Lending {
+  instance members = Membership
+  instance loans = LoanLibrary
+  connect loans.eligible <- members.activeMembers
+
+  transition BorrowRequiresActive on loans.borrow {
+    m in before(members.activeMembers)
+  }
+
+  scope Copy = 1
+}
+```
+
+`as` は参照先のファイルと公開名を保ったまま、読み込む側で使う名前を指定する。`LoanLibrary` はモデル宣言への参照で、`loans` が状態を持つインスタンス。`on loans.borrow` は、その操作の引数を性質に束縛する。読み込めないファイル、存在しない公開名、同じファイル内での名前衝突は `import` の該当箇所で報告する。循環する読み込みでは、参照が戻った経路も示す。
+
+インスタンスごとに状態の持ち主を区別する。たとえば `instance branchLoans = Library` を追加すると、その支店には独自の `borrower` ができる。両方の貸出インスタンスを同じ会員管理に接続することもできる。接続時は共有する型の同一性、ポートの型とアクセス権、必須ポートの接続漏れを検査する。操作はインスタンスごとに一つずつ選んで実行し、初期状態は各インスタンスの初期条件を満たす組から作る。複数モデルの操作を一手で同期させたいケースは、同期の書き方と意味を別途詰める。
+
+公開した `Lending` は、`Library` と同じように別ファイルからインポートして部品にできる。外から参照できる操作や状態は `Lending` 自身が公開する。未接続の必須ポートがあるかは接続を解決して判断する。たとえば `Lending` は会員管理を接続し、有限スコープを与えているので、その組み合わせを一つの検査対象として選べる。
+
+部品の型検査は接続前に行える。未接続の必須ポートを持つ部品の振る舞いを検査するときは、ポートに値を供給するテスト用の環境を接続する。組み合わせたときも、部品内の性質は各インスタンスに対して調べられる。部品にまたがる性質と検査用の有限スコープは、両方を参照できるモデルに置く。非公開の操作も探索では実行できる。たとえば `suspend` を公開しなくても、停止後の貸出に至る経路は調べられる。モデルの中に別の `model` を宣言する場合の名前解決や公開範囲は、まずファイル直下の複数宣言で検証してから決める。
+
+この構文は設計案。既存の実装で同じ判断を試すと、貸出部品は `eligible: set Member` を読み取りポートとして型検査できた。直接接続では `BorrowRequiresActive` が成立し、通知を挟む接続では「Aki を停止 → 通知が届く前に Aki が借りる」の2手で違反した。まずモデルをファイル単位で集めて名前を解決し、接続を既存の部品リンカーへ渡すと、この判定を移行前後の対照に使える。[現行の貸出・会員管理モデル](../examples/model-patterns/library-membership/README.md#接続を変える)
+
+短文投稿サービスでは、ユーザー・投稿・Queue・タイムラインに送信 relay と consumer を接続した。consumer が反映済みの投稿に対して配信 ID 付きの ACK 要求を出し、Queue が別のステップで受理する。これで、古い配信への要求が新しい配信を ACK してしまう故障まで調べられた。同期的な呼び出しを構文に加える場合は、この二段階の通信とは別に意味を定義する。[構文案と実行結果](../examples/model-patterns/worker-microblog/README.md)
+
 ## 再利用できる実装
 
 Idealis が接続層を通して外部形式やエンジンを利用する。TLA+ のパーサー、コンパイラー、探索器や Alloy・SMT-LIB の実装は、Idealis 固有の用語や `.ideal` への依存を持たずに単独で使えるようにする。

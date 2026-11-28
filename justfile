@@ -1301,3 +1301,13 @@ smt-protocol-compare-store native-dev native-conf wasm-dev wasm-conf previous ou
 [positional-arguments]
 smt-incremental-pair *args: build
   node dist/evals/experiments/smt-incremental/pair.js "$@"
+
+[positional-arguments]
+studio *args: studio-build
+  node tools/idealis-studio/server.mjs "$@"
+
+studio-build:
+  cargo build --locked --manifest-path crates/idealis-check/Cargo.toml --bin idealis-check
+
+studio-test: studio-build
+  node --test tests/studio/*.test.mjs

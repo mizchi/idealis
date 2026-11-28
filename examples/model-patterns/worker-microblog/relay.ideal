@@ -1,0 +1,15 @@
+description = {
+  ja: "保存済みの投稿を配信 Queue に渡す。",
+  en: "Hands saved posts to the delivery queue.",
+}
+
+init { no @offered }
+
+behavior @offer(p: Post) {
+  guard {
+    some p.@authors,
+    p not in @offered,
+    p = Earlier or Earlier in @accepted
+  }
+  update { @offered = @offered + p }
+}

@@ -1,0 +1,15 @@
+description = {
+  ja: "反映を確認し、その配信試行の ACK を要求する。",
+  en: "Requests an acknowledgement for the attempt after application.",
+}
+
+init { no @ackRequests }
+
+behavior @requestAck(p: Post, delivery: Delivery) {
+  guard {
+    delivery in p.@inFlight,
+    p in @applied,
+    (p -> delivery) not in @ackRequests
+  }
+  update { @ackRequests = @ackRequests + (p -> delivery) }
+}

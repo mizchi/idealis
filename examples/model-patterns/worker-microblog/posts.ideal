@@ -1,0 +1,11 @@
+description = {
+  ja: "Author が投稿を保存する。",
+  en: "Author saves a post.",
+}
+
+init { no @authors }
+
+behavior @publish(p: Post, author: User) {
+  guard { author = Author, no p.@authors, p = Earlier or some Earlier.@authors }
+  update { @authors = @authors + (p -> author) }
+}

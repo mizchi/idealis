@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Idealis Studio</title>
+    <link rel="stylesheet" href="/studio.css" />
+    <script type="module" src="/studio.js"></script>
+  </head>
+  <body>
+    <header class="top">
+      <a class="brand" href="/"
+        ><span aria-hidden="true" class="mark"></span>Idealis Studio</a
+      >
+      <nav id="tabs" aria-label="ビュー"></nav>
+      <div id="status" role="status">読み込み中</div>
+    </header>
+    <div id="diagnostics" class="diagnostics" hidden></div>
+    <div class="layout">
+      <aside>
+        <div class="project">
+          <span class="eyebrow">ワークスペース</span
+          ><strong id="project"></strong><small id="model-path"></small>
+        </div>
+        <nav id="explorer" aria-label="ワークスペース"></nav>
+      </aside>
+      <main id="main" tabindex="-1" aria-label="詳細"></main>
+    </div>
+  </body>
+</html>

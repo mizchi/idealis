@@ -660,6 +660,12 @@ the commands. `idealis_check::conform` replays the implementation along the
 reference semantics and reports the shortest command sequence where it
 differs.
 
+`idealis-check generate <model> typescript-types` emits TypeScript declarations
+for the model's values, configuration, state and commands. Save the output as
+a `.d.ts` file and consume it with `import type` in the adapter. Validation of
+runtime values is available through `validate` and replay. For projects with
+an export list, `--public` limits the generated command union to that list.
+
 The [runtime model patterns](../../examples/model-patterns/README.md) show how to connect a browser, a Node.js callback batch, or an object store to model predictions through an asynchronous observation adapter.
 
 ## Split sources and boundary properties
