@@ -16,7 +16,7 @@ fn check() -> Result<SafetyAnalysis, String> {
         _ => return Err("usage: rprob [--safety] <model> [--max-states N]".into()),
     };
     let source = std::fs::read_to_string(path).map_err(|error| error.to_string())?;
-    let model = rmodel::parse(&source).map_err(|error| error.to_string())?;
+    let model = idealis_syntax::parse(&source).map_err(|error| error.to_string())?;
     if !safety && !model.temporal.is_empty() {
         return Err(
             "unsupported: temporal obligations are outside the finite atom fragment".into(),

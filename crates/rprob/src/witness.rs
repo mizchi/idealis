@@ -1,8 +1,8 @@
 use crate::{Unsupported, bits, compile, indexed, indexed_rows, sequences, sparse, values};
-use rmodel::reference::{
+use idealis_semantics::reference::{
     Data, Next, Outcome, Runtime, SearchBudget, Snapshot, TraceCommand, Witness, WitnessResult,
 };
-use rmodel::{Model, Shape, ValueType};
+use idealis_syntax::{Model, Shape, ValueType};
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
@@ -91,6 +91,7 @@ impl Search {
 }
 
 pub(crate) struct Layout<'a> {
+    pub(crate) refined: BTreeMap<&'a str, std::sync::Arc<[u64]>>,
     pub(crate) sorts: BTreeMap<&'a str, Vec<u64>>,
     pub(crate) sparse: Option<sparse::Tuples>,
     pub(crate) records: values::Records<'a>,
@@ -254,9 +255,17 @@ impl Layout<'_> {
                     .rev()
                     .map(|(param, sort)| {
                         let (size, value) = if let Some(layout) = self.indexed.get(sort.as_str()) {
-                            (layout.count, layout.decode(instance % layout.count, &atoms))
+                            let allowed = self.refined.get(sort.as_str());
+                            let size = allowed.map_or(layout.count, |codes| codes.len());
+                            let ordinal = instance % size;
+                            let rank =
+                                allowed.map_or(ordinal, |codes| (codes[ordinal] - 1) as usize);
+                            (size, layout.decode(rank, &atoms))
                         } else {
-                            let domain = &self.sorts[sort.as_str()];
+                            let domain = self.refined.get(sort.as_str()).map_or_else(
+                                || self.sorts[sort.as_str()].as_slice(),
+                                AsRef::as_ref,
+                            );
                             (domain.len(), atom(domain[instance % domain.len()]))
                         };
                         instance /= size;
@@ -365,9 +374,9 @@ fn search_witness(
     budget: SearchBudget,
     force_argument_search: bool,
 ) -> Result<WitnessResult, Unsupported> {
-    let target = if question == rmodel::DECLARATIONS {
+    let target = if question == idealis_syntax::DECLARATIONS {
         Target::Declarations
-    } else if question == rmodel::SCOPE {
+    } else if question == idealis_syntax::SCOPE {
         Target::Scope
     } else if let Some(index) = model.checks.iter().position(|check| check.name == question) {
         Target::State(index)

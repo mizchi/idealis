@@ -13,7 +13,9 @@ pub mod itf;
 mod temporal;
 pub(crate) use temporal::rprob_temporal_answer;
 mod validation;
-pub use boundaries::{boundary_cases, boundary_go, boundary_typescript};
+pub use boundaries::{
+    boundary_cases, boundary_go, boundary_typescript, data_boundary_cases, data_boundary_typescript,
+};
 pub use branch_map::{BranchMap, generate as generate_branch_map};
 pub use validation::{Session, ValidationError, Validator};
 

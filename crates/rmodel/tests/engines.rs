@@ -196,11 +196,11 @@ fn both_engines_give_the_expected_verdicts() {
             assert_eq!(explicit.verdict, want, "{file} {} explicit", check.name);
             // The SAT bound covers the explicit search's depth.
             assert!(
-                (explicit.depth as usize) < model.scope.steps,
+                (explicit.depth as usize) < rmodel::alloy_steps(&model),
                 "{file} {}: depth {} needs more than {} steps",
                 check.name,
                 explicit.depth,
-                model.scope.steps
+                rmodel::alloy_steps(&model)
             );
             assert_eq!(
                 sat(&model, &alloy, check),
@@ -321,14 +321,13 @@ fn malformed_models_are_rejected() {
         ("action a() { r' = r }", "is not a var"),
         ("action a(x: A) { v' = x -> x }", "another arity"),
         ("invariant I { all v: A | some v }", "shadows"),
-        ("invariant I { #v < 9 }", "literal 9"),
         ("sig A", "duplicate name A"),
     ] {
         let error = rmodel::parse(&format!("{base}{body}{scope}")).unwrap_err();
         assert!(error.message.contains(needle), "{body}: {error}");
     }
     assert!(rmodel::parse("model M\nsig A\nscope A = 8, steps = 3").is_err());
-    assert!(rmodel::parse("model M\nsig A\nscope A = 2").is_err());
+    assert!(rmodel::parse("model M\nsig A\nscope A = 2").is_ok());
     assert!(rmodel::parse("model M\nsig A\nsig B\nscope A = 2, steps = 3").is_err());
 }
 

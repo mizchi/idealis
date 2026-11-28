@@ -19,7 +19,7 @@ pub(crate) fn validate_binding(model: &Model, expression: &Expr) -> Result<(), E
     .expression(expression)
 }
 
-pub(crate) fn validate(model: &Model, limits: RangeInclusive<i64>) -> Result<(), Error> {
+pub fn validate(model: &Model, limits: RangeInclusive<i64>) -> Result<(), Error> {
     let check = Arithmetic { model, limits };
     if let Some((lo, hi)) = model.scope.ints {
         check.require((i128::from(lo), i128::from(hi)), "integer scope")?;

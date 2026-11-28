@@ -3,18 +3,20 @@
 // crates use for it, so a crate that drifts from the shared meaning is
 // found against one definition.
 import "Schema.pkl" as s
+import "pkl:json"
 
 local ralloy = "crates/ralloy/src/lib.rs"
 local rtlc = "crates/rtlc/src/safety.rs"
 local roracle = "crates/roracle/src/report.rs"
-local rmodel = "crates/rmodel/src/syntax.rs"
+local rmodel = "crates/idealis-syntax/src/syntax.rs"
 local report = "spec/models/roracle-report.model"
 local compare = "spec/models/roracle-compare.model"
+local toolchain = (new json.Parser {}).parse(read("toolchain.json").text).spec
 
 spec: s.Spec = new {
   id = "idealis"
   name = s.text("idealis の語彙", "The idealis vocabulary")
-  groups { "探索の範囲"; "判定"; "比較"; "モデル" }
+  groups { "探索の範囲"; "判定"; "比較"; "モデル"; toolchain.name.ja }
   terms {
     new {
       id = "search.complete"
@@ -370,6 +372,26 @@ spec: s.Spec = new {
         "The range checked: atom counts, integer bit width, steps. Every verdict is about this range.",
       )
       code { s.code(ralloy, "Scope"); s.code(rmodel, "Scope") }
+    }
+    for (term in toolchain.terms) {
+      new s.VocabularyTerm {
+        id = term.id
+        kind = term.kind
+        group = term.group
+        name = s.text(term.name.ja, term.name.en)
+        definition = s.text(term.definition.ja, term.definition.en)
+        code {
+          for (ref in term.code) {
+            s.code(ref.path, ref.symbol)
+          }
+        }
+        flow = new {
+          role = term.flow.role
+          input { for (id in term.flow.input) { id } }
+          output { for (id in term.flow.output) { id } }
+          comparedWith { for (id in term.flow.comparedWith) { id } }
+        }
+      }
     }
   }
   rules {

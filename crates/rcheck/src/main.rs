@@ -1,6 +1,7 @@
-//! rcheck <model> [--checker auto|reference|explicit|sat|rprob|all] [--question NAME] [--max-states N]
+//! rcheck <model> [--checker auto|reference|explicit|sat|rprob|all] [--question NAME] [--max-states N] [--sat-steps N]
 //! rcheck capabilities <model>
-//! rcheck generate <model> rust|typescript|go|moonbit|ir|schema|states|glossary|pbt-cases|pbt-typescript|pbt-go|branch-map
+//! rcheck refinements <model> [--type NAME] [--max-work N]
+//! rcheck generate <model> rust|typescript|go|moonbit|ir|schema|states|glossary|glossary-localized|dictionary|pbt-cases|pbt-typescript|pbt-go|pbt-data-cases|pbt-data-typescript|branch-map
 //! rcheck generate <project> rust|typescript|go|moonbit|schema --public
 //! rcheck component <component.json>
 //! rcheck contracts <project.rmodel.json> [--max-states N] [--max-arguments N]
@@ -17,10 +18,12 @@
 //! rcheck checker-request <model> <question> [--max-states N]
 //! rcheck checker-verify <request.json> <reply.json|->
 //! rcheck traceability <spec.json> (--rule ID | --check MODEL CHECK) [--root DIR] [--document PATH] [--max-states N]
+//! rcheck impact <model> <state> [--spec SPEC.json [--root DIR]]
 //! Answers every question of an rmodel model, or one, and prints JSON. Exits
 //! 1 when two definite answers disagree, 2 on a usage or model error.
 use rcheck::{Selection, Verdict};
 mod capabilities;
+mod impact;
 mod lean_oracle;
 mod traceability;
 
@@ -45,10 +48,23 @@ fn main() {
         println!("{}", serde_json::to_string_pretty(&report).expect("JSON"));
         return;
     }
+    if let [command, path, flags @ ..] = arguments.as_slice()
+        && command == "refinements"
+    {
+        check_refinements(path, flags);
+        return;
+    }
     if let [command, spec, flags @ ..] = arguments.as_slice()
         && command == "traceability"
     {
         traceability::run(spec, flags);
+        return;
+    }
+    if let [command, path, state, flags @ ..] = arguments.as_slice()
+        && command == "impact"
+    {
+        let report = impact::run(path, state, flags).unwrap_or_else(|error| fail(&error));
+        println!("{}", serde_json::to_string_pretty(&report).expect("JSON"));
         return;
     }
     if let Some((command, args)) = arguments.split_first()
@@ -275,6 +291,12 @@ fn main() {
             println!("{}", serde_json::to_string_pretty(&map).expect("JSON"));
             return;
         }
+        if target == "dictionary" && !public {
+            let report =
+                rcheck::project::dictionary_report(path).unwrap_or_else(|error| fail(&error));
+            println!("{}", serde_json::to_string_pretty(&report).expect("JSON"));
+            return;
+        }
         let (model, source) = if public {
             let (mut model, exports) = rcheck::project::load_public_binding_source(path)
                 .unwrap_or_else(|error| fail(&error));
@@ -282,6 +304,8 @@ fn main() {
                 .actions
                 .retain(|action| exports.contains(&action.name));
             (model, None)
+        } else if matches!(target.as_str(), "glossary" | "glossary-localized") {
+            (load_model(path).0.into_model(), None)
         } else {
             let (model, source) =
                 rcheck::project::load_model_source(path).unwrap_or_else(|error| fail(&error));
@@ -311,6 +335,13 @@ fn main() {
                     rcheck::conform::reachable_states(&model).unwrap_or_else(|error| fail(&error));
                 format!("{}\n", serde_json::to_string_pretty(&states).expect("JSON"))
             }
+            "pbt-data-cases" => {
+                let cases = rcheck::conform::data_boundary_cases(&model)
+                    .unwrap_or_else(|error| fail(&error));
+                format!("{}\n", serde_json::to_string_pretty(&cases).expect("JSON"))
+            }
+            "pbt-data-typescript" => rcheck::conform::data_boundary_typescript(&model)
+                .unwrap_or_else(|error| fail(&error)),
             "pbt-cases" => {
                 let cases =
                     rcheck::conform::boundary_cases(&model, rcheck::Budget::default().states)
@@ -327,6 +358,32 @@ fn main() {
                 "{}\n",
                 serde_json::to_string_pretty(&model.entity_definitions).expect("JSON")
             ),
+            "glossary-localized" => {
+                use std::collections::BTreeMap;
+                let mut glossary: BTreeMap<&str, BTreeMap<&str, &str>> = model
+                    .entity_translations
+                    .iter()
+                    .map(|(name, translations)| {
+                        (
+                            name.as_str(),
+                            translations
+                                .iter()
+                                .map(|(tag, text)| (tag.as_str(), text.as_str()))
+                                .collect(),
+                        )
+                    })
+                    .collect();
+                for (name, description) in &model.entity_definitions {
+                    glossary
+                        .entry(name)
+                        .or_default()
+                        .insert("default", description);
+                }
+                format!(
+                    "{}\n",
+                    serde_json::to_string_pretty(&glossary).expect("JSON")
+                )
+            }
             _ => usage(),
         };
         print!("{text}");
@@ -337,6 +394,7 @@ fn main() {
     let mut only = None;
     let mut expectation = None;
     let mut budget = rcheck::Budget::default();
+    let mut sat_steps = None;
     let mut rest = arguments.iter();
     while let Some(argument) = rest.next() {
         match argument.as_str() {
@@ -369,6 +427,15 @@ fn main() {
                     .and_then(|limit| limit.parse().ok())
                     .unwrap_or_else(|| fail("invalid --max-states"));
             }
+            "--sat-steps" if sat_steps.is_none() => {
+                sat_steps = Some(
+                    rest.next()
+                        .and_then(|limit| limit.parse::<usize>().ok())
+                        .filter(|&steps| steps > 0)
+                        .unwrap_or_else(|| fail("invalid --sat-steps")),
+                );
+            }
+            "--sat-steps" => fail("--sat-steps can be specified once"),
             _ if path.is_none() => path = Some(argument.clone()),
             _ => usage(),
         }
@@ -383,6 +450,10 @@ fn main() {
             eprintln!("omitted by the adapter: {} ({})", part.name, part.reason);
         }
         fail("checking requires a complete model; the IR has adapter omissions");
+    }
+    let mut model = model.into_model();
+    if let Some(steps) = sat_steps {
+        model.scope.steps = Some(steps);
     }
     let names: Vec<String> = match only {
         Some(name) => vec![name],
@@ -428,6 +499,36 @@ fn enforce_expectation(report: &rcheck::Report, name: &str, expected: Verdict) {
     if !matched {
         eprintln!("{}: no definitive {name} result", report.question);
         std::process::exit(3);
+    }
+}
+
+fn check_refinements(path: &str, flags: &[String]) {
+    let mut selected = None;
+    let mut budget = None;
+    let mut flags = flags.iter().map(String::as_str);
+    while let Some(flag) = flags.next() {
+        let value = flags.next().unwrap_or_else(|| usage());
+        match flag {
+            "--type" if selected.is_none() => selected = Some(value),
+            "--max-work" if budget.is_none() => {
+                budget = Some(value.parse().unwrap_or_else(|_| fail("invalid --max-work")));
+            }
+            _ => usage(),
+        }
+    }
+    let budget = budget.unwrap_or(rcheck::refinements::DEFAULT_WORK);
+    let report = if path.ends_with(".json") && !rcheck::project::is_manifest(path) {
+        let (model, _) = load_model(path);
+        // Adapter omissions apply to properties. Record declarations are validated on import.
+        rcheck::refinements::check(&model, selected, budget)
+    } else {
+        rcheck::project::check_refinements(path, selected, budget)
+    }
+    .unwrap_or_else(|error| fail(&error));
+    println!("{}", serde_json::to_string_pretty(&report).expect("JSON"));
+    let code = report.exit_code();
+    if code != 0 {
+        std::process::exit(code);
     }
 }
 
@@ -666,9 +767,10 @@ fn dead_code(args: &[String]) {
 }
 
 const USAGE: &str = "Usage:
-  rcheck <model> [--checker auto|reference|explicit|sat|rprob|all] [--question NAME] [--max-states N]
+  rcheck <model> [--checker auto|reference|explicit|sat|rprob|all] [--question NAME] [--max-states N] [--sat-steps N]
          [--expect holds|violated|reachable|unreachable]
   rcheck capabilities <model>
+  rcheck refinements <model> [--type NAME] [--max-work N]
   rcheck generate <model> <target>
   rcheck generate <project> rust|typescript|go|moonbit|schema --public
   rcheck component <component.json>
@@ -688,11 +790,12 @@ const USAGE: &str = "Usage:
   rcheck checker-verify <request.json> <reply.json|->
   rcheck traceability <spec.json> (--rule ID | --check MODEL CHECK)
          [--root DIR] [--document PATH] [--max-states N]
+  rcheck impact <model> <state> [--spec SPEC.json [--root DIR]]
 
 Model inputs: .ideal source (.model also accepted), .rmodel.json project,
               or JSON IR (except for generate).
-Generation targets: rust, typescript, go, moonbit, ir, schema, states, glossary,
-                    pbt-cases, pbt-typescript, pbt-go, branch-map";
+Generation targets: rust, typescript, go, moonbit, ir, schema, states, glossary, glossary-localized, dictionary,
+                    pbt-cases, pbt-typescript, pbt-go, pbt-data-cases, pbt-data-typescript, branch-map";
 
 fn usage() -> ! {
     fail(USAGE)

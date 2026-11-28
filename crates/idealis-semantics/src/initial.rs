@@ -1,5 +1,5 @@
 //! Initial constraints that bind relations without traversing candidates.
-use crate::{Compare, Expr, Formula, Model};
+use idealis_syntax::{Compare, Expr, Formula, Model};
 use std::collections::BTreeMap;
 
 /// Closed value expressions can be evaluated before any relation is bound.
@@ -33,7 +33,7 @@ fn closed_value(model: &Model, expression: &Expr) -> bool {
     }
 }
 
-pub(crate) fn fixed_initial_values(model: &Model) -> BTreeMap<&str, &Expr> {
+pub fn fixed_initial_values(model: &Model) -> BTreeMap<&str, &Expr> {
     fn collect<'a>(
         model: &Model,
         formula: &'a Formula,

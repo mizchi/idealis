@@ -25,6 +25,28 @@ itself, rendered to `docs/glossary.md`), `fixtures/rmodel/spec.pkl`, and
 and rtlc. The grammar design specification uses rmodel's reference evaluator.
 See [SUPPORT.md](SUPPORT.md).
 
+## Toolchain vocabulary
+
+The TLA+ toolchain terms are authored in [toolchain.ideal](../../spec/toolchain.ideal).
+`input`, `output`, and `compared_with` refer to term IDs in that vocabulary.
+The parser resolves those IDs and checks the allowed roles. The compiled
+specification JSON retains the references under `flow`. The main Pkl
+specification imports the compiled vocabulary.
+
+The same syntax can define model terms. The [lending dictionary](../../examples/model-patterns/library-membership/dictionary.ideal)
+uses `kind = state` and `kind = entity`. Project manifests read the source
+directly. The Pkl rules import its generated specification JSON.
+
+```sh
+just vocabulary spec/toolchain.ideal
+just vocabulary spec/toolchain.ideal --uses safety-program
+```
+
+The second command lists producers, consumers, and tools that name the term
+as a comparison target. `just spec-write` regenerates both vocabulary JSON
+files before evaluating the main Pkl specification. `just spec-check` detects
+stale generated vocabulary.
+
 ## Clause reviews
 
 A rule with separately reviewable sentences can be declared as

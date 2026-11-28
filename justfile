@@ -281,6 +281,10 @@ spec-check:
 spec-write:
   cargo run --locked --quiet --manifest-path crates/idealis-spec/Cargo.toml --example spec_check -- --write
 
+[positional-arguments]
+vocabulary *args:
+  cargo run --locked --quiet --manifest-path crates/idealis-spec/Cargo.toml --example vocabulary -- "$@"
+
 rmodel-design-write:
   cargo run --locked --quiet --manifest-path crates/idealis-spec/Cargo.toml --example spec_check -- --rmodel-design --write
 
@@ -309,7 +313,15 @@ spec-drift:
 spec-drift-replay:
   env -u OPENROUTER_API_KEY pnpm exec jev-lint docs --replay --model jev-1.14.0 --document-manifest spec/documents.json --ledger .jev-lint/judgments/spec
 
-rmodel-test:
+idealis-language-test: (language-crate-test "idealis-syntax") (language-crate-test "idealis-semantics")
+
+[private]
+language-crate-test crate:
+  cargo fmt --manifest-path crates/{{crate}}/Cargo.toml -- --check
+  cargo clippy --all-targets --locked --manifest-path crates/{{crate}}/Cargo.toml -- -D warnings
+  cargo test --all-targets --locked --manifest-path crates/{{crate}}/Cargo.toml
+
+rmodel-test: idealis-language-test
   cargo fmt --manifest-path crates/rmodel/Cargo.toml -- --check
   cargo clippy --all-targets --locked --manifest-path crates/rmodel/Cargo.toml -- -D warnings
   cargo test --all-targets --locked --manifest-path crates/rmodel/Cargo.toml

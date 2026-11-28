@@ -348,6 +348,66 @@ fn entity_definitions_survive_ir_and_cannot_name_an_unknown_sort() {
 }
 
 #[test]
+fn localized_glossary_is_the_same_from_ideal_source_and_ir() {
+    let source = r#"model Ledger
+entity Account description = {
+  default: "Account",
+  ja: """残高を持つ口座。
+入出金で変わる。""",
+  "en-US": "An account that holds a balance."
+}
+entity Currency description = { en: "Currency" }
+scope Account = 1, Currency = 1, steps = 2
+"#;
+    let model = rmodel::parse(source).unwrap();
+    round_trip("localized glossary", &model);
+    let ir = rcheck::ir::to_ir(&model).unwrap();
+    let directory = std::env::temp_dir();
+    let name = format!("rcheck-localized-glossary-{}", std::process::id());
+    let ideal = directory.join(format!("{name}.ideal"));
+    let json = directory.join(format!("{name}.json"));
+    std::fs::write(&ideal, source).unwrap();
+    std::fs::write(&json, serde_json::to_vec(&ir).unwrap()).unwrap();
+    let generate = |path: &std::path::Path, target: &str| {
+        let output = std::process::Command::new(env!("CARGO_BIN_EXE_rcheck"))
+            .arg("generate")
+            .arg(path)
+            .arg(target)
+            .output()
+            .unwrap();
+        assert!(output.status.success(), "{:?}", output);
+        serde_json::from_slice::<serde_json::Value>(&output.stdout).unwrap()
+    };
+    let expected = serde_json::json!({
+        "Account": {
+            "default": "Account",
+            "en-us": "An account that holds a balance.",
+            "ja": "残高を持つ口座。\n入出金で変わる。"
+        },
+        "Currency": {"en": "Currency"}
+    });
+    let from_source = generate(&ideal, "glossary-localized");
+    let from_ir = generate(&json, "glossary-localized");
+    let legacy = generate(&ideal, "glossary");
+    std::fs::remove_file(ideal).unwrap();
+    std::fs::remove_file(json).unwrap();
+    assert_eq!(from_source, expected);
+    assert_eq!(from_ir, expected);
+    assert_eq!(legacy, serde_json::json!({ "Account": "Account" }));
+
+    let mut invalid = ir;
+    invalid.entity_translations.insert(
+        "Missing".into(),
+        [("ja".into(), "説明".into())].into_iter().collect(),
+    );
+    assert!(
+        rcheck::ir::from_ir(&invalid)
+            .unwrap_err()
+            .contains("unknown entity Missing")
+    );
+}
+
+#[test]
 fn the_corpus_round_trips() {
     let mut count = 0;
     for dir in ["fixtures/rmodel", "spec/models", "fixtures/rcheck"] {
@@ -409,7 +469,7 @@ fn malformed_ir_is_rejected() {
     ill_typed["relations"][0]["shape"]["to"] = "Nowhere".into();
     cases.push(("unknown sort", ill_typed, "unknown sig"));
     let mut steps = good.clone();
-    steps["scope"]["steps"] = 33.into();
+    steps["scope"]["steps"] = 0.into();
     cases.push(("trace scope", steps, "steps"));
     let mut sort_size = good.clone();
     sort_size["scope"]["sizes"]["User"] = 8.into();

@@ -455,12 +455,28 @@ const scopes: readonly CrateScope[] = [
     ],
   },
   {
-    name: "rmodel",
+    name: "idealis-syntax",
     evidence: [
       {
         path: "src/syntax.rs",
-        topic: "モデル言語の構文・型・actionの形の検査と拒否する入力",
+        topic: "Idealis のモデル構文と型検査",
+        context: ["src/lib.rs"],
       },
+    ],
+  },
+  {
+    name: "idealis-semantics",
+    evidence: [
+      {
+        path: "src/reference.rs",
+        topic: "検査済みモデルの有限探索、判定、反例とその再生",
+        context: ["src/reference/input.rs"],
+      },
+    ],
+  },
+  {
+    name: "rmodel",
+    evidence: [
       {
         path: "src/emit.rs",
         topic: "AlloyとTLA+への2つの写し方、暗黙のframeと多重度の意味",

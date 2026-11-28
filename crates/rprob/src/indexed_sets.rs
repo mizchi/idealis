@@ -3,7 +3,7 @@ use crate::{
     compile::{Environment, Predicate, Term},
     indexed_rows, sequences,
 };
-use rmodel::{Compare, SetOp};
+use idealis_syntax::{Compare, SetOp};
 use std::sync::Arc;
 
 pub(crate) enum Expression {

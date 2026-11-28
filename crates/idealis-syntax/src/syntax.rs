@@ -101,7 +101,7 @@ pub enum Expr {
 impl Expr {
     /// Value operands evaluated in the current binding scope. Conditions and
     /// comprehension predicates have their own control flow.
-    pub(crate) fn coverage_child(&self, index: usize) -> Option<&Self> {
+    pub fn coverage_child(&self, index: usize) -> Option<&Self> {
         match (self, index) {
             (Self::Record(_, values) | Self::Sequence(_, values), index) => values.get(index),
             (
@@ -185,15 +185,6 @@ pub enum Formula {
     Or(Box<Formula>, Box<Formula>),
     Implies(Box<Formula>, Box<Formula>),
     Quantified(Quantifier, String, String, Box<Formula>),
-}
-impl Formula {
-    pub(crate) fn tests_presence(&self) -> bool {
-        match self {
-            Self::Mult(Mult::Some, _) => true,
-            Self::And(parts) => parts.iter().any(Self::tests_presence),
-            _ => false,
-        }
-    }
 }
 #[derive(Clone, Debug)]
 pub struct Action {
@@ -289,10 +280,18 @@ pub struct Record {
     pub name: String,
     /// Field names and their sorts.
     pub fields: Vec<(String, String)>,
+    pub data: Option<DataKind>,
+    pub refinements: Vec<crate::Refinement>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DataKind {
+    Newtype,
+    Record,
 }
 
 impl Record {
-    pub(crate) fn field_index(&self, name: &str) -> Option<usize> {
+    pub fn field_index(&self, name: &str) -> Option<usize> {
         self.fields.iter().position(|(field, _)| field == name)
     }
 }
@@ -304,8 +303,8 @@ pub struct Scope {
     /// parameters and records. Values are mathematical; a state with an
     /// integer outside leaves the scope (plan 0103).
     pub ints: Option<(i64, i64)>,
-    /// The SAT engine's trace length.
-    pub steps: usize,
+    /// An optional legacy override of the SAT engine's trace length.
+    pub steps: Option<usize>,
 }
 #[derive(Clone, Debug)]
 pub struct Model {
@@ -313,6 +312,10 @@ pub struct Model {
     pub sigs: Vec<String>,
     /// Glossary text keyed by the entity's checked sort name.
     pub entity_definitions: BTreeMap<String, String>,
+    /// Translated glossary text keyed by sort name and normalized language tag.
+    pub entity_translations: BTreeMap<String, BTreeMap<String, String>>,
+    /// External vocabulary ID keyed by the declaration that gives it a formal meaning.
+    pub term_bindings: BTreeMap<String, String>,
     /// `enum Name = A | B`: named atoms, one each, with no scope (0093).
     pub enums: Vec<(String, Vec<String>)>,
     /// `type Party = Person + Org`: a union of signatures and enums with no
@@ -336,6 +339,24 @@ pub struct Model {
 impl Model {
     pub fn relation(&self, name: &str) -> Option<&Relation> {
         self.relations.iter().find(|relation| relation.name == name)
+    }
+    pub fn term_target_kind(&self, name: &str) -> Option<&'static str> {
+        if let Some(relation) = self.relation(name) {
+            Some(if relation.var { "state" } else { "relation" })
+        } else if self.sigs.iter().any(|sort| sort == name)
+            || self.enums.iter().any(|(sort, _)| sort == name)
+        {
+            Some("entity")
+        } else if self.actions.iter().any(|action| action.name == name) {
+            Some("action")
+        } else if self.checks.iter().any(|check| check.name == name)
+            || self.transitions.iter().any(|check| check.name == name)
+            || self.temporal.iter().any(|check| check.name == name)
+        {
+            Some("check")
+        } else {
+            None
+        }
     }
     /// The enum a member name belongs to.
     pub fn member(&self, name: &str) -> Option<&str> {
@@ -368,6 +389,12 @@ impl Model {
             }
         }
     }
+    pub fn has_refinements(&self) -> bool {
+        self.records
+            .iter()
+            .any(|record| !record.refinements.is_empty())
+    }
+
     pub fn record(&self, name: &str) -> Option<&Record> {
         self.records.iter().find(|record| record.name == name)
     }
@@ -388,7 +415,7 @@ impl Model {
     pub fn has_values(&self) -> bool {
         self.scope.ints.is_some() || !self.records.is_empty() || self.has_structures()
     }
-    pub(crate) fn uses_nat(&self) -> bool {
+    pub fn uses_nat(&self) -> bool {
         self.declared_sorts().any(|sort| sort == NAT)
     }
     fn declared_sorts(&self) -> impl Iterator<Item = &str> {
@@ -466,15 +493,33 @@ const KEYWORDS: &[&str] = &[
     "none",
 ];
 const MAX_SCOPE: usize = 7;
-const MAX_STEPS: usize = 32;
 
 fn valid_int_scope(low: i64, high: i64) -> bool {
     high.checked_sub(low)
         .is_some_and(|width| (0..20).contains(&width))
 }
-const MAX_LITERAL: i64 = 7;
+const TRIPLE_QUOTE: &[char] = &['"', '"', '"'];
+// No ordinary token can begin with a newline. Keep block strings distinct
+// from quoted reasons and the legacy one-line entity syntax.
+const BLOCK_STRING_TOKEN: char = '\n';
 
 fn definition_token(characters: &[char], position: &mut usize) -> Result<String, Error> {
+    if characters[*position..].starts_with(TRIPLE_QUOTE) {
+        *position += TRIPLE_QUOTE.len();
+        let mut token = String::from(BLOCK_STRING_TOKEN);
+        while let Some(&character) = characters.get(*position) {
+            if characters[*position..].starts_with(TRIPLE_QUOTE) {
+                *position += TRIPLE_QUOTE.len();
+                return Ok(token);
+            }
+            *position += 1;
+            if character == '\r' && characters.get(*position) == Some(&'\n') {
+                continue;
+            }
+            token.push(character);
+        }
+        return Err(Error::syntax("unterminated triple-quoted description"));
+    }
     *position += 1;
     // The prefix distinguishes a definition token from syntax and names.
     let mut token = String::from("\"");
@@ -500,6 +545,37 @@ fn definition_token(characters: &[char], position: &mut usize) -> Result<String,
 
 fn definition_character(c: char) -> bool {
     !c.is_control() && !matches!(c, '\u{2028}' | '\u{2029}')
+}
+
+fn valid_definition(text: &str) -> bool {
+    !text.trim().is_empty()
+        && text
+            .chars()
+            .all(|c| c == '\n' || c == '\t' || definition_character(c))
+}
+
+fn valid_language_tag(tag: &str) -> bool {
+    let mut parts = tag.split('-');
+    let first = parts.next().unwrap_or_default();
+    (1..=8).contains(&first.len())
+        && first.bytes().all(|c| c.is_ascii_lowercase())
+        && parts.all(|part| {
+            (1..=8).contains(&part.len())
+                && part
+                    .bytes()
+                    .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit())
+        })
+}
+
+/// IDs shared by `.ideal` terms and the specification vocabulary.
+pub fn valid_term_id(id: &str) -> bool {
+    id.as_bytes().first().is_some_and(u8::is_ascii_lowercase)
+        && id.split('.').all(|part| {
+            !part.is_empty()
+                && part
+                    .bytes()
+                    .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
+        })
 }
 
 fn tokens(source: &str) -> Result<(Vec<String>, Vec<usize>), ParseDiagnostic> {
@@ -584,6 +660,7 @@ fn lex(source: &str, component: bool) -> Result<(Vec<String>, Vec<usize>), Parse
 #[derive(Default)]
 struct Locations {
     named: BTreeMap<String, usize>,
+    terms: BTreeMap<String, usize>,
     facts: Vec<usize>,
     init: Vec<usize>,
     scope: Option<usize>,
@@ -677,6 +754,9 @@ impl Locations {
     }
 }
 
+pub(crate) mod vocabulary;
+
+#[derive(Default)]
 struct Parser {
     tokens: Vec<String>,
     offsets: Vec<usize>,
@@ -691,6 +771,7 @@ struct Parser {
     nodes: usize,
     /// Declared records and their field names, for record literals.
     records: BTreeMap<String, Vec<String>>,
+    newtypes: BTreeSet<String>,
 }
 /// Nesting and operator chains are bounded, so neither the parser nor the
 /// checks after it can exhaust the stack.
@@ -736,6 +817,17 @@ impl Parser {
         Ok(token)
     }
 
+    fn term_id(&mut self) -> Result<String, Error> {
+        let id = self
+            .peek()
+            .strip_prefix('"')
+            .filter(|id| valid_term_id(id))
+            .ok_or_else(|| Error::syntax("expected a quoted term ID"))?
+            .to_owned();
+        self.position += 1;
+        Ok(id)
+    }
+
     fn declared_name(&mut self) -> Result<String, Error> {
         let offset = self.offsets.get(self.position).copied();
         let name = self.name()?;
@@ -772,6 +864,8 @@ impl Parser {
             name: self.name()?,
             sigs: Vec::new(),
             entity_definitions: BTreeMap::new(),
+            entity_translations: BTreeMap::new(),
+            term_bindings: BTreeMap::new(),
             enums: Vec::new(),
             sums: Vec::new(),
             records: Vec::new(),
@@ -789,7 +883,7 @@ impl Parser {
             scope: Scope {
                 sizes: BTreeMap::new(),
                 ints: None,
-                steps: 0,
+                steps: None,
             },
         };
         let mut scoped = false;
@@ -798,6 +892,16 @@ impl Parser {
             self.nodes = 0;
             let start = self.position;
             match self.peek() {
+                "term" => {
+                    self.position += 1;
+                    let id = self.term_id()?;
+                    self.expect("for")?;
+                    let target = self.name()?;
+                    if model.term_bindings.insert(target.clone(), id).is_some() {
+                        return Err(Error::syntax(format!("more than one term binds {target}")));
+                    }
+                    self.locations.terms.insert(target, self.offsets[start]);
+                }
                 "derive" => {
                     self.position += 1;
                     let name = self.name()?;
@@ -857,22 +961,33 @@ impl Parser {
                     }
                     model.variants.push(Variant { name, cases });
                 }
-                "record" => {
+                "record" | "data" => {
+                    let data = self.peek() == "data";
                     self.position += 1;
                     let name = self.name()?;
-                    self.expect("{")?;
-                    let mut fields = Vec::new();
-                    while !self.take("}") {
-                        if !fields.is_empty() {
-                            self.expect(",")?;
-                            if self.take("}") {
-                                break;
-                            }
-                        }
-                        let field = self.name()?;
-                        self.expect(":")?;
-                        fields.push((field, self.name()?));
+                    if data {
+                        self.expect("=")?;
                     }
+                    let mut fields = Vec::new();
+                    let kind = if data && self.peek() != "{" {
+                        fields.push(("value".into(), self.name()?));
+                        self.newtypes.insert(name.clone());
+                        Some(DataKind::Newtype)
+                    } else {
+                        self.expect("{")?;
+                        while !self.take("}") {
+                            if !fields.is_empty() {
+                                self.expect(",")?;
+                                if self.take("}") {
+                                    break;
+                                }
+                            }
+                            let field = self.name()?;
+                            self.expect(":")?;
+                            fields.push((field, self.name()?));
+                        }
+                        data.then_some(DataKind::Record)
+                    };
                     if fields.is_empty() {
                         return Err(Error::syntax(format!("record {name} has no fields")));
                     }
@@ -880,17 +995,24 @@ impl Parser {
                         name.clone(),
                         fields.iter().map(|(field, _)| field.clone()).collect(),
                     );
-                    model.records.push(Record { name, fields });
+                    let refinements = if data && self.take("where") {
+                        self.refinements()?
+                    } else {
+                        Vec::new()
+                    };
+                    model.records.push(Record {
+                        refinements,
+                        name,
+                        fields,
+                        data: kind,
+                    });
                 }
                 "sig" | "entity" => {
                     let entity = self.peek() == "entity";
                     self.position += 1;
                     let name = self.name()?;
-                    if entity && let Some(definition) = self.peek().strip_prefix('"') {
-                        model
-                            .entity_definitions
-                            .insert(name.clone(), definition.to_owned());
-                        self.position += 1;
+                    if entity {
+                        self.entity_description(&name, &mut model)?;
                     }
                     model.sigs.push(name);
                 }
@@ -1015,7 +1137,10 @@ impl Parser {
                     loop {
                         if self.take("steps") {
                             self.expect("=")?;
-                            model.scope.steps = self.size(MAX_STEPS)?;
+                            if model.scope.steps.is_some() {
+                                return Err(Error::syntax("duplicate scope for steps"));
+                            }
+                            model.scope.steps = Some(self.size(usize::MAX)?);
                         } else if self.peek() == INT {
                             self.position += 1;
                             self.expect("=")?;
@@ -1049,7 +1174,7 @@ impl Parser {
                 "fact" => self.locations.facts.resize(model.facts.len(), offset),
                 "init" => self.locations.init.resize(model.init.len(), offset),
                 "scope" => self.locations.scope = Some(offset),
-                "fairness" => {}
+                "fairness" | "term" => {}
                 _ => {
                     self.locations
                         .named
@@ -1057,11 +1182,71 @@ impl Parser {
                 }
             }
         }
-        if !scoped || model.scope.steps == 0 {
-            return Err(Error::syntax("the model needs a scope with steps"));
-        }
         Ok(model)
     }
+
+    fn entity_description(&mut self, name: &str, model: &mut Model) -> Result<(), Error> {
+        if let Some(definition) = self.peek().strip_prefix('"') {
+            model
+                .entity_definitions
+                .insert(name.to_owned(), definition.to_owned());
+            self.position += 1;
+            return Ok(());
+        }
+        if !self.take("description") {
+            return Ok(());
+        }
+        self.expect("=")?;
+        if !self.take("{") {
+            model
+                .entity_definitions
+                .insert(name.to_owned(), self.description_text()?);
+            return Ok(());
+        }
+        let mut descriptions = BTreeMap::new();
+        loop {
+            let tag = if let Some(tag) = self.peek().strip_prefix('"') {
+                let tag = tag.to_owned();
+                self.position += 1;
+                tag
+            } else {
+                self.name()?
+            };
+            let tag = tag.to_ascii_lowercase();
+            self.expect(":")?;
+            let text = self.description_text()?;
+            if descriptions.insert(tag.clone(), text).is_some() {
+                return Err(Error::syntax(format!("duplicate description for {tag}")));
+            }
+            if self.take("}") {
+                break;
+            }
+            self.expect(",")?;
+            if self.take("}") {
+                break;
+            }
+        }
+        if let Some(default) = descriptions.remove("default") {
+            model.entity_definitions.insert(name.to_owned(), default);
+        }
+        if !descriptions.is_empty() {
+            model
+                .entity_translations
+                .insert(name.to_owned(), descriptions);
+        }
+        Ok(())
+    }
+
+    fn description_text(&mut self) -> Result<String, Error> {
+        let text = self
+            .peek()
+            .strip_prefix(['"', BLOCK_STRING_TOKEN])
+            .ok_or_else(|| Error::syntax("expected a quoted description"))?
+            .to_owned();
+        self.position += 1;
+        Ok(text)
+    }
+
     fn signed(&mut self) -> Result<i64, Error> {
         if !self.take("-") {
             return self.number();
@@ -1075,11 +1260,51 @@ impl Parser {
     }
     fn size(&mut self, maximum: usize) -> Result<usize, Error> {
         let value = self.number()?;
-        if value < 1 || value as usize > maximum {
-            return Err(Error::syntax(format!("size {value} outside 1..={maximum}")));
-        }
-        Ok(value as usize)
+        usize::try_from(value)
+            .ok()
+            .filter(|size| (1..=maximum).contains(size))
+            .ok_or_else(|| Error::syntax(format!("size {value} outside 1..={maximum}")))
     }
+
+    fn refinements(&mut self) -> Result<Vec<crate::Refinement>, Error> {
+        self.expect("{")?;
+        let mut clauses = Vec::new();
+        loop {
+            self.charge_nodes(1)?;
+            let left = self.refinement_operand()?;
+            let op = crate::Refinement::operator(self.peek())
+                .ok_or_else(|| Error::syntax("expected a numeric comparison in where"))?;
+            self.position += 1;
+            let right = self.refinement_operand()?;
+            clauses.push(crate::Refinement { left, op, right });
+            if self.take("}") {
+                return Ok(clauses);
+            }
+            if !self.take("and") {
+                self.expect(",")?;
+                if self.take("}") {
+                    return Ok(clauses);
+                }
+            }
+        }
+    }
+
+    fn refinement_operand(&mut self) -> Result<crate::RefinementOperand, Error> {
+        use crate::RefinementOperand;
+        if self.peek().starts_with(|c: char| c.is_ascii_digit()) || self.peek() == "-" {
+            let negative = self.take("-");
+            let n = self.number()?;
+            return Ok(RefinementOperand::Literal(if negative { -n } else { n }));
+        }
+        let mut path = vec![self.name()?];
+        while self.take(".") {
+            Self::chain(path.len() + 1)?;
+            self.charge_nodes(1)?;
+            path.push(self.name()?);
+        }
+        Ok(RefinementOperand::Field(path))
+    }
+
     fn block(&mut self) -> Result<Vec<Formula>, Error> {
         self.expect("{")?;
         self.block_body()
@@ -1848,6 +2073,11 @@ impl Parser {
                     arg.ok_or_else(|| Error::syntax("expected an argument"))
                 };
                 let call = match name.as_str() {
+                    _ if self.newtypes.contains(&name) => {
+                        let value = argument
+                            .ok_or_else(|| Error::syntax(format!("{name} expects one argument")))?;
+                        Expr::Record(name, vec![*value])
+                    }
                     "len" => Expr::Length(required(argument)?),
                     "before" => Expr::At(Phase::Before, required(argument)?),
                     "after" => Expr::At(Phase::After, required(argument)?),
@@ -2768,14 +2998,7 @@ impl Checker<'_> {
                         Int::Count(expression) => {
                             self.expression(expression, bound, vars)?;
                         }
-                        // Counts are Alloy integers of a few bits; integer
-                        // values have their own scope (plan 0103).
-                        Int::Literal(value) => {
-                            if self.model.scope.ints.is_none() && *value > MAX_LITERAL {
-                                return Err(Error::syntax(format!(
-                                    "literal {value} above {MAX_LITERAL}"
-                                )));
-                            }
+                        Int::Literal(_) => {
                             if !counts && self.model.scope.ints.is_none() {
                                 return Err(Error::kind(
                                     "an integer value needs a scope Int = lo..hi",
@@ -2917,6 +3140,7 @@ pub(crate) fn parse(
         depth: 0,
         nodes: 0,
         records: BTreeMap::new(),
+        newtypes: BTreeSet::new(),
     };
     let mut model = parser.model().map_err(|error| ParseDiagnostic {
         error,
@@ -2951,13 +3175,14 @@ pub(crate) fn parse(
     Ok(crate::LocatedModel {
         model,
         declarations: parser.locations.named,
+        term_locations: parser.locations.terms,
         state_reads: state_reads.into_inner(),
         update_branches: parser.locations.update_branches,
     })
 }
 
 /// Parse an observation predicate in the same environment as an action-scoped transition.
-pub(crate) fn transition_predicate(
+pub fn transition_predicate(
     model: &Model,
     action: &Action,
     source: &str,
@@ -2984,6 +3209,12 @@ pub(crate) fn transition_predicate(
                     record.fields.iter().map(|(name, _)| name.clone()).collect(),
                 )
             })
+            .collect(),
+        newtypes: model
+            .records
+            .iter()
+            .filter(|record| record.data == Some(DataKind::Newtype))
+            .map(|record| record.name.clone())
             .collect(),
     };
     let mut formula = parser.formula()?;
@@ -3167,6 +3398,13 @@ fn inspect_tree(model: &Model) -> Result<BTreeSet<String>, Error> {
     for record in &model.records {
         names.extend(record.fields.iter().map(|(_, sort)| sort.clone()));
     }
+    names.extend(model.sequences.iter().map(|seq| seq.element.clone()));
+    names.extend(
+        model
+            .variants
+            .iter()
+            .flat_map(|variant| variant.cases.iter().filter_map(|case| case.payload.clone())),
+    );
     for (_, expression) in &model.derivations {
         inspect_expression(expression, &mut nodes, 0, &mut names)?;
     }
@@ -3214,11 +3452,8 @@ pub(crate) fn validate(mut model: Model) -> Result<Model, Error> {
             .enums
             .push((BOOL.to_owned(), vec!["false".into(), "true".into()]));
     }
-    if model.scope.steps == 0 {
-        return Err(Error::syntax("the model needs a scope with steps"));
-    }
-    if model.scope.steps > MAX_STEPS {
-        return Err(Error::syntax(format!("steps outside 1..={MAX_STEPS}")));
+    if model.scope.steps == Some(0) {
+        return Err(Error::syntax("steps must be positive"));
     }
     for (name, &size) in &model.scope.sizes {
         if !(1..=MAX_SCOPE).contains(&size) {
@@ -3315,6 +3550,23 @@ fn check_in(
     }
     for record in &model.records {
         locations.enter(&record.name);
+        crate::refinement::validate(model, record)?;
+        match record.data {
+            Some(DataKind::Newtype) if !matches!(record.fields.as_slice(), [(field, _)] if field == "value") =>
+            {
+                return Err(Error::kind(format!(
+                    "{}: a newtype needs exactly one value field",
+                    record.name
+                )));
+            }
+            Some(DataKind::Record) if record.fields.is_empty() => {
+                return Err(Error::kind(format!(
+                    "{}: data record needs at least one field",
+                    record.name
+                )));
+            }
+            _ => {}
+        }
         let mut fields = BTreeSet::new();
         for (field, _) in &record.fields {
             if !fields.insert(field) {
@@ -3339,10 +3591,42 @@ fn check_in(
         if !sigs.contains(name.as_str()) {
             return Err(Error::kind(format!("definition for unknown entity {name}")));
         }
-        if definition.trim().is_empty() || !definition.chars().all(definition_character) {
+        if !valid_definition(definition) {
             return Err(Error::kind(format!(
-                "{name}: expected a nonempty one-line definition"
+                "{name}: expected a nonempty description with printable text"
             )));
+        }
+    }
+    for (name, translations) in &model.entity_translations {
+        locations.enter(name);
+        if !sigs.contains(name.as_str()) {
+            return Err(Error::kind(format!(
+                "description for unknown entity {name}"
+            )));
+        }
+        if translations.is_empty() {
+            return Err(Error::kind(format!(
+                "{name}: expected at least one translation"
+            )));
+        }
+        for (tag, text) in translations {
+            if tag == "default" || !valid_language_tag(tag) {
+                return Err(Error::kind(format!("{name}: invalid language tag {tag:?}")));
+            }
+            if !valid_definition(text) {
+                return Err(Error::kind(format!(
+                    "{name}: expected a nonempty description with printable text for {tag}"
+                )));
+            }
+        }
+    }
+    for (target, id) in &model.term_bindings {
+        locations.current.set(locations.terms.get(target).copied());
+        if !valid_term_id(id) {
+            return Err(Error::kind(format!("invalid term ID {id:?}")));
+        }
+        if model.term_target_kind(target).is_none() {
+            return Err(Error::kind(format!("unknown term target {target}")));
         }
     }
     for sig in &model.sigs {
@@ -3665,96 +3949,11 @@ fn check_in(
 }
 
 /// Every atom in scope: signature sizes and enum members.
-pub(crate) fn atoms(model: &Model) -> usize {
+pub fn atoms(model: &Model) -> usize {
     model.scope.sizes.values().sum::<usize>()
         + model
             .enums
             .iter()
             .map(|(_, members)| members.len())
             .sum::<usize>()
-}
-
-/// Operands of counts in the finite atom fragment used by the Alloy lowering.
-#[derive(Default)]
-pub(crate) struct CollectionFeatures<'a> {
-    pub counts: Vec<&'a Expr>,
-    pub selection: bool,
-}
-
-pub(crate) fn collection_features(model: &Model, transitions_only: bool) -> CollectionFeatures<'_> {
-    fn formula<'a>(value: &'a Formula, features: &mut CollectionFeatures<'a>) {
-        match value {
-            Formula::Ints(_, left, right) => {
-                for side in [left, right] {
-                    match side {
-                        Int::Count(counted) => {
-                            features.counts.push(counted);
-                            expression(counted, features);
-                        }
-                        Int::Value(value) | Int::LocatedValue(value, _) => {
-                            expression(value, features)
-                        }
-                        Int::Literal(_) => {}
-                    }
-                }
-            }
-            Formula::Compare(_, left, right) => {
-                expression(left, features);
-                expression(right, features);
-            }
-            Formula::Or(left, right) | Formula::Implies(left, right) => {
-                formula(left, features);
-                formula(right, features);
-            }
-            Formula::Mult(_, value) | Formula::Empty(value) => expression(value, features),
-            Formula::Not(inner) | Formula::Quantified(_, _, _, inner) => formula(inner, features),
-            Formula::And(parts) => parts.iter().for_each(|part| formula(part, features)),
-            Formula::HasTag(..) => {}
-        }
-    }
-    fn expression<'a>(value: &'a Expr, features: &mut CollectionFeatures<'a>) {
-        match value {
-            Expr::Count(inner) => {
-                features.counts.push(inner);
-                expression(inner, features);
-            }
-            Expr::If(condition, yes, no) => {
-                formula(condition, features);
-                expression(yes, features);
-                expression(no, features);
-            }
-            Expr::Select(_, _, predicate) => {
-                features.selection = true;
-                formula(predicate, features);
-            }
-            Expr::At(_, inner) | Expr::Keys(inner) | Expr::Closure(inner) => {
-                expression(inner, features)
-            }
-            Expr::Binary(_, left, right) | Expr::ReachableFrom(left, right) => {
-                expression(left, features);
-                expression(right, features);
-            }
-            _ => {}
-        }
-    }
-    let mut features = CollectionFeatures::default();
-    if transitions_only {
-        for check in &model.transitions {
-            formula(&check.formula, &mut features);
-        }
-    } else {
-        for condition in model
-            .facts
-            .iter()
-            .chain(&model.init)
-            .chain(model.checks.iter().map(|check| &check.formula))
-            .chain(model.actions.iter().flat_map(|action| &action.guards))
-        {
-            formula(condition, &mut features);
-        }
-        for (_, value) in model.actions.iter().flat_map(|action| &action.assignments) {
-            expression(value, &mut features);
-        }
-    }
-    features
 }

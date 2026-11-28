@@ -70,7 +70,7 @@ pub(super) fn load(path: &Path) -> Result<Checked, String> {
     for (file, text) in &types {
         source.append(file.clone(), text.clone(), None)?;
     }
-    let interface_model = source.located_model(&interface.to_string_lossy())?;
+    let interface_model = source.parse_model(&interface.to_string_lossy())?;
     let base = &interface_model.model;
     if !base.facts.is_empty()
         || !base.init.is_empty()
@@ -144,7 +144,11 @@ pub(super) fn load(path: &Path) -> Result<Checked, String> {
             .collect(),
     };
     source.append(body.clone(), text.clone(), Some(local))?;
-    let model = source.model(&path.to_string_lossy())?;
+    // The host project supplies the dictionary after port and namespace resolution.
+    let model = source
+        .parse_model(&path.to_string_lossy())?
+        .model
+        .into_model();
     let prefix = format!("{namespace}_");
     if let Some(contract) = &manifest.contract {
         contract

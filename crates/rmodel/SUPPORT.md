@@ -7,7 +7,10 @@
 - [x] アダプターは `Model::value_types_in_dependency_order` でレコード・列・variant の宣言を値型の依存順に取得できる。[有限値の lowering](../rprob/src/compile.rs)
 
 - [x] `sig`（scopeでちょうどの大きさ、1〜7）、静的な`rel`と状態の`var`。単項（`set`・`lone`・`one`・`some`）と二項（`A -> m B`）の関係（0091）。
-- [x] `entity Account "説明"` は個体を持つ sort と任意の1行の用語定義を宣言する。型と意味は `sig` と共通。定義は Rust・TypeScript 型と用語集に反映する。[構文の照合テスト](tests/entity.rs)。
+- [x] `entity` は個体を持つ sort と任意の説明を宣言する。1行の説明、`description = """…"""`、言語タグ付きの説明を扱う。型と意味は `sig` と共通。説明は Rust・TypeScript 型と用語集に反映する。[構文の照合テスト](tests/entity.rs)。
+- [x] `term "id" for 宣言名` は用語 ID を個体型・状態・固定関係・操作・性質に結び付ける。宣言名は型検査し、プロジェクトの辞書との照合は rcheck が行う。[辞書の CLI テスト](../rcheck/tests/dictionary.rs)
+- [x] `data Amount = Nat` は名前付きの値を定義し、`Amount(1)` と `.value` を使う。フィールド付きの `data` も既存のレコード表現に落とす。[支払申請のモデル](../../examples/model-patterns/payment-data/payment.ideal)
+- [x] `data ... where` は、値自身の数値フィールドと整数リテラル、または二つの数値フィールドの比較を連言で指定する。参照評価器と Rust・TypeScript・Go・MoonBit の生成デコーダーで適用する。`scope` は有限探索の設定。TLA+ では絞り込んだ値域を使い、保存時の述語違反と整数スコープ逸脱を区別する。Alloy への変換は対象外。JSON Schema は構造を記述し、フィールド間の比較はデコーダーが検査する。[回帰試験](../rcheck/tests/data_types.rs)
 - [x] `enum Name = A | B`: 名前の付いた、ちょうど1つずつのatom。scopeを書かず、sigと同じく量化と関係の型に使う（0093）。
 - [x] `fact`（varを参照しない設定の制約）、`init`、引数付きの`action`。actionは連言で、`v' = 式`の代入は1つのvarに1回まで、右辺と条件にprimeを書けない。代入しないvarと`rel`は変わらない（0091）。
 - [x] TLA+ 変換では、`fact` の静的関係と `init` の状態変数について、無条件の等式や空集合条件から初期値を直接束縛する。値の領域・多重度と元の条件も検査する。関係に依存する値や論理和の制約では従来の列挙を使う。
@@ -31,6 +34,7 @@
 - [x] 二項関係の `left ++ right` は、右辺に現れるキーの行をすべて右辺の値で置き換える。右辺が空なら左辺を保つ。参照評価器・TLA+・Alloy で照合した。[関係の置き換え](../../fixtures/rmodel/relations/override.model)。
 - [x] `&` の両辺で対応する sort に包含関係があるとき、結果は狭い sort を採る。二項関係では左右の列ごとに判定する。[IR の回帰試験](../rcheck/tests/ir.rs)
 - [x] `invariant`（到達できる全状態）と`reachable`（到達できる状態がある）。関係の型と多重度を検査し、違反は組み込みの `Declarations` で報告する（0091）。
+- [x] `scope` は個体数や整数域を指定する。有限値域の指定が不要なモデルでは省略できる。経路長は SAT が決め、従来の `scope steps = N` も任意の指定として読める。数値比較のリテラルを収める Alloy の整数幅と SAT の上限は lowering で判断する。[回帰試験](../rcheck/tests/portable_syntax.rs)
 - [x] Alloyへの写し方（ralloyのSATで有界、stepsのlasso）とTLA+への写し方（rtlcで完全、`rel`はInitで列挙）。
 
 - [x] 参照評価器（`reference::evaluate`）: scopeの中を全列挙して、意味論の正本として判定を返す。空・成り立つ・破れる・到達できる・到達できない・未確定を区別し、破れる・到達できるには最短の深さを付ける（0097）。
@@ -64,6 +68,7 @@
 - [x] `transition` の先頭で `let` に式を束縛できる。明示した前後状態は型検査時の展開で保持する。束縛名は位相指定の外から参照し、`ticket.after(claimed)` のように前後の値を結合できる。[リングのスロット再利用](../../examples/model-patterns/worker-deque/ring-reuse.model)。
 - [x] `transition` 内の `unchanged(式)` を前後の等値比較へ展開する。引数は位相指定を含まない状態式。[構文の照合テスト](tests/behavior.rs)。
 
+- [x] Rust の生成器は予約語の識別子をエスケープし、JSON の名前をモデルと一致させる。[回帰試験](../rcheck/tests/portable_syntax.rs)
 - [x] 実装のためのbindings（`bindings`、0102）: JSONの形（atomは名前、Boolはboolean、recordはobject、二項関係は定義域のatomを鍵にしたobject）、JSON Schema（draft 2020-12）、Rustのtraitと型、TypeScriptの型とJSON Linesのdriver、Goのinterfaceと厳密なdecoder・`Serve`（0104、出力はgofmtの書式）、MoonBitのtraitと厳密なdecoder・`Server::handle`（0105、targetに依存しない）。参照評価器を1歩ずつ進める`reference::Machine`。 コマンド JSON では `kind` 引数を `$kind` に写し、操作タグの `kind` と区別する。[契約](src/bindings.rs)。
 
 - [x] `validate`（0108）: parserを通らない構文木（核のIRのJSONなど）を、parserと同じ型検査と大きさの上限で検査する。Boolは名前が現れたときに足す。
@@ -86,4 +91,4 @@
 - [x] 2つの写し方は構文木だけを共有し、互いの出力を使わない。
 - [x] 列挙範囲と演算の表現範囲を分ける。参照評価器は符号付き64ビットで表現できる算術を正確に評価する。TLA+ lowering は TLC に移植できる範囲 `-2147483647..=2147483647` を使う。型検査された式の範囲を各上限と比較し、超えうるモデルや lowering を拒否する。[0115 の結果](../../evals/iterations/0115-nat-validation.md)
 
-[構文と型](src/syntax.rs)、[写し方](src/emit.rs)、[照合テスト](tests/engines.rs)を参照。
+[構文と型](../idealis-syntax/src/syntax.rs)、[写し方](src/emit.rs)、[照合テスト](tests/engines.rs)を参照。

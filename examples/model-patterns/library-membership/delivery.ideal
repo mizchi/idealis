@@ -1,0 +1,13 @@
+var knownActiveMembers: set Member
+term "known-active-member" for knownActiveMembers
+init { knownActiveMembers = Member }
+
+// 未配信の停止は、正本から消えて貸出側に残っている会員で表す。
+behavior deliverSuspension(m: Member) {
+  guard { m not in activeMembers, m in knownActiveMembers }
+  update { knownActiveMembers = knownActiveMembers - m }
+}
+
+transition BorrowRequiresKnownEligibility on library_borrow {
+  m in before(knownActiveMembers)
+}

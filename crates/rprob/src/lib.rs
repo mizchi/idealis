@@ -19,7 +19,7 @@ pub use witness::{witness, witness_support, witness_with_budget};
 
 use compile::{Environment, Predicate, Term};
 use frontier::{BitmapLayout, Frontier};
-use rmodel::reference::{Outcome, Report, SearchBudget, StopReason, Verdict};
+use idealis_semantics::reference::{Outcome, Report, SearchBudget, StopReason, Verdict};
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -47,7 +47,7 @@ pub struct SafetyAnalysis {
 
 /// Check the finite state graph without evaluating temporal properties or fairness.
 pub fn analyze_safety(
-    model: &rmodel::Model,
+    model: &idealis_syntax::Model,
     max_states: usize,
 ) -> Result<SafetyAnalysis, Unsupported> {
     Ok(SafetyAnalysis {
@@ -61,7 +61,7 @@ pub fn analyze_safety(
 }
 
 /// Check whether the model can be lowered for finite safety exploration.
-pub fn safety_support(model: &rmodel::Model) -> Result<(), Unsupported> {
+pub fn safety_support(model: &idealis_syntax::Model) -> Result<(), Unsupported> {
     compile::lower_safety(model).map(|_| ())
 }
 
@@ -214,7 +214,7 @@ pub struct Compiled {
 
 impl Compiled {
     /// Lower a model produced by rmodel's checked parser.
-    pub fn new(model: &rmodel::Model) -> Result<Self, Unsupported> {
+    pub fn new(model: &idealis_syntax::Model) -> Result<Self, Unsupported> {
         if !model.temporal.is_empty() {
             return Err(Unsupported::new(
                 "temporal obligations are outside the finite atom fragment",

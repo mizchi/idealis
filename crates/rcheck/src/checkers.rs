@@ -316,12 +316,12 @@ impl Checker for Sat {
             return Support::No(error.message);
         }
         Support::Yes(Coverage::Bounded {
-            steps: model.scope.steps,
+            steps: rmodel::alloy_steps(model),
         })
     }
     fn answer(&self, model: &rmodel::Model, question: &Question, budget: Budget) -> Answer {
         let coverage = Coverage::Bounded {
-            steps: model.scope.steps,
+            steps: rmodel::alloy_steps(model),
         };
         let failed = |detail: String| Answer {
             detail: Some(detail),
@@ -331,31 +331,44 @@ impl Checker for Sat {
             Ok(alloy) => alloy,
             Err(error) => return failed(error.to_string()),
         };
-        let label = rmodel::alloy_label(&question.name);
-        let Some(index) = alloy
-            .commands()
-            .iter()
-            .position(|command| command.label == label)
-        else {
-            return failed(format!("no Alloy command {label}"));
+        let analyze = |name, work| {
+            let label = rmodel::alloy_label(name);
+            let index = alloy
+                .commands()
+                .iter()
+                .position(|command| command.label == label)
+                .ok_or_else(|| format!("no Alloy command {label}"))?;
+            alloy
+                .analyze(index, work)
+                .map_err(|error| error.to_string())
         };
-        let analysis = match alloy.analyze(index, budget.sat) {
+        let analysis = match analyze(&question.name, budget.sat) {
             Ok(analysis) => analysis,
-            Err(error) => return failed(error.to_string()),
+            Err(error) => return failed(error),
         };
         let verdict = match analysis.status {
             ralloy::Status::Counterexample => Verdict::Violated,
             ralloy::Status::NoCounterexample => Verdict::Holds,
             ralloy::Status::Instance => Verdict::Reachable,
-            // A check with no instance at all has unsatisfiable facts or
-            // initial states. A run with none cannot tell empty from
-            // unreachable; it answers unreachable within the bound.
-            ralloy::Status::NoInstance
-                if matches!(question.kind, Kind::Invariant | Kind::Transition) =>
-            {
-                Verdict::Empty
+            ralloy::Status::NoInstance if question.kind == Kind::Reachable => {
+                // An Alloy run can be unsatisfiable because its goal or the
+                // base model is empty. A check of Declarations distinguishes
+                // these cases in the same scope, for both legal and broken
+                // traces. Charge the extra query to the original allowance.
+                let remaining = budget.sat.saturating_sub(analysis.stats.work);
+                match analyze(rmodel::DECLARATIONS, remaining).map(|base| base.status) {
+                    Ok(ralloy::Status::NoInstance) => Verdict::Empty,
+                    Ok(ralloy::Status::Counterexample | ralloy::Status::NoCounterexample) => {
+                        Verdict::Unreachable
+                    }
+                    Ok(ralloy::Status::Unknown) => Verdict::Unknown,
+                    Ok(other) => {
+                        return failed(format!("unexpected Alloy Declarations result {other:?}"));
+                    }
+                    Err(error) => return failed(error),
+                }
             }
-            ralloy::Status::NoInstance => Verdict::Unreachable,
+            ralloy::Status::NoInstance => Verdict::Empty,
             ralloy::Status::Unknown => Verdict::Unknown,
         };
         let diagnostics = if verdict == Verdict::Unknown {

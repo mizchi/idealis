@@ -4,10 +4,8 @@ use crate::{
     compile::{Environment, Predicate},
     witness::{Call, Search},
 };
-use rmodel::{
-    FairnessKind, Model,
-    reference::{Outcome, SearchBudget, StopReason, Witness},
-};
+use idealis_semantics::reference::{Outcome, SearchBudget, StopReason, Witness};
+use idealis_syntax::{FairnessKind, Model};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::rc::Rc;
 

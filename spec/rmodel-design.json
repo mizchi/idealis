@@ -796,7 +796,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rmodel/src/syntax.rs",
+            "path": "crates/idealis-syntax/src/syntax.rs",
             "symbol": "entity_definitions"
           }
         ]
@@ -818,7 +818,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rmodel/src/reference.rs",
+            "path": "crates/idealis-semantics/src/reference.rs",
             "symbol": "enabled"
           }
         ]
@@ -972,7 +972,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rmodel/src/syntax.rs",
+            "path": "crates/idealis-syntax/src/syntax.rs",
             "symbol": "NAT"
           }
         ]
@@ -1016,7 +1016,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rmodel/src/structured.rs",
+            "path": "crates/idealis-syntax/src/structured.rs",
             "symbol": "Sequence"
           }
         ]
@@ -1038,7 +1038,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rmodel/src/structured.rs",
+            "path": "crates/idealis-syntax/src/structured.rs",
             "symbol": "Variant"
           }
         ]
@@ -1060,7 +1060,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rmodel/src/syntax.rs",
+            "path": "crates/idealis-syntax/src/syntax.rs",
             "symbol": "TemporalCheck"
           }
         ]
@@ -1082,7 +1082,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rmodel/src/syntax.rs",
+            "path": "crates/idealis-syntax/src/syntax.rs",
             "symbol": "TransitionCheck"
           }
         ]
@@ -1419,8 +1419,8 @@
       {
         "id": "RMODEL-ENTITY",
         "text": {
-          "ja": "個体型の宣言を型と用語の正本とする。同じ名前を二重に宣言した場合や存在しない型を参照した場合は拒否する。用語の説明は IR、Rust と TypeScript の型、用語集へ引き継ぐ。",
-          "en": "The entity declaration defines both its type and its term. Duplicate names and unknown type references are rejected. The definition carries through the IR, the Rust and TypeScript types, and the glossary."
+          "ja": "個体型の宣言を型と用語の正本とする。同じ名前を二重に宣言した場合や存在しない型を参照した場合は拒否する。複数行の用語説明と翻訳は IR、Rust と TypeScript の型、全言語の用語集へ引き継ぐ。",
+          "en": "The entity declaration defines both its type and its term. Duplicate names and unknown type references are rejected. Multiline definitions and translations carry through the IR, the Rust and TypeScript types, and the localized glossary."
         },
         "terms": [
           "entity"
@@ -1665,7 +1665,7 @@
       {
         "model": "spec/models/rmodel-behavior.model",
         "implementation": {
-          "path": "crates/rmodel/src/syntax.rs",
+          "path": "crates/idealis-syntax/src/syntax.rs",
           "symbol": "action"
         },
         "test": {
@@ -1676,7 +1676,7 @@
       {
         "model": "spec/models/rmodel-calibration.model",
         "implementation": {
-          "path": "crates/rmodel/src/reference.rs",
+          "path": "crates/idealis-semantics/src/reference.rs",
           "symbol": "steps"
         },
         "test": {

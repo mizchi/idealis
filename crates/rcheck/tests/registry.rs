@@ -466,3 +466,86 @@ fn sat_capacity_excludes_transition_commands_omitted_by_the_lowering() {
     };
     assert!(reasons[0].1.contains("counts exceed"), "{reasons:?}");
 }
+
+#[test]
+fn sat_distinguishes_an_empty_model_from_an_unreachable_goal() {
+    const SOURCE: &str = "model Selection
+enum Member = Ren
+var selected: lone Member
+init { no selected }
+reachable Selected { some selected }
+scope steps = 2";
+    let empty = SOURCE.replace(
+        "init { no selected }",
+        "init { no selected, some selected }",
+    );
+    let reached = SOURCE.replace(
+        "reachable Selected",
+        "behavior choose() { update { selected = Ren } }\nreachable Selected",
+    );
+    let no_config = SOURCE.replace(
+        "init { no selected }",
+        "fact { no Member }\ninit { no selected }",
+    );
+    let broken = "model Selection
+enum Member = Ren
+var selected: one Member
+init { selected = Ren }
+behavior forget() { update { selected = none } }
+reachable Selected { no selected }
+scope steps = 2";
+    for (source, expected) in [
+        (SOURCE, Verdict::Unreachable),
+        (&empty, Verdict::Empty),
+        (&no_config, Verdict::Empty),
+        (&reached, Verdict::Reachable),
+        (broken, Verdict::Unreachable),
+    ] {
+        let model = rmodel::parse(source).unwrap();
+        for checker in ["reference", "explicit", "sat", "rprob"] {
+            let report = rcheck::check(
+                &model,
+                "Selected",
+                &Selection::Named(checker.into()),
+                Budget::default(),
+            )
+            .unwrap();
+            assert_eq!(report.answers[0].verdict, expected, "{checker}: {source}");
+        }
+    }
+}
+
+#[test]
+fn sat_spends_only_the_remaining_budget_to_check_for_initial_states() {
+    let model = rmodel::parse(
+        "model Selection
+enum Member = Ren
+var selected: lone Member
+init { no selected }
+reachable Selected { some selected }
+scope steps = 2",
+    )
+    .unwrap();
+    let alloy = ralloy::Model::parse(&rmodel::to_alloy(&model)).unwrap();
+    let index = alloy
+        .commands()
+        .iter()
+        .position(|command| command.label == rmodel::alloy_label("Selected"))
+        .unwrap();
+    let run = alloy.analyze(index, Budget::default().sat).unwrap();
+    assert_eq!(run.status, ralloy::Status::NoInstance);
+    let report = rcheck::check(
+        &model,
+        "Selected",
+        &Selection::Named("sat".into()),
+        Budget {
+            sat: run.stats.work,
+            ..Budget::default()
+        },
+    )
+    .unwrap();
+    assert_eq!(report.answers[0].verdict, Verdict::Unknown);
+    let diagnostic = serde_json::to_value(&report.answers[0].diagnostics[0]).unwrap();
+    assert_eq!(diagnostic["kind"], "budget");
+    assert_eq!(diagnostic["resource"], "work");
+}

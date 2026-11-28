@@ -1,6 +1,6 @@
 //! Ordinals for scalar structured values whose full domain cannot fit in bits.
 //! Zero denotes absence. Every other code is one plus its domain ordinal.
-use rmodel::reference::Data;
+use idealis_semantics::reference::Data;
 use std::sync::Arc;
 
 pub(crate) enum Field {
@@ -107,6 +107,18 @@ impl Layout {
             },
             fields[field].1.bit_mask(),
         ))
+    }
+
+    pub(crate) fn record_field(&self, code: u64, index: usize) -> u64 {
+        let Kind::Record { fields, .. } = &self.kind else {
+            unreachable!("a record layout")
+        };
+        let stride: usize = fields[index + 1..]
+            .iter()
+            .map(|(_, field)| field.size())
+            .product();
+        let domain = &fields[index].1;
+        domain.code(((code - 1) as usize / stride) % domain.size())
     }
 
     pub(crate) fn sequence_element(&self) -> Option<(&Field, usize)> {

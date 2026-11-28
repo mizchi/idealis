@@ -7,7 +7,7 @@
 //! notes, method calls for set and relation operators, `S.forall(x => ...)`,
 //! `action a(x: T) = all { ... }` with an implicit frame, and `invariant` /
 //! `reachable` properties.
-use crate::syntax::{
+use idealis_syntax::{
     Arith, CheckKind, Compare, Expr, Formula, Int, IntCompare, Model, Mult, Quantifier, SetOp,
     Shape,
 };
@@ -128,8 +128,13 @@ impl QuintLike<'_> {
             .iter()
             .map(|(sig, size)| format!("{sig} = {size}"))
             .collect();
-        scope.push(format!("steps = {}", model.scope.steps));
-        out.push_str(&format!("  check {{ {} }}\n}}\n", scope.join(", ")));
+        if let Some(steps) = model.scope.steps {
+            scope.push(format!("steps = {steps}"));
+        }
+        if !scope.is_empty() {
+            out.push_str(&format!("  check {{ {} }}\n", scope.join(", ")));
+        }
+        out.push_str("}\n");
         out
     }
     fn is_atom(&self, expression: &Expr) -> bool {

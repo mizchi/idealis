@@ -62,7 +62,7 @@ rcheck witness-step examples/model-patterns/checkout/checkout.model capture \
 
 | 書きたいもの                 | 書き方                                                                                                                   |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| 名前と説明を持つドメイン用語 | `entity Worker "ロックを取得する作業者"`。説明は省略できる。                                                             |
+| 名前と説明を持つドメイン用語 | `entity Worker "作業者"`。複数行は `description = """…"""`、翻訳は `description = { ja: "…", en: "…" }`。                |
 | 個体の型                     | `sig Lock`、または説明のない `entity Lock`。個体数は `scope Lock = 1` で指定する。                                       |
 | 名前の付いた個体             | `enum Carrier = Post \| Courier`。各メンバーが一つの個体になる。                                                         |
 | 複数の型をまとめる           | `type Actor = Worker + Robot`。所属する個体は各型の和になる。                                                            |
@@ -113,7 +113,7 @@ behavior release(a: Actor, l: Lock) {
 
 invariant OnlyAuthorized { all l: Lock | l.holder in l.authorized }
 reachable Held { some holder }
-scope Worker = 1, Lock = 1, steps = 4
+scope Worker = 1, Lock = 1
 ```
 
 `OnlyAuthorized` は成立し、`Held` は取得操作1回で到達する。旧表記の `action` では条件と `holder' = 式` を同じブロックに書ける。
@@ -237,6 +237,10 @@ transition FreshCandidateClaimsItsTicket on claim {
 
 ## 値を扱う
 
+`data Amount = Nat` は `Amount(1)` で構築し、`amount.value` で中の値を読みます。同じ `Nat` を包む `Fee` とは別の型です。複数の値をまとめるときは `data Request = { amount: Amount, fee: Fee }` と書きます。[支払申請のモデル](../../examples/model-patterns/payment-data/payment.ideal)
+
+`data Amount = Nat where { value <= 1000 }` は支払額の上限を定義します。申請全体なら `data Request = { amount: Amount, fee: Fee } where { fee.value <= amount.value }` と書きます。試作では `Int`・`Nat` のフィールドを整数リテラルか別の数値フィールドと比較でき、複数の比較を `and` またはカンマで連ねられます。`scope Int = 0..2` は探索時に使う整数だけを指定します。[範囲付きの支払申請](../../examples/model-patterns/payment-data/payment-refined.ideal)
+
 レコードのフィールド名は型ごとに扱う。`Amount { units: Nat }` と `Receipt { units: Nat }` のように同じ名前を使える。`receipt.units` は左辺の型からフィールドを選ぶ。
 
 `lone` のレコードを数値比較に使うときは、存在を先に確認する。例として `some accepted implies accepted.revision >= minimum` がある。連言では `some accepted and accepted.revision >= minimum` の順に書く。遷移の更新後を読むときは `some after(accepted)` で更新後の存在を確認する。
@@ -275,7 +279,7 @@ scope Int = 0..2, steps = 3
 
 `guard { some at(log, 0) }` を置くと、`update` の `let first = at(log, 0)` を単一の値として扱える。タグ付きの要素なら `is(first, Tag)` で分岐できる。[終了マーカーの例](../../examples/model-patterns/subscriptions/delivery-ticket-drain.model)
 
-`Bounded` は成立し、`FirstEntry` は追加1回で到達する。 `scope` は有限モデルの範囲を決める。Alloy の `steps` は lasso の有界検査に使われる。エンジンごとの対応範囲と探索予算は個別に確認する。[対応範囲](SUPPORT.md)
+`Bounded` は成立し、`FirstEntry` は追加1回で到達する。 `scope` は有限モデルの範囲を決める。SAT の経路長は `rcheck <model> --checker sat --sat-steps N` で指定する。省略時は既定の4状態を使う。従来の `scope steps = N` も SAT の設定として読める。エンジンごとの対応範囲と探索予算は個別に確認する。[対応範囲](SUPPORT.md)
 
 初期値を `init { calls = Invocations[] }` のような閉じた式で固定すると、参照評価器は値域全体を展開せずにその値から進める。4種類・長さ4の列では341通りのうち空列から始め、1手で4件のバッチに到達した。自由な初期値は探索予算を使う。値域の実体化上限に達したものは、探索の完了と区別して報告される。[I/O バッチ](../../examples/model-patterns/node-event-loop/nested-io-batch.model)
 

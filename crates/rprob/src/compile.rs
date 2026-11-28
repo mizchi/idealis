@@ -3,7 +3,7 @@ use crate::{
     ParameterizedAction, Toggle, Unsupported, WordTest, WordUpdate, bits, indexed, indexed_rows,
     indexed_sets, sequences, sparse, temporal, values,
 };
-use rmodel::{
+use idealis_syntax::{
     Arith, Compare, Expr, Formula, Int, IntCompare, Model, Mult, Phase, Quantifier, SetOp, Shape,
     ValueType,
 };
@@ -712,6 +712,9 @@ type Bindings = BTreeMap<String, Binding>;
 struct Compiler<'m> {
     model: &'m Model,
     sorts: BTreeMap<&'m str, Vec<u64>>,
+    // Valid codes are a subset of the raw representation. Raw codes let
+    // writes preserve an invalid value for Declarations and its witness.
+    refined: BTreeMap<&'m str, Arc<[u64]>>,
     members: BTreeMap<&'m str, u64>,
     slots: BTreeMap<&'m str, (Slot, Width, u64)>,
     nodes: Cell<usize>,
@@ -734,6 +737,7 @@ impl<'m> Compiler<'m> {
         let mut compiler = Self {
             model,
             sorts: BTreeMap::new(),
+            refined: BTreeMap::new(),
             members: BTreeMap::new(),
             slots: BTreeMap::new(),
             nodes: Cell::new(0),
@@ -916,10 +920,124 @@ impl<'m> Compiler<'m> {
                 }
             }
         }
+        if model.has_refinements() {
+            compiler.refine_domains()?;
+        }
         if compiler.atom_count > bits::ROW {
             compiler.sparse = Some(RefCell::default());
         }
         Ok(compiler)
+    }
+
+    fn refine_domains(&mut self) -> Result<(), Unsupported> {
+        for ty in self
+            .model
+            .value_types_in_dependency_order()
+            .map_err(|error| Unsupported::new(error.message))?
+        {
+            let affected = match ty {
+                ValueType::Record(record) => {
+                    !record.refinements.is_empty()
+                        || record
+                            .fields
+                            .iter()
+                            .any(|(_, sort)| self.refined.contains_key(sort.as_str()))
+                }
+                ValueType::Sequence(seq) => self.refined.contains_key(seq.element.as_str()),
+                ValueType::Variant(variant) => variant.cases.iter().any(|case| {
+                    case.payload
+                        .as_deref()
+                        .is_some_and(|sort| self.refined.contains_key(sort))
+                }),
+            };
+            if !affected {
+                continue;
+            }
+            let name = ty.name();
+            let valid = if let Some(layout) = self.indexed.get(name) {
+                self.spend_nodes(layout.count)?;
+                (1..=layout.count as u64)
+                    .filter(|&code| self.refinement_holds(ty, code))
+                    .collect()
+            } else {
+                let raw = self.raw_sort(name)?;
+                self.spend_nodes(raw.len())?;
+                raw.iter()
+                    .copied()
+                    .filter(|&code| self.refinement_holds(ty, code))
+                    .collect::<Vec<_>>()
+            };
+            self.refined.insert(name, valid.into());
+        }
+        Ok(())
+    }
+
+    fn refinement_holds(&self, ty: ValueType<'_>, code: u64) -> bool {
+        let accepts = |sort, code| {
+            self.refined
+                .get(sort)
+                .is_none_or(|allowed| allowed.binary_search(&code).is_ok())
+        };
+        match ty {
+            ValueType::Record(record) => {
+                record.fields.iter().enumerate().all(|(index, (_, sort))| {
+                    accepts(
+                        sort.as_str(),
+                        self.record_field_code(&record.name, code, index),
+                    )
+                }) && record.refinements.iter().all(|clause| {
+                    clause.holds(|path| {
+                        let mut record = record;
+                        let mut code = code;
+                        for field in path {
+                            let index = record
+                                .fields
+                                .iter()
+                                .position(|(name, _)| name == field)
+                                .expect("checked refinement path");
+                            code = self.record_field_code(&record.name, code, index);
+                            if let Some(nested) = self.model.record(&record.fields[index].1) {
+                                record = nested;
+                            }
+                        }
+                        self.integers
+                            .expect("numeric refinement field")
+                            .decode(code)
+                    })
+                })
+            }
+            ValueType::Sequence(seq) => {
+                let values = if let Some(layout) = self.indexed.get(seq.name.as_str()) {
+                    layout.sequence_codes(code)
+                } else {
+                    self.sequences[seq.name.as_str()].decode(code)
+                };
+                values
+                    .into_iter()
+                    .all(|value| accepts(seq.element.as_str(), value))
+            }
+            ValueType::Variant(variant) => variant.cases.iter().any(|case| {
+                let layout = &self.cases[case.tag.as_str()];
+                layout.mask & code != 0
+                    && case.payload.as_deref().is_none_or(|sort| {
+                        let (_, value) = layout
+                            .payloads
+                            .iter()
+                            .find(|&&(tagged, _)| tagged == code)
+                            .expect("case owns value code");
+                        accepts(sort, *value)
+                    })
+            }),
+        }
+    }
+
+    fn record_field_code(&self, sort: &str, code: u64, field: usize) -> u64 {
+        if let Some(layout) = self.indexed.get(sort) {
+            return layout.record_field(code, field);
+        }
+        let (_, layout) = &self.records[sort];
+        let rank = layout.values.binary_search(&code).expect("raw record code");
+        layout.field(rank, field)
     }
 
     fn allocate(&mut self, count: usize) -> Result<Vec<u64>, Unsupported> {
@@ -948,6 +1066,11 @@ impl<'m> Compiler<'m> {
     }
 
     fn sort(&self, name: &str) -> Result<&[u64], Unsupported> {
+        let raw = self.raw_sort(name)?;
+        Ok(self.refined.get(name).map_or(raw, AsRef::as_ref))
+    }
+
+    fn raw_sort(&self, name: &str) -> Result<&[u64], Unsupported> {
         self.sorts.get(name).map(Vec::as_slice).ok_or_else(|| {
             if self.indexed.contains_key(name) {
                 indexed_expression()
@@ -987,7 +1110,7 @@ impl<'m> Compiler<'m> {
         }
     }
 
-    fn indexed_relation(&self, expr: &Expr) -> Option<&'m rmodel::Relation> {
+    fn indexed_relation(&self, expr: &Expr) -> Option<&'m idealis_syntax::Relation> {
         if self.indexed_rows.is_empty() {
             return None;
         }
@@ -1012,7 +1135,7 @@ impl<'m> Compiler<'m> {
 
     fn indexed_rows_term(
         &self,
-        relation: &rmodel::Relation,
+        relation: &idealis_syntax::Relation,
         expr: &Expr,
         bound: &Bindings,
         after: bool,
@@ -1338,14 +1461,24 @@ impl<'m> Compiler<'m> {
                         tuples: Vec::new(),
                         integer_mask: None,
                         ordinal_count: Some(layout.count),
+                        refinement: self
+                            .refined
+                            .get(sig.as_str())
+                            .cloned()
+                            .map(bits::Refinement::Ordinals),
                     });
                 }
                 let tuples = self.sort(sig)?.to_vec();
                 let integer_mask = matches!(sig.as_str(), "Int" | "Nat")
                     .then(|| tuples.iter().fold(0, |mask, bit| mask | bit));
+                let valid_bits = self
+                    .refined
+                    .contains_key(sig.as_str())
+                    .then(|| tuples.iter().fold(0, |mask, bit| mask | bit));
                 bits::Domain {
                     mult: *mult,
                     rows: None,
+                    refinement: valid_bits.map(bits::Refinement::Bits),
                     row_width: 0,
                     tuples,
                     integer_mask,
@@ -1357,13 +1490,19 @@ impl<'m> Compiler<'m> {
                     if !matches!(mult, Mult::One | Mult::Lone) {
                         return Err(indexed_expression());
                     }
-                    let rows = indexed_rows::Layout::new(self.sort(from)?, layout.count, *mult)
-                        .ok_or_else(|| {
-                            Unsupported::new("indexed relation rows exceed one state word")
-                        })?;
+                    let rows = indexed_rows::Layout::with_refinement(
+                        self.sort(from)?,
+                        layout.count,
+                        *mult,
+                        self.refined.get(to.as_str()).cloned(),
+                    )
+                    .ok_or_else(|| {
+                        Unsupported::new("indexed relation rows exceed one state word")
+                    })?;
                     return Ok(bits::Domain {
                         mult: *mult,
                         rows: Some(bits::Rows::Indexed(Arc::new(rows))),
+                        refinement: None,
                         row_width: 0,
                         tuples: Vec::new(),
                         integer_mask: None,
@@ -1372,6 +1511,7 @@ impl<'m> Compiler<'m> {
                 }
                 let numeric = matches!(to.as_str(), "Int" | "Nat");
                 let from = self.sort(from)?;
+                let refined = self.refined.contains_key(to.as_str());
                 let to = self.sort(to)?;
                 let (tuples, rows) = if let Some(layout) = &self.sparse {
                     let mut layout = layout.borrow_mut();
@@ -1410,9 +1550,11 @@ impl<'m> Compiler<'m> {
                 }
                 let integer_mask =
                     numeric.then(|| tuples.iter().fold(0, |mask, tuple| mask | tuple));
+                let valid_bits = refined.then(|| tuples.iter().fold(0, |mask, tuple| mask | tuple));
                 bits::Domain {
                     mult: *mult,
                     rows: Some(rows),
+                    refinement: valid_bits.map(bits::Refinement::Bits),
                     row_width: to.len(),
                     tuples,
                     integer_mask,
@@ -2636,7 +2778,7 @@ impl<'m> Compiler<'m> {
 
     fn instances(
         &self,
-        action: &rmodel::Action,
+        action: &idealis_syntax::Action,
         args: &[(String, String)],
         bound: &mut Bindings,
         instances: &mut Vec<Action>,
@@ -2658,7 +2800,7 @@ impl<'m> Compiler<'m> {
 
     fn action(
         &self,
-        action: &rmodel::Action,
+        action: &idealis_syntax::Action,
         bound: &Bindings,
         transitions: &[(usize, &Formula)],
         guard: Predicate,
@@ -2687,7 +2829,7 @@ impl<'m> Compiler<'m> {
 
     fn parameterized_action(
         &self,
-        action: &rmodel::Action,
+        action: &idealis_syntax::Action,
         transitions: &[(usize, &Formula)],
     ) -> Result<ParameterizedAction, Unsupported> {
         let mut bound = Bindings::new();
@@ -2698,10 +2840,13 @@ impl<'m> Compiler<'m> {
             .map(|(index, (param, sort))| {
                 let (domain, support) = if let Some(layout) = self.indexed.get(sort.as_str()) {
                     (
-                        bits::Candidates::Ordinals {
-                            start: 1,
-                            count: layout.count,
-                        },
+                        self.refined.get(sort.as_str()).map_or_else(
+                            || bits::Candidates::Ordinals {
+                                start: 1,
+                                count: layout.count,
+                            },
+                            |valid| bits::Candidates::Table(valid.to_vec()),
+                        ),
                         0,
                     )
                 } else {
@@ -2745,7 +2890,7 @@ impl<'m> Compiler<'m> {
 
     fn temporal_instances(
         &self,
-        question: &rmodel::TemporalCheck,
+        question: &idealis_syntax::TemporalCheck,
         params: &[(String, String)],
         bound: &mut Bindings,
         instances: &mut Vec<temporal::Goal>,
@@ -2855,7 +3000,7 @@ pub(crate) fn lower_for_witness(
 
 pub(crate) fn lower_temporal<'a>(
     model: &'a Model,
-    question: &rmodel::TemporalCheck,
+    question: &idealis_syntax::TemporalCheck,
 ) -> Result<(Compiled, crate::witness::Layout<'a>), Unsupported> {
     lower_impl::<true>(model, Some(question), InitialBudget::Narrowed, false)
         .map(|(compiled, layout)| (compiled, layout.expect("requested layout")))
@@ -2945,7 +3090,7 @@ fn initial_search(
 
 fn lower_impl<'a, const TRACE: bool>(
     model: &'a Model,
-    question: Option<&rmodel::TemporalCheck>,
+    question: Option<&idealis_syntax::TemporalCheck>,
     initial_budget: InitialBudget,
     force_argument_search: bool,
 ) -> Result<(Compiled, Option<crate::witness::Layout<'a>>), Unsupported> {
@@ -2972,7 +3117,10 @@ fn lower_impl<'a, const TRACE: bool>(
                 || model.sequence(to).is_some())
             && !domain.is_indexed()
         {
-            let columns = compiler.sort(to)?.iter().fold(0, |mask, bit| mask | bit);
+            let columns = compiler
+                .raw_sort(to)?
+                .iter()
+                .fold(0, |mask, bit| mask | bit);
             compiler.value_rows.insert(&relation.name, columns);
         }
         if domain.integer_mask.is_some() {
@@ -3059,7 +3207,7 @@ fn lower_impl<'a, const TRACE: bool>(
     for check in &model.checks {
         checks.push(Check {
             name: check.name.clone(),
-            expects_true: check.kind == rmodel::CheckKind::Reachable,
+            expects_true: check.kind == idealis_syntax::CheckKind::Reachable,
             predicate: compiler.predicate(&check.formula, &scope, false)?,
         });
     }
@@ -3151,6 +3299,7 @@ fn lower_impl<'a, const TRACE: bool>(
     };
     let layout = TRACE.then(|| crate::witness::Layout {
         sorts: compiler.sorts,
+        refined: compiler.refined,
         sparse: compiler.sparse.map(RefCell::into_inner),
         records: compiler.records,
         cases: compiler.cases,

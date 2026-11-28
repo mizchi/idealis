@@ -1,5 +1,5 @@
 use crate::{ClauseReport, EvaluationRevision, Evidence, LinkStatus, SemanticComparison};
-use rmodel::reference::{Outcome, Report};
+use idealis_semantics::reference::{Outcome, Report};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::BTreeMap;
@@ -132,12 +132,12 @@ pub fn run_checker(
     plan: &ComparisonPlan,
     checker: Checker,
     source: &str,
-    evaluate: impl FnOnce(&rmodel::Model, usize) -> Result<Report, String>,
+    evaluate: impl FnOnce(&idealis_syntax::Model, usize) -> Result<Report, String>,
 ) -> Result<CheckerReceipt, String> {
     if source_digest(source) != plan.source_sha256 {
         return Err("the model source differs from the pinned input".into());
     }
-    let model = rmodel::parse(source).map_err(|error| error.to_string())?;
+    let model = idealis_syntax::parse(source).map_err(|error| error.to_string())?;
     let result = match evaluate(&model, plan.max_states) {
         Ok(report) => ReceiptResult::Report(report.into()),
         Err(reason) => ReceiptResult::Unsupported(reason),

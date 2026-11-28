@@ -120,7 +120,7 @@ pub fn observation_history_pair(
         }
         let when = rule
             .when
-            .map(|source| crate::syntax::transition_predicate(model, action, source))
+            .map(|source| idealis_syntax::transition_predicate(model, action, source))
             .transpose()
             .map_err(|error| format!("{} event predicate: {error}", rule.action))?;
         rules.insert(

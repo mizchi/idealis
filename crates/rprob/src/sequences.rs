@@ -1,6 +1,6 @@
 use crate::compile::{Environment, Number, Predicate, Term};
 use crate::{indexed, indexed_sets};
-use rmodel::{Compare, Expr, Formula, Int, Model, Mult, Shape};
+use idealis_syntax::{Compare, Expr, Formula, Int, Model, Mult, Shape};
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Arc;
 
@@ -419,8 +419,13 @@ impl Operand {
         }
     }
 
-    pub(crate) fn compare(&self, op: rmodel::Compare, right: &Self, env: Environment<'_>) -> bool {
-        use rmodel::Compare::{In, NotEqual, NotIn};
+    pub(crate) fn compare(
+        &self,
+        op: idealis_syntax::Compare,
+        right: &Self,
+        env: Environment<'_>,
+    ) -> bool {
+        use idealis_syntax::Compare::{In, NotEqual, NotIn};
         let subset = matches!(op, In | NotIn);
         let holds = match (self.evaluate(env), right.evaluate(env)) {
             (Value::Encoded(left), Value::Encoded(right)) if subset => left & !right == 0,

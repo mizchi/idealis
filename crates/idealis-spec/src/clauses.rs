@@ -1,5 +1,5 @@
 use crate::{Claim, Rule, Spec, Text};
-use rmodel::reference::{Outcome, Verdict};
+use idealis_semantics::reference::{Outcome, Verdict};
 use serde::Serialize;
 use serde_json::json;
 use sha2::{Digest, Sha256};
@@ -103,13 +103,13 @@ impl ClaimKind {
 }
 
 pub(crate) fn lookup_check<'m>(
-    model: &'m rmodel::Model,
+    model: &'m idealis_syntax::Model,
     name: &str,
-) -> Option<(ClaimKind, &'m rmodel::Formula)> {
+) -> Option<(ClaimKind, &'m idealis_syntax::Formula)> {
     if let Some(check) = model.checks.iter().find(|check| check.name == name) {
         let kind = match check.kind {
-            rmodel::CheckKind::Invariant => ClaimKind::Invariant,
-            rmodel::CheckKind::Reachable => ClaimKind::Reachable,
+            idealis_syntax::CheckKind::Invariant => ClaimKind::Invariant,
+            idealis_syntax::CheckKind::Reachable => ClaimKind::Reachable,
         };
         return Some((kind, &check.formula));
     }
@@ -122,15 +122,15 @@ pub(crate) fn lookup_check<'m>(
 
 struct EvaluatedModel {
     source_digest: String,
-    model: rmodel::Model,
+    model: idealis_syntax::Model,
     verdicts: Vec<Verdict>,
 }
 
 impl EvaluatedModel {
     fn load(path: &Path, max_states: usize) -> Result<Self, String> {
         let source = std::fs::read_to_string(path).map_err(|error| error.to_string())?;
-        let model = rmodel::parse(&source).map_err(|error| error.to_string())?;
-        let verdicts = rmodel::reference::evaluate(&model, max_states);
+        let model = idealis_syntax::parse(&source).map_err(|error| error.to_string())?;
+        let verdicts = idealis_semantics::reference::evaluate(&model, max_states);
         Ok(Self {
             source_digest: crate::comparison::source_digest(&source),
             model,
@@ -138,7 +138,10 @@ impl EvaluatedModel {
         })
     }
 
-    fn claim(&self, claim: &Claim) -> Result<(&'static str, &rmodel::Formula, Outcome), String> {
+    fn claim(
+        &self,
+        claim: &Claim,
+    ) -> Result<(&'static str, &idealis_syntax::Formula, Outcome), String> {
         let (kind, formula) = lookup_check(&self.model, &claim.check)
             .ok_or_else(|| format!("{}: no supported check {}", claim.model, claim.check))?;
         if !kind.accepts(&claim.expect) {
@@ -167,8 +170,8 @@ fn revision(
     clause: &crate::Clause,
     claim: &Claim,
     kind: &str,
-    formula: &rmodel::Formula,
-    model: &rmodel::Model,
+    formula: &idealis_syntax::Formula,
+    model: &idealis_syntax::Model,
 ) -> String {
     let terms = rule
         .terms
@@ -199,7 +202,7 @@ fn revision(
             &model.scope,
         )
     );
-    let payload = json!([
+    let mut payload = json!([
         "rspec-clause-v1",
         spec.id,
         rule.id,
@@ -214,6 +217,12 @@ fn revision(
         format!("{formula:?}"),
         declarations,
     ]);
+    if !model.entity_translations.is_empty() {
+        payload
+            .as_array_mut()
+            .expect("clause payload is an array")
+            .push(json!(model.entity_translations));
+    }
     let bytes = serde_json::to_vec(&payload).expect("JSON values serialize");
     format!("v1:{:x}", Sha256::digest(bytes))
 }

@@ -11,11 +11,12 @@
 //! a subset of their domain and stay unchanged thereafter.
 //! Every relation is typed and has its multiplicity in every state.
 use crate::reference::{Data, Machine};
-use crate::syntax::{
+use idealis_semantics::fixed_initial_values;
+use idealis_syntax::{
     Action, Arith, Check, CheckKind, Compare, Expr, FairnessKind, Formula, INT, Int, IntCompare,
     Model, Mult, NAT, Phase, Quantifier, SetOp, Shape, TemporalCheck, TransitionCheck,
 };
-use crate::{Error, initial::fixed_initial_values};
+use idealis_syntax::{DECLARATIONS, Error, SCOPE, atom_count, validate_integer_bounds};
 use std::collections::BTreeMap;
 
 /// The Alloy command label of a check.
@@ -29,18 +30,34 @@ struct AlloyScope {
     after: bool,
 }
 
+const ALLOY_MAX_STEPS: usize = 32;
+const ALLOY_DEFAULT_STEPS: usize = 4;
+
+/// The trace bound used by the Alloy backend.
+pub fn alloy_steps(model: &Model) -> usize {
+    model.scope.steps.unwrap_or(ALLOY_DEFAULT_STEPS)
+}
+
+fn alloy_bitwidth(model: &Model, features: CollectionFeatures<'_>) -> usize {
+    if alloy_count_bound(model, features.counts) > 7
+        || features
+            .literals
+            .iter()
+            .any(|&value| !(-8..=7).contains(&value))
+    {
+        5
+    } else {
+        4
+    }
+}
+
+/// Render Alloy for a model accepted by `alloy_supports`.
 pub fn to_alloy(model: &Model) -> String {
     let mut out = String::new();
     let emit_transitions = alloy_transition_supports(model).is_ok();
-    let mut count_bound = alloy_count_bound(
-        model,
-        crate::syntax::collection_features(model, false).counts,
-    );
+    let mut bitwidth = alloy_bitwidth(model, collection_features(model, false));
     if emit_transitions {
-        count_bound = count_bound.max(alloy_count_bound(
-            model,
-            crate::syntax::collection_features(model, true).counts,
-        ));
+        bitwidth = bitwidth.max(alloy_bitwidth(model, collection_features(model, true)));
     }
     // A sum sort is an abstract signature its children extend (plan 0100).
     let extends = |sort: &str| {
@@ -183,14 +200,8 @@ pub fn to_alloy(model: &Model) -> String {
             format!("exactly {size} s_{name}")
         }))
         .chain([
-            // Wide enough for any count of atoms in scope (review of #102).
-            format!(
-                "{} Int",
-                // Only a model that counts needs more than 4 bits; wider
-                // integers would crowd ralloy's 64-atom universe (issue #106).
-                if count_bound <= 7 { 4 } else { 5 }
-            ),
-            format!("{} steps", model.scope.steps),
+            format!("{bitwidth} Int"),
+            format!("{} steps", alloy_steps(model)),
         ])
         .collect();
     for check in &model.checks {
@@ -299,14 +310,6 @@ fn alloy_transition(
     }
 }
 
-/// The name of the built-in check that no transition breaks a var's
-/// multiplicity (plan 0099).
-pub const DECLARATIONS: &str = "Declarations";
-/// The built-in check that every state reached keeps its integers within
-/// the scope's `Int = lo..hi` (plan 0103). When it fails, the search is not
-/// complete and a check without a witness is unknown.
-pub const SCOPE: &str = "Scope";
-
 /// Every var's multiplicity as one Alloy formula, or `None` when no var has
 /// one.
 fn alloy_declarations(model: &Model) -> Option<String> {
@@ -356,11 +359,11 @@ fn alloy_sort_size(model: &Model, name: &str) -> usize {
             .map(|child| alloy_sort_size(model, child))
             .sum();
     }
-    crate::syntax::atoms(model)
+    atom_count(model)
 }
 
 fn alloy_collection_bound(model: &Model, value: &Expr) -> usize {
-    let atoms = crate::syntax::atoms(model);
+    let atoms = atom_count(model);
     let bound = if is_pair(model, value, &AlloyScope::default()) {
         atoms.saturating_mul(atoms)
     } else {
@@ -408,7 +411,7 @@ fn alloy_count_bound(model: &Model, counts: Vec<&Expr>) -> usize {
             if is_pair(model, value, &scope) {
                 alloy_collection_bound(model, value)
             } else {
-                crate::syntax::atoms(model)
+                atom_count(model)
             }
         })
         .max()
@@ -419,6 +422,9 @@ fn alloy_count_bound(model: &Model, counts: Vec<&Expr>) -> usize {
 /// at their bit width, and the value semantics of records has no lowering
 /// yet (plan 0103).
 pub fn alloy_supports(model: &Model) -> Result<(), String> {
+    if !(1..=ALLOY_MAX_STEPS).contains(&alloy_steps(model)) {
+        return Err(format!("Alloy steps must be in 1..={ALLOY_MAX_STEPS}"));
+    }
     if model.scope.ints.is_some() {
         return Err("integer values: Alloy integers wrap at their bit width".into());
     }
@@ -428,9 +434,16 @@ pub fn alloy_supports(model: &Model) -> Result<(), String> {
     if !model.records.is_empty() {
         return Err("records: no Alloy lowering of value semantics".into());
     }
-    let features = crate::syntax::collection_features(model, false);
+    let features = collection_features(model, false);
     if features.selection {
         return Err("set selection requires Alloy comprehension, unsupported by ralloy".into());
+    }
+    if features
+        .literals
+        .iter()
+        .any(|value| !(-16..=15).contains(value))
+    {
+        return Err("integer literals exceed Alloy's supported range -16..=15".into());
     }
     let count = alloy_count_bound(model, features.counts);
     if count > 15 {
@@ -444,11 +457,18 @@ pub fn alloy_supports(model: &Model) -> Result<(), String> {
 /// Whether the Alloy lowering can also emit the model's transition checks.
 pub fn alloy_transition_supports(model: &Model) -> Result<(), String> {
     alloy_supports(model)?;
-    let features = crate::syntax::collection_features(model, true);
+    let features = collection_features(model, true);
     if features.selection {
         return Err(
             "transition selection requires Alloy comprehension, unsupported by ralloy".into(),
         );
+    }
+    if features
+        .literals
+        .iter()
+        .any(|value| !(-16..=15).contains(value))
+    {
+        return Err("transition integer literals exceed Alloy's supported range -16..=15".into());
     }
     let count = alloy_count_bound(model, features.counts);
     if count > 15 {
@@ -727,10 +747,39 @@ fn alloy_formula(model: &Model, formula: &Formula, scope: &AlloyScope) -> String
 }
 
 /// TLC needs portable integers and materializable structured domains.
+fn tla_refinement(clause: &crate::Refinement) -> String {
+    let operand = |value: &crate::RefinementOperand| match value {
+        crate::RefinementOperand::Field(path) => path
+            .iter()
+            .fold("v".to_owned(), |value, field| format!("{value}.f_{field}")),
+        crate::RefinementOperand::Literal(n) => n.to_string(),
+    };
+    let op = match clause.symbol() {
+        "<=" => "=<",
+        "!=" => "#",
+        op => op,
+    };
+    format!("{} {op} {}", operand(&clause.left), operand(&clause.right))
+}
+
 pub fn tla_supports(model: &Model) -> Result<(), String> {
     let limit = i64::from(i32::MAX);
-    crate::numeric::validate(model, -limit..=limit).map_err(|error| error.message)?;
-    if model.has_structures()
+    validate_integer_bounds(model, -limit..=limit).map_err(|error| error.message)?;
+    for record in &model.records {
+        for clause in &record.refinements {
+            for operand in [&clause.left, &clause.right] {
+                if let crate::RefinementOperand::Literal(n) = operand
+                    && !(-limit..=limit).contains(n)
+                {
+                    return Err(format!(
+                        "{}: where literal {n} exceeds the TLA+ integer range",
+                        record.name
+                    ));
+                }
+            }
+        }
+    }
+    if (model.has_structures() || model.has_refinements())
         && let Some(domain) = model
             .value_domains()
             .map_err(|error| error.message)?
@@ -912,39 +961,67 @@ impl Tla<'_> {
                 out.push_str(&format!("s_{NAT} == {}..{high}\n", low.max(0)));
             }
         }
-        use crate::structured::ValueType;
+        use idealis_syntax::ValueType;
+        // s_ sorts constrain enumeration and declarations; u_ sorts retain
+        // just the integer scope for diagnostics on the attempted successor.
+        let mut refined_sorts = std::collections::BTreeSet::new();
         for value in model.value_domains().expect("checked value types") {
             let ty = value.kind;
-            let domain = match ty {
-                ValueType::Record(record) => {
-                    let fields = record
-                        .fields
-                        .iter()
-                        .map(|(field, sort)| format!("f_{field} : s_{sort}"))
-                        .collect::<Vec<_>>()
-                        .join(", ");
-                    format!("[{fields}]")
-                }
-                ValueType::Sequence(seq) => (0..=seq.max)
-                    .map(|len| {
-                        let domains = vec![format!("s_{}", seq.element); len];
-                        self.tuples(&domains)
-                    })
-                    .collect::<Vec<_>>()
-                    .join(" \\cup "),
-                ValueType::Variant(variant) => variant
-                    .cases
-                    .iter()
-                    .map(|case| {
-                        self.tagged(
-                            &case.tag,
-                            case.payload.as_ref().map(|sort| format!("s_{sort}")),
-                        )
-                    })
-                    .collect::<Vec<_>>()
-                    .join(" \\cup "),
+            let children = ty.children();
+            let own = match ty {
+                ValueType::Record(record) => record.refinements.as_slice(),
+                _ => &[],
             };
-            out.push_str(&format!("s_{} == {domain}\n", ty.name()));
+            let mut domain = |raw| {
+                let sort_name = |sort| {
+                    let prefix = if raw && refined_sorts.contains(sort) {
+                        "u"
+                    } else {
+                        "s"
+                    };
+                    format!("{prefix}_{sort}")
+                };
+                match ty {
+                    ValueType::Record(record) => {
+                        let fields = record
+                            .fields
+                            .iter()
+                            .map(|(field, sort)| {
+                                format!("f_{field} : {}", sort_name(sort.as_str()))
+                            })
+                            .collect::<Vec<_>>()
+                            .join(", ");
+                        format!("[{fields}]")
+                    }
+                    ValueType::Sequence(seq) => (0..=seq.max)
+                        .map(|len| self.tuples(&vec![sort_name(seq.element.as_str()); len]))
+                        .collect::<Vec<_>>()
+                        .join(" \\cup "),
+                    ValueType::Variant(variant) => variant
+                        .cases
+                        .iter()
+                        .map(|case| self.tagged(&case.tag, case.payload.as_deref().map(sort_name)))
+                        .collect::<Vec<_>>()
+                        .join(" \\cup "),
+                }
+            };
+            let filtered = domain(false);
+            let filtered = if own.is_empty() {
+                filtered
+            } else {
+                let predicate = own
+                    .iter()
+                    .map(tla_refinement)
+                    .collect::<Vec<_>>()
+                    .join(" /\\ ");
+                format!("{{v \\in {filtered} : {predicate}}}")
+            };
+            let name = ty.name();
+            out.push_str(&format!("s_{name} == {filtered}\n"));
+            if !own.is_empty() || children.iter().any(|sort| refined_sorts.contains(sort)) {
+                out.push_str(&format!("u_{name} == {}\n", domain(true)));
+                refined_sorts.insert(name);
+            }
         }
         for relation in &model.relations {
             let (domain, shape) = match &relation.shape {
@@ -980,7 +1057,21 @@ impl Tla<'_> {
                 Shape::Binary { to, .. } => to,
             };
             if model.is_value(target) {
-                out.push_str(&format!("T_{}(V) == {shape}\n", relation.name));
+                let name = &relation.name;
+                if refined_sorts.contains(target.as_str()) {
+                    let domain = match &relation.shape {
+                        Shape::Unary { .. } => format!("u_{target}"),
+                        Shape::Binary { from, .. } => {
+                            product(&format!("s_{from}"), &format!("u_{target}"), 0)
+                        }
+                    };
+                    out.push_str(&format!("U_{name} == {domain}\n"));
+                    out.push_str(&format!(
+                        "T_{name}(V) == V \\subseteq D_{name} /\\ {shape}\n"
+                    ));
+                } else {
+                    out.push_str(&format!("T_{name}(V) == {shape}\n"));
+                }
             } else {
                 out.push_str(&format!(
                     "T_{}(V) == V \\subseteq D_{} /\\ {shape}\n",
@@ -1110,7 +1201,18 @@ impl Tla<'_> {
                     };
                     model.is_value(target)
                 })
-                .map(|relation| format!("r_{0} \\subseteq D_{0}", relation.name))
+                .map(|relation| {
+                    let sort = match &relation.shape {
+                        Shape::Unary { sig, .. } => sig,
+                        Shape::Binary { to, .. } => to,
+                    };
+                    let prefix = if refined_sorts.contains(sort.as_str()) {
+                        "U"
+                    } else {
+                        "D"
+                    };
+                    format!("r_{0} \\subseteq {prefix}_{0}", relation.name)
+                })
                 .collect();
             let ranged = if ranged.is_empty() {
                 "TRUE".to_owned()
@@ -1283,7 +1385,7 @@ impl Tla<'_> {
     ) -> Vec<String> {
         let mut body = Vec::new();
         // A guard may establish that a value read by a later expression exists.
-        let guards_first = action.guards.iter().any(Formula::tests_presence);
+        let guards_first = action.guards.iter().any(tests_presence);
         if guards_first {
             body.extend(action.guards.iter().map(|guard| self.formula(guard, scope)));
         }
@@ -1377,7 +1479,7 @@ impl Tla<'_> {
                 let mut definitions = format!("(LET rows{id}_0 == {edges}");
                 // A shortest positive path uses at most one edge per atom,
                 // including paths from an atom back to itself along a cycle.
-                let doublings = crate::syntax::atoms(self.model)
+                let doublings = atom_count(self.model)
                     .max(1)
                     .next_power_of_two()
                     .trailing_zeros();
@@ -1407,7 +1509,7 @@ impl Tla<'_> {
                 let id = self.next();
                 let mut definitions =
                     format!("(LET roots{id}_0 == {roots}\n  edges{id} == {edges}");
-                let bound = crate::syntax::atoms(self.model);
+                let bound = atom_count(self.model);
                 for step in 1..=bound {
                     let prev = step - 1;
                     definitions.push_str(&format!(
@@ -1798,4 +1900,98 @@ fn product(left: &str, right: &str, id: usize) -> String {
 /// `{f(x, y) : x \in left, y \in right}` with one binder per map.
 fn pairwise(element: &str, left: &str, right: &str, id: usize) -> String {
     format!("UNION {{{{{element} : y{id} \\in {right}}} : x{id} \\in {left}}}")
+}
+
+fn tests_presence(formula: &Formula) -> bool {
+    match formula {
+        Formula::Mult(Mult::Some, _) => true,
+        Formula::And(parts) => parts.iter().any(tests_presence),
+        _ => false,
+    }
+}
+
+/// Operands of counts in the finite atom fragment used by the Alloy lowering.
+#[derive(Default)]
+struct CollectionFeatures<'a> {
+    pub counts: Vec<&'a Expr>,
+    pub literals: Vec<i64>,
+    pub selection: bool,
+}
+
+fn collection_features(model: &Model, transitions_only: bool) -> CollectionFeatures<'_> {
+    fn formula<'a>(value: &'a Formula, features: &mut CollectionFeatures<'a>) {
+        match value {
+            Formula::Ints(_, left, right) => {
+                for side in [left, right] {
+                    match side {
+                        Int::Count(counted) => {
+                            features.counts.push(counted);
+                            expression(counted, features);
+                        }
+                        Int::Value(value) | Int::LocatedValue(value, _) => {
+                            expression(value, features)
+                        }
+                        Int::Literal(value) => features.literals.push(*value),
+                    }
+                }
+            }
+            Formula::Compare(_, left, right) => {
+                expression(left, features);
+                expression(right, features);
+            }
+            Formula::Or(left, right) | Formula::Implies(left, right) => {
+                formula(left, features);
+                formula(right, features);
+            }
+            Formula::Mult(_, value) | Formula::Empty(value) => expression(value, features),
+            Formula::Not(inner) | Formula::Quantified(_, _, _, inner) => formula(inner, features),
+            Formula::And(parts) => parts.iter().for_each(|part| formula(part, features)),
+            Formula::HasTag(..) => {}
+        }
+    }
+    fn expression<'a>(value: &'a Expr, features: &mut CollectionFeatures<'a>) {
+        match value {
+            Expr::Count(inner) => {
+                features.counts.push(inner);
+                expression(inner, features);
+            }
+            Expr::If(condition, yes, no) => {
+                formula(condition, features);
+                expression(yes, features);
+                expression(no, features);
+            }
+            Expr::Select(_, _, predicate) => {
+                features.selection = true;
+                formula(predicate, features);
+            }
+            Expr::At(_, inner) | Expr::Keys(inner) | Expr::Closure(inner) => {
+                expression(inner, features)
+            }
+            Expr::Binary(_, left, right) | Expr::ReachableFrom(left, right) => {
+                expression(left, features);
+                expression(right, features);
+            }
+            _ => {}
+        }
+    }
+    let mut features = CollectionFeatures::default();
+    if transitions_only {
+        for check in &model.transitions {
+            formula(&check.formula, &mut features);
+        }
+    } else {
+        for condition in model
+            .facts
+            .iter()
+            .chain(&model.init)
+            .chain(model.checks.iter().map(|check| &check.formula))
+            .chain(model.actions.iter().flat_map(|action| &action.guards))
+        {
+            formula(condition, &mut features);
+        }
+        for (_, value) in model.actions.iter().flat_map(|action| &action.assignments) {
+            expression(value, &mut features);
+        }
+    }
+    features
 }

@@ -20,6 +20,10 @@ pub struct Ir {
     pub sigs: Vec<String>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub entity_definitions: BTreeMap<String, String>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub entity_translations: BTreeMap<String, BTreeMap<String, String>>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub term_bindings: BTreeMap<String, String>,
     #[serde(default)]
     pub enums: Vec<Named>,
     #[serde(default)]
@@ -80,6 +84,50 @@ pub struct DerivationIr {
 pub struct RecordIr {
     pub name: String,
     pub fields: Vec<Field>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub data: Option<DataKindIr>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty", rename = "where")]
+    pub refinements: Vec<RefinementIr>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RefinementIr {
+    pub left: RefinementOperandIr,
+    pub op: String,
+    pub right: RefinementOperandIr,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum RefinementOperandIr {
+    Field(Vec<String>),
+    Literal(i64),
+}
+
+impl From<&rmodel::RefinementOperand> for RefinementOperandIr {
+    fn from(operand: &rmodel::RefinementOperand) -> Self {
+        match operand {
+            rmodel::RefinementOperand::Field(path) => Self::Field(path.clone()),
+            rmodel::RefinementOperand::Literal(n) => Self::Literal(*n),
+        }
+    }
+}
+
+impl From<&RefinementOperandIr> for rmodel::RefinementOperand {
+    fn from(operand: &RefinementOperandIr) -> Self {
+        match operand {
+            RefinementOperandIr::Field(path) => Self::Field(path.clone()),
+            RefinementOperandIr::Literal(n) => Self::Literal(*n),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum DataKindIr {
+    Newtype,
+    Record,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -218,7 +266,8 @@ pub struct ScopeIr {
     pub sizes: BTreeMap<String, usize>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ints: Option<(i64, i64)>,
-    pub steps: usize,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub steps: Option<usize>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -859,6 +908,8 @@ pub fn to_ir(model: &Model) -> Result<Ir, String> {
         name: model.name.clone(),
         sigs: model.sigs.clone(),
         entity_definitions: model.entity_definitions.clone(),
+        entity_translations: model.entity_translations.clone(),
+        term_bindings: model.term_bindings.clone(),
         enums: named(&model.enums),
         sums: named(&model.sums),
         records: model
@@ -866,6 +917,19 @@ pub fn to_ir(model: &Model) -> Result<Ir, String> {
             .iter()
             .map(|r| RecordIr {
                 name: r.name.clone(),
+                data: r.data.map(|kind| match kind {
+                    rmodel::DataKind::Newtype => DataKindIr::Newtype,
+                    rmodel::DataKind::Record => DataKindIr::Record,
+                }),
+                refinements: r
+                    .refinements
+                    .iter()
+                    .map(|clause| RefinementIr {
+                        left: (&clause.left).into(),
+                        op: clause.symbol().into(),
+                        right: (&clause.right).into(),
+                    })
+                    .collect(),
                 fields: r
                     .fields
                     .iter()
@@ -1039,6 +1103,8 @@ fn from_ir_checked(ir: &Ir) -> Result<rmodel::CheckedModel, String> {
         name: ir.name.clone(),
         sigs: ir.sigs.clone(),
         entity_definitions: ir.entity_definitions.clone(),
+        entity_translations: ir.entity_translations.clone(),
+        term_bindings: ir.term_bindings.clone(),
         enums: ir
             .enums
             .iter()
@@ -1052,15 +1118,35 @@ fn from_ir_checked(ir: &Ir) -> Result<rmodel::CheckedModel, String> {
         records: ir
             .records
             .iter()
-            .map(|r| rmodel::Record {
-                name: r.name.clone(),
-                fields: r
-                    .fields
-                    .iter()
-                    .map(|f| (f.name.clone(), f.sort.clone()))
-                    .collect(),
+            .map(|r| {
+                Ok(rmodel::Record {
+                    name: r.name.clone(),
+                    data: r.data.map(|kind| match kind {
+                        DataKindIr::Newtype => rmodel::DataKind::Newtype,
+                        DataKindIr::Record => rmodel::DataKind::Record,
+                    }),
+                    refinements: r
+                        .refinements
+                        .iter()
+                        .map(|clause| {
+                            let op = rmodel::Refinement::operator(&clause.op).ok_or_else(|| {
+                                format!("{}: unknown where operator {:?}", r.name, clause.op)
+                            })?;
+                            Ok(rmodel::Refinement {
+                                left: (&clause.left).into(),
+                                op,
+                                right: (&clause.right).into(),
+                            })
+                        })
+                        .collect::<Result<_, String>>()?,
+                    fields: r
+                        .fields
+                        .iter()
+                        .map(|f| (f.name.clone(), f.sort.clone()))
+                        .collect(),
+                })
             })
-            .collect(),
+            .collect::<Result<_, String>>()?,
         sequences: ir
             .sequences
             .iter()

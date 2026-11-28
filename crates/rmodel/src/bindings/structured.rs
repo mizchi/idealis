@@ -5,15 +5,16 @@ use crate::Model;
 pub(super) fn rust(model: &Model, out: &mut String) {
     for seq in &model.sequences {
         let name = &seq.name;
+        let ident = super::rust_ident(name);
         let item = &seq.element;
         let ty = rust_type(item);
         let max = seq.max;
         out.push_str(&format!(
-            r#"pub type {name} = Vec<{ty}>;
-fn to_{name}(x: &{name}) -> Value {{
+            r#"pub type {ident} = Vec<{ty}>;
+fn to_{name}(x: &{ident}) -> Value {{
     serde_json::json!({{"$sequence": x.iter().map(to_{item}).collect::<Vec<_>>()}})
 }}
-fn from_{name}(v: &Value) -> Result<{name}, String> {{
+fn from_{name}(v: &Value) -> Result<{ident}, String> {{
     let items = v.as_object().filter(|o| o.len() == 1)
         .and_then(|o| o.get("$sequence")).and_then(Value::as_array)
         .filter(|a| a.len() <= {max}).ok_or_else(|| format!("not a {name}: {{v}}"))?;
@@ -25,39 +26,41 @@ fn from_{name}(v: &Value) -> Result<{name}, String> {{
     }
     for v in &model.variants {
         let name = &v.name;
+        let ident = super::rust_ident(name);
         let mut cases = String::new();
         let mut encoders = String::new();
         let mut decoders = String::new();
         for case in &v.cases {
             let tag = &case.tag;
+            let variant = super::rust_ident(tag);
             if let Some(item) = &case.payload {
                 let ty = rust_type(item);
-                cases.push_str(&format!("    {tag}({ty}),\n"));
+                cases.push_str(&format!("    {variant}({ty}),\n"));
                 encoders.push_str(&format!(
-                    "        {name}::{tag}(value) => serde_json::json!({{\"tag\":\"{tag}\",\"value\":to_{item}(value)}}),\n"
+                    "        {ident}::{variant}(value) => serde_json::json!({{\"tag\":\"{tag}\",\"value\":to_{item}(value)}}),\n"
                 ));
                 decoders.push_str(&format!(
-                    "        Some(\"{tag}\") if o.len() == 2 => Ok({name}::{tag}(from_{item}(o.get(\"value\").ok_or(\"missing value\")?)?)),\n"
+                    "        Some(\"{tag}\") if o.len() == 2 => Ok({ident}::{variant}(from_{item}(o.get(\"value\").ok_or(\"missing value\")?)?)),\n"
                 ));
             } else {
-                cases.push_str(&format!("    {tag},\n"));
+                cases.push_str(&format!("    {variant},\n"));
                 encoders.push_str(&format!(
-                    "        {name}::{tag} => serde_json::json!({{\"tag\":\"{tag}\"}}),\n"
+                    "        {ident}::{variant} => serde_json::json!({{\"tag\":\"{tag}\"}}),\n"
                 ));
                 decoders.push_str(&format!(
-                    "        Some(\"{tag}\") if o.len() == 1 => Ok({name}::{tag}),\n"
+                    "        Some(\"{tag}\") if o.len() == 1 => Ok({ident}::{variant}),\n"
                 ));
             }
         }
         out.push_str(&format!(
             r#"#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum {name} {{
+pub enum {ident} {{
 {cases}}}
-fn to_{name}(x: &{name}) -> Value {{
+fn to_{name}(x: &{ident}) -> Value {{
     match x {{
 {encoders}    }}
 }}
-fn from_{name}(v: &Value) -> Result<{name}, String> {{
+fn from_{name}(v: &Value) -> Result<{ident}, String> {{
     let o = v.as_object().ok_or_else(|| format!("not a {name}: {{v}}"))?;
     match o.get("tag").and_then(Value::as_str) {{
 {decoders}        _ => Err(format!("not a {name}: {{v}}")),

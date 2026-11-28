@@ -1,11 +1,29 @@
 # rcheck
 
 For a model with `entity` definitions, `rcheck generate <model> glossary`
-exports the checked names and definitions as JSON. The IR retains these
-definitions. The [bank model](../../fixtures/rcheck/bank.model) generates
+exports the checked names and default definitions as a flat JSON object.
+`rcheck generate <model> glossary-localized` exports all available definitions
+keyed by entity and language, using `default` for untagged text. Both commands
+read model source or JSON IR. The [bank model](../../fixtures/rcheck/bank.model) generates
 both language bindings. Its [snapshot sequence](../../fixtures/rcheck/bank.trace.json)
 can be replayed against the Rust and TypeScript drivers using
 `just rcheck-test` and `just rcheck-typescript`.
+
+### Bind model declarations to a domain dictionary
+
+A project manifest may declare `"dictionary": "dictionary.ideal"`, relative to
+the manifest. The source uses a `vocabulary` block with named `term` entries.
+The JSON dictionary format is also accepted, with an `id` and a `terms` array.
+Each JSON term has an `id`, a `kind`, and `name` and `definition` maps keyed by language. Use
+`term "active-member" for activeMembers` in a source fragment to bind a term to
+a declaration. Supported kinds are `entity` (an atom sort or enum), `state`,
+`relation` (fixed), `action`, and `check`.
+
+`rcheck generate PROJECT dictionary` emits the vocabulary and its linked
+targets. Unknown IDs and targets, kind mismatches, and duplicate dictionary
+IDs fail when loading the project. JSON IR preserves the declaration-to-ID
+bindings. The dictionary text is read from the project's file.
+[Library and membership example](../../examples/model-patterns/library-membership/README.md)
 
 One entry point for the questions of an [rmodel](../rmodel) model: its
 `invariant` and `reachable` checks and the built-in `Declarations`
@@ -117,11 +135,43 @@ claim. The result tracks correspondence to named checks and the current model
 verdict. Use the idealis-spec review workflow to assess whether a natural-language
 sentence and its formal check express the same requirement.
 
+### Find users of a state variable
+
+```sh
+dir=examples/model-patterns/library-membership
+spec_json=$(mktemp)
+pkl eval -f json "$dir/spec.pkl" > "$spec_json"
+rcheck impact "$dir/notification.rmodel.json" knownActiveMembers \
+  --spec "$spec_json" --root "$dir"
+rm "$spec_json"
+```
+
+`impact` accepts model source or a project manifest. Query the linked state
+name after port resolution. The report includes source locations for actions
+that read or write the state, named derived expressions that read it, and
+checks that read it or refer to an affected action through `on` or fairness.
+`reads` and `viaActions` distinguish the reasons a check appears.
+
+With `--spec`, the report also lists linked rule IDs and any implementation
+and test links declared for the model as a whole. Relative model paths in the
+specification use `--root`, which defaults to the current directory. Static
+references identify review candidates. Run the relevant checks and replay
+against the implementation to establish behavioral impact.
+
 ## Check an expected verdict in CI
 
 ```sh
 rcheck fixtures/rcheck/autosave.model --question FinishDoesNotEdit --expect holds
 ```
+
+For SAT, use `--sat-steps N` to set the trace bound for this run. The
+bound counts states, including the initial state. Without the flag, the
+SAT backend uses a model's legacy `scope steps = N` when present, or
+four states by default. SAT reports the effective bound in its coverage
+and supports bounds from 1 through 32. For reachability, SAT distinguishes
+an empty initial state space from an unreachable goal. It checks for an
+initial state with the remaining work budget when the goal has no witness.
+If the budget runs out during this check, the result is `unknown`.
 
 `--expect` takes `holds`, `violated`, `reachable`, or `unreachable` and
 requires `--question`. The command continues to print the usual JSON
@@ -554,6 +604,32 @@ elsewhere, it still returns that witness with `complete: false`.
 This also applies with `--ignore-stutter`: a scope exit or malformed
 successor prevents a stall verdict at its source state.
 
+## Check whether a data type has values
+
+```sh
+rcheck refinements examples/model-patterns/payment-data/payment-refined.ideal --type Request
+```
+
+`domain` solves the type's `where` clauses with rusmt over mathematical
+integers and nonnegative naturals. `scope` answers the same question with
+the model's integer interval applied to the value's fields. For example,
+`data Amount = Nat where { value >= 10 }` with `scope Int = 0..2`
+returns `domain: sat` with a value and `scope: unsat`. A refinement
+requiring a negative `Nat` returns `domain: unsat`.
+
+The value has the same JSON shape as the generated decoders expect, so
+it can seed a test. This command checks type domains without evaluating
+`init`, guards, or transitions. Specify `--type NAME` to select one
+data type. By default it checks declarations that have a `where` clause.
+Source files and projects retain declaration locations. JSON IR inputs
+include the type name.
+
+The exit code is 1 if any selected type is empty, 3 if a check is
+undetermined or no refinement is selected, and 0 if each selected type
+has a value and all scoped queries completed. A scope without values
+does not change that exit code. `--max-work N` sets the rusmt work
+budget independently for each query.
+
 ## Lean snapshot oracle
 
 ```sh
@@ -724,6 +800,24 @@ final acceptance and snapshot. The test can force every pair to be exercised
 by passing `examples: [[boundaryCases.pairs]]` to fast-check. See the
 [withdrawal test](../../tests/rcheck/withdrawal.pbt.test.ts) for an adapter
 using the generated bindings and a replay with a stored seed and path.
+
+### Test data type constraints at the input boundary
+
+```sh
+model=examples/model-patterns/payment-data/payment-refined.ideal
+rcheck generate "$model" typescript > bindings.ts
+rcheck generate "$model" pbt-data-cases > data-cases.json
+rcheck generate "$model" pbt-data-typescript > data-boundary.ts
+```
+
+Call `checkDataBoundaries({ Amount: decodeAmount, Request: decodeRequest })`
+from a test using the generated TypeScript bindings. Each case names a data
+type, its JSON input, and whether the decoder should accept it. The generator
+uses valid values from the finite model to fill the surrounding fields. It
+probes below, at, and above the comparison bound. A literal bound can yield
+cases outside the search scope, such as 999, 1000 and 1001 in the payment
+example. It emits comparisons for which it finds both an accepted and a
+rejected input.
 
 ### Check a component's behavior in a project
 

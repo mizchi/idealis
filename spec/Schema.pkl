@@ -27,7 +27,7 @@ class CodeRef {
   symbol: String(!isEmpty)
 }
 
-class Term {
+open class Term {
   id: Id
   kind: Kind
   /// The heading of the glossary section the term is rendered in.
@@ -40,6 +40,17 @@ class Term {
   avoid: Listing<String> = new {}
   model: Listing<ModelRef> = new {}
   code: Listing<CodeRef> = new {}
+}
+
+class ToolFlow {
+  role: "logic" | "language" | "artifact" | "parser" | "compiler" | "checker"
+  input: Listing<Id>
+  output: Listing<Id>
+  comparedWith: Listing<Id>
+}
+
+class VocabularyTerm extends Term {
+  flow: ToolFlow
 }
 
 class Claim {

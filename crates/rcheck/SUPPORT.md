@@ -8,6 +8,7 @@
 
 - [x] 問い: モデルの`invariant`・`reachable`と、組み込みの`Declarations`（0101）。
 - [x] 検査器の宣言（`supports`）: 参照評価器は関係の取りうるtupleが20以下ならcomplete、明示状態（rtlc）はcomplete、SAT（ralloy）はstepsまでのbounded（0101）。
+- [x] SAT の到達性検査は、到達条件を満たす経路がないとき、同じ経路長と残予算で初期状態の有無を確認する。`empty`、`unreachable`、予算切れの `unknown` を区別する。[検査器間の回帰試験](tests/registry.rs)
 - [x] SAT に渡す Alloy の宣言数を事前に確認し、上限を超える場合は種類・件数・上限を対応外の理由として返す。型検査や探索のほかの制約はそれぞれの経路で報告する。[境界の回帰試験](tests/registry.rs)
 - [x] 答え: 成り立つ・破れる・到達できる・到達できない・空・未確定・エラーと範囲、破れる・到達できるときの最短の深さ。boundedの成り立つ・到達できない、予算切れ、エラーをcompleteの答えとして扱わない（0101）。
 - [x] 選び方: `auto`はcompleteで答える最初の検査器、名前の指定、`all`は全検査器と食い違いの報告。boundedの否定の答えは、bound以上の深さの反例とは食い違わない（0101）。
@@ -30,12 +31,15 @@
 - [x] `select` の変数・型・述語を IR に運び、参照検査器と明示検査器の到達判定を照合する。ralloy の集合内包は対応外として報告する。[回帰試験](tests/ir.rs)
 - [x] `without_keys` を IR に運び、キーが値を共有する場合と削除対象が存在しない場合を参照・明示・SAT の各検査器で照合する。[回帰試験](tests/ir.rs)
 - [x] `closure` を IR の式のタグとして往復し、二項関係として型検査する。[IR の往復テスト](tests/ir.rs)
-- [x] `entity` の用語定義を IR の任意フィールド `entity_definitions` と `generate glossary` に写す。定義を持たない IR は従来の形式で読める。[IR の往復テスト](tests/ir.rs)。
+- [x] `entity` の用語定義と翻訳を IR の任意フィールド `entity_definitions` と `entity_translations` に写す。`generate glossary` は既定の説明を、`generate glossary-localized` は全言語を返す。定義を持たない IR も読める。[IR の往復テスト](tests/ir.rs)。
+- [x] `data` の宣言形式を IR のレコードに保持し、読み込み時に構成を検査する。TypeScript では異なる `data` を代入で混同できない型を生成する。[回帰試験](tests/data_types.rs)
+- [x] `.ideal` の `vocabulary` または JSON をプロジェクト辞書として読み、`term` の束縛を接続後の宣言の種類と照合する。`generate dictionary` は定義と参照先を出力し、IR は束縛を保持する。[辞書の CLI テスト](tests/dictionary.rs)
 - [x] `rcheck dead-code` は参照評価器で、到達する状態で成立するガードを操作ごとに調べる。`--instances ACTION` は選んだ操作の引数の組を最大4,096件まで個別に調べる。未確定、空、IR の欠落をデッド扱いしない。[到達性の CLI テスト](tests/dead_code.rs)。
 - [x] `rcheck deadlock` は操作の全引数のガードを調べ、有効な操作がない到達状態の経路を返す。`--unless` で完了条件を指定し、初期状態なし・未確定・宣言違反を区別する。[回帰試験](tests/deadlock.rs)
 - [x] `deadlock --ignore-stutter` は有効な操作が同じ状態を返す場合も停止候補にする。状態が変わる操作、範囲外への遷移、宣言違反を生む遷移が残っていれば、その状態を停止と判定しない。[再利用バリアの対照](tests/deadlock.rs)
 - [x] `rcheck witness MODEL QUESTION --checker rprob` は有限 atom・整数・関係の探索が得た状態・遷移・宣言の経路を共通の JSON 形式で返す。[rprob の再生試験](../rprob/tests/witness.rs)
 - [x] `rcheck branches` はソースの条件付き更新群と入れ子の前提を追い、成立・不成立の各枝への経路または到達不能・空・未確定を返す。[CLI の回帰試験](tests/branches.rs)
+- [x] `rcheck impact` は接続後の状態名から、操作・導出式・検査の静的な参照をソース位置付きで逆引きする。仕様を渡すと規則とモデル単位の実装・テストへのリンクも返す。[回帰試験](tests/impact.rs)
 - [x] `rcheck coverage` は一回の参照探索で全操作と条件付き更新群の到達性をまとめる。空・未確定・宣言違反を区別する。`generate branch-map` で元ファイルと分岐の入れ子を保存し、IR を使う `coverage` と `branches` に渡せる。[CLI の回帰試験](tests/coverage.rs)
 - [x] `coverage --instances` は同じ探索で引数の組を集計する。列挙上限を超える操作は一覧を省略し、到達不能とは別に診断する。[CLI の回帰試験](tests/coverage.rs)
 - [x] 代入の右辺が直接 `if` の場合は then・else と連続した条件式を `kind: value` として報告し、分岐マップ v2 で保存する。v1 は更新グループの情報を読み込める。[CLI の回帰試験](tests/branches.rs)
@@ -61,6 +65,8 @@
 - [x] manifest の `exports` から、Rust・TypeScript・Go・MoonBit と JSON Schema の公開コマンドを `generate ... --public` で生成する。内部操作を含む検査と証拠経路も保持する。[回帰試験](tests/public_bindings.rs)
 - [x] `rcheck component` は型断片・ポート宣言・本体を単独で型検査する。リンク時に共有の型断片とポートの型・多重度を照合し、部品の読み書き権限を使う。[回帰試験](tests/components.rs)
 - [x] `rcheck contracts` はリンク後の有限探索で部品の仮定・保証・到達条件をまとめて調べる。型が合う書き手による仮定の違反、成立する保証に対する未到達の入力例、予算切れを区別する。[回帰試験](tests/components.rs)
+- [x] `rcheck refinements` は rusmt で `data ... where` の値の存在を調べ、型そのものと今回の整数スコープの結果を返す。レコードの入れ子と variant のペイロードを扱い、具体値は生成デコーダーの JSON 形式で返す。予算切れは `unknown`。[CLI の回帰試験](tests/refinements.rs)
+- [x] `data ... where` を JSON IR に保持し、参照評価器・TLA+ 経由の明示検査・rprob と `validate` で適用する。`generate <model> pbt-data-cases|pbt-data-typescript` は比較の境界の前後を値デコーダーの試験用 JSON と fast-check のプロパティにする。有限スコープから足場となる値を選び、成立・不成立の対が得られた比較を出力する。[回帰試験](tests/data_types.rs)
 - [x] `generate <model> pbt-cases|pbt-typescript` は完全探索できる有限範囲から、隣接整数、一遷移、隣接入力後の一操作で受付が変わる組を導出する。再生用 JSON と fast-check のプロパティを生成する。探索未完了・不正・境界例なしはエラー。[CLI のテスト](tests/linked_projects.rs) · [TypeScript の正常・故障対照](../../tests/rcheck/withdrawal.pbt.test.ts)
 - [x] `generate <model> pbt-go` は `generate <model> go` の interface を実装する関数を受け取り、同じ境界例を Go の fuzz seed として再生する。[Go の出金実装と故障対照](../../tests/rcheck/go/withdrawal/withdrawal_test.go)
 - [x] IR の `reachable_from` は根と辺の式を保持する。構造を往復し、rcheck で同じ到達性を検査できる。[差分テスト](tests/witness.rs)。

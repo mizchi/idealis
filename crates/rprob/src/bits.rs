@@ -1,5 +1,5 @@
 use crate::indexed_rows;
-use rmodel::Mult;
+use idealis_syntax::Mult;
 use std::sync::Arc;
 
 pub(crate) const ROW: usize = 8;
@@ -65,6 +65,12 @@ pub(crate) struct Domain {
     pub(crate) tuples: Vec<u64>,
     pub(crate) integer_mask: Option<u64>,
     pub(crate) ordinal_count: Option<usize>,
+    pub(crate) refinement: Option<Refinement>,
+}
+
+pub(crate) enum Refinement {
+    Bits(u64),
+    Ordinals(Arc<[u64]>),
 }
 
 pub(crate) enum Rows {
@@ -80,7 +86,20 @@ impl Domain {
 
     pub(crate) fn admits(&self, value: u64) -> bool {
         if let Some(count) = self.ordinal_count {
-            return value <= count as u64 && (value != 0 || self.mult == Mult::Lone);
+            return if value == 0 {
+                self.mult == Mult::Lone
+            } else {
+                value <= count as u64
+                    && match &self.refinement {
+                        Some(Refinement::Ordinals(valid)) => valid.binary_search(&value).is_ok(),
+                        _ => true,
+                    }
+            };
+        }
+        if let Some(Refinement::Bits(mask)) = self.refinement
+            && value & !mask != 0
+        {
+            return false;
         }
         if self.mult == Mult::Set {
             return true;
@@ -96,6 +115,10 @@ impl Domain {
     }
 
     pub(crate) fn candidates(&self) -> Candidates {
+        if let Some(Refinement::Ordinals(valid)) = &self.refinement {
+            let absent = (self.mult == Mult::Lone).then_some(0);
+            return Candidates::Table(absent.into_iter().chain(valid.iter().copied()).collect());
+        }
         if let Some(count) = self.ordinal_count {
             return Candidates::Ordinals {
                 start: usize::from(self.mult == Mult::One),
@@ -313,6 +336,7 @@ mod tests {
                 tuples: tuples.clone(),
                 integer_mask: None,
                 ordinal_count: None,
+                refinement: None,
             };
             let choices = domain.candidates();
             let expected = (0..1 << tuples.len()).filter_map(|ordinal| {

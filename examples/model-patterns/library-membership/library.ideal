@@ -1,0 +1,21 @@
+var @borrower: Copy -> lone Member
+var @everBorrowed: set Copy
+term "loan-record" for @everBorrowed
+init { no @borrower, no @everBorrowed }
+
+behavior @borrow(c: Copy, m: Member) {
+  guard { m in @eligible, no c.@borrower }
+  update {
+    @borrower = @borrower + (c -> m)
+    @everBorrowed = @everBorrowed + c
+  }
+}
+
+// 返却には現在の借り手であることだけを求める。
+behavior @giveBack(c: Copy, m: Member) {
+  guard { m in c.@borrower }
+  update { @borrower = @borrower - (c -> m) }
+}
+
+invariant @LoanIsRecorded { keys(@borrower) in @everBorrowed }
+transition @ReturnKeepsRecord on @giveBack { unchanged(@everBorrowed) }

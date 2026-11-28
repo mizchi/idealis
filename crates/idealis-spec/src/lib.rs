@@ -9,6 +9,7 @@
 mod adoption;
 mod clauses;
 mod comparison;
+mod vocabulary;
 pub use adoption::{
     AdoptionBlocker, EvaluationRevision, Evidence, GoalMeasurement, SemanticComparison,
     assess_adoption,
@@ -19,6 +20,7 @@ pub use clauses::{
 pub use comparison::{
     Checker, CheckerReceipt, ComparisonPlan, ComparisonResult, compare_receipts, run_checker,
 };
+pub use vocabulary::{compile_vocabulary, vocabulary_uses};
 
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -54,6 +56,16 @@ pub struct Term {
     pub model: Vec<ModelRef>,
     #[serde(default)]
     pub code: Vec<CodeRef>,
+    #[serde(default)]
+    pub flow: Option<TermFlow>,
+}
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TermFlow {
+    pub role: String,
+    pub input: Vec<String>,
+    pub output: Vec<String>,
+    pub compared_with: Vec<String>,
 }
 #[derive(Clone, Debug, Deserialize)]
 pub struct Claim {
@@ -184,7 +196,7 @@ pub fn links(spec: &Spec, root: &Path) -> Vec<Problem> {
         }
     }
     // D2: references resolve.
-    let mut models: BTreeMap<&str, Option<rmodel::Model>> = BTreeMap::new();
+    let mut models: BTreeMap<&str, Option<idealis_syntax::Model>> = BTreeMap::new();
     let paths = spec
         .terms
         .iter()
@@ -203,7 +215,7 @@ pub fn links(spec: &Spec, root: &Path) -> Vec<Problem> {
         models
             .entry(path)
             .or_insert_with(|| match std::fs::read_to_string(root.join(path)) {
-                Ok(source) => match rmodel::parse(&source) {
+                Ok(source) => match idealis_syntax::parse(&source) {
                     Ok(model) => Some(model),
                     Err(error) => {
                         problems.push(problem("D2", format!("{path}: {error}")));
@@ -216,7 +228,7 @@ pub fn links(spec: &Spec, root: &Path) -> Vec<Problem> {
                 }
             });
     }
-    let declarations = |model: &rmodel::Model| -> Vec<String> {
+    let declarations = |model: &idealis_syntax::Model| -> Vec<String> {
         model
             .sigs
             .iter()
@@ -394,6 +406,22 @@ pub fn render(spec: &Spec, source: &str) -> String {
                 term.name.ja, term.name.en, term.definition.ja
             ));
             out.push_str(&format!("- id: `{}`\n", term.id));
+            if let Some(flow) = &term.flow {
+                out.push_str(&format!("- 種類: `{}`\n", flow.role));
+                for (label, references) in [
+                    ("入力", &flow.input),
+                    ("出力", &flow.output),
+                    ("比較先", &flow.compared_with),
+                ] {
+                    if !references.is_empty() {
+                        let ids = references
+                            .iter()
+                            .map(|id| format!("`{id}`"))
+                            .collect::<Vec<_>>();
+                        out.push_str(&format!("- {label}: {}\n", ids.join("、")));
+                    }
+                }
+            }
             if !term.aliases.is_empty() {
                 out.push_str(&format!("- 同じ意味の語: {}\n", term.aliases.join("、")));
             }

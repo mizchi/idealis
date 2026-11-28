@@ -239,14 +239,14 @@
 ドメインの個体を区別する有限の型。モデル中で使う名前に、用語の説明を添えられる。
 
 - id: `entity`
-- コード: `crates/rmodel/src/syntax.rs` の `entity_definitions`
+- コード: `crates/idealis-syntax/src/syntax.rs` の `entity_definitions`
 
 ### 到達しない操作（dead behavior）
 
 到達できる状態と引数のどの組でもガードが成立しない操作。
 
 - id: `dead-behavior`
-- コード: `crates/rmodel/src/reference.rs` の `enabled`
+- コード: `crates/idealis-semantics/src/reference.rs` の `enabled`
 
 ### 状態の oracle（snapshot oracle）
 
@@ -295,7 +295,7 @@
 整数スコープのうち0以上で、Nat の設定、操作引数や状態に使える値。
 
 - id: `natural-value`
-- コード: `crates/rmodel/src/syntax.rs` の `NAT`
+- コード: `crates/idealis-syntax/src/syntax.rs` の `NAT`
 
 ### 処理前の検証（command validation）
 
@@ -309,36 +309,36 @@
 長さに上限があり、順序と重複を保持する。
 
 - id: `bounded-sequence`
-- コード: `crates/rmodel/src/structured.rs` の `Sequence`
+- コード: `crates/idealis-syntax/src/structured.rs` の `Sequence`
 
 ### 値付き variant（payload variant）
 
 タグが値の型を決め、値のないタグも持てる。
 
 - id: `payload-variant`
-- コード: `crates/rmodel/src/structured.rs` の `Variant`
+- コード: `crates/idealis-syntax/src/structured.rs` の `Variant`
 
 ### 進行性の問い（progress obligation）
 
 指定した公平性を満たす実行について、いつか応答が起きることを求める。
 
 - id: `progress-obligation`
-- コード: `crates/rmodel/src/syntax.rs` の `TemporalCheck`
+- コード: `crates/idealis-syntax/src/syntax.rs` の `TemporalCheck`
 
 ### 遷移の性質（transition property）
 
 実行可能な一操作の直前と直後を比較する条件。
 
 - id: `transition-property`
-- コード: `crates/rmodel/src/syntax.rs` の `TransitionCheck`
+- コード: `crates/idealis-syntax/src/syntax.rs` の `TransitionCheck`
 
 ## 実装の照合
 
 - `evals/experiments/rprob/goal.py` の `score` を、`evals/experiments/rprob/test_goal.py` の `test_measurement_is_bound_to_pinned_inputs` がモデル `spec/models/measurement-gate.model` と照合する
 - `crates/idealis-spec/src/comparison.rs` の `compare_receipts` を、`crates/idealis-spec/tests/comparison.rs` の `real_checker_results_feed_adoption` がモデル `spec/models/checker-comparison.model` と照合する
 - `crates/idealis-spec/src/adoption.rs` の `assess_adoption` を、`crates/idealis-spec/tests/adoption.rs` の `a_late_result_cannot_authorize_the_current_candidate` がモデル `spec/models/evidence-adoption.model` と照合する
-- `crates/rmodel/src/syntax.rs` の `action` を、`crates/rmodel/tests/behavior.rs` の `behavior_has_the_same_guard_parallel_updates_and_frame_as_action` がモデル `spec/models/rmodel-behavior.model` と照合する
-- `crates/rmodel/src/reference.rs` の `steps` を、`crates/rmodel/tests/calibration.rs` の `the_next_revision_must_collect_new_evidence` がモデル `spec/models/rmodel-calibration.model` と照合する
+- `crates/idealis-syntax/src/syntax.rs` の `action` を、`crates/rmodel/tests/behavior.rs` の `behavior_has_the_same_guard_parallel_updates_and_frame_as_action` がモデル `spec/models/rmodel-behavior.model` と照合する
+- `crates/idealis-semantics/src/reference.rs` の `steps` を、`crates/rmodel/tests/calibration.rs` の `the_next_revision_must_collect_new_evidence` がモデル `spec/models/rmodel-calibration.model` と照合する
 
 ## rule
 
@@ -430,7 +430,7 @@
 
 ### RMODEL-ENTITY
 
-個体型の宣言を型と用語の正本とする。同じ名前を二重に宣言した場合や存在しない型を参照した場合は拒否する。用語の説明は IR、Rust と TypeScript の型、用語集へ引き継ぐ。
+個体型の宣言を型と用語の正本とする。同じ名前を二重に宣言した場合や存在しない型を参照した場合は拒否する。複数行の用語説明と翻訳は IR、Rust と TypeScript の型、全言語の用語集へ引き継ぐ。
 
 - 形式化しない理由: 名前解決と生成物は rmodel の entity.rs、IR の往復は rcheck の ir.rs、生成した型を使う入出金の照合は rcheck の domain.rs と typescript.rs で検査する。
 

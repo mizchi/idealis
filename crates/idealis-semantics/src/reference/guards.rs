@@ -1,6 +1,6 @@
 //! Split guards at the first clause that may read an operation argument.
 use super::{Scene, Universe};
-use crate::{Action, Formula};
+use idealis_syntax::{Action, Formula};
 
 pub(super) struct GuardPlan<'a> {
     before: Vec<&'a Formula>,

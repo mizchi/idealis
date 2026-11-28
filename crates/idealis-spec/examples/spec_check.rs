@@ -16,6 +16,14 @@ const DESIGN_JSON: &str = "spec/rmodel-design.json";
 const DESIGN_MARKDOWN: &str = "spec/rmodel-design.md";
 const DESIGN_MANIFEST: &str = "spec/rmodel-design-documents.json";
 
+const VOCABULARIES: &[(&str, &str)] = &[
+    ("spec/toolchain.ideal", "spec/toolchain.json"),
+    (
+        "examples/model-patterns/library-membership/dictionary.ideal",
+        "examples/model-patterns/library-membership/dictionary.spec.json",
+    ),
+];
+
 /// Pkl source, evaluated JSON, rendered Markdown, checker.
 const SPECS: &[(&str, &str, &str, Checker)] = &[
     (
@@ -107,6 +115,24 @@ fn main() {
     let write = args.iter().any(|argument| argument == "--write");
     let design_only = args.iter().any(|argument| argument == "--rmodel-design");
     let root = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
+    if !design_only {
+        for &(path, output) in VOCABULARIES {
+            let input = std::fs::read_to_string(root.join(path)).expect(path);
+            let module = idealis_spec::compile_vocabulary(&input)
+                .unwrap_or_else(|error| panic!("{path}:{error}"));
+            let expected = format!(
+                "{}\n",
+                serde_json::to_string_pretty(&module).expect("JSON value")
+            );
+            let output = root.join(output);
+            if write {
+                std::fs::write(output, expected).expect("write compiled vocabulary");
+            } else if std::fs::read_to_string(&output).ok().as_ref() != Some(&expected) {
+                eprintln!("D6 {} is stale; run just spec-write", output.display());
+                std::process::exit(1);
+            }
+        }
+    }
     let mut failures = 0;
     for (pkl, json, markdown, checker) in SPECS {
         if design_only && *json != DESIGN_JSON {

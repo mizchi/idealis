@@ -1,6 +1,6 @@
 //! Truth on a concrete, replayed ultimately periodic behavior.
 use super::{Atom, Next, Runtime, Scene, Snapshot, bindings};
-use crate::{Action, Fairness, FairnessKind, Formula};
+use idealis_syntax::{Action, Fairness, FairnessKind, Formula};
 use std::collections::BTreeMap;
 
 #[derive(Debug)]

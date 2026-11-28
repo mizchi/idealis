@@ -1,5 +1,6 @@
 //! Packed functions from atom keys to ordinal values.
-use rmodel::Mult;
+use idealis_syntax::Mult;
+use std::sync::Arc;
 
 pub(crate) struct Layout {
     /// Least significant row is the first declared key.
@@ -8,15 +9,21 @@ pub(crate) struct Layout {
     limit: u64,
     count: usize,
     required: bool,
+    allowed: Option<Arc<[u64]>>,
 }
 
 impl Layout {
-    pub(crate) fn new(keys: &[u64], values: usize, mult: Mult) -> Option<Self> {
+    pub(crate) fn with_refinement(
+        keys: &[u64],
+        values: usize,
+        mult: Mult,
+        allowed: Option<Arc<[u64]>>,
+    ) -> Option<Self> {
         let radix = u64::try_from(values).ok()?.checked_add(1)?;
         let limit = radix.checked_pow(keys.len() as u32)?;
         let required = mult == Mult::One;
-        let count =
-            usize::try_from((radix - u64::from(required)).checked_pow(keys.len() as u32)?).ok()?;
+        let choices = allowed.as_ref().map_or(values, |codes| codes.len());
+        let count = (choices + usize::from(!required)).checked_pow(keys.len() as u32)?;
         let rows = keys
             .iter()
             .copied()
@@ -29,6 +36,7 @@ impl Layout {
             limit,
             count,
             required,
+            allowed,
         })
     }
 
@@ -59,7 +67,20 @@ impl Layout {
     }
 
     pub(crate) fn admits(&self, word: u64) -> bool {
-        word < self.limit && (!self.required || self.values(word).count() == self.rows.len())
+        if word >= self.limit {
+            return false;
+        }
+        let Some(allowed) = &self.allowed else {
+            return !self.required || self.values(word).count() == self.rows.len();
+        };
+        self.rows.iter().all(|(_, weight)| {
+            let digit = self.digit(word, *weight);
+            if digit == 0 {
+                !self.required
+            } else {
+                allowed.binary_search(&digit).is_ok()
+            }
+        })
     }
 
     pub(crate) fn candidate_count(&self) -> usize {
@@ -67,6 +88,17 @@ impl Layout {
     }
 
     pub(crate) fn candidate(&self, ordinal: usize) -> u64 {
+        if let Some(codes) = &self.allowed {
+            let base = codes.len() + usize::from(!self.required);
+            let mut remaining = ordinal;
+            return self.rows.iter().fold(0, |code, (_, weight)| {
+                let digit = (remaining % base + usize::from(self.required))
+                    .checked_sub(1)
+                    .map_or(0, |index| codes[index]);
+                remaining /= base;
+                code + digit * weight
+            });
+        }
         if !self.required {
             return ordinal as u64;
         }

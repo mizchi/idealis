@@ -1,0 +1,20 @@
+model Payment
+
+// 支払申請は1件だけ受け付ける。手数料が支払額以下なら受け付けられる。
+data Amount = Nat
+data Fee = Nat
+data Request = { amount: Amount, fee: Fee }
+
+var request: lone Request
+init { no request }
+
+behavior submit(amount: Amount, fee: Fee) {
+  guard { no request, fee.value <= amount.value }
+  update { request = Request { amount: amount, fee: fee } }
+}
+
+invariant FeeWithinAmount {
+  some request implies request.fee.value <= request.amount.value
+}
+reachable Submitted { request.amount = Amount(1) and request.fee = Fee(0) }
+scope Int = 0..2, steps = 3

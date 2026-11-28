@@ -17,11 +17,11 @@
 //! - Depths are shortest transition counts from an initial state. A found
 //!   violation or reached state is definite; `holds` and `unreachable`
 //!   need the whole space within the budget, otherwise `unknown`.
-use crate::structured::{ValueDomain, ValueType};
-use crate::syntax::{
+use idealis_syntax::{
     Arith, Check, CheckKind, Compare, Expr, Formula, Int, IntCompare, Model, Mult, Quantifier,
     SetOp, Shape,
 };
+use idealis_syntax::{ValueDomain, ValueType};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::sync::OnceLock;
 mod guards;
@@ -166,32 +166,42 @@ impl<'a> Universe<'a> {
         // Values enumerate the scope: its integers, and records of every
         // combination of their fields (plan 0103).
         if let Some((low, high)) = model.scope.ints {
-            sorts.insert(crate::syntax::INT, (low..=high).map(Atom::Int).collect());
+            sorts.insert(idealis_syntax::INT, (low..=high).map(Atom::Int).collect());
             sorts.insert(
-                crate::syntax::NAT,
+                idealis_syntax::NAT,
                 (low.max(0)..=high).map(Atom::Int).collect(),
             );
         }
-        let structured = model
-            .value_domains()
-            .expect("checked value types")
-            .into_iter()
-            .map(|domain| {
-                (
-                    domain.kind.name(),
-                    StructuredSort {
-                        domain,
-                        atoms: OnceLock::new(),
-                    },
-                )
-            })
-            .collect();
-        Self {
+        let mut universe = Self {
             sorts,
-            structured,
+            structured: BTreeMap::new(),
             members,
             model,
+        };
+        for mut domain in model.value_domains().expect("checked value types") {
+            let kind = domain.kind;
+            domain.size = kind.size(|sort| universe.size(sort));
+            let size = domain.size;
+            universe.structured.insert(
+                kind.name(),
+                StructuredSort {
+                    domain,
+                    atoms: OnceLock::new(),
+                },
+            );
+            if let ValueType::Record(record) = kind
+                && !record.refinements.is_empty()
+            {
+                let atoms: Vec<_> = (0..size)
+                    .map(|index| universe.atom_at(&record.name, index))
+                    .filter(|atom| universe.satisfies_refinements(atom))
+                    .collect();
+                let filtered = universe.structured.get_mut(record.name.as_str()).unwrap();
+                filtered.domain.size = atoms.len();
+                filtered.atoms = OnceLock::from(atoms);
+            }
         }
+        universe
     }
 
     fn size(&self, sort: &str) -> usize {
@@ -220,6 +230,11 @@ impl<'a> Universe<'a> {
         };
         debug_assert!(s.domain.indexable() && index < s.domain.size);
         match s.domain.kind {
+            ValueType::Record(record)
+                if !record.refinements.is_empty() && s.atoms.get().is_some() =>
+            {
+                s.atoms.get().unwrap()[index].clone()
+            }
             ValueType::Record(record) => Atom::Record(
                 self.record_index(&record.name),
                 self.ranked_fields(index, record.fields.iter().map(|(_, sort)| sort.as_str()))
@@ -288,7 +303,54 @@ impl<'a> Universe<'a> {
             .expect("checked record") as u16
     }
 
+    fn satisfies_refinements(&self, atom: &Atom) -> bool {
+        let Atom::Record(index, _) = atom else {
+            return true;
+        };
+        self.model.records[usize::from(*index)]
+            .refinements
+            .iter()
+            .all(|clause| clause.holds(|path| self.refinement_field(atom, path)))
+    }
+
+    fn refinement_field(&self, atom: &Atom, path: &[String]) -> i64 {
+        let mut value = atom;
+        for field in path {
+            let Atom::Record(record, fields) = value else {
+                unreachable!("checked field path")
+            };
+            let index = self.model.records[usize::from(*record)]
+                .field_index(field)
+                .unwrap();
+            value = &fields[index];
+        }
+        let Atom::Int(n) = value else {
+            unreachable!("checked numeric field")
+        };
+        *n
+    }
+
+    fn valid_data(&self, atom: &Atom) -> bool {
+        match atom {
+            Atom::Record(index, fields) => {
+                let record = &self.model.records[usize::from(*index)];
+                self.satisfies_refinements(atom)
+                    && record.fields.iter().zip(fields).all(|((_, sort), atom)| {
+                        (!matches!((sort.as_str(), atom), (idealis_syntax::NAT, Atom::Int(n)) if *n < 0))
+                            && self.valid_data(atom)
+                    })
+            }
+            Atom::Sequence(items) => items.iter().all(|item| self.valid_data(item)),
+            Atom::Variant(_, Some(payload)) => self.valid_data(payload),
+            _ => true,
+        }
+    }
+
     fn contains(&self, sort: &str, atom: &Atom) -> bool {
+        self.contains_value(sort, atom, true)
+    }
+
+    fn contains_value(&self, sort: &str, atom: &Atom, refined: bool) -> bool {
         if let Some(values) = self.sorts.get(sort) {
             return values.contains(atom);
         }
@@ -300,10 +362,14 @@ impl<'a> Universe<'a> {
                         .fields
                         .iter()
                         .zip(fields)
-                        .all(|((_, sort), atom)| self.contains(sort, atom))
+                        .all(|((_, sort), atom)| self.contains_value(sort, atom, refined))
+                    && (!refined || self.satisfies_refinements(atom))
             }
             (ValueType::Sequence(seq), Atom::Sequence(items)) => {
-                items.len() <= seq.max && items.iter().all(|atom| self.contains(&seq.element, atom))
+                items.len() <= seq.max
+                    && items
+                        .iter()
+                        .all(|atom| self.contains_value(&seq.element, atom, refined))
             }
             (ValueType::Variant(variant), Atom::Variant(tag, payload)) => variant
                 .cases
@@ -311,7 +377,7 @@ impl<'a> Universe<'a> {
                 .find(|case| &case.tag == tag)
                 .is_some_and(|case| match (&case.payload, payload) {
                     (None, None) => true,
-                    (Some(sort), Some(atom)) => self.contains(sort, atom),
+                    (Some(sort), Some(atom)) => self.contains_value(sort, atom, refined),
                     _ => false,
                 }),
             _ => false,
@@ -370,6 +436,10 @@ impl<'a> Universe<'a> {
                 .all(|a| fits(*mult, value.iter().filter(|t| &t[0] == a).count())),
         }
     }
+    fn admits_update(&self, shape: &Shape, value: &Value) -> bool {
+        self.admits(shape, value) && (!self.model.has_refinements() || self.in_domain(shape, value))
+    }
+
     /// Whether every stored value lies in its scope, including nested fields.
     fn in_scope(&self, shape: &Shape, value: &Value) -> bool {
         let target = match shape {
@@ -379,7 +449,7 @@ impl<'a> Universe<'a> {
         !self.model.is_value(target)
             || value
                 .iter()
-                .all(|tuple| self.contains(target, tuple.last().expect("a target")))
+                .all(|tuple| self.contains_value(target, tuple.last().expect("a target"), false))
     }
     /// The only integer of a set the checker proved singular.
     fn int(&self, value: &Value) -> i64 {
@@ -487,8 +557,10 @@ impl Universe<'_> {
         match expression {
             Expr::At(phase, expr) => {
                 let relations = match phase {
-                    crate::Phase::Before => scene.relations,
-                    crate::Phase::After => scene.after.expect("a checked transition property"),
+                    idealis_syntax::Phase::Before => scene.relations,
+                    idealis_syntax::Phase::After => {
+                        scene.after.expect("a checked transition property")
+                    }
                 };
                 self.expression(
                     expr,
@@ -878,7 +950,7 @@ pub fn evaluate(model: &Model, max_states: usize) -> Vec<Verdict> {
 /// in an incomplete or empty search.
 pub struct Report {
     pub verdicts: Vec<Verdict>,
-    /// Whether a transition breaks a declared multiplicity (plan 0099):
+    /// Whether a transition breaks a declared multiplicity or data refinement:
     /// `Violated` with the shortest depth of the breaking state, `Holds`,
     /// `Empty` or `Unknown`.
     pub declarations: Outcome,
@@ -1045,7 +1117,7 @@ pub fn analyze_instances_with_budget(
 
 fn instance_count(
     universe: &Universe<'_>,
-    action: &crate::Action,
+    action: &idealis_syntax::Action,
     limit: usize,
 ) -> Result<usize, String> {
     let params = &action.params;
@@ -1064,7 +1136,7 @@ fn instance_count(
 
 fn describe_instances(
     universe: &Universe<'_>,
-    action: &crate::Action,
+    action: &idealis_syntax::Action,
     reached: &[bool],
     names: &BTreeMap<u16, String>,
     scope: Outcome,
@@ -1142,17 +1214,17 @@ struct BranchSite<'a> {
 }
 
 impl<'a> BranchSearch<'a> {
-    fn new(branch: &crate::UpdateBranch, action: &'a crate::Action) -> Option<Self> {
-        let sites = if branch.sites.is_empty() {
-            let path: Vec<_> = branch
-                .ancestors
-                .iter()
-                .map(|&yes| usize::from(!yes))
-                .collect();
-            vec![BranchSite::resolve(action, &branch.assignee, &path, false)?]
+    fn new(
+        branch: &idealis_syntax::UpdateBranch,
+        action: &'a idealis_syntax::Action,
+    ) -> Option<Self> {
+        let sites = if branch.value_sites().is_empty() {
+            let (assignee, ancestors) = branch.selector();
+            let path: Vec<_> = ancestors.iter().map(|&yes| usize::from(!yes)).collect();
+            vec![BranchSite::resolve(action, assignee, &path, false)?]
         } else {
             branch
-                .sites
+                .value_sites()
                 .iter()
                 .map(|(assignment, path)| BranchSite::resolve(action, assignment, path, true))
                 .collect::<Option<_>>()?
@@ -1166,7 +1238,7 @@ impl<'a> BranchSearch<'a> {
 
 impl<'a> BranchSite<'a> {
     fn resolve(
-        action: &'a crate::Action,
+        action: &'a idealis_syntax::Action,
         assignment: &str,
         path: &[usize],
         expanded: bool,
@@ -1334,7 +1406,7 @@ pub struct BranchWitnesses {
 pub fn update_branch_witnesses(
     model: &Model,
     action: &str,
-    branches: &[crate::UpdateBranch],
+    branches: &[idealis_syntax::UpdateBranch],
     budget: SearchBudget,
 ) -> Result<BranchWitnesses, String> {
     let index = model
@@ -1360,7 +1432,7 @@ pub type UpdatePaths = Vec<Vec<[Option<Witness>; 2]>>;
 /// Explore once for both operation reachability and all source update groups.
 pub fn update_coverage(
     model: &Model,
-    branches: &BTreeMap<String, Vec<crate::UpdateBranch>>,
+    branches: &BTreeMap<String, Vec<idealis_syntax::UpdateBranch>>,
     budget: SearchBudget,
 ) -> Result<(Report, UpdatePaths), String> {
     all_update_coverage(&Universe::new(model), branches, budget, None)
@@ -1376,7 +1448,7 @@ pub struct CoverageWithInstances {
 /// Explore the model once for actions, argument bindings and update groups.
 pub fn update_coverage_with_instances(
     model: &Model,
-    branches: &BTreeMap<String, Vec<crate::UpdateBranch>>,
+    branches: &BTreeMap<String, Vec<idealis_syntax::UpdateBranch>>,
     budget: SearchBudget,
     max_instances: usize,
 ) -> Result<CoverageWithInstances, String> {
@@ -1421,7 +1493,7 @@ pub fn update_coverage_with_instances(
 
 fn all_update_coverage<'a>(
     universe: &Universe<'a>,
-    branches: &'a BTreeMap<String, Vec<crate::UpdateBranch>>,
+    branches: &'a BTreeMap<String, Vec<idealis_syntax::UpdateBranch>>,
     budget: SearchBudget,
     instances: Option<&mut BTreeMap<usize, Vec<bool>>>,
 ) -> Result<(Report, UpdatePaths), String> {
@@ -1440,7 +1512,7 @@ fn all_update_coverage<'a>(
 
 fn explore_update_branches<'a>(
     universe: &Universe<'a>,
-    selected: impl IntoIterator<Item = (usize, &'a [crate::UpdateBranch])>,
+    selected: impl IntoIterator<Item = (usize, &'a [idealis_syntax::UpdateBranch])>,
     budget: SearchBudget,
     instances: Option<&mut BTreeMap<usize, Vec<bool>>>,
 ) -> Result<(Report, UpdatePaths), String> {
@@ -1629,8 +1701,10 @@ pub fn witness_with_budget(
     question: &str,
     budget: SearchBudget,
 ) -> Result<WitnessResult, String> {
-    if !matches!(question, crate::DECLARATIONS | crate::SCOPE)
-        && !model.checks.iter().any(|check| check.name == question)
+    if !matches!(
+        question,
+        idealis_syntax::DECLARATIONS | idealis_syntax::SCOPE
+    ) && !model.checks.iter().any(|check| check.name == question)
         && !model.transitions.iter().any(|check| check.name == question)
     {
         return Err(format!(
@@ -1651,8 +1725,8 @@ pub fn witness_with_budget(
         None,
     );
     let outcome = match question {
-        crate::DECLARATIONS => report.declarations,
-        crate::SCOPE => report.scope,
+        idealis_syntax::DECLARATIONS => report.declarations,
+        idealis_syntax::SCOPE => report.scope,
         _ => {
             report
                 .verdicts
@@ -1775,7 +1849,7 @@ pub fn transition_witness_with_budget(
         .iter()
         .find(|candidate| candidate.name == action)
         .ok_or_else(|| format!("no action named {action}"))?;
-    let formula = crate::syntax::transition_predicate(model, selected, predicate)
+    let formula = idealis_syntax::transition_predicate(model, selected, predicate)
         .map_err(|error| error.to_string())?;
     let used: BTreeSet<_> = model
         .checks
@@ -1790,7 +1864,7 @@ pub fn transition_witness_with_budget(
 
     // A counterexample to the negated predicate ends with a matching step.
     let mut queried = model.clone();
-    queried.transitions.push(crate::TransitionCheck {
+    queried.transitions.push(idealis_syntax::TransitionCheck {
         name: name.clone(),
         action: Some(action.to_owned()),
         formula: Formula::Not(Box::new(formula)),
@@ -1903,7 +1977,7 @@ fn explore<'model>(
         });
     }
     let fixed = crate::initial::fixed_initial_values(model);
-    let candidates = |&relation: &&'model crate::Relation| {
+    let candidates = |&relation: &&'model idealis_syntax::Relation| {
         universe
             .candidates(
                 &relation.shape,
@@ -2071,7 +2145,7 @@ fn explore<'model>(
                         if !universe.in_scope(&vars[position].shape, &value) {
                             inside = false;
                         }
-                        if !universe.admits(&vars[position].shape, &value) {
+                        if !universe.admits_update(&vars[position].shape, &value) {
                             valid = false;
                         }
                         next[position] = value;
@@ -2089,7 +2163,7 @@ fn explore<'model>(
                         if escaped.is_none_or(|known| depth + 1 < known) {
                             escaped = Some(depth + 1);
                             if let Some(search) = search.as_deref_mut()
-                                && search.targets_question(crate::SCOPE)
+                                && search.targets_question(idealis_syntax::SCOPE)
                             {
                                 search.record(
                                     &configuration,
@@ -2104,7 +2178,7 @@ fn explore<'model>(
                         if broken.is_none_or(|known| depth + 1 < known) {
                             broken = Some(depth + 1);
                             if let Some(search) = search.as_deref_mut()
-                                && search.targets_question(crate::DECLARATIONS)
+                                && search.targets_question(idealis_syntax::DECLARATIONS)
                             {
                                 search.record(
                                     &configuration,
@@ -2312,8 +2386,8 @@ pub struct Machine<'a> {
 pub struct Runtime<'a> {
     model: &'a Model,
     universe: Universe<'a>,
-    statics: Vec<&'a crate::syntax::Relation>,
-    vars: Vec<&'a crate::syntax::Relation>,
+    statics: Vec<&'a idealis_syntax::Relation>,
+    vars: Vec<&'a idealis_syntax::Relation>,
     names: BTreeMap<u16, String>,
 }
 
@@ -2360,7 +2434,7 @@ impl<'a> Machine<'a> {
         let runtime = Runtime::new(model);
         check_enumerable(model, &runtime.universe, collect_initial)?;
         let fixed = crate::initial::fixed_initial_values(model);
-        let choices = |relations: &[&'a crate::syntax::Relation]| {
+        let choices = |relations: &[&'a idealis_syntax::Relation]| {
             relations
                 .iter()
                 .map(|r| {
@@ -2417,7 +2491,7 @@ impl<'a> Machine<'a> {
 
     fn match_snapshot(
         &self,
-        relations: &[&crate::Relation],
+        relations: &[&idealis_syntax::Relation],
         choices: &[Candidates<'_>],
         mut matches: impl FnMut(&str, Vec<Vec<Data>>) -> bool,
     ) -> Option<Snapshot> {
@@ -2487,9 +2561,9 @@ impl<'a> Machine<'a> {
         steps
     }
     /// Enumerate named argument bindings within the remaining grounding budget.
-    pub(crate) fn action_arguments(
+    pub fn action_arguments(
         &self,
-        action: &crate::Action,
+        action: &idealis_syntax::Action,
         limit: usize,
     ) -> Option<Vec<Vec<(String, Data)>>> {
         let size = self.universe.argument_count(&action.params)?;
@@ -2535,7 +2609,7 @@ impl<'a> Machine<'a> {
         &self,
         name: &str,
         mut matches: impl FnMut(&str, Data) -> bool,
-    ) -> Option<(&crate::Action, BTreeMap<String, Atom>)> {
+    ) -> Option<(&idealis_syntax::Action, BTreeMap<String, Atom>)> {
         let action = self
             .model
             .actions
@@ -2654,7 +2728,12 @@ impl<'a> Runtime<'a> {
             .map(|check| check.name.as_str())
     }
 
-    fn next(&self, action: &crate::Action, scene: &Scene<'_>, state: &Snapshot) -> Option<Next> {
+    fn next(
+        &self,
+        action: &idealis_syntax::Action,
+        scene: &Scene<'_>,
+        state: &Snapshot,
+    ) -> Option<Next> {
         if !action
             .guards
             .iter()
@@ -2665,7 +2744,12 @@ impl<'a> Runtime<'a> {
         Some(self.advance(action, scene, state))
     }
 
-    fn advance(&self, action: &crate::Action, scene: &Scene<'_>, state: &Snapshot) -> Next {
+    fn advance(
+        &self,
+        action: &idealis_syntax::Action,
+        scene: &Scene<'_>,
+        state: &Snapshot,
+    ) -> Next {
         let mut next = state.0.clone();
         let (mut valid, mut inside) = (true, true);
         for (var, value) in &action.assignments {
@@ -2676,7 +2760,9 @@ impl<'a> Runtime<'a> {
                 .expect("checked var");
             let value = self.universe.expression(value, scene);
             inside &= self.universe.in_scope(&self.vars[position].shape, &value);
-            valid &= self.universe.admits(&self.vars[position].shape, &value);
+            valid &= self
+                .universe
+                .admits_update(&self.vars[position].shape, &value);
             next[position] = value;
         }
         match (inside, valid) {
@@ -2726,7 +2812,7 @@ impl<'a> Runtime<'a> {
             })
             .collect()
     }
-    fn describe(&self, relations: &[&crate::syntax::Relation], values: &[Value]) -> RelationData {
+    fn describe(&self, relations: &[&idealis_syntax::Relation], values: &[Value]) -> RelationData {
         relations
             .iter()
             .zip(values)
@@ -2735,7 +2821,7 @@ impl<'a> Runtime<'a> {
     }
     fn describe_relation(
         &self,
-        relation: &crate::syntax::Relation,
+        relation: &idealis_syntax::Relation,
         value: &Value,
     ) -> (String, Vec<Vec<Data>>) {
         (relation.name.clone(), self.describe_value(value))
@@ -2757,6 +2843,80 @@ impl<'a> Runtime<'a> {
             .map(|(r, value)| (r.name.as_str(), value.clone()))
             .collect()
     }
+}
+
+/// One candidate for a generated input decoder, independent of the search scope.
+pub struct DataBoundary {
+    pub sort: String,
+    pub input: Data,
+    pub valid: bool,
+}
+
+/// Probe just below, at and just above each written comparison's boundary.
+/// A valid value from the finite domain provides the other fields.
+pub fn data_boundaries(model: &Model) -> Vec<DataBoundary> {
+    let universe = Universe::new(model);
+    let names = atom_names(model);
+    let mut cases = Vec::new();
+    for record in model.records.iter().filter(|r| !r.refinements.is_empty()) {
+        let seeds = universe.atoms(&record.name);
+        for clause in &record.refinements {
+            for (vary, bound) in [(&clause.left, &clause.right), (&clause.right, &clause.left)] {
+                let idealis_syntax::RefinementOperand::Field(path) = vary else {
+                    continue;
+                };
+                let candidates = |seed: &Atom| {
+                    let pivot = match bound {
+                        idealis_syntax::RefinementOperand::Literal(n) => *n,
+                        idealis_syntax::RefinementOperand::Field(path) => {
+                            universe.refinement_field(seed, path)
+                        }
+                    };
+                    let mut probes = Vec::new();
+                    for delta in [-1i64, 0, 1] {
+                        let Some(n) = pivot.checked_add(delta) else {
+                            continue;
+                        };
+                        if n.unsigned_abs() > 9_007_199_254_740_991 {
+                            continue;
+                        }
+                        let mut candidate = seed.clone();
+                        let mut value = &mut candidate;
+                        for field in path {
+                            let Atom::Record(record, fields) = value else {
+                                unreachable!("checked field path")
+                            };
+                            let index = model.records[usize::from(*record)]
+                                .field_index(field)
+                                .unwrap();
+                            value = &mut fields[index];
+                        }
+                        *value = Atom::Int(n);
+                        let valid = universe.valid_data(&candidate);
+                        probes.push((candidate, valid));
+                    }
+                    probes
+                };
+                // Fixed boundary predicates need just one seed. For dependent
+                // bounds try the first few values to avoid a non-discriminating
+                // example (for example, a condition already implied by Nat).
+                for seed in seeds.iter().take(20).skip(1).chain(seeds.first()) {
+                    let probes = candidates(seed);
+                    if probes.iter().any(|(_, valid)| *valid)
+                        && probes.iter().any(|(_, valid)| !*valid)
+                    {
+                        cases.extend(probes.into_iter().map(|(atom, valid)| DataBoundary {
+                            sort: record.name.clone(),
+                            input: atom_data(model, &names, &atom),
+                            valid,
+                        }));
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    cases
 }
 
 fn atom_names(model: &Model) -> BTreeMap<u16, String> {

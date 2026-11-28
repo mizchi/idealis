@@ -1,0 +1,5 @@
+// 会員管理が資格の正本を更新する。
+behavior @suspend(m: Member) {
+  guard { m in @eligible }
+  update { @eligible = @eligible - m }
+}

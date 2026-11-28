@@ -5,6 +5,7 @@
 use serde::{Deserialize, Serialize};
 
 pub mod project;
+pub mod refinements;
 
 /// A question a model asks: one of its checks, or the built-in multiplicity
 /// check `Declarations` (plan 0099).
@@ -326,11 +327,10 @@ pub fn check_with(
             validate_answer(checker, &question, coverage, answer)
         })
         .collect();
-    let disagreement = answers.iter().enumerate().any(|(i, a)| {
-        answers[i + 1..]
-            .iter()
-            .any(|b| disagree(a, b, model.scope.steps))
-    });
+    let disagreement = answers
+        .iter()
+        .enumerate()
+        .any(|(i, a)| answers[i + 1..].iter().any(|b| answers_disagree(a, b)));
     Ok(Report {
         question: question.name,
         answers,
@@ -382,6 +382,10 @@ fn validate_answer(
 /// there is no witness shallower than the bound, so a deeper witness from a
 /// complete search does not contradict it.
 pub fn disagree(a: &Answer, b: &Answer, _model_steps: usize) -> bool {
+    answers_disagree(a, b)
+}
+
+fn answers_disagree(a: &Answer, b: &Answer) -> bool {
     let decided = |answer: &Answer| !matches!(answer.verdict, Verdict::Unknown | Verdict::Error);
     if !decided(a) || !decided(b) || a.verdict == b.verdict {
         return false;

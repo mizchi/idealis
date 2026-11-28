@@ -1,6 +1,6 @@
 //! Bind one supplied input using its declared types.
 use super::{Atom, Data, Next, Runtime, Scene, Snapshot, Value};
-use crate::{Action, INT, NAT, Relation, Shape};
+use idealis_syntax::{Action, INT, NAT, Relation, Shape};
 use std::collections::BTreeMap;
 
 /// One operation with arguments that have been admitted to their value domains.
@@ -151,10 +151,8 @@ impl<'a> Runtime<'a> {
                             .flatten()
                     })
                     .collect::<Option<Vec<_>>>()?;
-                Some(Atom::Record(
-                    self.universe.record_index(sort),
-                    values.into(),
-                ))
+                let atom = Atom::Record(self.universe.record_index(sort), values.into());
+                self.universe.satisfies_refinements(&atom).then_some(atom)
             }
             Data::Variant(tag, payload) => {
                 let variant = self.model.variant(sort)?;

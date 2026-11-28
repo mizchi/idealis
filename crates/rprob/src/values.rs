@@ -1,4 +1,4 @@
-use rmodel::Record;
+use idealis_syntax::Record;
 use std::{collections::BTreeMap, sync::Arc};
 
 pub(crate) type Records<'a> = BTreeMap<&'a str, (&'a Record, Arc<RecordLayout>)>;

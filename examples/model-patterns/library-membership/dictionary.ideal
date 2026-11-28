@@ -1,0 +1,39 @@
+vocabulary "library-membership" {
+  name = { ja: "貸出と会員管理", en: "Library lending and membership" }
+
+  term "copy" {
+    kind = entity
+    name = { ja: "蔵書", en: "Library copy" }
+    description = {
+      ja: "図書館が所蔵する1冊。同じ題名の本も1冊ずつ区別する。",
+      en: "A single copy held by the library. Copies with the same title are tracked separately."
+    }
+  }
+
+  term "active-member" {
+    kind = state
+    name = { ja: "有効な会員", en: "Active member" }
+    description = {
+      ja: "会員管理の正本で、現在貸出資格を持つ会員。",
+      en: "A member currently eligible to borrow according to the membership authority."
+    }
+  }
+
+  term "known-active-member" {
+    kind = state
+    name = { ja: "貸出側が有効と把握している会員", en: "Member known to be active by lending" }
+    description = {
+      ja: "貸出側が反映済みの情報で有効と判断する会員。資格停止の反映までは正本とずれることがある。",
+      en: "A member considered eligible according to the information applied by lending. This may differ from the authority until a suspension is applied."
+    }
+  }
+
+  term "loan-record" {
+    kind = state
+    name = { ja: "貸出履歴", en: "Loan history" }
+    description = {
+      ja: "このモデルでは、一度でも貸し出された蔵書の集合。",
+      en: "The set of copies that have been lent at least once in this model."
+    }
+  }
+}

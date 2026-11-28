@@ -5,7 +5,7 @@ pub const MAX_SEQUENCE_LENGTH: usize = 4;
 // Keep backend materialization separate from the type's mathematical domain.
 const MAX_ENUMERATION_NODES: usize = 16_384;
 
-pub(crate) struct ValueDomain<'a> {
+pub struct ValueDomain<'a> {
     pub kind: ValueType<'a>,
     pub size: usize,
     nodes_per_value: usize,
@@ -49,7 +49,7 @@ pub enum ValueType<'a> {
 }
 
 impl<'a> ValueType<'a> {
-    pub(crate) fn name(self) -> &'a str {
+    pub fn name(self) -> &'a str {
         match self {
             Self::Record(r) => &r.name,
             Self::Sequence(s) => &s.name,
@@ -57,7 +57,25 @@ impl<'a> ValueType<'a> {
         }
     }
 
-    fn children(self) -> Vec<&'a str> {
+    pub fn size(self, size_of: impl Fn(&str) -> usize) -> usize {
+        match self {
+            ValueType::Record(record) => record
+                .fields
+                .iter()
+                .fold(1usize, |size, (_, sort)| size.saturating_mul(size_of(sort))),
+            ValueType::Sequence(seq) => {
+                let elements = size_of(&seq.element);
+                (0..=seq.max).fold(0usize, |total, length| {
+                    total.saturating_add(elements.saturating_pow(length as u32))
+                })
+            }
+            ValueType::Variant(v) => v.cases.iter().fold(0usize, |size, case| {
+                size.saturating_add(case.payload.as_deref().map_or(1, &size_of))
+            }),
+        }
+    }
+
+    pub fn children(self) -> Vec<&'a str> {
         match self {
             Self::Record(r) => r.fields.iter().map(|(_, sort)| sort.as_str()).collect(),
             Self::Sequence(s) => vec![&s.element],
@@ -102,7 +120,7 @@ impl Model {
         !self.sequences.is_empty() || !self.variants.is_empty()
     }
 
-    pub(crate) fn value_domains(&self) -> Result<Vec<ValueDomain<'_>>, Error> {
+    pub fn value_domains(&self) -> Result<Vec<ValueDomain<'_>>, Error> {
         let mut types: Vec<_> = self
             .records
             .iter()
@@ -141,33 +159,19 @@ impl Model {
                     ))
                 })?;
             let ty = types.remove(index);
-            let size = match ty {
-                ValueType::Record(record) => {
-                    record.fields.iter().fold(1usize, |size, (_, sort)| {
-                        size.saturating_mul(sizes[sort.as_str()])
-                    })
+            match ty {
+                ValueType::Sequence(seq) if !(1..=MAX_SEQUENCE_LENGTH).contains(&seq.max) => {
+                    return Err(Error::kind(format!(
+                        "{}: sequence max must be 1..={MAX_SEQUENCE_LENGTH}",
+                        seq.name
+                    )));
                 }
-                ValueType::Sequence(seq) => {
-                    if !(1..=MAX_SEQUENCE_LENGTH).contains(&seq.max) {
-                        return Err(Error::kind(format!(
-                            "{}: sequence max must be 1..={MAX_SEQUENCE_LENGTH}",
-                            seq.name
-                        )));
-                    }
-                    let elements = sizes[seq.element.as_str()];
-                    (0..=seq.max).fold(0usize, |total, length| {
-                        total.saturating_add(elements.saturating_pow(length as u32))
-                    })
+                ValueType::Variant(v) if v.cases.is_empty() => {
+                    return Err(Error::kind(format!("{}: variant needs a case", v.name)));
                 }
-                ValueType::Variant(v) => {
-                    if v.cases.is_empty() {
-                        return Err(Error::kind(format!("{}: variant needs a case", v.name)));
-                    }
-                    v.cases.iter().fold(0usize, |size, case| {
-                        size.saturating_add(case.payload.as_deref().map_or(1, |t| sizes[t]))
-                    })
-                }
-            };
+                _ => {}
+            }
+            let size = ty.size(|sort| sizes[sort]);
             let child_nodes = |name: &str| nodes.get(name).copied().unwrap_or(1usize);
             let payload_nodes = match ty {
                 ValueType::Record(record) => {
@@ -187,11 +191,21 @@ impl Model {
             let nodes_per_value = payload_nodes.saturating_add(1);
             sizes.insert(ty.name(), size);
             nodes.insert(ty.name(), nodes_per_value);
-            ordered.push(ValueDomain {
+            let domain = ValueDomain {
                 kind: ty,
                 size,
                 nodes_per_value,
-            });
+            };
+            if let ValueType::Record(record) = ty
+                && !record.refinements.is_empty()
+                && !domain.enumerable()
+            {
+                return Err(Error::kind(format!(
+                    "{}: where exceeds the value materialization limit",
+                    record.name
+                )));
+            }
+            ordered.push(domain);
         }
         Ok(ordered)
     }

@@ -216,21 +216,21 @@ reachable の条件を満たす状態に、初期状態から到達できるこ�
 状態とともに変わらない関係（rmodel の rel）。solver はすべての候補を考え、明示状態の探索は初期状態で列挙する。
 
 - id: `model.configuration`
-- コード: `crates/rmodel/src/syntax.rs` の `Relation`
+- コード: `crates/idealis-syntax/src/syntax.rs` の `Relation`
 
 ### 状態（state）
 
 action によって変わる関係（rmodel の var、Alloy の var field）の、ある時点の値。
 
 - id: `model.state`
-- コード: `crates/rmodel/src/syntax.rs` の `var`
+- コード: `crates/idealis-syntax/src/syntax.rs` の `var`
 
 ### action（action）
 
 状態を変える遷移。条件と代入を持ち、代入しない状態は変わらない（暗黙の frame）。
 
 - id: `model.action`
-- コード: `crates/rmodel/src/syntax.rs` の `Action`
+- コード: `crates/idealis-syntax/src/syntax.rs` の `Action`
 
 ### trace（trace）
 
@@ -254,7 +254,91 @@ action によって変わる関係（rmodel の var、Alloy の var field）の�
 
 - id: `model.scope`
 - コード: `crates/ralloy/src/lib.rs` の `Scope`
-- コード: `crates/rmodel/src/syntax.rs` の `Scope`
+- コード: `crates/idealis-syntax/src/syntax.rs` の `Scope`
+
+## TLA+ の処理系
+
+### TLA（TLA）
+
+Temporal Logic of Actions。状態と状態間の変化を扱い、実行列全体について性質を記述する時相論理。
+
+- id: `tla`
+- 種類: `logic`
+
+### TLA+（TLA+）
+
+TLA、集合論、一階述語論理を土台とする形式仕様言語。状態、次状態への遷移、実行列が満たす性質をモジュールに記述する。
+
+- id: `tla-plus`
+- 種類: `language`
+
+### SANY（SANY）
+
+TLA+ の公式ツール群の構文解析・意味解析器。Idealis では対応する構文や演算子の優先順位を照合する基準として使う。
+
+- id: `sany`
+- 種類: `parser`
+- 入力: `tla-plus`
+
+### TLC（TLC）
+
+実行可能な TLA+ 仕様を検査・シミュレーションする公式ツール。Idealis では、対応する入力でモデル検査の判定や反例を照合する基準として使う。
+
+- id: `tlc`
+- 種類: `checker`
+- 入力: `tla-plus`、`tlc-config`
+
+### rtla（rtla）
+
+TLA+ ソースと TLC 設定を型付きの構文木へ変換する Idealis の Rust パーサー。
+
+- id: `rtla`
+- 種類: `parser`
+- 入力: `tla-plus`、`tlc-config`
+- 出力: `rtla-ast`
+- 比較先: `sany`
+- コード: `crates/rtla/src/parser.rs` の `parse_module`
+
+### rtla-compiler（rtla-compiler）
+
+rtla の TLA+ モジュールと TLC 設定から名前を解決し、対応する仕様を rtlc の SafetyProgram に変換する Rust コンパイラー。
+
+- id: `rtla-compiler`
+- 種類: `compiler`
+- 入力: `rtla-ast`
+- 出力: `safety-program`
+- コード: `crates/rtla-compiler/src/source.rs` の `compile_source_bundle`
+
+### rtlc（rtlc）
+
+SafetyProgram を入力に状態を列挙し、対応する有限モデルの不変条件・デッドロック・時相性質を調べる Idealis の Rust モデル検査ライブラリ。
+
+- id: `rtlc`
+- 種類: `checker`
+- 入力: `safety-program`
+- 比較先: `tlc`
+- コード: `crates/rtlc/src/ir.rs` の `SafetyProgram`
+
+### TLC 設定（TLC configuration）
+
+初期条件、遷移、定数、検査する性質などを選ぶ TLC の設定ファイル。
+
+- id: `tlc-config`
+- 種類: `artifact`
+
+### rtla AST（rtla AST）
+
+rtla が解析した TLA+ のモジュールと TLC 設定の型付き構文木。
+
+- id: `rtla-ast`
+- 種類: `artifact`
+
+### SafetyProgram（SafetyProgram）
+
+状態の生成、遷移、検査する性質を rtlc に渡す型付きの中間表現。
+
+- id: `safety-program`
+- 種類: `artifact`
 
 ## 実装の照合
 

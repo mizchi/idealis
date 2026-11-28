@@ -5,6 +5,8 @@ use std::ops::Range;
 use std::path::{Path, PathBuf};
 mod component;
 mod contracts;
+mod dictionary;
+pub mod impact;
 pub use contracts::check_contracts;
 
 #[derive(Deserialize)]
@@ -12,6 +14,7 @@ pub use contracts::check_contracts;
 struct Project {
     fragments: Vec<FragmentInput>,
     exports: Option<Vec<String>>,
+    dictionary: Option<PathBuf>,
 }
 
 #[derive(Deserialize)]
@@ -107,6 +110,35 @@ pub fn load_checked_model_source(path: &str) -> Result<(rmodel::CheckedModel, St
     Ok((model, source.text))
 }
 
+/// Check data-value domains and locate each declaration in the original files.
+pub fn check_refinements(
+    path: &str,
+    selected: Option<&str>,
+    max_work: u32,
+) -> Result<crate::refinements::Report, String> {
+    let source = read_source(path)?;
+    let located = source.located_model(path)?;
+    let mut report = crate::refinements::check(&located.model, selected, max_work)?;
+    for entry in &mut report.types {
+        entry.location = located
+            .declarations
+            .get(&entry.name)
+            .map(|&offset| source.position(offset));
+    }
+    Ok(report)
+}
+
+/// Export the dictionary with its bindings in this linked model.
+pub fn dictionary_report(path: &str) -> Result<serde_json::Value, String> {
+    let source = read_source(path)?;
+    let dictionary = source
+        .dictionary
+        .as_ref()
+        .ok_or_else(|| format!("{path}: no project dictionary"))?;
+    let located = source.located_model(path)?;
+    Ok(dictionary.report(&located.model))
+}
+
 /// Load the complete model with its checked list of exported actions.
 pub fn load_public_binding_source(path: &str) -> Result<(rmodel::Model, BTreeSet<String>), String> {
     let source = read_source(path)?;
@@ -146,6 +178,7 @@ struct Source {
     fragments: Vec<Fragment>,
     characters: usize,
     exports: Option<Vec<String>>,
+    dictionary: Option<dictionary::Dictionary>,
     port_shapes: BTreeMap<String, BTreeMap<String, component::Contract>>,
     contracts: BTreeMap<String, component::BehaviorContract>,
 }
@@ -262,6 +295,17 @@ impl Source {
     }
 
     fn located_model(
+        &self,
+        path: &str,
+    ) -> Result<rmodel::LocatedModel<rmodel::CheckedModel>, String> {
+        let located = self.parse_model(path)?;
+        dictionary::Dictionary::check(self.dictionary.as_ref(), &located, |offset| {
+            self.position(offset)
+        })?;
+        Ok(located)
+    }
+
+    fn parse_model(
         &self,
         path: &str,
     ) -> Result<rmodel::LocatedModel<rmodel::CheckedModel>, String> {
@@ -448,6 +492,11 @@ fn read_source(path: &str) -> Result<Source, String> {
     source.exports = project.exports;
 
     let directory = entry.parent().unwrap_or_else(|| Path::new("."));
+    source.dictionary = project
+        .dictionary
+        .as_ref()
+        .map(|file| dictionary::Dictionary::read(&directory.join(file)))
+        .transpose()?;
     let mut files = BTreeMap::new();
     let mut namespaces = BTreeSet::new();
     let mut components = BTreeMap::<PathBuf, component::Checked>::new();

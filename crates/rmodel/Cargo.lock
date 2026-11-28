@@ -98,6 +98,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "idealis-semantics"
+version = "0.1.0-alpha.0"
+dependencies = [
+ "idealis-syntax",
+]
+
+[[package]]
+name = "idealis-syntax"
+version = "0.1.0-alpha.0"
+
+[[package]]
 name = "itoa"
 version = "1.0.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -166,6 +177,8 @@ name = "rmodel"
 version = "0.1.0-alpha.0"
 dependencies = [
  "idealis-core",
+ "idealis-semantics",
+ "idealis-syntax",
  "ralloy",
  "serde_json",
  "sha2",
