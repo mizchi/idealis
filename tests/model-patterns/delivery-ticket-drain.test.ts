@@ -13,9 +13,9 @@ type Command =
   | { kind: "cancel" | "send" | "seal" | "receive" };
 type Fault = "release-on-send" | "release-when-empty" | null;
 
-const checker = "crates/rcheck/target/debug/rcheck";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 const model =
-  "examples/model-patterns/subscriptions/delivery-ticket-drain.model";
+  "examples/model-patterns/subscriptions/delivery-ticket-drain.ideal";
 
 function openTicketPort(t: TestContext, fault: Fault) {
   const { port1, port2 } = new MessageChannel();

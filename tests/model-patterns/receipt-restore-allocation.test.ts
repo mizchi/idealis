@@ -24,9 +24,9 @@ type Command =
   | { kind: "deliver"; origin: Ticket };
 type Fault = "publish-early" | "volatile-counter";
 
-const checker = "crates/rcheck/target/debug/rcheck";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 const model =
-  "examples/model-patterns/crash-recovery/receipt-restore-allocation.model";
+  "examples/model-patterns/crash-recovery/receipt-restore-allocation.ideal";
 const oldReply = { kind: "deliver", origin: "First" } as const;
 const commit = { kind: "commit" } as const;
 const send = { kind: "send" } as const;

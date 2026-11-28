@@ -23,8 +23,8 @@ type Command =
       outcome: Snapshot["outcome"];
     };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/subscriptions/delivery-revision.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/subscriptions/delivery-revision.ideal";
 const id = "shipment-1";
 const frame = (kind: "notice" | "end") => JSON.stringify({ id, kind }) + "\n";
 

@@ -18,20 +18,20 @@ type Command =
   | { readonly kind: "dispatch"; readonly ticket: Ticket };
 
 test("a deferred notification follows the registration captured at announcement", async () => {
-  const rcheck = "crates/rcheck/target/debug/rcheck";
-  const model = "examples/model-patterns/subscriptions/notification.model";
+  const checkerPath = "crates/idealis-check/target/debug/idealis-check";
+  const model = "examples/model-patterns/subscriptions/notification.ideal";
   const replaced = await reachableScenario<Command>(
-    rcheck,
+    checkerPath,
     model,
     "ReplacedWhileQueued",
   );
   const late = await reachableScenario<Command>(
-    rcheck,
+    checkerPath,
     model,
     "RightJoinsAfterAnnouncement",
   );
   const afterDelivery = await reachableScenario<Command>(
-    rcheck,
+    checkerPath,
     model,
     "LeftDeliveredWithRightPending",
   );
@@ -58,7 +58,7 @@ test("a deferred notification follows the registration captured at announcement"
     const delivered: Ticket[] = [];
     let started = false;
     const run = replay<Command>(
-      rcheck,
+      checkerPath,
       {
         ...trace,
         commands: [...trace.commands, ...suffix],
@@ -152,7 +152,7 @@ test("a deferred notification follows the registration captured at announcement"
 test("an unreachable state cannot become a replay scenario", async () => {
   await assert.rejects(
     reachableScenario(
-      "crates/rcheck/target/debug/rcheck",
+      "crates/idealis-check/target/debug/idealis-check",
       "spec/models/rmodel-behavior.model",
       "BothOn",
     ),

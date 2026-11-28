@@ -16,8 +16,8 @@ type Command =
   | { kind: "submit"; registration: Registration; sequence: Sequence };
 type Fault = "delete-without-fence" | "sequence-fence" | "seal-only";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/crash-recovery/receipt-collection.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/crash-recovery/receipt-collection.ideal";
 const oldRetry = {
   kind: "submit",
   registration: "Old",

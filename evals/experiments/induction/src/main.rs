@@ -1,4 +1,4 @@
-//! induction <model>...: inductive invariant checking of rmodel models
+//! induction <model>...: inductive invariant checking of Idealis models
 //! with z3, a prototype (plan 0106). For each invariant and Declarations it
 //! prints whether every obligation is unsat (inductive), and for a sat one
 //! the smallest concrete counterexample, re-checked by the reference
@@ -8,7 +8,7 @@ mod recheck;
 mod smt;
 mod vc;
 
-#[path = "../../../../crates/rmodel/examples/support/generator.rs"]
+#[path = "../../../../crates/idealis-model/examples/support/generator.rs"]
 mod generator;
 
 use std::collections::BTreeMap;
@@ -28,7 +28,7 @@ enum Verdict {
     Unknown(String),
 }
 
-fn check(model: &rmodel::Model) -> BTreeMap<String, Verdict> {
+fn check(model: &idealis_model::Model) -> BTreeMap<String, Verdict> {
     let mut verdicts: BTreeMap<String, Verdict> = BTreeMap::new();
     for obligation in vc::obligations(model) {
         if verdicts
@@ -72,8 +72,8 @@ fn check(model: &rmodel::Model) -> BTreeMap<String, Verdict> {
     verdicts
 }
 
-fn word(outcome: rmodel::reference::Outcome) -> &'static str {
-    use rmodel::reference::Outcome;
+fn word(outcome: idealis_model::reference::Outcome) -> &'static str {
+    use idealis_model::reference::Outcome;
     match outcome {
         Outcome::Empty => "empty",
         Outcome::Holds => "holds",
@@ -85,11 +85,11 @@ fn word(outcome: rmodel::reference::Outcome) -> &'static str {
 }
 
 /// One JSON line per invariant: the induction verdict and the reference's.
-fn compare(label: &str, model: &rmodel::Model) -> Vec<String> {
-    let reference = rmodel::reference::analyze(model, 200_000);
+fn compare(label: &str, model: &idealis_model::Model) -> Vec<String> {
+    let reference = idealis_model::reference::analyze(model, 200_000);
     let mut lines = Vec::new();
     for (name, verdict) in check(model) {
-        let reference = if name == rmodel::DECLARATIONS {
+        let reference = if name == idealis_model::DECLARATIONS {
             reference.declarations
         } else {
             reference
@@ -130,7 +130,7 @@ fn main() {
     if let [flag, path, check, step] = arguments.as_slice()
         && flag == "--show"
     {
-        let model = rmodel::parse(&std::fs::read_to_string(path).unwrap()).unwrap();
+        let model = idealis_model::parse(&std::fs::read_to_string(path).unwrap()).unwrap();
         let obligation = vc::obligations(&model)
             .into_iter()
             .find(|o| &o.check == check && &o.step == step)
@@ -171,7 +171,7 @@ fn main() {
         let (first, last): (u64, u64) = (first.parse().unwrap(), last.parse().unwrap());
         for seed in first..=last {
             let source = generator::generate(seed);
-            let Ok(model) = rmodel::parse(&source) else {
+            let Ok(model) = idealis_model::parse(&source) else {
                 continue;
             };
             if let Err(reason) = vc::supported(&model) {
@@ -186,7 +186,7 @@ fn main() {
     }
     for path in arguments {
         let source = std::fs::read_to_string(&path).unwrap();
-        let model = rmodel::parse(&source).unwrap();
+        let model = idealis_model::parse(&source).unwrap();
         if let Err(reason) = vc::supported(&model) {
             println!("{{\"model\":{path:?},\"unsupported\":{reason:?}}}");
             continue;

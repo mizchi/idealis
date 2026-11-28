@@ -5,7 +5,7 @@
 //! action instance. The invariant must then break at depth 0 (initial
 //! counterexample) or 1 (an action's).
 use crate::smt::Cti;
-use rmodel::{Compare, Expr, Formula, Model, Mult, Quantifier, SetOp, Shape};
+use idealis_model::{Compare, Expr, Formula, Model, Mult, Quantifier, SetOp, Shape};
 
 fn expr(e: &Expr) -> String {
     match e {
@@ -156,7 +156,7 @@ pub fn source(model: &Model, cti: &Cti, check: &str, step: &str) -> String {
     for c in model
         .checks
         .iter()
-        .filter(|c| c.kind == rmodel::CheckKind::Invariant)
+        .filter(|c| c.kind == idealis_model::CheckKind::Invariant)
     {
         out.push_str(&format!(
             "invariant {} {{ {} }}\n",
@@ -172,9 +172,9 @@ pub fn source(model: &Model, cti: &Cti, check: &str, step: &str) -> String {
 /// Whether the reference evaluator confirms the counterexample.
 pub fn confirms(model: &Model, cti: &Cti, check: &str, step: &str) -> Result<(), String> {
     let text = source(model, cti, check, step);
-    let rewritten = rmodel::parse(&text).map_err(|e| format!("{e}\n{text}"))?;
-    let report = rmodel::reference::analyze(&rewritten, 1_000_000);
-    use rmodel::reference::Outcome;
+    let rewritten = idealis_model::parse(&text).map_err(|e| format!("{e}\n{text}"))?;
+    let report = idealis_model::reference::analyze(&rewritten, 1_000_000);
+    use idealis_model::reference::Outcome;
     let depth = if step == "init" { 0 } else { 1 };
     // The pre-state of an action's counterexample satisfies every invariant.
     if step != "init" {
@@ -184,7 +184,7 @@ pub fn confirms(model: &Model, cti: &Cti, check: &str, step: &str) -> Result<(),
             }
         }
     }
-    let outcome = if check == rmodel::DECLARATIONS {
+    let outcome = if check == idealis_model::DECLARATIONS {
         report.declarations
     } else {
         report

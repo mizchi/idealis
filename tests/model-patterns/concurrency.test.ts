@@ -9,7 +9,7 @@ import {
   type Scenario,
 } from "../../examples/model-patterns/replay.js";
 
-const rcheck = "crates/rcheck/target/debug/rcheck";
+const checkerPath = "crates/idealis-check/target/debug/idealis-check";
 const patterns = "examples/model-patterns";
 
 type QueueCommand =
@@ -18,7 +18,7 @@ type QueueCommand =
 
 test("a mailbox keeps order and duplicates", async () => {
   const scenario: Scenario<QueueCommand> = {
-    model: `${patterns}/fifo/project.rmodel.json`,
+    model: `${patterns}/fifo/model.project.json`,
     config: {},
     initial: { queue: { $sequence: [] }, delivered: null },
     commands: [
@@ -33,7 +33,7 @@ test("a mailbox keeps order and duplicates", async () => {
   for (const lifo of [false, true]) {
     const queue: string[] = [];
     let delivered: string | null = null;
-    const run = replay(rcheck, scenario, {
+    const run = replay(checkerPath, scenario, {
       async apply(command) {
         if (command.kind === "enqueue") queue.push(command.message);
         else delivered = (lifo ? queue.pop() : queue.shift()) ?? null;
@@ -62,7 +62,7 @@ type SearchCommand = {
 
 test("an older promise completing late leaves the latest search result visible", async () => {
   const scenario: Scenario<SearchCommand> = {
-    model: `${patterns}/latest-request/search.model`,
+    model: `${patterns}/latest-request/search.ideal`,
     config: {},
     initial: { latest: null, pending: [], shown: null },
     commands: [
@@ -79,7 +79,7 @@ test("an older promise completing late leaves the latest search result visible",
       Request,
       { resolve: () => void; consumed: Promise<void> }
     >();
-    const run = replay(rcheck, scenario, {
+    const run = replay(checkerPath, scenario, {
       async apply(command) {
         const { request } = command;
         if (command.kind === "start") {
@@ -125,7 +125,7 @@ test(
   { timeout: 30_000 },
   async () => {
     const scenario: Scenario<WorkerCommand> = {
-      model: `${patterns}/worker-counter/counter.model`,
+      model: `${patterns}/worker-counter/counter.ideal`,
       config: {},
       initial: { value: 0, loaded: { Left: null, Right: null }, finished: [] },
       commands: [
@@ -158,7 +158,7 @@ test(
         Right: null,
       };
       try {
-        const run = replay(rcheck, scenario, {
+        const run = replay(checkerPath, scenario, {
           async apply(command) {
             const target = workers[command.worker];
             const acknowledged = once(target, "message");
@@ -197,7 +197,7 @@ test("cancellation and completion preserve the first terminal outcome", async ()
     [{ kind: "complete" }, { kind: "cancel" }],
   ] satisfies Completion[][]) {
     const scenario: Scenario<Completion> = {
-      model: `${patterns}/cancellation/request.model`,
+      model: `${patterns}/cancellation/request.ideal`,
       config: {},
       initial: { pending: true, outcome: null },
       commands,
@@ -216,7 +216,7 @@ test("cancellation and completion preserve the first terminal outcome", async ()
       controller.signal.addEventListener("abort", () => {
         if (outcome === null) outcome = "Cancelled";
       });
-      const run = replay(rcheck, scenario, {
+      const run = replay(checkerPath, scenario, {
         async apply(command) {
           if (command.kind === "cancel") controller.abort();
           else {
@@ -260,10 +260,10 @@ test(
       const config: { first: Record<Side, Lock> } = {
         first: { Left: "Alpha", Right: reversed ? "Beta" : "Alpha" },
       };
-      const model = `${patterns}/worker-locks/${reversed ? "reversed" : "ordered"}.rmodel.json`;
+      const model = `${patterns}/worker-locks/${reversed ? "reversed" : "ordered"}.project.json`;
       const scenario = reversed
-        ? await deadlockScenario<Command>(rcheck, model, "BothFinished")
-        : await reachableScenario<Command>(rcheck, model, "BothFinished");
+        ? await deadlockScenario<Command>(checkerPath, model, "BothFinished")
+        : await reachableScenario<Command>(checkerPath, model, "BothFinished");
       assert.deepEqual(scenario.config, config);
       const make = (side: Side) =>
         new Worker(
@@ -316,7 +316,7 @@ test(
           Left: await request("Left", "status"),
           Right: await request("Right", "status"),
         };
-        await replay(rcheck, scenario, {
+        await replay(checkerPath, scenario, {
           async apply(command) {
             current[command.worker] = await request(
               command.worker,

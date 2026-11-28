@@ -2,6 +2,7 @@
 
 ユーザーには日本語で答える。Node.js 24+ と pnpm 12+ を使う。
 
+- ディレクトリ名は英語にする。
 - TDD: 探索 → Red → Green → Refactoring。挙動を検証し、モデルと実装で遷移ロジックを共有しない。
 - コントラクトは `packages/idealis/src/contracts.ts`。コアは Node API、テストランナー、ソルバーに依存させない。
 - 状態と観測は immutable なスナップショット。`Model.key` は遷移に必要な状態を省略しない。

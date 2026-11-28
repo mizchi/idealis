@@ -14,8 +14,8 @@ type Command = {
 };
 type Stage = "Running" | "Cleaning" | "Exited";
 const children = ["Left", "Right"] as const;
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/cancellation/task-group.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/cancellation/task-group.ideal";
 
 test("a task group cancels siblings and waits for their actual finally blocks", async (t) => {
   const base = await reachableScenario<Command>(

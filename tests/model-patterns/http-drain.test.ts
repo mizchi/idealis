@@ -16,8 +16,8 @@ type Outcome = "Pending" | "Delivered" | "Rejected" | "Dropped";
 type Command =
   | { readonly kind: "submit" | "finish"; readonly request: Request }
   | { readonly kind: "beginDrain" | "stop" };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/http-drain/drain.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/http-drain/drain.ideal";
 
 test(
   "HTTP shutdown rejects late work and lets existing responses finish",

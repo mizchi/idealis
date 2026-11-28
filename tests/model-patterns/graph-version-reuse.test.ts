@@ -14,9 +14,9 @@ interface Node {
   next?: Node;
 }
 
-const checker = "crates/rcheck/target/debug/rcheck";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 const model =
-  "examples/model-patterns/worker-transfer/graph-version-reuse.model";
+  "examples/model-patterns/worker-transfer/graph-version-reuse.ideal";
 
 function graphWalk(compareLabelOnly: boolean): ObservationAdapter<Command> {
   const root: Node = { name: "Root", next: { name: "Middle" } };

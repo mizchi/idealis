@@ -1,6 +1,6 @@
 # 自動保存の応答を照合する
 
-タブごとに一件の自動保存を送信できる。送信後に文書が編集されても応答は届く。応答を受信したタブは、次の自動保存を送信できる。[自然言語の仕様](spec.json) · [モデル](autosave.model)
+タブごとに一件の自動保存を送信できる。送信後に文書が編集されても応答は届く。応答を受信したタブは、次の自動保存を送信できる。[自然言語の仕様](spec.json) · [モデル](autosave.ideal)
 
 ### AUTOSAVE-STALE-RESPONSE
 
@@ -13,14 +13,14 @@
 リポジトリのルートで実行する。
 
 ```sh
-cargo build --locked --manifest-path crates/rcheck/Cargo.toml
-rcheck=crates/rcheck/target/debug/rcheck
+cargo build --locked --manifest-path crates/idealis-check/Cargo.toml
+checker=crates/idealis-check/target/debug/idealis-check
 dir=examples/model-patterns/autosave
 
-"$rcheck" traceability "$dir/spec.json" --rule AUTOSAVE-STALE-RESPONSE \
+"$checker" traceability "$dir/spec.json" --rule AUTOSAVE-STALE-RESPONSE \
   --document "$dir/README.md"
-"$rcheck" traceability "$dir/spec.json" --check "$dir/autosave.model" StaleKeepsSaved
-"$rcheck" witness-step "$dir/autosave.model" finish \
+"$checker" traceability "$dir/spec.json" --check "$dir/autosave.ideal" StaleKeepsSaved
+"$checker" witness-step "$dir/autosave.ideal" finish \
   'before(tab.pending) != before(revision) and before(saved) = before(revision)'
 just build
 node --test dist/tests/model-patterns/autosave.test.js

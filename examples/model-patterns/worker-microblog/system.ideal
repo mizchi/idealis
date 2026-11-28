@@ -1,0 +1,46 @@
+model WorkerMicroblog
+
+description = {
+  ja: "投稿、フォロー、配信、タイムラインを組み合わせた短文投稿サービス。",
+  en: "A short-post service joining posts, follows, delivery, and timelines.",
+}
+
+var follows: User -> set User
+var authors: Post -> lone User
+var offered: set Post
+var accepted: set Post
+var pending: Post -> lone Delivery
+var inFlight: Post -> lone Delivery
+var acked: set Post
+var ackRequests: Post -> set Delivery
+var entries: User -> set Post
+var applied: set Post
+var replayed: set Post
+
+invariant AckAfterWrite { acked in applied }
+invariant IndexedPostsAreCommitted { User.entries in keys(authors) }
+
+transition AckMatchesDelivery on queue_ack {
+  (p -> delivery) in before(ackRequests)
+}
+transition ReplayKeepsRows on timeline_apply {
+  p in before(applied) implies unchanged(entries)
+}
+transition ReadRespectsFollow on timeline_read {
+  author in before(reader.follows)
+}
+
+reachable CommittedBeforeEnqueue { some (keys(authors) - accepted) }
+reachable LaterAppliedFirst { Later in applied, Earlier not in applied }
+reachable RedeliveredAfterWrite { some replayed }
+reachable AckedAfterRedelivery {
+  Earlier in acked, Initial in Earlier.ackRequests, Retry in Earlier.ackRequests
+}
+reachable DelayedInitialAckRequest {
+  Retry in Earlier.inFlight,
+  Initial in Earlier.ackRequests,
+  Retry not in Earlier.ackRequests
+}
+reachable StaleIndexRow {
+  Earlier in Reader.entries, Author in Earlier.authors, Author not in Reader.follows
+}

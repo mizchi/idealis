@@ -13,8 +13,8 @@ import {
 type Command = { kind: "prepare" | "check" | "replaceGraph" | "publish" };
 type Generation = "Old" | "New";
 type Node = "Root" | "Middle" | "Target";
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/worker-transfer/graph-publication.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/worker-transfer/graph-publication.ideal";
 
 async function graphPublisher(
   t: TestContext,

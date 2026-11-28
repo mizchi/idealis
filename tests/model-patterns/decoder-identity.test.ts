@@ -18,8 +18,8 @@ type Command =
 type Fault = "sequence-only" | "use-active-registration";
 const registrations = ["New", "Old"] as const;
 const sequences = ["First", "Second"] as const;
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/crash-recovery/decoder-identity.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/crash-recovery/decoder-identity.ideal";
 
 async function openReceiver(t: TestContext, fault?: Fault) {
   const dir = await mkdtemp(join(tmpdir(), "idealis-decoder-identity-"));

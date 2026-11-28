@@ -27,7 +27,7 @@ flowchart LR
 
 先に `dictionary.ideal` に「有効な会員」と「貸出側が有効と把握している会員」を別々に登録します。両プロジェクトはマニフェストの `dictionary` で同じ辞書ソースを読みます。モデルでは用語 ID を状態に結び付けます。
 
-```rmodel
+```ideal
 var activeMembers: set Member
 term "active-member" for activeMembers
 ```
@@ -35,8 +35,8 @@ term "active-member" for activeMembers
 通知版では `known-active-member` を `knownActiveMembers` に結び付けます。Pkl の業務ルールは同じ辞書から生成した `dictionary.spec.json` を読みます。辞書を変更したら `just spec-write` で再生成します。辞書の ID や状態名が解決できない場合と、状態として登録した用語を操作に割り当てた場合は、モデルを読み込む時点でエラーになります。
 
 ```sh
-crates/rcheck/target/debug/rcheck generate \
-  examples/model-patterns/library-membership/notification.rmodel.json dictionary
+crates/idealis-check/target/debug/idealis-check generate \
+  examples/model-patterns/library-membership/notification.project.json dictionary
 ```
 
 この出力で「貸出履歴」は `library_everBorrowed` を指します。結び付けは接続後の名前で表示されるので、部品の `@everBorrowed` がどの状態になったかも分かります。
@@ -45,10 +45,10 @@ crates/rcheck/target/debug/rcheck generate \
 
 二つの部品は同じ `eligible: set Member` ポートを使います。会員管理のポートは書き込み用、貸出のポートは読み取り用です。`@eligible` は接続先が決める名前で、`@borrower` と `@everBorrowed` は貸出部品の状態です。[会員管理](membership.ideal) · [貸出](library.ideal)
 
-| 接続                                 | 会員管理が書く状態 | 貸出が読む状態       |
-| ------------------------------------ | ------------------ | -------------------- |
-| [直接参照](direct.rmodel.json)       | `activeMembers`    | `activeMembers`      |
-| [通知経由](notification.rmodel.json) | `activeMembers`    | `knownActiveMembers` |
+| 接続                                  | 会員管理が書く状態 | 貸出が読む状態       |
+| ------------------------------------- | ------------------ | -------------------- |
+| [直接参照](direct.project.json)       | `activeMembers`    | `activeMembers`      |
+| [通知経由](notification.project.json) | `activeMembers`    | `knownActiveMembers` |
 
 通知経由では、`membership_suspend` で資格の正本が変わり、別の操作 `deliverSuspension` で貸出側の情報が追いつきます。通知は「正本から消え、貸出側にまだ残っている会員」で表します。この例では資格の停止だけを扱います。[通知のモデル](delivery.ideal)
 
@@ -57,14 +57,14 @@ crates/rcheck/target/debug/rcheck generate \
 リポジトリのルートで実行します。
 
 ```sh
-cargo build --locked --manifest-path crates/rcheck/Cargo.toml --bin rcheck
-rcheck=crates/rcheck/target/debug/rcheck
+cargo build --locked --manifest-path crates/idealis-check/Cargo.toml --bin idealis-check
+checker=crates/idealis-check/target/debug/idealis-check
 dir=examples/model-patterns/library-membership
-direct="$dir/direct.rmodel.json"
-notification="$dir/notification.rmodel.json"
+direct="$dir/direct.project.json"
+notification="$dir/notification.project.json"
 
-"$rcheck" "$direct" --checker reference --question BorrowRequiresActive --expect holds
-"$rcheck" witness "$notification" BorrowRequiresActive
+"$checker" "$direct" --checker reference --question BorrowRequiresActive --expect holds
+"$checker" witness "$notification" BorrowRequiresActive
 ```
 
 `BorrowRequiresActive` は、貸出の直前に資格の正本で会員が有効だったことを求めます。直接参照では成立します。通知経由では `Aki を停止 → Aki が Copy0 を借りる` の2手が反例です。貸出時点の正本に Aki はおらず、貸出側にはまだ Aki が残っています。
@@ -74,9 +74,9 @@ notification="$dir/notification.rmodel.json"
 ```sh
 spec_json=$(mktemp)
 pkl eval -f json "$dir/spec.pkl" > "$spec_json"
-"$rcheck" traceability "$spec_json" --root "$dir" --rule LIBRARY-RETURN-KEEPS-RECORD
+"$checker" traceability "$spec_json" --root "$dir" --rule LIBRARY-RETURN-KEEPS-RECORD
 status=0
-"$rcheck" traceability "$spec_json" --root "$dir" --rule LIBRARY-ACTIVE-AT-BORROW || status=$?
+"$checker" traceability "$spec_json" --root "$dir" --rule LIBRARY-ACTIVE-AT-BORROW || status=$?
 rm "$spec_json"
 test "$status" -eq 1
 ```
@@ -86,8 +86,8 @@ test "$status" -eq 1
 次の二つの問いで、停止通知が届く経路があることと、停止通知を反映した貸出側では Ren が借りられないことを確認します。
 
 ```sh
-"$rcheck" witness-step "$notification" deliverSuspension 'm = Ren'
-"$rcheck" witness-step "$notification" library_borrow \
+"$checker" witness-step "$notification" deliverSuspension 'm = Ren'
+"$checker" witness-step "$notification" library_borrow \
   'm = Ren and Ren not in before(knownActiveMembers)'
 ```
 
@@ -96,20 +96,20 @@ test "$status" -eq 1
 ## 資格停止後も返却できる
 
 ```sh
-"$rcheck" witness-step "$direct" library_giveBack \
+"$checker" witness-step "$direct" library_giveBack \
   'm = Ren and Ren not in before(activeMembers)'
 ```
 
 `Ren が借りる → Ren を停止 → Ren が返す` の3手が返ります。最後は借り手が空で、貸出履歴には `Copy0` が残ります。
 
-貸出側の Go インターフェースを生成するには、`"$rcheck" generate "$notification" go --public` を使います。公開操作は貸出と返却です。資格停止と通知は接続したモデルの探索に含まれます。
+貸出側の Go インターフェースを生成するには、`"$checker" generate "$notification" go --public` を使います。公開操作は貸出と返却です。資格停止と通知は接続したモデルの探索に含まれます。
 
 ## 資格の参照先を変えたら、確認箇所を逆引きする
 
 ```sh
 spec_json=$(mktemp)
 pkl eval -f json "$dir/spec.pkl" > "$spec_json"
-"$rcheck" impact "$notification" knownActiveMembers --spec "$spec_json" --root "$dir"
+"$checker" impact "$notification" knownActiveMembers --spec "$spec_json" --root "$dir"
 rm "$spec_json"
 ```
 

@@ -14,8 +14,8 @@ type Command = {
   readonly kind: "connect" | "deliver" | "commit" | "disconnect";
   readonly client: Client;
 };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/stream-terminal/multi-stream.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/stream-terminal/multi-stream.ideal";
 const log = [1, 2, 3] as const;
 
 test(

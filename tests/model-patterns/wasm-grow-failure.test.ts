@@ -14,8 +14,8 @@ type Command =
 type Fault = "none" | "discard-on-failure" | "collapse-host-error";
 type Result = "Grown" | "MinusOne" | "RangeFailure";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/wasm-memory/grow-failure.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/wasm-memory/grow-failure.ideal";
 const page = 65_536;
 const address = 17;
 

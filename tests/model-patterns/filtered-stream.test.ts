@@ -18,8 +18,8 @@ type Command = {
     | "compact"
     | "disconnect";
 };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/stream-terminal/filter-progress.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/stream-terminal/filter-progress.ideal";
 
 test(
   "filtered stream progress never advances past an unapplied matching event",

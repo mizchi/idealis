@@ -3,12 +3,12 @@
 [plan](../plans/0101-checker-registry.md)のとおり、crate `rcheck`を作った。rmodelのモデルの問い（`invariant`・`reachable`・`Declarations`）に、登録した検査器が宣言した範囲で答え、用語集の語で返す。
 
 ```sh
-rcheck model.model                    # auto: completeで答える最初の検査器
-rcheck model.model --checker all      # 全検査器と食い違い
-rcheck model.model --checker sat --question Safe
+idealis-check model.model                    # auto: completeで答える最初の検査器
+idealis-check model.model --checker all      # 全検査器と食い違い
+idealis-check model.model --checker sat --question Safe
 ```
 
-- **宣言**: 参照評価器は関係の取りうるtupleが20以下ならcomplete（`rmodel::reference::enumerable`）、明示状態（rtlc）はcomplete、SAT（ralloy）はstepsまでのbounded。
+- **宣言**: 参照評価器は関係の取りうるtupleが20以下ならcomplete（`idealis_model::reference::enumerable`）、明示状態（rtlc）はcomplete、SAT（ralloy）はstepsまでのbounded。
 - **答え**: 判定（成り立つ・破れる・到達できる・到達できない・空・未確定・エラー）、範囲、検査器、最短の深さ。boundedの成り立つ・到達できない、未確定、エラーは`definite`でない。
 - **食い違い**: 決まった2つの答えの判定が違うとき。ただし、boundedの否定の答えは、bound以上の深さの反例や、空との区別がつかない到達できない（SATのrun）とは食い違わない。差分テストの規則と同じ。
 

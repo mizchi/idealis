@@ -24,9 +24,9 @@ type Command =
   | { kind: "request"; part: Part }
   | ({ kind: "receive" } & Reply);
 type Fault = "relabel-old" | "clear-current-on-old";
-const checker = "crates/rcheck/target/debug/rcheck";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 const model =
-  "examples/model-patterns/crash-recovery/receipt-restore-attempt.model";
+  "examples/model-patterns/crash-recovery/receipt-restore-attempt.ideal";
 const oldLedger = {
   kind: "receive",
   attempt: "First",

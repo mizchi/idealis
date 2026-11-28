@@ -10,8 +10,8 @@ type Generation = "Old" | "New";
 type Command =
   | { kind: "acquire" | "release" | "write"; generation: Generation }
   | { kind: "expire" };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/lease/fence.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/lease/fence.ideal";
 const tokens = { Old: 1, New: 2 };
 const payload = { Old: "old data", New: "new data" };
 

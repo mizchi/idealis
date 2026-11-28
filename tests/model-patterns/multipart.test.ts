@@ -16,8 +16,8 @@ type Command =
   | { kind: "commit" };
 type Fault = "partial" | "publish-after-abort";
 type Complete = "Committed" | "NoSuchUpload";
-const rcheck = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/object-store/multipart.model";
+const checkerPath = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/object-store/multipart.ideal";
 const completeBodies = {
   First: "First-Head;First-Tail",
   Next: "Next-Head;Next-Tail",
@@ -143,7 +143,7 @@ async function multipart(
 
 test("multipart completion publishes only assembled data for a live upload", async (t) => {
   const pending = await reachableScenario<Command>(
-    rcheck,
+    checkerPath,
     model,
     "AbortedWithCompletionWaiting",
   );
@@ -154,7 +154,7 @@ test("multipart completion publishes only assembled data for a live upload", asy
   } satisfies typeof pending;
   for (const fault of [undefined, "partial", "publish-after-abort"] as const) {
     const run = await recordReplay(
-      rcheck,
+      checkerPath,
       withCommit,
       await multipart(t, fault),
     );
@@ -188,7 +188,7 @@ test("multipart completion publishes only assembled data for a live upload", asy
       { kind: "commit" },
     ],
   } satisfies typeof pending;
-  const reopened = await recordReplay(rcheck, reopen, await multipart(t));
+  const reopened = await recordReplay(checkerPath, reopen, await multipart(t));
   assert.equal(reopened.verdict, "matched");
   assert.deepEqual(reopened.recording.observations[9], {
     body: null,
@@ -200,7 +200,7 @@ test("multipart completion publishes only assembled data for a live upload", asy
   });
 
   const replacement = await reachableScenario<Command>(
-    rcheck,
+    checkerPath,
     model,
     "ReplacementPartsArePrivate",
   );
@@ -212,7 +212,7 @@ test("multipart completion publishes only assembled data for a live upload", asy
       { kind: "commit" },
     ],
   } satisfies typeof replacement;
-  const run = await recordReplay(rcheck, publish, await multipart(t));
+  const run = await recordReplay(checkerPath, publish, await multipart(t));
   assert.equal(run.verdict, "matched");
   assert.deepEqual(run.recording.observations.at(-3), {
     body: completeBodies.First,

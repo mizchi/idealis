@@ -17,8 +17,8 @@ type Command =
   | { readonly kind: "advanceFloor" | "reopen" };
 type Fault = "none" | "accept-expired" | "collect-inclusive";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/offline-merge/retention.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/offline-merge/retention.ideal";
 
 test("receipt cleanup preserves retries at the boundary and rejects expired tickets after reopening", async (t) => {
   const expired = await reachableScenario<Command>(

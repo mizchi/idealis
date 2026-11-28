@@ -13,8 +13,8 @@ type Entry = { tag: Tag; body: "BodyA" | "BodyB"; policy: Policy };
 type Command = { kind: "start" | "replace" | "evict" | "finish" };
 type Fault = "update-unmatched" | "resurrect";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/cache-refresh/conditional-304.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/cache-refresh/conditional-304.ideal";
 const original: Entry = { tag: "Old", body: "BodyA", policy: "Initial" };
 const replacement: Entry = { tag: "New", body: "BodyB", policy: "Replacement" };
 const tags = { Old: '"old"', New: '"new"' };

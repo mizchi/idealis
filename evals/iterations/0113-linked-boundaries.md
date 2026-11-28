@@ -7,8 +7,8 @@
 | 出金・初期残高2・整数0〜4 | 成功時の引き落としと拒否時の残高保持が成立し、同額出金と残高不足に到達した。6組を生成。 | 0と1で依頼の受付が変わる。2と3はどちらも依頼を受け付け、2なら出金して残高0、3なら残高不足で残高2。 |
 | Raft・3ノード・単一任期   | 選挙安全性が成立し、当選と票割れに到達した。3組を生成。                                 | 同じ候補の当選操作を自票だけの1票で拒み、別のサーバの票を1つ受け取った直後に受け付ける。           |
 
-`just rcheck-boundaries` で再生できる。Rust は出金の有限範囲の照合と、全6組の最後の受付・状態の再生に通過した。TypeScript は全6組を一度に実行する例を追加し、seed 113 の50回の fast-check に通過した。残高不足の確定時に残高を0へ変える対照では、`rejectWithdrawal` に失敗する1組まで縮小でき、同じ seed と path で再現した。Raft 側の対照では、投票済みのサーバに再度投票を許すと選挙安全性の反例を参照評価器が検出した。
+`just idealis-check-boundaries` で再生できる。Rust は出金の有限範囲の照合と、全6組の最後の受付・状態の再生に通過した。TypeScript は全6組を一度に実行する例を追加し、seed 113 の50回の fast-check に通過した。残高不足の確定時に残高を0へ変える対照では、`rejectWithdrawal` に失敗する1組まで縮小でき、同じ seed と path で再現した。Raft 側の対照では、投票済みのサーバに再度投票を許すと選挙安全性の反例を参照評価器が検出した。
 
-CLI は予算1で出金の境界生成を拒否した。境界の選出は設定、操作、種類ごとに一組。確認する状態は、各例の最後の操作直後。整数範囲外の入力や、Raft のログ・任期をまたぐ遷移・進行性は測定範囲の外に置いた。自然言語規則の構造と参照先は `just rmodel-design-check` で確認した。自然言語の意味自体に対する Jev のライブ判定は未実施。
+CLI は予算1で出金の境界生成を拒否した。境界の選出は設定、操作、種類ごとに一組。確認する状態は、各例の最後の操作直後。整数範囲外の入力や、Raft のログ・任期をまたぐ遷移・進行性は測定範囲の外に置いた。自然言語規則の構造と参照先は `just idealis-model-design-check` で確認した。自然言語の意味自体に対する Jev のライブ判定は未実施。
 
-[用語と規則の対応](../../fixtures/rcheck/linked/README.md) · [CLI の対照テスト](../../crates/rcheck/tests/linked_projects.rs) · [Rust の照合](../../crates/rcheck/tests/withdrawal.rs) · [TypeScript の正常・故障対照](../../tests/rcheck/withdrawal.pbt.test.ts) · [構文の意思決定](../../crates/rmodel/grammar-decisions.md#分割した仕様から業務ルール選挙境界テストを記述する)
+[用語と規則の対応](../../fixtures/rcheck/linked/README.md) · [CLI の対照テスト](../../crates/idealis-check/tests/linked_projects.rs) · [Rust の照合](../../crates/idealis-check/tests/withdrawal.rs) · [TypeScript の正常・故障対照](../../tests/idealis-check/withdrawal.pbt.test.ts) · [構文の意思決定](../../crates/idealis-model/grammar-decisions.md#分割した仕様から業務ルール選挙境界テストを記述する)

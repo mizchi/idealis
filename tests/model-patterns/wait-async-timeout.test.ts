@@ -27,8 +27,8 @@ type Command =
   | { kind: "wait"; timeout: Limit }
   | { kind: "notify"; count: Count };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/wait-notify/wait-async-timeout.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/wait-notify/wait-async-timeout.ideal";
 const duration = { Poll: 0, Finite: 10, Forever: Infinity };
 
 function openWait(t: TestContext, checkTimeoutFirst = false) {

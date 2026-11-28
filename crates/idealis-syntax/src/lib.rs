@@ -102,6 +102,8 @@ pub fn parse_diagnostic(source: &str) -> Result<Model, ParseDiagnostic> {
 pub struct LocatedModel<M = Model> {
     pub model: M,
     pub declarations: std::collections::BTreeMap<String, usize>,
+    /// Source descriptions keyed by the character offset of the declaration.
+    pub descriptions: std::collections::BTreeMap<usize, std::collections::BTreeMap<String, String>>,
     pub term_locations: std::collections::BTreeMap<String, usize>,
     /// Mutable state read by each declaration, including expanded derived expressions.
     pub state_reads: std::collections::BTreeMap<usize, std::collections::BTreeSet<String>>,
@@ -185,6 +187,7 @@ pub fn parse_located_checked(source: &str) -> Result<LocatedModel<CheckedModel>,
         model,
         declarations,
         term_locations,
+        descriptions,
         state_reads,
         update_branches,
     } = parse_located(source)?;
@@ -192,6 +195,7 @@ pub fn parse_located_checked(source: &str) -> Result<LocatedModel<CheckedModel>,
         model: CheckedModel(model),
         declarations,
         term_locations,
+        descriptions,
         state_reads,
         update_branches,
     })

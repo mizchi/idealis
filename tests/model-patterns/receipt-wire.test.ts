@@ -15,8 +15,8 @@ type Command =
   | { kind: "migrate" | "negotiate" }
   | { kind: "send" | "deliver"; attempt: Attempt };
 type Fault = "use-preference" | "use-storage";
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/crash-recovery/receipt-wire.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/crash-recovery/receipt-wire.ideal";
 const attempts = ["First", "Second"] as const;
 
 function openClient(t: TestContext, initial: Decision, fault?: Fault) {

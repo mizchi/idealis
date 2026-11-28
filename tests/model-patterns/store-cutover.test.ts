@@ -15,8 +15,8 @@ type Command =
       generation: "Old" | "New";
       contents: "Initial" | "Changed";
     };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/lease/store-cutover.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/lease/store-cutover.ideal";
 
 test("switching stores retains the fence and leaves the old destination closed", async () => {
   const base = await reachableScenario<Command>(checker, model, "TargetOpen");

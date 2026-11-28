@@ -10,8 +10,8 @@ import {
 import { taskGate } from "./helpers/task-gate.js";
 
 type Command = { kind: "accept" | "reply" | "dispatch" | "receive" };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/subscriptions/delayed-notice.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/subscriptions/delayed-notice.ideal";
 
 async function delivery(t: TestContext, dropNotice = false) {
   const entered = taskGate();

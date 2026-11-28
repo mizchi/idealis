@@ -34,12 +34,12 @@ export interface ObservationPairQuery {
 
 /** Convert the two traces from one model into separate scenarios. */
 export async function observationPairScenarios<Command>(
-  rcheck: string,
+  checkerPath: string,
   model: string,
   query: ObservationPairQuery,
 ): Promise<[Scenario<Command>, Scenario<Command>]> {
   const output = await checkerRequest(
-    rcheck,
+    checkerPath,
     ["observation-pair", model, "-"],
     query,
     "model rejected observation query",
@@ -61,14 +61,14 @@ export async function observationPairScenarios<Command>(
 }
 
 function checkerRequest(
-  rcheck: string,
+  checkerPath: string,
   args: string[],
   request: unknown,
   failure: string,
 ): Promise<string> {
   const input = JSON.stringify(request);
   return new Promise((resolve, reject) => {
-    const process = execFile(rcheck, args, (error, stdout, stderr) => {
+    const process = execFile(checkerPath, args, (error, stdout, stderr) => {
       if (error)
         reject(
           new Error(`${failure}: ${stderr.trim() || error.message}`, {
@@ -142,12 +142,12 @@ async function replayVerdict<Command>(
 
 /** Turn a complete reachability witness into a scenario without driving the environment. */
 export async function reachableScenario<Command>(
-  rcheck: string,
+  checkerPath: string,
   model: string,
   question: string,
   options: { readonly checker?: "rprob" } = {},
 ): Promise<Scenario<Command>> {
-  const { stdout } = await promisify(execFile)(rcheck, [
+  const { stdout } = await promisify(execFile)(checkerPath, [
     "witness",
     model,
     question,
@@ -158,12 +158,12 @@ export async function reachableScenario<Command>(
 
 /** Replay a shortest path whose last operation satisfies a transition predicate. */
 export async function transitionScenario<Command>(
-  rcheck: string,
+  checkerPath: string,
   model: string,
   action: string,
   predicate: string,
 ): Promise<Scenario<Command>> {
-  const { stdout } = await promisify(execFile)(rcheck, [
+  const { stdout } = await promisify(execFile)(checkerPath, [
     "witness-step",
     model,
     action,
@@ -174,7 +174,7 @@ export async function transitionScenario<Command>(
 
 /** Replay a stall before completion, optionally ignoring operations that leave state unchanged. */
 export async function deadlockScenario<Command>(
-  rcheck: string,
+  checkerPath: string,
   model: string,
   unless: string,
   options: { readonly ignoreStutter?: boolean } = {},
@@ -182,7 +182,7 @@ export async function deadlockScenario<Command>(
   const args = ["deadlock", model, "--unless", unless];
   if (options.ignoreStutter) args.push("--ignore-stutter");
   try {
-    await promisify(execFile)(rcheck, args);
+    await promisify(execFile)(checkerPath, args);
   } catch (error) {
     if (
       error instanceof Error &&
@@ -227,7 +227,7 @@ function scenarioFromWitness<Command>(
 
 /** Unroll an explicit temporal counterexample. Zero repetitions returns its prefix. */
 export async function repeatedTemporalScenario<Command>(
-  rcheck: string,
+  checkerPath: string,
   model: string,
   question: string,
   repetitions: number,
@@ -237,7 +237,7 @@ export async function repeatedTemporalScenario<Command>(
       "temporal replay needs a nonnegative integer repetition count",
     );
   }
-  const { stdout } = await promisify(execFile)(rcheck, [
+  const { stdout } = await promisify(execFile)(checkerPath, [
     "witness",
     model,
     question,
@@ -281,7 +281,7 @@ export async function repeatedTemporalScenario<Command>(
 
 /** Check the model before every command, then compare the observed projection. */
 export async function replay<Command>(
-  rcheck: string,
+  checkerPath: string,
   scenario: Scenario<Command>,
   adapter: ObservationAdapter<Command>,
   record?: (observation: unknown) => void,
@@ -307,7 +307,7 @@ export async function replay<Command>(
   };
   if (scenario.commands.length === 0) {
     const output = await checkerRequest(
-      rcheck,
+      checkerPath,
       ["validate", scenario.model, "-"],
       request,
       "model rejected initial snapshot",
@@ -325,7 +325,7 @@ export async function replay<Command>(
   for (const command of scenario.commands) {
     const step = prefix.length + 1;
     const output = await checkerRequest(
-      rcheck,
+      checkerPath,
       ["validate", scenario.model, "-"],
       {
         ...request,
@@ -353,14 +353,14 @@ export async function replay<Command>(
 
 /** Snapshot observations through the first difference. Model and runtime errors propagate. */
 export async function recordReplay<Command>(
-  rcheck: string,
+  checkerPath: string,
   scenario: Scenario<Command>,
   adapter: ObservationAdapter<Command>,
 ): Promise<RecordedReplay<Command>> {
   const observations: unknown[] = [];
   const recording = { scenario: structuredClone(scenario), observations };
   const verdict = await replayVerdict<Command>(() =>
-    replay(rcheck, recording.scenario, adapter, (value) => {
+    replay(checkerPath, recording.scenario, adapter, (value) => {
       observations.push(structuredClone(value));
     }),
   );
@@ -369,7 +369,7 @@ export async function recordReplay<Command>(
 
 /** Compare cumulative runtime notifications with a model-generated history trace. */
 export async function replayEvents<Command>(
-  rcheck: string,
+  checkerPath: string,
   scenario: Scenario<Command>,
   adapter: EventReplayAdapter<Command>,
 ): Promise<ReplayVerdict<Command>> {
@@ -390,7 +390,7 @@ export async function replayEvents<Command>(
   const events: PublicEvent[] = [];
   let step = 0;
   return replayVerdict<Command>(() =>
-    replay(rcheck, scenario, {
+    replay(checkerPath, scenario, {
       apply: (command) => adapter.apply(command),
       async observe() {
         return {
@@ -411,13 +411,13 @@ export async function replayEvents<Command>(
 
 /** Recover the verdict and first difference without constructing a runtime adapter. */
 export function replayRecording<Command>(
-  rcheck: string,
+  checkerPath: string,
   recording: ReplayRecording<Command>,
   project: ObservationProjection,
 ): Promise<ReplayVerdict<Command>> {
   return replayVerdict(() =>
     replayObservations(
-      rcheck,
+      checkerPath,
       recording.scenario,
       recording.observations,
       project,
@@ -427,13 +427,13 @@ export function replayRecording<Command>(
 
 /** Check recorded observations against the model without driving the environment. */
 export async function replayObservations<Command>(
-  rcheck: string,
+  checkerPath: string,
   scenario: Scenario<Command>,
   observations: readonly unknown[],
   project: ObservationProjection,
 ): Promise<void> {
   let step = 0;
-  await replay(rcheck, scenario, {
+  await replay(checkerPath, scenario, {
     async apply() {},
     async observe() {
       if (step >= observations.length) {

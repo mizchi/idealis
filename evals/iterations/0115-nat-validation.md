@@ -9,8 +9,8 @@
 
 処理前の検証は、JSON の型と数値範囲、設定の事実、初期条件、先行操作、現在のガード、遷移先の範囲と不変条件を確認する。Rust の `dispatch` はその後に実装を呼び、返された受付と状態を照合する。型エラー・範囲外・ガード偽・不変条件違反ではコールバックが実行されない。応答の不一致後はセッションを使えない。
 
-`rcheck validate` は同じ検証を実装の実行なしに再生する。初期残高3から `withdraw(2)` の先行操作を与えると、`withdraw(1)` の予測状態は残高0、`withdraw(2)` はガード偽になる。処理を呼ぶ側が実装と同じ先行操作列を渡す。セッションは有限の参照評価器の対応範囲を使う。
+`idealis-check validate` は同じ検証を実装の実行なしに再生する。初期残高3から `withdraw(2)` の先行操作を与えると、`withdraw(1)` の予測状態は残高0、`withdraw(2)` はガード偽になる。処理を呼ぶ側が実装と同じ先行操作列を渡す。セッションは有限の参照評価器の対応範囲を使う。
 
-0114 の外部検査の再実行では、出金・選挙・ACL と対照の29判定が維持された。整数幅の対照は、検査器を実行する前に拒否された。型と処理前の対照は `just rcheck-validation`、自然言語のリンクと主張は `just rmodel-design-check` で再確認できる。
+0114 の外部検査の再実行では、出金・選挙・ACL と対照の29判定が維持された。整数幅の対照は、検査器を実行する前に拒否された。型と処理前の対照は `just idealis-check-validation`、自然言語のリンクと主張は `just idealis-model-design-check` で再確認できる。
 
-[モデル](../../fixtures/rcheck/nat-account.model) · [実装呼び出しの回帰テスト](../../crates/rcheck/tests/validation.rs) · [使い方](../../crates/rcheck/README.md#validate-before-running-a-command) · [自然言語から参照する規則](../../spec/rmodel-design.md#rmodel-validate)
+[モデル](../../fixtures/rcheck/nat-account.model) · [実装呼び出しの回帰テスト](../../crates/idealis-check/tests/validation.rs) · [使い方](../../crates/idealis-check/README.md#validate-before-running-a-command) · [自然言語から参照する規則](../../spec/rmodel-design.md#rmodel-validate)

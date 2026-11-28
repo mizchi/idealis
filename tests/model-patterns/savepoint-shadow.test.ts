@@ -17,9 +17,9 @@ type Command =
   | { kind: "write"; value: Value };
 type Fault = "pop-after-rewind" | "commit-on-release" | "rewind-oldest";
 
-const checker = "crates/rcheck/target/debug/rcheck";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 const model =
-  "examples/model-patterns/sqlite-transactions/savepoint-shadow.model";
+  "examples/model-patterns/sqlite-transactions/savepoint-shadow.ideal";
 
 async function openSavepoints(t: TestContext, fault?: Fault) {
   const directory = await mkdtemp(join(tmpdir(), "idealis-savepoints-"));
@@ -201,7 +201,7 @@ test(
 
 test("a named savepoint skips unrelated marks but still selects the newest match", async (t) => {
   const named =
-    "examples/model-patterns/sqlite-transactions/savepoint-named.model";
+    "examples/model-patterns/sqlite-transactions/savepoint-named.ideal";
   const prefix = await reachableScenario<Command>(
     checker,
     named,

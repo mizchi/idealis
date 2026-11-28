@@ -12,7 +12,7 @@ type Command = {
   readonly request: (typeof ids)[number];
 };
 const scenario: Scenario<Command> = {
-  model: "examples/model-patterns/retry/delivery.model",
+  model: "examples/model-patterns/retry/delivery.ideal",
   config: {},
   initial: {
     effects: { First: null, Second: null },
@@ -42,64 +42,70 @@ test("retry after losing a committed response reads the receipt from a reopened 
           CREATE TABLE ledger (request TEXT NOT NULL);
         `);
         const replies = new Set<string>();
-        const run = replay("crates/rcheck/target/debug/rcheck", scenario, {
-          async apply(command) {
-            if (command.kind === "loseResponse") {
-              replies.delete(command.request);
-              db.close();
-              db = new DatabaseSync(path);
-              return;
-            }
-            db.exec("BEGIN");
-            try {
-              const receipt = db
-                .prepare("INSERT OR IGNORE INTO receipts VALUES (?)")
-                .run(command.request);
-              if (Number(receipt.changes) === 1 || applyDuplicate) {
-                db.prepare("INSERT INTO ledger VALUES (?)").run(
-                  command.request,
-                );
+        const run = replay(
+          "crates/idealis-check/target/debug/idealis-check",
+          scenario,
+          {
+            async apply(command) {
+              if (command.kind === "loseResponse") {
+                replies.delete(command.request);
+                db.close();
+                db = new DatabaseSync(path);
+                return;
               }
-              db.exec("COMMIT");
-            } catch (error) {
-              db.exec("ROLLBACK");
-              throw error;
-            }
-            const row = db
-              .prepare("SELECT request FROM receipts WHERE request = ?")
-              .get(command.request);
-            assert.equal(row?.request, command.request);
-            replies.add(command.request);
+              db.exec("BEGIN");
+              try {
+                const receipt = db
+                  .prepare("INSERT OR IGNORE INTO receipts VALUES (?)")
+                  .run(command.request);
+                if (Number(receipt.changes) === 1 || applyDuplicate) {
+                  db.prepare("INSERT INTO ledger VALUES (?)").run(
+                    command.request,
+                  );
+                }
+                db.exec("COMMIT");
+              } catch (error) {
+                db.exec("ROLLBACK");
+                throw error;
+              }
+              const row = db
+                .prepare("SELECT request FROM receipts WHERE request = ?")
+                .get(command.request);
+              assert.equal(row?.request, command.request);
+              replies.add(command.request);
+            },
+            async observe() {
+              const effects = Object.fromEntries(
+                ids.map((id) => {
+                  const count = db
+                    .prepare(
+                      "SELECT COUNT(*) AS n FROM ledger WHERE request = ?",
+                    )
+                    .get(id)?.n;
+                  return [
+                    id,
+                    count === 0 ? null : count === 1 ? "Posted" : "Duplicate",
+                  ];
+                }),
+              );
+              return {
+                effects,
+                receipts: db
+                  .prepare("SELECT request FROM receipts ORDER BY request")
+                  .all()
+                  .map((row) => row.request),
+                replies: [...replies].sort(),
+              };
+            },
+            project(state) {
+              return {
+                effects: state.effects,
+                receipts: [...(state.receipts as string[])].sort(),
+                replies: [...(state.replies as string[])].sort(),
+              };
+            },
           },
-          async observe() {
-            const effects = Object.fromEntries(
-              ids.map((id) => {
-                const count = db
-                  .prepare("SELECT COUNT(*) AS n FROM ledger WHERE request = ?")
-                  .get(id)?.n;
-                return [
-                  id,
-                  count === 0 ? null : count === 1 ? "Posted" : "Duplicate",
-                ];
-              }),
-            );
-            return {
-              effects,
-              receipts: db
-                .prepare("SELECT request FROM receipts ORDER BY request")
-                .all()
-                .map((row) => row.request),
-              replies: [...replies].sort(),
-            };
-          },
-          project(state) {
-            return {
-              effects: state.effects,
-              receipts: [...(state.receipts as string[])].sort(),
-              replies: [...(state.replies as string[])].sort(),
-            };
-          },
-        });
+        );
         if (applyDuplicate) {
           await assert.rejects(
             run,

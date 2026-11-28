@@ -1,6 +1,28 @@
 {
   "comparisons": [
     {
+      "id": "terms-crates-idealis-check-readme-md",
+      "mode": "terminology",
+      "reference": {
+        "source": "docs-glossary-md"
+      },
+      "target": {
+        "source": "crates-idealis-check-readme-md"
+      },
+      "topic": "idealis の語彙（用語集）の定義・避ける語と、この文書での語の使い方"
+    },
+    {
+      "id": "terms-crates-idealis-check-support-md",
+      "mode": "terminology",
+      "reference": {
+        "source": "docs-glossary-md"
+      },
+      "target": {
+        "source": "crates-idealis-check-support-md"
+      },
+      "topic": "idealis の語彙（用語集）の定義・避ける語と、この文書での語の使い方"
+    },
+    {
       "id": "terms-crates-idealis-cli-readme-md",
       "mode": "terminology",
       "reference": {
@@ -63,6 +85,28 @@
       },
       "target": {
         "source": "crates-idealis-core-support-md"
+      },
+      "topic": "idealis の語彙（用語集）の定義・避ける語と、この文書での語の使い方"
+    },
+    {
+      "id": "terms-crates-idealis-model-readme-md",
+      "mode": "terminology",
+      "reference": {
+        "source": "docs-glossary-md"
+      },
+      "target": {
+        "source": "crates-idealis-model-readme-md"
+      },
+      "topic": "idealis の語彙（用語集）の定義・避ける語と、この文書での語の使い方"
+    },
+    {
+      "id": "terms-crates-idealis-model-support-md",
+      "mode": "terminology",
+      "reference": {
+        "source": "docs-glossary-md"
+      },
+      "target": {
+        "source": "crates-idealis-model-support-md"
       },
       "topic": "idealis の語彙（用語集）の定義・避ける語と、この文書での語の使い方"
     },
@@ -151,50 +195,6 @@
       },
       "target": {
         "source": "crates-ralloy-support-md"
-      },
-      "topic": "idealis の語彙（用語集）の定義・避ける語と、この文書での語の使い方"
-    },
-    {
-      "id": "terms-crates-rcheck-readme-md",
-      "mode": "terminology",
-      "reference": {
-        "source": "docs-glossary-md"
-      },
-      "target": {
-        "source": "crates-rcheck-readme-md"
-      },
-      "topic": "idealis の語彙（用語集）の定義・避ける語と、この文書での語の使い方"
-    },
-    {
-      "id": "terms-crates-rcheck-support-md",
-      "mode": "terminology",
-      "reference": {
-        "source": "docs-glossary-md"
-      },
-      "target": {
-        "source": "crates-rcheck-support-md"
-      },
-      "topic": "idealis の語彙（用語集）の定義・避ける語と、この文書での語の使い方"
-    },
-    {
-      "id": "terms-crates-rmodel-readme-md",
-      "mode": "terminology",
-      "reference": {
-        "source": "docs-glossary-md"
-      },
-      "target": {
-        "source": "crates-rmodel-readme-md"
-      },
-      "topic": "idealis の語彙（用語集）の定義・避ける語と、この文書での語の使い方"
-    },
-    {
-      "id": "terms-crates-rmodel-support-md",
-      "mode": "terminology",
-      "reference": {
-        "source": "docs-glossary-md"
-      },
-      "target": {
-        "source": "crates-rmodel-support-md"
       },
       "topic": "idealis の語彙（用語集）の定義・避ける語と、この文書での語の使い方"
     },
@@ -808,6 +808,14 @@
     }
   ],
   "files": {
+    "crates-idealis-check-readme-md": {
+      "path": "crates/idealis-check/README.md",
+      "role": "document"
+    },
+    "crates-idealis-check-support-md": {
+      "path": "crates/idealis-check/SUPPORT.md",
+      "role": "document"
+    },
     "crates-idealis-cli-readme-md": {
       "path": "crates/idealis-cli/README.md",
       "role": "document"
@@ -830,6 +838,14 @@
     },
     "crates-idealis-core-support-md": {
       "path": "crates/idealis-core/SUPPORT.md",
+      "role": "document"
+    },
+    "crates-idealis-model-readme-md": {
+      "path": "crates/idealis-model/README.md",
+      "role": "document"
+    },
+    "crates-idealis-model-support-md": {
+      "path": "crates/idealis-model/SUPPORT.md",
       "role": "document"
     },
     "crates-idealis-semantics-readme-md": {
@@ -862,22 +878,6 @@
     },
     "crates-ralloy-support-md": {
       "path": "crates/ralloy/SUPPORT.md",
-      "role": "document"
-    },
-    "crates-rcheck-readme-md": {
-      "path": "crates/rcheck/README.md",
-      "role": "document"
-    },
-    "crates-rcheck-support-md": {
-      "path": "crates/rcheck/SUPPORT.md",
-      "role": "document"
-    },
-    "crates-rmodel-readme-md": {
-      "path": "crates/rmodel/README.md",
-      "role": "document"
-    },
-    "crates-rmodel-support-md": {
-      "path": "crates/rmodel/SUPPORT.md",
       "role": "document"
     },
     "crates-roracle-readme-md": {
@@ -1018,12 +1018,16 @@
     }
   },
   "roots": [
+    "crates/idealis-check/README.md",
+    "crates/idealis-check/SUPPORT.md",
     "crates/idealis-cli/README.md",
     "crates/idealis-cli/SUPPORT.md",
     "crates/idealis-connect/README.md",
     "crates/idealis-connect/SUPPORT.md",
     "crates/idealis-core/README.md",
     "crates/idealis-core/SUPPORT.md",
+    "crates/idealis-model/README.md",
+    "crates/idealis-model/SUPPORT.md",
     "crates/idealis-semantics/README.md",
     "crates/idealis-semantics/SUPPORT.md",
     "crates/idealis-spec/README.md",
@@ -1032,10 +1036,6 @@
     "crates/idealis-syntax/SUPPORT.md",
     "crates/ralloy/README.md",
     "crates/ralloy/SUPPORT.md",
-    "crates/rcheck/README.md",
-    "crates/rcheck/SUPPORT.md",
-    "crates/rmodel/README.md",
-    "crates/rmodel/SUPPORT.md",
     "crates/roracle/README.md",
     "crates/roracle/SUPPORT.md",
     "crates/rprob/README.md",

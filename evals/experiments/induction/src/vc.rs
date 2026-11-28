@@ -1,8 +1,8 @@
-//! Verification conditions of an rmodel model in SMT-LIB (plan 0106).
+//! Verification conditions of an Idealis model in SMT-LIB (plan 0106).
 //! Signatures are uninterpreted sorts, so an unsat answer covers every
 //! size; enums are finite datatypes; relations are Boolean functions, and
 //! an expression becomes the first-order formula "this tuple belongs to it".
-use rmodel::{Compare, Expr, Formula, Model, Mult, Quantifier, SetOp, Shape};
+use idealis_model::{Compare, Expr, Formula, Model, Mult, Quantifier, SetOp, Shape};
 use std::collections::BTreeMap;
 
 /// The fragment the prototype encodes, or the reason a model is outside.
@@ -13,7 +13,11 @@ pub fn supported(model: &Model) -> Result<(), String> {
     if !model.sums.is_empty() {
         return Err("union sorts".into());
     }
-    if model.enums.iter().any(|(name, _)| name == rmodel::BOOL) {
+    if model
+        .enums
+        .iter()
+        .any(|(name, _)| name == idealis_model::BOOL)
+    {
         return Err("Bool".into());
     }
     if rmodel_uses_counts(model) {
@@ -422,7 +426,7 @@ pub fn obligations(model: &Model) -> Vec<Obligation> {
     let invariants: Vec<_> = model
         .checks
         .iter()
-        .filter(|c| c.kind == rmodel::CheckKind::Invariant)
+        .filter(|c| c.kind == idealis_model::CheckKind::Invariant)
         .collect();
     let none = Scope::new();
     let base = |enc: &mut Encoder, initial: bool| -> Vec<String> {
@@ -446,33 +450,34 @@ pub fn obligations(model: &Model) -> Vec<Obligation> {
     };
     // Each action instance: parameters as constants, the guards, and the
     // post-state defined by the assignments and the implicit frame.
-    let step = |enc: &mut Encoder, action: &rmodel::Action| -> (String, Vec<String>, Scope) {
-        let mut decls = String::new();
-        let mut scope = Scope::new();
-        for (param, sort) in &action.params {
-            decls.push_str(&format!("(declare-const p_{param} S_{sort})\n"));
-            scope.insert(param.clone(), (format!("p_{param}"), sort.clone()));
-        }
-        let mut assertions = Vec::new();
-        for guard in &action.guards {
-            assertions.push(enc.formula(guard, &scope, Copy_::Pre));
-        }
-        for var in model.vars() {
-            let columns = shape_ty(&var.shape).columns();
-            let (names, binders) = enc.binders(&columns);
-            let post = format!("(r_{}_post {})", var.name, names.join(" "));
-            let value = match action.assignments.iter().find(|(v, _)| v == &var.name) {
-                Some((_, value)) => enc.member(value, &names, &scope, Copy_::Pre),
-                // Artificial fault 2 of plan 0106 leaves it unconstrained.
-                None if std::env::var("INDUCTION_MUTANT").as_deref() == Ok("frame") => {
-                    continue;
-                }
-                None => format!("(r_{} {})", var.name, names.join(" ")),
-            };
-            assertions.push(format!("(forall ({binders}) (= {post} {value}))"));
-        }
-        (decls, assertions, scope)
-    };
+    let step =
+        |enc: &mut Encoder, action: &idealis_model::Action| -> (String, Vec<String>, Scope) {
+            let mut decls = String::new();
+            let mut scope = Scope::new();
+            for (param, sort) in &action.params {
+                decls.push_str(&format!("(declare-const p_{param} S_{sort})\n"));
+                scope.insert(param.clone(), (format!("p_{param}"), sort.clone()));
+            }
+            let mut assertions = Vec::new();
+            for guard in &action.guards {
+                assertions.push(enc.formula(guard, &scope, Copy_::Pre));
+            }
+            for var in model.vars() {
+                let columns = shape_ty(&var.shape).columns();
+                let (names, binders) = enc.binders(&columns);
+                let post = format!("(r_{}_post {})", var.name, names.join(" "));
+                let value = match action.assignments.iter().find(|(v, _)| v == &var.name) {
+                    Some((_, value)) => enc.member(value, &names, &scope, Copy_::Pre),
+                    // Artificial fault 2 of plan 0106 leaves it unconstrained.
+                    None if std::env::var("INDUCTION_MUTANT").as_deref() == Ok("frame") => {
+                        continue;
+                    }
+                    None => format!("(r_{} {})", var.name, names.join(" ")),
+                };
+                assertions.push(format!("(forall ({binders}) (= {post} {value}))"));
+            }
+            (decls, assertions, scope)
+        };
     let render = |decls: &str, assertions: &[String], goal: &str| {
         let mut smt = prelude(model);
         smt.push_str(decls);
@@ -530,7 +535,7 @@ pub fn obligations(model: &Model) -> Vec<Obligation> {
             format!("(and {})", goals.join(" "))
         };
         out.push(Obligation {
-            check: rmodel::DECLARATIONS.into(),
+            check: idealis_model::DECLARATIONS.into(),
             step: action.name.clone(),
             smt: render(&decls, &assertions, &goal),
         });

@@ -18,14 +18,30 @@ import {
   type S3ObjectClient,
 } from "@mizchi/idealis/patterns";
 
-const rcheck = process.argv[2];
-assert.ok(rcheck);
+const checkerPath = process.argv[2];
+assert.ok(checkerPath);
+
+const models = "@mizchi/idealis/patterns/models";
+for (const [legacy, canonical] of [
+  ["node-event-loop/io-batch.model", "node-event-loop/io-batch.ideal"],
+  ["browser/project.rmodel.json", "browser/model.project.json"],
+  ["object-store/project.rmodel.json", "object-store/model.project.json"],
+]) {
+  assert.equal(
+    import.meta.resolve(`${models}/${legacy}`),
+    import.meta.resolve(`${models}/${canonical}`),
+  );
+}
 
 const file = new URL(import.meta.url);
 const io = nodeIoBatchPattern(nodeFileIoBatch(file));
 const ticks = nodeNextTickPattern(nodeFileNextTickBatch(file));
 for (const pattern of [io, ticks]) {
-  const result = await recordReplay(rcheck, pattern.scenario, pattern.adapter);
+  const result = await recordReplay(
+    checkerPath,
+    pattern.scenario,
+    pattern.adapter,
+  );
   assert.equal(result.verdict, "matched");
 }
 
@@ -56,7 +72,8 @@ const history: BrowserHistory = {
 };
 const browsing = browserHistoryPattern(history, routes);
 assert.equal(
-  (await recordReplay(rcheck, browsing.scenario, browsing.adapter)).verdict,
+  (await recordReplay(checkerPath, browsing.scenario, browsing.adapter))
+    .verdict,
   "matched",
 );
 
@@ -89,7 +106,7 @@ const client: S3ObjectClient = {
   },
 };
 const store = objectStorePattern(s3ObjectStore(client, "test"), "probe");
-const recorded = await recordReplay(rcheck, store.scenario, store.adapter);
+const recorded = await recordReplay(checkerPath, store.scenario, store.adapter);
 assert.equal(recorded.verdict, "mismatch");
 assert.equal(recorded.difference.step, 2);
 assert.deepEqual(recorded.difference.expected, { body: "V2", listed: true });
@@ -101,11 +118,14 @@ await writeFile(
 const saved = fromReplayItf(
   JSON.parse(await readFile("recording.itf.json", "utf8")),
 );
-assert.deepEqual(await replayRecording(rcheck, saved, objectStoreProjection), {
-  verdict: "mismatch",
-  difference: recorded.difference,
-});
-const fifo = await readFile("weighted-fifo.model", "utf8");
+assert.deepEqual(
+  await replayRecording(checkerPath, saved, objectStoreProjection),
+  {
+    verdict: "mismatch",
+    difference: recorded.difference,
+  },
+);
+const fifo = await readFile("weighted-fifo.ideal", "utf8");
 const bypass = fifo.replace(
   "client = at(waiting, 0),",
   "client in elements(waiting),",
@@ -113,7 +133,7 @@ const bypass = fifo.replace(
 assert.notEqual(bypass, fifo);
 await writeFile("weighted-bypass.model", bypass);
 const finite = await repeatedTemporalScenario<{ kind: string; client: string }>(
-  rcheck,
+  checkerPath,
   "weighted-bypass.model",
   "HeadGetsCapacity",
   2,

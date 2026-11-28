@@ -1,0 +1,156 @@
+{
+  "domains": [
+    {
+      "id": "social",
+      "name": {
+        "ja": "フォロー",
+        "en": "Following"
+      },
+      "models": ["users"]
+    },
+    {
+      "id": "publishing",
+      "name": {
+        "ja": "投稿",
+        "en": "Publishing"
+      },
+      "models": ["posts"]
+    },
+    {
+      "id": "delivery",
+      "name": {
+        "ja": "配信",
+        "en": "Delivery"
+      },
+      "models": ["relay", "queue", "consumer"]
+    },
+    {
+      "id": "timeline",
+      "name": {
+        "ja": "タイムライン",
+        "en": "Timeline"
+      },
+      "models": ["timeline"]
+    }
+  ],
+  "fragments": [
+    "system.ideal",
+    "types.ideal",
+    {
+      "path": "users.ideal",
+      "namespace": "users",
+      "ports": {
+        "follows": {
+          "state": "follows",
+          "access": "write"
+        }
+      }
+    },
+    {
+      "path": "posts.ideal",
+      "namespace": "posts",
+      "ports": {
+        "authors": {
+          "state": "authors",
+          "access": "write"
+        }
+      }
+    },
+    {
+      "path": "relay.ideal",
+      "namespace": "relay",
+      "ports": {
+        "authors": {
+          "state": "authors",
+          "access": "read"
+        },
+        "accepted": {
+          "state": "accepted",
+          "access": "read"
+        },
+        "offered": {
+          "state": "offered",
+          "access": "write"
+        }
+      }
+    },
+    {
+      "path": "queue.ideal",
+      "namespace": "queue",
+      "ports": {
+        "offered": {
+          "state": "offered",
+          "access": "read"
+        },
+        "ackRequests": {
+          "state": "ackRequests",
+          "access": "read"
+        },
+        "accepted": {
+          "state": "accepted",
+          "access": "write"
+        },
+        "pending": {
+          "state": "pending",
+          "access": "write"
+        },
+        "inFlight": {
+          "state": "inFlight",
+          "access": "write"
+        },
+        "acked": {
+          "state": "acked",
+          "access": "write"
+        }
+      }
+    },
+    {
+      "path": "timeline.ideal",
+      "namespace": "timeline",
+      "ports": {
+        "follows": {
+          "state": "follows",
+          "access": "read"
+        },
+        "authors": {
+          "state": "authors",
+          "access": "read"
+        },
+        "inFlight": {
+          "state": "inFlight",
+          "access": "read"
+        },
+        "entries": {
+          "state": "entries",
+          "access": "write"
+        },
+        "applied": {
+          "state": "applied",
+          "access": "write"
+        },
+        "replayed": {
+          "state": "replayed",
+          "access": "write"
+        }
+      }
+    },
+    {
+      "path": "consumer.ideal",
+      "namespace": "consumer",
+      "ports": {
+        "inFlight": {
+          "state": "inFlight",
+          "access": "read"
+        },
+        "applied": {
+          "state": "applied",
+          "access": "read"
+        },
+        "ackRequests": {
+          "state": "ackRequests",
+          "access": "write"
+        }
+      }
+    }
+  ]
+}

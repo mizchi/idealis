@@ -10,8 +10,8 @@ import {
 type Command = { kind: "send" | "deliver" | "acknowledge" | "close" };
 type Fault = "none" | "send-is-ack" | "close-means-unprocessed";
 type Status = "Idle" | "Pending" | "Confirmed" | "Unknown" | "Failed";
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/worker-transfer/acknowledgment.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/worker-transfer/acknowledgment.ideal";
 
 function openPort(t: TestContext, fault: Fault) {
   const source = new Uint8Array([61]);

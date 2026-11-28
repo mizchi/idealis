@@ -1,0 +1,241 @@
+{
+  "spec": {
+    "id": "worker-microblog",
+    "name": {
+      "ja": "短文投稿サービス",
+      "en": "Worker Microblog"
+    },
+    "groups": ["タイムライン", "投稿と配信"],
+    "terms": [
+      {
+        "id": "delivery",
+        "kind": "state",
+        "group": "タイムライン",
+        "name": {
+          "ja": "配信試行",
+          "en": "delivery attempt"
+        },
+        "definition": {
+          "ja": "投稿をタイムラインに反映するための初回配信または再配信。",
+          "en": "An initial or retry delivery of a post."
+        },
+        "model": [
+          {
+            "path": "examples/model-patterns/worker-microblog/model.project.json",
+            "name": "inFlight"
+          }
+        ]
+      },
+      {
+        "id": "timeline",
+        "kind": "state",
+        "group": "タイムライン",
+        "name": {
+          "ja": "タイムライン行",
+          "en": "timeline row"
+        },
+        "definition": {
+          "ja": "読者と、その読者のタイムラインに載った投稿の組。",
+          "en": "A pair of a reader and a post indexed for that reader."
+        },
+        "model": [
+          {
+            "path": "examples/model-patterns/worker-microblog/model.project.json",
+            "name": "entries"
+          }
+        ]
+      },
+      {
+        "id": "follow",
+        "kind": "state",
+        "group": "タイムライン",
+        "name": {
+          "ja": "フォロー関係",
+          "en": "follow relationship"
+        },
+        "definition": {
+          "ja": "読者が現在フォローしている投稿者との関係。",
+          "en": "A current following relationship between a reader and an author."
+        },
+        "model": [
+          {
+            "path": "examples/model-patterns/worker-microblog/model.project.json",
+            "name": "follows"
+          }
+        ]
+      },
+      {
+        "id": "post-authors",
+        "kind": "state",
+        "group": "投稿と配信",
+        "name": {
+          "ja": "投稿者の記録",
+          "en": "Post authorship"
+        },
+        "definition": {
+          "ja": "保存済みの投稿と、その投稿者の対応。",
+          "en": "The author recorded for each committed post."
+        },
+        "model": [
+          {
+            "path": "examples/model-patterns/worker-microblog/model.project.json",
+            "name": "authors"
+          }
+        ]
+      },
+      {
+        "id": "delivery-offer",
+        "kind": "state",
+        "group": "投稿と配信",
+        "name": {
+          "ja": "配信依頼",
+          "en": "Delivery offer"
+        },
+        "definition": {
+          "ja": "配信の受付に渡された保存済みの投稿。",
+          "en": "A committed post handed off for queue admission."
+        },
+        "model": [
+          {
+            "path": "examples/model-patterns/worker-microblog/model.project.json",
+            "name": "offered"
+          }
+        ]
+      },
+      {
+        "id": "queue-admission",
+        "kind": "state",
+        "group": "投稿と配信",
+        "name": {
+          "ja": "受付済み",
+          "en": "Admitted posts"
+        },
+        "definition": {
+          "ja": "配信 Queue が受け付けた投稿。",
+          "en": "Posts already admitted by the delivery queue."
+        },
+        "model": [
+          {
+            "path": "examples/model-patterns/worker-microblog/model.project.json",
+            "name": "accepted"
+          }
+        ]
+      },
+      {
+        "id": "timeline-applied",
+        "kind": "state",
+        "group": "投稿と配信",
+        "name": {
+          "ja": "反映済み",
+          "en": "Applied posts"
+        },
+        "definition": {
+          "ja": "タイムラインへの初回反映を終えた投稿。",
+          "en": "Posts whose first application to the timeline has finished."
+        },
+        "model": [
+          {
+            "path": "examples/model-patterns/worker-microblog/model.project.json",
+            "name": "applied"
+          }
+        ]
+      },
+      {
+        "id": "ack-request",
+        "kind": "state",
+        "group": "投稿と配信",
+        "name": {
+          "ja": "ACK 要求",
+          "en": "ACK requests"
+        },
+        "definition": {
+          "ja": "Consumer が ACK を要求した投稿と配信試行の組。",
+          "en": "Post and delivery-attempt pairs for which the consumer requested acknowledgement."
+        },
+        "model": [
+          {
+            "path": "examples/model-patterns/worker-microblog/model.project.json",
+            "name": "ackRequests"
+          }
+        ]
+      }
+    ],
+    "rules": [
+      {
+        "id": "MICROBLOG-ACK-AFTER-WRITE",
+        "text": {
+          "ja": "タイムラインへの反映処理を済ませてから配信を ACK する。",
+          "en": "A delivery can be acknowledged only after the post has been applied to the timeline."
+        },
+        "terms": ["delivery", "timeline"],
+        "claims": [
+          {
+            "model": "examples/model-patterns/worker-microblog/model.project.json",
+            "check": "AckAfterWrite",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "MICROBLOG-ACK-MATCHES-DELIVERY",
+        "text": {
+          "ja": "ACK 要求は、同じ投稿の同じ配信試行にだけ使える。",
+          "en": "An acknowledgement request applies only to the same post and delivery attempt."
+        },
+        "terms": ["delivery"],
+        "claims": [
+          {
+            "model": "examples/model-patterns/worker-microblog/model.project.json",
+            "check": "AckMatchesDelivery",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "MICROBLOG-REPLAY-KEEPS-ROWS",
+        "text": {
+          "ja": "反映済みの投稿を再配信しても、タイムライン行は変わらない。",
+          "en": "Redelivery of an already applied post leaves timeline rows unchanged."
+        },
+        "terms": ["delivery", "timeline"],
+        "claims": [
+          {
+            "model": "examples/model-patterns/worker-microblog/model.project.json",
+            "check": "ReplayKeepsRows",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "MICROBLOG-READ-RESPECTS-FOLLOW",
+        "text": {
+          "ja": "タイムライン行が残っていても、現在フォローしていない投稿者の投稿は読めない。",
+          "en": "A reader cannot view a post from an author they no longer follow, even if a timeline row remains."
+        },
+        "terms": ["timeline", "follow"],
+        "claims": [
+          {
+            "model": "examples/model-patterns/worker-microblog/model.project.json",
+            "check": "ReadRespectsFollow",
+            "expect": "holds"
+          }
+        ]
+      },
+      {
+        "id": "MICROBLOG-INDEXED-POSTS-COMMITTED",
+        "text": {
+          "ja": "タイムラインに載る投稿はすべて保存済みである。",
+          "en": "Every timeline entry refers to a committed post."
+        },
+        "terms": ["timeline"],
+        "claims": [
+          {
+            "model": "examples/model-patterns/worker-microblog/model.project.json",
+            "check": "IndexedPostsAreCommitted",
+            "expect": "holds"
+          }
+        ]
+      }
+    ]
+  }
+}

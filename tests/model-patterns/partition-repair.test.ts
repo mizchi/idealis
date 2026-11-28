@@ -20,8 +20,8 @@ type Decision =
   | "Published";
 type Fault = "direct-only" | "rescan-all" | "expiry-as-retry" | null;
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/subscriptions/partition-repair.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/subscriptions/partition-repair.ideal";
 const plan: Command = { kind: "plan" };
 const publish: Command = { kind: "publish" };
 const fetchPayment: Command = { kind: "fetch", row: "PaymentRow" };

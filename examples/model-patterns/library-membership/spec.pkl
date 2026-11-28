@@ -1,8 +1,8 @@
 import "../../../spec/Schema.pkl" as s
 import "pkl:json"
 
-local direct = "direct.rmodel.json"
-local notification = "notification.rmodel.json"
+local direct = "direct.project.json"
+local notification = "notification.project.json"
 local vocabulary = (new json.Parser {}).parse(read("dictionary.spec.json").text).spec
 
 spec: s.Spec = new {

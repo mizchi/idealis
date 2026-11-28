@@ -8,8 +8,8 @@ import {
 type Output = "First" | "Second";
 type Command = { kind: "dispatch"; output: Output } | { kind: "retain" };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/wasm-memory/output-lifetime.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/wasm-memory/output-lifetime.ideal";
 
 // (module (memory (export "memory") 1 1)
 //   (func (export "dispatch") (param i32) (result i32)

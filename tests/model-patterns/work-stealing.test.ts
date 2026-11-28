@@ -13,8 +13,8 @@ type Actor = (typeof actors)[number];
 type Task = (typeof tasks)[number];
 type Command = { kind: "snapshot" | "claim"; actor: Actor };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/worker-deque/last-task.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/worker-deque/last-task.ideal";
 
 function setup(t: TestContext, skipCas: boolean) {
   const slots = new Int32Array(

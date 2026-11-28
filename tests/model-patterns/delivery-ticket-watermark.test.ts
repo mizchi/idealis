@@ -13,9 +13,9 @@ type Command =
       kind: "cancel" | "send" | "seal" | "readControl" | "readData" | "recycle";
     };
 
-const checker = "crates/rcheck/target/debug/rcheck";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 const model =
-  "examples/model-patterns/subscriptions/delivery-ticket-watermark.model";
+  "examples/model-patterns/subscriptions/delivery-ticket-watermark.ideal";
 
 function openPorts(t: TestContext, fault: "control-only" | null) {
   const data = new MessageChannel();

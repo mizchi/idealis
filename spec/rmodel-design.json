@@ -2,8 +2,8 @@
   "spec": {
     "id": "rmodel-design",
     "name": {
-      "ja": "rmodel の文法設計仕様",
-      "en": "rmodel grammar design specification"
+      "ja": "Idealis の文法設計仕様",
+      "en": "Idealis grammar design specification"
     },
     "groups": [
       "文法変更と遷移"
@@ -862,7 +862,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rcheck/src/project.rs",
+            "path": "crates/idealis-check/src/project.rs",
             "symbol": "load_source"
           }
         ]
@@ -884,7 +884,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rcheck/src/conform/boundaries.rs",
+            "path": "crates/idealis-check/src/conform/boundaries.rs",
             "symbol": "boundary_cases"
           }
         ]
@@ -994,7 +994,7 @@
         "model": [],
         "code": [
           {
-            "path": "crates/rcheck/src/conform/validation.rs",
+            "path": "crates/idealis-check/src/conform/validation.rs",
             "symbol": "dispatch"
           }
         ]
@@ -1426,7 +1426,7 @@
           "entity"
         ],
         "claims": [],
-        "unformalized": "名前解決と生成物は rmodel の entity.rs、IR の往復は rcheck の ir.rs、生成した型を使う入出金の照合は rcheck の domain.rs と typescript.rs で検査する。"
+        "unformalized": "名前解決と生成物は idealis-syntax の entity 宣言、IR の往復は idealis-check の ir.rs、生成した型を使う入出金の照合は idealis-check の domain.rs と typescript.rs で検査する。"
       },
       {
         "id": "RMODEL-DEAD-CODE",
@@ -1669,7 +1669,7 @@
           "symbol": "action"
         },
         "test": {
-          "path": "crates/rmodel/tests/behavior.rs",
+          "path": "crates/idealis-model/tests/behavior.rs",
           "symbol": "behavior_has_the_same_guard_parallel_updates_and_frame_as_action"
         }
       },
@@ -1680,7 +1680,7 @@
           "symbol": "steps"
         },
         "test": {
-          "path": "crates/rmodel/tests/calibration.rs",
+          "path": "crates/idealis-model/tests/calibration.rs",
           "symbol": "the_next_revision_must_collect_new_evidence"
         }
       }

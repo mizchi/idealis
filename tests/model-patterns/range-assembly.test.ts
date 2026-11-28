@@ -20,8 +20,8 @@ type Command =
   | { kind: "request"; part: Part; mode: "Plain" | "Resume" }
   | { kind: "accept"; part: Part };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/cache-refresh/range-assembly.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/cache-refresh/range-assembly.ideal";
 const tags = { Old: '"old"', New: '"new"' };
 const bodies = { Old: "A0A1", New: "B0B1" };
 const parts = ["Head", "Tail"] as const;

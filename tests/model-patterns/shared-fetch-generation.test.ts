@@ -21,9 +21,9 @@ type Entry = {
   outcome: Promise<string | null>;
   cleaned: Promise<void>;
 };
-const checker = "crates/rcheck/target/debug/rcheck";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 const model =
-  "examples/model-patterns/cancellation/shared-fetch-generation.model";
+  "examples/model-patterns/cancellation/shared-fetch-generation.ideal";
 
 test(
   "a stale fetch finalizer cannot delete the new HTTP request for its key",

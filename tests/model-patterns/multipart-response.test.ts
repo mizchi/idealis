@@ -14,8 +14,8 @@ type Command =
   | { kind: "sendHeaders" | "readBody" }
   | { kind: "finish"; outcome: Wire; committed: boolean };
 type Fault = "trust-headers" | "ignore-error-body" | "reject-disconnect";
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/object-store/multipart-response.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/object-store/multipart-response.ideal";
 const success =
   "<CompleteMultipartUploadResult><ETag>example</ETag></CompleteMultipartUploadResult>";
 const failure = "<Error><Code>InternalError</Code></Error>";

@@ -14,8 +14,8 @@ type Command =
   | { kind: "writePart"; field: Field };
 type Timing = "after-both" | "on-reserve" | "after-header";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/worker-deque/ring-publication.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/worker-deque/ring-publication.ideal";
 
 function openSlot(t: TestContext, timing: Timing) {
   const words = new Int32Array(

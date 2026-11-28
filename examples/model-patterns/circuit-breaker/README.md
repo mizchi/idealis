@@ -1,17 +1,17 @@
 # サーキットブレーカーの回復試験
 
-通常状態で受け付けた要求には世代を記録する。失敗したら遮断し、時間の経過で半開状態へ進む。半開中は一つの試験要求だけを許可する。試験要求が成功したら通常状態に戻り、失敗したら次の世代で遮断する。通常状態で出した古い要求の応答が届いても、その応答が現在のブレーカーの状態を変えることはない。[モデル](half-open.model)
+通常状態で受け付けた要求には世代を記録する。失敗したら遮断し、時間の経過で半開状態へ進む。半開中は一つの試験要求だけを許可する。試験要求が成功したら通常状態に戻り、失敗したら次の世代で遮断する。通常状態で出した古い要求の応答が届いても、その応答が現在のブレーカーの状態を変えることはない。[モデル](half-open.ideal)
 
 リポジトリのルートで実行する。
 
 ```sh
-cargo build --locked --manifest-path crates/rcheck/Cargo.toml
-rcheck=crates/rcheck/target/debug/rcheck
-model=examples/model-patterns/circuit-breaker/half-open.model
+cargo build --locked --manifest-path crates/idealis-check/Cargo.toml
+checker=crates/idealis-check/target/debug/idealis-check
+model=examples/model-patterns/circuit-breaker/half-open.ideal
 
-"$rcheck" "$model" --checker explicit --question TrialEventuallyResolves --expect holds
-"$rcheck" witness "$model" TrialWithOlderPending --checker rprob
-"$rcheck" witness-step "$model" attempt 'before(phase) = HalfOpen and some before(probe)'
+"$checker" "$model" --checker explicit --question TrialEventuallyResolves --expect holds
+"$checker" witness "$model" TrialWithOlderPending --checker rprob
+"$checker" witness-step "$model" attempt 'before(phase) = HalfOpen and some before(probe)'
 just build
 node --test dist/tests/model-patterns/circuit-breaker.test.js
 ```

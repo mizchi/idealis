@@ -16,7 +16,7 @@
 - [x] SafetyProgramからsuccessorを生成し、BFSで状態を重複排除する。hash衝突時にも状態全体を比較する。具体グラフの reachable_graph は制約を適用した完全探索だけを返す。初期・後続状態の未代入時は branch 名と未代入変数を診断する。Value の Display と SafetyViolation::format_trace で変数名付きの反例を表示できる。
 - [x] invariant・deadlock・初期state property・action property・定数ASSUMEの検査とsafety反例の復元。
 - [x] 対応するtemporal formula、stuttering、WF/SFとlasso反例。safetyと異なり最短lassoは保証しない。
-- [x] `[]<> P` の `P` が原子条件または二つの原子条件の選言なら、各辺で条件を記録し、循環内で成立する辺の有無を検査する。[循環の試験](tests/temporal_sets.rs) · [配信の公平性の比較](../rcheck/tests/witness.rs)。
+- [x] `[]<> P` の `P` が原子条件または二つの原子条件の選言なら、各辺で条件を記録し、循環内で成立する辺の有無を検査する。[循環の試験](tests/temporal_sets.rs) · [配信の公平性の比較](../idealis-check/tests/witness.rs)。
 - [x] signed 32-bit整数、Bool、文字列、有限集合・有限関数。recordとsequenceも有限関数として等価性を判定する。
 - [x] IRの算術・集合・関数・record・sequence操作、有限量化、EXCEPTと@、foldの評価。
 - [x] 未一致CASEの評価時エラーと、singletonの文字列domainに限定したvariant-tag。

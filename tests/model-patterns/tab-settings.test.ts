@@ -10,7 +10,7 @@ type Command =
   | { readonly kind: "load"; readonly tab: Tab }
   | { readonly kind: "save"; readonly tab: Tab; readonly setting: Setting };
 const scenario: Scenario<Command> = {
-  model: "examples/model-patterns/tab-settings/settings.model",
+  model: "examples/model-patterns/tab-settings/settings.ideal",
   config: {},
   initial: {
     version: 0,
@@ -109,49 +109,53 @@ test(
         await Promise.all(
           Object.values(pages).map((page) => page.goto(origin)),
         );
-        const run = replay("crates/rcheck/target/debug/rcheck", scenario, {
-          async apply(command) {
-            await pages[command.tab].evaluate((command) => {
-              const app = window as unknown as {
-                loadSettings(): Promise<void>;
-                saveSettings(setting: Setting): Promise<void>;
+        const run = replay(
+          "crates/idealis-check/target/debug/idealis-check",
+          scenario,
+          {
+            async apply(command) {
+              await pages[command.tab].evaluate((command) => {
+                const app = window as unknown as {
+                  loadSettings(): Promise<void>;
+                  saveSettings(setting: Setting): Promise<void>;
+                };
+                return command.kind === "load"
+                  ? app.loadSettings()
+                  : app.saveSettings(command.setting);
+              }, command);
+            },
+            async observe() {
+              const snapshot = await fetch(`${origin}/settings`, {
+                signal: AbortSignal.timeout(5_000),
+              });
+              const current = (await snapshot.json()) as { value: Setting };
+              assert.ok(snapshot.headers.get("etag"));
+              const tabs = await Promise.all(
+                Object.values(pages).map((page) =>
+                  page.evaluate(() => {
+                    const screen = document.querySelector("main");
+                    const tag = screen?.dataset.etag;
+                    return {
+                      loaded: tag ? Number(tag.slice(1, -1)) : null,
+                      response: screen?.textContent || null,
+                    };
+                  }),
+                ),
+              );
+              const [left, right] = tabs;
+              assert.ok(left && right);
+              return {
+                version: Number(snapshot.headers.get("etag")?.slice(1, -1)),
+                value: current.value,
+                loaded: { Left: left.loaded, Right: right.loaded },
+                responses: { Left: left.response, Right: right.response },
               };
-              return command.kind === "load"
-                ? app.loadSettings()
-                : app.saveSettings(command.setting);
-            }, command);
+            },
+            project(state) {
+              return state;
+            },
           },
-          async observe() {
-            const snapshot = await fetch(`${origin}/settings`, {
-              signal: AbortSignal.timeout(5_000),
-            });
-            const current = (await snapshot.json()) as { value: Setting };
-            assert.ok(snapshot.headers.get("etag"));
-            const tabs = await Promise.all(
-              Object.values(pages).map((page) =>
-                page.evaluate(() => {
-                  const screen = document.querySelector("main");
-                  const tag = screen?.dataset.etag;
-                  return {
-                    loaded: tag ? Number(tag.slice(1, -1)) : null,
-                    response: screen?.textContent || null,
-                  };
-                }),
-              ),
-            );
-            const [left, right] = tabs;
-            assert.ok(left && right);
-            return {
-              version: Number(snapshot.headers.get("etag")?.slice(1, -1)),
-              value: current.value,
-              loaded: { Left: left.loaded, Right: right.loaded },
-              responses: { Left: left.response, Right: right.response },
-            };
-          },
-          project(state) {
-            return state;
-          },
-        });
+        );
         if (bypass) {
           await assert.rejects(
             run,

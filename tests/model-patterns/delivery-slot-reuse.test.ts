@@ -17,8 +17,8 @@ type Command =
   | { kind: "restart" }
   | { kind: "finish"; ticket: Ticket };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/subscriptions/delivery-slot-reuse.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/subscriptions/delivery-slot-reuse.ideal";
 const id = "notice-1";
 const finish = (ticket: Ticket): Command => ({ kind: "finish", ticket });
 

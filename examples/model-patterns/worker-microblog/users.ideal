@@ -1,0 +1,16 @@
+description = {
+  ja: "Reader と Author のフォロー関係を管理する。",
+  en: "Manages whether Reader follows Author.",
+}
+
+init { no @follows }
+
+behavior @follow(reader: User, author: User) {
+  guard { reader = Reader, author = Author, author not in reader.@follows }
+  update { @follows = @follows + (reader -> author) }
+}
+
+behavior @unfollow(reader: User, author: User) {
+  guard { author in reader.@follows }
+  update { @follows = @follows - (reader -> author) }
+}

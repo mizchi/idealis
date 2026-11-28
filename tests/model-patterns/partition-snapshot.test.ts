@@ -21,8 +21,8 @@ type Command =
 type Fault = "ignore-dependency" | "shared-cursor" | "two-edges" | null;
 type Entry = { part: Partition; seq: number; requires_order: number | null };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/subscriptions/partition-snapshot.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/subscriptions/partition-snapshot.ideal";
 const publish: Command = { kind: "publish" };
 
 function openReplica(t: TestContext, fault: Fault) {

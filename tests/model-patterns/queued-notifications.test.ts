@@ -14,8 +14,8 @@ type Command =
   | { kind: "announce"; notice: Notice }
   | ({ kind: "dispatch" } & Delivery);
 
-const rcheck = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/subscriptions/queued.model";
+const checkerPath = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/subscriptions/queued.ideal";
 const dispatch = (notice: Notice, registration: Registration): Command => ({
   kind: "dispatch",
   notice,
@@ -32,17 +32,17 @@ function rows(deliveries: readonly Delivery[]) {
 
 test("each queued notification retains the registration it captured", async () => {
   const shared = await reachableScenario<Command>(
-    rcheck,
+    checkerPath,
     model,
     "BothQueuedForOld",
   );
   const mixed = await reachableScenario<Command>(
-    rcheck,
+    checkerPath,
     model,
     "QueuedAcrossGenerations",
   );
   const replaced = await reachableScenario<Command>(
-    rcheck,
+    checkerPath,
     model,
     "BothQueuedAcrossReregistration",
   );
@@ -80,7 +80,7 @@ test("each queued notification retains the registration it captured", async () =
     const delivered: Delivery[] = [];
     const dropped: Delivery[] = [];
     const result = await recordReplay<Command>(
-      rcheck,
+      checkerPath,
       {
         ...base,
         commands: [...base.commands, ...suffix],

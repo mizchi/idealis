@@ -3,21 +3,21 @@
 [plan](../plans/0102-domain-typescript.md)（改訂を含む）のとおり、モデルからRustのtrait・TypeScriptの型・JSON Schemaを生成し、各言語の実装が参照評価器の意味に従うかを照合した。
 
 ```sh
-rcheck generate fixtures/rmodel/permissions.model rust        # trait Permissions と型
-rcheck generate fixtures/rmodel/permissions.model typescript  # 型、Domain、serve
-rcheck generate fixtures/rmodel/permissions.model schema      # Config・State・Command
+idealis-check generate fixtures/rmodel/permissions.model rust        # trait Permissions と型
+idealis-check generate fixtures/rmodel/permissions.model typescript  # 型、Domain、serve
+idealis-check generate fixtures/rmodel/permissions.model schema      # Config・State・Command
 ```
 
 - **Rust**: actionをmethodに持つtrait（`fn read(&mut self, u: User, d: Doc) -> bool`）、`new(config)`・`state()`。atomは`User(u8)`のnewtype、enumはRustのenum、和のsortは子のenum、recordはstruct、集合と関係は`BTreeSet`・`BTreeMap`。`conformance::<Impl>(budget)`が同じプロセスで照合する。
 - **TypeScript**: atomはbranded string、enumは文字列のunion、集合と関係は`ReadonlySet`・`ReadonlyMap`、commandは判別union。実装は`create(config): Domain`（`state`と`apply(command): boolean`）を書き、`serve(create)`がJSON Linesのdriverになる。
 - **JSON Schema**（draft 2020-12）: sortのatomの集合、enum、多重度（`one`・`lone`・`some`）を制約にする。照合器は実装の答えをまずschemaで検査し、合わなければinvalidにする。
-- **照合**（`rcheck::conform`）: 参照評価器を1歩ずつ進める`reference::Machine`の上で、設定ごとに、実装の初期状態がモデルの初期状態であること、到達する各状態で各action instanceの受け付けと次の状態が一致することを幅優先で確かめる。実装は、初期状態からのcommandの列を新しいインスタンスで再生して動かす。
+- **照合**（`idealis_check::conform`）: 参照評価器を1歩ずつ進める`reference::Machine`の上で、設定ごとに、実装の初期状態がモデルの初期状態であること、到達する各状態で各action instanceの受け付けと次の状態が一致することを幅優先で確かめる。実装は、初期状態からのcommandの列を新しいインスタンスで再生して動かす。
 
 ## 計画からの差（結果の前）
 
 - JSONの形を契約として決めた: atomは名前（`"User0"`、enumの`"JPY"`）、BoolはJSONのboolean、Intは整数、recordはobject、集合は配列、二項関係は定義域のすべてのatomを鍵にしたobject。比較では配列を集合として並べ替える。
 - 照合器のschemaの検査は、生成するキーワードだけを扱う自前のvalidator（知らないキーワードはエラー）にした。独立性はajv 8.20.0（dev依存に追加）と同じfixtureを検査して確かめる。
-- TypeScriptのdriverは、既存のテストと同じく`just build`で`dist/`に出したものを動かす（`just rcheck-typescript`、CIに追加）。
+- TypeScriptのdriverは、既存のテストと同じく`just build`で`dist/`に出したものを動かす（`just idealis-check-typescript`、CIに追加）。
 
 ## 正しさ
 

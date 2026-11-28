@@ -16,9 +16,9 @@ import {
 type Request = "First" | "Second";
 type Command = { kind: "commit" | "open" | "drop" | "send"; request: Request };
 type Fault = "none" | "early" | "latest";
-const checker = "crates/rcheck/target/debug/rcheck";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 const dir = "examples/model-patterns/offline-merge/handoff";
-const model = `${dir}/project.rmodel.json`;
+const model = `${dir}/model.project.json`;
 const requests = ["First", "Second"] as const;
 
 async function startHandoff(t: TestContext, fault: Fault) {
@@ -147,7 +147,7 @@ test(
   async (t) => {
     const [{ stdout: storage }, openOnly] = await Promise.all([
       promisify(execFile)(checker, [
-        `${dir}/storage.rmodel.json`,
+        `${dir}/storage.project.json`,
         "--checker",
         "reference",
         "--question",

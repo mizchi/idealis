@@ -13,8 +13,8 @@ type Command = {
 type Fault = "none" | "ignore-retired" | "ignore-generation";
 type Generation = "Old" | "Next";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/worker-deque/ring-admission.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/worker-deque/ring-admission.ideal";
 const next = 4,
   open = 2,
   held = 1;

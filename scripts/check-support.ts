@@ -438,7 +438,7 @@ const scopes: readonly CrateScope[] = [
     ],
   },
   {
-    name: "rcheck",
+    name: "idealis-check",
     evidence: [
       {
         path: "src/lib.rs",
@@ -475,7 +475,7 @@ const scopes: readonly CrateScope[] = [
     ],
   },
   {
-    name: "rmodel",
+    name: "idealis-model",
     evidence: [
       {
         path: "src/emit.rs",

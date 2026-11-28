@@ -14,8 +14,8 @@ import {
 type Doctor = "Ada" | "Ben";
 type Command = { kind: "inspect" | "submit"; doctor: Doctor };
 type Outcome = "Committed" | "Conflict" | "Refused";
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/sqlite-transactions/on-call.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/sqlite-transactions/on-call.ideal";
 const busySnapshot = 517;
 
 const roster = (db: DatabaseSync): Doctor[] =>
@@ -189,7 +189,7 @@ test(
 
 type SnapshotCommand = { kind: "inspect" | "pause" | "resume" | "submit" };
 const abaModel =
-  "examples/model-patterns/sqlite-transactions/snapshot-aba.model";
+  "examples/model-patterns/sqlite-transactions/snapshot-aba.ideal";
 const epochs = ["V0", "V1", "V2", "V3"];
 
 test(

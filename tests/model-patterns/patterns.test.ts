@@ -35,7 +35,7 @@ import {
   type Scenario,
 } from "../../examples/model-patterns/replay.js";
 
-const rcheck = "crates/rcheck/target/debug/rcheck";
+const checkerPath = "crates/idealis-check/target/debug/idealis-check";
 const models = "examples/model-patterns";
 
 async function serve(
@@ -102,7 +102,11 @@ test("a rejected history command never reaches the adapter", async () => {
     routes,
   );
   await assert.rejects(
-    replay(rcheck, { ...scenario, commands: [{ kind: "goBack" }] }, adapter),
+    replay(
+      checkerPath,
+      { ...scenario, commands: [{ kind: "goBack" }] },
+      adapter,
+    ),
     /model rejected step 1/,
   );
   assert.equal(applied, 0);
@@ -146,7 +150,7 @@ test(
       let result;
       try {
         await page.goto(`${origin}/home${faulty ? "?skip-popstate" : ""}`);
-        result = await recordReplay(rcheck, scenario, adapter);
+        result = await recordReplay(checkerPath, scenario, adapter);
       } finally {
         await page.close();
       }
@@ -162,7 +166,11 @@ test(
           JSON.stringify(result.recording),
         ) as typeof result.recording;
         assert.deepEqual(
-          await replayRecording(rcheck, saved, browserScreenProjection(routes)),
+          await replayRecording(
+            checkerPath,
+            saved,
+            browserScreenProjection(routes),
+          ),
           { verdict: "mismatch", difference: result.difference },
         );
       } else {
@@ -180,21 +188,21 @@ test("the built-in Node file batch records and rechecks observations without I/O
   const { scenario, adapter } = nodeIoBatchPattern(
     nodeFileIoBatch(new URL(import.meta.url)),
   );
-  const result = await recordReplay(rcheck, scenario, adapter);
+  const result = await recordReplay(checkerPath, scenario, adapter);
   assert.equal(result.verdict, "matched");
   assert.deepEqual(result.recording.observations, [
     { $sequence: [] },
     { $sequence: ["Microtask", "Immediate", "Timer"] },
   ]);
   assert.deepEqual(
-    await replayRecording(rcheck, result.recording, ioBatchProjection),
+    await replayRecording(checkerPath, result.recording, ioBatchProjection),
     {
       verdict: "matched",
     },
   );
   await assert.rejects(
     replayRecording(
-      rcheck,
+      checkerPath,
       {
         ...result.recording,
         observations: result.recording.observations.slice(0, 1),
@@ -207,7 +215,7 @@ test("the built-in Node file batch records and rechecks observations without I/O
     nodeFileIoBatch(new URL("missing-io-batch-input", import.meta.url)),
   );
   await assert.rejects(
-    recordReplay(rcheck, missing.scenario, missing.adapter),
+    recordReplay(checkerPath, missing.scenario, missing.adapter),
     { code: "ENOENT" },
   );
 });
@@ -236,7 +244,7 @@ test("Node runs the observed microtask and immediate before the timer queued in 
       },
       observe: () => calls,
     });
-    const run = replay(rcheck, scenario, adapter);
+    const run = replay(checkerPath, scenario, adapter);
     if (faulty)
       await assert.rejects(
         run,
@@ -251,7 +259,7 @@ test("a next tick queued inside a microtask waits for the microtask queue to dra
   const { scenario, adapter } = nodeNextTickPattern(
     nodeFileNextTickBatch(file),
   );
-  const normal = await recordReplay(rcheck, scenario, adapter);
+  const normal = await recordReplay(checkerPath, scenario, adapter);
   const expected = {
     $sequence: [
       "IoNextTick",
@@ -283,7 +291,11 @@ test("a next tick queued inside a microtask waits for the microtask queue to dra
     },
     observe: () => calls,
   });
-  const result = await recordReplay(rcheck, faulty.scenario, faulty.adapter);
+  const result = await recordReplay(
+    checkerPath,
+    faulty.scenario,
+    faulty.adapter,
+  );
   assert.equal(result.verdict, "mismatch");
   assert.deepEqual(result.difference, {
     step: 1,
@@ -299,7 +311,7 @@ test("a next tick queued inside a microtask waits for the microtask queue to dra
     },
   });
   assert.deepEqual(
-    await replayRecording(rcheck, result.recording, nextTickProjection),
+    await replayRecording(checkerPath, result.recording, nextTickProjection),
     {
       verdict: "mismatch",
       difference: result.difference,
@@ -326,7 +338,7 @@ test("an existing object stops the pattern before the first write", async () => 
     },
     "test",
   );
-  const result = await recordReplay(rcheck, scenario, adapter);
+  const result = await recordReplay(checkerPath, scenario, adapter);
   assert.equal(result.verdict, "mismatch");
   assert.equal(result.difference.step, 0);
   assert.equal(writes, 0);
@@ -400,7 +412,7 @@ test("read and list observe writes and deletes against a local object endpoint",
       httpObjectStore(origin),
       "test",
     );
-    const run = replay(rcheck, scenario, adapter);
+    const run = replay(checkerPath, scenario, adapter);
     if (fault === "stale-get")
       await assert.rejects(
         run,
@@ -425,7 +437,7 @@ test(
     const paths = { Home: "/home", Public: "/public", Account: "/account" };
     const screens = { ...paths, SignIn: "/sign-in" };
     const scenario: Scenario<Command> = {
-      model: `${models}/auth-history/history.model`,
+      model: `${models}/auth-history/history.ideal`,
       config: {},
       derive: ["screen"],
       initial: {
@@ -489,7 +501,7 @@ test(
       try {
         await page.goto(`${origin}/home${faulty ? "?unguarded-history" : ""}`);
         const initialLength = await page.evaluate(() => window.history.length);
-        const result = await recordReplay(rcheck, scenario, {
+        const result = await recordReplay(checkerPath, scenario, {
           async apply(command) {
             if (command.kind === "push") {
               await page.evaluate((path) => {
@@ -554,7 +566,7 @@ test(
         const restored = fromReplayItf(JSON.parse(JSON.stringify(itf)));
         assert.deepEqual(restored.scenario.derive, ["screen"]);
         assert.deepEqual(
-          await replayRecording(rcheck, restored, project),
+          await replayRecording(checkerPath, restored, project),
           verdict,
         );
       } finally {

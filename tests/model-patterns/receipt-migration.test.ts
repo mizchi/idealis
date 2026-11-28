@@ -16,8 +16,8 @@ type Fault = "early-cutover" | "reissue-on-copy";
 const requests = ["Primary", "Tail"] as const;
 const bodyCode = { Primary: 1, Tail: 2 };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/crash-recovery/receipt-migration.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/crash-recovery/receipt-migration.ideal";
 
 function openStore(t: TestContext, fault?: Fault) {
   const db = new DatabaseSync(":memory:");

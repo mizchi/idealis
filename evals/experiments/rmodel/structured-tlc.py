@@ -7,7 +7,7 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parents[3]
 MODELS = ROOT / "fixtures/rcheck/structured"
-EMIT = ROOT / "crates/rmodel/target/debug/examples/emit"
+EMIT = ROOT / "crates/idealis-model/target/debug/examples/emit"
 
 CASES = [
     ("journal", "ordered-log", None, {

@@ -16,7 +16,7 @@ const transition = study === "transition";
 const fixture = transition
   ? "fixtures/rmodel-readability/transition-cases.json"
   : "fixtures/rmodel-readability/cases.json";
-const rcheck = "crates/rcheck/target/release/rcheck";
+const rcheck = "crates/idealis-check/target/release/idealis-check";
 const model = "jev-1.14.0";
 const repetitions = 3;
 const variants = transition ? ["prime", "explicit"] : ["action", "behavior"];

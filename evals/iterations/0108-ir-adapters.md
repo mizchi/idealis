@@ -4,13 +4,13 @@
 
 ```
 rmodelの文 ─┐
-Pklの木    ─┼→ 核のIR（JSON、version 1）→ rmodel::validate（型検査）→ 参照評価器・rtlc・SAT・型の生成・照合
+Pklの木    ─┼→ 核のIR（JSON、version 1）→ idealis_model::validate（型検査）→ 参照評価器・rtlc・SAT・型の生成・照合
 （任意）    ─┘
 ```
 
-- IR: `crates/rcheck/src/ir.rs`。式は`name`・`none`・`union`・`difference`・`intersection`・`product`・`join`・`literal`・`count`・`add`・`sub`・`mul`・`record`、論理式は`in`・`not_in`・`eq`・`ne`・`lt`〜`int_ne`・`some`・`one`・`lone`・`no`・`not`・`and`・`or`・`implies`・`all`・`exists`。adapterは型を決めない（型検査はrmodel）。写せなかった部分は`omitted`。
-- adapter: rmodelの文（`rcheck generate <model> ir`）と、0107のPklの木から書くPklのmodule（[ToIR.pkl](../experiments/surface-languages/pkl/ToIR.pkl)）。Pklの要素単位の木（`App`・`Image`・`In`・点ごとの更新）を、IRの関係の木（join・和・差・直積）に写す。payload付きの直和型と`match`を含むモデルは`unsupported`、stepとtemporalの性質は`omitted`。
-- 差分テスト: `crates/rcheck/tests/adapters.rs`（roracle）。入力は0107の題材と観測するcheckの名前、基準はrmodelの文、対象はPklのadapterの記録した出力。`just rcheck-adapters`が出力を作り直して記録と比べ、テストを流す（CIに追加）。
+- IR: `crates/idealis-check/src/ir.rs`。式は`name`・`none`・`union`・`difference`・`intersection`・`product`・`join`・`literal`・`count`・`add`・`sub`・`mul`・`record`、論理式は`in`・`not_in`・`eq`・`ne`・`lt`〜`int_ne`・`some`・`one`・`lone`・`no`・`not`・`and`・`or`・`implies`・`all`・`exists`。adapterは型を決めない（型検査はrmodel）。写せなかった部分は`omitted`。
+- adapter: rmodelの文（`idealis-check generate <model> ir`）と、0107のPklの木から書くPklのmodule（[ToIR.pkl](../experiments/surface-languages/pkl/ToIR.pkl)）。Pklの要素単位の木（`App`・`Image`・`In`・点ごとの更新）を、IRの関係の木（join・和・差・直積）に写す。payload付きの直和型と`match`を含むモデルは`unsupported`、stepとtemporalの性質は`omitted`。
+- 差分テスト: `crates/idealis-check/tests/adapters.rs`（roracle）。入力は0107の題材と観測するcheckの名前、基準はrmodelの文、対象はPklのadapterの記録した出力。`just idealis-check-adapters`が出力を作り直して記録と比べ、テストを流す（CIに追加）。
 
 ## 正しさ
 

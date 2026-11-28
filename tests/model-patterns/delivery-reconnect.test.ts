@@ -17,8 +17,8 @@ type Command =
   | { kind: "interrupt" }
   | { kind: "finish"; marker: Delivery; hasNotice: boolean };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/subscriptions/delivery-reconnect.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/subscriptions/delivery-reconnect.ideal";
 const line = (kind: "notice" | "end", id: string) =>
   JSON.stringify({ kind, id }) + "\n";
 

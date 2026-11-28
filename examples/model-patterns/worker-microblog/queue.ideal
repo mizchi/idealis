@@ -1,0 +1,38 @@
+description = {
+  ja: "初回配信・再配信・ACK を管理する。",
+  en: "Manages first delivery, retries, and acknowledgements.",
+}
+
+init { no @accepted, no @pending, no @inFlight, no @acked }
+
+behavior @enqueue(p: Post) {
+  guard { p in @offered, p not in @accepted }
+  update {
+    @accepted = @accepted + p
+    @pending = @pending + (p -> Initial)
+  }
+}
+
+behavior @deliver(p: Post, delivery: Delivery) {
+  guard { delivery in p.@pending }
+  update {
+    @pending = @pending - (p -> delivery)
+    @inFlight = @inFlight + (p -> delivery)
+  }
+}
+
+behavior @retry(p: Post) {
+  guard { Initial in p.@inFlight }
+  update {
+    @inFlight = @inFlight - (p -> Initial)
+    @pending = @pending + (p -> Retry)
+  }
+}
+
+behavior @ack(p: Post, delivery: Delivery) {
+  guard { delivery in p.@inFlight, (p -> delivery) in @ackRequests }
+  update {
+    @inFlight = @inFlight - (p -> delivery)
+    @acked = @acked + p
+  }
+}

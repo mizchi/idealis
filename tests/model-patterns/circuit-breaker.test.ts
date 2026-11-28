@@ -6,8 +6,8 @@ import {
   type Scenario,
 } from "../../examples/model-patterns/replay.js";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/circuit-breaker/half-open.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/circuit-breaker/half-open.ideal";
 const requests = ["First", "Second", "Third"] as const;
 const generations = ["Initial", "Retry", "Final"] as const;
 type Request = (typeof requests)[number];

@@ -12,8 +12,8 @@ import {
 type Command =
   | { kind: "append" | "seal" | "cutover" | "stop" | "restart" }
   | { kind: "apply"; position: number };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/lease/feed-cutover.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/lease/feed-cutover.ideal";
 
 test("change feed restart preserves the cursor and cutover waits for the final position", async (t) => {
   const base = await reachableScenario<Command>(

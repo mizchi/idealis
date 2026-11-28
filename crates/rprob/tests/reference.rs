@@ -1,14 +1,16 @@
-use rmodel::reference::Outcome::{self, Empty, Holds, Reachable, Unknown, Unreachable, Violated};
+use idealis_model::reference::Outcome::{
+    self, Empty, Holds, Reachable, Unknown, Unreachable, Violated,
+};
 
 const PERMISSIONS: &str = include_str!("../../../fixtures/rmodel/permissions.model");
 const SHIPMENT: &str = include_str!("../../../fixtures/rprob/shipment.model");
 
-fn agree(source: &str, budgets: &[usize]) -> rmodel::reference::Report {
-    let model = rmodel::parse(source).unwrap();
+fn agree(source: &str, budgets: &[usize]) -> idealis_model::reference::Report {
+    let model = idealis_model::parse(source).unwrap();
     let compiled = rprob::Compiled::new(&model).unwrap();
     let mut full = None;
     for &budget in budgets {
-        let expected = rmodel::reference::analyze(&model, budget);
+        let expected = idealis_model::reference::analyze(&model, budget);
         let actual = compiled.analyze(budget);
         assert_eq!(actual.verdicts, expected.verdicts, "budget {budget}");
         assert_eq!(actual.scope, expected.scope, "budget {budget}");
@@ -23,7 +25,7 @@ fn agree(source: &str, budgets: &[usize]) -> rmodel::reference::Report {
     full.unwrap()
 }
 
-fn outcome(report: &rmodel::reference::Report, name: &str) -> Outcome {
+fn outcome(report: &idealis_model::reference::Report, name: &str) -> Outcome {
     report
         .verdicts
         .iter()
@@ -153,12 +155,12 @@ fn shipment_separates_reachable_differences_from_absence_and_budget() {
 #[test]
 fn unsupported_models_do_not_produce_a_verdict() {
     let sequence_model =
-        include_str!("../../../examples/model-patterns/node-event-loop/nested-io-batch.model");
+        include_str!("../../../examples/model-patterns/node-event-loop/nested-io-batch.ideal");
     let temporal_model = include_str!("../../../fixtures/rcheck/structured/retry-delivery.model");
     let oversized =
         include_str!("../../../fixtures/rprob/edges.model").replace("Left = 3", "Left = 6");
     for source in [sequence_model, temporal_model, &oversized] {
-        let model = rmodel::parse(source).unwrap();
+        let model = idealis_model::parse(source).unwrap();
         assert!(rprob::Compiled::new(&model).is_err());
     }
 }
@@ -166,19 +168,19 @@ fn unsupported_models_do_not_produce_a_verdict() {
 #[test]
 fn oversized_sequence_with_closed_writes_agrees_with_the_reference() {
     let source =
-        include_str!("../../../examples/model-patterns/node-event-loop/nested-io-batch.model");
-    let model = rmodel::parse(source).unwrap();
+        include_str!("../../../examples/model-patterns/node-event-loop/nested-io-batch.ideal");
+    let model = idealis_model::parse(source).unwrap();
     assert_eq!(
         rprob::analyze_safety(&model, 10).unwrap().report.verdicts,
-        rmodel::reference::analyze_actions(&model, 10).verdicts
+        idealis_model::reference::analyze_actions(&model, 10).verdicts
     );
     let actual = rprob::witness(&model, "ObservedBatch", 10).unwrap();
-    let expected = rmodel::reference::witness(&model, "ObservedBatch", 10).unwrap();
+    let expected = idealis_model::reference::witness(&model, "ObservedBatch", 10).unwrap();
     assert_eq!(actual.outcome, Reachable { depth: 1 });
     assert_eq!(actual.outcome, expected.outcome);
     let actual = actual.witness.unwrap();
     let expected = expected.witness.unwrap();
-    let path = |commands: Vec<rmodel::reference::TraceCommand>| {
+    let path = |commands: Vec<idealis_model::reference::TraceCommand>| {
         commands
             .into_iter()
             .map(|command| (command.action, command.args))
@@ -197,9 +199,9 @@ fn oversized_sequence_with_closed_writes_agrees_with_the_reference() {
             "scope steps",
             "reachable NeverWritten { calls = Invocations[NestedMicrotask] }\nscope steps",
         );
-    let model = rmodel::parse(&with_fork).unwrap();
+    let model = idealis_model::parse(&with_fork).unwrap();
     for budget in [0, 3, 4, 5, 10] {
-        let reference = rmodel::reference::analyze_actions(&model, budget);
+        let reference = idealis_model::reference::analyze_actions(&model, budget);
         let actual = rprob::analyze_safety(&model, budget).unwrap().report;
         assert_eq!(actual.verdicts, reference.verdicts, "budget {budget}");
         assert_eq!(actual.scope, reference.scope, "budget {budget}");
@@ -212,16 +214,16 @@ fn oversized_sequence_with_closed_writes_agrees_with_the_reference() {
 #[test]
 fn a_free_checkpoint_with_a_large_nested_sequence_preserves_its_shortest_trace() {
     let source =
-        include_str!("../../../examples/model-patterns/crash-recovery/restored-queue.model");
-    let model = rmodel::parse(source).unwrap();
+        include_str!("../../../examples/model-patterns/crash-recovery/restored-queue.ideal");
+    let model = idealis_model::parse(source).unwrap();
     for budget in [0, 1, 2728, 2729, 3000, 10_000] {
         let actual = rprob::analyze_safety(&model, budget).unwrap().report;
-        let reference = rmodel::reference::analyze_actions(&model, budget);
+        let reference = idealis_model::reference::analyze_actions(&model, budget);
         assert_eq!(actual.verdicts, reference.verdicts, "budget {budget}");
         assert_eq!(actual.stop, reference.stop, "budget {budget}");
     }
     let actual = rprob::witness(&model, "RestoresFullQueue", 10_000).unwrap();
-    let expected = rmodel::reference::witness(&model, "RestoresFullQueue", 10_000).unwrap();
+    let expected = idealis_model::reference::witness(&model, "RestoresFullQueue", 10_000).unwrap();
     assert_eq!(actual.outcome, Reachable { depth: 1 });
     assert_eq!(actual.outcome, expected.outcome);
     let actual = actual.witness.unwrap();
@@ -234,9 +236,9 @@ fn a_free_checkpoint_with_a_large_nested_sequence_preserves_its_shortest_trace()
         "restored = saved }",
         "restored = Checkpoint { pending: Pending[], retries: 8 } }",
     );
-    let model = rmodel::parse(&escaped).unwrap();
+    let model = idealis_model::parse(&escaped).unwrap();
     let actual = rprob::witness(&model, "Scope", 10_000).unwrap();
-    let expected = rmodel::reference::witness(&model, "Scope", 10_000).unwrap();
+    let expected = idealis_model::reference::witness(&model, "Scope", 10_000).unwrap();
     assert_eq!(actual.outcome, Violated { depth: 1 });
     assert_eq!(actual.outcome, expected.outcome);
     assert_eq!(
@@ -248,10 +250,10 @@ fn a_free_checkpoint_with_a_large_nested_sequence_preserves_its_shortest_trace()
 #[test]
 fn a_nested_checkpoint_projects_queue_and_retry_budget() {
     let source =
-        include_str!("../../../examples/model-patterns/crash-recovery/restart-budget.model");
-    let model = rmodel::parse(source).unwrap();
+        include_str!("../../../examples/model-patterns/crash-recovery/restart-budget.ideal");
+    let model = idealis_model::parse(source).unwrap();
     let actual = rprob::analyze_safety(&model, 10_000).unwrap().report;
-    let reference = rmodel::reference::analyze_actions(&model, 10_000);
+    let reference = idealis_model::reference::analyze_actions(&model, 10_000);
     assert_eq!(actual.verdicts, reference.verdicts);
     assert_eq!(
         outcome(&actual, "RestartsFullQueue"),
@@ -262,7 +264,7 @@ fn a_nested_checkpoint_projects_queue_and_retry_budget() {
     assert_eq!(outcome(&actual, "RestartsWithoutBudget"), Unreachable);
 
     let actual = rprob::witness(&model, "RestartsFullQueue", 10_000).unwrap();
-    let reference = rmodel::reference::witness(&model, "RestartsFullQueue", 10_000).unwrap();
+    let reference = idealis_model::reference::witness(&model, "RestartsFullQueue", 10_000).unwrap();
     assert_eq!(actual.outcome, reference.outcome);
     assert_eq!(
         actual.witness.unwrap().final_state,
@@ -270,9 +272,9 @@ fn a_nested_checkpoint_projects_queue_and_retry_budget() {
     );
 
     let fault = source.replace("no restored, saved.retries > 0", "no restored");
-    let model = rmodel::parse(&fault).unwrap();
+    let model = idealis_model::parse(&fault).unwrap();
     let actual = rprob::witness(&model, "Scope", 10_000).unwrap();
-    let reference = rmodel::reference::witness(&model, "Scope", 10_000).unwrap();
+    let reference = idealis_model::reference::witness(&model, "Scope", 10_000).unwrap();
     assert_eq!(actual.outcome, Violated { depth: 1 });
     assert_eq!(actual.outcome, reference.outcome);
     assert_eq!(
@@ -284,12 +286,12 @@ fn a_nested_checkpoint_projects_queue_and_retry_budget() {
 #[test]
 fn a_single_free_sequence_slot_keeps_distinct_ordinals() {
     let source =
-        include_str!("../../../examples/model-patterns/node-event-loop/nested-io-batch.model")
+        include_str!("../../../examples/model-patterns/node-event-loop/nested-io-batch.ideal")
             .replace("init { calls = Invocations[] }", "init { true }");
-    let model = rmodel::parse(&source).unwrap();
+    let model = idealis_model::parse(&source).unwrap();
     for budget in [341, 342, 683, 684] {
         let actual = rprob::analyze_safety(&model, budget).unwrap().report;
-        let reference = rmodel::reference::analyze_actions(&model, budget);
+        let reference = idealis_model::reference::analyze_actions(&model, budget);
         assert_eq!(actual.verdicts, reference.verdicts, "budget {budget}");
         assert_eq!(actual.stop, reference.stop, "budget {budget}");
     }
@@ -300,10 +302,10 @@ fn a_single_free_sequence_slot_keeps_distinct_ordinals() {
 #[test]
 fn batch_journal_recognizes_sets_of_structured_values() {
     let source =
-        include_str!("../../../examples/model-patterns/crash-recovery/deduplicate-batch.model");
-    let model = rmodel::parse(source).unwrap();
+        include_str!("../../../examples/model-patterns/crash-recovery/deduplicate-batch.ideal");
+    let model = idealis_model::parse(source).unwrap();
     let actual = rprob::analyze_safety(&model, 10).unwrap().report;
-    let expected = rmodel::reference::analyze_actions(&model, 10);
+    let expected = idealis_model::reference::analyze_actions(&model, 10);
     assert_eq!(actual.verdicts, expected.verdicts);
     assert_eq!(outcome(&actual, "AppliedBoth"), Reachable { depth: 1 });
     assert_eq!(outcome(&actual, "KnownBatchStaysOnce"), Holds);
@@ -313,16 +315,16 @@ fn batch_journal_recognizes_sets_of_structured_values() {
         "scope Int",
         "invariant SetAlgebra { one (elements(applied) & Batch[First, Second]), no (elements(applied) - (Batch[First, Second] + Batch[First, Third])), Batch[Second, First] not in elements(applied) }\nscope Int",
     );
-    let model = rmodel::parse(&edited).unwrap();
+    let model = idealis_model::parse(&edited).unwrap();
     let actual = rprob::analyze_safety(&model, 10).unwrap().report;
-    let expected = rmodel::reference::analyze_actions(&model, 10);
+    let expected = idealis_model::reference::analyze_actions(&model, 10);
     assert_eq!(actual.verdicts, expected.verdicts);
     assert_eq!(outcome(&actual, "SetAlgebra"), Holds);
 
     let fault = source.replace("batch not in elements(applied) and ", "");
-    let model = rmodel::parse(&fault).unwrap();
+    let model = idealis_model::parse(&fault).unwrap();
     let actual = rprob::witness(&model, "NoDuplicateBatches", 10).unwrap();
-    let expected = rmodel::reference::witness(&model, "NoDuplicateBatches", 10).unwrap();
+    let expected = idealis_model::reference::witness(&model, "NoDuplicateBatches", 10).unwrap();
     assert_eq!(actual.outcome, Violated { depth: 1 });
     assert_eq!(actual.outcome, expected.outcome);
     assert_eq!(
@@ -335,18 +337,19 @@ fn batch_journal_recognizes_sets_of_structured_values() {
 fn worker_checkpoints_preserve_other_large_rows() {
     let source =
         include_str!("../../../examples/model-patterns/crash-recovery/worker-checkpoints.ideal");
-    let model = rmodel::parse(source).unwrap();
+    let model = idealis_model::parse(source).unwrap();
     let actual = rprob::analyze_safety(&model, 100).unwrap().report;
-    let expected = rmodel::reference::analyze_actions(&model, 100);
+    let expected = idealis_model::reference::analyze_actions(&model, 100);
     assert_eq!(actual.verdicts, expected.verdicts);
     assert_eq!(outcome(&actual, "BothSaved"), Reachable { depth: 2 });
     assert_eq!(outcome(&actual, "CheckpointKeepsOtherWorker"), Holds);
     assert_eq!(outcome(&actual, "ExpireKeepsOtherWorker"), Holds);
 
     let faulty = source.replace("withoutKeys(saved, worker)", "withoutKeys(saved, Worker)");
-    let model = rmodel::parse(&faulty).unwrap();
+    let model = idealis_model::parse(&faulty).unwrap();
     let actual = rprob::witness(&model, "ExpireKeepsOtherWorker", 100).unwrap();
-    let expected = rmodel::reference::witness(&model, "ExpireKeepsOtherWorker", 100).unwrap();
+    let expected =
+        idealis_model::reference::witness(&model, "ExpireKeepsOtherWorker", 100).unwrap();
     assert_eq!(actual.outcome, Violated { depth: 3 });
     assert_eq!(actual.outcome, expected.outcome);
     assert_eq!(
@@ -360,9 +363,9 @@ fn worker_checkpoints_preserve_other_large_rows() {
             "init { no saved }",
             "init { saved = Worker -> Checkpoint { pending: Pending[], retries: 0 } }",
         );
-    let model = rmodel::parse(&required).unwrap();
+    let model = idealis_model::parse(&required).unwrap();
     let actual = rprob::witness(&model, "Declarations", 100).unwrap();
-    let expected = rmodel::reference::witness(&model, "Declarations", 100).unwrap();
+    let expected = idealis_model::reference::witness(&model, "Declarations", 100).unwrap();
     assert_eq!(actual.outcome, Violated { depth: 1 });
     assert_eq!(actual.outcome, expected.outcome);
     assert_eq!(
@@ -374,21 +377,21 @@ fn worker_checkpoints_preserve_other_large_rows() {
 #[test]
 fn indexed_relations_decline_unrestricted_union() {
     let source =
-        include_str!("../../../examples/model-patterns/node-event-loop/nested-io-batch.model")
+        include_str!("../../../examples/model-patterns/node-event-loop/nested-io-batch.ideal")
             .replace(
                 "scope steps",
         "rel other: Callback -> lone Invocations\nfact { other = (Microtask -> Invocations[]) + (Microtask -> Invocations[Timer]) }\nscope steps",
             );
-    let model = rmodel::parse(&source).unwrap();
+    let model = idealis_model::parse(&source).unwrap();
     assert!(rprob::analyze_safety(&model, 100).is_err());
 }
 
 #[test]
 fn indexed_queue_rotation_agrees_on_order_and_the_first_scope_exit() {
-    let source = include_str!("../../../examples/model-patterns/crash-recovery/rotate-queue.model");
-    let model = rmodel::parse(source).unwrap();
+    let source = include_str!("../../../examples/model-patterns/crash-recovery/rotate-queue.ideal");
+    let model = idealis_model::parse(source).unwrap();
     let actual = rprob::witness(&model, "Retried", 10).unwrap();
-    let expected = rmodel::reference::witness(&model, "Retried", 10).unwrap();
+    let expected = idealis_model::reference::witness(&model, "Retried", 10).unwrap();
     assert_eq!(actual.outcome, Reachable { depth: 1 });
     assert_eq!(actual.outcome, expected.outcome);
     assert_eq!(
@@ -397,9 +400,9 @@ fn indexed_queue_rotation_agrees_on_order_and_the_first_scope_exit() {
     );
 
     let fault = source.replace("append(tail(pending),", "append(pending,");
-    let model = rmodel::parse(&fault).unwrap();
+    let model = idealis_model::parse(&fault).unwrap();
     let actual = rprob::witness(&model, "Scope", 10).unwrap();
-    let expected = rmodel::reference::witness(&model, "Scope", 10).unwrap();
+    let expected = idealis_model::reference::witness(&model, "Scope", 10).unwrap();
     assert_eq!(actual.outcome, Violated { depth: 1 });
     assert_eq!(actual.outcome, expected.outcome);
     assert_eq!(
@@ -410,7 +413,7 @@ fn indexed_queue_rotation_agrees_on_order_and_the_first_scope_exit() {
 
 #[test]
 fn indexed_sequence_edits_preserve_duplicates_and_compare_temporary_values() {
-    let source = include_str!("../../../examples/model-patterns/crash-recovery/rotate-queue.model");
+    let source = include_str!("../../../examples/model-patterns/crash-recovery/rotate-queue.ideal");
     for (edit, result) in [
         ("tail(pending)", "Second, Third, Second"),
         ("take(pending, 2)", "First, Second"),
@@ -424,9 +427,9 @@ fn indexed_sequence_edits_preserve_duplicates_and_compare_temporary_values() {
                 "scope Int",
                 "invariant TemporaryListsCompare { append(pending, First) = append(pending, First), append(pending, First) != append(pending, Second), Second in elements(append(pending, Second)) }\nscope Int",
             );
-        let model = rmodel::parse(&source).unwrap();
+        let model = idealis_model::parse(&source).unwrap();
         let actual = rprob::analyze_safety(&model, 100).unwrap().report;
-        let reference = rmodel::reference::analyze_actions(&model, 100);
+        let reference = idealis_model::reference::analyze_actions(&model, 100);
         assert_eq!(actual.verdicts, reference.verdicts, "{edit}");
         assert_eq!(outcome(&actual, "Retried"), Reachable { depth: 1 });
         assert_eq!(outcome(&actual, "TemporaryListsCompare"), Holds);
@@ -436,7 +439,7 @@ fn indexed_sequence_edits_preserve_duplicates_and_compare_temporary_values() {
 
 #[test]
 fn indexed_sequence_elements_use_value_equality_for_removal_and_indexing() {
-    let source = include_str!("../../../examples/model-patterns/crash-recovery/refill-queue.model")
+    let source = include_str!("../../../examples/model-patterns/crash-recovery/refill-queue.ideal")
         .replace(
             "History[Batch[Third], Batch[Fourth]]",
             "History[Batch[First], Batch[Second]]",
@@ -457,9 +460,9 @@ fn indexed_sequence_elements_use_value_equality_for_removal_and_indexing() {
             "scope steps",
             "transition KeepsFirst on refill { at(history, 0) = Batch[First] }\nscope Int = 0..2, steps",
         );
-    let model = rmodel::parse(&source).unwrap();
+    let model = idealis_model::parse(&source).unwrap();
     let initial = rprob::analyze_safety(&model, 4).unwrap().report;
-    let reference = rmodel::reference::analyze_actions(&model, 4);
+    let reference = idealis_model::reference::analyze_actions(&model, 4);
     assert_eq!(initial.verdicts, reference.verdicts);
     assert_eq!(outcome(&initial, "Refilled"), Reachable { depth: 1 });
     assert_eq!(outcome(&initial, "RefillKeepsOrder"), Holds);
@@ -468,10 +471,10 @@ fn indexed_sequence_elements_use_value_equality_for_removal_and_indexing() {
 
 #[test]
 fn refill_enumerates_large_arguments_in_reference_order() {
-    let source = include_str!("../../../examples/model-patterns/crash-recovery/refill-queue.model");
-    let model = rmodel::parse(source).unwrap();
+    let source = include_str!("../../../examples/model-patterns/crash-recovery/refill-queue.ideal");
+    let model = idealis_model::parse(source).unwrap();
     let actual = rprob::witness(&model, "Refilled", 4).unwrap();
-    let expected = rmodel::reference::witness(&model, "Refilled", 4).unwrap();
+    let expected = idealis_model::reference::witness(&model, "Refilled", 4).unwrap();
     assert_eq!(actual.outcome, Reachable { depth: 1 });
     assert_eq!(actual.outcome, expected.outcome);
     assert!(actual.complete);
@@ -481,19 +484,20 @@ fn refill_enumerates_large_arguments_in_reference_order() {
     assert_eq!(actual.final_state, expected.final_state);
 
     let broken = source.replace("after(pending) = history", "after(pending) != history");
-    let model = rmodel::parse(&broken).unwrap();
+    let model = idealis_model::parse(&broken).unwrap();
     for (arguments, outcome) in [
         (1369, Unknown),
         (1370, Violated { depth: 1 }),
         (116_623, Violated { depth: 1 }),
     ] {
-        let budget = rmodel::reference::SearchBudget {
+        let budget = idealis_model::reference::SearchBudget {
             states: 4,
             arguments,
         };
         let question = "RefillKeepsOrder";
         let actual = rprob::witness_with_budget(&model, question, budget).unwrap();
-        let expected = rmodel::reference::witness_with_budget(&model, question, budget).unwrap();
+        let expected =
+            idealis_model::reference::witness_with_budget(&model, question, budget).unwrap();
         assert_eq!(actual.outcome, outcome, "arguments {arguments}");
         assert_eq!(actual.outcome, expected.outcome);
         assert_eq!(actual.stop, expected.stop);
@@ -507,7 +511,7 @@ fn refill_enumerates_large_arguments_in_reference_order() {
 
 #[test]
 fn budgeted_search_preserves_numeric_and_indexed_arguments_in_one_call() {
-    let source = include_str!("../../../examples/model-patterns/crash-recovery/refill-queue.model")
+    let source = include_str!("../../../examples/model-patterns/crash-recovery/refill-queue.ideal")
         .replace(
             "refill(history: History)",
             "refill(lane: Nat, history: History, keep: Bool)",
@@ -518,14 +522,14 @@ fn budgeted_search_preserves_numeric_and_indexed_arguments_in_one_call() {
         )
         .replace("after(pending) = history", "after(pending) != history")
         .replace("scope steps", "scope Int = 0..1, steps");
-    let model = rmodel::parse(&source).unwrap();
-    let budget = rmodel::reference::SearchBudget {
+    let model = idealis_model::parse(&source).unwrap();
+    let budget = idealis_model::reference::SearchBudget {
         states: 4,
         arguments: 2740,
     };
     let question = "RefillKeepsOrder";
     let actual = rprob::witness_with_budget(&model, question, budget).unwrap();
-    let expected = rmodel::reference::witness_with_budget(&model, question, budget).unwrap();
+    let expected = idealis_model::reference::witness_with_budget(&model, question, budget).unwrap();
     assert_eq!(actual.outcome, Violated { depth: 1 });
     assert_eq!(actual.outcome, expected.outcome);
     assert_eq!(actual.stop, expected.stop);
@@ -537,7 +541,7 @@ fn budgeted_search_preserves_numeric_and_indexed_arguments_in_one_call() {
 
 #[test]
 fn sparse_relations_with_unrelated_atoms_match_the_reference() {
-    let ring = include_str!("../../../examples/model-patterns/worker-deque/ring-copy.model");
+    let ring = include_str!("../../../examples/model-patterns/worker-deque/ring-copy.ideal");
     let early = ring.replace(
         "update { copy = copy + (field -> field.body) }",
         "update { copy = copy + (field -> field.body) if { field = Header } then { slot = Free } }",
@@ -554,7 +558,7 @@ fn sparse_relations_with_unrelated_atoms_match_the_reference() {
         Violated { depth: 5 }
     );
 
-    let cutover = include_str!("../../../examples/model-patterns/lease/store-cutover.model");
+    let cutover = include_str!("../../../examples/model-patterns/lease/store-cutover.ideal");
     assert_eq!(agree(cutover, &[0, 30, 10_000]).scope, Holds);
 
     // Force the sparse representation even for the existing fixtures with
@@ -601,9 +605,9 @@ fn sparse_relations_keep_candidate_order_and_enforce_pair_capacity() {
         enum Right = R0 | R1 | R2 | R3 | R4 | R5 | R6 | R7
         rel assigned: Left -> one Right
         scope steps = 1";
-    assert!(rprob::Compiled::new(&rmodel::parse(exact).unwrap()).is_ok());
+    assert!(rprob::Compiled::new(&idealis_model::parse(exact).unwrap()).is_ok());
     let overflow = exact.replace("L6 | L7", "L6 | L7 | L8");
-    let model = rmodel::parse(&overflow).unwrap();
+    let model = idealis_model::parse(&overflow).unwrap();
     let error = rprob::Compiled::new(&model)
         .err()
         .expect("72 ordered pairs");
@@ -630,7 +634,7 @@ fn cli_accepts_a_model_and_refuses_an_unsupported_one() {
     );
 
     let output = std::process::Command::new(binary)
-        .arg(directory.join("examples/model-patterns/node-event-loop/nested-io-batch.model"))
+        .arg(directory.join("examples/model-patterns/node-event-loop/nested-io-batch.ideal"))
         .output()
         .unwrap();
     assert!(output.status.success());
@@ -845,7 +849,7 @@ fn goal_improvement_requires_the_pinned_run_stable_samples_and_threshold() {
 #[test]
 fn a_wide_total_function_uses_legal_rows_and_keeps_the_budget_boundary() {
     let source = include_str!("../../../fixtures/rprob/wide-function.model");
-    let model = rmodel::parse(source).unwrap();
+    let model = idealis_model::parse(source).unwrap();
     let compiled = rprob::Compiled::new(&model).expect("six legal choices per row");
     let candidates = 6usize.pow(6);
     let incomplete = compiled.analyze(candidates + 1);
@@ -991,7 +995,7 @@ fn prepaid_initial_candidates_preserve_empty_and_partial_reports() {
 #[test]
 fn safety_charges_only_the_fixed_initial_error_graph() {
     let source = include_str!(
-        "../../../examples/model-patterns/node-event-loop/suppressed-error-graph.model"
+        "../../../examples/model-patterns/node-event-loop/suppressed-error-graph.ideal"
     )
     .replace("var root: lone Wrapper", "var root: lone ErrorNode")
     .replace("Wrapper -> lone ErrorNode", "ErrorNode -> lone ErrorNode");
@@ -1010,9 +1014,9 @@ fn safety_charges_only_the_fixed_initial_error_graph() {
             Empty,
         ),
     ] {
-        let model = rmodel::parse(&source).unwrap();
+        let model = idealis_model::parse(&source).unwrap();
         for budget in [0, 1, 2, 3, 4, 5, 10] {
-            let expected = rmodel::reference::analyze_actions(&model, budget);
+            let expected = idealis_model::reference::analyze_actions(&model, budget);
             let actual = rprob::analyze_safety(&model, budget).unwrap().report;
             assert_eq!(
                 actual.verdicts, expected.verdicts,
@@ -1028,9 +1032,9 @@ fn safety_charges_only_the_fixed_initial_error_graph() {
         let report = rprob::analyze_safety(&model, 10).unwrap().report;
         assert_eq!(outcome(&report, "ReusedErrorRemainsOneObject"), end);
         let witness = rprob::witness(&model, "InitialErrorScope", 10).unwrap();
-        let expected = rmodel::reference::witness(&model, "InitialErrorScope", 10).unwrap();
+        let expected = idealis_model::reference::witness(&model, "InitialErrorScope", 10).unwrap();
         assert_eq!(witness.outcome, expected.outcome, "{label}");
-        let trace_state = |result: rmodel::reference::WitnessResult| {
+        let trace_state = |result: idealis_model::reference::WitnessResult| {
             result.witness.map(|trace| {
                 assert!(trace.commands.is_empty());
                 (trace.initial, trace.final_state)
@@ -1043,7 +1047,7 @@ fn safety_charges_only_the_fixed_initial_error_graph() {
 #[test]
 fn safety_charges_only_configurations_allowed_by_constant_bindings() {
     let source = include_str!(
-        "../../../examples/model-patterns/node-event-loop/suppressed-error-graph.model"
+        "../../../examples/model-patterns/node-event-loop/suppressed-error-graph.ideal"
     )
     .replace(
         "var root:",
@@ -1070,9 +1074,9 @@ fn safety_charges_only_configurations_allowed_by_constant_bindings() {
             Empty,
         ),
     ] {
-        let model = rmodel::parse(&source).unwrap();
+        let model = idealis_model::parse(&source).unwrap();
         for budget in [0, 1, 2, 3, 4, 5, 10] {
-            let reference = rmodel::reference::analyze_actions(&model, budget);
+            let reference = idealis_model::reference::analyze_actions(&model, budget);
             let actual = rprob::analyze_safety(&model, budget).unwrap().report;
             assert_eq!(
                 actual.verdicts, reference.verdicts,
@@ -1084,9 +1088,9 @@ fn safety_charges_only_configurations_allowed_by_constant_bindings() {
         let report = rprob::analyze_safety(&model, 10).unwrap().report;
         assert_eq!(outcome(&report, "ReusedErrorRemainsOneObject"), expected);
         let witness = rprob::witness(&model, "InitialErrorScope", 10).unwrap();
-        let reference = rmodel::reference::witness(&model, "InitialErrorScope", 10).unwrap();
+        let reference = idealis_model::reference::witness(&model, "InitialErrorScope", 10).unwrap();
         assert_eq!(witness.outcome, reference.outcome, "{label}");
-        let configuration = |result: rmodel::reference::WitnessResult| {
+        let configuration = |result: idealis_model::reference::WitnessResult| {
             result.witness.map(|trace| {
                 trace
                     .config
@@ -1106,7 +1110,7 @@ fn safety_charges_only_configurations_allowed_by_constant_bindings() {
 fn an_overflowing_candidate_product_only_blocks_accepted_configurations() {
     let source = include_str!("../../../fixtures/rprob/candidates-large.model");
     let run = |source: &str| {
-        rprob::Compiled::new(&rmodel::parse(source).unwrap())
+        rprob::Compiled::new(&idealis_model::parse(source).unwrap())
             .unwrap()
             .analyze(usize::MAX)
     };
@@ -1115,7 +1119,7 @@ fn an_overflowing_candidate_product_only_blocks_accepted_configurations() {
         run(&source.replace("init {", "fact { false }\ninit {")).scope,
         Empty
     );
-    let model = rmodel::parse(source).unwrap();
+    let model = idealis_model::parse(source).unwrap();
     let report = rprob::analyze_safety(&model, 3).unwrap().report;
     assert_eq!(report.scope, Holds);
     assert_eq!(outcome(&report, "Initialized"), Reachable { depth: 0 });
@@ -1191,9 +1195,9 @@ fn action_parameter_depth_has_a_checked_limit() {
             args.join(", ")
         )
     };
-    let accepted = rmodel::parse(&source(128)).unwrap();
+    let accepted = idealis_model::parse(&source(128)).unwrap();
     assert!(rprob::Compiled::new(&accepted).is_ok());
-    let oversized = rmodel::parse(&source(129)).unwrap();
+    let oversized = idealis_model::parse(&source(129)).unwrap();
     let Err(error) = rprob::Compiled::new(&oversized) else {
         panic!("expected an unsupported parameter list");
     };
@@ -1240,14 +1244,14 @@ fn unchanged_cardinality_compares_counts_instead_of_set_members() {
 fn conditional_actions_compare_both_terminal_races() {
     for (source, check, expected_depth, chosen, wrong) in [
         (
-            include_str!("../../../examples/model-patterns/latest-request/search.model"),
+            include_str!("../../../examples/model-patterns/latest-request/search.ideal"),
             "CurrentResultStays",
             4,
             "if { request = latest } then request else shown",
             "request",
         ),
         (
-            include_str!("../../../examples/model-patterns/cancellation/request.model"),
+            include_str!("../../../examples/model-patterns/cancellation/request.ideal"),
             "TerminalOutcomeStays",
             2,
             "if { no outcome } then Done else outcome",
@@ -1280,15 +1284,15 @@ fn conditionals_in_after_use_poststate_counts() {
 
 #[test]
 fn ordered_and_reversed_locks_agree_with_the_reference() {
-    use rmodel::reference::Outcome::{Reachable, Unreachable};
-    let model = include_str!("../../../examples/model-patterns/worker-locks/locks.model");
+    use idealis_model::reference::Outcome::{Reachable, Unreachable};
+    let model = include_str!("../../../examples/model-patterns/worker-locks/locks.ideal");
     for (order, expected) in [
         (
-            include_str!("../../../examples/model-patterns/worker-locks/ordered.model"),
+            include_str!("../../../examples/model-patterns/worker-locks/ordered.ideal"),
             Unreachable,
         ),
         (
-            include_str!("../../../examples/model-patterns/worker-locks/reversed.model"),
+            include_str!("../../../examples/model-patterns/worker-locks/reversed.ideal"),
             Reachable { depth: 2 },
         ),
     ] {
@@ -1300,8 +1304,8 @@ fn ordered_and_reversed_locks_agree_with_the_reference() {
 
 #[test]
 fn scoped_transition_uses_the_action_instance_including_noop_retries() {
-    use rmodel::reference::Outcome::{Holds, Violated};
-    let source = include_str!("../../../examples/model-patterns/retry/delivery.model");
+    use idealis_model::reference::Outcome::{Holds, Violated};
+    let source = include_str!("../../../examples/model-patterns/retry/delivery.ideal");
     let report = agree(source, &[0, 20_000]);
     assert_eq!(outcome(&report, "RetryPreservesEffect"), Holds);
     assert_eq!(outcome(&report, "DeliveryReturnsReceipt"), Holds);
@@ -1340,24 +1344,24 @@ scope steps = 3";
     let report = agree(model, &[0, 20_000]);
     assert_eq!(
         outcome(&report, "OnlyA"),
-        rmodel::reference::Outcome::Violated { depth: 1 }
+        idealis_model::reference::Outcome::Violated { depth: 1 }
     );
 }
 
 #[test]
 fn safety_mode_keeps_the_crash_model_and_names_the_omitted_temporal_checks() {
-    use rmodel::reference::Outcome::{Holds, Reachable, Violated};
-    let source = include_str!("../../../examples/model-patterns/crash-recovery/transaction.model");
+    use idealis_model::reference::Outcome::{Holds, Reachable, Violated};
+    let source = include_str!("../../../examples/model-patterns/crash-recovery/transaction.ideal");
     let fault = source.replace("phase = Prepared }", "phase = Prepared ledger = Posted }");
     for (source, expected) in [(source, Holds), (fault.as_str(), Violated { depth: 4 })] {
-        let model = rmodel::parse(source).unwrap();
+        let model = idealis_model::parse(source).unwrap();
         assert!(rprob::Compiled::new(&model).is_err());
         let analysis = rprob::analyze_safety(&model, 20_000).unwrap();
         assert_eq!(
             analysis.omitted_temporal,
             ["RecoversWhenScheduled", "RecoveryWithoutScheduling"]
         );
-        let reference = rmodel::reference::analyze(&model, 20_000);
+        let reference = idealis_model::reference::analyze(&model, 20_000);
         assert_eq!(analysis.report.verdicts, reference.verdicts);
         assert_eq!(analysis.report.scope, reference.scope);
         assert_eq!(analysis.report.declarations, reference.declarations);
@@ -1371,7 +1375,7 @@ fn safety_mode_keeps_the_crash_model_and_names_the_omitted_temporal_checks() {
         let budget_exhausted = rprob::analyze_safety(&model, 0).unwrap();
         assert_eq!(
             budget_exhausted.report.scope,
-            rmodel::reference::Outcome::Unknown
+            idealis_model::reference::Outcome::Unknown
         );
         assert_eq!(budget_exhausted.omitted_temporal, analysis.omitted_temporal);
     }
@@ -1382,7 +1386,7 @@ fn cli_safety_mode_reports_which_questions_are_outside_its_scope() {
     use std::process::Command;
     let path = concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/../../examples/model-patterns/crash-recovery/transaction.model",
+        "/../../examples/model-patterns/crash-recovery/transaction.ideal",
     );
     let run = |args: &[&str]| {
         Command::new(env!("CARGO_BIN_EXE_rprob"))
@@ -1401,7 +1405,7 @@ fn cli_safety_mode_reports_which_questions_are_outside_its_scope() {
 
 #[test]
 fn outbox_faults_distinguish_lost_and_repeated_effects() {
-    let source = include_str!("../../../examples/model-patterns/outbox/delivery.model");
+    let source = include_str!("../../../examples/model-patterns/outbox/delivery.ideal");
     for (source, recoverable, unique) in [
         (source.to_owned(), Holds, Holds),
         (
@@ -1419,9 +1423,9 @@ fn outbox_faults_distinguish_lost_and_repeated_effects() {
             Violated { depth: 5 },
         ),
     ] {
-        let model = rmodel::parse(&source).unwrap();
+        let model = idealis_model::parse(&source).unwrap();
         let safety = rprob::analyze_safety(&model, 20_000).unwrap();
-        let reference = rmodel::reference::analyze(&model, 20_000);
+        let reference = idealis_model::reference::analyze(&model, 20_000);
         assert_eq!(safety.report.verdicts, reference.verdicts);
         assert_eq!(outcome(&safety.report, "CommittedIsRecoverable"), recoverable);
         assert_eq!(outcome(&safety.report, "AtMostOneEffect"), unique);
@@ -1440,7 +1444,7 @@ fn relational_override_keeps_other_keys_and_multi_valued_rows() {
 
 #[test]
 fn cache_coalesces_loads_and_rejects_an_obsolete_completion() {
-    let source = include_str!("../../../examples/model-patterns/cache-refresh/cache.model");
+    let source = include_str!("../../../examples/model-patterns/cache-refresh/cache.ideal");
     let report = agree(source, &[0, 250_000]);
     for check in ["OneLoadPerGeneration", "OldCompletionKeepsCurrent"] {
         assert_eq!(outcome(&report, check), Holds);
@@ -1471,7 +1475,7 @@ fn cache_coalesces_loads_and_rejects_an_obsolete_completion() {
 
 #[test]
 fn notification_dispatch_preserves_registration_identity() {
-    let source = include_str!("../../../examples/model-patterns/subscriptions/notification.model");
+    let source = include_str!("../../../examples/model-patterns/subscriptions/notification.ideal");
     let report = agree(source, &[0, 60_000]);
     assert_eq!(outcome(&report, "DispatchUsesSameRegistration"), Holds);
     assert_eq!(
@@ -1503,7 +1507,7 @@ fn notification_dispatch_preserves_registration_identity() {
 
 #[test]
 fn an_upload_keeps_publication_and_delivery_independently_current() {
-    let source = include_str!("../../../examples/model-patterns/upload/upload.model");
+    let source = include_str!("../../../examples/model-patterns/upload/upload.ideal");
     let report = agree(source, &[0, 60_000]);
     assert_eq!(outcome(&report, "NeverPublishAnOlderUpload"), Holds);
     assert_eq!(outcome(&report, "NeverShowAnOlderUpload"), Holds);
@@ -1559,7 +1563,7 @@ fn an_upload_keeps_publication_and_delivery_independently_current() {
 
 #[test]
 fn refund_safety_distinguishes_duplicate_effects_and_premature_confirmation() {
-    let source = include_str!("../../../examples/model-patterns/compensation/saga.model");
+    let source = include_str!("../../../examples/model-patterns/compensation/saga.ideal");
     let duplicate = source.replace("then Refunded else effect", "then Refunded else Repeated");
     let early = source.replace(
         "update { replyPending = false }",
@@ -1570,9 +1574,9 @@ fn refund_safety_distinguishes_duplicate_effects_and_premature_confirmation() {
         (&duplicate, Violated { depth: 5 }, Holds),
         (&early, Holds, Violated { depth: 4 }),
     ] {
-        let model = rmodel::parse(source).unwrap();
+        let model = idealis_model::parse(source).unwrap();
         let safety = rprob::analyze_safety(&model, 20_000).unwrap();
-        let reference = rmodel::reference::analyze(&model, 20_000);
+        let reference = idealis_model::reference::analyze(&model, 20_000);
         assert_eq!(safety.report.verdicts, reference.verdicts);
         assert_eq!(safety.report.scope, reference.scope);
         assert_eq!(safety.report.enabled, reference.enabled);
@@ -1585,7 +1589,7 @@ fn refund_safety_distinguishes_duplicate_effects_and_premature_confirmation() {
 
 #[test]
 fn reissued_lease_rejects_a_stale_release_and_a_stale_write() {
-    let source = include_str!("../../../examples/model-patterns/lease/fence.model");
+    let source = include_str!("../../../examples/model-patterns/lease/fence.ideal");
     let report = agree(source, &[0, 20_000]);
     for check in [
         "StaleReleaseKeepsLease",
@@ -1612,7 +1616,7 @@ fn reissued_lease_rejects_a_stale_release_and_a_stale_write() {
 
 #[test]
 fn split_lease_recovery_activates_only_after_the_sink_fence() {
-    let source = include_str!("../../../examples/model-patterns/lease/split-fence.model");
+    let source = include_str!("../../../examples/model-patterns/lease/split-fence.ideal");
     let normal = agree(source, &[0, 20_000]);
     for check in [
         "ExposedLeaseHasFence",
@@ -1713,7 +1717,7 @@ fn counts_ordered_pairs_in_dense_and_sparse_relations() {
 
 #[test]
 fn finite_integers_check_compacted_feed_and_keep_scope_exits_distinct() {
-    let feed = include_str!("../../../examples/model-patterns/lease/feed-compaction.model");
+    let feed = include_str!("../../../examples/model-patterns/lease/feed-compaction.ideal");
     let signed = "model Signed
 var integer: one Int
 var natural: one Nat
@@ -1740,9 +1744,9 @@ scope Int = -2..2, steps = 5";
     );
     assert_ne!(broken, feed);
     for (source, budget) in [(feed, 20_000), (broken.as_str(), 20_000), (signed, 100)] {
-        let model = rmodel::parse(source).unwrap();
+        let model = idealis_model::parse(source).unwrap();
         let actual = rprob::Compiled::new(&model).unwrap().analyze(budget);
-        let expected = rmodel::reference::analyze_actions(&model, budget);
+        let expected = idealis_model::reference::analyze_actions(&model, budget);
         assert_eq!(actual.verdicts, expected.verdicts);
         assert_eq!(actual.scope, expected.scope);
         assert_eq!(actual.declarations, expected.declarations);
@@ -1758,8 +1762,8 @@ scope Int = -2..2, steps = 5";
         ),
         (signed, "ReachedNegative", Reachable { depth: 1 }),
     ] {
-        let model = rmodel::parse(source).unwrap();
-        let expected = rmodel::reference::witness(&model, question, 20_000).unwrap();
+        let model = idealis_model::parse(source).unwrap();
+        let expected = idealis_model::reference::witness(&model, question, 20_000).unwrap();
         let actual = rprob::witness(&model, question, 20_000).unwrap();
         assert_eq!(actual.outcome, outcome);
         assert_eq!(actual.complete, expected.complete);
@@ -1781,7 +1785,7 @@ scope Int = -2..2, steps = 5";
 #[test]
 fn integer_rows_preserve_subscription_cursors_and_distinguish_invalid_updates() {
     let retention =
-        include_str!("../../../examples/model-patterns/stream-terminal/retention.model");
+        include_str!("../../../examples/model-patterns/stream-terminal/retention.ideal");
     let broken = retention.replace(
         "all client: Client | client in protected implies client.cursors >= through",
         "some client: Client | client in protected and client.cursors >= through",
@@ -1832,8 +1836,8 @@ scope Int = -1..1, steps = 3";
         sparse.as_str(),
         negative,
     ] {
-        let model = rmodel::parse(source).unwrap();
-        let reference = rmodel::reference::analyze_actions(&model, 20_000);
+        let model = idealis_model::parse(source).unwrap();
+        let reference = idealis_model::reference::analyze_actions(&model, 20_000);
         let actual = rprob::Compiled::new(&model).unwrap().analyze(20_000);
         assert_eq!(actual.verdicts, reference.verdicts);
         assert_eq!(actual.scope, reference.scope);
@@ -1845,9 +1849,9 @@ scope Int = -1..1, steps = 3";
             assert_eq!(actual.declarations, Unknown);
         }
     }
-    let model = rmodel::parse(&broken).unwrap();
+    let model = idealis_model::parse(&broken).unwrap();
     let question = "ProtectedClientsKeepTheirPrefix";
-    let expected = rmodel::reference::witness(&model, question, 20_000).unwrap();
+    let expected = idealis_model::reference::witness(&model, question, 20_000).unwrap();
     let actual = rprob::witness(&model, question, 20_000).unwrap();
     assert!(actual.complete);
     assert_eq!(actual.outcome, Violated { depth: 2 });
@@ -1867,8 +1871,8 @@ scope Int = -1..1, steps = 3";
 #[test]
 fn integer_sets_and_optional_integers_keep_transient_values_until_storage() {
     let navigation =
-        include_str!("../../../examples/model-patterns/browser/navigation-activation.model");
-    let autosave = include_str!("../../../examples/model-patterns/autosave/autosave.model");
+        include_str!("../../../examples/model-patterns/browser/navigation-activation.ideal");
+    let autosave = include_str!("../../../examples/model-patterns/autosave/autosave.ideal");
     let route_only = navigation.replace("if { visitId = visit }", "if { current = Detail }");
     let stale_save = autosave.replace("if { tab.pending = revision }", "if { some tab.pending }");
     assert_ne!(route_only, navigation);
@@ -1906,8 +1910,8 @@ scope Int = -1..3, steps = 5";
         set,
         escaped.as_str(),
     ] {
-        let model = rmodel::parse(source).unwrap();
-        let reference = rmodel::reference::analyze_actions(&model, 20_000);
+        let model = idealis_model::parse(source).unwrap();
+        let reference = idealis_model::reference::analyze_actions(&model, 20_000);
         let actual = rprob::Compiled::new(&model).unwrap().analyze(20_000);
         assert_eq!(actual.verdicts, reference.verdicts);
         assert_eq!(actual.scope, reference.scope);
@@ -1924,9 +1928,9 @@ scope Int = -1..3, steps = 5";
 
 #[test]
 fn finite_records_preserve_cas_evidence_and_nested_field_scope() {
-    use rmodel::reference::Data;
+    use idealis_model::reference::Data;
 
-    let register = include_str!("../../../examples/model-patterns/aba/register.model");
+    let register = include_str!("../../../examples/model-patterns/aba/register.ideal");
     let broken = register.replace("if { saved = current }", "if { saved.slot = current.slot }");
     assert_ne!(broken, register);
     let nested = "model Records
@@ -1950,8 +1954,8 @@ scope Int = 0..1, steps = 5";
         .replace("model Records", "model Records\nsig Padding")
         .replace("scope Int", "scope Padding = 4, Int");
     for source in [register, broken.as_str(), nested, sparse.as_str()] {
-        let model = rmodel::parse(source).unwrap();
-        let expected = rmodel::reference::analyze_actions(&model, 20_000);
+        let model = idealis_model::parse(source).unwrap();
+        let expected = idealis_model::reference::analyze_actions(&model, 20_000);
         let actual = rprob::Compiled::new(&model).unwrap().analyze(20_000);
         assert_eq!(actual.verdicts, expected.verdicts);
         assert_eq!(actual.scope, expected.scope);
@@ -1959,9 +1963,9 @@ scope Int = 0..1, steps = 5";
         assert_eq!(actual.enabled, expected.enabled);
     }
     for source in [nested, sparse.as_str()] {
-        let model = rmodel::parse(source).unwrap();
+        let model = idealis_model::parse(source).unwrap();
         let scope = rprob::witness(&model, "Scope", 20_000).unwrap();
-        let reference = rmodel::reference::witness(&model, "Scope", 20_000).unwrap();
+        let reference = idealis_model::reference::witness(&model, "Scope", 20_000).unwrap();
         assert!(!scope.complete);
         assert_eq!(scope.outcome, reference.outcome);
         assert_eq!(
@@ -1969,12 +1973,12 @@ scope Int = 0..1, steps = 5";
             reference.witness.unwrap().final_state
         );
     }
-    let model = rmodel::parse(&broken).unwrap();
+    let model = idealis_model::parse(&broken).unwrap();
     let result = rprob::witness(&model, "NoStaleSuccess", 20_000).unwrap();
     assert!(result.complete);
     assert_eq!(result.outcome, Violated { depth: 4 });
     let path = result.witness.unwrap();
-    let reference = rmodel::reference::witness(&model, "NoStaleSuccess", 20_000)
+    let reference = idealis_model::reference::witness(&model, "NoStaleSuccess", 20_000)
         .unwrap()
         .witness
         .unwrap();
@@ -1986,7 +1990,7 @@ scope Int = 0..1, steps = 5";
 
 #[test]
 fn computed_record_rows_preserve_replayed_offline_edits() {
-    let source = include_str!("../../../examples/model-patterns/offline-merge/retry.model");
+    let source = include_str!("../../../examples/model-patterns/offline-merge/retry.ideal");
     let faulty = source.replace(
         "then request.receipts",
         "then Reply { outcome: Saved, atRevision: revision }",
@@ -1994,10 +1998,10 @@ fn computed_record_rows_preserve_replayed_offline_edits() {
     assert_ne!(source, faulty);
     let check = "ExactRetryUsesOriginalReply";
     for (source, expected_outcome) in [(source, Holds), (&faulty, Violated { depth: 3 })] {
-        let model = rmodel::parse(source).unwrap();
+        let model = idealis_model::parse(source).unwrap();
         let compiled = rprob::Compiled::new(&model).unwrap();
         for budget in [1, 20_000] {
-            let expected = rmodel::reference::analyze_actions(&model, budget);
+            let expected = idealis_model::reference::analyze_actions(&model, budget);
             let actual = compiled.analyze(budget);
             assert_eq!(actual.verdicts, expected.verdicts);
             assert_eq!(actual.scope, expected.scope);
@@ -2007,9 +2011,9 @@ fn computed_record_rows_preserve_replayed_offline_edits() {
         }
         assert_eq!(outcome(&compiled.analyze(20_000), check), expected_outcome);
     }
-    let model = rmodel::parse(&faulty).unwrap();
+    let model = idealis_model::parse(&faulty).unwrap();
     let fast = rprob::witness(&model, check, 20_000).unwrap();
-    let reference = rmodel::reference::witness(&model, check, 20_000).unwrap();
+    let reference = idealis_model::reference::witness(&model, check, 20_000).unwrap();
     assert_eq!(fast.outcome, reference.outcome);
     assert_eq!(
         fast.witness.unwrap().final_state,
@@ -2043,9 +2047,9 @@ reachable LeftAtOne { Left.receipts.revision = 1 }
         let source = format!("{source}\nscope Padding = {padding}, Int = 0..1, steps = 4");
         let report = agree(&source, &[1, 1_000]);
         assert_eq!(outcome(&report, "LeftAtOne"), Reachable { depth: 1 });
-        let model = rmodel::parse(&source).unwrap();
+        let model = idealis_model::parse(&source).unwrap();
         let fast = rprob::witness(&model, "Scope", 1_000).unwrap();
-        let reference = rmodel::reference::witness(&model, "Scope", 1_000).unwrap();
+        let reference = idealis_model::reference::witness(&model, "Scope", 1_000).unwrap();
         assert_eq!(fast.outcome, Violated { depth: 2 });
         assert!(!fast.complete);
         assert_eq!(fast.outcome, reference.outcome);
@@ -2062,7 +2066,7 @@ fn variants_keep_the_original_receipt_after_takeover() {
     let shipment = agree(shipment, &[1_000]);
     assert_eq!(outcome(&shipment, "WasShipped"), Reachable { depth: 1 });
     let source =
-        include_str!("../../../examples/model-patterns/crash-recovery/recovery-receipt.model");
+        include_str!("../../../examples/model-patterns/crash-recovery/recovery-receipt.ideal");
     let broken = source.replace(
         "if { some known } then",
         "if { some known and (owner = Original or writer = owner) } then",
@@ -2070,20 +2074,20 @@ fn variants_keep_the_original_receipt_after_takeover() {
     assert_ne!(broken, source);
     let check = "MatchingReplayReturnsStoredReceipt";
     for (source, expected) in [(source, Holds), (&broken, Violated { depth: 4 })] {
-        let model = rmodel::parse(source).unwrap();
+        let model = idealis_model::parse(source).unwrap();
         let actual = rprob::Compiled::new(&model).unwrap().analyze(20_000);
-        let reference = rmodel::reference::analyze_actions(&model, 20_000);
+        let reference = idealis_model::reference::analyze_actions(&model, 20_000);
         assert_eq!(actual.verdicts, reference.verdicts);
         assert_eq!(actual.declarations, reference.declarations);
         assert_eq!(actual.scope, reference.scope);
         assert_eq!(outcome(&actual, check), expected);
     }
-    let model = rmodel::parse(&broken).unwrap();
+    let model = idealis_model::parse(&broken).unwrap();
     let fast = rprob::witness(&model, check, 20_000)
         .unwrap()
         .witness
         .unwrap();
-    let reference = rmodel::reference::witness(&model, check, 20_000)
+    let reference = idealis_model::reference::witness(&model, check, 20_000)
         .unwrap()
         .witness
         .unwrap();
@@ -2110,16 +2114,16 @@ behavior publish() {
 reachable WaitingHasNoStoredReceipt { is(reply, Waiting) and no payload(reply, Stored) }
 reachable Sent { payload(reply, Stored).body = Version(1) }
 scope Padding = 2, Int = 0..1, steps = 4";
-    let model = rmodel::parse(source).unwrap();
+    let model = idealis_model::parse(source).unwrap();
     let actual = rprob::Compiled::new(&model).unwrap().analyze(1_000);
-    let reference = rmodel::reference::analyze_actions(&model, 1_000);
+    let reference = idealis_model::reference::analyze_actions(&model, 1_000);
     assert_eq!(actual.verdicts, reference.verdicts);
     assert_eq!(
         outcome(&actual, "WaitingHasNoStoredReceipt"),
         Reachable { depth: 0 }
     );
     let actual = rprob::witness(&model, "Scope", 1_000).unwrap();
-    let reference = rmodel::reference::witness(&model, "Scope", 1_000).unwrap();
+    let reference = idealis_model::reference::witness(&model, "Scope", 1_000).unwrap();
     assert_eq!(actual.outcome, Violated { depth: 2 });
     assert!(!actual.complete);
     assert_eq!(
@@ -2127,7 +2131,7 @@ scope Padding = 2, Int = 0..1, steps = 4";
         reference.witness.unwrap().final_state
     );
     let actual = rprob::witness(&model, "Sent", 1_000).unwrap();
-    let reference = rmodel::reference::witness(&model, "Sent", 1_000).unwrap();
+    let reference = idealis_model::reference::witness(&model, "Sent", 1_000).unwrap();
     assert_eq!(actual.outcome, Reachable { depth: 1 });
     assert_eq!(
         actual.witness.unwrap().final_state,
@@ -2138,7 +2142,7 @@ scope Padding = 2, Int = 0..1, steps = 4";
 #[test]
 fn delivery_mailbox_preserves_order_and_detects_early_release() {
     let source =
-        include_str!("../../../examples/model-patterns/subscriptions/delivery-ticket-drain.model");
+        include_str!("../../../examples/model-patterns/subscriptions/delivery-ticket-drain.ideal");
     let broken = source.replace(
         "sender = none queued = append(queued, Seal())",
         "sender = none queued = append(queued, Seal()) phase = Available",
@@ -2146,21 +2150,21 @@ fn delivery_mailbox_preserves_order_and_detects_early_release() {
     assert_ne!(source, broken);
     let check = "PostingTheSealDoesNotReleaseTheTicket";
     for (source, want) in [(source, Holds), (&broken, Violated { depth: 3 })] {
-        let model = rmodel::parse(source).unwrap();
+        let model = idealis_model::parse(source).unwrap();
         let fast = rprob::analyze_safety(&model, 20_000).unwrap();
-        let reference = rmodel::reference::analyze_actions(&model, 20_000);
+        let reference = idealis_model::reference::analyze_actions(&model, 20_000);
         assert_eq!(fast.report.verdicts, reference.verdicts);
         assert_eq!(fast.report.scope, reference.scope);
         assert_eq!(fast.report.declarations, reference.declarations);
         assert_eq!(fast.omitted_temporal, ["SealedEventuallyReleases"]);
         assert_eq!(outcome(&fast.report, check), want);
     }
-    let model = rmodel::parse(&broken).unwrap();
+    let model = idealis_model::parse(&broken).unwrap();
     let actual = rprob::witness(&model, check, 20_000)
         .unwrap()
         .witness
         .unwrap();
-    let expected = rmodel::reference::witness(&model, check, 20_000)
+    let expected = idealis_model::reference::witness(&model, check, 20_000)
         .unwrap()
         .witness
         .unwrap();
@@ -2176,7 +2180,7 @@ var queue: one Queue
 init { queue = Queue[A] }
 behavior grow() { update { queue = append(queue, B) } }
 scope steps = 2";
-    let small = rmodel::parse(without_integers).unwrap();
+    let small = idealis_model::parse(without_integers).unwrap();
     let scope = rprob::witness(&small, "Scope", 100).unwrap();
     assert_eq!(scope.outcome, Violated { depth: 1 });
     assert!(!scope.complete);
@@ -2200,15 +2204,15 @@ reachable InitiallyRepeated {
 reachable Shifted { queue = Queue[A, B] }
 reachable Trimmed { queue = Queue[A] }
 scope Int = -1..2, steps = 4";
-    let model = rmodel::parse(source).unwrap();
+    let model = idealis_model::parse(source).unwrap();
     let fast = rprob::Compiled::new(&model).unwrap().analyze(1_000);
-    let reference = rmodel::reference::analyze_actions(&model, 1_000);
+    let reference = idealis_model::reference::analyze_actions(&model, 1_000);
     assert_eq!(fast.verdicts, reference.verdicts);
     assert_eq!(outcome(&fast, "InitiallyRepeated"), Reachable { depth: 0 });
     assert_eq!(outcome(&fast, "Shifted"), Reachable { depth: 1 });
     assert_eq!(outcome(&fast, "Trimmed"), Reachable { depth: 2 });
     let fast = rprob::witness(&model, "Scope", 1_000).unwrap();
-    let reference = rmodel::reference::witness(&model, "Scope", 1_000).unwrap();
+    let reference = idealis_model::reference::witness(&model, "Scope", 1_000).unwrap();
     assert_eq!(fast.outcome, Violated { depth: 1 });
     assert!(!fast.complete);
     assert_eq!(
@@ -2219,10 +2223,10 @@ scope Int = -1..2, steps = 4";
 
 #[test]
 fn append_in_a_transition_is_compared_as_an_ordered_value() {
-    let source = include_str!("../../../examples/model-patterns/stream-terminal/stream.model");
-    let model = rmodel::parse(source).unwrap();
+    let source = include_str!("../../../examples/model-patterns/stream-terminal/stream.ideal");
+    let model = idealis_model::parse(source).unwrap();
     let fast = rprob::Compiled::new(&model).unwrap().analyze(20_000);
-    let reference = rmodel::reference::analyze_actions(&model, 20_000);
+    let reference = idealis_model::reference::analyze_actions(&model, 20_000);
     assert_eq!(fast.verdicts, reference.verdicts);
     assert_eq!(outcome(&fast, "ReadFollowsQueue"), Holds);
     assert_eq!(outcome(&fast, "EndAfterTwoWrites"), Reachable { depth: 6 });
@@ -2231,7 +2235,7 @@ fn append_in_a_transition_is_compared_as_an_ordered_value() {
 #[test]
 fn derived_integer_indices_can_select_and_truncate_savepoints() {
     let source =
-        include_str!("../../../examples/model-patterns/sqlite-transactions/savepoint-named.model");
+        include_str!("../../../examples/model-patterns/sqlite-transactions/savepoint-named.ideal");
     let report = agree(source, &[20_000]);
     assert_eq!(report.declarations, Holds);
     assert_eq!(

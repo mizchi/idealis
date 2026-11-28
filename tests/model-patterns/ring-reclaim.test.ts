@@ -19,8 +19,8 @@ type Command = {
 };
 type Fault = "none" | "reclaim-on-timeout" | "untagged-release";
 type Status = "Copying" | "TimedOut" | "Stopped" | "Finished";
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/worker-deque/ring-reclaim.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/worker-deque/ring-reclaim.ideal";
 
 function openRing(t: TestContext, fault: Fault) {
   // Owner, header word, data word. The original reader starts with the slot pinned.

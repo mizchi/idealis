@@ -178,9 +178,9 @@ fn finite_model_agrees_with_the_gate(
     approved: &idealis_spec::ClauseReport,
     unreviewed: &idealis_spec::ClauseReport,
 ) {
-    use rmodel::reference::{Data, Machine, Next, Snapshot};
+    use idealis_model::reference::{Data, Machine, Next, Snapshot};
 
-    let model = rmodel::parse(source).unwrap();
+    let model = idealis_model::parse(source).unwrap();
     let machine = Machine::new(&model).unwrap();
     let config = machine.configurations().next().unwrap();
     let initial = machine.initial(&config).pop().unwrap();

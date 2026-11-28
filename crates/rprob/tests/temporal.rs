@@ -1,9 +1,9 @@
-use rmodel::reference::{Data, Outcome};
+use idealis_model::reference::{Data, Outcome};
 use rprob::TemporalOutcome;
 
 #[test]
 fn strong_fairness_can_leave_a_smaller_cycle_where_progress_is_disabled() {
-    let model = rmodel::parse(
+    let model = idealis_model::parse(
         "model OptionalService
 enum Phase = Ready | Paused | Done
 var phase: one Phase
@@ -45,7 +45,7 @@ init { phase = Ready }
 behavior drop() { update { phase = none } }
 eventually Finished { phase = Done }
 scope steps = 4";
-    let model = rmodel::parse(source).unwrap();
+    let model = idealis_model::parse(source).unwrap();
     assert!(matches!(
         rprob::temporal_witness(&model, "Finished", 100).unwrap(),
         TemporalOutcome::Unknown {
@@ -54,7 +54,8 @@ scope steps = 4";
         }
     ));
     let empty =
-        rmodel::parse(&source.replace("phase = Ready", "phase = Ready phase = Done")).unwrap();
+        idealis_model::parse(&source.replace("phase = Ready", "phase = Ready phase = Done"))
+            .unwrap();
     assert!(matches!(
         rprob::temporal_witness(&empty, "Finished", 100).unwrap(),
         TemporalOutcome::Empty

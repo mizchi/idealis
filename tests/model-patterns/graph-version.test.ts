@@ -16,8 +16,8 @@ interface Node {
   next?: Node;
 }
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/worker-transfer/graph-version.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/worker-transfer/graph-version.ideal";
 
 function project({
   startedAt,

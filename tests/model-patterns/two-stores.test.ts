@@ -18,9 +18,9 @@ type Command = {
   request: Request;
 };
 
-const checker = "crates/rcheck/target/debug/rcheck";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 const model =
-  "examples/model-patterns/offline-merge/two-stores/project.rmodel.json";
+  "examples/model-patterns/offline-merge/two-stores/model.project.json";
 
 test("two storage instances keep same-ID receipts separate across delivery", async (t) => {
   const scenario = await reachableScenario<Command>(
@@ -118,7 +118,7 @@ test("the standalone delivery harness replays a receipt across a message port", 
     | ({ kind: "publish" } & Input)
     | { kind: "subscriber_send"; request: Request };
   const harness =
-    "examples/model-patterns/offline-merge/two-stores/delivery-harness.rmodel.json";
+    "examples/model-patterns/offline-merge/two-stores/delivery-harness.project.json";
   const scenario = await reachableScenario<Step>(
     checker,
     harness,

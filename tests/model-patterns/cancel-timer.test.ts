@@ -11,8 +11,8 @@ type Command =
   | { kind: "cancel" | "elapse" };
 type Fault = "retain-handle" | "publish-obsolete";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/node-event-loop/cancel-timer.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/node-event-loop/cancel-timer.ideal";
 
 function openTimer(t: TestContext, fault?: Fault) {
   t.mock.timers.enable({ apis: ["setTimeout"] });

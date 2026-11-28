@@ -16,8 +16,8 @@ type Reader = {
   observed: number | null;
 };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/wait-notify/pulse-epoch.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/wait-notify/pulse-epoch.ideal";
 
 function openPulse(t: TestContext, levelOnly = false) {
   const shared = new Int32Array(

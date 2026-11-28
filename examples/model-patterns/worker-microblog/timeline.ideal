@@ -1,0 +1,30 @@
+description = {
+  ja: """初回反映でタイムライン行を作る。
+閲覧時は現在のフォローを確認する。""",
+  en: """Creates timeline rows on first delivery.
+Checks current follows on read.""",
+}
+
+var @appliedOnInitial: set Post
+init { no @entries, no @applied, no @appliedOnInitial, no @replayed }
+
+behavior @apply(p: Post, author: User) {
+  guard { some p.@inFlight, author in p.@authors }
+  update {
+    if { p not in @applied } then {
+      @entries = @entries + (@follows.author -> p)
+      @applied = @applied + p
+      if { Initial in p.@inFlight } then {
+        @appliedOnInitial = @appliedOnInitial + p
+      }
+    } else {
+      if { p in @appliedOnInitial, Retry in p.@inFlight } then {
+        @replayed = @replayed + p
+      }
+    }
+  }
+}
+
+behavior @read(reader: User, p: Post, author: User) {
+  guard { p in reader.@entries, author in p.@authors, author in reader.@follows }
+}

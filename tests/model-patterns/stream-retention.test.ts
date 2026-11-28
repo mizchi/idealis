@@ -20,8 +20,8 @@ type Command =
       readonly client: Client;
     }
   | { readonly kind: "compact"; readonly through: number };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/stream-terminal/retention.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/stream-terminal/retention.ideal";
 
 test(
   "compaction protects live subscriber positions and forces a snapshot after an expired gap",

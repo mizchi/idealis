@@ -12,4 +12,4 @@
 
 二人の独立した代理読み手に各題材3問を出した。読み手Aは出荷を明示表記、再試行をプライムで読み、読み手Bには割り当てを逆にした。前後の読み方は両者に同じように教えた。各表記6問中6問正解。どちらも前後、適用範囲、値の保存を読み取れた。試行が少なく、表記の優劣は判断できない。人間の読み手は未測定。[回答と根拠](../runs/0117-transition-readers/observations.json)
 
-`just rcheck-transition` と `just rmodel-transition-tlc .artifacts/0117-replay` で検査を再実行できる。読み取りの本比較は `just rmodel-readability-eval .artifacts/0117-live transition` を、認証が入っている環境で実行する。[設計判断](../../crates/rmodel/grammar-decisions.md)
+`just idealis-check-transition` と `just idealis-model-transition-tlc .artifacts/0117-replay` で検査を再実行できる。読み取りの本比較は `just idealis-model-readability-eval .artifacts/0117-live transition` を、認証が入っている環境で実行する。[設計判断](../../crates/idealis-model/grammar-decisions.md)

@@ -19,8 +19,8 @@ type Harness = {
   browserId: number;
   errors: number;
 };
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/stream-terminal/event-source.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/stream-terminal/event-source.ideal";
 
 test(
   "Chromium auto-reconnect reports the event ID while delivery resumes from the application commit",

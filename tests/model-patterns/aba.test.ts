@@ -10,8 +10,8 @@ import {
 type Slot = "A" | "B" | "C";
 type Command = { kind: "load" | "cas" } | { kind: "write"; destination: Slot };
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/aba/register.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/aba/register.ideal";
 const slots = ["A", "B", "C"];
 
 test(

@@ -13,8 +13,8 @@ type Command =
   | { kind: "deliver" | "editSender" | "editReceiver" };
 type Fault = "none" | "copy-instead" | "move-instead" | "deferred-copy";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/worker-transfer/array-buffer.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/worker-transfer/array-buffer.ideal";
 
 function openPort(t: TestContext, fault: Fault) {
   const buffer = new ArrayBuffer(1);

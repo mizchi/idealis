@@ -10,7 +10,7 @@ import {
   replayRecording,
 } from "../../examples/model-patterns/replay.js";
 
-const rcheck = "crates/rcheck/target/debug/rcheck";
+const checkerPath = "crates/idealis-check/target/debug/idealis-check";
 const bucket = "pattern-sandbox";
 const key = "isolated/test";
 
@@ -43,7 +43,7 @@ test("S3 observations traverse all pages and stop before touching an existing ke
     bucket,
   );
   const { scenario, adapter } = objectStorePattern(store, key);
-  const result = await recordReplay(rcheck, scenario, adapter);
+  const result = await recordReplay(checkerPath, scenario, adapter);
   assert.equal(result.verdict, "mismatch");
   assert.deepEqual(result.difference, {
     step: 0,
@@ -56,7 +56,7 @@ test("S3 observations traverse all pages and stop before touching an existing ke
     JSON.stringify(result.recording),
   ) as typeof result.recording;
   assert.deepEqual(
-    await replayRecording(rcheck, saved, objectStoreProjection),
+    await replayRecording(checkerPath, saved, objectStoreProjection),
     {
       verdict: "mismatch",
       difference: result.difference,
@@ -94,7 +94,7 @@ test("S3 commands use the configured bucket and compare independent GET and LIST
     bucket,
   );
   const { scenario, adapter } = objectStorePattern(store, key);
-  const result = await recordReplay(rcheck, scenario, adapter);
+  const result = await recordReplay(checkerPath, scenario, adapter);
   assert.equal(result.verdict, "matched");
   assert.deepEqual(writes, ["V1", "V2", "delete"]);
   assert.deepEqual(result.recording.observations, [

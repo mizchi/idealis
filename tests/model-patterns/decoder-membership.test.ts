@@ -21,8 +21,8 @@ type Command =
       registration: Registration;
     };
 type Fault = "follow-live" | "discard-detached";
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/crash-recovery/decoder-membership.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/crash-recovery/decoder-membership.ideal";
 
 function openReceiver(t: TestContext, fault?: Fault) {
   function channel() {

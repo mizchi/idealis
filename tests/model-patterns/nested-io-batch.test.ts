@@ -10,8 +10,8 @@ import {
   recordReplay,
 } from "../../examples/model-patterns/replay.js";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/node-event-loop/nested-io-batch.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/node-event-loop/nested-io-batch.ideal";
 type Callback = "Microtask" | "NestedMicrotask" | "Immediate" | "Timer";
 
 test("a nested microtask fits the modeled I/O batch without losing its order", async () => {

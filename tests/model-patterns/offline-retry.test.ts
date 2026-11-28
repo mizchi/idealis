@@ -23,8 +23,8 @@ type Command =
   | { readonly kind: "loseResponse" | "takeResponse" };
 type Fault = "none" | "recompute" | "duplicate" | "reuse-result";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/offline-merge/retry.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/offline-merge/retry.ideal";
 
 test(
   "lost successful offline edits retain their original decision and revision",

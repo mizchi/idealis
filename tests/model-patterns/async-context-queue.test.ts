@@ -20,9 +20,9 @@ type Command =
   | { kind: "enqueue"; task: Task; context: Request }
   | { kind: "runNext"; outcome: Outcome };
 
-const checker = "crates/rcheck/target/debug/rcheck";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 const model =
-  "examples/model-patterns/node-event-loop/async-context-queue.model";
+  "examples/model-patterns/node-event-loop/async-context-queue.ideal";
 
 function taskResults<Value>(): Record<Task, Value | null> {
   return { First: null, Second: null };

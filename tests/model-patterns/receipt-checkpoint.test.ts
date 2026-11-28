@@ -22,8 +22,8 @@ type Fault =
   | "mixed-revisions"
   | "abort-unverified"
   | "abort-copies-staged-receipts";
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/crash-recovery/receipt-checkpoint.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/crash-recovery/receipt-checkpoint.ideal";
 const oldRetry = { kind: "submit", frame: "OldTwo" } as const;
 const newRetry = { kind: "submit", frame: "NewOne" } as const;
 const fresh = { kind: "submit", frame: "NewTwo" } as const;

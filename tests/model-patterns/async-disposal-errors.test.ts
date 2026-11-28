@@ -25,9 +25,9 @@ type Scope = (
   body: () => void,
 ) => Promise<void>;
 
-const checker = "crates/rcheck/target/debug/rcheck";
+const checker = "crates/idealis-check/target/debug/idealis-check";
 const model =
-  "examples/model-patterns/node-event-loop/async-disposal-errors.model";
+  "examples/model-patterns/node-event-loop/async-disposal-errors.ideal";
 
 // Pass this syntax directly to Node instead of lowering it to TS helpers.
 const withAwaitUsing = new Function(

@@ -17,8 +17,8 @@ type Command = {
     | "halt";
 };
 type Outcome = "Idle" | "Pending" | "Success" | "Aborted";
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/http-drain/deadline.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/http-drain/deadline.ideal";
 
 test(
   "HTTP drain resolves finish and deadline in either order, releasing the resource once",

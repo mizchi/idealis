@@ -17,8 +17,8 @@ type Command =
   | { kind: "submit"; generation: Generation; sequence: Sequence };
 type Fault = "greatest-frontier" | "ignore-sparse";
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/crash-recovery/receipt-frontier.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/crash-recovery/receipt-frontier.ideal";
 const generations = ["Zero", "G1", "G2", "G3"] as const;
 const firstMissing = {
   kind: "submit",

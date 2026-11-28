@@ -34,8 +34,8 @@ declare global {
   var sharedLockHarness: Harness;
 }
 
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/browser/web-locks-shared-fifo.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/browser/web-locks-shared-fifo.ideal";
 
 async function installLocks(heldOnlyProbe: boolean) {
   const name = "document";

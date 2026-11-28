@@ -18,8 +18,8 @@ type Command =
     }
   | { readonly kind: "crash" | "restart" };
 type Fault = "none" | "skip-outbox" | "repeat-effect";
-const model = "examples/model-patterns/outbox/delivery.model";
-const rcheck = "crates/rcheck/target/debug/rcheck";
+const model = "examples/model-patterns/outbox/delivery.ideal";
+const checkerPath = "crates/idealis-check/target/debug/idealis-check";
 
 test(
   "an outbox survives both send boundaries and the receiver applies a retry once",
@@ -29,7 +29,7 @@ test(
     try {
       for (const sentBeforeCrash of [false, true]) {
         const trace = await reachableScenario<Command>(
-          rcheck,
+          checkerPath,
           model,
           sentBeforeCrash ? "StoppedAfterSend" : "StoppedBeforeSend",
         );
@@ -96,7 +96,7 @@ test(
               initial: trace.initial,
               commands,
             };
-            const run = replay(rcheck, scenario, {
+            const run = replay(checkerPath, scenario, {
               async apply(command) {
                 switch (command.kind) {
                   case "crash":

@@ -83,7 +83,7 @@ test(
                 ]
               : ["begin", "stage", "commit", "crash", "restart", "respond"];
           const scenario: Scenario<Command> = {
-            model: "examples/model-patterns/crash-recovery/transaction.model",
+            model: "examples/model-patterns/crash-recovery/transaction.ideal",
             config: {},
             initial: {
               phase: "Idle",
@@ -97,64 +97,68 @@ test(
           let child = launch();
           try {
             let state = await message(child);
-            const run = replay("crates/rcheck/target/debug/rcheck", scenario, {
-              async apply({ kind }) {
-                if (kind === "crash") {
-                  await stop(child);
-                  state = { phase: "Offline" };
-                } else if (kind === "restart") {
-                  child = launch();
-                  state = await message(child);
-                } else {
-                  state = await message(child, kind);
-                }
-              },
-              async observe() {
-                if (
-                  state.phase === "Offline" ||
-                  state.phase === "OpenTxn" ||
-                  state.phase === "Prepared"
-                ) {
-                  return { phase: state.phase };
-                }
-                const db = new DatabaseSync(path, { readOnly: true });
-                try {
-                  function marker(table: "ledger" | "receipt") {
-                    const count = db
-                      .prepare(`SELECT COUNT(*) AS n FROM ${table}`)
-                      .get()?.n;
-                    return count === 0
-                      ? null
-                      : count === 1
-                        ? "Posted"
-                        : "Duplicate";
+            const run = replay(
+              "crates/idealis-check/target/debug/idealis-check",
+              scenario,
+              {
+                async apply({ kind }) {
+                  if (kind === "crash") {
+                    await stop(child);
+                    state = { phase: "Offline" };
+                  } else if (kind === "restart") {
+                    child = launch();
+                    state = await message(child);
+                  } else {
+                    state = await message(child, kind);
+                  }
+                },
+                async observe() {
+                  if (
+                    state.phase === "Offline" ||
+                    state.phase === "OpenTxn" ||
+                    state.phase === "Prepared"
+                  ) {
+                    return { phase: state.phase };
+                  }
+                  const db = new DatabaseSync(path, { readOnly: true });
+                  try {
+                    function marker(table: "ledger" | "receipt") {
+                      const count = db
+                        .prepare(`SELECT COUNT(*) AS n FROM ${table}`)
+                        .get()?.n;
+                      return count === 0
+                        ? null
+                        : count === 1
+                          ? "Posted"
+                          : "Duplicate";
+                    }
+                    return {
+                      phase: state.phase,
+                      ledger: marker("ledger"),
+                      receipt: marker("receipt"),
+                      reply: state.reply ?? null,
+                    };
+                  } finally {
+                    db.close();
+                  }
+                },
+                project(state) {
+                  if (
+                    state.phase === "Offline" ||
+                    state.phase === "OpenTxn" ||
+                    state.phase === "Prepared"
+                  ) {
+                    return { phase: state.phase };
                   }
                   return {
                     phase: state.phase,
-                    ledger: marker("ledger"),
-                    receipt: marker("receipt"),
-                    reply: state.reply ?? null,
+                    ledger: state.ledger,
+                    receipt: state.receipt,
+                    reply: state.reply,
                   };
-                } finally {
-                  db.close();
-                }
+                },
               },
-              project(state) {
-                if (
-                  state.phase === "Offline" ||
-                  state.phase === "OpenTxn" ||
-                  state.phase === "Prepared"
-                ) {
-                  return { phase: state.phase };
-                }
-                return {
-                  phase: state.phase,
-                  ledger: state.ledger,
-                  receipt: state.receipt,
-                  reply: state.reply,
-                };
-              },
-            });
+            );
             if (split && boundary === "Prepared") {
               await assert.rejects(
                 run,

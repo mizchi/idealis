@@ -17,8 +17,8 @@ type Command =
   | { readonly kind: "apply"; readonly item: Item }
   | { readonly kind: "start" | "disconnect" | "finish" };
 const items: readonly Item[] = ["First", "Second"];
-const checker = "crates/rcheck/target/debug/rcheck";
-const model = "examples/model-patterns/offline-merge/batch-retry.model";
+const checker = "crates/idealis-check/target/debug/idealis-check";
+const model = "examples/model-patterns/offline-merge/batch-retry.ideal";
 
 test(
   "batch retry resumes an HTTP request after only one SQLite item committed",

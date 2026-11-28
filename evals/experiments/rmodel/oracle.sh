@@ -8,8 +8,8 @@ java=$1 alloy=$2 jar=$3 output=$4
 root=$(cd "$(dirname "$0")/../../.." && pwd)
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
-cargo build --locked --quiet --manifest-path "$root/crates/rmodel/Cargo.toml" --example emit
-emit="$root/crates/rmodel/target/debug/examples/emit"
+cargo build --locked --quiet --manifest-path "$root/crates/idealis-model/Cargo.toml" --example emit
+emit="$root/crates/idealis-model/target/debug/examples/emit"
 rows=()
 for path in "$root"/fixtures/rmodel/*.model; do
   file=$(basename "$path" .model)

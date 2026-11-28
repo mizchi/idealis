@@ -9,7 +9,7 @@ import tempfile
 
 MODEL = Path("fixtures/rcheck/structured/shipped-transition.model")
 CASES = Path("fixtures/rcheck/requirement-links/cases.json")
-RCHECK = Path("crates/rcheck/target/debug/rcheck")
+RCHECK = Path("crates/idealis-check/target/debug/idealis-check")
 PARTS = ("status", "tracking")
 
 

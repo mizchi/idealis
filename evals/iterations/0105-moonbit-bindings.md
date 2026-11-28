@@ -1,6 +1,6 @@
 # 0105: MoonBitのtraitとdecodeの生成
 
-[plan](../plans/0105-moonbit-bindings.md)のとおり、`rcheck generate <model> moonbit`でMoonBitのpackageを生成した。JSONの形は[0102](0102-domain-bindings.md)の契約と同じで、照合器も同じ。
+[plan](../plans/0105-moonbit-bindings.md)のとおり、`idealis-check generate <model> moonbit`でMoonBitのpackageを生成した。JSONの形は[0102](0102-domain-bindings.md)の契約と同じで、照合器も同じ。
 
 ```moonbit
 pub(open) trait Permissions {
@@ -17,9 +17,9 @@ pub fn[D : Permissions] Server::handle(self : Server[D], line : String) -> Strin
 
 ## 計画からの差（結果の前）
 
-- 記録する生成物は、生成器の出力に`moon fmt`をかけたもの。`moon fmt`は行幅で折り返すので、生成器の出力そのものを書式に一致させなかった。`scripts/rcheck-moonbit-fresh.sh`が、生成し直して`moon fmt`をかけたものと記録を比べ、moduleに`moon fmt`の差分がないことも確かめる。どちらのずれも検出することを、記録を崩して確かめた。
+- 記録する生成物は、生成器の出力に`moon fmt`をかけたもの。`moon fmt`は行幅で折り返すので、生成器の出力そのものを書式に一致させなかった。`scripts/idealis-check-moonbit-fresh.sh`が、生成し直して`moon fmt`をかけたものと記録を比べ、moduleに`moon fmt`の差分がないことも確かめる。どちらのずれも検出することを、記録を崩して確かめた。
 - 生成物のpackageは、使わないcodecの警告（`unused_value`）を外す。
-- CIに、MoonBitを入れて`just rcheck-moonbit`を動かすjobを足した。installerの版は固定していない。`moon fmt`の書式が版で変わると、freshnessの検査が落ちる。
+- CIに、MoonBitを入れて`just idealis-check-moonbit`を動かすjobを足した。installerの版は固定していない。`moon fmt`の書式が版で変わると、freshnessの検査が落ちる。
 
 ## 正しさ
 
